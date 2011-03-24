@@ -1,0 +1,26 @@
+# You can set flags specifically for your module by using the MODULE_XCC_FLAGS
+# variable. So the following
+#
+#   MODULE_XCC_FLAGS = $(XCC_FLAGS) -O3
+#
+# specifies that everything in the modules should have the application
+# build flags with -O3 appended (so the files will build at
+# optimization level -O3).
+#
+# You can also set MODULE_XCC_C_FLAGS, MODULE_XCC_XC_FLAGS etc..
+
+SOURCE_DIRS = src/media_fifos
+
+INCLUDE_DIRS = src/media_fifos
+
+SOURCE_DIRS += $(foreach x, $(USED_CODECS), src/codecs/$x)
+SOURCE_DIRS += $(foreach x, $(USED_AUDIO_INTERFACES), src/interfaces/$x)
+SOURCE_DIRS += $(foreach x, $(USED_EXTERNAL_CLOCK_CHIPS), src/media_clocks/external/$x)
+
+INCLUDE_DIRS += $(foreach x, $(USED_CODECS), src/codecs/$x)
+INCLUDE_DIRS += $(foreach x, $(USED_AUDIO_INTERFACES), src/interfaces/$x)
+INCLUDE_DIRS += $(foreach x, $(USED_EXTERNAL_CLOCK_CHIPS), src/media_clocks/external/$x)
+
+MODULE_XCC_FLAGS = $(XCC_FLAGS) -g -O3
+
+XCC_FLAGS_media_output_fifo.c = $(XCC_FLAGS) -g 

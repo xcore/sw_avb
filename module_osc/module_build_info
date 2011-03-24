@@ -1,0 +1,33 @@
+# You can set flags specifically for your module by using the MODULE_XCC_FLAGS
+# variable. So the following
+#
+#   MODULE_XCC_FLAGS = $(XCC_FLAGS) -O3
+#
+# specifies that everything in the modules should have the application
+# build flags with -O3 appended (so the files will build at
+# optimization level -O3).
+#
+# You can also set MODULE_XCC_C_FLAGS, MODULE_XCC_XC_FLAGS etc..
+
+MODULE_XCC_FLAGS = $(XCC_FLAGS) -Os
+
+ifeq ($(wildcard $(foreach x,$(subst :, ,$(PATH)),$x/perl)),)
+PERL_EXISTS = 0
+else
+PERL_EXISTS = 1
+endif
+
+REBUILD_OSC ?= $(PERL_EXISTS)
+
+ifeq ($(REBUILD_OSC),1)
+.PHONY: osc
+
+export OSC_MODULE_DIR := $(BASE_DIR)/../$(CURRENT_MODULE)
+export OSC_GEN_DIR := $(BASE_DIR)/src/osc
+
+osc:		
+	@xmake OSC_FILES="$(foreach d,$(FULL_SOURCE_DIRS),$(wildcard $d/*.osc))" -f $(OSC_MODULE_DIR)/make_osc all
+
+
+osc_tree.c: osc
+endif

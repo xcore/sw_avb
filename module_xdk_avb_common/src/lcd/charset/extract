@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# flip image
+pamflip -topbottom blackbg12.pgm > flipped.pgm
+
+x=0
+c=32
+height=13
+width=8
+while [[ $c -lt 128 ]]
+do
+  pnmcut -left $x -width $width -height $height < flipped.pgm | pnmnoraw > $c.pgm
+  x=$((x+$width))
+  c=$((c+1))
+done
+
+ppmmake red 320 240 | pnmpaste 109.pgm 100 100 | pnmpaste 109.pgm 107 100 | pnmpaste 103.pgm 114 100 | pnmpaste 94.pgm 121 100 | pnmpaste 111.pgm 128 100 | pnmpaste 35.pgm 50 50 | ppmtogif > x.gif
+
+
+x=0
+echo "unsigned char charset[$width*96*$height] = {"
+while [[ $x -lt $width ]]
+do
+  echo "// Column $x"
+  c=32
+  while [[ $c -lt 128 ]]
+  do
+    echo "// Char $c"
+    pnmcut -left $x -top 0 -width 1 -height $height < $c.pgm | pnmnoraw | tail -13 | sed 's/$/,/'
+    c=$((c+1))
+  done
+  x=$((x+1))
+done
+
+echo '};'
+

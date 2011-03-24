@@ -1,0 +1,552 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="799.41718"
+   height="281.49783"
+   id="svg2"
+   sodipodi:version="0.32"
+   inkscape:version="0.46"
+   sodipodi:docname="avb_min_system.svg"
+   inkscape:output_extension="org.inkscape.output.svg.inkscape"
+   version="1.0">
+  <defs
+     id="defs4">
+    <marker
+       inkscape:stockid="Arrow2Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Lend"
+       style="overflow:visible">
+      <path
+         id="path3215"
+         style="font-size:12px;fill-rule:evenodd;stroke-width:0.625;stroke-linejoin:round"
+         d="M 8.7185878,4.0337352 L -2.2072895,0.016013256 L 8.7185884,-4.0017078 C 6.97309,-1.6296469 6.9831476,1.6157441 8.7185878,4.0337352 z"
+         transform="matrix(-1.1,0,0,-1.1,-1.1,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow1Lend"
+       style="overflow:visible">
+      <path
+         id="path3197"
+         d="M 0,0 L 5,-5 L -12.5,0 L 5,5 L 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.8,0,0,-0.8,-10,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Mstart"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow1Mstart"
+       style="overflow:visible">
+      <path
+         id="path3200"
+         d="M 0,0 L 5,-5 L -12.5,0 L 5,5 L 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(0.4,0,0,0.4,4,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lstart"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow1Lstart"
+       style="overflow:visible">
+      <path
+         id="path3194"
+         d="M 0,0 L 5,-5 L -12.5,0 L 5,5 L 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(0.8,0,0,0.8,10,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Lstart"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Lstart"
+       style="overflow:visible">
+      <path
+         id="path3212"
+         style="font-size:12px;fill-rule:evenodd;stroke-width:0.625;stroke-linejoin:round"
+         d="M 8.7185878,4.0337352 L -2.2072895,0.016013256 L 8.7185884,-4.0017078 C 6.97309,-1.6296469 6.9831476,1.6157441 8.7185878,4.0337352 z"
+         transform="matrix(1.1,0,0,1.1,1.1,0)" />
+    </marker>
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 526.18109 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="744.09448 : 526.18109 : 1"
+       inkscape:persp3d-origin="372.04724 : 350.78739 : 1"
+       id="perspective10" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     gridtolerance="10000"
+     guidetolerance="10"
+     objecttolerance="10"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1"
+     inkscape:cx="351.46851"
+     inkscape:cy="244.9369"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="true"
+     inkscape:window-width="1679"
+     inkscape:window-height="975"
+     inkscape:window-x="0"
+     inkscape:window-y="25"
+     inkscape:snap-global="false">
+    <inkscape:grid
+       type="xygrid"
+       id="grid6069"
+       visible="true"
+       enabled="true" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(68.163892,-92.929948)">
+    <rect
+       style="fill:#ffffff;stroke:#000000;stroke-width:2.79790926;stroke-miterlimit:3.70000005;stroke-dasharray:11.19163644, 2.79790911;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect14197"
+       width="498.85904"
+       height="250.85445"
+       x="71.646423"
+       y="111.13696" />
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot10058"
+       style="font-size:40px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\text15804.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90"><flowRegion
+         id="flowRegion10060"><rect
+           id="rect10062"
+           width="248.57143"
+           height="78.571426"
+           x="285"
+           y="655.2193" /></flowRegion><flowPara
+         id="flowPara10064" /></flowRoot>    <text
+       xml:space="preserve"
+       style="font-size:24.73727989px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="745.84839"
+       y="361.09229"
+       id="text3405"
+       inkscape:transform-center-x="18.182746"
+       inkscape:transform-center-y="90.913729"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\text15804.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90"><tspan
+         sodipodi:role="line"
+         id="tspan3407"
+         x="745.84839"
+         y="361.09229" /></text>
+    <rect
+       style="fill:#cccccc;stroke:#000000;stroke-width:0.73194277;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect3467"
+       width="28.839485"
+       height="72.410912"
+       x="-608.82043"
+       y="265.07327"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300"
+       transform="scale(-1,1)" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 558.8746,299.73532 L 580.5767,299.77832"
+       id="path3469"
+       inkscape:connector-type="polyline"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300" />
+    <text
+       xml:space="preserve"
+       style="font-size:21.01779938px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="-333.82126"
+       y="593.97485"
+       id="text3471"
+       transform="matrix(0,-0.9893158,1.0107996,0,0,0)"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300"><tspan
+         sodipodi:role="line"
+         id="tspan3473"
+         x="-333.82126"
+         y="593.97485">MII Rx</tspan></text>
+    <rect
+       style="fill:#ffffff;stroke:#000000;stroke-width:1.3264991;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect3475"
+       width="70.671341"
+       height="97.05275"
+       x="-706.50598"
+       y="210.2847"
+       transform="scale(-1,1)"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.00757754px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 608.3636,300.14571 L 635.1088,300.18113"
+       id="path3481"
+       inkscape:connector-type="polyline"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300" />
+    <text
+       xml:space="preserve"
+       style="font-size:24.73727989px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="645.14441"
+       y="265.81583"
+       id="text3521"
+       inkscape:transform-center-x="18.182746"
+       inkscape:transform-center-y="90.913729"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300"><tspan
+         sodipodi:role="line"
+         id="tspan3523"
+         x="645.14441"
+         y="265.81583">PHY</tspan></text>
+    <rect
+       style="fill:#cccccc;stroke:#000000;stroke-width:0.73194277;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect2556"
+       width="28.839485"
+       height="72.410912"
+       x="-608.7948"
+       y="181.35513"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300"
+       transform="scale(-1,1)" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 558.849,216.01759 L 580.5511,216.06059"
+       id="path2558"
+       inkscape:connector-type="polyline"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300" />
+    <text
+       xml:space="preserve"
+       style="font-size:21.06933022px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="-247.73291"
+       y="595.05164"
+       id="text2560"
+       transform="matrix(0,-0.9917414,1.0083274,0,0,0)"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300"><tspan
+         sodipodi:role="line"
+         id="tspan2562"
+         x="-247.73291"
+         y="595.05164">MII Tx</tspan></text>
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.00757754px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 609.2196,216.10693 L 635.9649,216.14235"
+       id="path6638"
+       inkscape:connector-type="polyline"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.80199999;stroke-linecap:butt;stroke-linejoin:miter;marker-start:url(#Arrow2Lstart);marker-end:url(#Arrow2Lend);stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 706.99652,257.90703 C 730.18822,257.90703 730.18822,257.90703 730.18822,257.90703"
+       id="path2580"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300" />
+    <rect
+       style="fill:#cccccc;stroke:#000000;stroke-width:0.73470324;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect4227"
+       width="28.704798"
+       height="73.300461"
+       x="-56.295143"
+       y="132.7041"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300"
+       transform="scale(-1,1)" />
+    <rect
+       style="fill:#ffffff;stroke:#000000;stroke-width:0.85097927;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect4245"
+       width="71.040565"
+       height="39.734589"
+       x="-3.3021629"
+       y="147.98853"
+       transform="scale(-1,1)"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300" />
+    <text
+       xml:space="preserve"
+       style="font-size:20.15008736px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="-26.525375"
+       y="204.67342"
+       id="text4231"
+       inkscape:transform-center-x="27.478054"
+       inkscape:transform-center-y="41.574593"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300"
+       transform="scale(1.2291641,0.813561)"><tspan
+         sodipodi:role="line"
+         x="-26.525375"
+         y="204.67342"
+         style="font-size:14.66214466px;text-align:center;text-anchor:middle"
+         id="tspan4235">Audio</tspan><tspan
+         sodipodi:role="line"
+         x="-26.525375"
+         y="223.0011"
+         style="font-size:14.66214466px;text-align:center;text-anchor:middle"
+         id="tspan2525">DAC</tspan></text>
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.81456357px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 4.9619523,169.55584 L 26.690777,169.58433"
+       id="path4237"
+       inkscape:connector-type="polyline"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.82073593px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 55.922895,169.49309 L 82.701124,169.51657"
+       id="path4239"
+       inkscape:connector-type="polyline"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300" />
+    <rect
+       style="fill:#ffffff;stroke:#000000;stroke-width:0.812491;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect4241"
+       width="199.8736"
+       height="52.432541"
+       x="-282.00662"
+       y="140.14105"
+       transform="scale(-1,1)"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300" />
+    <rect
+       style="fill:#ffffff;stroke:#000000;stroke-width:1.05170417;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect4243"
+       width="173.16679"
+       height="101.40086"
+       x="-558.99097"
+       y="208.56491"
+       transform="scale(-1,1)"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300" />
+    <rect
+       style="fill:#ffffff;stroke:#000000;stroke-width:0.74319422;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect4267"
+       width="211.39742"
+       height="41.478603"
+       x="-557.87622"
+       y="135.87762"
+       transform="scale(-1,1)"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300" />
+    <rect
+       style="fill:#ffffff;stroke:#000000;stroke-width:0.63769972;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect4269"
+       width="122.30344"
+       height="52.785297"
+       x="-279.93524"
+       y="248.98175"
+       transform="scale(-1,1)"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300" />
+    <text
+       xml:space="preserve"
+       style="font-size:24.73727989px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="445.72501"
+       y="262.28809"
+       id="text4277"
+       inkscape:transform-center-x="18.182746"
+       inkscape:transform-center-y="90.913729"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300"><tspan
+         sodipodi:role="line"
+         id="tspan4279"
+         x="445.72501"
+         y="262.28809">MAC</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:24.73727989px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="192.93611"
+       y="286.25229"
+       id="text4281"
+       inkscape:transform-center-x="18.182746"
+       inkscape:transform-center-y="90.913729"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300"><tspan
+         sodipodi:role="line"
+         id="tspan4283"
+         x="192.93611"
+         y="286.25229">PTP</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:24.73727989px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="398.23297"
+       y="133.40353"
+       id="text4297"
+       inkscape:transform-center-x="18.182746"
+       inkscape:transform-center-y="90.913729"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300"><tspan
+         sodipodi:role="line"
+         id="tspan4299"
+         x="398.23297"
+         y="133.40353" /><tspan
+         sodipodi:role="line"
+         x="398.23297"
+         y="164.32513"
+         id="tspan14199">CONFIG</tspan></text>
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 283.47049,284.5161 L 385.36966,285.26535 L 385.36966,286.01461"
+       id="path4301" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 282.47049,167.85581 L 320.68268,168.60506 L 320.68268,238.28611 L 387.3667,238.28611"
+       id="path4303" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.84860426px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 482.44684,175.789 C 482.44684,208.13249 484.09676,207.64243 484.09676,207.64243"
+       id="path4309" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.25719142px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 197.05501,193.60887 C 197.05501,249.26748 197.05501,249.26748 197.05501,249.26748"
+       id="path4311" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.02178466px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 282.10676,149.12642 L 323.71733,149.12642 C 323.71733,149.12642 327.66652,144.33044 329.99816,144.64717 C 332.32981,144.9639 334.7088,150.61951 334.7088,150.61951 L 347.27047,150.61951"
+       id="path4329"
+       sodipodi:nodetypes="ccscc" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.01692796px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 283.22821,266.77024 L 370.87624,266.77024 C 370.87624,266.77024 380.56465,253.94683 380.61491,247.39586 C 380.67473,239.59808 369.37798,224.14663 369.37798,224.14663 L 369.37798,176.87316"
+       id="path4331"
+       sodipodi:nodetypes="ccscc" />
+    <rect
+       style="fill:#ffffff;stroke:#000000;stroke-width:0.67031157;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect4333"
+       width="77.215294"
+       height="22.682306"
+       x="-168.97864"
+       y="155.76538"
+       transform="scale(-1,1)"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300" />
+    <text
+       xml:space="preserve"
+       style="font-size:12.7527523px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="113.30428"
+       y="147.06488"
+       id="text4335"
+       inkscape:transform-center-x="-2.5461114"
+       inkscape:transform-center-y="74.403869"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300"
+       transform="scale(0.8546881,1.1700174)"><tspan
+         sodipodi:role="line"
+         id="tspan4337"
+         x="113.30428"
+         y="147.06488">I2S interface</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:24.73727989px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="179.78537"
+       y="174.61273"
+       id="text4343"
+       inkscape:transform-center-x="18.182746"
+       inkscape:transform-center-y="90.913729"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300"><tspan
+         sodipodi:role="line"
+         id="tspan4345"
+         x="179.78537"
+         y="174.61273">AUDIO</tspan><tspan
+         sodipodi:role="line"
+         x="179.78537"
+         y="205.53433"
+         id="tspan4347" /></text>
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:1.50304306;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect4373"
+       width="300.00137"
+       height="43.005661"
+       x="95.381516"
+       y="330.67059" />
+    <text
+       xml:space="preserve"
+       style="font-size:40px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="124.90213"
+       y="366.16156"
+       id="text4369"><tspan
+         sodipodi:role="line"
+         id="tspan4371"
+         x="124.90213"
+         y="366.16156">XMOS CHIP</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:30.25621223px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="55.693344"
+       y="105.35075"
+       id="text2527"
+       transform="scale(0.5525859,1.8096734)"><tspan
+         sodipodi:role="line"
+         id="tspan2529"
+         x="55.693344"
+         y="105.35075">I S</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:13.62609005px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="56.151478"
+       y="102.85503"
+       id="text2531"
+       transform="scale(0.6311721,1.5843539)"><tspan
+         sodipodi:role="line"
+         id="tspan2533"
+         x="56.151478"
+         y="102.85503">2</tspan></text>
+  </g>
+</svg>

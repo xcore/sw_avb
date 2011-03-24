@@ -1,0 +1,19 @@
+# You can set flags specifically for your module by using the MODULE_XCC_FLAGS
+# variable. So the following
+#
+#   MODULE_XCC_FLAGS = $(XCC_FLAGS) -O3
+#
+# specifies that everything in the modules should have the application
+# build flags with -O3 appended (so the files will build at
+# optimization level -O3).
+#
+# You can also set MODULE_XCC_C_FLAGS, MODULE_XCC_XC_FLAGS etc..
+
+
+MODULE_XCC_C_FLAGS = $(XCC_FLAGS) -std=c99
+
+XCC_FLAGS_avb_1722_listener.xc = $(XCC_FLAGS) -fsubword-select
+
+XCC_FLAGS_avb_1722_router_support.c = $(XCC_FLAGS) -g
+
+XCC_FLAGS_avb_1722_talker_support.c = $(XCC_FLAGS) -g 

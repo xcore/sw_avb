@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="446.28842"
+   height="237.717"
+   id="svg2"
+   sodipodi:version="0.32"
+   inkscape:version="0.46"
+   version="1.0"
+   sodipodi:docname="xc_chans.svg"
+   inkscape:output_extension="org.inkscape.output.svg.inkscape">
+  <defs
+     id="defs4">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 526.18109 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="744.09448 : 526.18109 : 1"
+       inkscape:persp3d-origin="372.04724 : 350.78739 : 1"
+       id="perspective10" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     gridtolerance="10000"
+     guidetolerance="10"
+     objecttolerance="10"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.7"
+     inkscape:cx="259.69151"
+     inkscape:cy="133.37181"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1280"
+     inkscape:window-height="949"
+     inkscape:window-x="0"
+     inkscape:window-y="25" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-14.355786,-173.86083)">
+    <rect
+       style="fill:#333333;fill-opacity:1;stroke:#797979;stroke-width:2.71700001;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect3185"
+       width="435.71429"
+       height="227.14285"
+       x="23.571421"
+       y="183.07648" />
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:#797979;stroke-width:2.71700001;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect2411"
+       width="435.71429"
+       height="227.14285"
+       x="15.714286"
+       y="175.21933" />
+    <text
+       xml:space="preserve"
+       style="font-size:21.84552383px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Courier 10 Pitch;-inkscape-font-specification:Courier 10 Pitch"
+       x="39.68433"
+       y="191.83575"
+       id="text2383"
+       sodipodi:linespacing="125%"
+       transform="scale(0.9570415,1.0448868)"><tspan
+         sodipodi:role="line"
+         id="tspan2385"
+         x="39.68433"
+         y="191.83575">par { // execute in parallel</tspan><tspan
+         sodipodi:role="line"
+         x="39.68433"
+         y="219.14265"
+         id="tspan2387">   ptp_server(ptp_chan0, ..</tspan><tspan
+         sodipodi:role="line"
+         x="39.68433"
+         y="246.44957"
+         id="tspan2389">   mac_server(mac_chan0, ..</tspan><tspan
+         sodipodi:role="line"
+         x="39.68433"
+         y="273.75647"
+         id="tspan2391">   ...</tspan><tspan
+         sodipodi:role="line"
+         x="39.68433"
+         y="301.06339"
+         id="tspan2393">   avb_1722_stream(ptp_chan0, ..</tspan><tspan
+         sodipodi:role="line"
+         x="39.68433"
+         y="328.37027"
+         id="tspan2395">                   mac_chan0, ..</tspan><tspan
+         sodipodi:role="line"
+         x="39.68433"
+         y="355.67719"
+         id="tspan2397">}</tspan></text>
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot2399"
+       style="font-size:40px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"><flowRegion
+         id="flowRegion2401"><rect
+           id="rect2403"
+           width="78.571426"
+           height="327.14285"
+           x="130"
+           y="155.21933" /></flowRegion><flowPara
+         id="flowPara2405" /></flowRoot>  </g>
+</svg>

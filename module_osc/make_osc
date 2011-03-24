@@ -1,0 +1,7 @@
+   
+$(OSC_GEN_DIR)/osc_tree.c : $(OSC_FILES) $(OSC_MODULE_DIR)/gen/gen_osc.pl
+	@echo Regenerating OSC code
+	@perl $(OSC_MODULE_DIR)/gen/gen_osc.pl $(OSC_GEN_DIR) $(OSC_FILES) 
+
+all: $(OSC_GEN_DIR)/osc_tree.c
+	@echo OSC code generated

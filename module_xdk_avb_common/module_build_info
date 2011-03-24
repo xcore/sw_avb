@@ -1,0 +1,10 @@
+AVB_XDK_SOURCE_DIRS = src/audio src/buttons src/freq src/lcd src/leds
+
+SOURCE_DIRS += $(AVB_XDK_SOURCE_DIRS) 
+INCLUDE_DIRS += $(AVB_XDK_SOURCE_DIRS) src/lcd/charset
+
+XCC_FLAGS_fft.xc = $(XCC_FLAGS) -fsubword-select
+XCC_FLAGS_xdk_lcd_debug.xc = $(XCC_FLAGS) -fsubword-select
+XCC_FLAGS_LCD_CharBuffer.xc = $(XCC_FLAGS) -fsubword-select
+
+EXCLUDE_FILES += LCD_CharCmds.xc

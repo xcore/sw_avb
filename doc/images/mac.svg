@@ -1,0 +1,649 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="974.59454"
+   height="491.2308"
+   id="svg2"
+   sodipodi:version="0.32"
+   inkscape:version="0.46"
+   sodipodi:docname="mac.svg"
+   inkscape:output_extension="org.inkscape.output.svg.inkscape"
+   version="1.0">
+  <defs
+     id="defs4">
+    <marker
+       inkscape:stockid="Arrow2Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Lend"
+       style="overflow:visible">
+      <path
+         id="path3215"
+         style="font-size:12px;fill-rule:evenodd;stroke-width:0.625;stroke-linejoin:round"
+         d="M 8.7185878,4.0337352 L -2.2072895,0.016013256 L 8.7185884,-4.0017078 C 6.97309,-1.6296469 6.9831476,1.6157441 8.7185878,4.0337352 z"
+         transform="matrix(-1.1,0,0,-1.1,-1.1,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow1Lend"
+       style="overflow:visible">
+      <path
+         id="path3197"
+         d="M 0,0 L 5,-5 L -12.5,0 L 5,5 L 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.8,0,0,-0.8,-10,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Mstart"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow1Mstart"
+       style="overflow:visible">
+      <path
+         id="path3200"
+         d="M 0,0 L 5,-5 L -12.5,0 L 5,5 L 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(0.4,0,0,0.4,4,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lstart"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow1Lstart"
+       style="overflow:visible">
+      <path
+         id="path3194"
+         d="M 0,0 L 5,-5 L -12.5,0 L 5,5 L 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(0.8,0,0,0.8,10,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Lstart"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Lstart"
+       style="overflow:visible">
+      <path
+         id="path3212"
+         style="font-size:12px;fill-rule:evenodd;stroke-width:0.625;stroke-linejoin:round"
+         d="M 8.7185878,4.0337352 L -2.2072895,0.016013256 L 8.7185884,-4.0017078 C 6.97309,-1.6296469 6.9831476,1.6157441 8.7185878,4.0337352 z"
+         transform="matrix(1.1,0,0,1.1,1.1,0)" />
+    </marker>
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 526.18109 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="744.09448 : 526.18109 : 1"
+       inkscape:persp3d-origin="372.04724 : 350.78739 : 1"
+       id="perspective10" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     gridtolerance="10000"
+     guidetolerance="10"
+     objecttolerance="10"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.66732634"
+     inkscape:cx="477.0745"
+     inkscape:cy="323.03073"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="true"
+     inkscape:window-width="1280"
+     inkscape:window-height="949"
+     inkscape:window-x="0"
+     inkscape:window-y="25"
+     inkscape:snap-global="false">
+    <inkscape:grid
+       type="xygrid"
+       id="grid6069"
+       visible="true"
+       enabled="true" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(187.11641,529.30777)">
+    <rect
+       style="fill:#ffffff;stroke:#000000;stroke-width:3.14718986;stroke-miterlimit:3.70000005;stroke-dasharray:12.58875866, 3.14718967;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect7186"
+       width="427.3302"
+       height="400.3569"
+       x="33.463551"
+       y="-481.56512" />
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot10058"
+       style="font-size:40px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\text15804.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90"><flowRegion
+         id="flowRegion10060"><rect
+           id="rect10062"
+           width="248.57143"
+           height="78.571426"
+           x="285"
+           y="655.2193" /></flowRegion><flowPara
+         id="flowPara10064" /></flowRoot>    <text
+       xml:space="preserve"
+       style="font-size:24.73727989px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="745.84839"
+       y="361.09229"
+       id="text3405"
+       inkscape:transform-center-x="18.182746"
+       inkscape:transform-center-y="90.913729"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\text15804.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90"><tspan
+         sodipodi:role="line"
+         id="tspan3407"
+         x="745.84839"
+         y="361.09229" /></text>
+    <path
+       sodipodi:type="arc"
+       style="fill:none;stroke:#000000;stroke-width:4.6177516;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="path3429"
+       sodipodi:cx="253.54829"
+       sodipodi:cy="224.54218"
+       sodipodi:rx="45.456863"
+       sodipodi:ry="54.043159"
+       d="M 299.00516,224.54218 A 45.456863,54.043159 0 1 1 208.09143,224.54218 A 45.456863,54.043159 0 1 1 299.00516,224.54218 z"
+       transform="matrix(-0.9474887,0,0,0.8861224,630.75454,-413.9582)"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300" />
+    <path
+       sodipodi:type="arc"
+       style="fill:none;stroke:#000000;stroke-width:4.6177516;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="path3431"
+       sodipodi:cx="253.54829"
+       sodipodi:cy="224.54218"
+       sodipodi:rx="45.456863"
+       sodipodi:ry="54.043159"
+       d="M 299.00516,224.54218 A 45.456863,54.043159 0 1 1 208.09143,224.54218 A 45.456863,54.043159 0 1 1 299.00516,224.54218 z"
+       transform="matrix(-0.9474887,0,0,0.8861224,493.23494,-414.92935)"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300" />
+    <path
+       sodipodi:type="arc"
+       style="fill:none;stroke:#000000;stroke-width:4.6177516;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="path3433"
+       sodipodi:cx="253.54829"
+       sodipodi:cy="224.54218"
+       sodipodi:rx="45.456863"
+       sodipodi:ry="54.043159"
+       d="M 299.00516,224.54218 A 45.456863,54.043159 0 1 1 208.09143,224.54218 A 45.456863,54.043159 0 1 1 299.00516,224.54218 z"
+       transform="matrix(-0.9474887,0,0,0.8861224,362.14732,-414.99985)"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.78740954;stroke-linecap:butt;stroke-linejoin:miter;marker-start:url(#Arrow2Lstart);marker-end:none;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 297.01846,-216.87924 C 346.65007,-216.87924 346.65007,-216.87924 346.65007,-216.87924"
+       id="path3435"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.17991161px;stroke-linecap:butt;stroke-linejoin:miter;marker-end:url(#Arrow2Lend);stroke-opacity:1"
+       d="M 481.38543,-215.42478 L 437.07121,-214.45125"
+       id="path3469"
+       inkscape:connector-type="polyline"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300" />
+    <rect
+       style="fill:#cccccc;stroke:#000000;stroke-width:1.59557045;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect3467"
+       width="58.902336"
+       height="168.47551"
+       x="-537.27246"
+       y="-271.55475"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300"
+       transform="scale(-1,1)" />
+    <text
+       xml:space="preserve"
+       style="font-size:45.81694412px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="113.55079"
+       y="549.13171"
+       id="text3471"
+       transform="matrix(0,-1.0559147,0.9470462,0,0,0)"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300"><tspan
+         sodipodi:role="line"
+         id="tspan3473"
+         x="113.55079"
+         y="549.13171">MII Rx</tspan></text>
+    <rect
+       style="fill:#ffffff;stroke:#000000;stroke-width:2.89165092;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect3475"
+       width="144.34055"
+       height="225.80865"
+       x="-736.78723"
+       y="-399.02905"
+       transform="scale(-1,1)"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.19642997px;stroke-linecap:butt;stroke-linejoin:miter;marker-start:none;marker-end:url(#Arrow2Lend);stroke-opacity:1"
+       d="M 592.74915,-188.56167 L 538.19309,-191.30513"
+       id="path3481"
+       inkscape:connector-type="polyline"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.68071187;stroke-linecap:butt;stroke-linejoin:miter;marker-start:url(#Arrow2Lstart);marker-end:none;stroke-miterlimit:3.20000005;stroke-dasharray:none;stroke-opacity:1"
+       d="M 164.71681,-216.06416 C 208.25059,-216.06416 208.25059,-216.06416 208.25059,-216.06416"
+       id="path3483"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300" />
+    <text
+       xml:space="preserve"
+       style="font-size:53.92508316px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="652.62347"
+       y="-252.80849"
+       id="text3521"
+       inkscape:transform-center-x="37.136884"
+       inkscape:transform-center-y="211.52527"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300"
+       transform="scale(0.9369278,1.0673181)"><tspan
+         sodipodi:role="line"
+         id="tspan3523"
+         x="652.62347"
+         y="-252.80849">PHY</tspan></text>
+    <path
+       sodipodi:type="arc"
+       style="fill:none;stroke:#000000;stroke-width:4.6177516;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="path2548"
+       sodipodi:cx="253.54829"
+       sodipodi:cy="224.54218"
+       sodipodi:rx="45.456863"
+       sodipodi:ry="54.043159"
+       d="M 299.00516,224.54218 A 45.456863,54.043159 0 1 1 208.09143,224.54218 A 45.456863,54.043159 0 1 1 299.00516,224.54218 z"
+       transform="matrix(-0.9474887,0,0,0.8861224,630.70225,-608.74081)"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300" />
+    <path
+       sodipodi:type="arc"
+       style="fill:none;stroke:#000000;stroke-width:4.6177516;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="path2550"
+       sodipodi:cx="253.54829"
+       sodipodi:cy="224.54218"
+       sodipodi:rx="45.456863"
+       sodipodi:ry="54.043159"
+       d="M 299.00516,224.54218 A 45.456863,54.043159 0 1 1 208.09143,224.54218 A 45.456863,54.043159 0 1 1 299.00516,224.54218 z"
+       transform="matrix(-0.9474887,0,0,0.8861224,493.18267,-609.71196)"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300" />
+    <path
+       sodipodi:type="arc"
+       style="fill:none;stroke:#000000;stroke-width:4.6177516;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="path2552"
+       sodipodi:cx="253.54829"
+       sodipodi:cy="224.54218"
+       sodipodi:rx="45.456863"
+       sodipodi:ry="54.043159"
+       d="M 299.00516,224.54218 A 45.456863,54.043159 0 1 1 208.09143,224.54218 A 45.456863,54.043159 0 1 1 299.00516,224.54218 z"
+       transform="matrix(-0.9474887,0,0,0.8861224,362.09505,-609.78246)"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.74862552;stroke-linecap:butt;stroke-linejoin:miter;marker-start:none;marker-end:url(#Arrow2Lend);stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 296.13305,-411.66198 C 343.50024,-411.66198 343.50024,-411.66198 343.50024,-411.66198"
+       id="path2554"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300" />
+    <rect
+       style="fill:#cccccc;stroke:#000000;stroke-width:1.59557045;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect2556"
+       width="58.902336"
+       height="168.47551"
+       x="-537.22009"
+       y="-466.33826"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300"
+       transform="scale(-1,1)" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.17991161px;stroke-linecap:butt;stroke-linejoin:miter;marker-end:url(#Arrow2Lend);stroke-opacity:1"
+       d="M 435.2098,-409.66684 L 479.5346,-409.5668"
+       id="path2558"
+       inkscape:connector-type="polyline"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300" />
+    <text
+       xml:space="preserve"
+       style="font-size:45.92927933px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="299.15823"
+       y="549.65082"
+       id="text2560"
+       transform="matrix(0,-1.0585035,0.94473,0,0,0)"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300"><tspan
+         sodipodi:role="line"
+         id="tspan2562"
+         x="299.15823"
+         y="549.65082">MII Tx</tspan></text>
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.68071187;stroke-linecap:butt;stroke-linejoin:miter;marker-start:none;marker-end:url(#Arrow2Lend);stroke-miterlimit:3.20000005;stroke-dasharray:none;stroke-opacity:1"
+       d="M 164.66432,-410.84676 C 208.19829,-410.84676 208.19829,-410.84676 208.19829,-410.84676"
+       id="path2564"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.54792714;stroke-linecap:butt;stroke-linejoin:miter;marker-start:url(#Arrow2Lstart);marker-end:none;stroke-miterlimit:3.20000005;stroke-dasharray:none;stroke-opacity:1"
+       d="M -70.235282,-276.93898 C 53.669681,-276.93898 86.637059,-239.47605 86.637059,-239.47605"
+       id="path6608"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.19642997px;stroke-linecap:butt;stroke-linejoin:miter;marker-mid:none;marker-end:url(#Arrow2Lend);stroke-opacity:1"
+       d="M 538.08772,-376.4916 L 592.71284,-376.40919"
+       id="path6638"
+       inkscape:connector-type="polyline"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.74828911;stroke-linecap:butt;stroke-linejoin:miter;marker-start:url(#Arrow2Lstart);marker-end:url(#Arrow2Lend);stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 737.78919,-288.22814 C 785.15639,-288.22814 785.15639,-288.22814 785.15639,-288.22814"
+       id="path2580"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.54792714;stroke-linecap:butt;stroke-linejoin:miter;marker-start:url(#Arrow2Lstart);marker-end:none;stroke-miterlimit:3.20000005;stroke-dasharray:none;stroke-opacity:1"
+       d="M -72.263171,-204.48701 C 51.641792,-204.48701 81.612135,-210.48108 81.612135,-210.48108"
+       id="path2567"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.54792714;stroke-linecap:butt;stroke-linejoin:miter;marker-start:url(#Arrow2Lstart);marker-end:none;stroke-miterlimit:3.20000005;stroke-dasharray:none;stroke-opacity:1"
+       d="M -81.254274,-253.93807 C 42.650689,-253.93807 81.612136,-223.96773 81.612136,-223.96773"
+       id="path2569"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300"
+       sodipodi:nodetypes="cc" />
+    <text
+       xml:space="preserve"
+       style="font-size:23.67303276px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
+       x="281.57272"
+       y="-117.15356"
+       id="text2571"
+       transform="scale(0.9128751,1.0954402)"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         x="281.57272"
+         y="-117.15356"
+         id="tspan2575">packet</tspan><tspan
+         sodipodi:role="line"
+         x="281.57272"
+         y="-87.562263"
+         id="tspan2585">buffer</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:23.67303085px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
+       x="719.18939"
+       y="-69.274963"
+       id="text2577"
+       transform="scale(0.9128751,1.0954402)"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan2579"
+         x="719.18939"
+         y="-69.274963">h/w</tspan><tspan
+         sodipodi:role="line"
+         x="719.18939"
+         y="-39.683674"
+         id="tspan2581">timestamper</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:23.67303276px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
+       x="136.14348"
+       y="-115.78559"
+       id="text2593"
+       transform="scale(0.9128751,1.0954402)"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         x="136.14348"
+         y="-115.78559"
+         id="tspan2597">mac</tspan><tspan
+         sodipodi:role="line"
+         x="136.14348"
+         y="-86.194298"
+         id="tspan2601">router</tspan></text>
+    <path
+       sodipodi:type="arc"
+       id="path2603"
+       sodipodi:cx="224.77759"
+       sodipodi:cy="-257.42117"
+       sodipodi:rx="7.4925861"
+       sodipodi:ry="17.232948"
+       d="M 232.27017,-257.42117 A 7.4925861,17.232948 0 1 1 217.285,-257.42117 A 7.4925861,17.232948 0 1 1 232.27017,-257.42117 z"
+       transform="translate(190.93427,-151.33947)"
+       style="fill:#666666" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:4.40329123;stroke-linecap:butt;stroke-linejoin:miter;marker-start:url(#Arrow2Lstart);marker-end:none;stroke-miterlimit:3.70000005;stroke-dasharray:none;stroke-opacity:1"
+       d="M 420.83709,-193.8023 C 473.09266,2.2452152 619.00854,-86.331825 619.00854,-86.331825"
+       id="path2605"
+       sodipodi:nodetypes="cc" />
+    <text
+       xml:space="preserve"
+       style="font-size:23.67303085px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
+       x="430.27896"
+       y="-115.78558"
+       id="text7180"
+       transform="scale(0.9128751,1.0954402)"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan7182"
+         x="430.27896"
+         y="-115.78558">h/w</tspan><tspan
+         sodipodi:role="line"
+         x="430.27896"
+         y="-86.194298"
+         id="tspan7184">interface</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:23.67303658px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
+       x="274.26166"
+       y="-298.40811"
+       id="text7188"
+       transform="scale(0.9128751,1.0954402)"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         x="274.26166"
+         y="-298.40811"
+         id="tspan7190">packet</tspan><tspan
+         sodipodi:role="line"
+         x="274.26166"
+         y="-268.8168"
+         id="tspan7192">buffer</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:23.67303658px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
+       x="128.83243"
+       y="-297.04013"
+       id="text7194"
+       transform="scale(0.9128751,1.0954402)"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         x="128.83243"
+         y="-297.04013"
+         id="tspan7198">tx</tspan><tspan
+         sodipodi:role="line"
+         x="128.83243"
+         y="-267.44882"
+         id="tspan7208">arbiter</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:23.67303467px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
+       x="422.9679"
+       y="-297.04013"
+       id="text7200"
+       transform="scale(0.9128751,1.0954402)"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan7202"
+         x="422.9679"
+         y="-297.04013">h/w</tspan><tspan
+         sodipodi:role="line"
+         x="422.9679"
+         y="-267.44885"
+         id="tspan7204">interface</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:25.3573246px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="-186.57724"
+       y="-263.63681"
+       id="text7210"
+       transform="scale(1.0065636,0.9934792)"><tspan
+         sodipodi:role="line"
+         id="tspan7212"
+         x="-186.57724"
+         y="-263.63681">to</tspan><tspan
+         sodipodi:role="line"
+         x="-186.57724"
+         y="-231.94016"
+         id="tspan7216">client</tspan><tspan
+         sodipodi:role="line"
+         x="-186.57724"
+         y="-200.2435"
+         id="tspan7214">threads</tspan></text>
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.54792714;stroke-linecap:butt;stroke-linejoin:miter;marker-start:none;marker-end:url(#Arrow2Lend);stroke-miterlimit:3.20000005;stroke-dasharray:none;stroke-opacity:1"
+       d="M -72.747744,-457.7689 C 30.177978,-441.28521 79.629047,-433.79262 79.629047,-433.79262"
+       id="path7218"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.54792714;stroke-linecap:butt;stroke-linejoin:miter;marker-start:none;marker-end:url(#Arrow2Lend);stroke-miterlimit:3.20000005;stroke-dasharray:none;stroke-opacity:1"
+       d="M -74.775633,-385.31693 C 49.12933,-385.31693 79.099669,-391.311 79.099669,-391.311"
+       id="path7220"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.54792714;stroke-linecap:butt;stroke-linejoin:miter;marker-start:none;marker-end:url(#Arrow2Lend);stroke-miterlimit:3.20000005;stroke-dasharray:none;stroke-opacity:1"
+       d="M -83.766736,-434.76799 C 32.645641,-418.2843 77.601162,-404.79765 77.601162,-404.79765"
+       id="path7222"
+       inkscape:export-filename="C:\Documents and Settings\ed\My Documents\XMOS\marketing\XS1\Collateral\demo brief one pagers\NAMM\talker.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300"
+       sodipodi:nodetypes="cc" />
+    <text
+       xml:space="preserve"
+       style="font-size:25.3573246px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="-182.78615"
+       y="-445.7301"
+       id="text8302"
+       transform="scale(1.0065636,0.9934792)"><tspan
+         sodipodi:role="line"
+         id="tspan8304"
+         x="-182.78615"
+         y="-445.7301">from</tspan><tspan
+         sodipodi:role="line"
+         x="-182.78615"
+         y="-414.03345"
+         id="tspan8306">client</tspan><tspan
+         sodipodi:role="line"
+         x="-182.78615"
+         y="-382.33679"
+         id="tspan8308">threads</tspan></text>
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:3.75362778;stroke-linecap:butt;stroke-linejoin:miter;marker-start:url(#Arrow2Lstart);marker-end:none;stroke-miterlimit:3.70000005;stroke-dasharray:none;stroke-opacity:1"
+       d="M 424.26171,-424.69107 C 476.68574,-566.69848 623.07205,-502.53753 623.07205,-502.53753"
+       id="path8318"
+       sodipodi:nodetypes="cc" />
+    <path
+       sodipodi:type="arc"
+       id="path8320"
+       sodipodi:cx="224.77759"
+       sodipodi:cy="-257.42117"
+       sodipodi:rx="7.4925861"
+       sodipodi:ry="17.232948"
+       d="M 232.27017,-257.42117 A 7.4925861,17.232948 0 1 1 217.285,-257.42117 A 7.4925861,17.232948 0 1 1 232.27017,-257.42117 z"
+       transform="translate(189.43575,42.718509)"
+       style="fill:#666666" />
+    <text
+       xml:space="preserve"
+       style="font-size:23.67303467px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
+       x="717.72693"
+       y="-446.3902"
+       id="text8322"
+       transform="scale(0.9128751,1.0954402)"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan8324"
+         x="717.72693"
+         y="-446.3902">h/w</tspan><tspan
+         sodipodi:role="line"
+         x="717.72693"
+         y="-416.79889"
+         id="tspan8326">timestamper</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:40px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="212.98769"
+       y="-499.62027"
+       id="text13738"><tspan
+         sodipodi:role="line"
+         id="tspan13740"
+         x="212.98769"
+         y="-499.62027">MAC</tspan></text>
+  </g>
+</svg>
