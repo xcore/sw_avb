@@ -219,35 +219,6 @@ media_output_fifo_maintain(media_output_fifo_t s0,
     }
 }
 
-/*
-void 
-media_output_fifo_push_sample(media_output_fifo_t s0,
-                                  unsigned int sample)
-
-{
-  struct ofifo_t *s = (struct ofifo_t *) s0;
-  unsigned int *wrptr = s->wrptr;
-  unsigned int *new_wrptr;
-  if (s->state == ZEROING)
-    sample = 0;
-
-  new_wrptr = wrptr+1;
-  
-  if (new_wrptr == s->end_of_fifo)
-    new_wrptr = s->start_of_fifo;
-  
-  
-  if (new_wrptr == s->dptr)
-    return;
-  
-  *wrptr = sample;
-  s->wrptr = new_wrptr;
-  s->sample_count++;
-  return;
-}
-
-*/
-
 void 
 media_output_fifo_strided_push(media_output_fifo_t s0,
                                    unsigned int *sample_ptr,
