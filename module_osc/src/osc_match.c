@@ -119,8 +119,6 @@ static int match(osc_node *p, char *query) {
 osc_node *osc_match(char *query)
 {
   osc_node *working_set = NULL;
-  osc_node *saved = NULL;
-  int finished = 0;
   char *next_query;
   osc_node *p;
   osc_node *child_set = NULL;
@@ -130,7 +128,6 @@ osc_node *osc_match(char *query)
   //  printf("init_set:");print_set(working_set);
 
   while (*query) {
-    int matched;   
     child_set = NULL;
     matched_set = NULL;
 

@@ -442,9 +442,7 @@ static void doTx(mrp_attribute_state *st,
          (*msg != 0 || *(msg+1) != 0)) {      
     mrp_msg_header *hdr = (mrp_msg_header *) &msg[0];     
     unsigned attr_list_len;
-    int numvalues;
-    int vector_len;
-    int attr_type = decode_attr_type(current_etype, hdr->AttributeType);
+
     merged = merge_msg(msg, st, vector);
 
     attr_list_len = 
@@ -464,8 +462,6 @@ static void doTx(mrp_attribute_state *st,
 
 static void mrp_update_state(mrp_event e, mrp_attribute_state *st)
 {
-  //  simple_printf("Update state in: %d\n", st->applicant_state);
-
 #ifdef MRP_FULL_PARTICIPANT
   // Registrar state machine
   switch (e) 
@@ -1044,6 +1040,8 @@ static int msg_match(mrp_attribute_type attr_type,
     return avb_mmrp_match(attr, msg, i);
   case MVRP_VID_VECTOR:
     return avb_mvrp_match(attr, msg, i);
+  default:
+	return 0;
   }
   return 0;
 }
@@ -1071,6 +1069,8 @@ static void process(mrp_attribute_type attr_type,
   case MVRP_VID_VECTOR:
     avb_mvrp_process(msg, i);
     return;
+  default:
+	return;
   }
   return;
 

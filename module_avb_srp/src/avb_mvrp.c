@@ -76,7 +76,7 @@ void avb_leave_vlan(int vlan)
 
 void avb_mvrp_process(char *buf, int num)
 {
-  return AVB_NO_STATUS;
+  return;
 }
 
 
@@ -101,7 +101,7 @@ int avb_mvrp_merge_message(char *buf,
   if (merge) {
     mvrp_first_value *first_value = 
       (mvrp_first_value *) (buf + sizeof(mrp_msg_header) + sizeof(mrp_vector_header));
-    int *vlan = (char *) st->attribute_info;
+    int *vlan = (int*) st->attribute_info;
 
     first_value->vlan[0] = (*vlan >> 8) & 0xff;
     first_value->vlan[1] = (*vlan) & 0xff;
@@ -123,7 +123,7 @@ int avb_mvrp_match(mrp_attribute_state *attr,
 {
 
   int vlan;
-  int *my_vlan = (char *) attr->attribute_info;
+  int *my_vlan = (int*) attr->attribute_info;
   mvrp_first_value *first_value =  (mvrp_first_value *) fv;
 
   vlan = (first_value->vlan[0] << 8) + first_value->vlan[1] + i;

@@ -81,15 +81,10 @@ void avb_leave_multicast_group(unsigned char addr[6])
   }
 }
 
-
-
-
 void avb_mmrp_process(char *buf, int num)
 {
-  return 0;
+  return;
 }
-
-
 
 #define MIN_ETHERNET_FRAME_SIZE (64)
 int avb_mmrp_merge_message(char *buf,
