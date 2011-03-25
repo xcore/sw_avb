@@ -82,6 +82,7 @@ static int sync_count = 0;
 
 static AnnounceMessage best_announce_msg;
 
+#ifdef AVNU_OBSERVABILITY
 static char * sprint_clock_id(char *s, n64_t *id)
 {
   for (int i=0;i<8;i++) {
@@ -90,6 +91,7 @@ static char * sprint_clock_id(char *s, n64_t *id)
   }
   return s;
 }
+#endif
 
 unsigned local_timestamp_to_ptp_mod32(unsigned local_ts,
                                       ptp_time_info_mod64 *info)
@@ -443,11 +445,12 @@ static void update_path_delay(ptp_timestamp *master_ingress_ts,
   long long delay;
   long long round_trip;
   signed diff_with_prev;
-  static count =0;
+  ptp_timestamp local_egress_ts_ptp, local_ingress_ts_ptp;
+
+#ifdef GPTP_DEBUG
   char msg[] = "NN  xxxxxxxxxx.xxxxxxxx  ";
-  ptp_timestamp local_egress_ts_ptp,
-    local_ingress_ts_ptp;
   long long adj;
+#endif
   /* The sequence of events is:
      
      local egress   (ptp req sent from our local port)
@@ -475,7 +478,7 @@ static void update_path_delay(ptp_timestamp *master_ingress_ts,
   local_diff = local_time_to_ptp_time(local_diff, ptp_adjust);
 
 
-#if 0
+#ifdef GPTP_DEBUG
   if (ptp_adjust < 0) {
     msg[3] = '-';
     adj = -ptp_adjust;
@@ -552,21 +555,24 @@ static void update_path_delay(ptp_timestamp *master_ingress_ts,
   if (diff_with_prev < 0) diff_with_prev = -diff_with_prev;
 
 #ifdef AVNU_OBSERVABILITY
-  count++;
-  if (count == 10) {
-    char buf[] = "xxxxxxxxxxx   ";
-    int i;
-    int pd=0;
-    for (int j=0;j<10;j++)
-      pd += pdelay_history[j];
-    
-    pd = pd / 10;
-    
-    count = 0;
-    i = avb_itoa(pd, buf, 10, 0);
-    strcpy(&buf[i]," ns");
-    avnu_log(AVNU_TESTPOINT_PDELAY, NULL, buf);
-    
+  {
+	  static count =0;
+	  count++;
+	  if (count == 10) {
+		char buf[] = "xxxxxxxxxxx   ";
+		int i;
+		int pd=0;
+		for (int j=0;j<10;j++)
+		  pd += pdelay_history[j];
+		
+		pd = pd / 10;
+		
+		count = 0;
+		i = avb_itoa(pd, buf, 10, 0);
+		strcpy(&buf[i]," ns");
+		avnu_log(AVNU_TESTPOINT_PDELAY, NULL, buf);
+		
+	  }
   }
 #endif
     

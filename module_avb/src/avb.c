@@ -66,7 +66,7 @@ static void register_talkers(chanend talker_ctl[])
       source->local_id = j;
       source->presentation = AVB_DEFAULT_PRESENTATION_TIME_DELAY_NS;
       source->vlan = AVB_DEFAULT_VLAN;
-      source->srp_attr = (int) mrp_get_attr();
+      source->srp_attr = mrp_get_attr();
       mrp_attribute_init(source->srp_attr, 
                          MSRP_TALKER_ADVERTISE, 
                          source);      
@@ -91,8 +91,10 @@ static void register_listeners(chanend listener_ctl[])
       sink->listener_ctl = listener_ctl[i];
       sink->core_id = core_id;
       sink->local_id = j;
-      sink->srp_attr = (int) mrp_get_attr();
-      mrp_attribute_init(sink->srp_attr, MSRP_LISTENER, sink);
+      sink->srp_attr = mrp_get_attr();
+      mrp_attribute_init(sink->srp_attr,
+    		  MSRP_LISTENER,
+    		  sink);
       max_listener_stream_id++;
     }    
     xc_abi_outuint(listener_ctl[i], max_link_id);
@@ -186,7 +188,7 @@ void avb_init(chanend media_ctl[],
   c_mac_tx = c_mac_tx0;
   c_ptp = c_ptp0;
 
-  domain_attr = (int) mrp_get_attr();
+  domain_attr = mrp_get_attr();
   mrp_attribute_init(domain_attr, 
                      MSRP_DOMAIN_VECTOR, 
                      NULL);      

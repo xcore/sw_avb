@@ -94,8 +94,7 @@ avb_srp_process_listener(char *fv,
   // place the steamId in the failed_streamId global in
   // case it is a failed message
   unsigned int *pdu_streamId = &failed_streamId[0];
-  avb_status_t ret = AVB_SRP_OK;
-  //printstr("srp: recieved listener pdu\n");
+
   unsigned long long streamId;
 
   for (int i=0;i<8;i++)
@@ -140,14 +139,6 @@ avb_srp_process_listener(char *fv,
     if (state != AVB_SOURCE_STATE_DISABLED) {
       get_avb_source_id(i, lstreamId);
 
-#if 0
-  simple_printf("pdu stream %x%x, lstream %x%x\n",
-                pdu_streamId[0],
-                pdu_streamId[1],
-                lstreamId[0],
-                lstreamId[1]);   
-#endif
-
       if (pdu_streamId[0] == lstreamId[0] &&
           pdu_streamId[1] == lstreamId[1]) {                  
         
@@ -156,7 +147,6 @@ avb_srp_process_listener(char *fv,
           case AVB_SRP_FOUR_PACKED_EVENT_ASKING_FAILED:            
             {
               set_avb_source_state(i, AVB_SOURCE_STATE_POTENTIAL);
-              ret = AVB_SRP_TALKER_ROUTE_FAILED;
             }
             break;
           case AVB_SRP_FOUR_PACKED_EVENT_READY:
@@ -170,7 +160,7 @@ avb_srp_process_listener(char *fv,
     }
   }
    
-  return ret;
+  return;
 }
 
 
@@ -185,7 +175,7 @@ avb_srp_process_talker(int mrp_attribute_type,
   srp_talker_first_value *packet = (srp_talker_first_value *) fv;
   unsigned int *pdu_streamId = &failed_streamId[0];
   int registered = 0;
-  avb_status_t ret = AVB_SRP_OK;
+
   unsigned int lstreamId[2];
   unsigned long long streamId;
 
@@ -228,7 +218,7 @@ avb_srp_process_talker(int mrp_attribute_type,
     get_avb_sink_id(i, lstreamId);
     if (pdu_streamId[0] == lstreamId[0] &&
         pdu_streamId[1] == lstreamId[1]) { 
-      srp_stream_state *st;
+
       unsigned latency;
 
       latency = 
@@ -237,17 +227,10 @@ avb_srp_process_talker(int mrp_attribute_type,
         ((unsigned) packet->AccumulatedLatency[2] << 8) +
         ((unsigned) packet->AccumulatedLatency[3] << 0);
       
-      //      simple_printf("AccLatency: %d",latency);
-
       registered = 1;
-      //      get_avb_sink_srp_state(i, &st);
       switch (mrp_attribute_type)
         {
         case AVB_SRP_ATTRIBUTE_TYPE_TALKER_FAILED:
-          simple_printf("Got talker failed\n");
-          ret = AVB_SRP_LISTENER_ROUTE_FAILED;
-          //          st->u.listener.attribute_type = MSRP_LISTENER_ASKING_FAILED;
-          //          mrp_update_state(MRP_EVENT_REDECLARE, &st->u.listener);
           break;
         }
     }
@@ -263,7 +246,7 @@ avb_srp_process_talker(int mrp_attribute_type,
   avb_add_detected_stream(pdu_streamId, 2, packet->DestMacAddr, num);
 #endif
 
-  return ret;
+  return;
 }
 
 void
@@ -318,16 +301,13 @@ static int merge_listener_message(char *buf,
     (mrp_vector_header *) (buf + sizeof(mrp_msg_header));  
   int merge = 0;
   avb_sink_info_t *sink_info = st->attribute_info;       
-  char *macaddr = avb_control_get_my_mac_addr();
+
   int num_values;
 
   if (mrp_hdr->AttributeType != AVB_SRP_ATTRIBUTE_TYPE_LISTENER)
     return 0;
 
-
-
   num_values = hdr->NumberOfValuesLow;
-  //  simple_printf("merge listener %d\n",num_values);
                            
   if (num_values == 0) 
     merge = 1;
@@ -338,7 +318,7 @@ static int merge_listener_message(char *buf,
   if (merge) {
     srp_listener_first_value *first_value = 
       (srp_listener_first_value *) (buf + sizeof(mrp_msg_header) + sizeof(mrp_vector_header));
-    int * streamId = sink_info->streamId;
+    unsigned * streamId = sink_info->streamId;
 
     if (num_values == 0) {
       first_value->StreamId[0] = (unsigned char) (streamId[0] >> 24);

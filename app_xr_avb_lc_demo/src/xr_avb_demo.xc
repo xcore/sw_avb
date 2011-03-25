@@ -122,7 +122,7 @@ int main(void)
   streaming chan c_samples_to_codec;
 
   // tcp/ip channels
-  chan xtcp[2];
+  chan xtcp[1];
 
   chan c_gpio_ctl;
 

@@ -1,10 +1,12 @@
 #ifndef __avb_stream_h__
 #define __avb_stream_h__
 
+struct mrp_attribute_state;
+
 typedef struct avb_source_info_t
 {
   int state;
-  int srp_attr;
+  struct mrp_attribute_state* srp_attr;
   int core_id;
   int local_id;
   int talker_ctl;
@@ -24,7 +26,7 @@ typedef struct avb_sink_info_t
 {
   unsigned int streamId[2];
   int state;
-  int srp_attr;
+  struct mrp_attribute_state* srp_attr;
   int core_id;
   int local_id;
   int listener_ctl;
