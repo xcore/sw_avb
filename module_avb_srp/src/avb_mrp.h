@@ -6,6 +6,17 @@
 #include "mrp_conf.h"
 #endif
 
+/** \file avb_mrp.h
+ *
+ *  MRP (from 802.1ak) is the Multiple Registration Protocol which
+ *  allows units in an 802.1 LAN to register attributes with other
+ *  nodes.  It is used, in this case, for registering membership of
+ *  VLANs and Multicast groups.
+ *
+ *  Switches in the LAN will respond to this protocol and update
+ *  whatever tables are necessary to ensure that the node receives
+ *  the correct traffic.
+ */
 #ifndef MRP_MAX_ATTRS
 #define MRP_MAX_ATTRS 20
 #endif
@@ -130,29 +141,25 @@ typedef struct mrp_attribute_state {
 #define MRP_PERIODIC_TIMER_PERIOD_CENTISECONDS 100
 #define MRP_PERIODIC_TIMER_MULTIPLIER 10
 
-/* Function: mrp_init
+/** Function: mrp_init
 
    This function initializes the MRP state machines. It just 
    needs to be called once at the start of the program.
 */      
 void mrp_init(char macaddr[]);
 
-/* Function: mrp_attribute_init
+/** Function: mrp_attribute_init
 
    This function initializes the state of an MRP attribute. Currently
    only MSRP attributes are supported.
 
-   Parameters:
+   \param st the attribute state structure to intialize
+   \param t the type of the attribute
+   \param info a void * pointer that will be associated with the attribute.
+               This pointer is passed on to attribute specific functions
+               (e.g. functions to send particulars PDUs)
 
-         st   - the attribute state structure to intialize
-         t    - the type of the attribute
-         info - a void * pointer that will be associated with the attribute.
-                This pointer is passed on to attribute specific functions 
-                (e.g. functions to send particulars PDUs)
-
-   See also:
-
-         mrp_update_state
+   \note: see also mrp_update_state
 */
 void mrp_attribute_init(mrp_attribute_state *st,
                         mrp_attribute_type t,
@@ -163,13 +170,11 @@ void mrp_attribute_init(mrp_attribute_state *st,
 void mrp_mad_init(mrp_attribute_state *st);
 void mrp_mad_new(mrp_attribute_state *st);
 
-/* Function: mrp_mad_join
+/** Function: mrp_mad_join
 
    This function registers a MAD_Join request for a particular attribute
 
-   Parameters:
-   
-         st - the attribute to join
+   \param st the attribute to join
    
 */
 
@@ -177,18 +182,16 @@ void mrp_mad_new(mrp_attribute_state *st);
 
 void mrp_mad_join(mrp_attribute_state *st);
 
-/* Function: mrp_mad_leave
+/** Function: mrp_mad_leave
 
    This function registers a MAD_Leave request for a particular attribute
 
-   Parameters:
-   
-         st - The attribute to leave
+   \param st The attribute to leave
    
 */
 void mrp_mad_leave(mrp_attribute_state *st);
 
-/* Function: mrp_periodic
+/** Function: mrp_periodic
 
    This function performs periodic MRP processing. It must be called 
    approximately 4 times a second.
@@ -217,4 +220,5 @@ mrp_attribute_state *mrp_get_attr(void);
 avb_status_t avb_mrp_process_packet(unsigned int buf[], int len);
 
 void avb_mrp_set_legacy_mode(int mode);
+
 #endif  //_avb_mrp_h_

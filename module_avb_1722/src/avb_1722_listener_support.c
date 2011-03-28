@@ -18,7 +18,7 @@
 
 
 //#define DEBUG_DBC 1
-#define DEBUG_STREAM_INDICATORS 1
+//#define DEBUG_STREAM_INDICATORS 1
 
 #ifdef DEBUG_DBC
 static int dbc_fail_count = 1;

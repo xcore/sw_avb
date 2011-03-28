@@ -36,7 +36,7 @@ typedef struct media_clock_t {
 // over the recovery period to allow a lock
 #define ACCEPTABLE_LOCKED_FILL_DEVIATION 20
 
-unsigned int init_media_clock_recovery(chanend ptp_svr, 
+void init_media_clock_recovery(chanend ptp_svr,
                                        int clock_info,
                                        unsigned int clk_time,
                                        unsigned int rate);

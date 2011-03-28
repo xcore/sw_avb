@@ -9,7 +9,7 @@
 #
 # You can also set MODULE_XCC_C_FLAGS, MODULE_XCC_XC_FLAGS etc..
 
-MODULE_XCC_C_FLAGS = $(XCC_FLAGS) -Os -std=c99
-#MODULE_XCC_C_FLAGS = $(XCC_FLAGS) -O0 -g -std=c99
+#MODULE_XCC_C_FLAGS = $(XCC_FLAGS) -Os -std=c99
+MODULE_XCC_C_FLAGS = $(XCC_FLAGS) -O0 -g -std=c99
 
 OPTIONAL_HEADERS += mrp_conf.h

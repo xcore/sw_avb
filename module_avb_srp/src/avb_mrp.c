@@ -56,7 +56,7 @@ static void configure_send_buffer_mmrp() {
   memcpy(&hdr->dest_addr, mmrp_dest_mac, 6);
   
   hdr->ethertype[0] = (AVB_MMRP_ETHERTYPE >> 8);
-  hdr->ethertype[0] = AVB_MMRP_ETHERTYPE & 0xff;
+  hdr->ethertype[1] = AVB_MMRP_ETHERTYPE & 0xff;
   current_etype = AVB_MMRP_ETHERTYPE;
 }
 
@@ -66,7 +66,7 @@ static void configure_send_buffer_mvrp() {
   memcpy(&hdr->dest_addr, mvrp_dest_mac, 6);
   
   hdr->ethertype[0] = (AVB_MVRP_ETHERTYPE >> 8);
-  hdr->ethertype[0] = AVB_MVRP_ETHERTYPE & 0xff;
+  hdr->ethertype[1] = AVB_MVRP_ETHERTYPE & 0xff;
   current_etype = AVB_MVRP_ETHERTYPE;
 }
 
@@ -1170,3 +1170,4 @@ avb_status_t avb_mrp_process_packet(unsigned int buf[], int len)
  
   return status;
 }
+

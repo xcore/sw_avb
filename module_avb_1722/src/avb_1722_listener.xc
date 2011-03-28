@@ -99,6 +99,7 @@ void avb_1722_listener(chanend ethernet_rx_svr,
           pktByteCnt -= 4;
           
           avb_hash = RxBuf[1];
+
           // process the audio packet if enabled.
           if (avb_hash < MAX_AVB_STREAMS_PER_LISTENER &&
               listener_streams[avb_hash].active)
