@@ -338,6 +338,7 @@ void demo(chanend listener_ctl[], chanend talker_ctl[], chanend media_ctl[],
 
 	// Initialize the media clock (a ptp derived clock)
 	//set_device_media_clock_type(0, MEDIA_FIFO_DERIVED);
+	//set_device_media_clock_type(0, LOCAL_CLOCK);
 	set_device_media_clock_type(0, PTP_DERIVED);
 	set_device_media_clock_rate(0, SAMPLE_RATE);
 	set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_ENABLED);

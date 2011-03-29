@@ -226,6 +226,9 @@ static void set_new_role(enum ptp_state_t new_role,
 
 
   if (new_role == PTP_SLAVE) {
+
+	simple_printf("PTP Role: Slave\n");
+
     // Reset synotization variables
     ptp_path_delay_valid = 0;
     ptp_adjust = 0;
@@ -241,6 +244,9 @@ static void set_new_role(enum ptp_state_t new_role,
   }
   
   if (new_role == PTP_MASTER) {
+
+	simple_printf("PTP Role: Master\n");
+
     // Now we are the master so no rate matching is needed
     ptp_adjust = 0;
     inv_ptp_adjust = 0;

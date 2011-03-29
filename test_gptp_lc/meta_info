@@ -1,0 +1,7 @@
+# This file describes how a app is published into a package.
+
+# The current version of the app
+VERSION = 1v0
+
+# The licensing terms of the ap e.g. FREE, XMOS_UNSPECIFIC
+LICENSE = XMOS_UNSPECIFIC
