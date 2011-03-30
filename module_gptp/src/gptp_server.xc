@@ -88,6 +88,7 @@ void ptp_process_client_request(chanend c)
 {
   unsigned char cmd;
   unsigned now;
+  unsigned core_id = get_core_id();
 
   cmd = inuchar(c);
   (void) inuchar(c);
@@ -110,6 +111,7 @@ void ptp_process_client_request(chanend c)
       c <: lo;
       c <: ptp_adjust;
       c <: inv_ptp_adjust;
+      c <: core_id;
       }                        
       break;
     }

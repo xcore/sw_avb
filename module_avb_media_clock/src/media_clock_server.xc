@@ -314,8 +314,8 @@ void media_clock_server(chanend media_clock_ctl,
                                  clk_time,
                                  CLOCK_RECOVERY_PERIOD);            
             count++;
-            if ((count & 0x3f) == 0) {
-                   simple_printf("w:%x\n", media_clocks[i].wordLength);
+            if ((count & 0xf) == 0) {
+                simple_printf("w:%x\n", media_clocks[i].wordLength);
             }
             for (int j=0;j<num_clk_ctl;j++) {
               if (registered[j]==i)

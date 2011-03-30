@@ -1,6 +1,7 @@
 #include <xs1.h>
 #include "gptp.h"
 #include "gptp_cmd.h"
+#include "simple_printf.h"
 
 static void send_cmd(chanend c, char cmd)
 {
@@ -54,17 +55,23 @@ void ptp_get_requested_time_info_mod64(chanend c,
 {
   timer tmr;
   signed t1,t2;
+  unsigned server_core_id;
   slave {
     c <: 0;
-    c :> t2;
     tmr :> t1;
+    c :> t2;
     c :> info.local_ts;
     c :> info.ptp_ts_hi;
     c :> info.ptp_ts_lo;
     c :> info.ptp_adjust;
     c :> info.inv_ptp_adjust;
+    c :> server_core_id;
   }
-  info.local_ts = info.local_ts - (t2-t1);
+  if (server_core_id != get_core_id())
+  {
+	  // 3 = protocol instruction cycle difference
+	  info.local_ts = info.local_ts - (t2-t1-3);
+  }
 }
 
 

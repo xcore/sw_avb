@@ -33,7 +33,6 @@
 // worldlen representation.  The max percision is 26 bits before the PTP clock recovery multiplcation overflows
 #define WORDLEN_FRACTIONAL_BITS 24
 
-
 typedef struct stream_info_t {
   int valid;
   unsigned int sample_count;
@@ -159,6 +158,10 @@ unsigned int update_media_clock(chanend ptp_svr,
         err = (diff_ptp * clock_info->wordlen) - (diff_local * clock_info->wordlen_ptp);
         err = ((err << WORDLEN_FRACTIONAL_BITS) / (long long)clock_info->wordlen);
 
+        // Chop off bottom bits - thread scheduling causes noise here
+        err = err / 256;
+        err = err * 256;
+
         if ((err >> WORDLEN_FRACTIONAL_BITS) > MAX_ERROR_TOLERANCE ||
             (err >> WORDLEN_FRACTIONAL_BITS) < -MAX_ERROR_TOLERANCE) {
             clock_info->wordlen = ((100000000LL << WORDLEN_FRACTIONAL_BITS) / clock_info->rate);
@@ -169,7 +172,8 @@ unsigned int update_media_clock(chanend ptp_svr,
           clock_info->err += err;
 
           // original *8, /4
-          long long diff = (((err) / diff_local) * 4) + (((clock_info->err) / diff_local) / 32);
+          long long diff = (((err) / diff_local) * 8) + (((clock_info->err) / diff_local) / 4);
+
           // adjust for error
           clock_info->wordlen = clock_info->wordlen  - diff;
         }
