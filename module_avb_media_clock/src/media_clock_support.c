@@ -30,8 +30,8 @@
 #define NANO_SECOND 1000000000
 
 // The clock recovery internal representation of the worldlen.  More precision and range than the external
-// worldlen representation
-#define WORDLEN_FRACTIONAL_BITS 32
+// worldlen representation.  The max percision is 26 bits before the PTP clock recovery multiplcation overflows
+#define WORDLEN_FRACTIONAL_BITS 24
 
 
 typedef struct stream_info_t {
@@ -77,8 +77,8 @@ void init_media_clock_recovery(chanend ptp_svr,
   clock_info->err = 0;
   clock_info->ierror = 0;
   if (rate != 0) {
-    clock_info->wordlen_ptp = ((1000000000LL << WORDLEN_FRACTIONAL_BITS) / clock_info->rate);
-    clock_info->wordlen = clock_info->wordlen_ptp / 10;
+      clock_info->wordlen = ((100000000LL << WORDLEN_FRACTIONAL_BITS) / clock_info->rate);
+      clock_info->wordlen_ptp = clock_info->wordlen * 10;
   }
   else {
     clock_info->wordlen = 0;
@@ -149,22 +149,6 @@ unsigned int update_media_clock(chanend ptp_svr,
         
         ptp2 = local_timestamp_to_ptp_mod32(t2, &timeInfo);
 
-        {
-            static int counts[6] = { 0,0,0,0,0,0 };
-            static int i=0;
-            int d = ((int)((signed) ptp2 - (signed) clock_info->ptp1) - 20971520)/10 + 2;
-            if (d >= 0 && d <= 4)
-            	counts[d]++;
-            else
-            	counts[5]++;
-
-            if (i % 0x40 == 0)
-            {
-            	simple_printf("%d %d (%d) %d %d. outside=%d\n", counts[0], counts[1], counts[2], counts[3], counts[4], counts[5]);
-            }
-            i++;
-        }
-
         diff_local = (signed) t2 - (signed) clock_info->t1;
         diff_ptp = (signed) ptp2 - (signed) clock_info->ptp1;
               
@@ -172,32 +156,22 @@ unsigned int update_media_clock(chanend ptp_svr,
         //      error in ns * wl = dptp * wl - dlocal * wlptp
         //      err = actual - expected
 
-        err = (long long) diff_ptp * clock_info->wordlen -
-          (long long) diff_local * clock_info->wordlen_ptp;
-        
-        err = (err << WORDLEN_FRACTIONAL_BITS) / clock_info->wordlen;
+        err = (diff_ptp * clock_info->wordlen) - (diff_local * clock_info->wordlen_ptp);
+        err = ((err << WORDLEN_FRACTIONAL_BITS) / (long long)clock_info->wordlen);
 
         if ((err >> WORDLEN_FRACTIONAL_BITS) > MAX_ERROR_TOLERANCE ||
-            (err >> WORDLEN_FRACTIONAL_BITS) < -MAX_ERROR_TOLERANCE)
-          {
-            clock_info->wordlen_ptp = ((1000000000LL << WORDLEN_FRACTIONAL_BITS) / clock_info->rate);
-            clock_info->wordlen = clock_info->wordlen_ptp / 10;
+            (err >> WORDLEN_FRACTIONAL_BITS) < -MAX_ERROR_TOLERANCE) {
+            clock_info->wordlen = ((100000000LL << WORDLEN_FRACTIONAL_BITS) / clock_info->rate);
+            clock_info->wordlen_ptp = clock_info->wordlen * 10;
             clock_info->err = 0;
           }
         else {
           clock_info->err += err;
 
-          long long diff = ((err / diff_local)*8) + (clock_info->err / diff_local) / 4;
+          // original *8, /4
+          long long diff = (((err) / diff_local) * 4) + (((clock_info->err) / diff_local) / 32);
           // adjust for error
-          //clock_info->wordlen =
-            //clock_info->wordlen  - diff;
-
-          {
-  			static int i=0;
-  			if (i % 0x40 == 0) simple_printf("%x %x\n", (int)(clock_info->wordlen_ptp), (int)(clock_info->wordlen));
-  			i++;
-          }
-
+          clock_info->wordlen = clock_info->wordlen  - diff;
         }
         
         clock_info->t1 = t2;

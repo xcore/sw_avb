@@ -42,9 +42,7 @@ out port p_mute_led_remote = PORT_SHARED_OUT; // mute, led remote;
 out port p_chan_leds = PORT_LEDS;
 in port p_buttons = PORT_SHARED_IN;
 
-void demo(chanend listener_ctl[], chanend talker_ctl[], chanend media_ctl[],
-		chanend media_clock_ctl, chanend c_ptp, chanend tcp_svr, chanend c_rx,
-		chanend c_tx, chanend c_gpio_ctl);
+void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl);
 
 void ptp_server_and_gpio(chanend c_rx, chanend c_tx, chanend ptp_link[],
 		int num_ptp, enum ptp_server_type server_type, chanend c);
@@ -228,14 +226,19 @@ int main(void) {
 		}
 
 		// Xlog server
-		on stdcore[0]: xlog_server_uart(p_uart_tx);
+		on stdcore[0]:
+		{
+			xlog_server_uart(p_uart_tx);
+		}
 
 		// Application threads
-		on stdcore[0]: demo(listener_ctl, talker_ctl, media_ctl,
-				media_clock_ctl,
-				ptp_link[2],
-				xtcp[0], rx_link[2], tx_link[4],
-				c_gpio_ctl);
+		on stdcore[0]:
+		{
+			// First initialize avb higher level protocols
+			avb_init(media_ctl, listener_ctl, talker_ctl, media_clock_ctl, rx_link[2], tx_link[4], ptp_link[2]);
+
+			demo(xtcp[0], rx_link[2], tx_link[4], c_gpio_ctl);
+		}
 	}
 
 	return 0;
@@ -306,9 +309,7 @@ void ptp_server_and_gpio(chanend c_rx, chanend c_tx, chanend ptp_link[],
 }
 
 /** The main application control thread **/
-void demo(chanend listener_ctl[], chanend talker_ctl[], chanend media_ctl[],
-		chanend media_clock_ctl, chanend c_ptp, chanend tcp_svr, chanend c_rx,
-		chanend c_tx, chanend c_gpio_ctl) {
+void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl) {
 
 	timer tmr;
 	int avb_status = 0;
@@ -317,10 +318,6 @@ void demo(chanend listener_ctl[], chanend talker_ctl[], chanend media_ctl[],
 	int selected_chan = 0;
 	unsigned change_stream = 1;
 	unsigned timeout;
-
-	// First initialize avb higher level protocols
-	avb_init(media_ctl, listener_ctl, talker_ctl, media_clock_ctl, c_rx, c_tx,
-			c_ptp);
 
 	// Set AVB to be in "legacy" mode
 	//  avb_set_legacy_mode(1);
