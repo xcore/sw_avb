@@ -335,8 +335,8 @@ void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl) {
 
 	// Initialize the media clock (a ptp derived clock)
 	//set_device_media_clock_type(0, MEDIA_FIFO_DERIVED);
-	//set_device_media_clock_type(0, LOCAL_CLOCK);
-	set_device_media_clock_type(0, PTP_DERIVED);
+	set_device_media_clock_type(0, LOCAL_CLOCK);
+	//set_device_media_clock_type(0, PTP_DERIVED);
 	set_device_media_clock_rate(0, SAMPLE_RATE);
 	set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_ENABLED);
 
@@ -400,7 +400,15 @@ void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl) {
 				avb_start();
 			}
 
-			mdns_xtcp_handler(tcp_svr, conn);
+			{
+				mdns_event res;
+				res = mdns_xtcp_handler(tcp_svr, conn);
+				if (res & mdns_entry_lost)
+				{
+					set_device_media_clock_type(0, MEDIA_FIFO_DERIVED);
+				}
+			}
+
 			c_api_xtcp_handler(tcp_svr, conn);
 
 			// add any special tcp/ip packet handling here
