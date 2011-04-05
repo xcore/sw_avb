@@ -121,7 +121,7 @@ void inform_media_clock_of_lock(int clock_index)
  clock_info->stream_info2.valid = 0;
 }
 
-#define MAX_ERROR_TOLERANCE 1000
+#define MAX_ERROR_TOLERANCE 100
 
 unsigned int update_media_clock(chanend ptp_svr, 
                                 int clock_index,
