@@ -16,6 +16,7 @@
 #include "gptp.h"
 #include "i2c.h"
 #include "xtcp_client.h"
+#include "uip_server.h"
 #include "mdns.h"
 #include "osc.h"
 #include "monitor.h"

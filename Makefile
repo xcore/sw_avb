@@ -49,7 +49,7 @@ PLUGIN_SUBDIRS = plugin_template
 
 # This variable should contain a space separated list of all
 # the directories containing applications with a 'test' make target
-TEST_SUBDIRS = app_template
+TEST_SUBDIRS = test_api_listener test_api_talker
 
 # Provided that the above variables are set you shouldn't need to modify
 # the targets below here. 

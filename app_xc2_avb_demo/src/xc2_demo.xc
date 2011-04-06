@@ -6,6 +6,7 @@
 #include <string.h>
 #include "xtcp_client.h"
 #include "xlog_server.h"
+#include "uip_server.h"
 #include "i2c.h"
 #include "avb.h"
 #include "simple_printf.h"

@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "xtcp_client.h"
+#include "uip_server.h"
 #include "audio_i2s.h"
 #include "xlog_server.h"
 #include "i2c.h"

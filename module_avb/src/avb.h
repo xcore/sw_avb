@@ -12,8 +12,6 @@
 #include "getmac.h"
 #include "media_clock_server.h"
 #include "media_clock_client.h"
-#include "xtcp_client.h"
-#include "uip_server.h"
 #include "avb_control_types.h"
 #include "avb_stream_detect.h"
 #ifndef __AVB_C__
