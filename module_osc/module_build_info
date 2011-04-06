@@ -11,6 +11,11 @@
 
 MODULE_XCC_FLAGS = $(XCC_FLAGS) -Os
 
+#
+# If you are building on windows then the simplest thing, when you need to 
+# rebuild the OSC files into the osc_tree and avb_api files, if to just
+# comment out the test below and set PERL_EXISTS explicitly
+#
 ifeq ($(wildcard $(foreach x,$(subst :, ,$(PATH)),$x/perl)),)
 PERL_EXISTS = 0
 else
