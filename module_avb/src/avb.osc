@@ -22,7 +22,7 @@
 /avb/source/#/sync i rw
 /avb/source/#/state s{disabled|potential|enabled} rw
 /avb/sinks i r
-/avb/sink/#/id h r
+/avb/sink/#/id h rw
 /avb/sink/#/name s rw
 /avb/sink/#/state s{disabled|potential|enabled} rw
 /avb/sink/#/channels i rw

@@ -511,18 +511,6 @@ int getset_avb_sink_id(int set, int sink_num, unsigned int a1[2])
     return 0;
 }
 
-
-inline int set_avb_sink_id(int h0, unsigned int a1[2])
-{return getset_avb_sink_id(1, h0, a1);}
-
-inline int get_avb_sink_id(int h0, unsigned int a1[2])
- {return getset_avb_sink_id(0, h0, a1);}
-
-extern int set_avb_sink_id(int h0, unsigned int a1[2]);
-
-extern int get_avb_sink_id(int h0, unsigned int a1[2]);
-
-
 int getset_avb_sink_channels(int set, 
                                int sink_num, 
                                int *channels)

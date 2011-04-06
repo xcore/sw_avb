@@ -14,9 +14,7 @@
 #include "media_clock_client.h"
 #include "avb_control_types.h"
 #include "avb_stream_detect.h"
-#ifndef __AVB_C__
-#include "avb_control.h"
-#endif
+#include "avb_api.h"
 #include "avb_unit.h"
 
 #ifndef AVB_OSC

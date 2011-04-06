@@ -11,11 +11,11 @@
 
 MODULE_XCC_FLAGS = $(XCC_FLAGS) -Os
 
-ifeq ($(wildcard $(foreach x,$(subst :, ,$(PATH)),$x/perl)),)
-PERL_EXISTS = 0
-else
+#ifeq ($(wildcard $(foreach x,$(subst :, ,$(PATH)),$x/perl)),)
+#PERL_EXISTS = 0
+#else
 PERL_EXISTS = 1
-endif
+#endif
 
 REBUILD_OSC ?= $(PERL_EXISTS)
 

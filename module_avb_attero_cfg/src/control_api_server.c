@@ -29,7 +29,7 @@
 #include "avb_conf.h"
 #include "avb_device_defines.h"
 #include "avb_control_types.h"
-#include "avb_control.h"
+#include "avb_api.h"
 #include "control_api_protocol.h"
 #include "control_api_server.h"
 #include "c_api_bswap.h"

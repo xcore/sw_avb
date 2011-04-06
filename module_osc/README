@@ -1,1 +1,21 @@
-module README.
+The OSC module takes *.osc files in the source tree to autogenerate some useful files:
+
+1) The main API for accessing the top level state of the system
+2) A parse tree for accessing that state 
+
+The files are called:
+
+  avb_api.h  - the main API calls, which are a get and a set call. Both of these are a call to a
+               getset function which is implemented in another part of the code.
+               
+  osc_tree.h - the OSC enumeration and node variables that define a parse tree for the API
+  
+  osc_tree.c - the definitions of the tokens in the parse tree, and a non-inline version of the main API 
+
+
+
+The module_osc directory also contains:
+
+  the TCP transport for the OSC protocol - although this is not included in the code by default.
+  the parser that takes string tokens and finds API calls in the parse tree based upon those tokens.
+
