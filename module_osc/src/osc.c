@@ -1,6 +1,6 @@
 #include "osc_types.h"
 #include "xccompat.h"
-#include "xtcp_client.h"
+//#include "xtcp_client.h"
 #include <string.h>
 
 
@@ -8,12 +8,6 @@ void osc_init(chanend tcp_svr, unsigned int osc_port)
 {
 
 }
-
-void osc_xtcp_handler(chanend tcp_svr, xtcp_connection_t *conn)
-{
-
-}
-
 
 int get_osc_version(char a0[]) 
 {
@@ -35,6 +29,13 @@ int get_osc_type_accepts(char a0[])
 
 
 #if 0
+
+// This is the TCP server for the OSC transport protocol
+
+void osc_xtcp_handler(chanend tcp_svr, xtcp_connection_t *conn)
+{
+
+}
 
 struct osc_connection_state {
   char inbuf[OSC_MAX_MESSAGE_LENGTH];

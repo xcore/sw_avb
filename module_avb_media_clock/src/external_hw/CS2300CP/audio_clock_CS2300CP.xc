@@ -26,6 +26,7 @@ void audio_gen_CS2300CP_clock(out port p,
   unsigned int prevLowBits = 0;
   unsigned int bitMask = (1 << WC_FRACTIONAL_BITS) - 1;
   int count=0;
+  int stop=0;
   
   // we need 2 ticks per sample
   mult = mult/2;
@@ -44,8 +45,10 @@ void audio_gen_CS2300CP_clock(out port p,
       break;
     }
 
+  stop = 0;
+
   p <: 0 @ wordTime;
-  while (1) {
+  while (!stop) {
     wordTime += baseLength;
 
     count++;
@@ -72,6 +75,9 @@ void audio_gen_CS2300CP_clock(out port p,
           wordLength = clk_arg >> 1; 
           baseLength = wordLength >> WC_FRACTIONAL_BITS;
           break;
+        case CLK_CTL_STOP:
+        	stop = 1;
+        	break;
         }
       break;
     default:
@@ -90,12 +96,6 @@ void audio_clock_CS2300CP_init(struct r_i2c &r_i2c,
 
    mult = mult/2;
    mult = mult << 12;
-
-   if (i2c_rd(0x01, deviceAddr, r_i2c))
-  {
-    printstr("PLL chip not found\n");
-    printhexln(i2c_rd(0x01, deviceAddr, r_i2c));
-  }
 
   // Configure PLL
   i2c_wr(0x03, 0x01,deviceAddr,r_i2c);

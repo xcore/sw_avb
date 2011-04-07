@@ -2,12 +2,7 @@
 #define __media_clock_client_h__
 
 #define CLK_CTL_SET_RATE 0x1
-#define CLK_CTL_ADJUST   0x2
-#define CLK_CTL_RATE_ADJUST   0x3
-#define CLK_CTL_RESET_COUNT   0x4
-#define CLK_CTL_GET_COUNT   0x5
-#define CLK_CTL_ATTACH_TO_CLOCK  0x6
-#define CLK_CTL_CONFIGURE_CLOCK 0x7
+#define CLK_CTL_STOP     0x2
 
 #define WC_FRACTIONAL_BITS 16
 
@@ -31,32 +26,8 @@
 #define BUF_CTL_NEW_STREAM 17
 #define BUF_CTL_REQUEST_NEW_STREAM_INFO 18
 
-
-
-void configure_ptp_derived_clock(chanend clk_svr,
-                                 int clock_num,
-                                 int rate);
-
-void configure_local_stream_derived_clock(chanend clk_svr,
-                                          int clock_num,
-                                          int buf_ctl_index,
-                                          int stream_num,
-                                          int rate);
-
-
-/** Attach to a particular media clock.
- *  This function attaches a link to the media clock server with a 
- *  particular media clock. After this call, the server will send
- *  clock adjust messages on the clk_svr chanend.
- * 1
- *  \param clk_svr  - the chanend connected to the media clock server
- *  \param clock_num - the clock number of the media clock 
- */
-void attach_to_media_clock(chanend clk_svr, int clock_num);
-
 void notify_buf_ctl_of_info(chanend buf_ctl, int stream_num);
-void notify_buf_ctl_of_new_stream(chanend buf_ctl, 
-                                  int stream_num);
+void notify_buf_ctl_of_new_stream(chanend buf_ctl, int stream_num);
 #endif
 
 

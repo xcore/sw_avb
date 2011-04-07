@@ -126,13 +126,6 @@ void synth(int period,
           wordLength = clk_arg;
           baseLength = wordLength >> WC_FRACTIONAL_BITS;
           break;
-        case CLK_CTL_ADJUST:
-          wordTime += clk_arg;
-          break;
-        case CLK_CTL_RATE_ADJUST:
-          wordLength += clk_arg;
-          baseLength = wordLength >> WC_FRACTIONAL_BITS;
-          break;
         }
       break;
     }

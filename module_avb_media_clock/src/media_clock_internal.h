@@ -15,21 +15,13 @@ typedef struct media_clock_t {
 } media_clock_t;
 
 
-#define CLK_CTL_SET_RATE 0x1
-#define CLK_CTL_ADJUST   0x2
-#define CLK_CTL_RATE_ADJUST   0x3
-#define CLK_CTL_RESET_COUNT   0x4
-#define CLK_CTL_GET_COUNT   0x5
-
 #define WC_FRACTIONAL_BITS 16
 
 // The number of ticks to wait before trying to get initial lock
 #define INITIAL_CLOCK_RECOVERY_DELAY (1<<26)
 
-
 // The number of ticks between period clock recovery checks
 #define CLOCK_RECOVERY_SLOW_PERIOD  300000000
-//#define CLOCK_RECOVERY_SLOW_PERIOD (1<<21)
 #define CLOCK_RECOVERY_PERIOD  (1<<21)
 
 // The number of samples the buffer can deviate from the fill point 

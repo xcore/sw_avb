@@ -165,13 +165,6 @@ static void inline i2s_master(clock bclk,
           wordLength = clk_arg >> 1;
           baseLength = wordLength >> WC_FRACTIONAL_BITS;
           break;
-        case CLK_CTL_ADJUST:
-          wordTime += clk_arg;
-          break;
-        case CLK_CTL_RATE_ADJUST:
-          wordLength += clk_arg >> 1;
-          baseLength = wordLength >> WC_FRACTIONAL_BITS;
-          break;
         }
       break;
     case monitor_ctl :> monitor_val:

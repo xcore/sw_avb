@@ -3,13 +3,6 @@
 #include "media_clock_client.h"
 #include "media_clock_server.h"
 
-void attach_to_media_clock(chanend c, int id) {
-  c <: CLK_CTL_ATTACH_TO_CLOCK;
-  c <: id;
-  return;
-}
-
-
 void notify_buf_ctl_of_info(chanend buf_ctl, int fifo)
 {
   outuchar(buf_ctl, BUF_CTL_GOT_INFO); 
@@ -78,37 +71,5 @@ void send_buf_ctl_new_stream_info(chanend buf_ctl,
   slave {
     buf_ctl <: media_clock;
   }
-}
-
-
-void configure_ptp_derived_clock(chanend clk_svr,
-                                 int clock_num,
-                                 int rate)
-{
-  clk_svr <: CLK_CTL_CONFIGURE_CLOCK;
-  master {
-    clk_svr <: clock_num;
-    clk_svr <: PTP_DERIVED;
-    clk_svr <: 0;
-    clk_svr <: 0;
-    clk_svr <: rate;
-  }    
-}
-
-void configure_local_stream_derived_clock(chanend clk_svr,
-                                          int clock_num,
-                                          int buf_ctl_index,
-                                          int stream_num,
-                                          int rate)
-{
-  clk_svr <: CLK_CTL_CONFIGURE_CLOCK;
-  master {
-    clk_svr <: clock_num;
-    clk_svr <: MEDIA_FIFO_DERIVED;
-    clk_svr <: buf_ctl_index;
-    clk_svr <: stream_num;
-    clk_svr <: rate;
-  }    
-  return;
 }
 
