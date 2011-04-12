@@ -206,7 +206,8 @@ static int dbc_miss = 0;
  */
 int avb1722_create_packet(unsigned char Buf0[],
                          avb1722_Talker_StreamConfig_t *stream_info,
-                         ptp_time_info_mod64 *timeInfo)
+                          ptp_time_info_mod64 *timeInfo,
+                          int time)
 {
    unsigned int timerValue;
    int pktSize;
@@ -232,6 +233,14 @@ int avb1722_create_packet(unsigned char Buf0[],
    int dbc;
    if (media_input_fifo_empty(map[0])) 
      return 0;
+
+   if (!stream_info->transmit_ok) {
+     int elapsed = time - stream_info->last_transmit_time;
+     if (elapsed < AVB1722_PACKET_PERIOD_TIMER_TICKS) 
+       return 0;
+     
+     stream_info->transmit_ok = 1;
+   }
 
    if (stream_info->latency == 0) {
      int ticks_per_sample = 100000000 / (stream_info->samples_per_fifo_packet * 8000);
@@ -332,7 +341,9 @@ int avb1722_create_packet(unsigned char Buf0[],
      AVB_TP_HDR_SIZE + 
      AVB_AVB1722_HDR_SIZE +
      (num_audio_samples<<2);
-      
+
+   stream_info->last_transmit_time = time;     
+   stream_info->transmit_ok = 0;      
    return (pktSize);
 }
 

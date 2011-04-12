@@ -33,7 +33,7 @@ void configure_stream(chanend avb1722_tx_config,
 {
   unsigned int streamIdExt;
   unsigned int rate;  
-
+  unsigned int tmp;
   avb1722_tx_config :> stream.sampleType;
     
   for (int i = 0; i < MAC_ADRS_BYTE_COUNT; i++) {
@@ -77,9 +77,9 @@ void configure_stream(chanend avb1722_tx_config,
 
   stream.samples_per_fifo_packet = ((rate + (AVB1722_PACKET_RATE-1))/AVB1722_PACKET_RATE * 4) / 3;
 
-  rate = ((rate / 100) << 16) / (AVB1722_PACKET_RATE / 100);
-  stream.samples_per_packet_base = rate >> 16;
-  stream.samples_per_packet_fractional = rate & 0xffff;
+  tmp = ((rate / 100) << 16) / (AVB1722_PACKET_RATE / 100);
+  stream.samples_per_packet_base = tmp >> 16;
+  stream.samples_per_packet_fractional = tmp & 0xffff;
   stream.rem = 0;
 
   stream.samples_left = 0;
@@ -88,7 +88,7 @@ void configure_stream(chanend avb1722_tx_config,
   stream.active = 1;
   stream.latency = 0;
   stream.prev_dbc = -1;
-  
+  stream.transmit_ok = 1;
 }
 
 
@@ -211,10 +211,13 @@ void avb_1722_talker(chanend ptp_svr,
           if (max_active_avb_stream != -1 &&
               talker_streams[cur_avb_stream].active==2) {
             int packet_size;
+            int t;
+            tmr :> t;
             packet_size =
               avb1722_create_packet((TxBuf, unsigned char[]),
                                     talker_streams[cur_avb_stream],
-                                    timeInfo);
+                                    timeInfo,
+                                    t);
             if (packet_size) {
               ethernet_send_frame_offset2(ethernet_tx_svr, 
                                           TxBuf,

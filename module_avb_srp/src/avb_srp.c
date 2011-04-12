@@ -458,6 +458,7 @@ static int merge_talker_message(char *buf,
   avb_source_info_t *source_info = st->attribute_info;       
   char *macaddr = avb_control_get_my_mac_addr();
   int num_values;
+  int samples_per_packet;
 
 
   if (mrp_hdr->AttributeType != AVB_SRP_ATTRIBUTE_TYPE_TALKER_ADVERTISE)
@@ -507,7 +508,8 @@ static int merge_talker_message(char *buf,
         AVB_SRP_TSPEC_RANK_DEFAULT << 4 |
         AVB_SRP_TSPEC_RESERVED_VALUE;
       
-      framesize = 32 + (source_info->num_channels * 6 * 4);
+      samples_per_packet = (source_info->rate + (AVB1722_PACKET_RATE-1))/AVB1722_PACKET_RATE;
+      framesize = 32 + (source_info->num_channels * samples_per_packet * 4);
 
   
 
