@@ -45,6 +45,8 @@ typedef struct avb1722_Talker_StreamConfig_t
   unsigned int samples_left;
   unsigned int initial;
   unsigned presentation_delay;
+  unsigned transmit_ok;
+  int last_transmit_time;
 } avb1722_Talker_StreamConfig_t;
 
 
@@ -68,6 +70,7 @@ int avb1722_create_packet(unsigned char Buf[],
                           REFERENCE_PARAM(avb1722_Talker_StreamConfig_t,
                                           stream_info),
                           REFERENCE_PARAM(ptp_time_info_mod64,
-                                          timeInfo));
+                                          timeInfo),
+                          int time);
 
 #endif

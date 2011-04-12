@@ -10,7 +10,9 @@
 #define MAX_ETHERNET_CLIENTS   5
 #define MII_RX_BUFSIZE_HIGH_PRIORITY (512)    
 #define MII_RX_BUFSIZE_LOW_PRIORITY (512)
-#define MII_TX_BUFSIZE (512)
+#define MII_TX_BUFSIZE_HIGH_PRIORITY (512)    
+#define MII_TX_BUFSIZE_LOW_PRIORITY (512)
+#define ETHERNET_MAX_TX_HP_PACKET_SIZE (100)
     
 /* General purpose AVB configuration */
 #define AVB_MAX_NAME_LEN 32

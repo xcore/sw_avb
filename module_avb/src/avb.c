@@ -206,6 +206,8 @@ avb_status_t avb_periodic(void) {
   return avb_1722_maap_periodic(c_mac_tx);  
 }
 
+
+
 void avb_start(void) {
   avb_1722_maap_rerequest_addresses();
   
@@ -213,6 +215,21 @@ void avb_start(void) {
   //  avb_srp_domain_start();
   mrp_mad_new(domain_attr);
   mrp_mad_join(domain_attr);       
+}
+
+static void avb_set_talker_bandwidth() 
+{
+  int data_size = 0;
+  for (int i=0;i<AVB_NUM_SOURCES;i++) {
+    avb_source_info_t *source = &sources[i];
+    if (source->state == AVB_SOURCE_STATE_POTENTIAL ||
+        source->state == AVB_SOURCE_STATE_ENABLED)
+      {
+        int samples_per_packet = (source->rate + (AVB1722_PACKET_RATE-1))/AVB1722_PACKET_RATE;
+        data_size += 18 + 32 + (source->num_channels * samples_per_packet * 4);
+      }
+  }
+  mac_set_qav_bandwidth(c_mac_tx, (data_size*8*AVB1722_PACKET_RATE*102)/100);  
 }
 
 int get_avb_sources(int *a0)
@@ -401,7 +418,7 @@ int getset_avb_source_state(int set,
             inputs[source->map[i]].mapped_to = UNMAPPED;
           }
       }
-
+      avb_set_talker_bandwidth();
       source->state = *state;      
     }
     *state = source->state;
