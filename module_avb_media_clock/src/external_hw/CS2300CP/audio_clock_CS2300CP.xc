@@ -11,11 +11,30 @@
 
 #define DEVICE_ADRS                    (0x90)
 
+/*
+ *  This module takes the output from the media clock server and transforms it into a
+ *  reference clock to be sent to a PLL multiplier device - the CS2300
+ *
+ *  There are four important clocks in the system:
+ *
+ *    100MHz reference clock
+ *    The word clock
+ *    The master clock (MCLK)
+ *    The i2s bit clock (BCLK)
+ *
+ *  The media clock server outputs the length of the sample period in 100MHz clocks.
+ *  This module converts that into a reference clock by waiting for a multiple of this
+ *  period (the multiple is PLL_TO_WORD_MULTIPLIER) and outputting a clock based on that
+ *  multiplier period.   The PLL device then takes this low frequency clock and multiplies
+ *  the frequency up to the MCLK frequency, which is the product of PLL_TO_WORD_MULTIPLIER
+ *  and mclks_per_wordclk
+ */
 
-// outputs a clock of media clock (e.g. 48khz) * mult
-void audio_gen_CS2300CP_clock(out port p, 
-                              chanend clk_ctl, 
-                              unsigned mult)
+// This is the number of word clocks per cycle of the PLL output clock
+#define PLL_TO_WORD_MULTIPLIER 100
+
+// outputs a clock of media clock
+void audio_gen_CS2300CP_clock(out port p, chanend clk_ctl)
 {
   int bit = 0x0;
   unsigned int wordTime;
@@ -28,11 +47,16 @@ void audio_gen_CS2300CP_clock(out port p,
   int count=0;
   int stop=0;
   
+  // this is the number of word clocks in one PLL output
+  unsigned mult = PLL_TO_WORD_MULTIPLIER;
+
   // we need 2 ticks per sample
   mult = mult/2;
 
-  clk_cmd = -1;
-  while (clk_cmd != CLK_CTL_SET_RATE) 
+  while (1)
+  {
+   clk_cmd = -1;
+   while (clk_cmd != CLK_CTL_SET_RATE)
     {
       slave {clk_ctl :> clk_cmd; clk_ctl :> clk_arg; };
       switch (clk_cmd)
@@ -83,16 +107,19 @@ void audio_gen_CS2300CP_clock(out port p,
     default:
       break;
     }
-    
+   }
   }
 }
 
 
-
-void audio_clock_CS2300CP_init(struct r_i2c &r_i2c,
-                               unsigned mult) 
+// Set up the multiplier in the PLL clock generator
+void audio_clock_CS2300CP_init(struct r_i2c &r_i2c, unsigned mclks_per_wordclk)
 {
    int deviceAddr = 0x9C;
+
+   // this is the muiltiplier in the PLL, which takes the PLL reference clock and
+   // multiplies it up to the MCLK frequency.
+   unsigned mult = (PLL_TO_WORD_MULTIPLIER * mclks_per_wordclk);
 
    mult = mult/2;
    mult = mult << 12;

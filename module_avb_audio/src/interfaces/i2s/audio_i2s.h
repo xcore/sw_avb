@@ -75,7 +75,7 @@ inline void i2s_master(const clock mclk,
                        chanend media_ctl,
                        int clk_ctl_index)
 {
-  int num_bclk_outputs = master_to_word_clock_ratio / 64;
+  int mclk_to_bclk_ratio = master_to_word_clock_ratio / 64;
   unsigned int bclk_val;
   unsigned int lrclk_val = 0;
   timer tmr;
@@ -92,7 +92,7 @@ inline void i2s_master(const clock mclk,
   // how many bitclocks outputs you have to do per word and also the 
   // length of the bitclock w.r.t the master clock.
   // In every case you will end up with 32 bit clocks per word.
-  switch (num_bclk_outputs) 
+  switch (mclk_to_bclk_ratio)
     {
     case 2:
       bclk_val = 0xaaaaaaaa;
@@ -133,7 +133,7 @@ inline void i2s_master(const clock mclk,
   p_lrclk @ 31 <: 0;
 
   for (int j=0;j<2;j++) {
-    for (int i=0;i<num_bclk_outputs;i++)  {
+    for (int i=0;i<mclk_to_bclk_ratio;i++)  {
       p_bclk <: bclk_val;
     }  
   }
@@ -161,7 +161,7 @@ inline void i2s_master(const clock mclk,
       p_lrclk <: lrclk_val;
       lrclk_val = ~lrclk_val;
 #pragma loop unroll    
-      for (int k=0;k<num_bclk_outputs;k++)  {
+      for (int k=0;k<mclk_to_bclk_ratio;k++)  {
         unsigned int sample_in;
         unsigned int sample_out;
         p_bclk <: bclk_val;

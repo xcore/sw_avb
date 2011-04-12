@@ -18,11 +18,11 @@
 #include "osc.h"
 #include "demo_stream_manager.h"
 
-/* Defines to determine the sample rate of the demo */
+// this is the sample rate, the frequency of the word clock
 #define SAMPLE_RATE 48000
-#define PLL_INPUT_RATE (SAMPLE_RATE/100)
-#define BCLK_RATIO 512
-#define MCLK_FREQUENCY (SAMPLE_RATE * BCLK_RATIO)
+
+// This is the number of master clocks in a word clock
+#define MASTER_TO_WORDCLOCK_RATIO 512
 
 void demo(chanend listener_ctl[], chanend talker_ctl[], chanend media_ctl[],
           chanend media_clock_ctl,
@@ -162,15 +162,14 @@ par
   // AVB - Audio
   on stdcore[1]: {
     audio_codec_CS42448_init(p_aud_rst, r_i2c, CODEC_I2S);
-    audio_clock_CS2300CP_init(r_i2c, MCLK_FREQUENCY/PLL_INPUT_RATE);        
+    audio_clock_CS2300CP_init(r_i2c, MASTER_TO_WORDCLOCK_RATIO);
     init_media_input_fifos(ififos, ififo_data, AVB_NUM_MEDIA_INPUTS);
     configure_clock_src(b_mclk, p_aud_mclk);
     start_clock(b_mclk);
     par
       {
-        audio_gen_CS2300CP_clock(p_fs,
-                                 clk_ctl[0], 
-                                 (SAMPLE_RATE/PLL_INPUT_RATE));
+        audio_gen_CS2300CP_clock(p_fs, clk_ctl[0]);
+
         i2s_master (b_mclk,
                     b_bclk,
                     p_aud_bclk,
@@ -179,7 +178,7 @@ par
                     AVB_NUM_MEDIA_OUTPUTS,
                     p_aud_din,
                     AVB_NUM_MEDIA_INPUTS,
-                    BCLK_RATIO,                                      
+                    MASTER_TO_WORDCLOCK_RATIO,
                     c_samples_to_codec,
                     ififos,
                     media_ctl[0],

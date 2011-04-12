@@ -19,11 +19,11 @@
 #include "osc.h"
 #include "demo_stream_manager.h"
 
-/* Defines to determine the sample rate of the demo */
+// this is the sample rate, the frequency of the word clock
 #define SAMPLE_RATE 48000
-#define PLL_INPUT_RATE (SAMPLE_RATE/100)
-#define BCLK_RATIO 512
-#define MCLK_FREQUENCY (SAMPLE_RATE * BCLK_RATIO)
+
+// This is the number of master clocks in a word clock
+#define MASTER_TO_WORDCLOCK_RATIO 512
 
 // Set the period inbetween periodic processing to 50us based
 // on the Xcore 100Mhz timer.
@@ -161,7 +161,7 @@ int main(void) {
 		{
 			// We need to initiate the PLL from core 1, so do it here before
 			// launching  the main function of the thread
-			audio_clock_CS2300CP_init(r_i2c, MCLK_FREQUENCY/PLL_INPUT_RATE);
+			audio_clock_CS2300CP_init(r_i2c, MASTER_TO_WORDCLOCK_RATIO);
 
 			ptp_server_and_gpio(rx_link[0], tx_link[0], ptp_link, 3,
 					PTP_GRANDMASTER_CAPABLE,
@@ -185,9 +185,8 @@ int main(void) {
 			start_clock(b_mclk);
 			par
 			{
-				audio_gen_CS2300CP_clock(p_fs,
-						clk_ctl[0],
-						(SAMPLE_RATE/PLL_INPUT_RATE));
+				audio_gen_CS2300CP_clock(p_fs, clk_ctl[0]);
+
 				i2s_master (b_mclk,
 						b_bclk,
 						p_aud_bclk,
@@ -196,7 +195,7 @@ int main(void) {
 						AVB_NUM_MEDIA_OUTPUTS,
 						p_aud_din,
 						AVB_NUM_MEDIA_INPUTS,
-						BCLK_RATIO,
+						MASTER_TO_WORDCLOCK_RATIO,
 						c_samples_to_codec,
 						ififos,
 						media_ctl[0],
