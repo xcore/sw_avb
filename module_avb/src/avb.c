@@ -623,7 +623,6 @@ int getset_avb_sink_state(int set,
         xc_abi_outuint(c, sink->sync);
         xc_abi_outuint(c, sink->num_channels);
         for (int i=0;i<sink->num_channels;i++) {
-          //simple_printf("m:%d, %x\n",sink->map[i],outputs[sink->map[i]].fifo);
           xc_abi_outuint(c, outputs[sink->map[i]].fifo);
         }                       
         (void) xc_abi_inuint(c);
@@ -654,6 +653,26 @@ int getset_avb_sink_state(int set,
 
         mrp_mad_new(sink->srp_attr);         
         mrp_mad_join(sink->srp_attr);         
+      }
+      else if (sink->state == AVB_SINK_STATE_ENABLED &&
+              *state == AVB_SINK_STATE_DISABLED) {
+
+		  chanend c = sink->listener_ctl;
+		  xc_abi_outuint(c, AVB1722_DISABLE_LISTENER_STREAM);
+		  xc_abi_outuint(c, sink->local_id);
+		  (void) xc_abi_inuint(c);
+
+    	  mrp_mad_leave(sink->srp_attr);
+
+#ifndef AVB_NO_MMRP
+        if (sink->addr[0] & 1)
+          avb_leave_multicast_group(sink->addr);
+#endif
+
+#ifndef AVB_NO_MVRP
+        if (sink->vlan)
+          avb_leave_vlan(sink->vlan);
+#endif
       }
       sink->state = *state;
     }

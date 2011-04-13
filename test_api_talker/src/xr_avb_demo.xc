@@ -14,9 +14,6 @@
 #include "simple_printf.h"
 #include "media_fifo.h"
 
-// this is the sample rate, the frequency of the word clock
-#define SAMPLE_RATE 48000
-
 // This is the number of master clocks in a word clock
 #define MASTER_TO_WORDCLOCK_RATIO 512
 
@@ -259,7 +256,7 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 	unsigned timeout;
 	unsigned talker_active = 0;
 	unsigned talker_ok_to_start = 0;
-	unsigned sample_rate = SAMPLE_RATE;
+	unsigned sample_rate = 48000;
 
 	// Initialize the media clock (a ptp derived clock)
 	//set_device_media_clock_type(0, MEDIA_FIFO_DERIVED);
