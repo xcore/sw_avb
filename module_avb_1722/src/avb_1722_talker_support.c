@@ -209,7 +209,7 @@ int avb1722_create_packet(unsigned char Buf0[],
                           ptp_time_info_mod64 *timeInfo,
                           int time)
 {
-   unsigned int timerValue;
+   unsigned int presentationTime;
    int pktSize;
    int timerValid;
    int i;
@@ -275,7 +275,7 @@ int avb1722_create_packet(unsigned char Buf0[],
          media_input_fifo_release_packet(map[i]);
        }
        src = (int *) media_input_fifo_get_packet(map[i],
-                                                 &timerValue,
+                                                 &presentationTime,
                                                  &(stream_info->dbc));       
        media_input_fifo_set_ptr(map[i],src);   
        dest+=1;
@@ -322,10 +322,8 @@ int avb1722_create_packet(unsigned char Buf0[],
 
    // perform required updates to header
    if (timerValid) {
-     unsigned int presentationTime =  (timerValue);
      ptp_ts = local_timestamp_to_ptp_mod32(presentationTime, timeInfo);
-     ptp_ts = ptp_ts + 2000000;
-       //stream_info->presentation_delay;
+     ptp_ts = ptp_ts + stream_info->presentation_delay;
    } 
      
    // Update timestamp value and valid flag.

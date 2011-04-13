@@ -166,8 +166,6 @@ static void manage_buffer(buf_info_t &b,
                                                             
   diff = (signed) ptp_outgoing_actual - (signed) presentation_timestamp;
 
-   
-
   update_stream_derived_clocks(index,
                                sample_count,
                                outgoing_timestamp_local,
