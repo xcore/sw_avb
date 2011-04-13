@@ -13,7 +13,6 @@
 #include "audio_codec_CS42448.h"
 #include "simple_printf.h"
 #include "media_fifo.h"
-#include "demo_stream_manager.h"
 
 // this is the sample rate, the frequency of the word clock
 #define SAMPLE_RATE 48000
@@ -94,34 +93,23 @@ on stdcore[0]: port p_uart_tx = PORT_UART_TX;
 media_input_fifo_data_t ififo_data[AVB_NUM_MEDIA_INPUTS];
 media_input_fifo_t ififos[AVB_NUM_MEDIA_INPUTS];
 
-media_output_fifo_data_t ofifo_data[AVB_NUM_MEDIA_OUTPUTS];
-media_output_fifo_t ofifos[AVB_NUM_MEDIA_OUTPUTS];
-
-
-
 
 int main(void) {
 	// ethernet tx channels
-	chan tx_link[4];
-	chan rx_link[3];
+	chan tx_link[3];
+	chan rx_link[2];
 	chan connect_status;
 
 	//ptp channels
 	chan ptp_link[3];
 
 	// avb unit control
-	chan listener_ctl[AVB_NUM_LISTENER_UNITS];
-	chan buf_ctl[AVB_NUM_LISTENER_UNITS];
 	chan talker_ctl[AVB_NUM_TALKER_UNITS];
 
 	// media control
-	chan media_ctl[2];
-	chan clk_ctl[1];
+	chan media_ctl[AVB_NUM_MEDIA_UNITS];
+	chan clk_ctl[AVB_NUM_MEDIA_CLOCKS];
 	chan media_clock_ctl;
-
-	// audio channels
-	streaming
-	chan c_samples_to_codec;
 
 	// control channel from the GPIO buttons
 	chan c_gpio_ctl;
@@ -138,8 +126,8 @@ int main(void) {
 					mii);
 
 			ethernet_server(mii, mac_address,
-					rx_link, 3,
-					tx_link, 4,
+					rx_link, 2,
+					tx_link, 3,
 					smi, connect_status);
 		}
 
@@ -159,8 +147,8 @@ int main(void) {
 		{
 			media_clock_server(media_clock_ctl,
 					ptp_link[1],
-					buf_ctl,
-					1,
+					null,
+					0,
 					clk_ctl,
 					1);
 		}
@@ -183,7 +171,7 @@ int main(void) {
 						p_aud_din,
 						AVB_NUM_MEDIA_INPUTS,
 						MASTER_TO_WORDCLOCK_RATIO,
-						c_samples_to_codec,
+						null,
 						ififos,
 						media_ctl[0],
 						0);
@@ -196,22 +184,6 @@ int main(void) {
 				talker_ctl[0],
 				AVB_NUM_SOURCES);
 
-		// AVB Listener
-		on stdcore[0]: avb_1722_listener(rx_link[1],
-				tx_link[3],
-				buf_ctl[0],
-				listener_ctl[0],
-				AVB_NUM_SINKS);
-
-		on stdcore[0]:
-		{	init_media_output_fifos(ofifos, ofifo_data, AVB_NUM_MEDIA_OUTPUTS);
-			media_output_fifo_to_xc_channel_split_lr(media_ctl[1],
-					c_samples_to_codec,
-					0, // clk_ctl index
-					ofifos,
-					AVB_NUM_MEDIA_OUTPUTS);
-		}
-
 		// Xlog server
 		on stdcore[0]:
 		{
@@ -222,9 +194,9 @@ int main(void) {
 		on stdcore[0]:
 		{
 			// First initialize avb higher level protocols
-			avb_init(media_ctl, listener_ctl, talker_ctl, media_clock_ctl, rx_link[2], tx_link[2], ptp_link[2]);
+			avb_init(media_ctl, null, talker_ctl, media_clock_ctl, rx_link[1], tx_link[2], ptp_link[2]);
 
-			demo(rx_link[2], tx_link[2], c_gpio_ctl, connect_status);
+			demo(rx_link[1], tx_link[2], c_gpio_ctl, connect_status);
 		}
 	}
 
@@ -302,8 +274,6 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 	int avb_status = 0;
 	int map[8];
 	unsigned char macaddr[6];
-	int selected_chan = 0;
-	unsigned change_stream = 1;
 	unsigned timeout;
 
 	// Initialize the media clock (a ptp derived clock)
@@ -316,15 +286,17 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 	// Configure the source stream
 	set_avb_source_name(0, "8 channel stream out");
 
-	set_avb_source_channels(0, 8);
-	for (int i = 0; i < 8; i++)
+	set_avb_source_channels(0, 2);
+	for (int i = 0; i < 2; i++)
 		map[i] = i;
-	set_avb_source_map(0, map, 8);
+	set_avb_source_map(0, map, 2);
 	set_avb_source_format(0, AVB_SOURCE_FORMAT_MBLA_24BIT, SAMPLE_RATE);
 	set_avb_source_sync(0, 0); // use the media_clock defined above
 
 	// Request a multicast addresses for stream transmission
 	avb_1722_maap_request_addresses(AVB_NUM_SOURCES, null);
+
+	avb_start();
 
 	tmr	:> timeout;
 	while (1) {
@@ -382,22 +354,7 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 			case c_gpio_ctl :> int cmd:
 			switch (cmd)
 			{
-				case STREAM_SEL:
-				change_stream = 1;
-				break;
-				case CHAN_SEL:
-				{
-					enum avb_sink_state_t cur_state;
-
-					c_gpio_ctl :> selected_chan;
-					get_avb_sink_state(0, cur_state);
-					set_avb_sink_state(0, AVB_SINK_STATE_DISABLED);
-					for (int j=0;j<8;j++)
-					map[j] = (j+selected_chan*2) & 0x7;
-					set_avb_sink_map(0, map, 8);
-					if (cur_state != AVB_SINK_STATE_DISABLED)
-					set_avb_sink_state(0, AVB_SINK_STATE_POTENTIAL);
-				}
+			default:
 				break;
 			}
 			break;
@@ -418,10 +375,6 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 				}
 				break;
 			}
-
-			// Call the stream manager to check for new streams/manage
-			// what is being listened to
-			demo_manage_listener_stream(change_stream, selected_chan);
 
 			break;
 		}
