@@ -104,7 +104,7 @@ int main(void) {
 
   // media control
   chan media_ctl[AVB_NUM_MEDIA_UNITS];
-  chan clk_ctl[1];
+  chan clk_ctl[AVB_NUM_MEDIA_CLOCKS];
   chan filter_ctl;
   streaming chan audio_monitor;
   chan media_clock_ctl;

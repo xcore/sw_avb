@@ -29,7 +29,6 @@
 /* Media configuration */
 #define AVB_NUM_MEDIA_OUTPUTS 0
 #define AVB_NUM_MEDIA_INPUTS 2
-#define AVB_MAX_SAMPLE_RATE 48000
 #define AVB_NUM_MEDIA_UNITS 1
 
 /* Media clock configuration */
