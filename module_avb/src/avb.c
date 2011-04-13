@@ -404,12 +404,10 @@ int getset_avb_source_state(int set,
         // start transmitting
 
         simple_printf("Enabling stream %d\n", source_num);
-#if 1
         chanend c = source->talker_ctl;
         xc_abi_outuint(c, AVB1722_TALKER_GO);
         xc_abi_outuint(c, source->local_id);
         (void) xc_abi_inuint(c); //ACK        
-#endif
       }
       else if (source->state != AVB_SOURCE_STATE_DISABLED &&
                *state == AVB_SOURCE_STATE_DISABLED) {
@@ -417,6 +415,13 @@ int getset_avb_source_state(int set,
           for (int i=0;i<source->num_channels;i++) {
             inputs[source->map[i]].mapped_to = UNMAPPED;
           }
+          chanend c = source->talker_ctl;
+          xc_abi_outuint(c, AVB1722_TALKER_STOP);
+          xc_abi_outuint(c, source->local_id);
+          (void) xc_abi_inuint(c); //ACK
+
+          // And remove the group
+          mrp_mad_leave(source->srp_attr);
       }
       avb_set_talker_bandwidth();
       source->state = *state;      

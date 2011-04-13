@@ -167,19 +167,23 @@ void mrp_attribute_init(mrp_attribute_state *st,
 
 
 
-void mrp_mad_init(mrp_attribute_state *st);
+/** Function: mrp_mad_new
+
+   Registers a new attribute
+
+   \param st the attribute
+   
+*/
 void mrp_mad_new(mrp_attribute_state *st);
+
 
 /** Function: mrp_mad_join
 
    This function registers a MAD_Join request for a particular attribute
 
    \param st the attribute to join
-   
+
 */
-
-void mrp_mad_new(mrp_attribute_state *st);
-
 void mrp_mad_join(mrp_attribute_state *st);
 
 /** Function: mrp_mad_leave

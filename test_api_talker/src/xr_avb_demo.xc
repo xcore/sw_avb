@@ -25,7 +25,7 @@
 #define PERIODIC_POLL_TIME 5000
 
 // Timeout for debouncing buttons
-#define BUTTON_TIMEOUT_PERIOD (20000000)
+#define BUTTON_TIMEOUT_PERIOD (50000000)
 
 // Commands sent from the GPIO to the main demo app
 enum gpio_cmd {
@@ -208,13 +208,9 @@ void ptp_server_and_gpio(chanend c_rx, chanend c_tx, chanend ptp_link[],
 
 	static unsigned buttons_active = 1;
 	static unsigned buttons_timeout;
-	static unsigned remote = 0;
-	static unsigned selected_chan = 0;
 
 	unsigned button_val;
 	timer tmr;
-    p_mute_led_remote <: ~(remote << 1) | 1;
-	p_chan_leds <: ~(1 << selected_chan);
 	p_buttons :> button_val;
 
 	ptp_server_init(c_rx, c_tx, server_type);
@@ -226,30 +222,16 @@ void ptp_server_and_gpio(chanend c_rx, chanend c_tx, chanend ptp_link[],
 
 			case buttons_active =>
 			p_buttons when pinsneq(button_val) :> unsigned new_button_val:
-			if ((button_val & 0x1) == 1 &&
-					(new_button_val & 0x1) == 0) {
+			if ((button_val & 0x1) == 1 && (new_button_val & 0x1) == 0) {
 				c <: STREAM_SEL;
 				buttons_active = 0;
 			}
-			if ((button_val & 0x2) == 2 &&
-					(new_button_val & 0x2) == 0) {
-				remote = 1-remote;
-				p_mute_led_remote <: ~(remote << 1) | 1;
-
-				/* Currently we do not do anything with the remote select
-				 mode. So there is no need to signal the demo thread. */
-				//c <: REMOTE_SEL;
-				//c <: remote;
+			if ((button_val & 0x2) == 2 && (new_button_val & 0x2) == 0) {
+				c <: REMOTE_SEL;
 				buttons_active = 0;
 			}
-			if ((button_val & 0x4) == 4 &&
-					(new_button_val & 0x4) == 0) {
-				selected_chan++;
-				if (selected_chan > 3)
-				selected_chan = 0;
-				p_chan_leds <: ~(1 << selected_chan);
+			if ((button_val & 0x4) == 4 && (new_button_val & 0x4) == 0) {
 				c <: CHAN_SEL;
-				c <: selected_chan;
 				buttons_active = 0;
 			}
 			if (!buttons_active) {
@@ -275,22 +257,25 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 	int map[8];
 	unsigned char macaddr[6];
 	unsigned timeout;
+	unsigned talker_active = 0;
+	unsigned talker_ok_to_start = 0;
+	unsigned sample_rate = SAMPLE_RATE;
 
 	// Initialize the media clock (a ptp derived clock)
 	//set_device_media_clock_type(0, MEDIA_FIFO_DERIVED);
 	set_device_media_clock_type(0, LOCAL_CLOCK);
 	//set_device_media_clock_type(0, PTP_DERIVED);
-	set_device_media_clock_rate(0, SAMPLE_RATE);
+	set_device_media_clock_rate(0, sample_rate);
 	set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_ENABLED);
 
 	// Configure the source stream
-	set_avb_source_name(0, "8 channel stream out");
+	set_avb_source_name(0, "2 channel testing stream");
 
 	set_avb_source_channels(0, 2);
 	for (int i = 0; i < 2; i++)
 		map[i] = i;
 	set_avb_source_map(0, map, 2);
-	set_avb_source_format(0, AVB_SOURCE_FORMAT_MBLA_24BIT, SAMPLE_RATE);
+	set_avb_source_format(0, AVB_SOURCE_FORMAT_MBLA_24BIT, sample_rate);
 	set_avb_source_sync(0, 0); // use the media_clock defined above
 
 	// Request a multicast addresses for stream transmission
@@ -354,8 +339,59 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 			case c_gpio_ctl :> int cmd:
 			switch (cmd)
 			{
+			case CHAN_SEL:
+			{
+				// The channel select button starts and stops listening
+				if (talker_active)
+				{
+					set_avb_source_state(0, AVB_SOURCE_STATE_DISABLED);
+					talker_active = 0;
+					simple_printf("Talker disabled\n");
+				}
+				else if (talker_ok_to_start)
+				{
+					set_avb_source_state(0, AVB_SOURCE_STATE_POTENTIAL);
+					talker_active = 1;
+					simple_printf("Talker enabled\n");
+				}
+			}
+			break;
+			case STREAM_SEL:
+			{
+				// The stream sel button cycles through frequency settings
+				if (!talker_active)
+				{
+					switch (sample_rate)
+					{
+					case 8000:
+						sample_rate = 16000;
+						break;
+					case 16000:
+						sample_rate = 32000;
+						break;
+					case 32000:
+						sample_rate = 44100;
+						break;
+					case 44100:
+						sample_rate = 48000;
+						break;
+					case 48000:
+						sample_rate = 8000;
+						break;
+					}
+					simple_printf("Frequency set to %d Hz\n", sample_rate);
+
+
+					set_avb_source_format(0, AVB_SOURCE_FORMAT_MBLA_24BIT, sample_rate);
+
+					set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_DISABLED);
+					set_device_media_clock_rate(0, sample_rate);
+					set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_ENABLED);
+				}
+			}
+			break;
 			default:
-				break;
+			break;
 			}
 			break;
 
@@ -367,12 +403,11 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 			switch (avb_status)
 			{
 				case AVB_MAAP_ADDRESSES_RESERVED:
-				for(int i=0;i<AVB_NUM_SOURCES;i++) {
-					avb_1722_maap_get_offset_address(macaddr, i);
-					// activate the source
-					set_avb_source_dest(i, macaddr, 6);
-					set_avb_source_state(i, AVB_SOURCE_STATE_POTENTIAL);
-				}
+				avb_1722_maap_get_offset_address(macaddr, 0);
+				// activate the source
+				set_avb_source_dest(0, macaddr, 6);
+				talker_ok_to_start = 1;
+				simple_printf("Talker stream prepared, press Channel Select to advertise stream.\n");
 				break;
 			}
 
