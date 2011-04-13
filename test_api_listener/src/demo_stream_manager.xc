@@ -72,7 +72,7 @@ void demo_manage_listener_stream(unsigned int &change_stream,
     }
     
     if (change_stream && new_hi != 0) {
-      int map[8];
+      int map[2];
       
       // we want to change the stream we are listening to
       // map the new stream to our single I/O output
@@ -83,12 +83,12 @@ void demo_manage_listener_stream(unsigned int &change_stream,
                     curStreamId[1],
                     0);
 
-      for (int j=0;j<8;j++)
+      for (int j=0;j<2;j++)
         map[j] = (j+selected_chan*2) & 0x7;
 
       set_avb_sink_sync(0, 0);
-      set_avb_sink_channels(0, 8);
-      set_avb_sink_map(0, map, 8);
+      set_avb_sink_channels(0, 2);
+      set_avb_sink_map(0, map, 2);
       set_avb_sink_state(0, AVB_SINK_STATE_DISABLED);
       set_avb_sink_id(0, curStreamId);
       set_avb_sink_vlan(0, new_vlan);

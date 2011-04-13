@@ -23,12 +23,12 @@
 #define AVB_NUM_LISTENER_UNITS 1
 
 /* Talker configuration */
-#define AVB_NUM_SOURCES 1
-#define AVB_NUM_TALKER_UNITS 1
+#define AVB_NUM_SOURCES 0
+#define AVB_NUM_TALKER_UNITS 0
 
 /* Media configuration */
 #define AVB_NUM_MEDIA_OUTPUTS 2
-#define AVB_NUM_MEDIA_INPUTS 2
+#define AVB_NUM_MEDIA_INPUTS 0
 #define AVB_NUM_MEDIA_UNITS 2
 
 /* Media clock configuration */

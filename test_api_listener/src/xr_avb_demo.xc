@@ -91,32 +91,25 @@ on stdcore[0]: in buffered port:32 p_aud_din[4] = {
 
 on stdcore[0]: port p_uart_tx = PORT_UART_TX;
 
-media_input_fifo_data_t ififo_data[AVB_NUM_MEDIA_INPUTS];
-media_input_fifo_t ififos[AVB_NUM_MEDIA_INPUTS];
-
 media_output_fifo_data_t ofifo_data[AVB_NUM_MEDIA_OUTPUTS];
 media_output_fifo_t ofifos[AVB_NUM_MEDIA_OUTPUTS];
 
-
-
-
 int main(void) {
 	// ethernet tx channels
-	chan tx_link[4];
+	chan tx_link[3];
 	chan rx_link[3];
 	chan connect_status;
 
 	//ptp channels
-	chan ptp_link[3];
+	chan ptp_link[2];
 
 	// avb unit control
 	chan listener_ctl[AVB_NUM_LISTENER_UNITS];
 	chan buf_ctl[AVB_NUM_LISTENER_UNITS];
-	chan talker_ctl[AVB_NUM_TALKER_UNITS];
 
 	// media control
-	chan media_ctl[2];
-	chan clk_ctl[1];
+	chan media_ctl[AVB_NUM_MEDIA_UNITS];
+	chan clk_ctl[AVB_NUM_MEDIA_CLOCKS];
 	chan media_clock_ctl;
 
 	// audio channels
@@ -139,7 +132,7 @@ int main(void) {
 
 			ethernet_server(mii, mac_address,
 					rx_link, 3,
-					tx_link, 4,
+					tx_link, 3,
 					smi, connect_status);
 		}
 
@@ -150,7 +143,7 @@ int main(void) {
 			// launching  the main function of the thread
 			audio_clock_CS2300CP_init(r_i2c, MASTER_TO_WORDCLOCK_RATIO);
 
-			ptp_server_and_gpio(rx_link[0], tx_link[0], ptp_link, 3,
+			ptp_server_and_gpio(rx_link[0], tx_link[0], ptp_link, 2,
 					PTP_GRANDMASTER_CAPABLE,
 					c_gpio_ctl);
 		}
@@ -160,14 +153,13 @@ int main(void) {
 			media_clock_server(media_clock_ctl,
 					ptp_link[1],
 					buf_ctl,
-					1,
+					AVB_NUM_LISTENER_UNITS,
 					clk_ctl,
-					1);
+					AVB_NUM_MEDIA_CLOCKS);
 		}
 
 		// AVB - Audio
 		on stdcore[0]: {
-			init_media_input_fifos(ififos, ififo_data, AVB_NUM_MEDIA_INPUTS);
 			configure_clock_src(b_mclk, p_aud_mclk);
 			start_clock(b_mclk);
 			par
@@ -184,21 +176,15 @@ int main(void) {
 						AVB_NUM_MEDIA_INPUTS,
 						MASTER_TO_WORDCLOCK_RATIO,
 						c_samples_to_codec,
-						ififos,
+						null,
 						media_ctl[0],
 						0);
 			}
 		}
 
-		// AVB Talker - must be on the same core as the audio interface
-		on stdcore[0]: avb_1722_talker(ptp_link[0],
-				tx_link[1],
-				talker_ctl[0],
-				AVB_NUM_SOURCES);
-
 		// AVB Listener
 		on stdcore[0]: avb_1722_listener(rx_link[1],
-				tx_link[3],
+				tx_link[1],
 				buf_ctl[0],
 				listener_ctl[0],
 				AVB_NUM_SINKS);
@@ -222,7 +208,7 @@ int main(void) {
 		on stdcore[0]:
 		{
 			// First initialize avb higher level protocols
-			avb_init(media_ctl, listener_ctl, talker_ctl, media_clock_ctl, rx_link[2], tx_link[2], ptp_link[2]);
+			avb_init(media_ctl, listener_ctl, null, media_clock_ctl, rx_link[2], tx_link[2], ptp_link[0]);
 
 			demo(rx_link[2], tx_link[2], c_gpio_ctl, connect_status);
 		}
@@ -307,8 +293,8 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 	unsigned timeout;
 
 	// Initialize the media clock (a ptp derived clock)
-	//set_device_media_clock_type(0, MEDIA_FIFO_DERIVED);
-	set_device_media_clock_type(0, LOCAL_CLOCK);
+	set_device_media_clock_type(0, MEDIA_FIFO_DERIVED);
+	//set_device_media_clock_type(0, LOCAL_CLOCK);
 	//set_device_media_clock_type(0, PTP_DERIVED);
 	set_device_media_clock_rate(0, SAMPLE_RATE);
 	set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_ENABLED);
@@ -325,6 +311,8 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 
 	// Request a multicast addresses for stream transmission
 	avb_1722_maap_request_addresses(AVB_NUM_SOURCES, null);
+
+	avb_start();
 
 	tmr	:> timeout;
 	while (1) {
