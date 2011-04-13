@@ -154,8 +154,11 @@ inline void i2s_master(const clock mclk,
         sine_count[k] -= I2S_SINE_TABLE_SIZE * 256;
     }
 #endif
-    tmr :> timestamp;    
-    c_listener <: timestamp;
+    if (num_out > 0)
+    {
+        tmr :> timestamp;
+    	c_listener <: timestamp;
+    }
 #pragma unsafe arrays
     for (int j=0;j<2;j++) {
       p_lrclk <: lrclk_val;
