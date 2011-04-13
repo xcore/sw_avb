@@ -119,8 +119,8 @@ int main(void) {
 	chan talker_ctl[AVB_NUM_TALKER_UNITS];
 
 	// media control
-	chan media_ctl[2];
-	chan clk_ctl[1];
+	chan media_ctl[AVB_NUM_MEDIA_UNITS];
+	chan clk_ctl[AVB_NUM_MEDIA_CLOCKS];
 	chan media_clock_ctl;
 
 	// audio channels

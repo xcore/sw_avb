@@ -38,9 +38,6 @@ Configuration Defines
  * - ``AVB_MAX_CHANNELS_PER_STREAM``
    - The maximum allowed number of channels per AVB stream (incoming
      or outgoing).
- * - ``AVB_MAX_SAMPLE_RATE``
-   - The maximum allowed sample rate in the system. This is used to 
-     set the audio fifo buffer sizes.
 
 .. list-table::
  :header-rows: 1
