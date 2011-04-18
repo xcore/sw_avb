@@ -18,13 +18,13 @@
 #endif
 
 typedef struct ififo_t {
-  int wrIndex;
-  int rdIndex;
-  int startIndex;
-  int overflow;
-  int packetSize;
-  int sampleCountInPacket;
-  unsigned int dbc;
+  int wrIndex;				//!< Current write index
+  int rdIndex;				//!< Current read index
+  int startIndex;			//!<
+  int overflow;				//!< Flag to say if we have overflowed the FIFO
+  int packetSize;			//!< Size of the packet. Samples plus timestamp plus data block count
+  int sampleCountInPacket;	//!< The current number of words in the FIFO (samples plus TS + DBC)
+  unsigned int dbc;			//!< The Data Block Count from IEC.61883
   int fifoEnd;
   int ptr;
   unsigned int buf[MEDIA_INPUT_FIFO_SAMPLE_FIFO_SIZE];
@@ -39,12 +39,24 @@ typedef struct ififo_t media_input_fifo_data_t;
  **/
 typedef int media_input_fifo_t;
 
+/**
+ *  \brief Push a sample into the FIFO
+ *
+ *  If the packet of samples has just begun then a timestamp and data
+ *  block count are added along with the first sample.  If the last sample
+ *  of a packet has been written then the pointer to the start of the
+ *  packet is updated.
+ */
 void 
 media_input_fifo_push_sample(media_input_fifo_t media_input_fifo,
                              unsigned int sample,
                              unsigned int ts);
 
 #ifndef __XC__
+/**
+ *  \brief Perform a blocking read of the next audio packet
+ *
+ */
 unsigned int *
 media_input_fifo_get_packet(media_input_fifo_t media_input_fifo,
                                unsigned int *ts,
