@@ -218,6 +218,7 @@ void avb_1722_talker(chanend ptp_svr,
                                     timeInfo,
                                     t);
             if (packet_size) {
+              if (packet_size < 60) packet_size = 60;
               ethernet_send_frame_offset2(ethernet_tx_svr, 
                                           TxBuf,
                                           packet_size, 

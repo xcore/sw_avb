@@ -21,6 +21,8 @@
 #include "avb_unit.h"
 #include "mac_custom_filter.h"
 
+#include "simple_printf.h"
+
 // Max. packet size for AVB AVB1722 listener
 #define MAX_PKT_BUF_SIZE_LISTENER (AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + AVB_AVB1722_HDR_SIZE + TALKER_NUM_AUDIO_SAMPLES_PER_CHANNEL_PER_AVB1722_PKT * AVB_MAX_CHANNELS_PER_STREAM * 4 + 4)
 
@@ -96,7 +98,6 @@ void avb_1722_listener(chanend ethernet_rx_svr,
                           src_port):
         { 
           pktByteCnt -= 4;
-          
           avb_hash = RxBuf[1];
 
           // process the audio packet if enabled.
