@@ -18,15 +18,14 @@
 #endif
 
 typedef struct ififo_t {
-  int wrIndex;				//!< Current write index
-  int rdIndex;				//!< Current read index
-  int startIndex;			//!<
-  int overflow;				//!< Flag to say if we have overflowed the FIFO
-  int packetSize;			//!< Size of the packet. Samples plus timestamp plus data block count
-  int sampleCountInPacket;	//!< The current number of words in the FIFO (samples plus TS + DBC)
+  int wrIndex;				//!< Current write pointer
+  int rdIndex;				//!< Current read pointer
+  int startIndex;			//!< The pointer for the start of the packet being written
+  int packetSize;			//!< Size of the packet, exclusing the Timestamp and DBC value.
+  int sampleCountInPacket;	//!< The current number of words in the FIFO (samples only)
   unsigned int dbc;			//!< The Data Block Count from IEC.61883
-  int fifoEnd;
-  int ptr;
+  int fifoEnd;				//!< The index of the end of the FIFO
+  int ptr;					//!< The read pointer used by the packet reader in the talker
   unsigned int buf[MEDIA_INPUT_FIFO_SAMPLE_FIFO_SIZE];
 } ififo_t;
 
@@ -56,6 +55,7 @@ media_input_fifo_push_sample(media_input_fifo_t media_input_fifo,
 /**
  *  \brief Perform a blocking read of the next audio packet
  *
+ *  \param media_input_fifo the media fifo
  */
 unsigned int *
 media_input_fifo_get_packet(media_input_fifo_t media_input_fifo,
@@ -66,13 +66,27 @@ media_input_fifo_get_packet(media_input_fifo_t media_input_fifo,
 void 
 media_input_fifo_release_packet(media_input_fifo_t media_input_fifos);
 
-void 
+void
 media_input_fifo_init(media_input_fifo_t media_input_fifo,
                       int rate);
 
-void 
-media_input_fifo_enable(media_input_fifo_t media_input_fifo,
-                        int rate);
+/**
+ *  \brief Start storing samples/packets in the FIFO
+ *
+ *  \param media_input_fifo the media fifo
+ *  \param the rate in Hz
+ *  \return the number of samples in each audio packet
+ */
+int
+media_input_fifo_enable(media_input_fifo_t media_input_fifo, int rate);
+
+/**
+ *  \brief Stop storing samples/packets in the FIFO
+ *
+ *  \param media_input_fifo the media fifo
+ */
+void
+media_input_fifo_disable(media_input_fifo_t media_input_fifo);
 
 /** Initialize media input fifos.
  *
@@ -90,13 +104,20 @@ init_media_input_fifos(media_input_fifo_t ififos[],
                        int n);
                        
 
+/**
+ *  \brief Get the FIFO for the given stream number
+ */
 media_input_fifo_t get_media_input_fifo(int stream_num);
 
+/**
+ *  \brief Check if the FIFO is empty
+ */
 int media_input_fifo_empty(media_input_fifo_t media_input_fifo0);
 
-int media_input_fifo_fill_level(media_input_fifo_t media_infput_fifo0);
+
 
 #ifndef __XC__
+
 inline void media_input_fifo_set_ptr(media_input_fifo_t media_input_fifo0,
                                      int *p)
 {

@@ -34,6 +34,7 @@ void configure_stream(chanend avb1722_tx_config,
   unsigned int streamIdExt;
   unsigned int rate;  
   unsigned int tmp;
+  int samplesPerPacket;
   avb1722_tx_config :> stream.sampleType;
     
   for (int i = 0; i < MAC_ADRS_BYTE_COUNT; i++) {
@@ -69,13 +70,13 @@ void configure_stream(chanend avb1722_tx_config,
 
   for (int i=0;i<stream.num_channels;i++) {
     int id;
-    media_input_fifo_enable(stream.map[i], rate);
+    samplesPerPacket = media_input_fifo_enable(stream.map[i], rate);
   }
 
  avb1722_tx_config :> stream.presentation_delay;
   
 
-  stream.samples_per_fifo_packet = ((rate + (AVB1722_PACKET_RATE-1))/AVB1722_PACKET_RATE * 4) / 3;
+  stream.samples_per_fifo_packet = samplesPerPacket;
 
   tmp = ((rate / 100) << 16) / (AVB1722_PACKET_RATE / 100);
   stream.samples_per_packet_base = tmp >> 16;
@@ -86,8 +87,6 @@ void configure_stream(chanend avb1722_tx_config,
   stream.initial = 1;
   stream.dbc = -1;
   stream.active = 1;
-  stream.latency = 0;
-  stream.prev_dbc = -1;
   stream.transmit_ok = 1;
 }
 

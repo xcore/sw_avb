@@ -36,8 +36,9 @@ typedef struct avb1722_Talker_StreamConfig_t
   media_input_fifo_t map[AVB_MAX_CHANNELS_PER_STREAM];  
   unsigned int sampleType;
   unsigned int dbc;
-  unsigned int prev_dbc;
+#if 0
   unsigned int latency;
+#endif
   unsigned int samples_per_fifo_packet;
   unsigned int samples_per_packet_base;
   unsigned int samples_per_packet_fractional;

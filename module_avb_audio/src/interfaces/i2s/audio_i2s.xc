@@ -79,7 +79,6 @@ void i2s_master_configure_ports(const clock mclk,
   return;
 }
 
-
 extern inline void i2s_master(const clock mclk,
                               clock bclk,
                               out buffered port:32 p_bclk,

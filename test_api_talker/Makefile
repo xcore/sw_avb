@@ -54,9 +54,10 @@ include ../../xcommon/module_xcommon/build/Makefile.common
 #
 #  all : $(BIN_DIR)/my_app.xe
 
-all: $(BIN_DIR)/$(APP_NAME).xe
+test: $(BIN_DIR)/$(APP_NAME).xe
 	@echo Build Complete
 
 
 clean: clean_common
+all: test
 

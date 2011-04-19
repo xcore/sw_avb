@@ -13,16 +13,8 @@
 #include "media_output_fifo.h"
 #include <string.h>
 #include <print.h>
-#include "simple_printf.h"
 #include <xs1.h>
 
-
-//#define DEBUG_DBC 1
-//#define DEBUG_STREAM_INDICATORS 1
-
-#ifdef DEBUG_DBC
-static int dbc_fail_count = 1;
-#endif
 
 int avb_1722_listener_process_packet(chanend buf_ctl,
                                      unsigned char Buf0[], 
@@ -80,15 +72,6 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
 
    stream_info->count++;
 
-#ifdef DEBUG_STREAM_INDICATORS
-   if (stream_info->count > 8000) {
-     char s[2] = "0";
-     *s = *s + index;     
-     printstr(s);
-     stream_info->count=0;
-   }
-#endif
-
    if (stream_info->chan_lock < 10) {
      int num_channels;
      int prev_num_samples = stream_info->prev_num_samples;
@@ -116,20 +99,6 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
      timestamp = AVBTP_TIMESTAMP(pAVBHdr);
    else
      timestamp = 0;
-
-#if DEBUG_DBC
-   if (dbc_value && !dbc_fail_count && dbc_value != ((prev_dbc+6)&0xff))  {
-     dbc_fail_count=1;
-     simple_printf("dbc: %d,%d\n",dbc_value, prev_dbc);
-   }
-       
-   if (dbc_fail_count)
-     dbc_fail_count++;
-
-   if (dbc_fail_count>1000) {
-     dbc_fail_count=0;
-   }
-#endif
 
    stream_info->dbc = dbc_value;
 

@@ -12,7 +12,6 @@
 #include <string.h>
 #include <print.h>
 #include <xccompat.h>
-#include "simple_printf.h"
 
 // Min frame size for sanity check.
 #define MIN_ETHERNET_FRAME_SIZE     (60)
@@ -195,12 +194,6 @@ static void sample_copy_strided(int *src,
   }
 }
                    
-#define DEBUG_DBC 1
-
-#ifdef DEBUG_DBC             
-static int dbc_miss = 0;
-#endif
-
 /** This receives user defined audio samples from local out stream and packetize
  *  them into specified AVB1722 transport packet.
  */
@@ -214,11 +207,12 @@ int avb1722_create_packet(unsigned char Buf0[],
    int timerValid;
    int i;
    int num_channels = stream_info->num_channels;
-   media_input_fifo_t *map = stream_info->map;
    int stream_id0 = stream_info->streamId[0];
+   media_input_fifo_t *map = stream_info->map;
    int samples_per_fifo_packet = stream_info->samples_per_fifo_packet;
    int num_audio_samples;
    int samples_in_packet;
+
    // pull the required samples out of the fifo
 
    // align packet 2 chars into the buffer so that samples are
@@ -228,9 +222,11 @@ int avb1722_create_packet(unsigned char Buf0[],
    unsigned int *dest = (unsigned int *) &Buf[(AVB_ETHERNET_HDR_SIZE + 
                                                AVB_TP_HDR_SIZE + 
                                                AVB_AVB1722_HDR_SIZE)];
+
    int stride = num_channels;
    unsigned ptp_ts=0;
    int dbc;
+
    if (media_input_fifo_empty(map[0])) 
      return 0;
 
@@ -240,13 +236,6 @@ int avb1722_create_packet(unsigned char Buf0[],
        return 0;
      
      stream_info->transmit_ok = 1;
-   }
-
-   if (stream_info->latency == 0) {
-     int ticks_per_sample = 100000000 / (stream_info->samples_per_fifo_packet * 8000);
-     stream_info->latency = (media_input_fifo_fill_level(map[0]) - stream_info->samples_per_fifo_packet)* ticks_per_sample;
-     if (stream_info->latency == 0) 
-       stream_info->latency = 1;
    }
 
    samples_in_packet = stream_info->samples_per_packet_base;
@@ -276,28 +265,10 @@ int avb1722_create_packet(unsigned char Buf0[],
        }
        src = (int *) media_input_fifo_get_packet(map[i],
                                                  &presentationTime,
-                                                 &(stream_info->dbc));       
+                                                 &(stream_info->dbc));
        media_input_fifo_set_ptr(map[i],src);   
        dest+=1;
      }
-
-#ifdef DEBUG_DBC
-     if (stream_info->prev_dbc != -1 && 
-         (
-          (stream_info->prev_dbc + samples_per_fifo_packet) 
-          != stream_info->dbc
-          )          
-         )           
-       {
-         dbc_miss++;          
-         if (dbc_miss > 1) 
-         {
-           //           simple_printf("%d,%d\n",stream_info->prev_dbc,stream_info->dbc);
-           dbc_miss = 0;
-         }
-       }
-     stream_info->prev_dbc = stream_info->dbc;     
-#endif
 
      dest += (stream_info->samples_left - 1) * num_channels;
      samples_in_packet -= stream_info->samples_left;
@@ -316,7 +287,6 @@ int avb1722_create_packet(unsigned char Buf0[],
    dbc &= 0xff;
 
    AVB1722_CIP_HeaderGen(Buf, dbc);     
-
 
    timerValid = 1;
 

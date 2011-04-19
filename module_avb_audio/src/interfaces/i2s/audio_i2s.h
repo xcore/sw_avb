@@ -78,9 +78,12 @@ inline void i2s_master(const clock mclk,
   int mclk_to_bclk_ratio = master_to_word_clock_ratio / 64;
   unsigned int bclk_val;
   unsigned int lrclk_val = 0;
+
+  // This is the master timing clock for the audio system.  Its value is sent
+  // to the input and output fifos and is converted into presentation time for
+  // clock recovery.
   timer tmr;
-  unsigned int timestamp;
-  int offset = 0;
+
 #ifdef I2S_SYNTH_FROM
   int sine_count[8] = {0};
   int sine_inc[8] = {0x080, 0x100, 0x180, 0x200, 0x100, 0x100, 0x100, 0x100};
@@ -142,11 +145,12 @@ inline void i2s_master(const clock mclk,
   for (int i=0;i<num_out>>1;i++) 
     p_dout[i] <: 0;
 
-  offset = num_in>>1;
   // the unroll directives in the following loops only make sense if this
   // function is inlined into a more specific version
-  while (1) {    
-    int i=0;
+  while (1) {
+
+	  unsigned int timestamp;
+
 #ifdef I2S_SYNTH_FROM
     for (int k=I2S_SYNTH_FROM;k<num_in>>1;k++) {
       sine_count[k] += sine_inc[k];
@@ -154,41 +158,40 @@ inline void i2s_master(const clock mclk,
         sine_count[k] -= I2S_SINE_TABLE_SIZE * 256;
     }
 #endif
+
     tmr :> timestamp;
     if (num_out > 0)
     {
     	c_listener <: timestamp;
     }
-#pragma unsafe arrays
+
     for (int j=0;j<2;j++) {
-      p_lrclk <: lrclk_val;
-      lrclk_val = ~lrclk_val;
+    	p_lrclk <: lrclk_val;
+    	lrclk_val = ~lrclk_val;
+
 #pragma loop unroll    
       for (int k=0;k<mclk_to_bclk_ratio;k++)  {
-        unsigned int sample_in;
-        unsigned int sample_out;
+
         p_bclk <: bclk_val;
+
         if (k < num_in>>1) {
+          unsigned int sample_in;
           asm("in %0, res[%1]":"=r"(sample_in):"r"(p_din[k]));
-          //          p_din[k]  :> sample_in;
-          // ***handle the newly inputted sample
+
           sample_in = (bitrev(sample_in) >> 8);        
 #ifdef I2S_SYNTH_FROM
           if (k >= I2S_SYNTH_FROM) {
             sample_in = i2s_sine[sine_count[k]>>8];
           }
 #endif
-          media_input_fifo_push_sample(input_fifos[j+k*2],
-                                       sample_in, 
-                                       timestamp);                
-          i++;
+          media_input_fifo_push_sample(input_fifos[j+k*2], sample_in, timestamp);
         }
         
         if (k < num_out>>1) {
-          // ***get a new sample to output
+          unsigned int sample_out;
+
           c_listener :> sample_out;
           sample_out = bitrev(sample_out << 8);
-          //sample_out = bitrev(sample_in << 8); // DEBUG - loopback
           p_dout[k] <: sample_out;
         }
         
