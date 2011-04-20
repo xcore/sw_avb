@@ -26,23 +26,32 @@
 static void configure_stream(chanend c,
                              avb_1722_stream_info_t &s)
 {
-  int media_clock;
+	int media_clock;
 
-  c :> media_clock;
-  c :> s.num_channels;
-  for(int i=0;i<s.num_channels;i++) {
-    c :> s.map[i];
-    enable_media_output_fifo(s.map[i], media_clock);   
-  }
-  
-  s.active = 1;
-  s.num_channels_in_payload = 0;
-  s.chan_lock = 0;
-  s.prev_num_samples = 0;
-  s.dbc = -1;
-  s.count = 0;
+	c :> media_clock;
+	c :> s.num_channels;
+	for(int i=0;i<s.num_channels;i++) {
+		c :> s.map[i];
+		enable_media_output_fifo(s.map[i], media_clock);
+	}
+
+	s.active = 1;
+	s.num_channels_in_payload = 0;
+	s.chan_lock = 0;
+	s.prev_num_samples = 0;
+	s.dbc = -1;
+	s.count = 0;
 }
 
+static void disable_stream(avb_1722_stream_info_t &s)
+{
+	printstr("Disabling stream");
+	for(int i=0;i<s.num_channels;i++) {
+		disable_media_output_fifo(s.map[i]);
+	}
+
+	s.active = 0;
+}
 
 void avb_1722_listener(chanend ethernet_rx_svr,
                        chanend ethernet_tx_svr,
@@ -136,7 +145,7 @@ void avb_1722_listener(chanend ethernet_rx_svr,
               {
                 int stream_num;
                 listener_ctl :> stream_num;
-                listener_streams[stream_num].active = 0;
+                disable_stream(listener_streams[stream_num]);
                 listener_ctl <: AVB1722_ACK;     
               }
             break;

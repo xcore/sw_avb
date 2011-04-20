@@ -654,7 +654,7 @@ int getset_avb_sink_state(int set,
         mrp_mad_new(sink->srp_attr);         
         mrp_mad_join(sink->srp_attr);         
       }
-      else if (sink->state == AVB_SINK_STATE_ENABLED &&
+      else if (sink->state != AVB_SINK_STATE_DISABLED &&
               *state == AVB_SINK_STATE_DISABLED) {
 
 		  chanend c = sink->listener_ctl;

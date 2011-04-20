@@ -30,35 +30,35 @@ typedef enum ofifo_state_t {
 
 
 struct media_output_fifo_data_t {
-  int zero_flag;
-  unsigned int dptr;
-  unsigned int wrptr;
-  unsigned int end_of_fifo;  
-  unsigned int start_of_fifo;
-  unsigned int marker;
-  int local_ts;
-  int ptp_ts;
-  unsigned int sample_count;
-  unsigned int zero_marker;
-  ofifo_state_t state;
-  int last_notification_time;
-  int stream_num;
-  int media_clock;
+  int zero_flag;							//!< When set, the FIFO will output zero samples instead of its contents
+  unsigned int dptr;						//!< The read pointer
+  unsigned int wrptr;						//!< The write pointer
+  unsigned int marker;						//!<
+  int local_ts;								//!<
+  int ptp_ts;								//!<
+  unsigned int sample_count;				//!<
+  unsigned int zero_marker;					//!<
+  ofifo_state_t state;						//!<
+  int last_notification_time;				//!<
+  int stream_num;							//!<
+  int media_clock;							//!<
+  int pending_init_notification;			//!<
+  unsigned int sample_count_at_timestamp;	//!<
   unsigned int fifo[MEDIA_OUTPUT_FIFO_SAMPLE_FIFO_SIZE];
-  int pending_init_notification;
-  unsigned int sample_count_at_timestamp;
 };
 
-/** This type provides the data structure used by a media output FIFO.
+/**
+ * \brief This type provides the data structure used by a media output FIFO.
  */
 typedef struct media_output_fifo_data_t media_output_fifo_data_t;
 
 /**
- * This type provides a handle to a media output FIFO.
+ * \brief This type provides a handle to a media output FIFO.
  **/
 typedef int media_output_fifo_t;
 
-/** Output audio streams from media fifos to an XC channel.
+/**
+ *  \brief Output audio streams from media fifos to an XC channel.
  *
  * This function outputs samples from several media output FIFOs
  * over an XC channel over the streaming chanend ``samples_out``.
@@ -86,7 +86,8 @@ void media_output_fifo_to_xc_channel(chanend media_ctl,
                                      int num_channels);
 
 
-/** Output audio streams from media FIFOs to an XC channel, splitting left
+/**
+ *  \brief Output audio streams from media FIFOs to an XC channel, splitting left
  *  and right pairs.
  *
  * This function outputs samples from several media output FIFOs
@@ -123,12 +124,28 @@ media_output_fifo_to_xc_channel_split_lr(chanend media_ctl,
 
 void media_output_fifo_ctl(streaming chanend samples_out);
 
+/**
+ * \brief Get the number of the FIFO from a pointer to the structure
+ */
 int get_media_output_fifo_num(media_output_fifo_t s);
 
+/**
+ * \brief Intiialise a FIFO
+ */
 void media_output_fifo_init(media_output_fifo_t s, int stream_num);
 
+/**
+ * \brief Disable a FIFO
+ *
+ * This prevents samples from flowing through the FIFO
+ */
 void disable_media_output_fifo(media_output_fifo_t s);
 
+/**
+ * \brief Enable a FIFO
+ *
+ * This starts samples flowing through the FIFO
+ */
 void enable_media_output_fifo(media_output_fifo_t s,
                               int media_clock);
 
