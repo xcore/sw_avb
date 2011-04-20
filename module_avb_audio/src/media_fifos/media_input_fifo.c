@@ -2,13 +2,18 @@
 #include "avb_1722_def.h"
 #include "simple_printf.h"
 
-void media_input_fifo_init(media_input_fifo_t media_input_fifo0,
-                           int stream_num)
+void media_input_fifo_init(media_input_fifo_t media_input_fifo0, int stream_num)
 {
   volatile ififo_t *media_input_fifo =  (ififo_t *) media_input_fifo0;
 
   media_input_fifo->sampleCountInPacket = -1;
+  media_input_fifo->packetSize = -1;
   return;
+}
+
+void media_input_fifo_disable(media_input_fifo_t media_input_fifo0)
+{
+	media_input_fifo_init(media_input_fifo0, 0);
 }
 
 int media_input_fifo_enable(media_input_fifo_t media_input_fifo0,
@@ -22,11 +27,11 @@ int media_input_fifo_enable(media_input_fifo_t media_input_fifo0,
   media_input_fifo->wrIndex = (int) &media_input_fifo->buf[0]; 
   media_input_fifo->startIndex = (int) &media_input_fifo->buf[0]; 
   // add on 2 for the dbc and timestamp
-  media_input_fifo->packetSize =  packetSize + 2;
   media_input_fifo->dbc = 0;
   media_input_fifo->fifoEnd = (int) &media_input_fifo->buf[MEDIA_INPUT_FIFO_SAMPLE_FIFO_SIZE-1];
   media_input_fifo->sampleCountInPacket = 0;
   media_input_fifo->ptr = 0;
+  media_input_fifo->packetSize = packetSize + 2;
   return packetSize;
 }
 

@@ -1,3 +1,8 @@
+/**
+ * \file avb_1722_router.c
+ * \brief A packet router for 1722. Allows multiple listeners on multiple streams
+ */
+
 #include <xccompat.h>
 #include "avb_1722_router.h"
 #include "avb_1722_router_table.h"

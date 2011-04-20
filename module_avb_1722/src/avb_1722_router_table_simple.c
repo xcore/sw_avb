@@ -1,3 +1,9 @@
+/**
+ * \file avb_1722_router_table_simple.c
+ * \brief A simple non-hashed routing table for the 1722 packet router
+ */
+
+
 #include <xs1.h>
 #include <print.h>
 #include "hwlock.h"

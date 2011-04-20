@@ -1,3 +1,8 @@
+/**
+ * \file avb_1722_router_table.h
+ * \brief Definition for the 1722 router table
+ */
+
 #ifndef _avb_1722_router_table_h_
 #define _avb_1722_router_table_h_
 #include <xccompat.h>

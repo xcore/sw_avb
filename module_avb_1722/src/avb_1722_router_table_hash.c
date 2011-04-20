@@ -1,3 +1,8 @@
+/**
+ * \file avb_1722_router_table_hash.c
+ * \brief Hash table and hash for 1722 packet router
+ */
+
 #include <xs1.h>
 #include <print.h>
 #include "hwlock.h"

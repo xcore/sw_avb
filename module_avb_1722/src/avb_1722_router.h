@@ -1,3 +1,8 @@
+/**
+ * \file avb_1722_router.h
+ * \brief Definitions for the AVB 1722 packet router
+ */
+
 #ifndef _avb_1722_router_h_
 #define _avb_1722_router_h_
 #include <xccompat.h>

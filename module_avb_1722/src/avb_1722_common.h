@@ -1,9 +1,6 @@
-/*
- * @ModuleName AVB 1722 
- * @Description: Audio Video Bridge.
- *
- *
- *
+/**
+ * \file avb_1722_common.h
+ * \brief AVB 1722 common definitions
  */
 
 

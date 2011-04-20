@@ -1,9 +1,6 @@
-/*
- * @ModuleName IEC 61883-6/AVB1722 Audio over 1722 AVB Transport.
- * @Description: Implements Talker functionality.
- *
- *
- *
+/**
+ * \file avb_1722_talker_support.c
+ * \brief 1722 Talker support C functions
  */
 #define streaming 
 #include "avb_1722_talker.h"

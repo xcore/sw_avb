@@ -1,9 +1,6 @@
-/*
- * @ModuleName IEC 61883-6/AVB1722 Audio over 1722 AVB Transport.
- * @Description: AVB1722 Common definations.
- *
- *
- *
+/**
+ * \file avb_1722_listener.xc
+ * \brief AVB1722 Listener
  */
 
 #include <platform.h>

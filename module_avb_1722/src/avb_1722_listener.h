@@ -1,9 +1,6 @@
-/*
- * @ModuleName IEC 61883-6/AVB1722 Audio over 1722 AVB Transport.
- * @Description: AVB1722 Listener module.
- *
- *
- *
+/**
+ * \file avb_1722_listener.h
+ * \brief IEC 61883-6/AVB1722 Listener definitions
  */
 
 #ifndef _AVB1722_LISTENER_H_ 
