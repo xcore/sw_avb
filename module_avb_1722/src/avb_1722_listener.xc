@@ -45,7 +45,6 @@ static void configure_stream(chanend c,
 
 static void disable_stream(avb_1722_stream_info_t &s)
 {
-	printstr("Disabling stream");
 	for(int i=0;i<s.num_channels;i++) {
 		disable_media_output_fifo(s.map[i]);
 	}
