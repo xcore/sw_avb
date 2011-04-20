@@ -1,7 +1,7 @@
 #ifndef _avb_control_h_
 #define _avb_control_h_
 
-/** \function set_avb_source_presentation
+/** \fn set_avb_source_presentation
  *
  *  Get/set the presentation time offset of an AVB source.
  *
@@ -18,7 +18,7 @@
  *
  **/
 
-/** \function set_avb_source_map
+/** \fn set_avb_source_map
  *
  *  Get/set the channel map of an avb source.
  *
@@ -36,7 +36,7 @@
  *
  **/
 
-/** \function set_avb_source_dest
+/** \fn set_avb_source_dest
  *
  *  Get/set the destination address of an avb source.
  *
@@ -50,7 +50,7 @@
  *
  **/
 
-/** \function set_avb_source_format
+/** \fn set_avb_source_format
  *
  *  Get/Set the format of an AVB source.
  *
@@ -66,7 +66,7 @@
  *  \param rate       the sample rate of the stream in Hz
  */
 
-/** \function set_avb_source_channels
+/** \fn set_avb_source_channels
  *
  *  Get/Set the channel count of an AVB source.
  *
@@ -79,7 +79,7 @@
  *  \param n          the number of channels
  */
 
-/** \function set_avb_source_sync
+/** \fn set_avb_source_sync
  *
  *  Get/Set the media clock of an AVB source.
  *
@@ -89,7 +89,7 @@
  *  \param mclock     the media clock number
  */
 
-/** \function set_avb_source_name
+/** \fn set_avb_source_name
  *
  *  Get/Set the name of an AVB source.
  *
@@ -100,7 +100,7 @@
  *  \param name       the string containing the name
  */
 
-/** \function set_avb_source_vlan
+/** \fn set_avb_source_vlan
  *
  *  Get/set the destination vlan of an AVB source.
  *
@@ -114,7 +114,7 @@
  *  \param vlan       the destination vlan id, The media clock number
  */
 
-/** \function set_avb_source_state
+/** \fn set_avb_source_state
  *
  *  Get/set the current state of an AVB source.
  *
@@ -127,7 +127,7 @@
  *  \param state      the state of the source
  */
 
-/** \function set_avb_sink_map
+/** \fn set_avb_sink_map
  *
  *  Get/set the map of an AVB sink.
  *
@@ -143,7 +143,7 @@
  *                   of channels in the stream
  */
 
-/** \function set_avb_sink_channels
+/** \fn set_avb_sink_channels
  *
  *  Get/set the number of channels of an AVB sink.
  *
@@ -157,7 +157,7 @@
  *
  */
 
-/** \function set_avb_sink_sync
+/** \fn set_avb_sink_sync
  *
  *  Get/set the media clock sync of an AVB sink.
  *
@@ -171,7 +171,7 @@
  *
  */
 
-/** \function set_avb_sink_vlan
+/** \fn set_avb_sink_vlan
  *
  *  Get/set the virtual lan id of an AVB sink.
  *
@@ -185,7 +185,7 @@
  *
  */
 
-/** \function set_avb_sink_addr
+/** \fn set_avb_sink_addr
  *
  *  Get/set the incoming destination mac address of an avb sink.
  *
@@ -202,7 +202,7 @@
  *
  **/
 
-/** \function set_avb_sink_name
+/** \fn set_avb_sink_name
  *
  *  Get/set the name of an AVB sink.
  *
@@ -214,7 +214,7 @@
  *
  */
 
-/** \function set_avb_sink_id
+/** \fn set_avb_sink_id
  *
  *  Get/set the stream id that an AVB sink listens to.
  *
@@ -229,7 +229,7 @@
  *
  */
 
-/** \function set_avb_sink_state
+/** \fn set_avb_sink_state
  *
  *  Get/set the state of an AVB sink.
  *
@@ -243,56 +243,56 @@
  *
  */
 
-/** \function get_device_name
+/** \fn get_device_name
  *
  *  Get the name of the device.
  * 
  *  \param device_name_string array to be filled with the device name
  **/
 
-/** \function get_device_system
+/** \fn get_device_system
  *
  *  Get the name of the system the device is part of.
  * 
  *  \param device_name_string array to be filled with the system name
  **/
 
-/** \function get_device_identity_vendor
+/** \fn get_device_identity_vendor
  *
  *  Get the name of the device vendor.
  * 
  *  \param vendor_name_string array to be filled with the vendor name
  **/
 
-/** \function get_device_identity_vendor_id
+/** \fn get_device_identity_vendor_id
  *
  *  Get the id of the vendor
  * 
  *  \param vendor_id_string array to be filled with the vendor id
  **/
 
-/** \function get_device_identity_product
+/** \fn get_device_identity_product
  *
  *  Get the name of the product.
  * 
  *  \param product_string array to be filled with the product name
  **/
 
-/** \function get_device_identity_version
+/** \fn get_device_identity_version
  *
  *  Get the version of the product
  * 
  *  \param version_string array to be filled with the version
  **/
 
-/** \function get_device_identity_serial
+/** \fn get_device_identity_serial
  *
  *  Get the serial number of the device.
  * 
  *  \param serial_no_string array to be filled with the serial number
  **/
 
-/** \function set_device_media_clock_source
+/** \fn set_device_media_clock_source
  *
  *  Get/set the source of a media clock.
  *
@@ -304,7 +304,7 @@
  *
  **/
 
-/** \function set_device_media_clock_rate
+/** \fn set_device_media_clock_rate
  *
  *  Get/set the rate of a media clock.
  *
@@ -315,7 +315,7 @@
  *
  **/
 
-/** \function set_device_media_clock_type
+/** \fn set_device_media_clock_type
  *
  *  Get/set the type of a media clock.
  *
@@ -324,7 +324,7 @@
  * 
  **/
 
-/** \function set_device_media_clock_state
+/** \fn set_device_media_clock_state
  *
  *  Get/set the state of a media clock.
  *

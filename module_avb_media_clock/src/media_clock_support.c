@@ -87,8 +87,7 @@ void init_media_clock_recovery(chanend ptp_svr,
 	clock_info->err = 0;
 	clock_info->ierror = 0;
 	if (rate != 0) {
-		clock_info->wordlen = ((100000000LL << WORDLEN_FRACTIONAL_BITS)
-				/ clock_info->rate);
+		clock_info->wordlen = ((100000000LL << WORDLEN_FRACTIONAL_BITS) / clock_info->rate);
 		clock_info->wordlen_ptp = clock_info->wordlen * 10;
 	} else {
 		clock_info->wordlen = 0;

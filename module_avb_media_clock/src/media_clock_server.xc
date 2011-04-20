@@ -31,7 +31,6 @@ void clk_ctl_set_rate(chanend clk_ctl, int wordLength)
 #define MIN_FILL_LEVEL 5
 
 typedef struct buf_info_t {
-  int active;
   int lock_count;
   int prev_diff;
   int stability_count;
@@ -88,7 +87,6 @@ static buf_info_t buf_info[AVB_NUM_MEDIA_OUTPUTS];
 static void init_buffers(void) 
 {
   for (int i=0;i<AVB_NUM_MEDIA_OUTPUTS;i++) {
-    buf_info[i].active = 0;
     buf_info[i].adjust = 0;
   }
 }
@@ -116,7 +114,6 @@ static void manage_buffer(buf_info_t &b,
   unsigned int ptp_outgoing_actual;
   int diff, sample_diff;
   unsigned int sample_count;
-  static int i =0;
   unsigned int wordLength;
   int rdptr,wrptr,fill;
   timer tmr;
@@ -128,12 +125,8 @@ static void manage_buffer(buf_info_t &b,
       inct(buf_ctl);  
       return;
   }
-  else {
-    wordLength = media_clocks[b.media_clock].wordLength;
-  }
 
-
-
+  wordLength = media_clocks[b.media_clock].wordLength;
 
   buf_ctl <: b.fifo;
   buf_ctl <: BUF_CTL_REQUEST_INFO;
@@ -149,7 +142,6 @@ static void manage_buffer(buf_info_t &b,
     buf_ctl :> wrptr;
   }
   outgoing_timestamp_local = outgoing_timestamp_local + (t2-t1);
-  
   outgoing_timestamp_local += b.adjust;
 
   fill = wrptr - rdptr;
@@ -177,7 +169,7 @@ static void manage_buffer(buf_info_t &b,
 
 
   if (wordLength == 0) {
-    // clock not locked yet
+      // clock not locked yet
       buf_ctl <: b.fifo;
       buf_ctl <: BUF_CTL_ACK;
       inct(buf_ctl);  
@@ -190,35 +182,23 @@ static void manage_buffer(buf_info_t &b,
     b.lock_count++;
   }
 
-
   if (sample_diff < ACCEPTABLE_FILL_ADJUST &&
       sample_diff > -ACCEPTABLE_FILL_ADJUST &&
       (sample_diff - b.prev_diff <= 1 &&
-       sample_diff - b.prev_diff >= -1))
+       sample_diff - b.prev_diff >= -1)) {
     b.stability_count++;
-  else
+  } else {
     b.stability_count = 0;
-
-  
-
-  if ((i&0x7ff)==0)  {
-    //simple_printf("sd: %d, %d, %x\n", sample_diff, fill, wordLength);
   }
-  if (!locked && (b.stability_count > STABLE_THRESHOLD))
-    {
 
-      simple_printf("Media output %d locked: %d (%d * %x) , %d\n",
-                    index,
-                    diff,
-                    sample_diff,
-                    wordLength,
-                     fill);
+  if (!locked && (b.stability_count > STABLE_THRESHOLD)) {
+
+      simple_printf("Media output %d locked: buffer delta %d samples\n", index, sample_diff);
 
       if (sample_diff < -MEDIA_OUTPUT_FIFO_SAMPLE_FIFO_SIZE*1/4) {
-        simple_printf("Presentation time more than can be buffered!\n");
         b.adjust = -(MEDIA_OUTPUT_FIFO_SAMPLE_FIFO_SIZE*1/4)*(wordLength*10>>WC_FRACTIONAL_BITS) - diff;
         b.adjust = b.adjust/10;
-        simple_printf("Compensating by %d ns\n",b.adjust*10);
+        simple_printf("Presentation time compentation too large, limited to %d ns\n",b.adjust*10);
         sample_diff = -MEDIA_OUTPUT_FIFO_SAMPLE_FIFO_SIZE*1/4;
       }
       
@@ -228,36 +208,24 @@ static void manage_buffer(buf_info_t &b,
       buf_ctl <: BUF_CTL_ADJUST_FILL;
       buf_ctl <: sample_diff;
       inct(buf_ctl);
-    }
-  else if (locked && 
+  } else if (locked &&
            b.lock_count == LOCK_COUNT_THRESHOLD &&
-           (sample_diff > LOST_LOCK_THRESHOLD
-            ||
-            sample_diff < -LOST_LOCK_THRESHOLD 
-            ||
+           (sample_diff > LOST_LOCK_THRESHOLD ||
+            sample_diff < -LOST_LOCK_THRESHOLD ||
             fill < MIN_FILL_LEVEL))
-    {
-      simple_printf("Media output %d lost lock: %d (%d), %d\n",
-                    index,
-                    sample_diff,
-                    b.prev_diff,
-                    fill);                    
+  {
+      simple_printf("Media output %d lost lock\n", index);
       b.adjust = 0;
       buf_ctl <: b.fifo;
       buf_ctl <: BUF_CTL_RESET;
       inct(buf_ctl);  
-    }
-  else
-    {
+  } else {
       buf_ctl <: b.fifo;
       buf_ctl <: BUF_CTL_ACK;
       inct(buf_ctl);  
-    }
+  }
 
   b.prev_diff = sample_diff;
-
-
-  i++;
 }
  
 
@@ -279,7 +247,6 @@ void media_clock_server(chanend media_clock_ctl,
 #if (AVB_NUM_MEDIA_OUTPUTS != 0)
   unsigned char buf_ctl_cmd;
 #endif
-  int count=0;
 
 #if (AVB_NUM_MEDIA_OUTPUTS != 0)
   init_buffers();
@@ -311,10 +278,6 @@ void media_clock_server(chanend media_clock_ctl,
                                  media_clocks[i],
                                  clk_time,
                                  CLOCK_RECOVERY_PERIOD);            
-            count++;
-            if ((count & 0xf) == 0) {
-                //simple_printf("w:%x\n", media_clocks[i].wordLength);
-            }
             for (int j=0;j<num_clk_ctl;j++) {
               if (registered[j]==i)
                 clk_ctl_set_rate(clk_ctl[j], media_clocks[i].wordLength);   
@@ -323,6 +286,7 @@ void media_clock_server(chanend media_clock_ctl,
         }
         clk_time += CLOCK_RECOVERY_PERIOD;        
         break;
+
 #if (AVB_NUM_MEDIA_OUTPUTS != 0)
       case (int i=0;i<num_buf_ctl;i++) inuchar_byref(buf_ctl[i], buf_ctl_cmd): 
         {
@@ -334,9 +298,7 @@ void media_clock_server(chanend media_clock_ctl,
           fifo = fifo + x;
           fifo |= 0x10000;
           (void) inct(buf_ctl[i]);
-          //          outuint(buf_ctl[i],0);
-          //          fifo = inuint(buf_ctl[i]);
-          //          outct(buf_ctl[i], XS1_CT_END);
+
           buf_index = get_buf_info(fifo);
           switch (buf_ctl_cmd)
             {
