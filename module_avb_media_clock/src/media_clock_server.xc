@@ -193,7 +193,7 @@ static void manage_buffer(buf_info_t &b,
 
   if (!locked && (b.stability_count > STABLE_THRESHOLD)) {
 
-      simple_printf("Media output %d locked: buffer delta %d samples\n", index, sample_diff);
+      simple_printf("Media output %d locked: buffer %d samples shorter\n", index, sample_diff);
 
       if (sample_diff < -MEDIA_OUTPUT_FIFO_SAMPLE_FIFO_SIZE*1/4) {
         b.adjust = -(MEDIA_OUTPUT_FIFO_SAMPLE_FIFO_SIZE*1/4)*(wordLength*10>>WC_FRACTIONAL_BITS) - diff;

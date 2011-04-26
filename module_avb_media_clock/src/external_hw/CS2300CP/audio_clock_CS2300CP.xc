@@ -116,31 +116,59 @@ void audio_gen_CS2300CP_clock(out port p, chanend clk_ctl)
 void audio_clock_CS2300CP_init(struct r_i2c &r_i2c, unsigned mclks_per_wordclk)
 {
    int deviceAddr = 0x9C;
+   struct i2c_data_info data;
+   int fail = 0;
 
    // this is the muiltiplier in the PLL, which takes the PLL reference clock and
    // multiplies it up to the MCLK frequency.
    unsigned mult = (PLL_TO_WORD_MULTIPLIER * mclks_per_wordclk);
 
+   data.data_len = 8;
+   data.master_num = 0;
+   data.clock_mul = 1;
+
    mult = mult/2;
    mult = mult << 12;
 
   // Configure PLL
-  i2c_wr(0x03, 0x01,deviceAddr,r_i2c);
-  i2c_wr(0x05, 0x01,deviceAddr,r_i2c);
-  i2c_wr(0x16, 0x10,deviceAddr,r_i2c);
-  i2c_wr(0x17, 0x00,deviceAddr,r_i2c);
+  data.data[0] = 0x01;
+  i2c_master_tx(deviceAddr, 0x03, data, r_i2c);
+  data.data[0] = 0x01;
+  i2c_master_tx(deviceAddr, 0x05, data, r_i2c);
+  data.data[0] = 0x10;
+  i2c_master_tx(deviceAddr, 0x16, data, r_i2c);
+  data.data[0] = 0x00;
+  i2c_master_tx(deviceAddr, 0x17, data, r_i2c);
 
-  i2c_wr( 0x06, (mult >> 24) & 0xFF,deviceAddr,r_i2c);
-  i2c_wr( 0x07, (mult >> 16) & 0xFF,deviceAddr,r_i2c);
-  i2c_wr( 0x08, (mult >> 8) & 0xFF, deviceAddr,r_i2c);
-  i2c_wr( 0x09, (mult) & 0xFF,      deviceAddr,r_i2c);
+  data.data[0] = (mult >> 24) & 0xFF;
+  i2c_master_tx(deviceAddr, 0x06, data, r_i2c);
+  data.data[0] = (mult >> 16) & 0xFF;
+  i2c_master_tx(deviceAddr, 0x07, data, r_i2c);
+  data.data[0] = (mult >> 8) & 0xFF;
+  i2c_master_tx(deviceAddr, 0x08, data, r_i2c);
+  data.data[0] = (mult) & 0xFF;
+  i2c_master_tx(deviceAddr, 0x09, data, r_i2c);
 
   // Check configuration
-  if (i2c_rd(0x03, deviceAddr, r_i2c) != 0x01 || i2c_rd(0x09, deviceAddr, r_i2c) != (mult & 0xFF))
+  if (!i2c_master_rx(deviceAddr, 0x03, data, r_i2c))
   {
-    printstr("PLL chip configuration failed\n");
-    return;
+	  if (data.data[0] != 0x01)
+	  {
+		  fail = 1;
+	  }
   }
 
+  if (!i2c_master_rx(deviceAddr, 0x09, data, r_i2c))
+  {
+	  if (data.data[0] != (mult & 0xFF))
+	  {
+		  fail = 1;
+	  }
+  }
+
+  if (fail)
+  {
+	  printstr("PLL chip configuration failed\n");
+  }
 }
 

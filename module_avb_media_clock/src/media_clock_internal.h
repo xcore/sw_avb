@@ -6,11 +6,11 @@
 /** A description of a media clock */
 typedef struct media_clock_t {
   int active;
-  media_clock_type_t clock_type;  //< The type of the clock
-  int source;               //< If the clock is derived from a fifo
-                            //  this is the id of the output
-                            //  fifo it should be derived from.
-  int rate;                 //<  The rate of the media clock in Hz
+  media_clock_type_t clock_type;  ///< The type of the clock
+  int source;               ///< If the clock is derived from a fifo
+                            ///  this is the id of the output
+                            ///  fifo it should be derived from.
+  int rate;                 ///<  The rate of the media clock in Hz
   unsigned int wordLength;
 } media_clock_t;
 

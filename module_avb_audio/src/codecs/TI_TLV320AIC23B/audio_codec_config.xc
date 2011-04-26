@@ -202,7 +202,12 @@ int swc_audio_codec_ctl_reg_wr(port AUD_SCLK, port AUD_SDIN,
 int audio_TI_TLV320AIC23B_init(struct r_i2c &r_i2c, int makeSlave)
 {
    int Result;
-   int WrData, error;
+   int error;
+
+   struct i2c_data_info data;
+   data.master_num = 0;
+   data.data_len = 1;
+   data.clock_mul = 1;
    
    // Initialise the ports.  
    r_i2c.scl <: 1;
@@ -211,8 +216,8 @@ int audio_TI_TLV320AIC23B_init(struct r_i2c &r_i2c, int makeSlave)
    error = 0;
 
    // write to codec with reset register.
-   WrData = 0;
-   Result = i2c_wr(CODEC_RESET_REG, WrData, DEVICE_ADRS, r_i2c);   
+   data.data[0] = 0;
+   Result = i2c_master_tx(DEVICE_ADRS, CODEC_RESET_REG, data, r_i2c);
    if (Result == 1) {
       printstr("AudioCodec: Reset successful.\n");      
    } else {
@@ -225,9 +230,8 @@ int audio_TI_TLV320AIC23B_init(struct r_i2c &r_i2c, int makeSlave)
    // b. Left line input        : Normal.
    // c. Left line input volume : b1011 : 0db Default
    
-   //   WrData = 0b100010111;
-        WrData = 0b100010010;
-   Result = i2c_wr(CODEC_LEFT_LINE_IN_CTL_REG, WrData, DEVICE_ADRS, r_i2c);   
+   data.data[0] = 0b100010010;
+   Result = i2c_master_tx(DEVICE_ADRS, CODEC_LEFT_LINE_IN_CTL_REG, data, r_i2c);
    if (Result == 1) {
       printstr("AudioCodec: CODEC_LEFT_LINE_IN_CTL_REG successful.\n");      
    } else {
@@ -240,9 +244,8 @@ int audio_TI_TLV320AIC23B_init(struct r_i2c &r_i2c, int makeSlave)
    // b. Right line input        : Normal.
    // c. Right line input volume : b1011 : 0db Default
 
-   //   WrData = 0b100010111;
-        WrData = 0b100010010;
-   Result = i2c_wr(CODEC_RIGHT_LINE_IN_CTL_REG, WrData, DEVICE_ADRS, r_i2c);   
+   data.data[0] = 0b100010010;
+   Result = i2c_master_tx(DEVICE_ADRS, CODEC_RIGHT_LINE_IN_CTL_REG, data, r_i2c);
    if (Result == 1) {
       printstr("AudioCodec: CODEC_RIGHT_LINE_IN_CTL_REG successful.\n");      
    } else {
@@ -260,9 +263,9 @@ int audio_TI_TLV320AIC23B_init(struct r_i2c &r_i2c, int makeSlave)
    // d. INSEL                   : Line Input.
    // e. MICM                    : Microphone muted.
    // f. MICB                    : 0db    
-   WrData = 0x12;
-   //WrData = 0x1A;    //Debugging bypass
-   Result = i2c_wr(CODEC_ANALOGE_CTL_REG, WrData, DEVICE_ADRS, r_i2c);   
+   data.data[0] = 0x12;
+   //data.data[0] = 0x1A;    //Debugging bypass
+   Result = i2c_master_tx(DEVICE_ADRS, CODEC_ANALOGE_CTL_REG, data, r_i2c);
    if (Result == 1) {
       printstr("AudioCodec: CODEC_ANALOGE_CTL_REG successful.\n");      
    } else {
@@ -274,8 +277,8 @@ int audio_TI_TLV320AIC23B_init(struct r_i2c &r_i2c, int makeSlave)
    // a. DAC Soft Mute           : Disable
    // b. DEEMP[1:0] De-emphasis  : Disabled
    // c. ADC high pass filter    : Enable.
-   WrData = 0x0;
-   Result = i2c_wr(CODEC_DIGITAL_CTL_REG, WrData, DEVICE_ADRS, r_i2c);   
+   data.data[0] = 0x0;
+   Result = i2c_master_tx(DEVICE_ADRS, CODEC_DIGITAL_CTL_REG, data, r_i2c);
    if (Result == 1) {
       printstr("AudioCodec: CODEC_DIGITAL_CTL_REG successful.\n");      
    } else {
@@ -292,8 +295,8 @@ int audio_TI_TLV320AIC23B_init(struct r_i2c &r_i2c, int makeSlave)
    // f. ADC                     : ON
    // g. MIC                     : OFF
    // h. LINE                    : ON
-   WrData = 0x2;
-   Result = i2c_wr(CODEC_POWER_DOWN_CTL_REG, WrData, DEVICE_ADRS, r_i2c);   
+   data.data[0] = 0x2;
+   Result = i2c_master_tx(DEVICE_ADRS, CODEC_POWER_DOWN_CTL_REG, data, r_i2c);
    if (Result == 1) {
       printstr("AudioCodec: CODEC_POWER_DOWN_CTL_REG successful.\n");      
    } else {
@@ -310,11 +313,11 @@ int audio_TI_TLV320AIC23B_init(struct r_i2c &r_i2c, int makeSlave)
 
 
    if (makeSlave)
-     WrData = 0b0001010;
+	   data.data[0] = 0b0001010;
    else
-     WrData = 0x4A;
+	   data.data[0] = 0x4A;
 
-   Result = i2c_wr(CODEC_DIG_IF_FORMAT_CTL_REG, WrData, DEVICE_ADRS, r_i2c);   
+   Result = i2c_master_tx(DEVICE_ADRS, CODEC_DIG_IF_FORMAT_CTL_REG, data, r_i2c);
    if (Result == 1) {
       printstr("AudioCodec: CODEC_DIG_IF_FORMAT_CTL_REG successful.\n");      
    } else {
@@ -329,10 +332,10 @@ int audio_TI_TLV320AIC23B_init(struct r_i2c &r_i2c, int makeSlave)
    // d. BOSR                    : 1'b0
    // e. USB/Normal              : Normal
 
-   WrData = 0b00000000; // 48KHz
-   //WrData = 0b000011100; // 96KHz
-   //WrData = 0b000011000; // 32KHz
-   Result = i2c_wr(CODEC_SAMPLE_RATE_CTL_REG, WrData, DEVICE_ADRS, r_i2c);   
+   data.data[0] = 0b00000000; // 48KHz
+   //data.data[0] = 0b000011100; // 96KHz
+   //data.data[0] = 0b000011000; // 32KHz
+   Result = i2c_master_tx(DEVICE_ADRS, CODEC_SAMPLE_RATE_CTL_REG, data, r_i2c);
    if (Result == 1) {
       printstr("AudioCodec: CODEC_SAMPLE_RATE_CTL_REG successful.\n");      
    } else {
@@ -342,8 +345,8 @@ int audio_TI_TLV320AIC23B_init(struct r_i2c &r_i2c, int makeSlave)
    
    // Digital Interface Activation reg.
    // a. ACT                     : Enable
-   WrData = 0x1;
-   Result = i2c_wr(CODEC_DIF_IF_ACT_CTL_REG, WrData, DEVICE_ADRS, r_i2c);   
+   data.data[0] = 0x1;
+   Result = i2c_master_tx(DEVICE_ADRS, CODEC_DIF_IF_ACT_CTL_REG, data, r_i2c);
    if (Result == 1) {
       printstr("AudioCodec: CODEC_DIF_IF_ACT_CTL_REG successful.\n");      
    } else {

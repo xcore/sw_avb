@@ -344,10 +344,29 @@ void regwr(int addr, int data, int device, port scl, port sda)
 #define CODEC_INTERFACE_FORMATS        (0x4)
 #define CODEC_ADC_CONTROL              (0x5)
 
-#define REGWR(reg, val)  i2c_wr(reg, val, DEVICE_ADRS, r_i2c)
-//swc_audio_codec_ctl_reg_wr(DEVICE_ADRS, reg, val, AUD_SCLK, AUD_SDIN)
-#define REGRD(reg) i2c_rd(reg, DEVICE_ADRS, r_i2c)
-//swc_audio_codec_ctl_reg_rd(DEVICE_ADRS, reg, AUD_SCLK, AUD_SDIN)
+
+void REGWR(unsigned reg, unsigned val, struct r_i2c &r_i2c)
+{
+	struct i2c_data_info data;
+	data.master_num = 0;
+	data.data_len = 1;
+	data.clock_mul = 1;
+	data.data[0] = val;
+
+	i2c_master_tx(DEVICE_ADRS, reg, data, r_i2c);
+}
+
+unsigned int REGRD(unsigned reg, struct r_i2c &r_i2c)
+{
+	struct i2c_data_info data;
+	data.master_num = 0;
+	data.data_len = 1;
+	data.clock_mul = 1;
+
+	i2c_master_rx(DEVICE_ADRS, reg, data, r_i2c);
+	return data.data[0];
+}
+
 
 void audio_codec_CS42448_init(out port AUD_RESET_N, 
                               struct r_i2c &r_i2c,
@@ -370,35 +389,24 @@ void audio_codec_CS42448_init(out port AUD_RESET_N,
    //   AUD_SCLK <: 1;
    //   AUD_SDIN <: 1;
 
-   if ((REGRD(0x01) != 0x04 && REGRD(0x01) != 0x03) || REGRD(0x04) != 0x36)
-	 {
-           printstr("CODEC chip not found\n");
-           printstrln("CODEC chip not found\n");
-           printintln(REGRD(0x01));
-           printintln(REGRD(0x04));
-           //           exit(1);
-           //           exit(1);
-           //           return;
-	 }
-
    // DAC_FM = 0 (single speed), ADC_FM = 0 (single speed), MFREQ = 2:  MCLK/512 - 48Khz
    //   WrData = 0x54;
    //   WrData = 0b01010100;
    if (mode == CODEC_TDM)
-     REGWR(CODEC_FUNCTIONAL_MODE, 0b11111000);
+     REGWR(CODEC_FUNCTIONAL_MODE, 0b11111000, r_i2c);
    else  // Default to I2S
-     REGWR(CODEC_FUNCTIONAL_MODE, 0b00000100);
+     REGWR(CODEC_FUNCTIONAL_MODE, 0b00000100, r_i2c);
    
    // FREEZE = 0, AUX_DIF = 0, DAC_DIF=1 (I2S), ADC_DIF = 1 (I2S)
    //WrData = 0x11;
    //WrData = 0b00010001;
    
    if (mode == CODEC_TDM)
-     REGWR(CODEC_INTERFACE_FORMATS, 0b00110110);
+     REGWR(CODEC_INTERFACE_FORMATS, 0b00110110, r_i2c);
    else  // Default to I2S
-     REGWR(CODEC_INTERFACE_FORMATS, 0b00001001);
+     REGWR(CODEC_INTERFACE_FORMATS, 0b00001001, r_i2c);
    
    // ADC1-2_HPF FREEZE = 0, ADC3_HPF FREEZE = 0, DAC_DEM = 0, 
    // ADC1_SINGLE = 1(single ended), ADC2_SINGLE = 1, ADC3_SINGLE = 1, AIN5_MUX = 0, AIN6_MUX = 0  
-   REGWR(CODEC_ADC_CONTROL, 0x1C);
+   REGWR(CODEC_ADC_CONTROL, 0x1C, r_i2c);
 }
