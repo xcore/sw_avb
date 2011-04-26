@@ -123,7 +123,7 @@ void audio_clock_CS2300CP_init(struct r_i2c &r_i2c, unsigned mclks_per_wordclk)
    // multiplies it up to the MCLK frequency.
    unsigned mult = (PLL_TO_WORD_MULTIPLIER * mclks_per_wordclk);
 
-   data.data_len = 8;
+   data.data_len = 1;
    data.master_num = 0;
    data.clock_mul = 1;
 
