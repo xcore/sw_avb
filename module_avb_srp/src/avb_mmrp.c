@@ -59,8 +59,8 @@ int avb_join_multicast_group(unsigned char addr[6])
   if (found != -1) {
     entries[found].active = 1;
     memcpy(entries[found].addr, addr, 6);
-    mrp_mad_new(entries[found].attr);
-    mrp_mad_join(entries[found].attr);
+    mrp_mad_begin(entries[found].attr);
+    mrp_mad_join(entries[found].attr, 1);
     return 1;
   }
 

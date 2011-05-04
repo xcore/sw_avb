@@ -51,8 +51,8 @@ int avb_join_vlan(int vlan)
   if (found != -1) {
     entries[found].active = 1;
     entries[found].vlan = vlan;
-    mrp_mad_new(entries[found].attr);
-    mrp_mad_join(entries[found].attr);
+    mrp_mad_begin(entries[found].attr);
+    mrp_mad_join(entries[found].attr, 1);
     return 1;
   }
 

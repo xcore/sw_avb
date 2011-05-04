@@ -153,8 +153,7 @@ void mrp_init(char macaddr[]);
 
 /** Function: mrp_attribute_init
 
-   This function initializes the state of an MRP attribute. Currently
-   only MSRP attributes are supported.
+   This function initializes the state of an MRP attribute.
 
    \param st the attribute state structure to intialize
    \param t the type of the attribute
@@ -170,28 +169,34 @@ void mrp_attribute_init(mrp_attribute_state *st,
 
 
 
-/** Function: mrp_mad_new
+/** Function: mrp_mad_begin
 
-   Registers a new attribute
+   Move the state machines for the attribute into the starting state
+   from the initial (unused) state. The Begin! transition is made from
+   the state table and descriptions in IEEE802.1ak 10.7.
 
    \param st the attribute
    
 */
-void mrp_mad_new(mrp_attribute_state *st);
+void mrp_mad_begin(mrp_attribute_state *st);
 
 
 /** Function: mrp_mad_join
 
-   This function registers a MAD_Join request for a particular attribute
+   Issue a MAD_Join.request service primitive for the attribute. The MRP state
+   transitions occur as if either the New! or Join! events have occurred (see
+   IEEE802.1ak 10.7)
 
    \param st the attribute to join
+   \param new whether the attribute is a new one or not
 
 */
-void mrp_mad_join(mrp_attribute_state *st);
+void mrp_mad_join(mrp_attribute_state *st, int new);
 
 /** Function: mrp_mad_leave
 
-   This function registers a MAD_Leave request for a particular attribute
+   This function registers a MAD_Leave request for a particular attribute. The
+   state machines transition as if the Leave! event has occurred (see IEEE802.1ak 10.7)
 
    \param st The attribute to leave
    

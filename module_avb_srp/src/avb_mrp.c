@@ -490,8 +490,10 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st)
     case MRP_EVENT_RECEIVE_LEAVE_ALL:
     case MRP_EVENT_TX_LEAVE_ALL:
     case MRP_EVENT_REDECLARE:
-      start_timer(&st->leaveTimer, MRP_LEAVETIMER_PERIOD_CENTISECONDS);
-      st->registrar_state = MRP_LV;
+      if (st->registrar_state == MRP_IN) {
+        start_timer(&st->leaveTimer, MRP_LEAVETIMER_PERIOD_CENTISECONDS);
+        st->registrar_state = MRP_LV;
+      }
       break;
     case MRP_EVENT_LEAVETIMER:
     case MRP_EVENT_FLUSH:
@@ -726,18 +728,21 @@ void mrp_attribute_init(mrp_attribute_state *st,
 }
 
 
-void mrp_mad_new(mrp_attribute_state *st) 
+void mrp_mad_begin(mrp_attribute_state *st)
 {
 #ifdef MRP_FULL_PARTICIPANT
   init_timer(&st->leaveTimer, 1);
 #endif
   mrp_update_state(MRP_EVENT_BEGIN, st);
-  mrp_update_state(MRP_EVENT_NEW, st);
 }
 
-void mrp_mad_join(mrp_attribute_state *st)
+void mrp_mad_join(mrp_attribute_state *st, int new)
 {
-  mrp_update_state(MRP_EVENT_JOIN, st);
+  if (new) {
+    mrp_update_state(MRP_EVENT_NEW, st);
+  } else {
+    mrp_update_state(MRP_EVENT_JOIN, st);
+  }
 }
 
 void mrp_mad_leave(mrp_attribute_state *st)
@@ -926,6 +931,12 @@ void mrp_periodic()
     start_timer(&leaveall_timer, MRP_LEAVEALL_TIMER_PERIOD_CENTISECONDS / MRP_LEAVEALL_TIMER_MULTIPLIER);
     leave_all = 1;
     global_event(MRP_EVENT_RECEIVE_LEAVE_ALL);
+  }
+
+  for (int j=0;j<MRP_MAX_ATTRS;j++) {
+    if (timer_expired(&attrs[j].leaveTimer)) {
+      mrp_update_state(MRP_EVENT_LEAVETIMER, &attrs[j]);
+    }
   }  
 #endif
 
@@ -960,7 +971,6 @@ void mrp_periodic()
     force_send(c_tx);
     leave_all = 0;
   }
-
 }
 
 

@@ -217,8 +217,8 @@ void avb_start(void) {
   
   
   //  avb_srp_domain_start();
-  mrp_mad_new(domain_attr);
-  mrp_mad_join(domain_attr);       
+  mrp_mad_begin(domain_attr);
+  mrp_mad_join(domain_attr, 1);
 }
 
 static void avb_set_talker_bandwidth() 
@@ -388,10 +388,10 @@ int getset_avb_source_state(int set,
 
           
 
-          mrp_mad_new(source->stream.srp_talker_attr);
-          mrp_mad_new(source->stream.srp_talker_failed_attr);
-          mrp_mad_new(source->stream.srp_listener_attr);
-          mrp_mad_join(source->stream.srp_talker_attr);
+          mrp_mad_begin(source->stream.srp_talker_attr);
+          mrp_mad_begin(source->stream.srp_talker_failed_attr);
+          mrp_mad_begin(source->stream.srp_listener_attr);
+          mrp_mad_join(source->stream.srp_talker_attr, 1);
 
           media_clock_register(media_clock_svr, clk_ctl, source->stream.sync);
 
@@ -648,10 +648,10 @@ int getset_avb_sink_state(int set,
           avb_join_multicast_group(sink->addr);
 #endif
 
-        mrp_mad_new(sink->stream.srp_talker_attr);
-        mrp_mad_new(sink->stream.srp_talker_failed_attr);
-        mrp_mad_new(sink->stream.srp_listener_attr);
-        mrp_mad_join(sink->stream.srp_listener_attr);
+        mrp_mad_begin(sink->stream.srp_talker_attr);
+        mrp_mad_begin(sink->stream.srp_talker_failed_attr);
+        mrp_mad_begin(sink->stream.srp_listener_attr);
+        mrp_mad_join(sink->stream.srp_listener_attr, 1);
       }
       else if (sink->stream.state != AVB_SINK_STATE_DISABLED &&
               *state == AVB_SINK_STATE_DISABLED) {
