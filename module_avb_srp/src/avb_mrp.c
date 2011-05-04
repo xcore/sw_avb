@@ -549,7 +549,10 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st)
         case MRP_VP:
           st->applicant_state = MRP_VO;
           break;
-        default:
+        case MRP_VN:
+        case MRP_AN:
+        case MRP_AA:
+        case MRP_QA:
           st->applicant_state = MRP_LA;
           break;
         }
@@ -574,8 +577,12 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st)
           break;
         }
     case MRP_EVENT_RECEIVE_IN:
-      st->applicant_state = MRP_QA;
-      break;
+    	switch (st->applicant_state)
+    	{
+    	case MRP_AA:
+    	  st->applicant_state = MRP_QA;
+    	  break;
+    	}
     case MRP_EVENT_RECEIVE_JOINMT:
     case MRP_EVENT_RECEIVE_MT:
       switch (st->applicant_state) 
@@ -601,19 +608,20 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st)
     case MRP_EVENT_REDECLARE:
       switch (st->applicant_state) 
         {
-#ifdef MRP_FULL_PARTICIPANT
         case MRP_VO:
         case MRP_AO:
         case MRP_QO:
+#ifdef MRP_FULL_PARTICIPANT
           st->applicant_state = MRP_LO;
-          break;
+#else
+          st->applicant_state = MRP_VO;
 #endif
+          break;
         case MRP_AN:
           st->applicant_state = MRP_VN;
           break;
         case MRP_AA:
-          st->applicant_state = MRP_VP;
-          break;
+        case MRP_QA:
         case MRP_AP:
         case MRP_QP:
           st->applicant_state = MRP_VP;
@@ -632,8 +640,6 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st)
         }
       break;
     case MRP_EVENT_TX: 
-      //      printstr("tx event ");
-      //      printintln(st->applicant_state);
       switch (st->applicant_state) 
         {
         case MRP_VP:
@@ -681,8 +687,8 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st)
         case MRP_AN:
         case MRP_AA:
         case MRP_LA:
-        case MRP_AP:
         case MRP_QA:
+        case MRP_AP:
         case MRP_QP:
           {         
           int vector = makeTxEvent(e, st, 1);
@@ -695,15 +701,16 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st)
         case MRP_LA:
         case MRP_AO:
         case MRP_QO:
-        case MRP_LO:
           st->applicant_state = MRP_LO;
           break;
         case MRP_VN:
-        case MRP_AN:
-          st->applicant_state = MRP_VN;
+          st->applicant_state = MRP_AN;
           break;
-        default:
-          st->applicant_state = MRP_VP;
+        case MRP_AN:
+        case MRP_AA:
+        case MRP_AP:
+        case MRP_QP:
+          st->applicant_state = MRP_QA;
           break;
         }
       }
