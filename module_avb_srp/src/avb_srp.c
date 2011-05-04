@@ -33,18 +33,13 @@ int avb_srp_match_talker_advertise(mrp_attribute_state *attr,
   avb_source_info_t *source_info = (avb_source_info_t *) attr->attribute_info;
   unsigned long long stream_id=0, my_stream_id=0;
   srp_talker_first_value *first_value = (srp_talker_first_value *) fv;
-  char *macaddr = avb_control_get_my_mac_addr();  
 
-  for (int i=0;i<6;i++) {
-    my_stream_id = (my_stream_id << 8) + ((unsigned char) macaddr[i]);
+  my_stream_id = source_info->stream.streamId[0];
+  my_stream_id = (my_stream_id << 32) + source_info->stream.streamId[1];
+
+  for (int i=0;i<8;i++) {
     stream_id = (stream_id << 8) + first_value->StreamId[i];
   }
-  
-  my_stream_id = (my_stream_id << 8) + (unsigned char) (source_info->local_id >>  8);
-  my_stream_id = (my_stream_id << 8) + (unsigned char) (source_info->local_id >>  0);
-  stream_id = (stream_id << 8) + first_value->StreamId[6];
-  stream_id = (stream_id << 8) + first_value->StreamId[7];
-
 
   stream_id += i;
 
@@ -64,8 +59,8 @@ int avb_srp_match_listener(mrp_attribute_state *attr,
   if (four_packed_event != AVB_SRP_FOUR_PACKED_EVENT_READY)
     return 0;
 
-  my_stream_id = sink_info->streamId[0];
-  my_stream_id = (my_stream_id << 32) + sink_info->streamId[1];
+  my_stream_id = sink_info->stream.streamId[0];
+  my_stream_id = (my_stream_id << 32) + sink_info->stream.streamId[1];
 
   for (int i=0;i<8;i++) {
     stream_id = (stream_id << 8) + first_value->StreamId[i];
@@ -274,8 +269,8 @@ static int check_listener_merge(char *buf,
     (srp_listener_first_value *) (buf + sizeof(mrp_msg_header) + sizeof(mrp_vector_header));
 
   // check if we can merge
-  my_stream_id = sink_info->streamId[0];
-  my_stream_id = (my_stream_id << 32) + sink_info->streamId[1];
+  my_stream_id = sink_info->stream.streamId[0];
+  my_stream_id = (my_stream_id << 32) + sink_info->stream.streamId[1];
 
   for (int i=0;i<8;i++) {
     stream_id = (stream_id << 8) + first_value->StreamId[i];
@@ -318,7 +313,7 @@ static int merge_listener_message(char *buf,
   if (merge) {
     srp_listener_first_value *first_value = 
       (srp_listener_first_value *) (buf + sizeof(mrp_msg_header) + sizeof(mrp_vector_header));
-    unsigned * streamId = sink_info->streamId;
+    unsigned * streamId = sink_info->stream.streamId;
 
     if (num_values == 0) {
       first_value->StreamId[0] = (unsigned char) (streamId[0] >> 24);
@@ -397,7 +392,6 @@ static int check_talker_merge(char *buf,
   int vlan, my_vlan;
   srp_talker_first_value *first_value = 
     (srp_talker_first_value *) (buf + sizeof(mrp_msg_header) + sizeof(mrp_vector_header));
-  char *macaddr = avb_control_get_my_mac_addr();
 
   // check if we can merge
 
@@ -411,17 +405,13 @@ static int check_talker_merge(char *buf,
   if (dest_addr != my_dest_addr)
     return 0;
 
+  // check if we can merge
+  my_stream_id = source_info->stream.streamId[0];
+  my_stream_id = (my_stream_id << 32) + source_info->stream.streamId[1];
 
-  for (int i=0;i<6;i++) {
-    my_stream_id = (my_stream_id << 8) + ((unsigned char) macaddr[i]);
+  for (int i=0;i<8;i++) {
     stream_id = (stream_id << 8) + first_value->StreamId[i];
   }
-  
-  my_stream_id = (my_stream_id << 8) + (unsigned char) (source_info->local_id >>  8);
-  my_stream_id = (my_stream_id << 8) + (unsigned char) (source_info->local_id >>  0);
-  stream_id = (stream_id << 8) + first_value->StreamId[6];
-  stream_id = (stream_id << 8) + first_value->StreamId[7];
-
 
   stream_id += num_values;
 
@@ -430,12 +420,12 @@ static int check_talker_merge(char *buf,
 
 
   vlan = NTOH_U16(first_value->VlanID);
-  my_vlan = source_info->vlan;
+  my_vlan = source_info->stream.vlan;
 
   if (vlan != my_vlan)
     return 0;
   
-  my_framesize = 32 + (source_info->num_channels * 6 * 4);
+  my_framesize = 32 + (source_info->stream.num_channels * 6 * 4);
 
   framesize = NTOH_U16(first_value->TSpecMaxFrameSize);  
 
@@ -456,16 +446,12 @@ static int merge_talker_message(char *buf,
     (mrp_vector_header *) (buf + sizeof(mrp_msg_header));  
   int merge = 0;
   avb_source_info_t *source_info = st->attribute_info;       
-  char *macaddr = avb_control_get_my_mac_addr();
   int num_values;
   int samples_per_packet;
 
 
   if (mrp_hdr->AttributeType != AVB_SRP_ATTRIBUTE_TYPE_TALKER_ADVERTISE)
     return 0;
-
-
-
 
   num_values = hdr->NumberOfValuesLow;
                            
@@ -488,19 +474,19 @@ static int merge_talker_message(char *buf,
       for (int i=0;i<6;i++) {
         first_value->DestMacAddr[i] = source_info->dest[i];
       }
-    
-      first_value->StreamId[0] = (unsigned char) macaddr[0];
-      first_value->StreamId[1] = (unsigned char) macaddr[1];
-      first_value->StreamId[2] = (unsigned char) macaddr[2];
-      first_value->StreamId[3] = (unsigned char) macaddr[3];
-      first_value->StreamId[4] = (unsigned char) macaddr[4];
-      first_value->StreamId[5] = (unsigned char) macaddr[5];
-      first_value->StreamId[6] = (unsigned char) (source_info->local_id >>  8);
-      first_value->StreamId[7] = (unsigned char) (source_info->local_id >>  0);
+
+      first_value->StreamId[0] = (unsigned char) (source_info->stream.streamId[0] >>  24);
+      first_value->StreamId[1] = (unsigned char) (source_info->stream.streamId[0] >>  16);
+      first_value->StreamId[2] = (unsigned char) (source_info->stream.streamId[0] >>  8);
+      first_value->StreamId[3] = (unsigned char) (source_info->stream.streamId[0] >>  0);
+      first_value->StreamId[4] = (unsigned char) (source_info->stream.streamId[1] >>  24);
+      first_value->StreamId[5] = (unsigned char) (source_info->stream.streamId[1] >>  16);
+      first_value->StreamId[6] = (unsigned char) (source_info->stream.streamId[1] >>  8);
+      first_value->StreamId[7] = (unsigned char) (source_info->stream.streamId[1] >>  0);
 
 #ifndef SRP_VERSION_5
       //      printintln(source_info->vlan);
-      HTON_U16(first_value->VlanID, source_info->vlan);
+      HTON_U16(first_value->VlanID, source_info->stream.vlan);
 #endif
  
 
@@ -508,8 +494,8 @@ static int merge_talker_message(char *buf,
         AVB_SRP_TSPEC_RANK_DEFAULT << 4 |
         AVB_SRP_TSPEC_RESERVED_VALUE;
       
-      samples_per_packet = (source_info->rate + (AVB1722_PACKET_RATE-1))/AVB1722_PACKET_RATE;
-      framesize = 32 + (source_info->num_channels * samples_per_packet * 4);
+      samples_per_packet = (source_info->stream.rate + (AVB1722_PACKET_RATE-1))/AVB1722_PACKET_RATE;
+      framesize = 32 + (source_info->stream.num_channels * samples_per_packet * 4);
 
   
 
@@ -563,7 +549,7 @@ int avb_srp_compare_talker_attributes(mrp_attribute_state *a,
   avb_source_info_t *source_info_a = (avb_source_info_t *) a->attribute_info;
   avb_source_info_t *source_info_b = (avb_source_info_t *) b->attribute_info; 
 
-  return (source_info_a->local_id < source_info_b->local_id);
+  return (source_info_a->stream.local_id < source_info_b->stream.local_id);
 }
 
 int avb_srp_compare_listener_attributes(mrp_attribute_state *a,
@@ -571,8 +557,8 @@ int avb_srp_compare_listener_attributes(mrp_attribute_state *a,
 {
   avb_sink_info_t *sink_info_a = (avb_sink_info_t *) a->attribute_info;       
   avb_sink_info_t *sink_info_b = (avb_sink_info_t *) b->attribute_info;       
-  unsigned int *sA = sink_info_a->streamId;
-  unsigned int *sB = sink_info_b->streamId;
+  unsigned int *sA = sink_info_a->stream.streamId;
+  unsigned int *sB = sink_info_b->stream.streamId;
   for (int i=0;i<2;i++) {
     if (sA[i] < sB[i])
       return 1;

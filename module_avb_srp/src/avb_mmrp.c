@@ -29,6 +29,7 @@ void avb_mmrp_init(void)
   for (int i=0;i<AVB_MAX_MMRP_GROUPS;i++) {
     entries[i].active = 0;
     entries[i].attr = mrp_get_attr();
+    mrp_attribute_init(entries[i].attr, MMRP_MAC_VECTOR, &entries[i].addr);
   }
 }
 
@@ -58,9 +59,6 @@ int avb_join_multicast_group(unsigned char addr[6])
   if (found != -1) {
     entries[found].active = 1;
     memcpy(entries[found].addr, addr, 6);
-    mrp_attribute_init(entries[found].attr, 
-                       MMRP_MAC_VECTOR, 
-                       &entries[found].addr);
     mrp_mad_new(entries[found].attr);
     mrp_mad_join(entries[found].attr);
     return 1;

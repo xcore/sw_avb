@@ -60,16 +60,20 @@ static void register_talkers(chanend talker_ctl[])
     int num_streams = xc_abi_inuint(talker_ctl[i]);
     for (int j=0;j<num_streams;j++) {
       avb_source_info_t *source = &sources[max_talker_stream_id];
-      source->state = AVB_SOURCE_STATE_DISABLED;
+      source->stream.state = AVB_SOURCE_STATE_DISABLED;
       source->talker_ctl = talker_ctl[i];
-      source->core_id = core_id;
-      source->local_id = j;
+      source->stream.core_id = core_id;
+      source->stream.local_id = j;
+      source->stream.streamId[0] = (mac_addr[0] << 24) | (mac_addr[1] << 16) | (mac_addr[2] <<  8) | (mac_addr[3] <<  0);
+      source->stream.streamId[1] = (mac_addr[4] << 24) | (mac_addr[5] << 16) | ((source->stream.local_id & 0xffff)<<0);
       source->presentation = AVB_DEFAULT_PRESENTATION_TIME_DELAY_NS;
-      source->vlan = AVB_DEFAULT_VLAN;
-      source->srp_attr = mrp_get_attr();
-      mrp_attribute_init(source->srp_attr, 
-                         MSRP_TALKER_ADVERTISE, 
-                         source);      
+      source->stream.vlan = AVB_DEFAULT_VLAN;
+      source->stream.srp_talker_attr = mrp_get_attr();
+      source->stream.srp_talker_failed_attr = mrp_get_attr();
+      source->stream.srp_listener_attr = mrp_get_attr();
+      mrp_attribute_init(source->stream.srp_talker_attr, MSRP_TALKER_ADVERTISE, source);
+      mrp_attribute_init(source->stream.srp_talker_failed_attr, MSRP_TALKER_FAILED, source);
+      mrp_attribute_init(source->stream.srp_listener_attr, MSRP_LISTENER, source);
       max_talker_stream_id++;
     }       
   }
@@ -87,14 +91,16 @@ static void register_listeners(chanend listener_ctl[])
     int num_streams = xc_abi_inuint(listener_ctl[i]);
     for (int j=0;j<num_streams;j++) {
       avb_sink_info_t *sink = &sinks[max_listener_stream_id];
-      sink->state = AVB_SINK_STATE_DISABLED;
+      sink->stream.state = AVB_SINK_STATE_DISABLED;
       sink->listener_ctl = listener_ctl[i];
-      sink->core_id = core_id;
-      sink->local_id = j;
-      sink->srp_attr = mrp_get_attr();
-      mrp_attribute_init(sink->srp_attr,
-    		  MSRP_LISTENER,
-    		  sink);
+      sink->stream.core_id = core_id;
+      sink->stream.local_id = j;
+      sink->stream.srp_talker_attr = mrp_get_attr();
+      sink->stream.srp_talker_failed_attr = mrp_get_attr();
+      sink->stream.srp_listener_attr = mrp_get_attr();
+      mrp_attribute_init(sink->stream.srp_talker_attr, MSRP_TALKER_ADVERTISE, sink);
+      mrp_attribute_init(sink->stream.srp_talker_failed_attr, MSRP_TALKER_FAILED, sink);
+      mrp_attribute_init(sink->stream.srp_listener_attr, MSRP_LISTENER, sink);
       max_listener_stream_id++;
     }    
     xc_abi_outuint(listener_ctl[i], max_link_id);
@@ -189,9 +195,7 @@ void avb_init(chanend media_ctl[],
   c_ptp = c_ptp0;
 
   domain_attr = mrp_get_attr();
-  mrp_attribute_init(domain_attr, 
-                     MSRP_DOMAIN_VECTOR, 
-                     NULL);      
+  mrp_attribute_init(domain_attr, MSRP_DOMAIN_VECTOR, NULL);
 
   avb_mmrp_init();
   avb_mvrp_init();
@@ -222,11 +226,11 @@ static void avb_set_talker_bandwidth()
   int data_size = 0;
   for (int i=0;i<AVB_NUM_SOURCES;i++) {
     avb_source_info_t *source = &sources[i];
-    if (source->state == AVB_SOURCE_STATE_POTENTIAL ||
-        source->state == AVB_SOURCE_STATE_ENABLED)
+    if (source->stream.state == AVB_SOURCE_STATE_POTENTIAL ||
+        source->stream.state == AVB_SOURCE_STATE_ENABLED)
       {
-        int samples_per_packet = (source->rate + (AVB1722_PACKET_RATE-1))/AVB1722_PACKET_RATE;
-        data_size += 18 + 32 + (source->num_channels * samples_per_packet * 4);
+        int samples_per_packet = (source->stream.rate + (AVB1722_PACKET_RATE-1))/AVB1722_PACKET_RATE;
+        data_size += 18 + 32 + (source->stream.num_channels * samples_per_packet * 4);
       }
   }
   mac_set_qav_bandwidth(c_mac_tx, (data_size*8*AVB1722_PACKET_RATE*102)/100);  
@@ -247,14 +251,14 @@ int getset_avb_source_format(int set,
                              int *rate)
 {
   if (source_num < AVB_NUM_SOURCES &&
-      (!set || sources[source_num].state == AVB_SOURCE_STATE_DISABLED)) {
+      (!set || sources[source_num].stream.state == AVB_SOURCE_STATE_DISABLED)) {
     avb_source_info_t *source = &sources[source_num]; 
     if (set) {
-      source->format = *format;
-      source->rate = *rate;
+      source->stream.format = *format;
+      source->stream.rate = *rate;
     }
-    *format = source->format;
-    source->rate = *rate;
+    *format = source->stream.format;
+    source->stream.rate = *rate;
     return 1;
   }
   else 
@@ -267,12 +271,12 @@ int getset_avb_source_channels(int set,
                                int *channels)
 {
   if (source_num < AVB_NUM_SOURCES &&
-      (!set || sources[source_num].state == AVB_SOURCE_STATE_DISABLED)) {
+      (!set || sources[source_num].stream.state == AVB_SOURCE_STATE_DISABLED)) {
     avb_source_info_t *source = &sources[source_num]; 
     if (set) {
-      source->num_channels = *channels;
+      source->stream.num_channels = *channels;
     }
-    *channels = source->num_channels;
+    *channels = source->stream.num_channels;
     return 1;
   }
   else 
@@ -284,12 +288,12 @@ int getset_avb_source_sync(int set,
                            int *sync)
 {
   if (source_num < AVB_NUM_SOURCES &&
-      (!set || sources[source_num].state == AVB_SOURCE_STATE_DISABLED)) {
+      (!set || sources[source_num].stream.state == AVB_SOURCE_STATE_DISABLED)) {
     avb_source_info_t *source = &sources[source_num]; 
     if (set) {
-      source->sync = *sync;
+      source->stream.sync = *sync;
     }
-    *sync = source->sync;
+    *sync = source->stream.sync;
     return 1;
   }
   else 
@@ -301,7 +305,7 @@ int getset_avb_source_presentation(int set,
                                int *presentation)
 {
   if (source_num < AVB_NUM_SOURCES &&
-      (!set || sources[source_num].state == AVB_SOURCE_STATE_DISABLED)) {
+      (!set || sources[source_num].stream.state == AVB_SOURCE_STATE_DISABLED)) {
     avb_source_info_t *source = &sources[source_num]; 
     if (set) {
       source->presentation = *presentation;
@@ -318,12 +322,12 @@ int getset_avb_source_vlan(int set,
                                int *vlan)
 {
   if (source_num < AVB_NUM_SOURCES &&
-      (!set || sources[source_num].state == AVB_SOURCE_STATE_DISABLED)) {
+      (!set || sources[source_num].stream.state == AVB_SOURCE_STATE_DISABLED)) {
     avb_source_info_t *source = &sources[source_num]; 
     if (set) {
-      source->vlan = *vlan;
+      source->stream.vlan = *vlan;
     }
-    *vlan = source->vlan;
+    *vlan = source->stream.vlan;
     return 1;
   }
   else 
@@ -337,44 +341,44 @@ int getset_avb_source_state(int set,
   if (source_num < AVB_NUM_SOURCES) {
     avb_source_info_t *source = &sources[source_num]; 
     if (set) {      
-      if (source->state == AVB_SOURCE_STATE_DISABLED &&
+      if (source->stream.state == AVB_SOURCE_STATE_DISABLED &&
           *state == AVB_SOURCE_STATE_POTENTIAL) {
         // enable the source
         int valid = 1;
         int clk_ctl;
 
-        if (source->num_channels <= 0)
+        if (source->stream.num_channels <= 0)
           valid = 0;
 
-        clk_ctl = inputs[source->map[0]].clk_ctl;
+        clk_ctl = inputs[source->stream.map[0]].clk_ctl;
 
         // check that the map is ok
-        for (int i=0;i<source->num_channels;i++) {
-          if (inputs[source->map[i]].mapped_to != UNMAPPED)
+        for (int i=0;i<source->stream.num_channels;i++) {
+          if (inputs[source->stream.map[i]].mapped_to != UNMAPPED)
             valid = 0;
-          if (inputs[source->map[i]].clk_ctl != clk_ctl)
+          if (inputs[source->stream.map[i]].clk_ctl != clk_ctl)
             valid = 0;
         }
         
 
         if (valid) {
           chanend c = source->talker_ctl;
-          for (int i=0;i<source->num_channels;i++) {
-            inputs[source->map[i]].mapped_to = source_num;
+          for (int i=0;i<source->stream.num_channels;i++) {
+            inputs[source->stream.map[i]].mapped_to = source_num;
           }
           
           xc_abi_outuint(c, AVB1722_CONFIGURE_TALKER_STREAM);
-          xc_abi_outuint(c, source->local_id);
-          xc_abi_outuint(c, source->format);
+          xc_abi_outuint(c, source->stream.local_id);
+          xc_abi_outuint(c, source->stream.format);
           for (int i=0; i < 6;i++) {
             xc_abi_outuint(c, source->dest[i]);
           }
           xc_abi_outuint(c, source_num);
-          xc_abi_outuint(c, source->num_channels);
-          for (int i=0;i<source->num_channels;i++) {
-            xc_abi_outuint(c, inputs[source->map[i]].fifo);
+          xc_abi_outuint(c, source->stream.num_channels);
+          for (int i=0;i<source->stream.num_channels;i++) {
+            xc_abi_outuint(c, inputs[source->stream.map[i]].fifo);
           }
-          xc_abi_outuint(c, source->rate);
+          xc_abi_outuint(c, source->stream.rate);
           if (source->presentation)
             xc_abi_outuint(c, source->presentation);
           else
@@ -384,49 +388,51 @@ int getset_avb_source_state(int set,
 
           
 
-          mrp_mad_new(source->srp_attr);         
-          mrp_mad_join(source->srp_attr);         
+          mrp_mad_new(source->stream.srp_talker_attr);
+          mrp_mad_new(source->stream.srp_talker_failed_attr);
+          mrp_mad_new(source->stream.srp_listener_attr);
+          mrp_mad_join(source->stream.srp_talker_attr);
 
-          media_clock_register(media_clock_svr, clk_ctl, source->sync);
+          media_clock_register(media_clock_svr, clk_ctl, source->stream.sync);
 
 #if defined(AVB_TRANSMIT_BEFORE_RESERVATION)
           {chanend c = source->talker_ctl;
             xc_abi_outuint(c, AVB1722_TALKER_GO);
-            xc_abi_outuint(c, source->local_id);
+            xc_abi_outuint(c, source->stream.local_id);
             (void) xc_abi_inuint(c); //ACK        
           }
 #endif
 
         }
       }
-      else if (source->state == AVB_SOURCE_STATE_POTENTIAL &&
+      else if (source->stream.state == AVB_SOURCE_STATE_POTENTIAL &&
                *state == AVB_SOURCE_STATE_ENABLED) {
         // start transmitting
 
         simple_printf("Enabling stream %d\n", source_num);
         chanend c = source->talker_ctl;
         xc_abi_outuint(c, AVB1722_TALKER_GO);
-        xc_abi_outuint(c, source->local_id);
+        xc_abi_outuint(c, source->stream.local_id);
         (void) xc_abi_inuint(c); //ACK        
       }
-      else if (source->state != AVB_SOURCE_STATE_DISABLED &&
+      else if (source->stream.state != AVB_SOURCE_STATE_DISABLED &&
                *state == AVB_SOURCE_STATE_DISABLED) {
         // disabled the source
-          for (int i=0;i<source->num_channels;i++) {
-            inputs[source->map[i]].mapped_to = UNMAPPED;
+          for (int i=0;i<source->stream.num_channels;i++) {
+            inputs[source->stream.map[i]].mapped_to = UNMAPPED;
           }
           chanend c = source->talker_ctl;
           xc_abi_outuint(c, AVB1722_TALKER_STOP);
-          xc_abi_outuint(c, source->local_id);
+          xc_abi_outuint(c, source->stream.local_id);
           (void) xc_abi_inuint(c); //ACK
 
           // And remove the group
-          mrp_mad_leave(source->srp_attr);
+          mrp_mad_leave(source->stream.srp_talker_attr);
       }
       avb_set_talker_bandwidth();
-      source->state = *state;      
+      source->stream.state = *state;
     }
-    *state = source->state;
+    *state = source->stream.state;
     return 1;
   }
   else 
@@ -451,16 +457,16 @@ int getset_avb_source_map(int set, int source_num, int map[], int *map_len)
 {
   if (source_num < AVB_NUM_SOURCES &&
       (!set || 
-       (sources[source_num].state == AVB_SOURCE_STATE_DISABLED &&
+       (sources[source_num].stream.state == AVB_SOURCE_STATE_DISABLED &&
         *map_len <= AVB_MAX_CHANNELS_PER_STREAM))) {
     avb_source_info_t *source = &sources[source_num];
     if (set) {      
-      memcpy(source->map, map, *map_len<<2);        
+      memcpy(source->stream.map, map, *map_len<<2);
     }      
     else {
-      *map_len = source[source_num].num_channels;
+      *map_len = source[source_num].stream.num_channels;
     }
-    memcpy(map, source->map, *map_len<<2);
+    memcpy(map, source->stream.map, *map_len<<2);
     return 1;
   }
   else 
@@ -472,7 +478,7 @@ int getset_avb_source_dest(int set, int source_num, unsigned char dest[], int *d
 {
   if (source_num < AVB_NUM_SOURCES &&
       (!set || 
-       (sources[source_num].state == AVB_SOURCE_STATE_DISABLED &&
+       (sources[source_num].stream.state == AVB_SOURCE_STATE_DISABLED &&
         *dest_len == 6))) {
     avb_source_info_t *source = &sources[source_num];
     if (set) {      
@@ -493,16 +499,7 @@ int get_avb_source_id(int source_num, unsigned int a1[2])
   if (source_num < AVB_NUM_SOURCES) {
     avb_source_info_t *source = &sources[source_num];    
 
-    a1[0] = 
-      (mac_addr[0] << 24) |
-      (mac_addr[1] << 16) |
-      (mac_addr[2] <<  8) |
-      (mac_addr[3] <<  0);
-
-    a1[1] = 
-      (mac_addr[4] << 24) |
-      (mac_addr[5] << 16) |
-      ((source->local_id & 0xffff)<<0);
+    memcpy(a1, source->stream.streamId, 8);
       
     return 1;
   }
@@ -521,12 +518,12 @@ int get_avb_sinks(int *a0)
 int getset_avb_sink_id(int set, int sink_num, unsigned int a1[2])
 {
   if (sink_num < AVB_NUM_SINKS &&
-      (!set || sinks[sink_num].state == AVB_SINK_STATE_DISABLED)) {
+      (!set || sinks[sink_num].stream.state == AVB_SINK_STATE_DISABLED)) {
     avb_sink_info_t *sink = &sinks[sink_num];
     if (set) {      
-      memcpy(sink->streamId, a1, 8);        
+      memcpy(sink->stream.streamId, a1, 8);
     }      
-    memcpy(a1, sink->streamId, 8);
+    memcpy(a1, sink->stream.streamId, 8);
     return 1;
   }
   else 
@@ -538,12 +535,12 @@ int getset_avb_sink_channels(int set,
                                int *channels)
 {
   if (sink_num < AVB_NUM_SINKS &&
-      (!set || sinks[sink_num].state == AVB_SINK_STATE_DISABLED)) {
+      (!set || sinks[sink_num].stream.state == AVB_SINK_STATE_DISABLED)) {
     avb_sink_info_t *sink = &sinks[sink_num]; 
     if (set) {
-      sink->num_channels = *channels;
+      sink->stream.num_channels = *channels;
     }
-    *channels = sink->num_channels;
+    *channels = sink->stream.num_channels;
     return 1;
   }
   else 
@@ -556,12 +553,12 @@ int getset_avb_sink_sync(int set,
                          int *sync)
 {
   if (sink_num < AVB_NUM_SINKS &&
-      (!set || sinks[sink_num].state == AVB_SINK_STATE_DISABLED)) {
+      (!set || sinks[sink_num].stream.state == AVB_SINK_STATE_DISABLED)) {
     avb_sink_info_t *sink = &sinks[sink_num]; 
     if (set) {
-      sink->sync = *sync;
+      sink->stream.sync = *sync;
     }
-    *sync = sink->sync;
+    *sync = sink->stream.sync;
     return 1;
   }
   else 
@@ -573,12 +570,12 @@ int getset_avb_sink_vlan(int set,
                          int *vlan)
 {
   if (sink_num < AVB_NUM_SINKS &&
-      (!set || sinks[sink_num].state == AVB_SINK_STATE_DISABLED)) {
+      (!set || sinks[sink_num].stream.state == AVB_SINK_STATE_DISABLED)) {
     avb_sink_info_t *sink = &sinks[sink_num]; 
     if (set) {
-      sink->vlan = *vlan;
+      sink->stream.vlan = *vlan;
     }
-    *vlan = sink->vlan;
+    *vlan = sink->stream.vlan;
     return 1;
   }
   else 
@@ -590,7 +587,7 @@ int getset_avb_sink_addr(int set, int sink_num, unsigned char addr[], int *addr_
 {
   if (sink_num < AVB_NUM_SINKS &&
       (!set || 
-       (sinks[sink_num].state == AVB_SINK_STATE_DISABLED &&
+       (sinks[sink_num].stream.state == AVB_SINK_STATE_DISABLED &&
         *addr_len == 6))) {
     avb_sink_info_t *sink = &sinks[sink_num];
     if (set) {      
@@ -614,21 +611,21 @@ int getset_avb_sink_state(int set,
   if (sink_num < AVB_NUM_SINKS) {
     avb_sink_info_t *sink = &sinks[sink_num]; 
     if (set) {
-      if (sink->state == AVB_SINK_STATE_DISABLED &&
+      if (sink->stream.state == AVB_SINK_STATE_DISABLED &&
           *state == AVB_SINK_STATE_POTENTIAL) {
         chanend c = sink->listener_ctl;
         int clk_ctl;
         xc_abi_outuint(c, AVB1722_CONFIGURE_LISTENER_STREAM);
-        xc_abi_outuint(c, sink->local_id);
-        xc_abi_outuint(c, sink->sync);
-        xc_abi_outuint(c, sink->num_channels);
-        for (int i=0;i<sink->num_channels;i++) {
-          xc_abi_outuint(c, outputs[sink->map[i]].fifo);
+        xc_abi_outuint(c, sink->stream.local_id);
+        xc_abi_outuint(c, sink->stream.sync);
+        xc_abi_outuint(c, sink->stream.num_channels);
+        for (int i=0;i<sink->stream.num_channels;i++) {
+          xc_abi_outuint(c, outputs[sink->stream.map[i]].fifo);
         }                       
         (void) xc_abi_inuint(c);
 
-        clk_ctl = outputs[sink->map[0]].clk_ctl;
-        media_clock_register(media_clock_svr, clk_ctl, sink->sync);
+        clk_ctl = outputs[sink->stream.map[0]].clk_ctl;
+        media_clock_register(media_clock_svr, clk_ctl, sink->stream.sync);
 
         { int router_link;
          
@@ -636,14 +633,14 @@ int getset_avb_sink_state(int set,
           router_link = xc_abi_inuint(c);
           
           avb_1722_add_stream_mapping(c_mac_tx,
-                                      sink->streamId,
+                                      sink->stream.streamId,
                                       router_link,
-                                      sink->local_id); 
+                                      sink->stream.local_id);
         }
 
 #ifndef AVB_NO_MVRP
-        if (sink->vlan)
-          avb_join_vlan(sink->vlan);
+        if (sink->stream.vlan)
+          avb_join_vlan(sink->stream.vlan);
 #endif
 
 #ifndef AVB_NO_MMRP
@@ -651,18 +648,20 @@ int getset_avb_sink_state(int set,
           avb_join_multicast_group(sink->addr);
 #endif
 
-        mrp_mad_new(sink->srp_attr);         
-        mrp_mad_join(sink->srp_attr);         
+        mrp_mad_new(sink->stream.srp_talker_attr);
+        mrp_mad_new(sink->stream.srp_talker_failed_attr);
+        mrp_mad_new(sink->stream.srp_listener_attr);
+        mrp_mad_join(sink->stream.srp_listener_attr);
       }
-      else if (sink->state != AVB_SINK_STATE_DISABLED &&
+      else if (sink->stream.state != AVB_SINK_STATE_DISABLED &&
               *state == AVB_SINK_STATE_DISABLED) {
 
 		  chanend c = sink->listener_ctl;
 		  xc_abi_outuint(c, AVB1722_DISABLE_LISTENER_STREAM);
-		  xc_abi_outuint(c, sink->local_id);
+		  xc_abi_outuint(c, sink->stream.local_id);
 		  (void) xc_abi_inuint(c);
 
-    	  mrp_mad_leave(sink->srp_attr);
+    	  mrp_mad_leave(sink->stream.srp_listener_attr);
 
 #ifndef AVB_NO_MMRP
         if (sink->addr[0] & 1)
@@ -670,13 +669,13 @@ int getset_avb_sink_state(int set,
 #endif
 
 #ifndef AVB_NO_MVRP
-        if (sink->vlan)
-          avb_leave_vlan(sink->vlan);
+        if (sink->stream.vlan)
+          avb_leave_vlan(sink->stream.vlan);
 #endif
       }
-      sink->state = *state;
+      sink->stream.state = *state;
     }
-    *state = sink->state;
+    *state = sink->stream.state;
     return 1;
   }
   else 
@@ -700,15 +699,15 @@ int getset_avb_sink_name(int set, int sink_num, char a2[])
 int getset_avb_sink_map(int set, int sink_num, int map[], int *map_len) 
 {
   if (sink_num < AVB_NUM_SINKS &&
-      (!set || (sinks[sink_num].state == AVB_SINK_STATE_DISABLED
+      (!set || (sinks[sink_num].stream.state == AVB_SINK_STATE_DISABLED
                 && *map_len <= AVB_MAX_CHANNELS_PER_STREAM))) {
     avb_sink_info_t *sink = &sinks[sink_num];
     if (set) {      
-      memcpy(sink->map, map, *map_len<<2);        
+      memcpy(sink->stream.map, map, *map_len<<2);
     }      
     else
-      *map_len = sinks->num_channels;
-    memcpy(map, sink->map, *map_len<<2);
+      *map_len = sinks->stream.num_channels;
+    memcpy(map, sink->stream.map, *map_len<<2);
     return 1;
   }
   else 

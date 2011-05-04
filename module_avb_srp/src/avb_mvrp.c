@@ -22,6 +22,7 @@ void avb_mvrp_init(void)
   for (int i=0;i<AVB_MAX_NUM_VLAN;i++) {
     entries[i].active = 0;
     entries[i].attr = mrp_get_attr();
+    mrp_attribute_init(entries[i].attr, MVRP_VID_VECTOR, &entries[i].vlan);
   }
 }
 
@@ -50,9 +51,6 @@ int avb_join_vlan(int vlan)
   if (found != -1) {
     entries[found].active = 1;
     entries[found].vlan = vlan;
-    mrp_attribute_init(entries[found].attr, 
-                       MVRP_VID_VECTOR, 
-                       &entries[found].vlan);
     mrp_mad_new(entries[found].attr);
     mrp_mad_join(entries[found].attr);
     return 1;

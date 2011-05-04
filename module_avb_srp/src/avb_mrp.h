@@ -18,6 +18,9 @@
  *  the correct traffic.
  */
 #ifndef MRP_MAX_ATTRS
+// There are 3 attributes per stream (talker_advertise, talker_failed
+// and listener). Therefore the number of attributes needed is:
+// (nTalkers * 3) + (nListeners * 3) + (nDomains=1) + AVB_MAX_NUM_VLAN + AVB_MAX_MMRP_GROUPS
 #define MRP_MAX_ATTRS 20
 #endif
 
@@ -203,7 +206,6 @@ void mrp_mad_leave(mrp_attribute_state *st);
    See also:
    
        mrp_init
-       mrp_attribute_periodic
  */
 void mrp_periodic();
 

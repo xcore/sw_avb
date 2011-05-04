@@ -474,6 +474,7 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st)
         stop_timer(&st->leaveTimer);
       st->registrar_state = MRP_IN;
       // New
+      simple_printf("MRP: MAD_Join.indication *new* (%d)\n", st->attribute_type);
       break;
     case MRP_EVENT_RECEIVE_JOININ:
     case MRP_EVENT_RECEIVE_JOINMT:
@@ -481,6 +482,7 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st)
         stop_timer(&st->leaveTimer);
       if (st->registrar_state == MRP_MT) {
         // Jn
+        simple_printf("MRP: MAD_Join.indication (%d)\n", st->attribute_type);
       }
       st->registrar_state = MRP_IN;
       break;
@@ -489,12 +491,13 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st)
     case MRP_EVENT_TX_LEAVE_ALL:
     case MRP_EVENT_REDECLARE:
       start_timer(&st->leaveTimer, MRP_LEAVETIMER_PERIOD_CENTISECONDS);
-      st->registrar_state = MRP_MT;
+      st->registrar_state = MRP_LV;
       break;
     case MRP_EVENT_LEAVETIMER:
     case MRP_EVENT_FLUSH:
       if (st->registrar_state == MRP_LV) {
         // Lv
+        simple_printf("MRP: MAD_Leave.indication (%d)\n", st->attribute_type);
       }
       st->registrar_state = MRP_MT;
       break;
@@ -986,17 +989,6 @@ static void mrp_in(int firstEvent, mrp_attribute_state *st)
   }
 }
 
-void mrp_attribute_periodic(mrp_attribute_state *st)
-{
-
-#ifdef MRP_FULL_PARTICIPANT
-  if (timer_expired(&st->leaveTimer)) {
-    start_timer(&st->leaveTimer, MRP_JOINTIMER_PERIOD_CENTISECONDS);
-    mrp_update_state(MRP_EVENT_LEAVETIMER, st);
-  }
-#endif
-}
-
 int mrp_is_observer(mrp_attribute_state *st)
 {
   switch (st->applicant_state) 
@@ -1026,7 +1018,6 @@ static int msg_match(mrp_attribute_type attr_type,
   if (attr->attribute_type != attr_type)
     return 0;
       
-
   switch (attr_type) {
   case MSRP_TALKER_ADVERTISE:   
     return avb_srp_match_talker_advertise(attr, msg, i);
@@ -1120,8 +1111,6 @@ avb_status_t avb_mrp_process_packet(unsigned int buf[], int len)
       if (attr_type==-1)
         invalid_message = 1;
       
-      //      simple_printf("msg: attr_len=%u, attr_list_len = %u\n",hdr->AttributeLength, attr_list_len);
-
       while (!invalid_message && 
              msg < next_msg && 
              (*msg != 0 || *(msg+1) != 0)) {
@@ -1149,7 +1138,6 @@ avb_status_t avb_mrp_process_packet(unsigned int buf[], int len)
             decode_fourpacked(*(first_value + first_value_len + threepacked_len + i/4),
                               i%4):
             0;
-
 
           process(attr_type, first_value, i, 
                   three_packed_event, four_packed_event);
