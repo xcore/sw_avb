@@ -78,6 +78,13 @@ int avb_srp_match_listener(mrp_attribute_state *attr,
 int avb_srp_match_domain(mrp_attribute_state *attr,
                          char *msg,
                          int i);
+
+void avb_srp_listener_join_ind(mrp_attribute_state *attr, int new);
+void avb_srp_listener_leave_ind(mrp_attribute_state *attr);
+
+void avb_srp_talker_join_ind(mrp_attribute_state *attr, int new);
+void avb_srp_talker_leave_ind(mrp_attribute_state *attr);
+
 #endif
 
 

@@ -132,8 +132,6 @@ typedef struct mrp_attribute_state {
   void *attribute_info;
 } mrp_attribute_state;
 
-
-
 #define MRP_JOINTIMER_PERIOD_CENTISECONDS 20
 
 #define MRP_LEAVETIMER_PERIOD_CENTISECONDS 80

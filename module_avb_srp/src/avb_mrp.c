@@ -36,7 +36,6 @@ static int current_etype = 0;
 static int legacy_mode = 0;
 
 
-
 static void configure_send_buffer_msrp() {
   mrp_ethernet_hdr* hdr = (mrp_ethernet_hdr *) &send_buf[0];
 
@@ -388,12 +387,6 @@ static void create_empty_msg(mrp_attribute_type attr, int leave_all) {
   int attr_list_length = first_value_length + sizeof(mrp_vector_header)  + vector_length + sizeof(mrp_footer);
   int msg_length = hdr_length + attr_list_length;
 
-  /*  simple_printf("fv: %d, vh: %d, v: %d, f:%d = %d\n",
-                first_value_length,
-                sizeof(mrp_vector_header),
-                vector_length,
-                sizeof(mrp_footer),
-                attr_list_length);*/
   // clear message
   memset((char *)hdr, 0, msg_length);
 
@@ -460,6 +453,36 @@ static void doTx(mrp_attribute_state *st,
   send(c_tx);
 }
 
+static void send_join_indication(mrp_attribute_state *st, int new)
+{
+  switch (st->attribute_type)
+  {
+  case MSRP_TALKER_ADVERTISE:
+	  avb_srp_talker_join_ind(st, new);
+	  break;
+  case MSRP_TALKER_FAILED:
+	  break;
+  case MSRP_LISTENER:
+	  avb_srp_listener_join_ind(st, new);
+	  break;
+  }
+}
+
+static void send_leave_indication(mrp_attribute_state *st)
+{
+  switch (st->attribute_type)
+  {
+  case MSRP_TALKER_ADVERTISE:
+	  avb_srp_talker_leave_ind(st);
+	  break;
+  case MSRP_TALKER_FAILED:
+	  break;
+  case MSRP_LISTENER:
+	  avb_srp_listener_leave_ind(st);
+	  break;
+  }
+}
+
 static void mrp_update_state(mrp_event e, mrp_attribute_state *st)
 {
 #ifdef MRP_FULL_PARTICIPANT
@@ -473,16 +496,14 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st)
       if (st->registrar_state == MRP_LV) 
         stop_timer(&st->leaveTimer);
       st->registrar_state = MRP_IN;
-      // New
-      simple_printf("MRP: MAD_Join.indication *new* (%d)\n", st->attribute_type);
+      send_join_indication(st, 1);
       break;
     case MRP_EVENT_RECEIVE_JOININ:
     case MRP_EVENT_RECEIVE_JOINMT:
       if (st->registrar_state == MRP_LV)
         stop_timer(&st->leaveTimer);
       if (st->registrar_state == MRP_MT) {
-        // Jn
-        simple_printf("MRP: MAD_Join.indication (%d)\n", st->attribute_type);
+          send_join_indication(st, 0);
       }
       st->registrar_state = MRP_IN;
       break;
@@ -498,8 +519,7 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st)
     case MRP_EVENT_LEAVETIMER:
     case MRP_EVENT_FLUSH:
       if (st->registrar_state == MRP_LV) {
-        // Lv
-        simple_printf("MRP: MAD_Leave.indication (%d)\n", st->attribute_type);
+        // Lv        send_leave_indication(st);
       }
       st->registrar_state = MRP_MT;
       break;
