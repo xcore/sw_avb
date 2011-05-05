@@ -22,28 +22,42 @@
 #define AVB_MAX_STREAMS_PER_TALKER_UNIT (AVB_NUM_SOURCES)
 #endif
 
-// Data structure to identify Ethernet/AVB stream configuration.
+//! Data structure to identify Ethernet/AVB stream configuration.
 typedef struct avb1722_Talker_StreamConfig_t
 {
+  //! 0=disabled, 1=enabled, 2=streaming
   int active;
+  //! the destination mac address - typically a multicast address
   unsigned char destMACAdrs[MAC_ADRS_BYTE_COUNT];
-  unsigned char srcMACAdrs[MAC_ADRS_BYTE_COUNT];   
+  //! the source mac address - typically my own address
+  unsigned char srcMACAdrs[MAC_ADRS_BYTE_COUNT];
+  //! the stream ID
   unsigned int  streamId[2];
+  //! number of channels in the stream
   unsigned int  num_channels;
+  //! map from media fifos to channels in the stream
   media_input_fifo_t map[AVB_MAX_CHANNELS_PER_STREAM];  
+  //! the type of samples in the stream
   unsigned int sampleType;
+  //! Data Block Count (count of samples transmitted in the stream)
   unsigned int dbc;
-#if 0
-  unsigned int latency;
-#endif
+  //! Number of samples per packet in the audio fifo
   unsigned int samples_per_fifo_packet;
+  //! Number of samples per 1722 packet (integer part)
   unsigned int samples_per_packet_base;
+  //! Number of samples per 1722 packet (16.16)
   unsigned int samples_per_packet_fractional;
+  //! An accumulator for the fractional part
   unsigned int rem;
+  //! The number of samples remaining in the fifo packet
   unsigned int samples_left;
+  //! a flag, true when the stream has just been initialised
   unsigned int initial;
+  //! the delay in ms that is added to the current PTP time
   unsigned presentation_delay;
+  //! 1 when the packet should be transmitted without checking the transmission timer
   unsigned transmit_ok;
+  //! the internal clock count when the last 1722 packet was transmitted
   int last_transmit_time;
 } avb1722_Talker_StreamConfig_t;
 
