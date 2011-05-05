@@ -112,6 +112,11 @@ typedef enum {
 
 #ifndef __XC__
 
+#define PENDING_JOIN_NEW 0x01
+#define PENDING_JOIN     0x02
+#define PENDING_LEAVE    0x04
+
+
 typedef struct mrp_timer {
   unsigned int timeout;
   unsigned int period;
@@ -128,7 +133,18 @@ typedef struct mrp_attribute_state {
   mrp_timer leaveTimer;
 #endif
 
+  //! used to note indications that have been detected by the state machine but not
+  //! indicated to the application yet
+  short pending_indications;
+
+  //! if there is a pending indication and it had an associated four vector parameter
+  //! then the parameter is stored here
+  short four_vector_parameter;
+
+  //! While sorting the attributes, this contains a linked list of sorted attributes
   struct mrp_attribute_state *next;
+
+  //! Generic pointer to allow random data to be stored alongside the attribute
   void *attribute_info;
 } mrp_attribute_state;
 

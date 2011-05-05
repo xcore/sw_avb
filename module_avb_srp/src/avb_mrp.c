@@ -453,37 +453,7 @@ static void doTx(mrp_attribute_state *st,
   send(c_tx);
 }
 
-static void send_join_indication(mrp_attribute_state *st, int new)
-{
-  switch (st->attribute_type)
-  {
-  case MSRP_TALKER_ADVERTISE:
-	  avb_srp_talker_join_ind(st, new);
-	  break;
-  case MSRP_TALKER_FAILED:
-	  break;
-  case MSRP_LISTENER:
-	  avb_srp_listener_join_ind(st, new);
-	  break;
-  }
-}
-
-static void send_leave_indication(mrp_attribute_state *st)
-{
-  switch (st->attribute_type)
-  {
-  case MSRP_TALKER_ADVERTISE:
-	  avb_srp_talker_leave_ind(st);
-	  break;
-  case MSRP_TALKER_FAILED:
-	  break;
-  case MSRP_LISTENER:
-	  avb_srp_listener_leave_ind(st);
-	  break;
-  }
-}
-
-static void mrp_update_state(mrp_event e, mrp_attribute_state *st)
+static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_packed_event)
 {
 #ifdef MRP_FULL_PARTICIPANT
   // Registrar state machine
@@ -496,14 +466,16 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st)
       if (st->registrar_state == MRP_LV) 
         stop_timer(&st->leaveTimer);
       st->registrar_state = MRP_IN;
-      send_join_indication(st, 1);
+      st->pending_indications |= PENDING_JOIN_NEW;
+      st->four_vector_parameter = four_packed_event;
       break;
     case MRP_EVENT_RECEIVE_JOININ:
     case MRP_EVENT_RECEIVE_JOINMT:
       if (st->registrar_state == MRP_LV)
         stop_timer(&st->leaveTimer);
       if (st->registrar_state == MRP_MT) {
-          send_join_indication(st, 0);
+          st->pending_indications |= PENDING_JOIN;
+          st->four_vector_parameter = four_packed_event;
       }
       st->registrar_state = MRP_IN;
       break;
@@ -519,7 +491,9 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st)
     case MRP_EVENT_LEAVETIMER:
     case MRP_EVENT_FLUSH:
       if (st->registrar_state == MRP_LV) {
-        // Lv        send_leave_indication(st);
+        // Lv
+        st->pending_indications |= PENDING_LEAVE;
+        st->four_vector_parameter = four_packed_event;
       }
       st->registrar_state = MRP_MT;
       break;
@@ -760,21 +734,21 @@ void mrp_mad_begin(mrp_attribute_state *st)
 #ifdef MRP_FULL_PARTICIPANT
   init_timer(&st->leaveTimer, 1);
 #endif
-  mrp_update_state(MRP_EVENT_BEGIN, st);
+  mrp_update_state(MRP_EVENT_BEGIN, st, 0);
 }
 
 void mrp_mad_join(mrp_attribute_state *st, int new)
 {
   if (new) {
-    mrp_update_state(MRP_EVENT_NEW, st);
+    mrp_update_state(MRP_EVENT_NEW, st, 0);
   } else {
-    mrp_update_state(MRP_EVENT_JOIN, st);
+    mrp_update_state(MRP_EVENT_JOIN, st, 0);
   }
 }
 
 void mrp_mad_leave(mrp_attribute_state *st)
 {
-  mrp_update_state(MRP_EVENT_LV, st);
+  mrp_update_state(MRP_EVENT_LV, st, 0);
 }
 
 void mrp_init(char *macaddr)
@@ -922,7 +896,7 @@ static void global_event(mrp_event e) {
   while (attr != NULL) {
     if (attr->applicant_state != MRP_DISABLED &&
         attr->applicant_state != MRP_UNUSED) 
-      mrp_update_state(e, attr);
+      mrp_update_state(e, attr, 0);
     attr = attr->next;
   }
   
@@ -934,14 +908,41 @@ static void attribute_type_event(mrp_attribute_type atype, mrp_event e) {
     if (attr->applicant_state != MRP_DISABLED && 
         attr->applicant_state != MRP_UNUSED && 
         attr->attribute_type == atype)  {
-      mrp_update_state(e, attr);
+      mrp_update_state(e, attr, 0);
     }
     attr = attr->next;
   }
 }
 
+static void send_join_indication(mrp_attribute_state *st, int new, int four_packed_event)
+{
+  switch (st->attribute_type)
+  {
+  case MSRP_TALKER_ADVERTISE:
+	  avb_srp_talker_join_ind(st, new);
+	  break;
+  case MSRP_TALKER_FAILED:
+	  break;
+  case MSRP_LISTENER:
+	  avb_srp_listener_join_ind(st, new, four_packed_event);
+	  break;
+  }
+}
 
-
+static void send_leave_indication(mrp_attribute_state *st, int four_packed_event)
+{
+  switch (st->attribute_type)
+  {
+  case MSRP_TALKER_ADVERTISE:
+	  avb_srp_talker_leave_ind(st);
+	  break;
+  case MSRP_TALKER_FAILED:
+	  break;
+  case MSRP_LISTENER:
+	  avb_srp_listener_leave_ind(st, four_packed_event);
+	  break;
+  }
+}
 
 void mrp_periodic()
 {
@@ -959,12 +960,6 @@ void mrp_periodic()
     leave_all = 1;
     global_event(MRP_EVENT_RECEIVE_LEAVE_ALL);
   }
-
-  for (int j=0;j<MRP_MAX_ATTRS;j++) {
-    if (timer_expired(&attrs[j].leaveTimer)) {
-      mrp_update_state(MRP_EVENT_LEAVETIMER, &attrs[j]);
-    }
-  }  
 #endif
 
   if (timer_expired(&joinTimer)) {
@@ -998,30 +993,52 @@ void mrp_periodic()
     force_send(c_tx);
     leave_all = 0;
   }
+
+  for (int j=0;j<MRP_MAX_ATTRS;j++) {
+	if (attrs[j].pending_indications != 0) {
+	  if ((attrs[j].pending_indications & PENDING_JOIN_NEW) != 0) {
+		  send_join_indication(&attrs[j], 1, attrs[j].four_vector_parameter);
+	  }
+	  if ((attrs[j].pending_indications & PENDING_JOIN) != 0) {
+		  send_join_indication(&attrs[j], 0, attrs[j].four_vector_parameter);
+	  }
+	  if ((attrs[j].pending_indications & PENDING_LEAVE) != 0) {
+		  send_leave_indication(&attrs[j], attrs[j].four_vector_parameter);
+	  }
+	  attrs[j].pending_indications = 0;
+	  attrs[j].four_vector_parameter = 0;
+	}
+#ifdef MRP_FULL_PARTICIPANT
+    if (timer_expired(&attrs[j].leaveTimer)) {
+      mrp_update_state(MRP_EVENT_LEAVETIMER, &attrs[j], 0);
+    }
+#endif
+  }
+
 }
 
 
-static void mrp_in(int firstEvent, mrp_attribute_state *st)
+static void mrp_in(int three_packed_event, int four_packed_event, mrp_attribute_state *st)
 {
-  switch (firstEvent) 
+  switch (three_packed_event)
     {
     case MRP_ATTRIBUTE_EVENT_NEW:
-      mrp_update_state(MRP_EVENT_RECEIVE_NEW, st);
+      mrp_update_state(MRP_EVENT_RECEIVE_NEW, st, four_packed_event);
       break;
     case MRP_ATTRIBUTE_EVENT_JOININ:
-      mrp_update_state(MRP_EVENT_RECEIVE_JOININ, st);
+      mrp_update_state(MRP_EVENT_RECEIVE_JOININ, st, four_packed_event);
       break;
     case MRP_ATTRIBUTE_EVENT_IN:
-      mrp_update_state(MRP_EVENT_RECEIVE_IN, st);
+      mrp_update_state(MRP_EVENT_RECEIVE_IN, st, four_packed_event);
       break;
     case MRP_ATTRIBUTE_EVENT_JOINMT:
-      mrp_update_state(MRP_EVENT_RECEIVE_JOINMT, st);
+      mrp_update_state(MRP_EVENT_RECEIVE_JOINMT, st, four_packed_event);
       break;
     case MRP_ATTRIBUTE_EVENT_MT:
-      mrp_update_state(MRP_EVENT_RECEIVE_MT, st);
+      mrp_update_state(MRP_EVENT_RECEIVE_MT, st, four_packed_event);
       break;
     case MRP_ATTRIBUTE_EVENT_LV:   
-      mrp_update_state(MRP_EVENT_RECEIVE_LEAVE, st);
+      mrp_update_state(MRP_EVENT_RECEIVE_LEAVE, st, four_packed_event);
       break;
   }
 }
@@ -1183,7 +1200,7 @@ avb_status_t avb_mrp_process_packet(unsigned int buf[], int len)
             if (msg_match(attr_type, &attrs[j], first_value, i, 
                           three_packed_event,
                           four_packed_event)) {
-              mrp_in(three_packed_event, &attrs[j]);
+              mrp_in(three_packed_event, four_packed_event, &attrs[j]);
             }
           }
         }

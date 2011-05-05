@@ -84,90 +84,47 @@ avb_srp_process_listener(char *fv,
                          int num,
                          int four_packed_event) 
 {
-  srp_listener_first_value *packet = (srp_listener_first_value *) fv;
-  unsigned int lstreamId[2];
-  // place the steamId in the failed_streamId global in
-  // case it is a failed message
-  unsigned int *pdu_streamId = &failed_streamId[0];
-
-  unsigned long long streamId;
-
-  for (int i=0;i<8;i++)
-    streamId = (streamId << 8) + packet->StreamId[i];
-
-  streamId += num;
-
-  pdu_streamId[0] = streamId >> 32;
-  pdu_streamId[1] = (unsigned) streamId;
-
-#ifdef AVNU_OBSERVABILITY
-  switch (four_packed_event) 
-    {
-    case AVB_SRP_FOUR_PACKED_EVENT_ASKING_FAILED:            
-      {
-        avnu_log(AVNU_TESTPOINT_LAF,
-                 NULL,
-                 "");
-      }
-      break;
-    case AVB_SRP_FOUR_PACKED_EVENT_READY:
-      {
-        avnu_log(AVNU_TESTPOINT_LR,
-                 NULL,
-                 "");
-      }
-      break;
-    case AVB_SRP_FOUR_PACKED_EVENT_READY_FAILED:
-      {
-        avnu_log(AVNU_TESTPOINT_LRF,
-                 NULL,
-                 "");
-      }
-      break;
-    }
-#endif
-
-
-  for(int i=0;i<AVB_NUM_SOURCES;i++) {
-    enum avb_source_state_t state;
-    get_avb_source_state(i, &state);
-    if (state != AVB_SOURCE_STATE_DISABLED) {
-      get_avb_source_id(i, lstreamId);
-
-      if (pdu_streamId[0] == lstreamId[0] &&
-          pdu_streamId[1] == lstreamId[1]) {                  
-        
-        switch (four_packed_event) 
-          {
-          case AVB_SRP_FOUR_PACKED_EVENT_ASKING_FAILED:            
-            {
-              set_avb_source_state(i, AVB_SOURCE_STATE_POTENTIAL);
-            }
-            break;
-          case AVB_SRP_FOUR_PACKED_EVENT_READY:
-          case AVB_SRP_FOUR_PACKED_EVENT_READY_FAILED:
-            {
-              set_avb_source_state(i, AVB_SOURCE_STATE_ENABLED);
-            }
-            break;
-          }             
-      }
-    }
-  }
-   
   return;
 }
 
-void avb_srp_listener_join_ind(mrp_attribute_state *attr, int new)
+void avb_srp_listener_join_ind(mrp_attribute_state *attr, int new, int four_packed_event)
 {
 	avb_stream_info_t* stream_info = attr->attribute_info;
 	simple_printf("SRP: Listener registered for stream %x%x\n", stream_info->streamId[0], stream_info->streamId[1]);
+    for(int i=0;i<AVB_NUM_SOURCES;i++) {
+        enum avb_source_state_t state;
+        get_avb_source_state(i, &state);
+        if (state == AVB_SOURCE_STATE_POTENTIAL) {
+          unsigned int lstreamId[2];
+          get_avb_source_id(i, lstreamId);
+          if (stream_info->streamId[0] == lstreamId[0] &&
+              stream_info->streamId[1] == lstreamId[1]) {
+
+             if (four_packed_event == AVB_SRP_FOUR_PACKED_EVENT_READY ||
+                 four_packed_event == AVB_SRP_FOUR_PACKED_EVENT_READY_FAILED) {
+                 set_avb_source_state(i, AVB_SOURCE_STATE_ENABLED);
+             }
+           }
+        }
+    }
 }
 
-void avb_srp_listener_leave_ind(mrp_attribute_state *attr)
+void avb_srp_listener_leave_ind(mrp_attribute_state *attr, int four_packed_event)
 {
 	avb_stream_info_t* stream_info = attr->attribute_info;
 	simple_printf("SRP: Listener unregistered for stream %x%x\n", stream_info->streamId[0], stream_info->streamId[1]);
+    for(int i=0;i<AVB_NUM_SOURCES;i++) {
+      enum avb_source_state_t state;
+      get_avb_source_state(i, &state);
+      if (state == AVB_SOURCE_STATE_ENABLED) {
+        unsigned int lstreamId[2];
+        get_avb_source_id(i, lstreamId);
+        if (stream_info->streamId[0] == lstreamId[0] &&
+            stream_info->streamId[1] == lstreamId[1]) {
+          set_avb_source_state(i, AVB_SOURCE_STATE_POTENTIAL);
+        }
+      }
+    }
 }
 
 

@@ -396,20 +396,36 @@ int getset_avb_source_state(int set,
           media_clock_register(media_clock_svr, clk_ctl, source->stream.sync);
 
 #if defined(AVB_TRANSMIT_BEFORE_RESERVATION)
-          {chanend c = source->talker_ctl;
+          {
+        	chanend c = source->talker_ctl;
             xc_abi_outuint(c, AVB1722_TALKER_GO);
             xc_abi_outuint(c, source->stream.local_id);
-            (void) xc_abi_inuint(c); //ACK        
+            (void) xc_abi_inuint(c); //ACK
+
+            simple_printf("Stream #%d active\n", source_num);
           }
+#else
+          simple_printf("Stream #%d prepared\n", source_num);
 #endif
 
         }
+      }
+      else if (source->stream.state == AVB_SOURCE_STATE_ENABLED &&
+          *state == AVB_SOURCE_STATE_POTENTIAL) {
+    	  // stop transmission
+
+          chanend c = source->talker_ctl;
+          xc_abi_outuint(c, AVB1722_TALKER_STOP);
+          xc_abi_outuint(c, source->stream.local_id);
+          (void) xc_abi_inuint(c); //ACK
+
+          simple_printf("Stream #%d idle\n", source_num);
       }
       else if (source->stream.state == AVB_SOURCE_STATE_POTENTIAL &&
                *state == AVB_SOURCE_STATE_ENABLED) {
         // start transmitting
 
-        simple_printf("Enabling stream %d\n", source_num);
+        simple_printf("Stream #%d active\n", source_num);
         chanend c = source->talker_ctl;
         xc_abi_outuint(c, AVB1722_TALKER_GO);
         xc_abi_outuint(c, source->stream.local_id);
