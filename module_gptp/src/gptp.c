@@ -1177,8 +1177,6 @@ void ptp_recv(chanend c_tx,
   int ethernet_pkt_size = has_qtag ? 18 : 14;
   ComMessageHdr *msg =  (ComMessageHdr *) &buf[ethernet_pkt_size];
 
-  //  printstr("ptp_rx\n");
-  //  printintln((msg->transportSpecific_messageType & 0xf));
   switch ((msg->transportSpecific_messageType & 0xf)) 
     {
     case PTP_ANNOUNCE_MESG: {
@@ -1200,12 +1198,8 @@ void ptp_recv(chanend c_tx,
       }
       break;
     case PTP_SYNC_MESG:
-#ifdef GPTP_DEBUG
 
-#endif
-      //printstr("SyncRX\n");
       if (port_id_equal(&master_port_id, &msg->sourcePortIdentity)) {
-        //printstr("SyncRXMP\n");
         received_sync = 1;
         received_sync_id = ntoh16(msg->sequenceId);        
         received_sync_ts = local_ingress_ts;
@@ -1239,11 +1233,6 @@ void ptp_recv(chanend c_tx,
         }
       break;
     case PTP_PDELAY_RESP_MESG:
-
-
-#ifdef GPTP_DEBUG
-
-#endif
 
       if (ptp_legacy_mode == 0 ||
           port_id_equal(&master_port_id, &msg->sourcePortIdentity)) {
@@ -1351,7 +1340,6 @@ void ptp_periodic(chanend c_tx, unsigned t) {
       timeafter(t, last_received_announce_time + RECV_ANNOUNCE_TIMEOUT)) {
 
     if (ptp_state == PTP_SLAVE ) {
-      printstr("U\n");
       set_new_role(PTP_UNCERTAIN, t);
       last_received_announce_time = t;
       send_ptp_announce_msg(c_tx);
@@ -1361,8 +1349,6 @@ void ptp_periodic(chanend c_tx, unsigned t) {
       if (ptp_state == PTP_UNCERTAIN) {
         set_new_role(PTP_MASTER, t);
       }
-
-
   }
 
   if ((ptp_state == PTP_MASTER || ptp_state == PTP_UNCERTAIN
@@ -1380,7 +1366,6 @@ void ptp_periodic(chanend c_tx, unsigned t) {
 
   if ((ptp_legacy_mode == 0 || ptp_state == PTP_SLAVE || ptp_state == PTP_UNCERTAIN) &&
       (timeafter(t, last_pdelay_req_time + PDELAY_REQ_PERIOD))) {
-    //printstr("ReqTx\n");
     send_ptp_pdelay_req_msg(c_tx);
     last_pdelay_req_time = t;
   }
@@ -1389,7 +1374,6 @@ void ptp_periodic(chanend c_tx, unsigned t) {
 
 #ifdef GPTP_DEBUG
   if (timeafter(t, last_debug_time + 400000000)) {
-    //    if ((ptp_state == PTP_SLAVE || ptp_state == PTP_UNCERTAIN) && ptp_path_delay_valid) {
 
     simple_printf("\n\nref local_ts: %d\nref ptp_ts: %d.%d\n\n\n",
                   ptp_reference_local_ts,
