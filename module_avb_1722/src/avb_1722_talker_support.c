@@ -201,7 +201,7 @@ int avb1722_create_packet(unsigned char Buf0[],
 {
    unsigned int presentationTime;
    int pktSize;
-   int timerValid;
+   int timerValid=0;
    int i;
    int num_channels = stream_info->num_channels;
    int stream_id0 = stream_info->streamId[0];
@@ -265,6 +265,7 @@ int avb1722_create_packet(unsigned char Buf0[],
                                                  &(stream_info->dbc));
        media_input_fifo_set_ptr(map[i],src);   
        dest+=1;
+       timerValid = 1;
      }
 
      dest += (stream_info->samples_left - 1) * num_channels;
@@ -284,8 +285,6 @@ int avb1722_create_packet(unsigned char Buf0[],
    dbc &= 0xff;
 
    AVB1722_CIP_HeaderGen(Buf, dbc);     
-
-   timerValid = 1;
 
    // perform required updates to header
    if (timerValid) {

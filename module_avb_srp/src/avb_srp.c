@@ -90,7 +90,7 @@ avb_srp_process_listener(char *fv,
 void avb_srp_listener_join_ind(mrp_attribute_state *attr, int new, int four_packed_event)
 {
 	avb_stream_info_t* stream_info = attr->attribute_info;
-	simple_printf("SRP: Listener registered for stream %x%x\n", stream_info->streamId[0], stream_info->streamId[1]);
+	//simple_printf("SRP: Listener registered for stream %x%x\n", stream_info->streamId[0], stream_info->streamId[1]);
     for(int i=0;i<AVB_NUM_SOURCES;i++) {
         enum avb_source_state_t state;
         get_avb_source_state(i, &state);
@@ -111,8 +111,9 @@ void avb_srp_listener_join_ind(mrp_attribute_state *attr, int new, int four_pack
 
 void avb_srp_listener_leave_ind(mrp_attribute_state *attr, int four_packed_event)
 {
+#if 0
 	avb_stream_info_t* stream_info = attr->attribute_info;
-	simple_printf("SRP: Listener unregistered for stream %x%x\n", stream_info->streamId[0], stream_info->streamId[1]);
+	//simple_printf("SRP: Listener unregistered for stream %x%x\n", stream_info->streamId[0], stream_info->streamId[1]);
     for(int i=0;i<AVB_NUM_SOURCES;i++) {
       enum avb_source_state_t state;
       get_avb_source_state(i, &state);
@@ -125,6 +126,7 @@ void avb_srp_listener_leave_ind(mrp_attribute_state *attr, int four_packed_event
         }
       }
     }
+#endif
 }
 
 
@@ -215,14 +217,14 @@ avb_srp_process_talker(int mrp_attribute_type,
 void avb_srp_talker_join_ind(mrp_attribute_state *attr, int new)
 {
 	// a talker has advertised the stream
-	avb_stream_info_t* stream_info = attr->attribute_info;
-	simple_printf("SRP: Stream %x%x advertised\n", stream_info->streamId[0], stream_info->streamId[1]);
+	//avb_stream_info_t* stream_info = attr->attribute_info;
+	//simple_printf("SRP: Stream %x%x advertised\n", stream_info->streamId[0], stream_info->streamId[1]);
 }
 
 void avb_srp_talker_leave_ind(mrp_attribute_state *attr)
 {
-	avb_stream_info_t* stream_info = attr->attribute_info;
-	simple_printf("SRP: Stream %x%x withdrawn\n", stream_info->streamId[0], stream_info->streamId[1]);
+	//avb_stream_info_t* stream_info = attr->attribute_info;
+	//simple_printf("SRP: Stream %x%x withdrawn\n", stream_info->streamId[0], stream_info->streamId[1]);
 }
 
 

@@ -92,7 +92,8 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
    }
  
 
-   if ((dbc_value & 7)==0) 
+   //if (AVBTP_TV(pAVBHdr)==0)
+   if ((dbc_value & 7)==0)
      timestamp = AVBTP_TIMESTAMP(pAVBHdr);
    else
      timestamp = 0;

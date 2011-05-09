@@ -334,6 +334,7 @@ void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl) {
 	c_api_server_init(tcp_svr);
 
 	// Initialize the media clock (a ptp derived clock)
+	printstr("Media clock: LOCAL\n");
 	//set_device_media_clock_type(0, MEDIA_FIFO_DERIVED);
 	set_device_media_clock_type(0, LOCAL_CLOCK);
 	//set_device_media_clock_type(0, PTP_DERIVED);
@@ -405,6 +406,7 @@ void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl) {
 				res = mdns_xtcp_handler(tcp_svr, conn);
 				if (res & mdns_entry_lost)
 				{
+					printstr("Media clock: FIFO\n");
 					set_device_media_clock_type(0, MEDIA_FIFO_DERIVED);
 				}
 			}

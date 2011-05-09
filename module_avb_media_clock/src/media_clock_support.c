@@ -222,7 +222,7 @@ unsigned int update_media_clock(chanend ptp_svr,
 			clock_info->ierror = ierror;
 
 			// Kp = 32, Ki = 1 (originally)
-			clock_info->wordlen = clock_info->wordlen - (perror / diff_local) * 64 - (ierror / diff_local) * 4;
+			clock_info->wordlen = clock_info->wordlen - (perror / diff_local) * 16 - (ierror / diff_local) / 2;
 
 #if 0
 			unsigned long long f = (100000000LL << WC_FRACTIONAL_BITS)*1000 / local_wordlen_to_external_wordlen(clock_info->wordlen);

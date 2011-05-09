@@ -287,8 +287,7 @@ static void set_new_role(enum ptp_state_t new_role,
    with */
 #define ADJUST_CALC_PREC 35
 
-static int debug_adjust = 0;
-
+#define DEBUG_ADJUST
 
 static void update_adjust(ptp_timestamp *master_ts,
                           unsigned local_ts) 
@@ -311,12 +310,6 @@ static void update_adjust(ptp_timestamp *master_ts,
     adjust = master_diff - local_diff;
     inv_adjust = local_diff - master_diff;
 
-    if (debug_adjust) {
-      printstr("  md: ");printintln(master_diff);
-      printstr("  ld: ");printintln(local_diff);
-      printstr("  md-ld: ");printintln(adjust);
-    }
-
     adjust <<= ADJUST_CALC_PREC;
     inv_adjust <<= ADJUST_CALC_PREC;
     
@@ -332,11 +325,6 @@ static void update_adjust(ptp_timestamp *master_ts,
     adjust >>= (ADJUST_CALC_PREC - PTP_ADJUST_PREC);
     inv_adjust >>= (ADJUST_CALC_PREC - PTP_ADJUST_PREC);
     
-    if (debug_adjust) {
-      printstr("  a: ");printintln(adjust);
-    }
-
-
     if (adjust >> 32) {
     // Overflow on adjust!!
       
@@ -378,6 +366,7 @@ static void update_adjust(ptp_timestamp *master_ts,
       
 
       adjust = (((long long)ptp_adjust) * (PTP_ADJUST_WEIGHT - 1) + adjust) / PTP_ADJUST_WEIGHT;
+      //simple_printf("adjust from network %d\n", ptp_adjust, (int) adjust);
 
       ptp_adjust = (int) adjust;
 
@@ -390,8 +379,6 @@ static void update_adjust(ptp_timestamp *master_ts,
       inv_ptp_adjust = (int) inv_adjust;
       ptp_adjust_valid = 1;
     }
-
-    debug_adjust = 0;
   }
 
   prev_adjust_local_ts = local_ts;
@@ -453,10 +440,6 @@ static void update_path_delay(ptp_timestamp *master_ingress_ts,
   signed diff_with_prev;
   ptp_timestamp local_egress_ts_ptp, local_ingress_ts_ptp;
 
-#ifdef GPTP_DEBUG
-  char msg[] = "NN  xxxxxxxxxx.xxxxxxxx  ";
-  long long adj;
-#endif
   /* The sequence of events is:
      
      local egress   (ptp req sent from our local port)
@@ -469,64 +452,15 @@ static void update_path_delay(ptp_timestamp *master_ingress_ts,
      ((local_ingress_ts - local_egress_ts) - (master_egress_ts - master_ingress_ts) ) / 2
 
   */
-  //  ptp_adjust = 0;
-  
   
   local_to_ptp_ts(&local_ingress_ts_ptp, local_ingress_ts);
   local_to_ptp_ts(&local_egress_ts_ptp, local_egress_ts);
 
   master_diff = ptp_timestamp_diff(master_egress_ts,  master_ingress_ts);
 
-  //local_diff = ptp_timestamp_diff(&local_ingress_ts_ptp,  &local_egress_ts_ptp);
-
   local_diff = (signed) local_ingress_ts - (signed) local_egress_ts;
   
   local_diff = local_time_to_ptp_time(local_diff, ptp_adjust);
-
-
-#ifdef GPTP_DEBUG
-  if (ptp_adjust < 0) {
-    msg[3] = '-';
-    adj = -ptp_adjust;
-  }
-  else {
-    msg[3] = ' ';
-    adj = ptp_adjust;
-  }
-
-  msg[0] = 'L';msg[1] = 'O';
-  avb_itoa(adj >> PTP_ADJUST_PREC,&msg[4],10,10);    
-  avb_itoa(adj*1000000000 >> PTP_ADJUST_PREC,&msg[15],10,9);    
-  printstrln(msg);  
-
-  msg[3] = ' ';
-
-  msg[0] = 'L';msg[1] = 'S';
-  avb_itoa(local_egress_ts_ptp.seconds[0],&msg[4],10,10);
-  avb_itoa(local_egress_ts_ptp.nanoseconds,&msg[15],10,9);
-  printstrln(msg);
-
-  msg[0] = 'R';msg[1] = 'R';
-  avb_itoa(master_ingress_ts->seconds[0],&msg[4],10,10);
-  avb_itoa(master_ingress_ts->nanoseconds,&msg[15],10,9);
-  printstrln(msg);
-
-  msg[0] = 'R';msg[1] = 'S';
-  avb_itoa(master_egress_ts->seconds[0],&msg[4],10,10);
-  avb_itoa(master_egress_ts->nanoseconds,&msg[15],10,9);
-  printstrln(msg);
-
-  msg[0] = 'L';msg[1] = 'R';
-  avb_itoa(local_ingress_ts_ptp.seconds[0],&msg[4],10,10);
-  avb_itoa(local_ingress_ts_ptp.nanoseconds,&msg[15],10,9);
-  printstrln(msg);
-
-  round_trip = (local_diff - master_diff);
-
-  printstr("RS - RR = ");printintln(master_diff);
-  printstr("LR - LS = ");printintln(local_diff);
-  printstr("((LR - LS) - (RS - RR)) / 2 = ");printintln(round_trip/2);
-#endif
 
   round_trip = (local_diff - master_diff);
 
@@ -646,39 +580,29 @@ static void bcma_update_roles(char *msg, unsigned t)
    /* Message is from a different clock. Let's work out if it is better or 
       worse according to the 802.1as BCMA */ 
     if (pAnnounceMesg->grandmasterPriority1 > best_announce_msg.grandmasterPriority1) {
-      //      printintln(1);
     }
     else if (pAnnounceMesg->grandmasterPriority1 < best_announce_msg.grandmasterPriority1) {
       new_best = 1;
-      //      printintln(101);
     }
     else if (pAnnounceMesg->clockClass > best_announce_msg.clockClass)  {
-     //     printintln(2);
     }
     else if (pAnnounceMesg->clockClass < best_announce_msg.clockClass) {
      new_best = 1;
-     //      printintln(102);
     }
     else if (pAnnounceMesg->clockAccuracy > best_announce_msg.clockAccuracy) {
-     //     printintln(3);
     }
     else if (pAnnounceMesg->clockAccuracy < best_announce_msg.clockAccuracy) {
      new_best = 1;
-     //      printintln(103);
     }
     else if (ntoh16(pAnnounceMesg->clockOffsetScaledLogVariance) > ntoh16(best_announce_msg.clockOffsetScaledLogVariance)) {
-     //     printintln(4);
     }
     else if (ntoh16(pAnnounceMesg->clockOffsetScaledLogVariance) < ntoh16(best_announce_msg.clockOffsetScaledLogVariance)) {
      new_best = 1;
-     //      printintln(104);
     }
     else if (pAnnounceMesg->grandmasterPriority2 > best_announce_msg.grandmasterPriority2) {
-     //     printintln(5);
     }
     else if (pAnnounceMesg->grandmasterPriority2 < best_announce_msg.grandmasterPriority2) {
      new_best = 1;   
-     //      printintln(104);
     }
     else
       {
@@ -688,11 +612,9 @@ static void bcma_update_roles(char *msg, unsigned t)
                                                       
         if (clock_identity_comp <= 0) {
           // 
-          //     printintln(6);
         }
         else  {
           new_best = 1;
-          //      printintln(105);
         }
       }
   }
@@ -701,27 +623,13 @@ static void bcma_update_roles(char *msg, unsigned t)
   if (new_best) {
     memcpy(&best_announce_msg, pAnnounceMesg, sizeof(AnnounceMessage));
     master_port_id = pComMesgHdr->sourcePortIdentity;          
-    //    if (ptp_state != PTP_SLAVE) 
+
     {
       set_new_role(PTP_SLAVE, t);
       last_received_announce_time_valid = 0;    
       master_port_id = pComMesgHdr->sourcePortIdentity;    
     }
   }
-
-
-
-#ifdef GPTP_DEBUG
-  if (new_role == PTP_SLAVE) {
-    /*      printstr(" GM Identity: ");
-      for(int i=0;i<8;i++) {
-        printhex(pAnnounceMesg->grandmasterIdentity.data[i]);
-        printstr(" ");
-      }
-      printstr("\n");*/
-  }
-#endif
-
 
   return;
 }
@@ -1001,6 +909,35 @@ static void send_ptp_sync_msg(chanend c_tx)
   // populate the time in packet
   local_to_ptp_ts(&ptp_egress_ts, local_egress_ts);
   
+  /** DEBUG **/
+#if 0
+  {
+	  static int last_local_egress_ts=0;
+	  static ptp_timestamp last_ptp_egress_ts;
+	  int fail=0;
+	  if (((int)local_egress_ts - last_local_egress_ts) > (200000000>>3))
+	  {
+		  fail =1;
+	  }
+	  if (ptp_egress_ts.seconds[0] - last_ptp_egress_ts.seconds[0] > 1 ||
+	      ptp_egress_ts.seconds[1] - last_ptp_egress_ts.seconds[1] > 1)
+	  {
+		  fail = 1;
+	  }
+	  if (fail)
+	  {
+		  simple_printf("PTP FAILURE: Port egress times: this->%d  last->%d\n", local_egress_ts, last_local_egress_ts);
+
+		  simple_printf("             PTP egress times: this->%d,%d,%d  last->%d,%d,%d\n",
+				  ptp_egress_ts.seconds[0], ptp_egress_ts.seconds[1], ptp_egress_ts.nanoseconds,
+				  last_ptp_egress_ts.seconds[0], last_ptp_egress_ts.seconds[1], last_ptp_egress_ts.nanoseconds
+				  );
+	  }
+	  last_local_egress_ts = local_egress_ts;
+	  last_ptp_egress_ts = ptp_egress_ts;
+  }
+#endif
+
   timestamp_to_network(&pFollowUpMesg->preciseOriginTimestamp,
                        &ptp_egress_ts);
 
@@ -1181,10 +1118,6 @@ void ptp_recv(chanend c_tx,
     {
     case PTP_ANNOUNCE_MESG: {
         AnnounceMessage *announce_msg = (AnnounceMessage *) (msg + 1);
-#ifdef GPTP_DEBUG
-      printstr("AnnounceRX\n");
-#endif
-
 
       bcma_update_roles((char *) msg, local_ingress_ts);
       
@@ -1239,7 +1172,6 @@ void ptp_recv(chanend c_tx,
         if (pdelay_request_sent && 
             pdelay_req_seq_id == ntoh16(msg->sequenceId)) {
           PdelayRespMessage *resp_msg = (PdelayRespMessage *) (msg + 1);
-          //printstr("RespRX\n");
           received_pdelay = 1;
           received_pdelay_id = ntoh16(msg->sequenceId);        
           pdelay_resp_ingress_ts = local_ingress_ts;        
@@ -1382,19 +1314,13 @@ void ptp_periodic(chanend c_tx, unsigned t) {
                   
 
     if (ptp_path_delay_valid) {
-      debug_adjust = 1;
-      
       long long ptp_adjust_frac;
       int abs_adjust;
 
       abs_adjust = ptp_adjust < 0 ? -ptp_adjust : ptp_adjust;
 
       printstr("  delay:   ");printintln(ptp_path_delay);
-      if (ptp_adjust < 0) 
-        printstr("  adjust:   ");
-      else
-        printstr("  adjust:   ");
-      printhexln(ptp_adjust);
+      printstr("  adjust:   ");printhexln(ptp_adjust);
     }
     last_debug_time = t;
   }
