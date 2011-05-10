@@ -9,9 +9,6 @@ void notify_buf_ctl_of_info(chanend buf_ctl, int fifo)
   outuchar(buf_ctl,fifo>>8);
   outuchar(buf_ctl,fifo&0xff);  
   outct(buf_ctl, XS1_CT_END);            
-  // (void) inuint(buf_ctl);
-  //  outuint(buf_ctl, stream_num);
-  //  (void) inct(buf_ctl);
 }
 
 void notify_buf_ctl_of_new_stream(chanend buf_ctl,
@@ -21,9 +18,6 @@ void notify_buf_ctl_of_new_stream(chanend buf_ctl,
   outuchar(buf_ctl,fifo>>8);
   outuchar(buf_ctl,fifo&0xff);  
   outct(buf_ctl, XS1_CT_END);            
-  //  (void) inuint(buf_ctl);
-  //  outuint(buf_ctl, fifo);
-  //  (void) inct(buf_ctl);
 }
 
 void buf_ctl_ack(chanend buf_ctl)
