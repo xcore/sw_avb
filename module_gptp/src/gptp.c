@@ -31,9 +31,9 @@ static int ptp_legacy_mode = 0;
    For example, if we are running 1% faster than the master clock then 
    this value will be 0.01 */
 #define PTP_ADJUST_WEIGHT 32
-int ptp_adjust_valid = 0;
-signed ptp_adjust = 0;
-signed inv_ptp_adjust = 0;
+static int g_ptp_adjust_valid = 0;
+signed g_ptp_adjust = 0;
+signed g_inv_ptp_adjust = 0;
 
 
 
@@ -41,7 +41,7 @@ signed inv_ptp_adjust = 0;
    between the foreign master port and our slave port in nanoseconds (ptp time)
 */
 #define PTP_PATH_DELAY_WEIGHT 32
-int ptp_path_delay_valid = 0;
+static int ptp_path_delay_valid = 0;
 static unsigned ptp_path_delay = 0;
 static unsigned prev_ptp_path_delay = 0;
 
@@ -52,7 +52,6 @@ enum ptp_state_t {
 };
 
 /* These variables make up the state of the local clock/port */
-unsigned reference_ts_valid = 0;
 unsigned ptp_reference_local_ts;
 ptp_timestamp ptp_reference_ptp_ts;
 static long long ptp_gmoffset = 0;
@@ -92,6 +91,7 @@ static char * sprint_clock_id(char *s, n64_t *id)
   return s;
 }
 #endif
+
 
 unsigned local_timestamp_to_ptp_mod32(unsigned local_ts,
                                       ptp_time_info_mod64 *info)
@@ -134,12 +134,12 @@ void ptp_get_reference_ptp_ts_mod_64(unsigned *hi, unsigned *lo)
   *lo = (unsigned) t;
 }
 
-static long long local_time_to_ptp_time(unsigned t, int ptp_adjust)
+static long long local_time_to_ptp_time(unsigned t, int l_ptp_adjust)
 {
   long long ret = ((long long) t)*10;
 
-  if (ptp_adjust_valid) {
-    ret = ret + ((ret * ptp_adjust) >> PTP_ADJUST_PREC);
+  if (g_ptp_adjust_valid) {
+    ret = ret + ((ret * l_ptp_adjust) >> PTP_ADJUST_PREC);
   }
   return ret;
 }
@@ -170,6 +170,11 @@ static void ptp_timestamp_offset64(ptp_timestamp *dst,
 }
 
 
+void ptp_timestamp_offset(ptp_timestamp *ts, int offset)
+{
+  ptp_timestamp_offset64(ts, ts, offset);
+}
+
 static long long ptp_timestamp_diff(ptp_timestamp *a,
                                     ptp_timestamp *b)
 {
@@ -182,12 +187,23 @@ static long long ptp_timestamp_diff(ptp_timestamp *a,
 
   long long sec_diff = sec_a - sec_b;
   long long nanosec_diff = nanosec_a - nanosec_b;
-  
+
   nanosec_diff += sec_diff * NANOSECONDS_PER_SECOND;
   
   return nanosec_diff;  
 }
-                                    
+
+unsigned ptp_timestamp_to_local(ptp_timestamp *ts,
+                                ptp_time_info *info)
+{
+  long long ptp_diff;
+  long long local_diff;
+  ptp_diff = ptp_timestamp_diff(ts, &info->ptp_ts);
+
+  local_diff = ptp_diff + ((ptp_diff * info->inv_ptp_adjust) >> PTP_ADJUST_PREC);
+  local_diff = local_diff / 10;
+  return (info->local_ts + local_diff);
+}
 
 static void _local_timestamp_to_ptp(ptp_timestamp *ptp_ts,
                                     unsigned local_ts,
@@ -217,7 +233,7 @@ void local_timestamp_to_ptp(ptp_timestamp *ptp_ts,
   return;
 }
 
-#define local_to_ptp_ts(ptp_ts, local_ts) _local_timestamp_to_ptp(ptp_ts, local_ts, ptp_reference_local_ts, &ptp_reference_ptp_ts, ptp_adjust)
+#define local_to_ptp_ts(ptp_ts, local_ts) _local_timestamp_to_ptp(ptp_ts, local_ts, ptp_reference_local_ts, &ptp_reference_ptp_ts, g_ptp_adjust)
 
 static void create_my_announce_msg(AnnounceMessage *pAnnounceMesg);
 
@@ -231,8 +247,8 @@ static void set_new_role(enum ptp_state_t new_role,
 
     // Reset synotization variables
     ptp_path_delay_valid = 0;
-    ptp_adjust = 0;
-    inv_ptp_adjust = 0;
+    g_ptp_adjust = 0;
+    g_inv_ptp_adjust = 0;
     prev_adjust_valid = 0;
     // Since there has been a role change there may be a gm discontinuity 
     // to detect
@@ -248,8 +264,8 @@ static void set_new_role(enum ptp_state_t new_role,
 	simple_printf("PTP Role: Master\n");
 
     // Now we are the master so no rate matching is needed
-    ptp_adjust = 0;
-    inv_ptp_adjust = 0;
+    g_ptp_adjust = 0;
+    g_inv_ptp_adjust = 0;
 
     ptp_reference_local_ts = 
       ptp_reference_local_ts;
@@ -332,9 +348,9 @@ static void update_adjust(ptp_timestamp *master_ts,
 
     /* Re-average the adjust with a given weighting.
        This method loses a few bits of precision */
-    if (ptp_adjust_valid) {
+    if (g_ptp_adjust_valid) {
 
-      long long diff = adjust - (long long) ptp_adjust;
+      long long diff = adjust - (long long) g_ptp_adjust;
       
       if (diff < 0) 
         diff = -diff;
@@ -365,19 +381,18 @@ static void update_adjust(ptp_timestamp *master_ts,
       }
       
 
-      adjust = (((long long)ptp_adjust) * (PTP_ADJUST_WEIGHT - 1) + adjust) / PTP_ADJUST_WEIGHT;
-      //simple_printf("adjust from network %d\n", ptp_adjust, (int) adjust);
+      adjust = (((long long)g_ptp_adjust) * (PTP_ADJUST_WEIGHT - 1) + adjust) / PTP_ADJUST_WEIGHT;
 
-      ptp_adjust = (int) adjust;
+      g_ptp_adjust = (int) adjust;
 
-      inv_adjust = (((long long)inv_ptp_adjust) * (PTP_ADJUST_WEIGHT - 1) + inv_adjust) / PTP_ADJUST_WEIGHT;
+      inv_adjust = (((long long)g_inv_ptp_adjust) * (PTP_ADJUST_WEIGHT - 1) + inv_adjust) / PTP_ADJUST_WEIGHT;
 
-      inv_ptp_adjust = (int) inv_adjust;
+      g_inv_ptp_adjust = (int) inv_adjust;
     }
     else {
-      ptp_adjust = (int) adjust;
-      inv_ptp_adjust = (int) inv_adjust;
-      ptp_adjust_valid = 1;
+      g_ptp_adjust = (int) adjust;
+      g_inv_ptp_adjust = (int) inv_adjust;
+      g_ptp_adjust_valid = 1;
     }
   }
 
@@ -415,7 +430,7 @@ static void periodic_update_reference_timestamps(unsigned int local_ts)
   
 
   if (local_diff > UPDATE_REFERENCE_TIMESTAMP_PERIOD) {
-    long long ptp_diff = local_time_to_ptp_time(local_diff, ptp_adjust);
+    long long ptp_diff = local_time_to_ptp_time(local_diff, g_ptp_adjust);
 
     ptp_reference_local_ts = local_ts;
     ptp_timestamp_offset64(&ptp_reference_ptp_ts, 
@@ -460,7 +475,7 @@ static void update_path_delay(ptp_timestamp *master_ingress_ts,
 
   local_diff = (signed) local_ingress_ts - (signed) local_egress_ts;
   
-  local_diff = local_time_to_ptp_time(local_diff, ptp_adjust);
+  local_diff = local_time_to_ptp_time(local_diff, g_ptp_adjust);
 
   round_trip = (local_diff - master_diff);
 
@@ -1330,23 +1345,3 @@ void ptp_periodic(chanend c_tx, unsigned t) {
   return;
 }
 
-
-unsigned ptp_timestamp_to_local(ptp_timestamp *ts,
-                                ptp_time_info *info)
-{
-  long long ptp_diff;
-  long long local_diff;
-  ptp_diff = ptp_timestamp_diff(ts, &info->ptp_ts);
-  
-  local_diff = ptp_diff + ((ptp_diff * inv_ptp_adjust) >> PTP_ADJUST_PREC);    
-  
-  local_diff = local_diff / 10;
-  
-  return (info->local_ts + local_diff);
-
-}
-
-void ptp_timestamp_offset(ptp_timestamp *ts, int offset)
-{
-  ptp_timestamp_offset64(ts, ts, offset);
-}

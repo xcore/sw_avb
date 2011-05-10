@@ -4,8 +4,7 @@
 #include <platform.h>
 #include "getmac.h"
 #include "xlog_server.h"
-#include "print.h"
-
+#include "simple_printf.h"
 
 
 //***** UART port ****
@@ -72,6 +71,9 @@ int main()
         int t;
         ptp_timestamp ptp_ts;
         ptp_time_info ptp_info;
+
+        tmr :> t;
+        tmr when timerafter(t+10*100000000) :> void;
 
         ptp_get_time_info(ptp_link[0], ptp_info);
 

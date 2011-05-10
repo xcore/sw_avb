@@ -192,22 +192,21 @@ static void manage_buffer(buf_info_t &b,
   }
 
   if (!locked && (b.stability_count > STABLE_THRESHOLD)) {
-
-      simple_printf("Media output %d locked: buffer %d samples shorter\n", index, sample_diff);
-
       if (sample_diff < -MEDIA_OUTPUT_FIFO_SAMPLE_FIFO_SIZE*1/4) {
-        b.adjust = -(MEDIA_OUTPUT_FIFO_SAMPLE_FIFO_SIZE*1/4)*(wordLength*10>>WC_FRACTIONAL_BITS) - diff;
-        b.adjust = b.adjust/10;
-        simple_printf("Presentation time compentation too large, limited to %d ns\n",b.adjust*10);
-        sample_diff = -MEDIA_OUTPUT_FIFO_SAMPLE_FIFO_SIZE*1/4;
+        printstr("Presentation time compensation too large\n");
+        b.adjust = 0;
+        buf_ctl <: b.fifo;
+        buf_ctl <: BUF_CTL_RESET;
+        inct(buf_ctl);
+      } else {
+        simple_printf("Media output %d locked: buffer %d samples shorter\n", index, sample_diff);
+        inform_media_clocks_of_lock(index);
+        b.lock_count = 0;
+        buf_ctl <: b.fifo;
+        buf_ctl <: BUF_CTL_ADJUST_FILL;
+        buf_ctl <: sample_diff;
+        inct(buf_ctl);
       }
-      
-      inform_media_clocks_of_lock(index);  
-      b.lock_count = 0;
-      buf_ctl <: b.fifo;
-      buf_ctl <: BUF_CTL_ADJUST_FILL;
-      buf_ctl <: sample_diff;
-      inct(buf_ctl);
   } else if (locked &&
            b.lock_count == LOCK_COUNT_THRESHOLD &&
            (sample_diff > LOST_LOCK_THRESHOLD ||

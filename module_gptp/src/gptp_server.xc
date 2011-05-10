@@ -26,8 +26,8 @@ void receive_ptp_cmd(chanend c, unsigned int &cmd)
 
 extern unsigned ptp_reference_local_ts;
 extern ptp_timestamp ptp_reference_ptp_ts;
-extern signed int ptp_adjust;
-extern signed int inv_ptp_adjust;
+extern signed int g_ptp_adjust;
+extern signed int g_inv_ptp_adjust;
 
 #define do_ptp_server(c_rx, c_tx, client, num_clients) \
   case ptp_recv_and_process_packet(c_rx, c_tx): \
@@ -70,7 +70,7 @@ void ptp_recv_and_process_packet(chanend c_rx, chanend c_tx)
   ptp_recv(c_tx, (buf, unsigned char[]), ts);
 }
 
-void ptp_give_requested_time_info(chanend c) 
+static void ptp_give_requested_time_info(chanend c)
 {
   int now;
   master {
@@ -78,8 +78,8 @@ void ptp_give_requested_time_info(chanend c)
     c <: now;
     c <: ptp_reference_local_ts;
     c <: ptp_reference_ptp_ts;
-    c <: ptp_adjust;
-    c <: inv_ptp_adjust;
+    c <: g_ptp_adjust;
+    c <: g_inv_ptp_adjust;
   }
 }
 
@@ -109,8 +109,8 @@ void ptp_process_client_request(chanend c)
       c <: ptp_reference_local_ts;
       c <: hi;
       c <: lo;
-      c <: ptp_adjust;
-      c <: inv_ptp_adjust;
+      c <: g_ptp_adjust;
+      c <: g_inv_ptp_adjust;
       c <: core_id;
       }                        
       break;
