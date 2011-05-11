@@ -82,7 +82,7 @@ void avb_1722_listener(chanend ethernet_rx_svr,
    // initialisation
    listenerEnabled = 0;
 
-   mac_set_queue_size(ethernet_rx_svr, num_streams+1);
+   mac_set_queue_size(ethernet_rx_svr, num_streams+2);
    mac_set_custom_filter(ethernet_rx_svr, ROUTER_LINK(router_link));
 
 
@@ -109,7 +109,6 @@ void avb_1722_listener(chanend ethernet_rx_svr,
           if (avb_hash < MAX_AVB_STREAMS_PER_LISTENER &&
               listener_streams[avb_hash].active)
             {
-#if 1
               // process the current packet
               avb_1722_listener_process_packet(buf_ctl,
                                                (RxBuf, unsigned char[]), 
@@ -117,7 +116,6 @@ void avb_1722_listener(chanend ethernet_rx_svr,
                                                listener_streams[avb_hash],
                                                avb_hash,
                                                notified_buf_ctl);
-#endif              
             }
           break;
         }

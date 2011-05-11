@@ -163,8 +163,7 @@ unsigned int update_media_clock(chanend ptp_svr,
 				/ (long long) clock_info->wordlen);
 
 		// Chop off bottom bits - thread scheduling causes noise here
-		err = err / 256;
-		err = err * 256;
+		err = err & (~255);
 
 		if ((err >> WORDLEN_FRACTIONAL_BITS) > MAX_ERROR_TOLERANCE ||
 			(err >> WORDLEN_FRACTIONAL_BITS) < -MAX_ERROR_TOLERANCE) {
@@ -176,7 +175,7 @@ unsigned int update_media_clock(chanend ptp_svr,
 			clock_info->err += err;
 
 			// original *8, /4
-			long long diff = (((err) / diff_local) * 8) + (((clock_info->err) / diff_local) / 4);
+			long long diff = (((err) / diff_local) * 512) + (((clock_info->err) / diff_local) * 16);
 
 			// adjust for error
 			clock_info->wordlen = clock_info->wordlen - diff;

@@ -24,7 +24,6 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
    int pktDataLength, dbc_value;
    AVB_DataHeader_t *pAVBHdr;
    AVB_AVB1722_CIP_Header_t *pAVB1722Hdr; 
-   unsigned int timestamp;
    unsigned char *Buf = &Buf0[2];
    int avb_ethernet_hdr_size = (Buf[12]==0x81) ? 18 : 14;
    int num_samples_in_payload, num_channels_in_payload;
@@ -36,7 +35,6 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
    media_output_fifo_t *map = &stream_info->map[0];
    int stride;   
    int dbc_diff;
-   int prev_dbc;
 
    // sanity check on number bytes in payload
    if (numBytes <= avb_ethernet_hdr_size + AVB_TP_HDR_SIZE + AVB_AVB1722_HDR_SIZE)
@@ -57,24 +55,21 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
 
 
    dbc_value = (int) pAVB1722Hdr->DBC;
-
    dbc_diff = dbc_value - stream_info->dbc;
+   stream_info->dbc = dbc_value;
 
-   if (dbc_diff < 0) 
-     dbc_diff += 0xff;
+   if (dbc_diff < 0) dbc_diff += 0x100;
 
    pktDataLength = NTOH_U16(pAVBHdr->packet_data_length);
-   prev_dbc = stream_info->dbc;
-   stream_info->dbc = dbc_value;
    num_samples_in_payload = (pktDataLength-8)>>2;
+
+   int prev_num_samples = stream_info->prev_num_samples;
+   stream_info->prev_num_samples = num_samples_in_payload;
 
    stream_info->count++;
 
    if (stream_info->chan_lock < 10) {
      int num_channels;
-     int prev_num_samples = stream_info->prev_num_samples;
-
-     stream_info->prev_num_samples = num_samples_in_payload;
 
      if (!prev_num_samples || dbc_diff == 0) 
        return 0;
@@ -92,26 +87,20 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
      return 0;
    }
 
-   if ((AVBTP_TV(pAVBHdr)==1) && (dbc_value & 7)==0)
-     timestamp = AVBTP_TIMESTAMP(pAVBHdr);
-   else
-     timestamp = 0;
+   if ((AVBTP_TV(pAVBHdr)==1) && (dbc_value & 7)==0) {
+	   unsigned int timestamp = AVBTP_TIMESTAMP(pAVBHdr);
 
-   stream_info->dbc = dbc_value;
-
-   // register timestamp
-  if (timestamp != 0) 
-    {
-      int i;
-      for (i=0;i<num_channels;i++)  {
-        media_output_fifo_set_ptp_timestamp(map[i], timestamp);
-      }
-    }
+	   // register timestamp
+	  if (timestamp != 0) {
+		  int i;
+		  for (i=0;i<num_channels;i++)  {
+			  media_output_fifo_set_ptp_timestamp(map[i], timestamp);
+		  }
+	  }
+   }
 
   for (i=0;i<num_channels;i++)  {
-    media_output_fifo_maintain(map[i],
-                               buf_ctl,
-                               notified_buf_ctl);
+    media_output_fifo_maintain(map[i], buf_ctl, notified_buf_ctl);
   }           
 
 
