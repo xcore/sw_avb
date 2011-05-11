@@ -44,8 +44,8 @@ typedef struct buf_info_t {
 void update_stream_derived_clocks(int source_num,
                                   unsigned int sample_count,
                                   unsigned int local_ts,
-                                  unsigned int outgoing_ptp_ts,
-                                  unsigned int presentation_ts,
+                                  unsigned int ptp_outgoing_actual,
+                                  unsigned int presentation_timestamp,
                                   int locked,
                                   int fill)
 {
@@ -57,8 +57,8 @@ void update_stream_derived_clocks(int source_num,
         update_media_clock_stream_info(i, 
                                        sample_count,
                                        local_ts,
-                                       outgoing_ptp_ts,
-                                       presentation_ts,
+                                       ptp_outgoing_actual,
+                                       presentation_timestamp,
                                        locked,
                                        fill);
       }

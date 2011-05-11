@@ -104,9 +104,8 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
     {
       int i;
       for (i=0;i<num_channels;i++)  {
-        media_output_fifo_set_ptp_timestamp(map[i],
-                                            timestamp);
-      }           
+        media_output_fifo_set_ptp_timestamp(map[i], timestamp);
+      }
     }
 
   for (i=0;i<num_channels;i++)  {

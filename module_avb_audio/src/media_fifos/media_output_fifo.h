@@ -186,12 +186,6 @@ void media_output_fifo_set_ptp_timestamp(media_output_fifo_t s0,
                                          unsigned int timestamp);
 
 
-int 
-media_output_fifo_get_timestamps(media_output_fifo_t s0,
-                                 REFERENCE_PARAM(unsigned int, local_ts),
-                                 REFERENCE_PARAM(unsigned int, ptp_ts));
-
-
 void
 media_output_fifo_handle_buf_ctl(chanend buf_ctl, 
                                  int stream_num,

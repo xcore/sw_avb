@@ -90,40 +90,23 @@ int get_media_output_fifo_num(media_output_fifo_t s0)
   return s->stream_num;
 }
 
+// 1722 thread
 void media_output_fifo_set_ptp_timestamp(media_output_fifo_t s0,
-                                         unsigned int timestamp)
+                                         unsigned int ptp_ts)
 {
   struct ofifo_t *s = 
     (struct ofifo_t *) s0;
 
-  if (s->marker == 0 && s->local_ts == 0) {
-    s->ptp_ts = timestamp;
-    s->marker = s->wrptr;
-    s->sample_count_at_timestamp = s->sample_count;
-  }
-
-  return;
-}
-
-int 
-media_output_fifo_get_timestamps(media_output_fifo_t s0,
-                                 unsigned int *local_ts,
-                                 unsigned int *ptp_ts)
-{
-  struct ofifo_t *s = 
-    (struct ofifo_t *) s0;
-
-  if (s->local_ts != 0 && s->ptp_ts != 0)  {
-    *local_ts = s->local_ts;
-    *ptp_ts = s->ptp_ts;
+  if (s->marker == 0) {
+	if (ptp_ts==0) ptp_ts = 1;
+    s->ptp_ts = ptp_ts;
     s->local_ts = 0;
-    s->ptp_ts = 0;
-    return 1;
+    s->sample_count_at_timestamp = s->sample_count;
+    s->marker = s->wrptr;
   }
-  
-  return 0;
 }
 
+// Audio/channel thread
 unsigned int
 media_output_fifo_pull_sample(media_output_fifo_t s0,
                               unsigned int timestamp)
@@ -137,11 +120,9 @@ media_output_fifo_pull_sample(media_output_fifo_t s0,
     return 0;
 
   sample = *dptr;
-  if (dptr == s->marker && s->local_ts == 0) { 
-    if (timestamp)
-      s->local_ts = timestamp;
-    else
-      s->marker = 0;
+  if (dptr == s->marker && s->local_ts == 0) {
+    if (timestamp==0) timestamp=1;
+    s->local_ts = timestamp;
   }
   dptr++;
   if (dptr == END_OF_FIFO(s)) {
@@ -156,7 +137,7 @@ media_output_fifo_pull_sample(media_output_fifo_t s0,
   return sample;
 }
 
-
+// 1722 thread
 void 
 media_output_fifo_maintain(media_output_fifo_t s0,
                            chanend buf_ctl,
@@ -188,9 +169,9 @@ media_output_fifo_maintain(media_output_fifo_t s0,
 
         s->wrptr = new_wrptr;
         s->state = LOCKING;
-        s->marker = 0;
         s->local_ts = 0;
         s->ptp_ts = 0;
+        s->marker = 0;
 #ifdef OUTPUT_DURING_LOCK
         s->zero_flag = 0;
 #endif
@@ -216,6 +197,7 @@ media_output_fifo_maintain(media_output_fifo_t s0,
     }
 }
 
+// 1722 thread
 void 
 media_output_fifo_strided_push(media_output_fifo_t s0,
                                    unsigned int *sample_ptr,
@@ -255,7 +237,7 @@ media_output_fifo_strided_push(media_output_fifo_t s0,
 }
 
 
-
+// 1722 thread
 void
 media_output_fifo_handle_buf_ctl(chanend buf_ctl, 
                                  int s0,
