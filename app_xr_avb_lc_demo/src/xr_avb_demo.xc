@@ -334,7 +334,7 @@ void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl) {
 	c_api_server_init(tcp_svr);
 
 	// Initialize the media clock (a ptp derived clock)
-	printstr("Media clock: LOCAL\n");
+	//printstr("Media clock: LOCAL\n");
 	//set_device_media_clock_type(0, MEDIA_FIFO_DERIVED);
 	set_device_media_clock_type(0, LOCAL_CLOCK);
 	//set_device_media_clock_type(0, PTP_DERIVED);
@@ -350,9 +350,6 @@ void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl) {
 	set_avb_source_map(0, map, 8);
 	set_avb_source_format(0, AVB_SOURCE_FORMAT_MBLA_24BIT, SAMPLE_RATE);
 	set_avb_source_sync(0, 0); // use the media_clock defined above
-
-	// Request a multicast addresses for stream transmission
-	avb_1722_maap_request_addresses(AVB_NUM_SOURCES, null);
 
 	tmr	:> timeout;
 	while (1) {
@@ -399,6 +396,9 @@ void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl) {
 			case xtcp_event(tcp_svr, conn):
 			if (conn.event == XTCP_IFUP) {
 				avb_start();
+
+				// Request a multicast addresses for stream transmission
+				avb_1722_maap_request_addresses(AVB_NUM_SOURCES, null);
 			}
 
 			{
