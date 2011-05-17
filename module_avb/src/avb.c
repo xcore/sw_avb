@@ -224,7 +224,7 @@ void avb_start(void) {
 
 static void avb_set_talker_bandwidth() 
 {
-#ifdef ETHERNET_TX_HP_QUEUE
+#if defined(ETHERNET_TX_HP_QUEUE) && defined(ETHERNET_TRAFFIC_SHAPER)
   int data_size = 0;
   for (int i=0;i<AVB_NUM_SOURCES;i++) {
     avb_source_info_t *source = &sources[i];
