@@ -20,7 +20,7 @@
 #include "mac_custom_filter.h"
 #include "avb_1722_maap.h"
 
-//#define AVB_TRANSMIT_BEFORE_RESERVATION 1
+#define AVB_TRANSMIT_BEFORE_RESERVATION 1
 
 #define UNMAPPED (-1)
 
@@ -95,6 +95,7 @@ static void register_listeners(chanend listener_ctl[])
       sink->listener_ctl = listener_ctl[i];
       sink->stream.core_id = core_id;
       sink->stream.local_id = j;
+      sink->stream.vlan = AVB_DEFAULT_VLAN;
       sink->stream.srp_talker_attr = mrp_get_attr();
       sink->stream.srp_talker_failed_attr = mrp_get_attr();
       sink->stream.srp_listener_attr = mrp_get_attr();
@@ -223,6 +224,7 @@ void avb_start(void) {
 
 static void avb_set_talker_bandwidth() 
 {
+#ifdef ETHERNET_TX_HP_QUEUE
   int data_size = 0;
   for (int i=0;i<AVB_NUM_SOURCES;i++) {
     avb_source_info_t *source = &sources[i];
@@ -234,6 +236,7 @@ static void avb_set_talker_bandwidth()
       }
   }
   mac_set_qav_bandwidth(c_mac_tx, (data_size*8*AVB1722_PACKET_RATE*102)/100);  
+#endif
 }
 
 int get_avb_sources(int *a0)
