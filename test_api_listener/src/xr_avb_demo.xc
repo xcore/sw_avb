@@ -367,21 +367,6 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 				break;
 			}
 
-			// Print out ethernet dropped packet counter
-			{
-				static unsigned n=0;
-				++n;
-				if (n == (1000000000/PERIODIC_POLL_TIME))
-				{
-	    		  static int last_dropped_count=0;
-	    		  int n = mac_get_mii_overflowcnt(c_rx);
-	    		  if (n != last_dropped_count) {
-	    			  simple_printf("Ethernet MII dropped %d packets\n", n-last_dropped_count);
-	    			  last_dropped_count = n;
-	    		  }
-	    	  }
-			}
-
 			// Look for new streams
 			{
 			  unsigned int streamId[2];
