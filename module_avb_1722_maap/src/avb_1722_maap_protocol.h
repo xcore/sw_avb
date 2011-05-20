@@ -48,7 +48,7 @@ enum maap_message_type_t {
 #define GET_MAAP_VERSION(pkt) (pkt->maap_version_data_length_hi & 0xf8 >> 3)
 #define GET_MAAP_DATALENGTH(pkt) \
    (((pkt->maap_version_data_length_hi & 0x7) << 8) + \
-          ((pkt->xdata_length_lo) << 8))
+          ((pkt->data_length_lo) << 8))
 
 #define GET_MAAP_CONFLICT_COUNT(pkt) ((pkt->conflict_count[0] + (pkt->conflict_count[1]<<8)))
 

@@ -116,7 +116,9 @@ typedef enum {
 #define PENDING_JOIN     0x02
 #define PENDING_LEAVE    0x04
 
-
+/*!
+ * Utility structure for keeping track of timeout periods
+ */
 typedef struct mrp_timer {
   unsigned int timeout;
   unsigned int period;

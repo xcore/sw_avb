@@ -13,7 +13,6 @@
 #define MII_TX_BUFSIZE_HIGH_PRIORITY (300)
 #define MII_TX_BUFSIZE_LOW_PRIORITY (200)
 #define ETHERNET_MAX_TX_HP_PACKET_SIZE (300)
-#define ETHERNET_COUNT_DROPPED_MII_PACKETS
 
 /* General purpose AVB configuration */
 #define AVB_MAX_NAME_LEN 25
@@ -37,5 +36,7 @@
 
 /* Add synths from channels 3/4 upwards in I2S for this demo */
 #define I2S_SYNTH_FROM 1
+
+#define USE_1722_1
 
 #endif

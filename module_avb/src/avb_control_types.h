@@ -71,13 +71,14 @@ typedef enum avb_status_t {
                                       avb_1722_maap_get_offset_address()
                                       to access the reserved addresses. */
                                       
-  AVB_MAAP_ADDRESSES_LOST        /*!< Previously reserved multicast 
+  AVB_MAAP_ADDRESSES_LOST,       /*!< Previously reserved multicast
                                       addresses have been lost.
                                       After this event the control thread
                                       should disable any streams using 
                                       MAAP addresses and recall
                                       avb_1722_maap_request_addresses()
                                  */
+  AVB_1722_1_OK					 /*!< 1722.1 status ok */
 } avb_status_t;
 
 

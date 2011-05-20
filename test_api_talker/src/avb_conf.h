@@ -37,4 +37,6 @@
 /* Add synths from channels 3/4 upwards in I2S for this demo */
 #define I2S_SYNTH_FROM 1
 
+#define USE_1722_1
+
 #endif

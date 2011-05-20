@@ -20,6 +20,10 @@
 #include "mac_custom_filter.h"
 #include "avb_1722_maap.h"
 
+#ifdef USE_1722_1
+#include "avb_1722_1.h"
+#endif
+
 #define AVB_TRANSMIT_BEFORE_RESERVATION 1
 
 #define UNMAPPED (-1)
@@ -208,10 +212,11 @@ void avb_init(chanend media_ctl[],
 
 avb_status_t avb_periodic(void) {
   mrp_periodic();
+#ifdef USE_1722_1
+  avb_1722_1_periodic(c_mac_tx);
+#endif
   return avb_1722_maap_periodic(c_mac_tx);  
 }
-
-
 
 void avb_start(void) {
   avb_1722_maap_rerequest_addresses();
@@ -902,6 +907,12 @@ avb_status_t avb_process_control_packet(unsigned int buf[],
   status = avb_mrp_process_packet(buf, nbytes);
   if (status != AVB_SRP_OK && status != AVB_NO_STATUS)
     return status;
+
+#ifdef USE_1722_1
+  status = avb_1722_1_process_packet(buf, nbytes, c_tx);
+  if (status != AVB_SRP_OK && status != AVB_NO_STATUS)
+    return status;
+#endif
 
   status = avb_1722_maap_process_packet_(buf, nbytes, c_tx);
 
