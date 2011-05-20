@@ -250,6 +250,8 @@ int avb1722_create_packet(unsigned char Buf0[],
 
    dbc += samples_per_fifo_packet - stream_info->samples_left;
 
+   if (stream_info->samples_left == 0) timerValid = 1;
+
    if (stream_info->samples_left < samples_in_packet) {
      for (i=0;i<num_channels;i++) {
        int *src = media_input_fifo_get_ptr(map[i]);   
@@ -265,7 +267,6 @@ int avb1722_create_packet(unsigned char Buf0[],
                                                  &(stream_info->dbc));
        media_input_fifo_set_ptr(map[i],src);   
        dest+=1;
-       timerValid = 1;
      }
 
      dest += (stream_info->samples_left - 1) * num_channels;
