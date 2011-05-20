@@ -195,6 +195,10 @@ void avb_init(chanend media_ctl[],
 
   avb_1722_maap_init(mac_addr);
 
+#ifdef USE_1722_1
+  avb_1722_1_init(mac_addr);
+#endif
+
   c_mac_rx = c_mac_rx0;
   c_mac_tx = c_mac_tx0;
   c_ptp = c_ptp0;

@@ -2,8 +2,6 @@
 #define __AVB_1722_1_PROTOCOL_H__
 
 
-#define AVB_1722_1_PROTOCOL_ADDRESS {0x01, 0x50, 0x43, 0xff, 0x00, 0x00}
-
 #define MAX_AVB_1722_1_PDU_SIZE (40)
 
 /**
@@ -18,27 +16,32 @@ typedef struct avb_1722_1_packet_header_t {
 } avb_1722_1_packet_header_t;
 
 /**
- * A 1722.1 Simple Discovery Protocol packet
+ *  A 1722.1 Simple Discovery Protocol packet
+ *
+ *  \note all elements 16 bit aligned
  */
-typedef struct avb_1722_1_sdp_packet_t {
+typedef struct {
 	avb_1722_1_packet_header_t header;
-	unsigned entity_guid[2];
-	unsigned vendor_id;
-	unsigned model_id;
-	unsigned entity_capabilities;
+	short entity_guid_lo[2];
+	short entity_guid_hi[2];
+	short vendor_id[2];
+	short model_id[2];
+	short entity_capabilities[2];
 	short talker_stream_sources;
 	short talker_capabilities;
 	short listener_stream_sinks;
 	short listener_capabilites;
-	unsigned controller_capabilities;
-	unsigned boot_id;
-	unsigned reserved[3];
+	short controller_capabilities[2];
+	short boot_id[2];
+	short reserved[6];
 } avb_1722_1_sdp_packet_t;
 
 /**
- * A 1722.1 Simple Connection Management packet
+ *  A 1722.1 Simple Connection Management packet
+ *
+ * \note all elements 16 bit aligned
  */
-typedef struct avb_1722_1_scm_packet_t {
+typedef struct {
 	avb_1722_1_packet_header_t header;
 	unsigned stream_id[2];
 	unsigned controller_guid[2];
@@ -53,16 +56,18 @@ typedef struct avb_1722_1_scm_packet_t {
 } avb_1722_1_scm_packet_t;
 
 /**
- * A 1722.1 Simple Enumeration and Control packet
+ *  A 1722.1 Simple Enumeration and Control packet
+ *
+ * \note all elements 16 bit aligned
  */
-typedef struct avb_1722_1_sec_packet_t {
+typedef struct {
 	avb_1722_1_packet_header_t header;
 	unsigned target_guid[2];
 	unsigned controller_guid[2];
 	short sequence_id;
 	char mode_length_upper;
 	char length_lower;
-	unsigned mode_specific_data[0];
+	unsigned mode_specific_data[1];
 } avb_1722_1_sec_packet_t;
 
 #define DEFAULT_1722_1_CD_FLAG (1)
@@ -110,7 +115,11 @@ typedef struct avb_1722_1_sec_packet_t {
      SET_BITS(&pkt->data_length_lo, 0, 7, (val) & 0xff); \
    }while(0)
 
-
+#define SET_WORD(member, data) \
+	do { \
+		member[0] = (data & 0xffff); \
+		member[1] = (data >> 16); \
+	} while(0);
 
 typedef enum {
 	ENTITY_AVAILABLE = 0,

@@ -11,5 +11,6 @@
 
 OPTIONAL_HEADERS += avb_1722_1_protocol
 
-MODULE_XCC_C_FLAGS = $(XCC_FLAGS) -std=c99
+#MODULE_XCC_C_FLAGS = $(XCC_FLAGS) -Os -std=c99
+MODULE_XCC_C_FLAGS = $(XCC_FLAGS) -O0 -g -std=c99
 

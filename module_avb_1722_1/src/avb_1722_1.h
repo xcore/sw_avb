@@ -71,8 +71,7 @@
  *
  *  Initialization
  */
-void avb_1722_1_init();
-
+void avb_1722_1_init(unsigned char macaddr[6]);
 
 /** \fn avb_1722_1_periodic
  *
@@ -87,6 +86,17 @@ void avb_1722_1_periodic(chanend c_tx);
  */
 avb_status_t avb_1722_1_process_packet(unsigned int buf[], int len, chanend c_tx);
 
+/** \fn avb_1722_1_sdp_announce
+ *
+ *  Start advertising that this is an endpoint
+ */
+void avb_1722_1_sdp_announce();
+
+/** \fn avb_1722_1_sdp_depart
+ *
+ *  Stop advertising that this is an endpoint
+ */
+void avb_1722_1_sdp_depart();
 
 #endif
 

@@ -13,6 +13,7 @@
 #include "audio_codec_CS42448.h"
 #include "simple_printf.h"
 #include "media_fifo.h"
+#include "avb_1722_1.h"
 
 // This is the number of master clocks in a word clock
 #define MASTER_TO_WORDCLOCK_RATIO 512
@@ -279,6 +280,8 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 	avb_1722_maap_request_addresses(AVB_NUM_SOURCES, null);
 
 	avb_start();
+
+	avb_1722_1_sdp_announce();
 
 	tmr	:> timeout;
 	while (1) {
