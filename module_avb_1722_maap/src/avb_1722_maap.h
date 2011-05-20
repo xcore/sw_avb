@@ -3,7 +3,7 @@
 #include <xccompat.h>
 #include "avb_control_types.h"
 
-#define MAX_AVB_1722_MAAP_PDU_SIZE (48)
+#define MAX_AVB_1722_MAAP_PDU_SIZE (64)
 
 /** Request a range of multicast addresses.
  * 

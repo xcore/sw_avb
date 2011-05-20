@@ -21,20 +21,20 @@ typedef struct tagged_ethernet_hdr_t {
 } tagged_ethernet_hdr_t;
 
 
-enum maap_state_t {
+typedef enum {
   MAAP_DISABLED,
   MAAP_PROBING,
   MAAP_RESERVED
-};
+} maap_state_t;
 
-struct maap_address_range {
+typedef struct {
   unsigned char base[6];
   int  range;
   int  count;
   int  timeout;
   int immediately;
-  enum maap_state_t state;
-};
+  maap_state_t state;
+} maap_address_range;
 
 static unsigned char maap_allocated_lo[6] = MAAP_ALLOCATED_ADDRESS_RANGE_LOW;
 static unsigned char maap_allocated_hi[6] = MAAP_ALLOCATED_ADDRESS_RANGE_HIGH;
@@ -48,7 +48,7 @@ static unsigned int c=1013904223;
 
 #define RAND(x) do {x = a*x+c;} while (0)
 
-static struct maap_address_range maap_addr;
+static maap_address_range maap_addr;
 
 static unsigned int maap_buf[(MAX_AVB_1722_MAAP_PDU_SIZE+1)/4];
 
@@ -72,13 +72,13 @@ static void num_to_mac_addr(unsigned char addr[6],
 }
 
 static int create_maap_packet(int message_type,
-                              struct maap_address_range *addr,
+                              maap_address_range *addr,
                               char *buf,
                               unsigned char *conflict_addr,
                               int conflict_count)
 { 
-  struct ethernet_hdr_t *hdr = (struct ethernet_hdr_t *) &buf[0];
-  struct maap_packet_t *pkt = (struct maap_packet_t *) (hdr + 1);
+  struct ethernet_hdr_t *hdr = (ethernet_hdr_t*) &buf[0];
+  struct maap_packet_t *pkt = (maap_packet_t*) (hdr + 1);
 
   for (int i=0;i<6;i++) {
     hdr->src_addr[i] = my_mac_addr[i];
@@ -192,7 +192,7 @@ void avb_1722_maap_get_base_address(unsigned char addr[6])
   avb_1722_maap_get_offset_address(addr, 0);
 }
 
-static void set_timeout(struct maap_address_range *addr,
+static void set_timeout(maap_address_range *addr,
                         unsigned current_time,
                         unsigned base_ms,
                         unsigned variation_ms)
@@ -282,8 +282,8 @@ int avb_1722_maap_periodic(chanend c_tx)
   return status;
 }
 
-static int maap_conflict(struct maap_address_range *addr,
-                         struct maap_packet_t *pkt,
+static int maap_conflict(maap_address_range* addr,
+                         maap_packet_t* pkt,
                          unsigned char conflict_addr[6],
                          int *conflict_count)
 {

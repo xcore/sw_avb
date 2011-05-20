@@ -3,6 +3,56 @@
 #define _avb_1722_1_h_
 
 #include "avb_control_types.h"
+#include "avb_1722_1_protocol.h"
+
+#ifdef __avb_1722_1_conf_h_exists__
+#include "avb_1722_1_conf.h"
+#endif
+
+#ifndef AVB_1722_1_SDP_ENTITY_GUID_LO
+#define AVB_1722_1_SDP_ENTITY_GUID_LO 0
+#endif
+
+#ifndef AVB_1722_1_SDP_ENTITY_GUID_HI
+#define AVB_1722_1_SDP_ENTITY_GUID_HI 0
+#endif
+
+#ifndef AVB_1722_1_SDP_VENDOR_ID
+#define AVB_1722_1_SDP_VENDOR_ID 0
+#endif
+
+#ifndef AVB_1722_1_SDP_MODEL_ID
+#define AVB_1722_1_SDP_MODEL_ID 0
+#endif
+
+#ifndef AVB_1722_1_SDP_ENTITY_CAPIBILITIES
+#define AVB_1722_1_SDP_ENTITY_CAPIBILITIES 0
+#endif
+
+#ifndef AVB_1722_1_SDP_TALKER_STREAM_SOURCES
+#define AVB_1722_1_SDP_TALKER_STREAM_SOURCES 0
+#endif
+
+#ifndef AVB_1722_1_SDP_TALKER_CAPABILITIES
+#define AVB_1722_1_SDP_TALKER_CAPABILITIES 0
+#endif
+
+#ifndef AVB_1722_1_SDP_LISTENER_STREAM_SINKS
+#define AVB_1722_1_SDP_LISTENER_STREAM_SINKS 0
+#endif
+
+#ifndef AVB_1722_1_SDP_LISTENER_CAPIBILITIES
+#define AVB_1722_1_SDP_LISTENER_CAPIBILITIES 0
+#endif
+
+#ifndef AVB_1722_1_SDP_CONTROLLER_CAPABILITIES
+#define AVB_1722_1_SDP_CONTROLLER_CAPABILITIES 0
+#endif
+
+#ifndef AVB_1722_1_SDP_BOOT_ID
+#define AVB_1722_1_SDP_BOOT_ID 0
+#endif
+
 
 /** \file avb_mrp.h
  *
