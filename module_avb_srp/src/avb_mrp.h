@@ -6,6 +6,8 @@
 #include "mrp_conf.h"
 #endif
 
+#include "misc_timer.h"
+
 /** \file avb_mrp.h
  *
  *  MRP (from 802.1ak) is the Multiple Registration Protocol which
@@ -116,15 +118,6 @@ typedef enum {
 #define PENDING_JOIN     0x02
 #define PENDING_LEAVE    0x04
 
-/*!
- * Utility structure for keeping track of timeout periods
- */
-typedef struct mrp_timer {
-  unsigned int timeout;
-  unsigned int period;
-  int active;
-  int timeout_multiplier;
-} mrp_timer;
 
 typedef struct mrp_attribute_state {
   unsigned char attribute_type;
@@ -132,7 +125,7 @@ typedef struct mrp_attribute_state {
 
 #ifdef MRP_FULL_PARTICIPANT
   unsigned char registrar_state;
-  mrp_timer leaveTimer;
+  avb_timer leaveTimer;
 #endif
 
   //! used to note indications that have been detected by the state machine but not

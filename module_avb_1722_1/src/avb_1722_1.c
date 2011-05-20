@@ -5,11 +5,17 @@
 #include "avb_1722_1_protocol.h"
 #include "ethernet_tx_client.h"
 #include "nettypes.h"
+#include "misc_timer.h"
 
 static unsigned char my_mac_addr[6];
 static unsigned char avb_1722_1_dest_addr[6] = AVB_1722_1_PROTOCOL_ADDRESS;
 
 static unsigned int avb_1722_1_buf[(MAX_AVB_1722_1_PDU_SIZE+1)/4];
+
+#define AVB_1722_1_SDP_PERIODIC_TIMER_PERIOD_CENTISECONDS 100
+#define AVB_1722_1_SDP_PERIODIC_TIMER_MULTIPLIER 10
+
+static avb_timer periodic_timer;
 
 void avb_1722_1_init(unsigned char macaddr[6])
 {
@@ -44,7 +50,8 @@ static void avb_1722_1_create_sdp_packet(int message_type)
 	  struct ethernet_hdr_t *hdr = (ethernet_hdr_t*) &avb_1722_1_buf[0];
 	  struct avb_1722_1_sdp_packet_t *pkt = (avb_1722_1_sdp_packet_t*) (hdr + 1);
 
-	  avb_1722_1_create_1722_1_header(DEFAULT_1722_1_SDP_SUBTYPE, message_type, 0, 40, hdr);
+	  avb_1722_1_create_1722_1_header(DEFAULT_1722_1_SDP_SUBTYPE, message_type,
+			  (message_type==ENTITY_AVAILABLE)?AVB_1722_1_SDP_VALID_TIME:0, 40, hdr);
 
 	  pkt->entity_guid[0] = AVB_1722_1_SDP_ENTITY_GUID_LO;
 	  pkt->entity_guid[1] = AVB_1722_1_SDP_ENTITY_GUID_HI;
@@ -97,7 +104,10 @@ avb_status_t process_avb_1722_1_scm_packet(avb_1722_1_scm_packet_t* pkt)
 
 void avb_1722_1_periodic(chanend c_tx)
 {
-	avb_1722_1_create_sdp_packet(ENTITY_AVAILABLE);
+	if (avb_timer_expired(&periodic_timer)) {
+		avb_1722_1_create_sdp_packet(ENTITY_AVAILABLE);
+		start_avb_timer(&periodic_timer, AVB_1722_1_SDP_PERIODIC_TIMER_PERIOD_CENTISECONDS / AVB_1722_1_SDP_PERIODIC_TIMER_MULTIPLIER);
+	}
 }
 
 avb_status_t avb_1722_1_process_packet(unsigned int buf0[], int len, chanend c_tx)

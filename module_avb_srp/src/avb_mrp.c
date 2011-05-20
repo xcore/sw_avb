@@ -15,9 +15,6 @@
 #include <string.h>
 
 
-
-#define TICKS_PER_CENTISECOND (XS1_TIMER_KHZ * 10)
-
 #define MAX_MRP_MSG_SIZE (sizeof(mrp_msg_header) + sizeof(srp_talker_first_value) + 1 /* for event vector */ + sizeof(mrp_msg_footer))
 
 static int first_value_lengths[MRP_NUM_ATTRIBUTE_TYPES] = FIRST_VALUE_LENGTHS;
@@ -102,55 +99,14 @@ static void send(chanend c_tx)
   }
 }
 
-
-
-
-
-#define timeafter(A, B) ((int)((B) - (A)) < 0)
-
-
-static mrp_timer periodic_timer;
-static mrp_timer joinTimer;
+static avb_timer periodic_timer;
+static avb_timer joinTimer;
 
 #ifdef MRP_FULL_PARTICIPANT
-static mrp_timer leaveall_timer;
+static avb_timer leaveall_timer;
 #endif
 
 
-
-static inline void init_timer(mrp_timer *tmr,
-                              int mult)
-{
-  tmr->active = 0;
-  tmr->timeout_multiplier = mult;
-}
-
-static inline void start_timer(mrp_timer *tmr,
-                             unsigned int period_cs) 
-{
-  tmr->period = (period_cs * TICKS_PER_CENTISECOND);
-  tmr->timeout = get_local_time() + (period_cs * TICKS_PER_CENTISECOND);
-  tmr->active = tmr->timeout_multiplier;
-} 
-
-static inline int timer_expired(mrp_timer *tmr)
-{
-  unsigned int now = get_local_time();
-  if (!tmr->active) 
-    return 0;
-
-  if (timeafter(now, tmr->timeout)) {
-    tmr->active--;
-    tmr->timeout = now + tmr->period;
-  }
-  
-  return (tmr->active == 0);
-}
-
-static inline void stop_timer(mrp_timer *tmr)
-{
-  tmr->active = 0;
-}
  
 static unsigned int makeTxEvent(mrp_event e, mrp_attribute_state *st, int leave_all)
 {
@@ -464,7 +420,7 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
       break;
     case MRP_EVENT_RECEIVE_NEW:
       if (st->registrar_state == MRP_LV) 
-        stop_timer(&st->leaveTimer);
+        stop_avb_timer(&st->leaveTimer);
       st->registrar_state = MRP_IN;
       st->pending_indications |= PENDING_JOIN_NEW;
       st->four_vector_parameter = four_packed_event;
@@ -472,7 +428,7 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
     case MRP_EVENT_RECEIVE_JOININ:
     case MRP_EVENT_RECEIVE_JOINMT:
       if (st->registrar_state == MRP_LV)
-        stop_timer(&st->leaveTimer);
+        stop_avb_timer(&st->leaveTimer);
       if (st->registrar_state == MRP_MT) {
           st->pending_indications |= PENDING_JOIN;
           st->four_vector_parameter = four_packed_event;
@@ -484,7 +440,7 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
     case MRP_EVENT_TX_LEAVE_ALL:
     case MRP_EVENT_REDECLARE:
       if (st->registrar_state == MRP_IN) {
-        start_timer(&st->leaveTimer, MRP_LEAVETIMER_PERIOD_CENTISECONDS);
+        start_avb_timer(&st->leaveTimer, MRP_LEAVETIMER_PERIOD_CENTISECONDS);
         st->registrar_state = MRP_LV;
       }
       break;
@@ -732,7 +688,7 @@ void mrp_attribute_init(mrp_attribute_state *st,
 void mrp_mad_begin(mrp_attribute_state *st)
 {
 #ifdef MRP_FULL_PARTICIPANT
-  init_timer(&st->leaveTimer, 1);
+  init_avb_timer(&st->leaveTimer, 1);
 #endif
   mrp_update_state(MRP_EVENT_BEGIN, st, 0);
 }
@@ -767,16 +723,16 @@ void mrp_init(char *macaddr)
   }
   first_attr = &attrs[0];
 
-  init_timer(&periodic_timer, MRP_PERIODIC_TIMER_MULTIPLIER);
-  start_timer(&periodic_timer, MRP_PERIODIC_TIMER_PERIOD_CENTISECONDS / MRP_PERIODIC_TIMER_MULTIPLIER);
+  init_avb_timer(&periodic_timer, MRP_PERIODIC_TIMER_MULTIPLIER);
+  start_avb_timer(&periodic_timer, MRP_PERIODIC_TIMER_PERIOD_CENTISECONDS / MRP_PERIODIC_TIMER_MULTIPLIER);
 
-  init_timer(&joinTimer, 1);
-  start_timer(&joinTimer, MRP_JOINTIMER_PERIOD_CENTISECONDS);
+  init_avb_timer(&joinTimer, 1);
+  start_avb_timer(&joinTimer, MRP_JOINTIMER_PERIOD_CENTISECONDS);
 
 
 #ifdef MRP_FULL_PARTICIPANT
-  init_timer(&leaveall_timer, MRP_LEAVEALL_TIMER_MULTIPLIER);
-  start_timer(&leaveall_timer, MRP_LEAVEALL_TIMER_PERIOD_CENTISECONDS / MRP_LEAVEALL_TIMER_MULTIPLIER);
+  init_avb_timer(&leaveall_timer, MRP_LEAVEALL_TIMER_MULTIPLIER);
+  start_avb_timer(&leaveall_timer, MRP_LEAVEALL_TIMER_PERIOD_CENTISECONDS / MRP_LEAVEALL_TIMER_MULTIPLIER);
 #endif
 
 }
@@ -949,22 +905,22 @@ void mrp_periodic()
   chanend c_tx = avb_control_get_mac_tx();
   static int leave_all = 0;
 
-  if (timer_expired(&periodic_timer)) {
+  if (avb_timer_expired(&periodic_timer)) {
     global_event(MRP_EVENT_PERIODIC);    
-    start_timer(&periodic_timer, MRP_PERIODIC_TIMER_PERIOD_CENTISECONDS / MRP_PERIODIC_TIMER_MULTIPLIER);
+    start_avb_timer(&periodic_timer, MRP_PERIODIC_TIMER_PERIOD_CENTISECONDS / MRP_PERIODIC_TIMER_MULTIPLIER);
   }
 
 #ifdef MRP_FULL_PARTICIPANT
-  if (timer_expired(&leaveall_timer)) {
-    start_timer(&leaveall_timer, MRP_LEAVEALL_TIMER_PERIOD_CENTISECONDS / MRP_LEAVEALL_TIMER_MULTIPLIER);
+  if (avb_timer_expired(&leaveall_timer)) {
+    start_avb_timer(&leaveall_timer, MRP_LEAVEALL_TIMER_PERIOD_CENTISECONDS / MRP_LEAVEALL_TIMER_MULTIPLIER);
     leave_all = 1;
     global_event(MRP_EVENT_RECEIVE_LEAVE_ALL);
   }
 #endif
 
-  if (timer_expired(&joinTimer)) {
+  if (avb_timer_expired(&joinTimer)) {
     mrp_event tx_event = leave_all ? MRP_EVENT_TX_LEAVE_ALL : MRP_EVENT_TX;
-    start_timer(&joinTimer, MRP_JOINTIMER_PERIOD_CENTISECONDS);
+    start_avb_timer(&joinTimer, MRP_JOINTIMER_PERIOD_CENTISECONDS);
     sort_attrs();    
     configure_send_buffer_msrp();
     if (leave_all) {
@@ -1009,7 +965,7 @@ void mrp_periodic()
 	  attrs[j].four_vector_parameter = 0;
 	}
 #ifdef MRP_FULL_PARTICIPANT
-    if (timer_expired(&attrs[j].leaveTimer)) {
+    if (avb_timer_expired(&attrs[j].leaveTimer)) {
       mrp_update_state(MRP_EVENT_LEAVETIMER, &attrs[j], 0);
     }
 #endif

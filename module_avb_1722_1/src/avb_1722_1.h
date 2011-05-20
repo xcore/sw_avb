@@ -9,6 +9,10 @@
 #include "avb_1722_1_conf.h"
 #endif
 
+#ifndef AVB_1722_1_SDP_VALID_TIME
+#define AVB_1722_1_SDP_VALID_TIME (30)  // 30*2 = 60 seconds validity time
+#endif
+
 #ifndef AVB_1722_1_SDP_ENTITY_GUID_LO
 #define AVB_1722_1_SDP_ENTITY_GUID_LO 0
 #endif
@@ -54,7 +58,7 @@
 #endif
 
 
-/** \file avb_mrp.h
+/** \file avb_1722_1.h
  *
  *  1722.1 is a discovery and control protocol for 1722.  It is a layer 2 protocol
  *  similar to Open Sound Control (OSC), and allows for 1722 endpoints to be discovered
@@ -62,15 +66,6 @@
  *  established
  */
 
-/**
- * Utility structure for keeping track of timeout periods
- */
-typedef struct avb_1722_1_timer {
-  unsigned int timeout;
-  unsigned int period;
-  int active;
-  int timeout_multiplier;
-} avb_1722_1_timer;
 
 /** \fn avb_1722_1_init
  *
