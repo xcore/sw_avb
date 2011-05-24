@@ -24,7 +24,7 @@ void clk_ctl_set_rate(chanend clk_ctl, int wordLength)
 }
 
 
-#define STABLE_THRESHOLD 64
+#define STABLE_THRESHOLD 32
 #define LOCK_COUNT_THRESHOLD 400
 #define ACCEPTABLE_FILL_ADJUST 50000
 #define LOST_LOCK_THRESHOLD 24

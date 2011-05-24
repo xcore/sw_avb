@@ -27,11 +27,12 @@ unsigned int AVB1722_audioSampleType = MBLA_24BIT;
  *  \para   dbc DBC value of CIP header to be populated.
  *  \return none.
  */
-static inline void AVB1722_CIP_HeaderGen(unsigned char Buf[], int dbc)
+static inline void AVB1722_CIP_HeaderGen(unsigned char Buf[], int dbc, unsigned numAudioSamples)
 {
    AVB_AVB1722_CIP_Header_t *pAVB1722Hdr = (AVB_AVB1722_CIP_Header_t *) &(Buf[AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE]);
 
    SET_AVB1722_CIP_DBC(pAVB1722Hdr, dbc);      
+   SET_AVB1722_CIP_DBS(pAVB1722Hdr, numAudioSamples);
 }
 
 static inline void AVB1722_AVBTP_HeaderGen(unsigned char Buf[], 
@@ -49,7 +50,7 @@ static inline void AVB1722_AVBTP_HeaderGen(unsigned char Buf[],
    // actual sample bits, valid for 61883-6/AVB1722
    pkt_data_length = 8 + (numAudioSamples << 2);
    HTON_U16(pAVBHdr->packet_data_length, pkt_data_length);
-   
+
    // only stamp the AVBTP timestamp when required.
    if (valid_ts) {
       SET_AVBTP_TV(pAVBHdr, 1);        // AVB timestamp valid.     
@@ -62,8 +63,6 @@ static inline void AVB1722_AVBTP_HeaderGen(unsigned char Buf[],
    // update stream ID by adding stream number to preloaded stream ID
    // (ignoring the fact that talkerStreamIdExt is stored MSB-first - it's just an ID)
    SET_AVBTP_STREAM_ID0(pAVBHdr, stream_id0);
-
-
 }
 
 
@@ -285,7 +284,7 @@ int avb1722_create_packet(unsigned char Buf0[],
 
    dbc &= 0xff;
 
-   AVB1722_CIP_HeaderGen(Buf, dbc);     
+   AVB1722_CIP_HeaderGen(Buf, dbc, num_audio_samples);
 
    // perform required updates to header
    if (timerValid) {

@@ -30,7 +30,6 @@
 #define AVB1722_DEFAULT_EOH1                   (0)
 #define AVB1722_DEFAULT_SID                    (63)
 #define AVB1722_DEFAULT_DBS                    (2)
-#define LOG_AVB1722_DEFAULT_DBS                (1)
 #define AVB1722_DEFAULT_FN                     (0)
 #define AVB1722_DEFAULT_QPC                    (0)
 #define AVB1722_DEFAULT_SPH                    (0)
