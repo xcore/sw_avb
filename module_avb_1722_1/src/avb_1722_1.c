@@ -10,7 +10,7 @@
 
 static unsigned char my_mac_addr[6];
 
-static unsigned char avb_1722_1_sdp_dest_addr[6] =  {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+static unsigned char avb_1722_1_sdp_dest_addr[6] =  {0x01, 0x50, 0x43, 0xff, 0x00, 0x00};
 //static unsigned char avb_1722_1_scm_dest_addr[6] =  {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 //static unsigned char avb_1722_1_sec_dest_addr[6] =  {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 
@@ -45,13 +45,13 @@ enum { SCM_LISTENER_IDLE,
 } scm_listener_state = SCM_LISTENER_IDLE;
 
 
-void avb_1722_1_init(unsigned char macaddr[6])
+void avb_1722_1_init(unsigned char macaddr[6], unsigned serial_number)
 {
   for (int i=0;i<6;i++)
     my_mac_addr[i] = macaddr[i];
 
-  my_guid[0] = AVB_1722_1_SDP_ENTITY_GUID_LO;
-  my_guid[1] = AVB_1722_1_SDP_ENTITY_GUID_HI;
+  my_guid[0] = ((serial_number&0xff) << 24) + (macaddr[2] << 16) + (macaddr[1] << 8) + macaddr[0];
+  my_guid[1] = serial_number >> 8;
 
   init_avb_timer(&sdp_advertise_timer, 1);
   init_avb_timer(&sdp_discovery_timer, 1);

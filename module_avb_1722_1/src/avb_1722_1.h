@@ -71,7 +71,7 @@
  *
  *  Initialization
  */
-void avb_1722_1_init(unsigned char macaddr[6]);
+void avb_1722_1_init(unsigned char macaddr[6], unsigned int serial_number);
 
 /** \fn avb_1722_1_periodic
  *
