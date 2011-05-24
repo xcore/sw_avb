@@ -132,11 +132,11 @@ static void avb_1722_1_create_sdp_packet(int message_type, unsigned guid[2])
 	  {
 		  SET_WORD(pkt->vendor_id, AVB_1722_1_SDP_VENDOR_ID);
 		  SET_WORD(pkt->model_id, AVB_1722_1_SDP_MODEL_ID);
-		  SET_WORD(pkt->entity_capabilities, AVB_1722_1_SDP_ENTITY_CAPIBILITIES);
+		  SET_WORD(pkt->entity_capabilities, AVB_1722_1_SDP_ENTITY_CAPABILITIES);
 		  pkt->talker_stream_sources = AVB_1722_1_SDP_TALKER_STREAM_SOURCES;
 		  pkt->talker_capabilities = AVB_1722_1_SDP_TALKER_CAPABILITIES;
 		  pkt->listener_stream_sinks = AVB_1722_1_SDP_LISTENER_STREAM_SINKS;
-		  pkt->listener_capabilites = AVB_1722_1_SDP_LISTENER_CAPIBILITIES;
+		  pkt->listener_capabilites = AVB_1722_1_SDP_LISTENER_CAPABILITIES;
 		  SET_WORD(pkt->controller_capabilities, AVB_1722_1_SDP_CONTROLLER_CAPABILITIES);
 		  SET_WORD(pkt->boot_id, AVB_1722_1_SDP_BOOT_ID);
 	  }
