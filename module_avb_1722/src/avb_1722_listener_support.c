@@ -13,6 +13,9 @@
 #include <print.h>
 #include <xs1.h>
 
+#ifdef AVB_1722_RECORD_ERRORS
+static unsigned avb_1722_listener_dbc_discontinuity = 0;
+#endif
 
 int avb_1722_listener_process_packet(chanend buf_ctl,
                                      unsigned char Buf0[], 
@@ -86,6 +89,12 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
 
      return 0;
    }
+#ifdef AVB_1722_RECORD_ERRORS
+   else if (dbc_diff != 6) {
+	   avb_1722_listener_dbc_discontinuity++;
+   }
+#endif
+
 
    if ((AVBTP_TV(pAVBHdr)==1) && (dbc_value & 7)==0) {
 	   unsigned int timestamp = AVBTP_TIMESTAMP(pAVBHdr);
