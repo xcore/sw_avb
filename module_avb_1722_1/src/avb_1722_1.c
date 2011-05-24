@@ -17,6 +17,7 @@ static unsigned char avb_1722_1_sdp_dest_addr[6] =  {0x01, 0x50, 0x43, 0xff, 0x0
 static unsigned int avb_1722_1_buf[(sizeof(avb_1722_1_packet_t)+sizeof(ethernet_hdr_t)+3)/4];
 
 static avb_timer sdp_advertise_timer;
+static avb_timer sdp_readvertise_timer;
 static avb_timer sdp_discovery_timer;
 
 static unsigned sdp_two_second_counter = 0;
@@ -50,11 +51,15 @@ void avb_1722_1_init(unsigned char macaddr[6], unsigned serial_number)
   for (int i=0;i<6;i++)
     my_mac_addr[i] = macaddr[i];
 
-  my_guid[0] = ((serial_number&0xff) << 24) + (macaddr[2] << 16) + (macaddr[1] << 8) + macaddr[0];
-  my_guid[1] = serial_number >> 8;
+  my_guid[0] = (macaddr[3] << 24) + (macaddr[2] << 16) + (macaddr[1] << 8) + macaddr[0];
+  my_guid[1] = (serial_number << 16) + (macaddr[5] << 8) +(macaddr[4]);
 
   init_avb_timer(&sdp_advertise_timer, 1);
-  init_avb_timer(&sdp_discovery_timer, 1);
+  init_avb_timer(&sdp_readvertise_timer, 100);
+  init_avb_timer(&sdp_discovery_timer, 200);
+
+  sdp_discovery_state = SDP_DISCOVERY_WAITING;
+  start_avb_timer(&sdp_discovery_timer, 1);
 }
 
 static void avb_1722_1_entity_database_add(avb_1722_1_sdp_packet_t* pkt)
@@ -167,10 +172,11 @@ avb_status_t process_avb_1722_1_sdp_packet(avb_1722_1_sdp_packet_t* pkt)
 
 	if (GET_1722_1_MSG_TYPE(hdr)==ENTITY_DISCOVER)
 	{
-		if (COMPARE_WORD(pkt->entity_guid_lo, AVB_1722_1_SDP_ENTITY_GUID_LO) ||
-			COMPARE_WORD(pkt->entity_guid_lo, 0))
+		if ( (COMPARE_WORD(pkt->entity_guid_lo, my_guid[0]) && COMPARE_WORD(pkt->entity_guid_hi, my_guid[1])) ||
+		     (COMPARE_WORD(pkt->entity_guid_lo, 0) && COMPARE_WORD(pkt->entity_guid_hi, 0)) )
 		{
-			sdp_advertise_state = SDP_ADVERTISE_ADVERTISE_1;
+			if (sdp_advertise_state == SDP_ADVERTISE_WAITING)
+				sdp_advertise_state = SDP_ADVERTISE_ADVERTISE_1;
 		}
 		return AVB_1722_1_OK;
 	}
@@ -287,7 +293,7 @@ static void avb_1722_1_sdp_discovery_periodic(chanend c_tx)
 			if (avb_timer_expired(&sdp_discovery_timer)) {
 				sdp_two_second_counter++;
 				avb_1722_1_entity_database_check_timeout();
-				start_avb_timer(&sdp_discovery_timer, 200);
+				start_avb_timer(&sdp_discovery_timer, 1);
 			}
 		}
 		break;
@@ -309,7 +315,6 @@ static void avb_1722_1_sdp_advertising_periodic(chanend c_tx)
 	case SDP_ADVERTISE_ADVERTISE_1:
 		avb_1722_1_create_sdp_packet(ENTITY_AVAILABLE, my_guid);
 		mac_tx(c_tx, avb_1722_1_buf, 60, ETH_BROADCAST);
-		printstr("Sending SDP packet 1\n");
 		start_avb_timer(&sdp_advertise_timer, 3); // 3 centiseconds
 		sdp_advertise_state = SDP_ADVERTISE_ADVERTISE_2;
 		break;
@@ -317,10 +322,14 @@ static void avb_1722_1_sdp_advertising_periodic(chanend c_tx)
 		if (avb_timer_expired(&sdp_advertise_timer)) {
 			avb_1722_1_create_sdp_packet(ENTITY_AVAILABLE, my_guid);
 			mac_tx(c_tx, avb_1722_1_buf, 60, ETH_BROADCAST);
+			start_avb_timer(&sdp_readvertise_timer, AVB_1722_1_SDP_VALID_TIME);
 			sdp_advertise_state = SDP_ADVERTISE_WAITING;
 		}
 		break;
 	case SDP_ADVERTISE_WAITING:
+		if (avb_timer_expired(&sdp_readvertise_timer)) {
+			sdp_advertise_state = SDP_ADVERTISE_ADVERTISE_1;
+		}
 		break;
 	case SDP_ADVERTISE_DEPARTING_1:
 		avb_1722_1_create_sdp_packet(ENTITY_DEPARTING, my_guid);
@@ -357,7 +366,7 @@ void avb_1722_1_sdp_announce()
 
 void avb_1722_1_sdp_depart()
 {
-	if (sdp_advertise_state != SDP_ADVERTISE_IDLE) sdp_advertise_state = SDP_ADVERTISE_DEPARTING_1;
+	if (sdp_advertise_state == SDP_ADVERTISE_IDLE) sdp_advertise_state = SDP_ADVERTISE_DEPARTING_1;
 }
 
 void avb_1722_1_sdp_discover(unsigned guid[])
