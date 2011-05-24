@@ -14,7 +14,7 @@ static unsigned char avb_1722_1_sdp_dest_addr[6] =  {0xff, 0xff, 0xff, 0xff, 0xf
 //static unsigned char avb_1722_1_scm_dest_addr[6] =  {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 //static unsigned char avb_1722_1_sec_dest_addr[6] =  {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 
-static unsigned int avb_1722_1_buf[(MAX_AVB_1722_1_PDU_SIZE+1)/4];
+static unsigned int avb_1722_1_buf[(sizeof(avb_1722_1_packet_t)+sizeof(ethernet_hdr_t)+3)/4];
 
 static avb_timer sdp_timer;
 
