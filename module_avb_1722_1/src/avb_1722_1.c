@@ -168,9 +168,11 @@ static void avb_1722_1_create_sec_packet(int message_type)
 
 avb_status_t process_avb_1722_1_sdp_packet(avb_1722_1_sdp_packet_t* pkt)
 {
-	avb_1722_1_packet_header_t* hdr = (avb_1722_1_packet_header_t*)pkt;
+	unsigned message_type = GET_1722_1_MSG_TYPE(((avb_1722_1_packet_header_t*)pkt));
 
-	if (GET_1722_1_MSG_TYPE(hdr)==ENTITY_DISCOVER)
+	switch (message_type)
+	{
+	case ENTITY_DISCOVER:
 	{
 		if ( (COMPARE_WORD(pkt->entity_guid_lo, my_guid[0]) && COMPARE_WORD(pkt->entity_guid_hi, my_guid[1])) ||
 		     (COMPARE_WORD(pkt->entity_guid_lo, 0) && COMPARE_WORD(pkt->entity_guid_hi, 0)) )
@@ -181,16 +183,18 @@ avb_status_t process_avb_1722_1_sdp_packet(avb_1722_1_sdp_packet_t* pkt)
 		return AVB_1722_1_OK;
 	}
 
-	if (GET_1722_1_MSG_TYPE(hdr)==ENTITY_AVAILABLE)
+	case ENTITY_AVAILABLE:
 	{
 		avb_1722_1_entity_database_add(pkt);
 		return AVB_1722_1_ENTITY_ADDED;
 	}
 
-	if (GET_1722_1_MSG_TYPE(hdr)==ENTITY_DEPARTING)
+	case ENTITY_DEPARTING:
 	{
 		avb_1722_1_entity_database_remove(pkt);
 		return AVB_1722_1_ENTITY_REMOVED;
+	}
+
 	}
 
 	return AVB_1722_1_OK;
@@ -198,11 +202,35 @@ avb_status_t process_avb_1722_1_sdp_packet(avb_1722_1_sdp_packet_t* pkt)
 
 avb_status_t process_avb_1722_1_sec_packet(avb_1722_1_sec_packet_t* pkt)
 {
+	unsigned message_type = GET_1722_1_MSG_TYPE(((avb_1722_1_packet_header_t*)pkt));
+	switch (message_type)
+	{
+	case SCM_CMD_CONNECT_TX_COMMAND:
+	case SCM_CMD_CONNECT_TX_RESPONSE:
+	case SCM_CMD_DISCONNECT_TX_COMMAND:
+	case SCM_CMD_DISCONNECT_TX_RESPONSE:
+	case SCM_CMD_GET_TX_STATE_COMMAND:
+	case SCM_CMD_GET_TX_STATE_RESPONSE:
+	case SCM_CMD_CONNECT_RX_COMMAND:
+	case SCM_CMD_CONNECT_RX_RESPONSE:
+	case SCM_CMD_DISCONNECT_RX_COMMAND:
+	case SCM_CMD_DISCONNECT_RX_RESPONSE:
+	case SCM_CMD_GET_RX_STATE_COMMAND:
+	case SCM_CMD_GET_RX_STATE_RESPONSE:
+	case SCM_CMD_GET_TX_CONNECTION_COMMAND:
+	case SCM_CMD_GET_TX_CONNECTION_RESPONSE:
+		break;
+	}
+
 	return AVB_1722_1_OK;
 }
 
 avb_status_t process_avb_1722_1_scm_packet(avb_1722_1_scm_packet_t* pkt)
 {
+	unsigned message_type = GET_1722_1_MSG_TYPE(((avb_1722_1_packet_header_t*)pkt));
+	switch (message_type)
+	{
+	}
 	return AVB_1722_1_OK;
 }
 
