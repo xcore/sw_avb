@@ -90,7 +90,7 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
      return 0;
    }
 #ifdef AVB_1722_RECORD_ERRORS
-   else if (dbc_diff != 6) {
+   else if (dbc_diff != num_samples_in_payload) {
 	   avb_1722_listener_dbc_discontinuity++;
    }
 #endif
