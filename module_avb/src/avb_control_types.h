@@ -78,7 +78,15 @@ typedef enum avb_status_t {
                                       MAAP addresses and recall
                                       avb_1722_maap_request_addresses()
                                  */
-  AVB_1722_1_OK					 /*!< 1722.1 status ok */
+
+  AVB_1722_1_OK,				 /*!< 1722.1 status ok */
+
+  AVB_1722_1_ENTITY_ADDED,		 /*!< An entity has been added to the
+                                      database by the discovery protocol */
+
+  AVB_1722_1_ENTITY_REMOVED  	 /*!< An entity has been removed from the
+                                      database by the discovery protocol */
+
 } avb_status_t;
 
 

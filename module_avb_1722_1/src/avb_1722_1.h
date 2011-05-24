@@ -98,6 +98,18 @@ void avb_1722_1_sdp_announce();
  */
 void avb_1722_1_sdp_depart();
 
+/** \fn avb_1722_1_sdp_discover
+ *
+ *  Ask to discover the information for a specific entity guid
+ */
+void avb_1722_1_sdp_discover(unsigned guid[]);
+
+/** \fn avb_1722_1_sdp_discover_all
+ *
+ *  Ask to discover all available entities
+ */
+void avb_1722_1_sdp_discover_all();
+
 #endif
 
 

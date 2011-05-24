@@ -127,6 +127,9 @@ typedef union {
 		member[1] = (data >> 16); \
 	} while(0);
 
+#define COMPARE_WORD(member, data) \
+		((member[0] == (data & 0xffff)) && (member[1] == (data >> 16)))
+
 typedef enum {
 	ENTITY_AVAILABLE = 0,
 	ENTITY_DEPARTING = 1,
