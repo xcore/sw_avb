@@ -1,3 +1,11 @@
+/** \file avb_1722_1.h
+ *
+ *  1722.1 is a discovery and control protocol for 1722.  It is a layer 2 protocol
+ *  similar to Open Sound Control (OSC), and allows for 1722 endpoints to be discovered
+ *  by a central controller, and connections between talkers and listeners to be
+ *  established
+ */
+
 
 #ifndef _avb_1722_1_h_
 #define _avb_1722_1_h_
@@ -53,13 +61,17 @@
 #define AVB_1722_1_MAX_ENTITIES 4
 #endif
 
-/** \file avb_1722_1.h
- *
- *  1722.1 is a discovery and control protocol for 1722.  It is a layer 2 protocol
- *  similar to Open Sound Control (OSC), and allows for 1722 endpoints to be discovered
- *  by a central controller, and connections between talkers and listeners to be
- *  established
- */
+#ifndef AVB_1722_1_MAX_LISTENERS
+#define AVB_1722_1_MAX_LISTENERS 1
+#endif
+
+#ifndef AVB_1722_1_MAX_TALKERS
+#define AVB_1722_1_MAX_TALKERS 1
+#endif
+
+#ifndef AVB_1722_1_MAX_LISTENERS_PER_TALKER
+#define AVB_1722_1_MAX_LISTENERS_PER_TALKER 4
+#endif
 
 
 /** \fn avb_1722_1_init

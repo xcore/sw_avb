@@ -43,10 +43,10 @@ typedef struct {
  */
 typedef struct {
 	avb_1722_1_packet_header_t header;
-	unsigned stream_id[2];
-	unsigned controller_guid[2];
-	unsigned talker_guid[2];
-	unsigned listener_guid[2];
+	short stream_id[4];
+	short controller_guid[4];
+	short talker_guid[4];
+	short listener_guid[4];
 	short talker_unique_id;
 	short listener_unique_id;
 	char dest_mac[6];
@@ -62,12 +62,12 @@ typedef struct {
  */
 typedef struct {
 	avb_1722_1_packet_header_t header;
-	unsigned target_guid[2];
-	unsigned controller_guid[2];
+	short target_guid[4];
+	short controller_guid[4];
 	short sequence_id;
 	char mode_length_upper;
 	char length_lower;
-	unsigned mode_specific_data[1];
+	short mode_specific_data[1];
 } avb_1722_1_sec_packet_t;
 
 typedef union {
