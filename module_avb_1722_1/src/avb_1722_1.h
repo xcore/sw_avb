@@ -49,6 +49,9 @@
 #define AVB_1722_1_SDP_BOOT_ID 0
 #endif
 
+#ifndef AVB_1722_1_MAX_ENTITIES
+#define AVB_1722_1_MAX_ENTITIES 4
+#endif
 
 /** \file avb_1722_1.h
  *

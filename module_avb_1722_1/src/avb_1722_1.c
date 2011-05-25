@@ -6,7 +6,8 @@
 #include "ethernet_tx_client.h"
 #include "nettypes.h"
 #include "misc_timer.h"
-#include "print.h"
+#include "simple_printf.h"
+#include <print.h>
 
 static unsigned char my_mac_addr[6];
 
@@ -45,6 +46,12 @@ enum { SCM_LISTENER_IDLE,
 	   SCM_LISTENER_WAITING
 } scm_listener_state = SCM_LISTENER_IDLE;
 
+typedef struct {
+	unsigned guid[2];
+	unsigned timeout;
+} avb_1722_1_entity_record;
+
+avb_1722_1_entity_record entities[AVB_1722_1_MAX_ENTITIES];
 
 void avb_1722_1_init(unsigned char macaddr[6], unsigned serial_number)
 {
@@ -64,19 +71,58 @@ void avb_1722_1_init(unsigned char macaddr[6], unsigned serial_number)
 
 static void avb_1722_1_entity_database_add(avb_1722_1_sdp_packet_t* pkt)
 {
-	printstr("1722.1 entity database: added\n");
+	unsigned guid[2];
+	unsigned int found_slot_index = AVB_1722_1_MAX_ENTITIES;
+
+	guid[0] = GET_WORD(pkt->entity_guid_lo);
+	guid[1] = GET_WORD(pkt->entity_guid_hi);
+
+	for (unsigned i=0; i<AVB_1722_1_MAX_ENTITIES; ++i) {
+		if (entities[i].guid[0]==0 || entities[i].guid[1]==0) found_slot_index=i;
+		if (entities[i].guid[0]==guid[0] && entities[i].guid[1]==guid[1]) {
+			found_slot_index=i;
+			break;
+		}
+	}
+
+	if (found_slot_index != AVB_1722_1_MAX_ENTITIES) {
+		entities[found_slot_index].guid[0] = guid[0];
+		entities[found_slot_index].guid[1] = guid[1];
+		entities[found_slot_index].timeout = GET_1722_1_VALID_TIME(&pkt->header) + sdp_two_second_counter;
+		return;
+	}
 }
 
 static void avb_1722_1_entity_database_remove(avb_1722_1_sdp_packet_t* pkt)
 {
-	printstr("1722.1 entity database: added\n");
+	unsigned guid[2];
+	guid[0] = GET_WORD(pkt->entity_guid_lo);
+	guid[1] = GET_WORD(pkt->entity_guid_hi);
+
+	for (unsigned i=0; i<AVB_1722_1_MAX_ENTITIES; ++i) {
+		if (entities[i].guid[0]==guid[0] && entities[i].guid[1]==guid[1]) {
+			entities[i].guid[0]=0;
+			entities[i].guid[1]=0;
+		}
+	}
 }
 
 static void avb_1722_1_entity_database_check_timeout()
 {
+	for (unsigned i=0; i<AVB_1722_1_MAX_ENTITIES; ++i) {
+		if (entities[i].guid[0]==0 && entities[i].guid[1]==0) continue;
 
+		if (entities[i].timeout < sdp_two_second_counter) {
+			entities[i].guid[0]=0;
+			entities[i].guid[1]=0;
+		}
+	}
 }
 
+static unsigned compare_guid(short* a, short* b)
+{
+	return a[0]==b[0] && a[1]==b[1] && a[2]==b[2] && a[3]==b[3];
+}
 
 static void avb_1722_1_create_1722_1_header(unsigned char* dest_addr, int subtype, int message_type, char valid_time_status, unsigned data_len, ethernet_hdr_t *hdr)
 {
@@ -111,8 +157,7 @@ static void avb_1722_1_create_sdp_packet(int message_type, unsigned guid[2])
 	  SET_WORD(pkt->entity_guid_lo, guid[0]);
 	  SET_WORD(pkt->entity_guid_hi, guid[1]);
 
-	  if (message_type==ENTITY_DISCOVER)
-	  {
+	  if (message_type==ENTITY_DISCOVER) {
 		  pkt->vendor_id[0] = 0;
 		  pkt->vendor_id[1] = 0;
 		  pkt->model_id[0] = 0;
@@ -127,9 +172,7 @@ static void avb_1722_1_create_sdp_packet(int message_type, unsigned guid[2])
 		  pkt->controller_capabilities[1] = 0;
 		  pkt->boot_id[0] = 0;
 		  pkt->boot_id[1] = 0;
-	  }
-	  else
-	  {
+	  } else {
 		  SET_WORD(pkt->vendor_id, AVB_1722_1_SDP_VENDOR_ID);
 		  SET_WORD(pkt->model_id, AVB_1722_1_SDP_MODEL_ID);
 		  SET_WORD(pkt->entity_capabilities, AVB_1722_1_SDP_ENTITY_CAPABILITIES);
@@ -169,13 +212,11 @@ static void avb_1722_1_create_sec_packet(int message_type)
 avb_status_t process_avb_1722_1_sdp_packet(avb_1722_1_sdp_packet_t* pkt)
 {
 	unsigned message_type = GET_1722_1_MSG_TYPE(((avb_1722_1_packet_header_t*)pkt));
+	short zero_guid[4] = { 0,0,0,0 };
 
-	switch (message_type)
-	{
-	case ENTITY_DISCOVER:
-	{
-		if ( (COMPARE_WORD(pkt->entity_guid_lo, my_guid[0]) && COMPARE_WORD(pkt->entity_guid_hi, my_guid[1])) ||
-		     (COMPARE_WORD(pkt->entity_guid_lo, 0) && COMPARE_WORD(pkt->entity_guid_hi, 0)) )
+	switch (message_type) {
+	case ENTITY_DISCOVER: {
+		if ( compare_guid(pkt->entity_guid_lo, (short*)my_guid) || compare_guid(pkt->entity_guid_lo, zero_guid) )
 		{
 			if (sdp_advertise_state == SDP_ADVERTISE_WAITING)
 				sdp_advertise_state = SDP_ADVERTISE_ADVERTISE_1;
@@ -183,14 +224,12 @@ avb_status_t process_avb_1722_1_sdp_packet(avb_1722_1_sdp_packet_t* pkt)
 		return AVB_1722_1_OK;
 	}
 
-	case ENTITY_AVAILABLE:
-	{
+	case ENTITY_AVAILABLE: {
 		avb_1722_1_entity_database_add(pkt);
 		return AVB_1722_1_ENTITY_ADDED;
 	}
 
-	case ENTITY_DEPARTING:
-	{
+	case ENTITY_DEPARTING: {
 		avb_1722_1_entity_database_remove(pkt);
 		return AVB_1722_1_ENTITY_REMOVED;
 	}
@@ -203,8 +242,7 @@ avb_status_t process_avb_1722_1_sdp_packet(avb_1722_1_sdp_packet_t* pkt)
 avb_status_t process_avb_1722_1_sec_packet(avb_1722_1_sec_packet_t* pkt)
 {
 	unsigned message_type = GET_1722_1_MSG_TYPE(((avb_1722_1_packet_header_t*)pkt));
-	switch (message_type)
-	{
+	switch (message_type) {
 	case SCM_CMD_CONNECT_TX_COMMAND:
 	case SCM_CMD_CONNECT_TX_RESPONSE:
 	case SCM_CMD_DISCONNECT_TX_COMMAND:
@@ -228,8 +266,7 @@ avb_status_t process_avb_1722_1_sec_packet(avb_1722_1_sec_packet_t* pkt)
 avb_status_t process_avb_1722_1_scm_packet(avb_1722_1_scm_packet_t* pkt)
 {
 	unsigned message_type = GET_1722_1_MSG_TYPE(((avb_1722_1_packet_header_t*)pkt));
-	switch (message_type)
-	{
+	switch (message_type) {
 	}
 	return AVB_1722_1_OK;
 }
@@ -239,8 +276,7 @@ avb_status_t avb_1722_1_process_packet(unsigned int buf0[], int len, chanend c_t
 	  unsigned char *buf = (unsigned char *) buf0;
 
 	  struct ethernet_hdr_t *ethernet_hdr = (ethernet_hdr_t *) &buf[0];
-	  struct tagged_ethernet_hdr_t *tagged_ethernet_hdr =
-	    (tagged_ethernet_hdr_t *) &buf[0];
+	  struct tagged_ethernet_hdr_t *tagged_ethernet_hdr = (tagged_ethernet_hdr_t *) &buf[0];
 
 	  int has_qtag = ethernet_hdr->ethertype[1]==0x18;
 	  int ethernet_pkt_size = has_qtag ? 18 : 14;
@@ -250,21 +286,17 @@ avb_status_t avb_1722_1_process_packet(unsigned int buf0[], int len, chanend c_t
 
 	  if (has_qtag) {
 	    if (tagged_ethernet_hdr->ethertype[1] != (AVB_ETYPE & 0xff) ||
-	        tagged_ethernet_hdr->ethertype[0] != (AVB_ETYPE >> 8))
-	      {
+	        tagged_ethernet_hdr->ethertype[0] != (AVB_ETYPE >> 8)) {
 	        // not a 1722 packet
 	        return AVB_NO_STATUS;
 	      }
-	  }
-	  else {
+	  } else {
 	    if (ethernet_hdr->ethertype[1] != (AVB_ETYPE & 0xff) ||
-	        ethernet_hdr->ethertype[0] != (AVB_ETYPE >> 8))
-	      {
+	        ethernet_hdr->ethertype[0] != (AVB_ETYPE >> 8)) {
 	        // not a 1722 packet
 	        return AVB_NO_STATUS;
 	      }
 	  }
-
 
 	  if (GET_1722_1_CD_FLAG(pkt) != 1)
 		    // not a 1722.1 packet
@@ -272,8 +304,7 @@ avb_status_t avb_1722_1_process_packet(unsigned int buf0[], int len, chanend c_t
 
 	  {
 		  unsigned subtype = GET_1722_1_SUBTYPE(pkt);
-		  switch (subtype)
-		  {
+		  switch (subtype) {
 		  case DEFAULT_1722_1_SDP_SUBTYPE:
 			  return process_avb_1722_1_sdp_packet((avb_1722_1_sdp_packet_t*)pkt);
 		  case DEFAULT_1722_1_SEC_SUBTYPE:
@@ -285,13 +316,12 @@ avb_status_t avb_1722_1_process_packet(unsigned int buf0[], int len, chanend c_t
 		  }
 	  }
 
-	  return AVB_1722_1_OK;
+	  return AVB_NO_STATUS;
 }
 
 static void avb_1722_1_scm_talker_periodic(chanend c_tx)
 {
-	switch (scm_talker_state)
-	{
+	switch (scm_talker_state) {
 	case SCM_TALKER_IDLE:
 		break;
 	case SCM_TALKER_WAITING:
@@ -301,8 +331,7 @@ static void avb_1722_1_scm_talker_periodic(chanend c_tx)
 
 static void avb_1722_1_scm_listener_periodic(chanend c_tx)
 {
-	switch (scm_listener_state)
-	{
+	switch (scm_listener_state) {
 	case SCM_LISTENER_IDLE:
 		break;
 	case SCM_LISTENER_WAITING:
@@ -312,12 +341,11 @@ static void avb_1722_1_scm_listener_periodic(chanend c_tx)
 
 static void avb_1722_1_sdp_discovery_periodic(chanend c_tx)
 {
-	switch (sdp_discovery_state)
-	{
+	switch (sdp_discovery_state) {
 	case SDP_DISCOVERY_IDLE:
 		break;
-	case SDP_DISCOVERY_WAITING:
-		{
+
+	case SDP_DISCOVERY_WAITING: {
 			if (avb_timer_expired(&sdp_discovery_timer)) {
 				sdp_two_second_counter++;
 				avb_1722_1_entity_database_check_timeout();
@@ -325,8 +353,8 @@ static void avb_1722_1_sdp_discovery_periodic(chanend c_tx)
 			}
 		}
 		break;
-	case SDP_DISCOVERY_DISCOVER:
-		{
+
+	case SDP_DISCOVERY_DISCOVER: {
 			avb_1722_1_create_sdp_packet(ENTITY_DISCOVER, discover_guid);
 			mac_tx(c_tx, avb_1722_1_buf, 60, ETH_BROADCAST);
 			sdp_discovery_state = SDP_DISCOVERY_WAITING;
@@ -340,12 +368,14 @@ static void avb_1722_1_sdp_advertising_periodic(chanend c_tx)
 	switch (sdp_advertise_state) {
 	case SDP_ADVERTISE_IDLE:
 		break;
+
 	case SDP_ADVERTISE_ADVERTISE_1:
 		avb_1722_1_create_sdp_packet(ENTITY_AVAILABLE, my_guid);
 		mac_tx(c_tx, avb_1722_1_buf, 60, ETH_BROADCAST);
 		start_avb_timer(&sdp_advertise_timer, 3); // 3 centiseconds
 		sdp_advertise_state = SDP_ADVERTISE_ADVERTISE_2;
 		break;
+
 	case SDP_ADVERTISE_ADVERTISE_2:
 		if (avb_timer_expired(&sdp_advertise_timer)) {
 			avb_1722_1_create_sdp_packet(ENTITY_AVAILABLE, my_guid);
@@ -354,17 +384,20 @@ static void avb_1722_1_sdp_advertising_periodic(chanend c_tx)
 			sdp_advertise_state = SDP_ADVERTISE_WAITING;
 		}
 		break;
+
 	case SDP_ADVERTISE_WAITING:
 		if (avb_timer_expired(&sdp_readvertise_timer)) {
 			sdp_advertise_state = SDP_ADVERTISE_ADVERTISE_1;
 		}
 		break;
+
 	case SDP_ADVERTISE_DEPARTING_1:
 		avb_1722_1_create_sdp_packet(ENTITY_DEPARTING, my_guid);
 		mac_tx(c_tx, avb_1722_1_buf, 60, ETH_BROADCAST);
 		start_avb_timer(&sdp_advertise_timer, 3); // 3 centiseconds
 		sdp_advertise_state = SDP_ADVERTISE_DEPARTING_2;
 		break;
+
 	case SDP_ADVERTISE_DEPARTING_2:
 		if (avb_timer_expired(&sdp_advertise_timer)) {
 			avb_1722_1_create_sdp_packet(ENTITY_DEPARTING, my_guid);
@@ -372,6 +405,7 @@ static void avb_1722_1_sdp_advertising_periodic(chanend c_tx)
 			sdp_advertise_state = SDP_ADVERTISE_IDLE;
 		}
 		break;
+
 	default:
 		break;
 	}

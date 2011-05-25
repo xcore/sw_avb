@@ -1103,10 +1103,12 @@ avb_status_t avb_mrp_process_packet(unsigned int buf[], int len)
   char *msg = (char *) &buf[0] + sizeof(mrp_ethernet_hdr) + sizeof(mrp_header);
   avb_status_t status = AVB_NO_STATUS;
   int invalid_message = 0;
-  //  simple_printf("mrp packet %u\n", len);
+
   if (etype == AVB_SRP_ETHERTYPE ||
       etype == AVB_MMRP_ETHERTYPE ||
       etype == AVB_MVRP_ETHERTYPE) {
+	status = AVB_1722_1_OK;
+
     while (!invalid_message && 
            msg < end && 
            (*msg != 0 || *(msg+1) != 0)) {      
