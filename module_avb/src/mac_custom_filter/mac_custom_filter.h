@@ -46,10 +46,10 @@ inline int mac_custom_filter(unsigned int buf[])
       {
         int cd_flag;
         if (qhdr) {
-          cd_flag = (buf[4] >> 15) & 1;
+          cd_flag = (buf[4] >> 23) & 1;
         }
         else {
-          cd_flag = (buf[3] >> 15) & 1;
+          cd_flag = (buf[3] >> 23) & 1;
         }
         if (cd_flag) 
           result = MAC_FILTER_AVB_CONTROL;

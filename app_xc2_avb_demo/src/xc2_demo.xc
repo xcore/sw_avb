@@ -262,19 +262,22 @@ void demo(chanend talker_ctl[],
       case tmr when timerafter(timeout) :> void:        
         timeout += PERIODIC_POLL_TIME;
 
-        avb_status = avb_periodic();
-        switch (avb_status)
-          {
-          case AVB_MAAP_ADDRESSES_RESERVED:
-            for(int i=0;i<AVB_NUM_SOURCES;i++) {
-              avb_1722_maap_get_offset_address(macaddr, i);
-              // activate the source
-              set_avb_source_dest(i, macaddr, 6);
-              set_avb_source_state(i, AVB_SOURCE_STATE_POTENTIAL);
-            }
-            break;
-          }               
-        break;
+		do {
+			avb_status = avb_periodic();
+			switch (avb_status)
+			{
+			case AVB_MAAP_ADDRESSES_RESERVED:
+				for(int i=0;i<AVB_NUM_SOURCES;i++) {
+					avb_1722_maap_get_offset_address(macaddr, i);
+					// activate the source
+					set_avb_source_dest(i, macaddr, 6);
+					set_avb_source_state(i, AVB_SOURCE_STATE_POTENTIAL);
+				}
+				break;
+			}
+		} while (avb_status != AVB_NO_STATUS);
+
+		break;
       }
   }
 }

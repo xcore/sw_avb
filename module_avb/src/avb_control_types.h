@@ -84,9 +84,21 @@ typedef enum avb_status_t {
   AVB_1722_1_ENTITY_ADDED,		 /*!< An entity has been added to the
                                       database by the discovery protocol */
 
-  AVB_1722_1_ENTITY_REMOVED  	 /*!< An entity has been removed from the
+  AVB_1722_1_ENTITY_REMOVED,  	 /*!< An entity has been removed from the
                                       database by the discovery protocol */
 
+  AVB_1722_1_CONNECT_TALKER,	 /*!< A connection management protocol message
+									  has been received indicating that a talker
+									  component should initiate a connection */
+
+  AVB_1722_1_DISCONNECT_TALKER,  /*!< An SCM message indicates that a talker should
+									  release a connection */
+
+  AVB_1722_1_CONNECT_LISTENER,	 /*!< An SCM message indicates that a listener should
+									  initiate a connection */
+
+  AVB_1722_1_DISCONNECT_LISTENER /*!< An SCM message indicates that a listener should
+									  release a connection */
 } avb_status_t;
 
 

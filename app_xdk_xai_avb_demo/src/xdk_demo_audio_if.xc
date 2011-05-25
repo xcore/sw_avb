@@ -339,6 +339,7 @@ void demo(chanend listener_ctl[], chanend talker_ctl[],
       case tmr when timerafter(timeout) :> void:        
         timeout += PERIODIC_POLL_TIME;
 
+        do {
         avb_status = avb_periodic();
         switch (avb_status)
           {
@@ -351,7 +352,7 @@ void demo(chanend listener_ctl[], chanend talker_ctl[],
             }
             break;
           }
-        
+        } while (avb_status != AVB_NO_STATUS);
         
         // Call the stream manager to check for new streams/manage
         // what is being listened to

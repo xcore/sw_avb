@@ -447,6 +447,7 @@ void xdk_demo(chanend listener_ctl[], chanend talker_ctl[],
                                      
       default:
         // Periodic avb config processing
+    	do {
         avb_status = avb_periodic();
 
         switch (avb_status) 
@@ -460,7 +461,7 @@ void xdk_demo(chanend listener_ctl[], chanend talker_ctl[],
             }
             break;
           }
-
+    	} while (avb_status != AVB_NO_STATUS);
 
         // Handle any button events
         button_manager(lcd_ctl, media_ctl[0], txt_svr, 

@@ -396,6 +396,7 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 			case tmr when timerafter(timeout) :> void:
 			timeout += PERIODIC_POLL_TIME;
 
+			do {
 			avb_status = avb_periodic();
 			switch (avb_status)
 			{
@@ -407,6 +408,7 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 				simple_printf("Talker stream prepared, press Channel Select to advertise stream.\n");
 				break;
 			}
+			} while (avb_status != AVB_NO_STATUS);
 
 			break;
 		}

@@ -73,6 +73,10 @@
 #define AVB_1722_1_MAX_LISTENERS_PER_TALKER 4
 #endif
 
+#ifndef AVB_1722_1_MAX_INFLIGHT_COMMANDS
+#define AVB_1722_1_MAX_INFLIGHT_COMMANDS 2
+#endif
+
 
 /** \fn avb_1722_1_init
  *
@@ -82,10 +86,9 @@ void avb_1722_1_init(unsigned char macaddr[6], unsigned int serial_number);
 
 /** \fn avb_1722_1_periodic
  *
- *  This function performs periodic processing. It must be called
- *  approximately 4 times a second.
+ *  This function performs periodic processing. It must be called frequently
  */
-void avb_1722_1_periodic(chanend c_tx);
+avb_status_t avb_1722_1_periodic(chanend c_tx);
 
 /** \fn avb_1722_1_process_packet
  *

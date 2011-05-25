@@ -217,7 +217,10 @@ void avb_init(chanend media_ctl[],
 avb_status_t avb_periodic(void) {
   mrp_periodic();
 #ifdef USE_1722_1
-  avb_1722_1_periodic(c_mac_tx);
+  {
+	  avb_status_t res = avb_1722_1_periodic(c_mac_tx);
+	  if (res != AVB_NO_STATUS) return res;
+  }
 #endif
   return avb_1722_maap_periodic(c_mac_tx);  
 }

@@ -89,7 +89,9 @@ void avb_start(void);
 /** Perform AVB periodic processing.
  *
  *  This function performs AVB periodic processing. It should be called 
- *  from the main control thread at least once each ms. 
+ *  from the main control thread at least once each ms. If it returns
+ *  a state other than AVB_NO_STATUS then it should be called again
+ *  immediately.
  * 
  *  \returns A status update from the periodic processing to indicate
  *           an event due to a timeout etc. (see :c:type:`avb_status_t`)

@@ -444,6 +444,7 @@ void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl) {
 			case tmr when timerafter(timeout) :> void:
 			timeout += PERIODIC_POLL_TIME;
 
+			do {
 			avb_status = avb_periodic();
 			switch (avb_status)
 			{
@@ -456,6 +457,7 @@ void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl) {
 				}
 				break;
 			}
+			} while (avb_status != AVB_NO_STATUS);
 
 			// Call the stream manager to check for new streams/manage
 			// what is being listened to

@@ -363,12 +363,14 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 			case tmr when timerafter(timeout) :> void:
 			timeout += PERIODIC_POLL_TIME;
 
+			do {
 			avb_status = avb_periodic();
 			switch (avb_status)
 			{
 			default:
 				break;
 			}
+			} while (avb_status != AVB_NO_STATUS);
 
 			// Look for new streams
 			{
