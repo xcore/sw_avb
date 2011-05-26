@@ -19,22 +19,28 @@
 #define AVB_MAX_CHANNELS_PER_STREAM 8
 
 /* Listener configuration */
-#define AVB_NUM_SINKS 1
-#define AVB_NUM_LISTENER_UNITS 1
+#define AVB_NUM_SINKS 0
+#define AVB_NUM_LISTENER_UNITS 0
 
 /* Talker configuration */
-#define AVB_NUM_SOURCES 0
-#define AVB_NUM_TALKER_UNITS 0
+#define AVB_NUM_SOURCES 1
+#define AVB_NUM_TALKER_UNITS 1
 
 /* Media configuration */
-#define AVB_NUM_MEDIA_OUTPUTS 2
-#define AVB_NUM_MEDIA_INPUTS 0
-#define AVB_NUM_MEDIA_UNITS 2
+#define AVB_NUM_MEDIA_OUTPUTS 0
+#define AVB_NUM_MEDIA_INPUTS 2
+#define AVB_NUM_MEDIA_UNITS 1
 
 /* Media clock configuration */
 #define AVB_NUM_MEDIA_CLOCKS 1
 
 /* Add synths from channels 3/4 upwards in I2S for this demo */
 #define I2S_SYNTH_FROM 1
+
+#define USE_1722_1
+
+#define AVB_1722_1_SDP_ENTITY_CAPABILITIES  	(AVB_1722_1_SDP_ENTITY_CAPABILITES_17221_CONTROL)
+#define AVB_1722_1_SDP_TALKER_STREAM_SOURCES 	1
+#define AVB_1722_1_SDP_TALKER_CAPABILITIES 		(AVB_1722_1_SDP_TALKER_CAPABILITES_IMPLEMENTED|AVB_1722_1_SDP_TALKER_CAPABILITES_AUDIO_SOURCE)
 
 #endif

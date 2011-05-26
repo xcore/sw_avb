@@ -3,6 +3,7 @@
 #include "avb_1722_common.h"
 #include "avb_1722_1.h"
 #include "avb_1722_1_protocol.h"
+#include "avb_api.h"
 #include "ethernet_tx_client.h"
 #include "nettypes.h"
 #include "misc_timer.h"
@@ -271,12 +272,14 @@ static avb_status_t process_avb_1722_1_sec_packet(avb_1722_1_sec_packet_t* pkt)
 
 static unsigned scm_listener_valid_listener_unique()
 {
-	return 0 < AVB_1722_1_MAX_LISTENERS;
+	return scm_listener_rcvd_cmd_resp.listener_unique_id < AVB_1722_1_MAX_LISTENERS;
 }
 
 static unsigned scm_listener_listener_is_connected()
 {
-	return 0;
+	enum avb_sink_state_t state;
+	get_avb_sink_state(scm_listener_rcvd_cmd_resp.listener_unique_id, &state);
+	return state == AVB_SINK_STATE_DISABLED;
 }
 
 static avb_1722_1_scm_status_type scm_listener_get_state()
@@ -286,7 +289,7 @@ static avb_1722_1_scm_status_type scm_listener_get_state()
 
 static unsigned scm_talker_valid_talker_unique()
 {
-	return 0 < AVB_1722_1_MAX_TALKERS;
+	return scm_talker_rcvd_cmd_resp.listener_unique_id < AVB_1722_1_MAX_TALKERS;
 }
 
 static avb_1722_1_scm_status_type scm_talker_get_state()
@@ -324,11 +327,13 @@ static void avb_1722_1_create_scm_packet(avb_1722_1_scm_rcvd_cmd_resp* rcr)
 
 }
 
-static void scm_listener_tx_command(unsigned message_type)
+static void scm_listener_tx_command(unsigned message_type, unsigned timeout_ms)
 {
 	scm_talker_rcvd_cmd_resp.message_type = message_type;
 	scm_listener_rcvd_cmd_resp.status = SCM_STATUS_SUCCESS;
 	avb_1722_1_create_scm_packet(&scm_listener_rcvd_cmd_resp);
+
+	// set up inflight command
 }
 
 static void scm_listener_tx_response(unsigned type, unsigned error_code)
@@ -525,7 +530,7 @@ static avb_status_t avb_1722_1_scm_listener_periodic(chanend c_tx)
 			scm_listener_tx_response(SCM_CMD_CONNECT_RX_RESPONSE, SCM_STATUS_LISTENER_UNKNOWN_ID);
 		} else {
 			if (!scm_listener_listener_is_connected()) {
-				scm_listener_tx_command(SCM_CMD_CONNECT_TX_COMMAND);
+				scm_listener_tx_command(SCM_CMD_CONNECT_TX_COMMAND, 2000);
 			} else {
 				scm_listener_tx_response(SCM_CMD_CONNECT_RX_RESPONSE, SCM_STATUS_LISTENER_EXCLUSIVE);
 			}
@@ -537,7 +542,7 @@ static avb_status_t avb_1722_1_scm_listener_periodic(chanend c_tx)
 			scm_listener_tx_response(SCM_CMD_DISCONNECT_RX_RESPONSE, SCM_STATUS_LISTENER_UNKNOWN_ID);
 		} else {
 			if (scm_listener_listener_is_connected()) {
-				scm_listener_tx_command(SCM_CMD_CONNECT_TX_COMMAND);
+				scm_listener_tx_command(SCM_CMD_DISCONNECT_TX_COMMAND, 200);
 			} else {
 				scm_listener_tx_response(SCM_CMD_DISCONNECT_RX_RESPONSE, SCM_STATUS_NOT_CONNECTED);
 			}

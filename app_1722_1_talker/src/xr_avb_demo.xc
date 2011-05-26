@@ -13,6 +13,7 @@
 #include "audio_codec_CS42448.h"
 #include "simple_printf.h"
 #include "media_fifo.h"
+#include "avb_1722_1.h"
 
 // This is the number of master clocks in a word clock
 #define MASTER_TO_WORDCLOCK_RATIO 512
@@ -22,7 +23,7 @@
 #define PERIODIC_POLL_TIME 5000
 
 // Timeout for debouncing buttons
-#define BUTTON_TIMEOUT_PERIOD (20000000)
+#define BUTTON_TIMEOUT_PERIOD (50000000)
 
 // Commands sent from the GPIO to the main demo app
 enum gpio_cmd {
@@ -87,30 +88,26 @@ on stdcore[0]: in buffered port:32 p_aud_din[4] = {
 
 on stdcore[0]: port p_uart_tx = PORT_UART_TX;
 
-media_output_fifo_data_t ofifo_data[AVB_NUM_MEDIA_OUTPUTS];
-media_output_fifo_t ofifos[AVB_NUM_MEDIA_OUTPUTS];
+media_input_fifo_data_t ififo_data[AVB_NUM_MEDIA_INPUTS];
+media_input_fifo_t ififos[AVB_NUM_MEDIA_INPUTS];
+
 
 int main(void) {
 	// ethernet tx channels
 	chan tx_link[3];
-	chan rx_link[3];
+	chan rx_link[2];
 	chan connect_status;
 
 	//ptp channels
-	chan ptp_link[2];
+	chan ptp_link[3];
 
 	// avb unit control
-	chan listener_ctl[AVB_NUM_LISTENER_UNITS];
-	chan buf_ctl[AVB_NUM_LISTENER_UNITS];
+	chan talker_ctl[AVB_NUM_TALKER_UNITS];
 
 	// media control
 	chan media_ctl[AVB_NUM_MEDIA_UNITS];
 	chan clk_ctl[AVB_NUM_MEDIA_CLOCKS];
 	chan media_clock_ctl;
-
-	// audio channels
-	streaming
-	chan c_samples_to_codec;
 
 	// control channel from the GPIO buttons
 	chan c_gpio_ctl;
@@ -127,7 +124,7 @@ int main(void) {
 					mii);
 
 			ethernet_server(mii, mac_address,
-					rx_link, 3,
+					rx_link, 2,
 					tx_link, 3,
 					smi, connect_status);
 		}
@@ -139,7 +136,7 @@ int main(void) {
 			// launching  the main function of the thread
 			audio_clock_CS2300CP_init(r_i2c, MASTER_TO_WORDCLOCK_RATIO);
 
-			ptp_server_and_gpio(rx_link[0], tx_link[0], ptp_link, 2,
+			ptp_server_and_gpio(rx_link[0], tx_link[0], ptp_link, 3,
 					PTP_GRANDMASTER_CAPABLE,
 					c_gpio_ctl);
 		}
@@ -148,14 +145,15 @@ int main(void) {
 		{
 			media_clock_server(media_clock_ctl,
 					ptp_link[1],
-					buf_ctl,
-					AVB_NUM_LISTENER_UNITS,
+					null,
+					0,
 					clk_ctl,
-					AVB_NUM_MEDIA_CLOCKS);
+					1);
 		}
 
 		// AVB - Audio
 		on stdcore[0]: {
+			init_media_input_fifos(ififos, ififo_data, AVB_NUM_MEDIA_INPUTS);
 			configure_clock_src(b_mclk, p_aud_mclk);
 			start_clock(b_mclk);
 			par
@@ -171,28 +169,18 @@ int main(void) {
 						p_aud_din,
 						AVB_NUM_MEDIA_INPUTS,
 						MASTER_TO_WORDCLOCK_RATIO,
-						c_samples_to_codec,
 						null,
+						ififos,
 						media_ctl[0],
 						0);
 			}
 		}
 
-		// AVB Listener
-		on stdcore[0]: avb_1722_listener(rx_link[1],
+		// AVB Talker - must be on the same core as the audio interface
+		on stdcore[0]: avb_1722_talker(ptp_link[0],
 				tx_link[1],
-				buf_ctl[0],
-				listener_ctl[0],
-				AVB_NUM_SINKS);
-
-		on stdcore[0]:
-		{	init_media_output_fifos(ofifos, ofifo_data, AVB_NUM_MEDIA_OUTPUTS);
-			media_output_fifo_to_xc_channel_split_lr(media_ctl[1],
-					c_samples_to_codec,
-					0, // clk_ctl index
-					ofifos,
-					AVB_NUM_MEDIA_OUTPUTS);
-		}
+				talker_ctl[0],
+				AVB_NUM_SOURCES);
 
 		// Xlog server
 		on stdcore[0]:
@@ -204,9 +192,9 @@ int main(void) {
 		on stdcore[0]:
 		{
 			// First initialize avb higher level protocols
-			avb_init(media_ctl, listener_ctl, null, media_clock_ctl, rx_link[2], tx_link[2], ptp_link[0]);
+			avb_init(media_ctl, null, talker_ctl, media_clock_ctl, rx_link[1], tx_link[2], ptp_link[2]);
 
-			demo(rx_link[2], tx_link[2], c_gpio_ctl, connect_status);
+			demo(rx_link[1], tx_link[2], c_gpio_ctl, connect_status);
 		}
 	}
 
@@ -264,19 +252,36 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 
 	timer tmr;
 	int avb_status = 0;
+	int map[8];
+	unsigned char macaddr[6];
 	unsigned timeout;
-	unsigned listener_active = 0;
-	unsigned listener_ready = 0;
+	unsigned talker_active = 0;
+	unsigned talker_ok_to_start = 0;
 	unsigned sample_rate = 48000;
 
 	// Initialize the media clock (a ptp derived clock)
-	set_device_media_clock_type(0, MEDIA_FIFO_DERIVED);
-	//set_device_media_clock_type(0, LOCAL_CLOCK);
+	//set_device_media_clock_type(0, MEDIA_FIFO_DERIVED);
+	set_device_media_clock_type(0, LOCAL_CLOCK);
 	//set_device_media_clock_type(0, PTP_DERIVED);
 	set_device_media_clock_rate(0, sample_rate);
 	set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_ENABLED);
 
+	// Configure the source stream
+	set_avb_source_name(0, "2 channel testing stream");
+
+	set_avb_source_channels(0, 2);
+	for (int i = 0; i < 2; i++)
+		map[i] = i;
+	set_avb_source_map(0, map, 2);
+	set_avb_source_format(0, AVB_SOURCE_FORMAT_MBLA_24BIT, sample_rate);
+	set_avb_source_sync(0, 0); // use the media_clock defined above
+
+	// Request a multicast addresses for stream transmission
+	avb_1722_maap_request_addresses(AVB_NUM_SOURCES, null);
+
 	avb_start();
+
+	avb_1722_1_sdp_announce();
 
 	tmr	:> timeout;
 	while (1) {
@@ -289,6 +294,16 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 
 		select
 		{
+			// Check ethernet link status
+			case inuchar_byref(connect_status, ifnum):
+	        {
+				int status;
+				status = inuchar(connect_status);
+				(void) inuchar(connect_status);
+				(void) inct(connect_status);
+				avb_start();
+	        }
+			break;
 
 			// Receive any incoming AVB packets (802.1Qat, 1722_MAAP)
 			case avb_get_control_packet(c_rx, buf, nbytes):
@@ -297,6 +312,22 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 			avb_status = avb_process_control_packet(buf, nbytes, c_tx);
 			switch (avb_status)
 			{
+				case AVB_SRP_TALKER_ROUTE_FAILED:
+				avb_srp_get_failed_stream(streamId);
+				// handle a routing failure here
+				break;
+				case AVB_SRP_LISTENER_ROUTE_FAILED:
+				avb_srp_get_failed_stream(streamId);
+				// handle a routing failure here
+				break;
+				case AVB_MAAP_ADDRESSES_LOST:
+				// oh dear, someone else is using our multicast address
+				for (int i=0;i<AVB_NUM_SOURCES;i++)
+				set_avb_source_state(i, AVB_SOURCE_STATE_DISABLED);
+
+				// request a different address
+				avb_1722_maap_request_addresses(AVB_NUM_SOURCES, null);
+				break;
 				default:
 				break;
 			}
@@ -308,51 +339,56 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 			case c_gpio_ctl :> int cmd:
 			switch (cmd)
 			{
-				case CHAN_SEL:
+			case CHAN_SEL:
+			{
+				// The channel select button starts and stops listening
+				if (talker_active)
 				{
-					if (listener_active)
-					{
-						set_avb_sink_state(0, AVB_SINK_STATE_DISABLED);
-						listener_active = 0;
-						simple_printf("Listener disabled\n");
-					}
-					else if (listener_ready)
-					{
-						set_avb_sink_state(0, AVB_SINK_STATE_POTENTIAL);
-						listener_active = 1;
-						simple_printf("Listener enabled\n");
-					}
+					set_avb_source_state(0, AVB_SOURCE_STATE_DISABLED);
+					talker_active = 0;
+					simple_printf("Talker disabled\n");
 				}
-				break;
-				case STREAM_SEL:
+				else if (talker_ok_to_start)
 				{
-					// Channel select switches the sample frequency
-					// The stream sel button cycles through frequency settings
-					switch (sample_rate)
-					{
-					case 8000:
-						sample_rate = 16000;
-						break;
-					case 16000:
-						sample_rate = 32000;
-						break;
-					case 32000:
-						sample_rate = 44100;
-						break;
-					case 44100:
-						sample_rate = 48000;
-						break;
-					case 48000:
-						sample_rate = 8000;
-						break;
-					}
-					simple_printf("Frequency set to %d Hz\n", sample_rate);
+					set_avb_source_state(0, AVB_SOURCE_STATE_POTENTIAL);
+					talker_active = 1;
+					simple_printf("Talker enabled\n");
+				}
+			}
+			break;
+			case STREAM_SEL:
+			{
+				// The stream sel button cycles through frequency settings
+				switch (sample_rate)
+				{
+				case 8000:
+					sample_rate = 16000;
+					break;
+				case 16000:
+					sample_rate = 32000;
+					break;
+				case 32000:
+					sample_rate = 44100;
+					break;
+				case 44100:
+					sample_rate = 48000;
+					break;
+				case 48000:
+					sample_rate = 8000;
+					break;
+				}
+				simple_printf("Frequency set to %d Hz\n", sample_rate);
 
-					set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_DISABLED);
-					set_device_media_clock_rate(0, sample_rate);
-					set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_ENABLED);
-				}
-				break;
+
+				set_avb_source_format(0, AVB_SOURCE_FORMAT_MBLA_24BIT, sample_rate);
+
+				set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_DISABLED);
+				set_device_media_clock_rate(0, sample_rate);
+				set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_ENABLED);
+			}
+			break;
+			default:
+			break;
 			}
 			break;
 
@@ -364,35 +400,15 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 			avb_status = avb_periodic();
 			switch (avb_status)
 			{
-			default:
+				case AVB_MAAP_ADDRESSES_RESERVED:
+				avb_1722_maap_get_offset_address(macaddr, 0);
+				// activate the source
+				set_avb_source_dest(0, macaddr, 6);
+				talker_ok_to_start = 1;
+				simple_printf("Talker stream prepared, press Channel Select to advertise stream.\n");
 				break;
 			}
 			} while (avb_status != AVB_NO_STATUS);
-
-			// Look for new streams
-			{
-			  unsigned int streamId[2];
-			  unsigned vlan;
-			  unsigned char addr[6];
-			  int map[2] = { 0 ,  1 };
-
-			  // check if there is a new stream
-			  int res = avb_check_for_new_stream(streamId, vlan, addr);
-
-			  // if so, add it to the stream table
-			  if (res && listener_ready==0) {
-			    simple_printf("Found %x%x\n.", streamId[0], streamId[1]);
-			    set_avb_sink_sync(0, 0);
-			    set_avb_sink_channels(0, 2);
-			    set_avb_sink_map(0, map, 2);
-			    set_avb_sink_state(0, AVB_SINK_STATE_DISABLED);
-			    set_avb_sink_id(0, streamId);
-			    set_avb_sink_vlan(0, vlan);
-			    set_avb_sink_addr(0, addr, 6);
-
-			    listener_ready = 1;
-			  }
-			}
 
 			break;
 		}
