@@ -59,9 +59,7 @@ enum { SCM_TALKER_IDLE,
 	   SCM_TALKER_GET_STATE,
 	   SCM_TALKER_GET_CONNECTION,
 	   SCM_TALKER_WAITING_FOR_CONNECT,
-	   SCM_TALKER_WAITING_FOR_DISCONNECT,
-	   SCM_TALKER_CONNECTED,
-	   SCM_TALKER_DISCONNECTED
+	   SCM_TALKER_WAITING_FOR_DISCONNECT
 } scm_talker_state = SCM_TALKER_IDLE;
 
 enum { SCM_LISTENER_IDLE,
@@ -72,9 +70,7 @@ enum { SCM_LISTENER_IDLE,
 	   SCM_LISTENER_DISCONNECT_TX_RESPONSE,
 	   SCM_LISTENER_GET_STATE,
 	   SCM_LISTENER_WAITING_FOR_CONNECT,
-	   SCM_LISTENER_WAITING_FOR_DISCONNECT,
-	   SCM_LISTENER_CONNECTED,
-	   SCM_LISTENER_DISCONNECTED
+	   SCM_LISTENER_WAITING_FOR_DISCONNECT
 } scm_listener_state = SCM_LISTENER_IDLE;
 
 //! Record for entries in the SRP entity database
@@ -308,7 +304,7 @@ static void avb_1722_1_create_scm_packet(avb_1722_1_scm_rcvd_cmd_resp* rcr)
 	struct ethernet_hdr_t *hdr = (ethernet_hdr_t*) &avb_1722_1_buf[0];
 	avb_1722_1_scm_packet_t *pkt = (avb_1722_1_scm_packet_t*) (hdr + 1);
 
-	avb_1722_1_create_1722_1_header(avb_1722_1_scm_dest_addr, DEFAULT_1722_1_SCM_SUBTYPE, rcr->message_type, 0, 40, hdr);
+	avb_1722_1_create_1722_1_header(avb_1722_1_scm_dest_addr, DEFAULT_1722_1_SCM_SUBTYPE, rcr->message_type, rcr->status, 40, hdr);
 
 	SET_LONG_WORD(pkt->stream_id, rcr->stream_id);
 	SET_LONG_WORD(pkt->controller_guid, rcr->controller_guid);
@@ -331,17 +327,20 @@ static void avb_1722_1_create_scm_packet(avb_1722_1_scm_rcvd_cmd_resp* rcr)
 static void scm_listener_tx_command(unsigned message_type)
 {
 	scm_talker_rcvd_cmd_resp.message_type = message_type;
-	avb_1722_1_create_scm_packet(&scm_talker_rcvd_cmd_resp);
+	scm_listener_rcvd_cmd_resp.status = SCM_STATUS_SUCCESS;
+	avb_1722_1_create_scm_packet(&scm_listener_rcvd_cmd_resp);
 }
 
-static void scm_listener_tx_response(unsigned error_code)
+static void scm_listener_tx_response(unsigned type, unsigned error_code)
 {
-	scm_talker_rcvd_cmd_resp.status = error_code;
-	avb_1722_1_create_scm_packet(&scm_talker_rcvd_cmd_resp);
+	scm_listener_rcvd_cmd_resp.message_type = type;
+	scm_listener_rcvd_cmd_resp.status = error_code;
+	avb_1722_1_create_scm_packet(&scm_listener_rcvd_cmd_resp);
 }
 
-static void scm_talker_tx_response(unsigned error_code)
+static void scm_talker_tx_response(unsigned type, unsigned error_code)
 {
+	scm_talker_rcvd_cmd_resp.message_type = type;
 	scm_talker_rcvd_cmd_resp.status = error_code;
 	avb_1722_1_create_scm_packet(&scm_talker_rcvd_cmd_resp);
 }
@@ -377,9 +376,8 @@ static void store_rcvd_cmd_resp(avb_1722_1_scm_rcvd_cmd_resp* store, avb_1722_1_
 	store->stream_dest_mac[3] = pkt->dest_mac[3];
 	store->stream_dest_mac[4] = pkt->dest_mac[4];
 	store->stream_dest_mac[5] = pkt->dest_mac[5];
-	//store->message_type;
-	//store->status;
-
+	store->message_type = GET_1722_1_MSG_TYPE(&(pkt->header));
+	store->status = GET_1722_1_VALID_TIME(&(pkt->header));
 }
 
 static avb_status_t process_avb_1722_1_scm_talker_packet(unsigned message_type, avb_1722_1_scm_packet_t* pkt)
@@ -473,7 +471,7 @@ static avb_status_t avb_1722_1_scm_talker_periodic(chanend c_tx)
 
 	case SCM_TALKER_CONNECT:
 		if (!scm_talker_valid_talker_unique(1)) {
-			scm_talker_tx_response(SCM_STATUS_TALKER_UNKNOWN_ID);
+			scm_talker_tx_response(SCM_CMD_CONNECT_TX_RESPONSE, SCM_STATUS_TALKER_UNKNOWN_ID);
 			scm_talker_state = SCM_TALKER_WAITING;
 			return AVB_NO_STATUS;
 		} else {
@@ -483,7 +481,7 @@ static avb_status_t avb_1722_1_scm_talker_periodic(chanend c_tx)
 		break;
 	case SCM_TALKER_DISCONNECT:
 		if (!scm_talker_valid_talker_unique(1)) {
-			scm_talker_tx_response(SCM_STATUS_TALKER_UNKNOWN_ID);
+			scm_talker_tx_response(SCM_CMD_DISCONNECT_TX_RESPONSE, SCM_STATUS_TALKER_UNKNOWN_ID);
 			scm_talker_state = SCM_TALKER_WAITING;
 			return AVB_NO_STATUS;
 		} else {
@@ -493,24 +491,18 @@ static avb_status_t avb_1722_1_scm_talker_periodic(chanend c_tx)
 		break;
 	case SCM_TALKER_GET_STATE:
 		if (!scm_talker_valid_talker_unique(1)) {
-			scm_talker_tx_response(SCM_STATUS_TALKER_UNKNOWN_ID);
+			scm_talker_tx_response(SCM_CMD_GET_TX_STATE_RESPONSE, SCM_STATUS_TALKER_UNKNOWN_ID);
 		} else {
-			scm_talker_tx_response(scm_talker_get_state());
+			scm_talker_tx_response(SCM_CMD_GET_TX_STATE_RESPONSE, scm_talker_get_state());
 		}
 		scm_talker_state = SCM_TALKER_WAITING;
 		return AVB_NO_STATUS;
 	case SCM_TALKER_GET_CONNECTION:
 		if (!scm_talker_valid_talker_unique(1)) {
-			scm_talker_tx_response(SCM_STATUS_TALKER_UNKNOWN_ID);
+			scm_talker_tx_response(SCM_CMD_GET_TX_CONNECTION_RESPONSE, SCM_STATUS_TALKER_UNKNOWN_ID);
 		} else {
-			scm_talker_tx_response(scm_talker_get_connection());
+			scm_talker_tx_response(SCM_CMD_GET_TX_CONNECTION_RESPONSE, scm_talker_get_connection());
 		}
-		scm_talker_state = SCM_TALKER_WAITING;
-		return AVB_NO_STATUS;
-	case SCM_TALKER_CONNECTED:
-		scm_talker_state = SCM_TALKER_WAITING;
-		return AVB_NO_STATUS;
-	case SCM_TALKER_DISCONNECTED:
 		scm_talker_state = SCM_TALKER_WAITING;
 		return AVB_NO_STATUS;
 	}
@@ -530,43 +522,39 @@ static avb_status_t avb_1722_1_scm_listener_periodic(chanend c_tx)
 		break;
 	case SCM_LISTENER_CONNECT_RX_COMMAND:
 		if (!scm_listener_valid_listener_unique()) {
-			scm_listener_tx_response(SCM_STATUS_LISTENER_UNKNOWN_ID);
+			scm_listener_tx_response(SCM_CMD_CONNECT_RX_RESPONSE, SCM_STATUS_LISTENER_UNKNOWN_ID);
 		} else {
 			if (!scm_listener_listener_is_connected()) {
 				scm_listener_tx_command(SCM_CMD_CONNECT_TX_COMMAND);
 			} else {
-				scm_listener_tx_response(SCM_STATUS_LISTENER_EXCLUSIVE);
+				scm_listener_tx_response(SCM_CMD_CONNECT_RX_RESPONSE, SCM_STATUS_LISTENER_EXCLUSIVE);
 			}
 		}
 		scm_listener_state = SCM_LISTENER_WAITING;
 		break;
 	case SCM_LISTENER_DISCONNECT_RX_COMMAND:
 		if (!scm_listener_valid_listener_unique()) {
-			scm_listener_tx_response(SCM_STATUS_LISTENER_UNKNOWN_ID);
+			scm_listener_tx_response(SCM_CMD_DISCONNECT_RX_RESPONSE, SCM_STATUS_LISTENER_UNKNOWN_ID);
 		} else {
 			if (scm_listener_listener_is_connected()) {
 				scm_listener_tx_command(SCM_CMD_CONNECT_TX_COMMAND);
 			} else {
-				scm_listener_tx_response(SCM_STATUS_NOT_CONNECTED);
+				scm_listener_tx_response(SCM_CMD_DISCONNECT_RX_RESPONSE, SCM_STATUS_NOT_CONNECTED);
 			}
 		}
 		scm_listener_state = SCM_LISTENER_WAITING;
 		break;
 	case SCM_LISTENER_CONNECT_TX_RESPONSE:
-		if (!scm_listener_valid_listener_unique()) {
-			scm_listener_tx_response(SCM_STATUS_LISTENER_UNKNOWN_ID);
-			scm_listener_state = SCM_LISTENER_WAITING;
-		} else {
+		if (scm_listener_valid_listener_unique()) {
+			scm_listener_tx_response(SCM_CMD_CONNECT_RX_RESPONSE, 0);
 			scm_listener_remove_inflight();
 			scm_listener_state = SCM_LISTENER_WAITING_FOR_CONNECT;
 			return AVB_1722_1_CONNECT_LISTENER;
 		}
 		break;
 	case SCM_LISTENER_DISCONNECT_TX_RESPONSE:
-		if (!scm_listener_valid_listener_unique()) {
-			scm_listener_tx_response(SCM_STATUS_LISTENER_UNKNOWN_ID);
-			scm_listener_state = SCM_LISTENER_WAITING;
-		} else {
+		if (scm_listener_valid_listener_unique()) {
+			scm_listener_tx_response(SCM_CMD_DISCONNECT_RX_RESPONSE, 0);
 			scm_listener_remove_inflight();
 			scm_listener_state = SCM_LISTENER_WAITING_FOR_DISCONNECT;
 			return AVB_1722_1_DISCONNECT_LISTENER;
@@ -574,16 +562,10 @@ static avb_status_t avb_1722_1_scm_listener_periodic(chanend c_tx)
 		break;
 	case SCM_LISTENER_GET_STATE:
 		if (!scm_listener_valid_listener_unique()) {
-			scm_listener_tx_response(SCM_STATUS_LISTENER_UNKNOWN_ID);
+			scm_listener_tx_response(SCM_CMD_GET_RX_STATE_RESPONSE, SCM_STATUS_LISTENER_UNKNOWN_ID);
 		} else {
-			scm_listener_tx_response(scm_listener_get_state());
+			scm_listener_tx_response(SCM_CMD_GET_RX_STATE_RESPONSE, scm_listener_get_state());
 		}
-		scm_listener_state = SCM_LISTENER_WAITING;
-		break;
-	case SCM_LISTENER_CONNECTED:
-		scm_listener_state = SCM_LISTENER_WAITING;
-		break;
-	case SCM_LISTENER_DISCONNECTED:
 		scm_listener_state = SCM_LISTENER_WAITING;
 		break;
 	}
@@ -606,12 +588,12 @@ void avb_1722_1_scm_talker_connection_complete(short code)
 	switch (scm_talker_state)
 	{
 	case SCM_TALKER_WAITING_FOR_CONNECT:
-		scm_talker_rcvd_cmd_resp.status = code;
-		scm_talker_state = SCM_TALKER_CONNECTED;
+		scm_talker_tx_response(SCM_CMD_CONNECT_TX_RESPONSE, code);
+		scm_talker_state = SCM_TALKER_WAITING;
 		break;
 	case SCM_TALKER_WAITING_FOR_DISCONNECT:
-		scm_talker_rcvd_cmd_resp.status = code;
-		scm_talker_state = SCM_TALKER_DISCONNECTED;
+		scm_talker_tx_response(SCM_CMD_DISCONNECT_TX_RESPONSE, code);
+		scm_talker_state = SCM_TALKER_WAITING;
 		break;
 	default:
 		break;
@@ -625,11 +607,11 @@ void avb_1722_1_scm_listener_connection_complete(short code)
 	{
 	case SCM_LISTENER_WAITING_FOR_CONNECT:
 		scm_listener_rcvd_cmd_resp.status = code;
-		scm_listener_state = SCM_LISTENER_CONNECTED;
+		scm_listener_state = SCM_LISTENER_WAITING;
 		break;
 	case SCM_LISTENER_WAITING_FOR_DISCONNECT:
 		scm_listener_rcvd_cmd_resp.status = code;
-		scm_listener_state = SCM_LISTENER_DISCONNECTED;
+		scm_listener_state = SCM_LISTENER_WAITING;
 		break;
 	default:
 		break;
