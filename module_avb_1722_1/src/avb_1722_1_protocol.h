@@ -4,6 +4,7 @@
 
 #define MAX_AVB_1722_1_PDU_SIZE (40)
 
+
 /**
  * The general header for a 1722 packet
  */
@@ -22,8 +23,7 @@ typedef struct avb_1722_1_packet_header_t {
  */
 typedef struct {
 	avb_1722_1_packet_header_t header;
-	short entity_guid_lo[2];
-	short entity_guid_hi[2];
+	short entity_guid[4];
 	short vendor_id[2];
 	short model_id[2];
 	short entity_capabilities[2];
@@ -123,12 +123,23 @@ typedef union {
 
 #define SET_WORD(member, data) \
 	do { \
-		member[0] = (data & 0xffff); \
-		member[1] = (data >> 16); \
+		member[0] = ((data >> 0)  & 0xffff); \
+		member[1] = ((data >> 16) & 0xffff); \
 	} while(0);
 
-#define GET_WORD(member) \
-	((member[0]<<0) + (member[1] << 16))
+#define SET_LONG_WORD(member, data) \
+	do { \
+		member[0] = ((data >> 0)  & 0xffff); \
+		member[1] = ((data >> 16) & 0xffff); \
+		member[2] = ((data >> 32) & 0xffff); \
+		member[3] = ((data >> 48) & 0xffff); \
+	} while(0);
+
+#define GET_LONG_WORD(data, member) \
+	do { \
+		data = ((long long)member[0]<<0) + ((long long)member[1] << 16) + \
+		       ((long long)member[2]<<32) + ((long long)member[3] << 48); \
+	} while (0);
 
 #define COMPARE_WORD(member, data) \
 		((member[0] == (data & 0xffff)) && (member[1] == (data >> 16)))

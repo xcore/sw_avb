@@ -120,6 +120,40 @@ void avb_1722_1_sdp_discover(unsigned guid[]);
  */
 void avb_1722_1_sdp_discover_all();
 
+/** \fn avb_1722_1_scm_get_talker_connection_info
+ *
+ * Return information that is required for processing the AVB_1722_1_CONNECT_TALKER and
+ * AVB_1722_1_DISCONNECT_TALKER notifications.
+ */
+unsigned avb_1722_1_scm_get_talker_connection_info();
+
+/** \fn avb_1722_1_scm_get_listener_connection_info
+ *
+ * Return information that is required for processing the AVB_1722_1_CONNECT_LISTENER and
+ * AVB_1722_1_DISCONNECT_LISTENER notifications.
+ */
+unsigned avb_1722_1_scm_get_listener_connection_info();
+
+/** \fn avb_1722_1_scm_talker_connection_complete
+ *
+ * Inform the 1722.1 state machine that the AVB_1722_1_CONNECT_TALKER or
+ * AVB_1722_1_DISCONNECT_TALKER has completed, and passing in an error
+ * code.
+ *
+ * \param code the 1722.1 status field code
+ */
+void avb_1722_1_scm_talker_connection_complete(short code);
+
+/** \fn avb_1722_1_scm_listener_connection_complete
+ *
+ * Inform the 1722.1 state machine that the AVB_1722_1_CONNECT_LISTENER or
+ * AVB_1722_1_DISCONNECT_LISTENER has completed, and passing in an error
+ * code.
+ *
+ * \param code the 1722.1 status field code
+ */
+void avb_1722_1_scm_listener_connection_complete(short code);
+
 #endif
 
 
