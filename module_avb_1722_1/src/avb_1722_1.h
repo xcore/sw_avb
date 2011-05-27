@@ -82,7 +82,7 @@
  *
  *  Initialization
  */
-void avb_1722_1_init(unsigned char macaddr[6], unsigned int serial_number);
+void avb_1722_1_init(unsigned char macaddr[6], unsigned char serial_number[2]);
 
 /** \fn avb_1722_1_periodic
  *
@@ -142,7 +142,7 @@ unsigned avb_1722_1_scm_get_listener_connection_info();
  *
  * \param code the 1722.1 status field code
  */
-void avb_1722_1_scm_talker_connection_complete(short code);
+void avb_1722_1_scm_talker_connection_complete(short code, chanend c_tx);
 
 /** \fn avb_1722_1_scm_listener_connection_complete
  *
@@ -152,7 +152,7 @@ void avb_1722_1_scm_talker_connection_complete(short code);
  *
  * \param code the 1722.1 status field code
  */
-void avb_1722_1_scm_listener_connection_complete(short code);
+void avb_1722_1_scm_listener_connection_complete(short code, chanend c_tx);
 
 /** \fn avb_1722_1_talker_set_mac_address
  *
