@@ -154,6 +154,13 @@ void avb_1722_1_scm_talker_connection_complete(short code);
  */
 void avb_1722_1_scm_listener_connection_complete(short code);
 
+/** \fn avb_1722_1_talker_set_mac_address
+ *
+ *  Called by the application to inform 1722.1 of the source MAC
+ *  address for the particular talker.
+ */
+void avb_1722_1_talker_set_mac_address(unsigned talker_unique_id, char macaddr[]);
+
 #endif
 
 

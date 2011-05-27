@@ -255,8 +255,6 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 	int map[8];
 	unsigned char macaddr[6];
 	unsigned timeout;
-	unsigned talker_active = 0;
-	unsigned talker_ok_to_start = 0;
 	unsigned sample_rate = 48000;
 
 	// Initialize the media clock (a ptp derived clock)
@@ -337,59 +335,6 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 
 			// Receive any events from user button presses
 			case c_gpio_ctl :> int cmd:
-			switch (cmd)
-			{
-			case CHAN_SEL:
-			{
-				// The channel select button starts and stops listening
-				if (talker_active)
-				{
-					set_avb_source_state(0, AVB_SOURCE_STATE_DISABLED);
-					talker_active = 0;
-					simple_printf("Talker disabled\n");
-				}
-				else if (talker_ok_to_start)
-				{
-					set_avb_source_state(0, AVB_SOURCE_STATE_POTENTIAL);
-					talker_active = 1;
-					simple_printf("Talker enabled\n");
-				}
-			}
-			break;
-			case STREAM_SEL:
-			{
-				// The stream sel button cycles through frequency settings
-				switch (sample_rate)
-				{
-				case 8000:
-					sample_rate = 16000;
-					break;
-				case 16000:
-					sample_rate = 32000;
-					break;
-				case 32000:
-					sample_rate = 44100;
-					break;
-				case 44100:
-					sample_rate = 48000;
-					break;
-				case 48000:
-					sample_rate = 8000;
-					break;
-				}
-				simple_printf("Frequency set to %d Hz\n", sample_rate);
-
-
-				set_avb_source_format(0, AVB_SOURCE_FORMAT_MBLA_24BIT, sample_rate);
-
-				set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_DISABLED);
-				set_device_media_clock_rate(0, sample_rate);
-				set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_ENABLED);
-			}
-			break;
-			default:
-			break;
-			}
 			break;
 
 			// Periodic processing
@@ -401,12 +346,21 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 			switch (avb_status)
 			{
 				case AVB_MAAP_ADDRESSES_RESERVED:
-				avb_1722_maap_get_offset_address(macaddr, 0);
-				// activate the source
-				set_avb_source_dest(0, macaddr, 6);
-				talker_ok_to_start = 1;
-				simple_printf("Talker stream prepared, press Channel Select to advertise stream.\n");
-				break;
+					avb_1722_maap_get_offset_address(macaddr, 0);
+					set_avb_source_dest(0, macaddr, 6);
+					avb_1722_1_talker_set_mac_address(0, macaddr);
+					simple_printf("Stream multicast address acquired (%x:%x:%x:%x:%x:%x)\n", macaddr[0], macaddr[1], macaddr[2], macaddr[3], macaddr[4], macaddr[5]);
+					break;
+
+				case AVB_1722_1_CONNECT_TALKER:
+					simple_printf("1722.1 request to connect talker\n");
+					set_avb_source_state(0, AVB_SOURCE_STATE_POTENTIAL);
+					break;
+
+				case AVB_1722_1_DISCONNECT_TALKER:
+					simple_printf("1722.1 request to disconnect talker\n");
+					set_avb_source_state(0, AVB_SOURCE_STATE_DISABLED);
+					break;
 			}
 			} while (avb_status != AVB_NO_STATUS);
 

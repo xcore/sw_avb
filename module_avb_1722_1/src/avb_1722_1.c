@@ -623,6 +623,16 @@ void avb_1722_1_scm_listener_connection_complete(short code)
 	}
 }
 
+void avb_1722_1_talker_set_mac_address(unsigned talker_unique_id, char macaddr[])
+{
+	if (talker_unique_id < AVB_1722_1_MAX_TALKERS)
+	{
+		for (unsigned i=0; i<6; ++i)
+			scm_talker_streams[talker_unique_id].destination_mac[i] = macaddr[i];
+	}
+}
+
+
 //----------------------------------------------------------------------------------------
 
 avb_status_t process_avb_1722_1_sdp_packet(avb_1722_1_sdp_packet_t* pkt)

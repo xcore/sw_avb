@@ -146,7 +146,7 @@ par
     ptp_server(rx_link[0], tx_link[0], 
                ptp_link,
                3,
-               PTP_GRANDMASTER_CAPABLE);
+               PTP_SLAVE_ONLY);
   }
 
   on stdcore[1]:
@@ -265,7 +265,7 @@ void demo(chanend listener_ctl[], chanend talker_ctl[],
   mdns_register_canonical_name("xdk_xai_avb");
 
   // Initialize the media clock (a ptp derived clock)
-  set_device_media_clock_type(0, PTP_DERIVED);
+  set_device_media_clock_type(0, MEDIA_FIFO_DERIVED);
   set_device_media_clock_rate(0, SAMPLE_RATE);
   set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_ENABLED);
   

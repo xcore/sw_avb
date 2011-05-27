@@ -375,6 +375,8 @@ void audio_codec_CS42448_init(out port AUD_RESET_N,
    timer t;
    unsigned int time;
    
+   printstr("CS42448 CODEC initializing\n");
+
    // Reset the codec
    AUD_RESET_N <: 0;
    t :> time;
@@ -409,4 +411,6 @@ void audio_codec_CS42448_init(out port AUD_RESET_N,
    // ADC1-2_HPF FREEZE = 0, ADC3_HPF FREEZE = 0, DAC_DEM = 0, 
    // ADC1_SINGLE = 1(single ended), ADC2_SINGLE = 1, ADC3_SINGLE = 1, AIN5_MUX = 0, AIN6_MUX = 0  
    REGWR(CODEC_ADC_CONTROL, 0x1C, r_i2c);
+
+   printstr("CS42448 CODEC initialized\n");
 }

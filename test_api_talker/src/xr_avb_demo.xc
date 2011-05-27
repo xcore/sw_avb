@@ -402,7 +402,7 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 				// activate the source
 				set_avb_source_dest(0, macaddr, 6);
 				talker_ok_to_start = 1;
-				simple_printf("Talker stream prepared, press Channel Select to advertise stream.\n");
+				simple_printf("Stream multicast address acquired (%x:%x:%x:%x:%x:%x)\nPress Channel Select to advertise stream.\n", macaddr[0], macaddr[1], macaddr[2], macaddr[3], macaddr[4], macaddr[5]);
 				break;
 			}
 			} while (avb_status != AVB_NO_STATUS);

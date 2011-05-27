@@ -266,8 +266,6 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 	timer tmr;
 	int avb_status = 0;
 	unsigned timeout;
-	unsigned listener_active = 0;
-	unsigned listener_ready = 0;
 	unsigned sample_rate = 48000;
 
 	// Initialize the media clock (a ptp derived clock)
@@ -309,54 +307,6 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 
 			// Receive any events from user button presses
 			case c_gpio_ctl :> int cmd:
-			switch (cmd)
-			{
-				case CHAN_SEL:
-				{
-					if (listener_active)
-					{
-						set_avb_sink_state(0, AVB_SINK_STATE_DISABLED);
-						listener_active = 0;
-						simple_printf("Listener disabled\n");
-					}
-					else if (listener_ready)
-					{
-						set_avb_sink_state(0, AVB_SINK_STATE_POTENTIAL);
-						listener_active = 1;
-						simple_printf("Listener enabled\n");
-					}
-				}
-				break;
-				case STREAM_SEL:
-				{
-					// Channel select switches the sample frequency
-					// The stream sel button cycles through frequency settings
-					switch (sample_rate)
-					{
-					case 8000:
-						sample_rate = 16000;
-						break;
-					case 16000:
-						sample_rate = 32000;
-						break;
-					case 32000:
-						sample_rate = 44100;
-						break;
-					case 44100:
-						sample_rate = 48000;
-						break;
-					case 48000:
-						sample_rate = 8000;
-						break;
-					}
-					simple_printf("Frequency set to %d Hz\n", sample_rate);
-
-					set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_DISABLED);
-					set_device_media_clock_rate(0, sample_rate);
-					set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_ENABLED);
-				}
-				break;
-			}
 			break;
 
 			// Periodic processing
@@ -367,34 +317,42 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 			avb_status = avb_periodic();
 			switch (avb_status)
 			{
+			case AVB_1722_1_CONNECT_LISTENER: {
+					unsigned int streamId[2];
+					unsigned vlan;
+					unsigned char addr[6];
+					int map[2] = { 0 ,  1 };
+
+					simple_printf("1722.1 request to connect listener\n");
+
+					set_avb_sink_sync(0, 0);
+					set_avb_sink_channels(0, 2);
+					set_avb_sink_map(0, map, 2);
+					//set_avb_sink_id(0, streamId);
+					//set_avb_sink_vlan(0, vlan);
+					set_avb_sink_addr(0, addr, 6);
+					set_avb_sink_state(0, AVB_SINK_STATE_POTENTIAL);
+				}
+				break;
+			case AVB_1722_1_DISCONNECT_LISTENER:
+				simple_printf("1722.1 request to disconnect listener\n");
+				set_avb_sink_state(0, AVB_SINK_STATE_DISABLED);
+				break;
 			default:
 				break;
 			}
 			} while (avb_status != AVB_NO_STATUS);
 
-			// Look for new streams
+			// Look for new streams.  Don't actually need to do this because
 			{
-			  unsigned int streamId[2];
-			  unsigned vlan;
-			  unsigned char addr[6];
-			  int map[2] = { 0 ,  1 };
+				unsigned int streamId[2];
+				unsigned vlan;
+				unsigned char addr[6];
 
-			  // check if there is a new stream
-			  int res = avb_check_for_new_stream(streamId, vlan, addr);
-
-			  // if so, add it to the stream table
-			  if (res && listener_ready==0) {
-			    simple_printf("Found %x%x\n.", streamId[0], streamId[1]);
-			    set_avb_sink_sync(0, 0);
-			    set_avb_sink_channels(0, 2);
-			    set_avb_sink_map(0, map, 2);
-			    set_avb_sink_state(0, AVB_SINK_STATE_DISABLED);
-			    set_avb_sink_id(0, streamId);
-			    set_avb_sink_vlan(0, vlan);
-			    set_avb_sink_addr(0, addr, 6);
-
-			    listener_ready = 1;
-			  }
+				// check if there is a new stream and display if one is spotted
+				if (avb_check_for_new_stream(streamId, vlan, addr)) {
+					simple_printf("Found %x%x\n.", streamId[0], streamId[1]);
+				}
 			}
 
 			break;
