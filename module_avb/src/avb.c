@@ -24,7 +24,7 @@
 #include "avb_1722_1.h"
 #endif
 
-#define AVB_TRANSMIT_BEFORE_RESERVATION 1
+//#define AVB_TRANSMIT_BEFORE_RESERVATION 1
 
 #define UNMAPPED (-1)
 

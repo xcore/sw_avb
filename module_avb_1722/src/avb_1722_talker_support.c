@@ -252,9 +252,10 @@ int avb1722_create_packet(unsigned char Buf0[],
    if (stream_info->samples_left == 0) timerValid = 1;
 
    if (stream_info->samples_left < samples_in_packet) {
+	 unsigned first=stream_info->initial;
      for (i=0;i<num_channels;i++) {
        int *src = media_input_fifo_get_ptr(map[i]);   
-       if (stream_info->initial) {
+       if (first) {
          stream_info->initial = 0;
        }
        else {
