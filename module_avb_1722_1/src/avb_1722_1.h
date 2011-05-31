@@ -10,6 +10,8 @@
 #ifndef _avb_1722_1_h_
 #define _avb_1722_1_h_
 
+#include <xccompat.h>
+
 #include "avb_control_types.h"
 #include "avb_1722_1_protocol.h"
 
@@ -125,14 +127,14 @@ void avb_1722_1_sdp_discover_all();
  * Return information that is required for processing the AVB_1722_1_CONNECT_TALKER and
  * AVB_1722_1_DISCONNECT_TALKER notifications.
  */
-unsigned avb_1722_1_scm_get_talker_connection_info();
+unsigned avb_1722_1_scm_get_talker_connection_info(REFERENCE_PARAM(short,talker));
 
 /** \fn avb_1722_1_scm_get_listener_connection_info
  *
  * Return information that is required for processing the AVB_1722_1_CONNECT_LISTENER and
  * AVB_1722_1_DISCONNECT_LISTENER notifications.
  */
-unsigned avb_1722_1_scm_get_listener_connection_info();
+unsigned avb_1722_1_scm_get_listener_connection_info(REFERENCE_PARAM(short,listener), char address[6], unsigned streamId[2], REFERENCE_PARAM(unsigned,vlan));
 
 /** \fn avb_1722_1_scm_talker_connection_complete
  *
@@ -160,6 +162,13 @@ void avb_1722_1_scm_listener_connection_complete(short code, chanend c_tx);
  *  address for the particular talker.
  */
 void avb_1722_1_talker_set_mac_address(unsigned talker_unique_id, char macaddr[]);
+
+/** \fn avb_1722_1_talker_set_stream_id
+ *
+ * Called by the application to inform 1722.1 of the source stream identifier
+ * for a particular stream.
+ */
+void avb_1722_1_talker_set_stream_id(unsigned talker_unique_id, unsigned streamId[2]);
 
 #endif
 

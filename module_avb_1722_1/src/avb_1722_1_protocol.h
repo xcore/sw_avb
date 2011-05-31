@@ -1,6 +1,7 @@
 #ifndef __AVB_1722_1_PROTOCOL_H__
 #define __AVB_1722_1_PROTOCOL_H__
 
+#include <xclib.h>
 
 #define MAX_AVB_1722_1_PDU_SIZE (40)
 
@@ -23,17 +24,17 @@ typedef struct avb_1722_1_packet_header_t {
  */
 typedef struct {
 	avb_1722_1_packet_header_t header;
-	short entity_guid[4];
-	short vendor_id[2];
-	short model_id[2];
-	short entity_capabilities[2];
+	char entity_guid[8];
+	char vendor_id[4];
+	char model_id[4];
+	char entity_capabilities[4];
 	short talker_stream_sources;
 	short talker_capabilities;
 	short listener_stream_sinks;
 	short listener_capabilites;
-	short controller_capabilities[2];
-	short boot_id[2];
-	short reserved[6];
+	char controller_capabilities[4];
+	char boot_id[4];
+	char reserved[12];
 } avb_1722_1_sdp_packet_t;
 
 /**
@@ -43,10 +44,10 @@ typedef struct {
  */
 typedef struct {
 	avb_1722_1_packet_header_t header;
-	short stream_id[4];
-	short controller_guid[4];
-	short talker_guid[4];
-	short listener_guid[4];
+	char stream_id[8];
+	char controller_guid[8];
+	char talker_guid[8];
+	char listener_guid[8];
 	short talker_unique_id;
 	short listener_unique_id;
 	char dest_mac[6];
@@ -62,12 +63,12 @@ typedef struct {
  */
 typedef struct {
 	avb_1722_1_packet_header_t header;
-	short target_guid[4];
-	short controller_guid[4];
+	char target_guid[8];
+	char controller_guid[8];
 	short sequence_id;
 	char mode_length_upper;
 	char length_lower;
-	short mode_specific_data[1];
+	char mode_specific_data[1];
 } avb_1722_1_sec_packet_t;
 
 typedef union {
@@ -82,8 +83,6 @@ typedef union {
 #define DEFAULT_1722_1_SDP_SUBTYPE (0x7a)
 #define DEFAULT_1722_1_SEC_SUBTYPE (0x7b)
 #define DEFAULT_1722_1_SCM_SUBTYPE (0x7c)
-
-
 
 #define GET_1722_1_CD_FLAG(pkt) ((pkt)->cd_subtype >> 7)
 #define GET_1722_1_SUBTYPE(pkt) ((pkt)->cd_subtype & 0x7f)
@@ -121,24 +120,36 @@ typedef union {
      SET_BITS(&pkt->data_length_lo, 0, 7, (val) & 0xff); \
    }while(0)
 
-#define SET_WORD(member, data) \
+#define SET_WORD_CONST(member, data) \
 	do { \
-		member[0] = ((data >> 0)  & 0xffff); \
+		member[0] = ((data >> 24) & 0xffff); \
 		member[1] = ((data >> 16) & 0xffff); \
+		member[2] = ((data >> 8 ) & 0xffff); \
+		member[3] = ((data >> 0 ) & 0xffff); \
 	} while(0);
 
 #define SET_LONG_WORD(member, data) \
 	do { \
-		member[0] = ((data >> 0)  & 0xffff); \
-		member[1] = ((data >> 16) & 0xffff); \
-		member[2] = ((data >> 32) & 0xffff); \
-		member[3] = ((data >> 48) & 0xffff); \
+		member[0] = data.c[7]; \
+		member[1] = data.c[6]; \
+		member[2] = data.c[5]; \
+		member[3] = data.c[4]; \
+		member[4] = data.c[3]; \
+		member[5] = data.c[2]; \
+		member[6] = data.c[1]; \
+		member[7] = data.c[0]; \
 	} while(0);
 
 #define GET_LONG_WORD(data, member) \
 	do { \
-		data = ((long long)member[0]<<0) + ((long long)member[1] << 16) + \
-		       ((long long)member[2]<<32) + ((long long)member[3] << 48); \
+		data.c[7] = member[0]; \
+		data.c[6] = member[1]; \
+		data.c[5] = member[2]; \
+		data.c[4] = member[3]; \
+		data.c[3] = member[4]; \
+		data.c[2] = member[5]; \
+		data.c[1] = member[6]; \
+		data.c[0] = member[7]; \
 	} while (0);
 
 #define COMPARE_WORD(member, data) \

@@ -111,7 +111,6 @@ void avb_srp_listener_join_ind(mrp_attribute_state *attr, int new, int four_pack
 
 void avb_srp_listener_leave_ind(mrp_attribute_state *attr, int four_packed_event)
 {
-#if 0
 	avb_stream_info_t* stream_info = attr->attribute_info;
 	//simple_printf("SRP: Listener unregistered for stream %x%x\n", stream_info->streamId[0], stream_info->streamId[1]);
     for(int i=0;i<AVB_NUM_SOURCES;i++) {
@@ -126,7 +125,6 @@ void avb_srp_listener_leave_ind(mrp_attribute_state *attr, int four_packed_event
         }
       }
     }
-#endif
 }
 
 

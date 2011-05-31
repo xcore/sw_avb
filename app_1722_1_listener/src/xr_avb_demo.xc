@@ -318,25 +318,33 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 			switch (avb_status)
 			{
 			case AVB_1722_1_CONNECT_LISTENER: {
+					short listener;
 					unsigned int streamId[2];
 					unsigned vlan;
 					unsigned char addr[6];
 					int map[2] = { 0 ,  1 };
 
-					simple_printf("1722.1 request to connect listener\n");
+					avb_1722_1_scm_get_listener_connection_info(listener, addr, streamId, vlan);
+					simple_printf("1722.1 request to connect to stream %x.%x, address %x:%x:%x:%x:%x:%x, vlan %d\n",
+							streamId[0], streamId[1],
+							addr[0], addr[1], addr[2], addr[3], addr[4], addr[5],
+							vlan);
 
 					set_avb_sink_sync(0, 0);
 					set_avb_sink_channels(0, 2);
 					set_avb_sink_map(0, map, 2);
-					//set_avb_sink_id(0, streamId);
-					//set_avb_sink_vlan(0, vlan);
+					set_avb_sink_id(0, streamId);
+					set_avb_sink_vlan(0, vlan);
 					set_avb_sink_addr(0, addr, 6);
 					set_avb_sink_state(0, AVB_SINK_STATE_POTENTIAL);
+
+					avb_1722_1_scm_listener_connection_complete(listener, c_tx);
 				}
 				break;
 			case AVB_1722_1_DISCONNECT_LISTENER:
 				simple_printf("1722.1 request to disconnect listener\n");
 				set_avb_sink_state(0, AVB_SINK_STATE_DISABLED);
+				avb_1722_1_scm_listener_connection_complete(0, c_tx);
 				break;
 			default:
 				break;
@@ -348,10 +356,22 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 				unsigned int streamId[2];
 				unsigned vlan;
 				unsigned char addr[6];
+				int map[2] = { 0 ,  1 };
 
 				// check if there is a new stream and display if one is spotted
 				if (avb_check_for_new_stream(streamId, vlan, addr)) {
-					simple_printf("Found %x%x\n.", streamId[0], streamId[1]);
+				    simple_printf("Found stream %x.%x, address %x:%x:%x:%x:%x:%x, vlan %d\n.",
+				    		streamId[0], streamId[1],
+				    		addr[0], addr[1], addr[2], addr[3], addr[4], addr[5],
+				    		vlan);
+
+//					set_avb_sink_sync(0, 0);
+//					set_avb_sink_channels(0, 2);
+//					set_avb_sink_map(0, map, 2);
+//					set_avb_sink_id(0, streamId);
+//					set_avb_sink_vlan(0, vlan);
+//					set_avb_sink_addr(0, addr, 6);
+//					set_avb_sink_state(0, AVB_SINK_STATE_POTENTIAL);
 				}
 			}
 
