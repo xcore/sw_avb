@@ -57,6 +57,40 @@ typedef struct {
 } avb_1722_1_scm_packet_t;
 
 /**
+ * 1722.1 SEC AVDECC command format
+ */
+typedef struct {
+	char mode_len;
+	char lower_len;
+	char mode_specific_data[1];
+} avb_1722_1_sec_avdecc_msg_t;
+
+/**
+ * 1722.1 SEC Address access format
+ */
+typedef struct {
+	char mode_len;
+	char lower_len;
+	char mode_specific_data[1];
+} avb_1722_1_sec_address_access_t;
+
+/**
+ * 1722.1m SEC Legacy AV/C command format
+ */
+typedef struct {
+	char length[2];
+	char avc_data[512];
+} avb_1722_1_sec_avc_t;
+
+/**
+ * 1722.1 SEC Vendor specific command format
+ */
+typedef struct {
+	char protocol_id[6];
+	char payload_data[1];
+} avb_1722_1_sec_vendor_t;
+
+/**
  *  A 1722.1 Simple Enumeration and Control packet
  *
  * \note all elements 16 bit aligned
@@ -66,9 +100,13 @@ typedef struct {
 	char target_guid[8];
 	char controller_guid[8];
 	short sequence_id;
-	char mode_length_upper;
-	char length_lower;
-	char mode_specific_data[1];
+	union {
+		avb_1722_1_sec_avdecc_msg_t avdecc;
+		avb_1722_1_sec_address_access_t address;
+		avb_1722_1_sec_avc_t avc;
+		avb_1722_1_sec_vendor_t vendor;
+		char payload[514];
+	} data;
 } avb_1722_1_sec_packet_t;
 
 typedef union {
@@ -212,6 +250,24 @@ typedef enum {
 	SCM_STATUS_COULD_NOT_SEND_MESSAGE = 12,
 	SCM_STATUS_NOT_SUPPORTED = 31
 } avb_1722_1_scm_status_type;
+
+typedef enum {
+	SEC_CMD_AVDECC_MSG_COMMAND = 0,
+	SEC_CMD_AVDECC_MSG_RESPONSE = 1,
+	SEC_CMD_ADDRESS_ACCESS_COMMAND = 2,
+	SEC_CMD_ADDRESS_ACCESS_RESPONSE = 3,
+	SEC_CMD_AVC_COMMAND = 4,
+	SEC_CMD_AVC_RESPONSE = 5,
+	SEC_CMD_VENDOR_UNIQUE_COMMAND = 6,
+	SEC_CMD_VENDOR_UNIQUE_RESPONSE = 7,
+	SEC_CMD_EXTENDED_COMMAND = 14,
+	SEC_CMD_EXTENDED_RESPONSE = 15
+} avb_1722_1_sec_message_type;
+
+typedef enum {
+	SEC_STATUS_SUCCESS = 0,
+	SEC_STATUS_NOT_IMPLEMENTED = 1
+} avb_1722_1_sec_status_type;
 
 #define AVB_1722_1_SCM_FLAGS_CLASS_B							(0x0001)
 #define AVB_1722_1_SCM_FLAGS_FAST_CONNECT						(0x0002)
