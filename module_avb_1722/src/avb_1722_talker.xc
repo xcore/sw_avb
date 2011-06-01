@@ -76,7 +76,7 @@ static void configure_stream(chanend avb1722_tx_config,
 	stream.samples_per_packet_fractional = tmp & 0xffff;
 	stream.rem = 0;
 
-	stream.samples_left = 0;
+	stream.samples_left_in_fifo_packet = 0;
 	stream.initial = 1;
 	stream.dbc = -1;
 	stream.active = 1;

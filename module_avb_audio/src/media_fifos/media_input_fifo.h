@@ -73,11 +73,16 @@ media_input_fifo_get_packet(media_input_fifo_t media_input_fifo,
  * This is called by the talker thread when it has written all of the
  * samples within a particular audio packet into 1722 AVBTP packets
  *
- * \param media_input_fifo The packet to release
+ * \param media_input_fifo  The fifo on which to release the packet
  */
 void 
 media_input_fifo_release_packet(media_input_fifo_t media_input_fifo);
 
+/** \brief Initialise the fifo
+ *
+ *  \param media_input_fifo the media fifo
+ *  \param stream_num  the numberical index of the stream
+ */
 void
 media_input_fifo_init(media_input_fifo_t media_input_fifo, int stream_num);
 
@@ -125,6 +130,12 @@ media_input_fifo_t get_media_input_fifo(int stream_num);
  */
 int media_input_fifo_empty(media_input_fifo_t media_input_fifo0);
 
+/**
+ *   \brief Flush any complete packets which are sitting in the fifo
+ *
+ *   \param  media_input_fifo  The fifo to flush
+ */
+void media_input_fifo_flush(media_input_fifo_t media_input_fifo);
 
 
 #ifndef __XC__

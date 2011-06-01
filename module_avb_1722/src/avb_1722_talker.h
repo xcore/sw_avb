@@ -50,7 +50,7 @@ typedef struct avb1722_Talker_StreamConfig_t
   //! An accumulator for the fractional part
   unsigned int rem;
   //! The number of samples remaining in the fifo packet
-  unsigned int samples_left;
+  unsigned int samples_left_in_fifo_packet;
   //! a flag, true when the stream has just been initialised
   unsigned int initial;
   //! the delay in ms that is added to the current PTP time

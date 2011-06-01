@@ -95,6 +95,19 @@ int media_input_fifo_empty(media_input_fifo_t media_input_fifo0)
          media_input_fifo->rdIndex==media_input_fifo->startIndex);
 }
 
+void media_input_fifo_flush(media_input_fifo_t media_input_fifo0)
+{
+	volatile ififo_t *media_input_fifo =  (ififo_t *) media_input_fifo0;
+	int *rdIndex = (int *) media_input_fifo->rdIndex;
+
+	if (rdIndex==0) return;
+
+	while (rdIndex != (int *) media_input_fifo->startIndex)
+	{
+		media_input_fifo_release_packet(media_input_fifo0);
+	}
+
+}
 
 unsigned int *
 media_input_fifo_get_packet(media_input_fifo_t media_input_fifo0,
