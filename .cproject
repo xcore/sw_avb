@@ -15,11 +15,11 @@
 </extensions>
 </storageModule>
 <storageModule moduleId="cdtBuildSystem" version="4.0.0">
-<configuration artifactName="ap_avb" buildProperties="" description="" id="com.xmos.cdt.toolchain.30841826" name="XMOS Compiler Collection (xcc)" parent="org.eclipse.cdt.build.core.emptycfg">
+<configuration artifactName="sw_avb" buildProperties="" description="" id="com.xmos.cdt.toolchain.30841826" name="XMOS Compiler Collection (xcc)" parent="org.eclipse.cdt.build.core.emptycfg">
 <folderInfo id="com.xmos.cdt.toolchain.30841826.1961785845" name="/" resourcePath="">
 <toolChain id="com.xmos.cdt.toolchain.331533569" name="com.xmos.cdt.toolchain" superClass="com.xmos.cdt.toolchain">
 <targetPlatform archList="all" binaryParser="com.xmos.cdt.core.XEBinaryParser" id="com.xmos.cdt.core.platform.312514423" isAbstract="false" osList="linux,win32,macosx" superClass="com.xmos.cdt.core.platform"/>
-<builder arguments="-f Makefile" buildPath="${workspace_loc:/ap_avb}" command="xmake" id="com.xmos.cdt.builder.base.484433574" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="com.xmos.cdt.builder.base"/>
+<builder arguments="-f Makefile" buildPath="${workspace_loc:/sw_avb}" command="xmake" id="com.xmos.cdt.builder.base.484433574" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="com.xmos.cdt.builder.base"/>
 <tool id="com.xmos.cdt.linker.base.564215645" name="XMOS Mapper" superClass="com.xmos.cdt.linker.base">
 <inputType id="com.xmos.cdt.linker.input.xm.71127389" name="XM File"/>
 <inputType id="com.xmos.cdt.linker.input.1104586842" superClass="com.xmos.cdt.linker.input">
@@ -167,6 +167,6 @@
 </cconfiguration>
 </storageModule>
 <storageModule moduleId="cdtBuildSystem" version="4.0.0">
-<project id="ap_avb.null.306906532" name="ap_avb"/>
+<project id="sw_avb.null.306906532" name="sw_avb"/>
 </storageModule>
 </cproject>
