@@ -117,7 +117,8 @@ static void manage_buffer(buf_info_t &b,
   unsigned int wordLength;
   int rdptr,wrptr,fill;
   timer tmr;
-  int t1,t2;
+  int thiscore_now,othercore_now;
+  unsigned server_core_id;
 
   if (b.media_clock == -1) {
       buf_ctl <: b.fifo;
@@ -132,16 +133,20 @@ static void manage_buffer(buf_info_t &b,
   buf_ctl <: BUF_CTL_REQUEST_INFO;
   master {
     buf_ctl <: 0;
-    buf_ctl :> t2;
-    tmr :> t1;
+    buf_ctl :> othercore_now;
+    tmr :> thiscore_now;
     buf_ctl :> locked;
     buf_ctl :> presentation_timestamp;    
     buf_ctl :> outgoing_timestamp_local;
     buf_ctl :> sample_count;
     buf_ctl :> rdptr;
     buf_ctl :> wrptr;
+    buf_ctl :> server_core_id;
   }
-  outgoing_timestamp_local = outgoing_timestamp_local + (t2-t1);
+  if (server_core_id != get_core_id())
+  {
+	  outgoing_timestamp_local = outgoing_timestamp_local - (othercore_now - thiscore_now);
+  }
   outgoing_timestamp_local += b.adjust;
 
   fill = wrptr - rdptr;

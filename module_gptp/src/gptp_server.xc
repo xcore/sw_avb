@@ -72,14 +72,16 @@ void ptp_recv_and_process_packet(chanend c_rx, chanend c_tx)
 
 static void ptp_give_requested_time_info(chanend c)
 {
-  int now;
+  int thiscore_now;
+  unsigned core_id = get_core_id();
   master {
-    ptp_timer :> now;
-    c <: now;
+    ptp_timer :> thiscore_now;
+    c <: thiscore_now;
     c <: ptp_reference_local_ts;
     c <: ptp_reference_ptp_ts;
     c <: g_ptp_adjust;
     c <: g_inv_ptp_adjust;
+    c <: core_id;
   }
 }
 
@@ -87,7 +89,7 @@ static void ptp_give_requested_time_info(chanend c)
 void ptp_process_client_request(chanend c)
 {
   unsigned char cmd;
-  unsigned now;
+  unsigned thiscore_now;
   unsigned core_id = get_core_id();
 
   cmd = inuchar(c);
@@ -104,8 +106,8 @@ void ptp_process_client_request(chanend c)
       ptp_get_reference_ptp_ts_mod_64(hi,lo);
       master {
       c :> int;
-      ptp_timer :> now;
-      c <: now;
+      ptp_timer :> thiscore_now;
+      c <: thiscore_now;
       c <: ptp_reference_local_ts;
       c <: hi;
       c <: lo;

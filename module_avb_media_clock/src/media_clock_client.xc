@@ -45,17 +45,19 @@ void send_buf_ctl_info(chanend buf_ctl,
                        unsigned int rdptr,
                        unsigned int wrptr) {
   timer tmr;
-  int now;
+  int thiscore_now;
+  int core_id = get_core_id();
   slave {
     buf_ctl :>  int;
-    tmr :> now;
-    buf_ctl <: now;
+    tmr :> thiscore_now;
+    buf_ctl <: thiscore_now;
     buf_ctl <: active;
     buf_ctl <: ptp_ts;
     buf_ctl <: local_ts;
     buf_ctl <: sample_count;
     buf_ctl <: rdptr;
     buf_ctl <: wrptr;
+    buf_ctl <: core_id;
   }
 }
 
