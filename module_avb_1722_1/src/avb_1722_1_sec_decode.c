@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#if 0
+
 extern unsigned char avb_1722_1_sec_constant_data[];
 extern unsigned int avb_1722_1_sec_data_type_length_t[];
 extern unsigned avb_1722_1_sec_dispatch(unsigned func_num, unsigned item_number, char* data);
@@ -44,3 +46,4 @@ unsigned int* avb_1722_1_walk_tree(unsigned int address)
 	return node;
 }
 
+#endif
