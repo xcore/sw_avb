@@ -104,8 +104,14 @@ unsigned int avb_1722_1_walk_tree(unsigned int address, unsigned set, char* data
 		} else {
 		    // Data leaf
 			char* param = (char*)((*node & 0x00FFFFFF));
-			memcpy(data, param, avb_1722_1_sec_data_type_length_t[*node & 0x3F000000]);
-			return 0;
+			unsigned int length = avb_1722_1_sec_data_type_length_t[*node & 0x3F000000];
+
+			if (length == 0) {
+				length = strlen(param)+1;
+			}
+
+			memcpy(data, param, length);
+			return length;
 		}
 	} else {
 	    return 0;

@@ -9,6 +9,7 @@
 #include "misc_timer.h"
 #include "simple_printf.h"
 #include <print.h>
+#include <string.h>
 
 typedef union {
 	unsigned long long l;
@@ -24,8 +25,7 @@ static unsigned char my_mac_addr[6];
 
 static unsigned char avb_1722_1_sdp_dest_addr[6] =  {0x01, 0x50, 0x43, 0xff, 0x00, 0x00};
 static unsigned char avb_1722_1_scm_dest_addr[6] =  {0x01, 0x50, 0x43, 0xff, 0x00, 0x00};
-//static unsigned char avb_1722_1_scm_dest_addr[6] =  {0x91, 0xe0, 0xf0, 0x00, 0xff, 0x01};
-//static unsigned char avb_1722_1_sec_dest_addr[6] =  {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+static unsigned char avb_1722_1_sec_dest_addr[6] =  {0x01, 0x50, 0x43, 0xff, 0x00, 0x00};
 
 //! Buffer for constructing 1722.1 transmit packets
 static unsigned int avb_1722_1_buf[(sizeof(avb_1722_1_packet_t)+sizeof(ethernet_hdr_t)+3)/4];
@@ -282,20 +282,56 @@ static void avb_1722_1_create_1722_1_header(unsigned char* dest_addr, int subtyp
 
 //----------------------------------------------------------------------------------------
 
-/*
-static void avb_1722_1_create_sec_packet(int message_type)
+
+static void avb_1722_1_create_sec_packet(int message_type, avb_1722_1_sec_packet_t* cmd_pkt)
 {
-	  struct ethernet_hdr_t *hdr = (ethernet_hdr_t*) &avb_1722_1_buf[0];
-	  struct avb_1722_1_sec_packet_t *pkt = (avb_1722_1_sec_packet_t*) (hdr + 1);
+	struct ethernet_hdr_t *hdr = (ethernet_hdr_t*) &avb_1722_1_buf[0];
+	avb_1722_1_sec_packet_t *pkt = (avb_1722_1_sec_packet_t*) (hdr + 1);
 
-	  avb_1722_1_create_1722_1_header(avb_1722_1_sec_dest_addr, DEFAULT_1722_1_SEC_SUBTYPE, message_type, 0, 40, hdr);
+	avb_1722_1_create_1722_1_header(avb_1722_1_sec_dest_addr, DEFAULT_1722_1_SEC_SUBTYPE, message_type, 0, 40, hdr);
+
+	memcpy(pkt->target_guid, cmd_pkt->target_guid, (pkt->data.payload - pkt->target_guid));
 }
-*/
 
-static avb_status_t process_avb_1722_1_sec_packet(avb_1722_1_sec_packet_t* pkt)
+static avb_status_t process_avb_1722_1_sec_packet(avb_1722_1_sec_packet_t* pkt, chanend c_tx)
 {
 	unsigned message_type = GET_1722_1_MSG_TYPE(((avb_1722_1_packet_header_t*)pkt));
+	if (compare_guid(pkt->target_guid, &my_guid)==0) return AVB_1722_1_OK;
+
 	switch (message_type) {
+	case SEC_CMD_AVDECC_MSG_COMMAND: {
+		unsigned int len = (((unsigned)(pkt->data.avdecc.mode_len & 0xF)) << 8) + (unsigned)(pkt->data.avdecc.lower_len);
+		unsigned int d_index = 0;
+		avb_1722_1_create_sec_packet(SEC_CMD_AVDECC_MSG_RESPONSE, pkt);
+		while (d_index < len) {
+			unsigned msg_byte_len = (pkt->data.avdecc.mode_specific_data[d_index+0] << 16) +
+									(pkt->data.avdecc.mode_specific_data[d_index+1] << 8) +
+									(pkt->data.avdecc.mode_specific_data[d_index+2] << 0);
+			unsigned address = 	(pkt->data.avdecc.mode_specific_data[d_index+3] << 24) +
+								(pkt->data.avdecc.mode_specific_data[d_index+4] << 16) +
+								(pkt->data.avdecc.mode_specific_data[d_index+5] << 8) +
+								(pkt->data.avdecc.mode_specific_data[d_index+6] << 0);
+			d_index += 7;
+
+			d_index += msg_byte_len;
+		}
+		break;
+	}
+	case SEC_CMD_ADDRESS_ACCESS_COMMAND: {
+		break;
+	}
+	case SEC_CMD_AVC_COMMAND: {
+		break;
+	}
+	case SEC_CMD_VENDOR_UNIQUE_COMMAND: {
+		break;
+	}
+	case SEC_CMD_EXTENDED_COMMAND: {
+		break;
+	}
+	default:
+		// This node is not expecting a response
+		break;
 	}
 	return AVB_1722_1_OK;
 }
@@ -481,7 +517,7 @@ static avb_status_t process_avb_1722_1_scm_listener_packet(unsigned message_type
 	return AVB_1722_1_OK;
 }
 
-static avb_status_t process_avb_1722_1_scm_packet(avb_1722_1_scm_packet_t* pkt)
+static avb_status_t process_avb_1722_1_scm_packet(avb_1722_1_scm_packet_t* pkt, chanend c_tx)
 {
 	unsigned message_type = GET_1722_1_MSG_TYPE(((avb_1722_1_packet_header_t*)pkt));
 
@@ -690,7 +726,7 @@ void avb_1722_1_talker_set_stream_id(unsigned talker_unique_id, unsigned streamI
 
 //----------------------------------------------------------------------------------------
 
-avb_status_t process_avb_1722_1_sdp_packet(avb_1722_1_sdp_packet_t* pkt)
+avb_status_t process_avb_1722_1_sdp_packet(avb_1722_1_sdp_packet_t* pkt, chanend c_tx)
 {
 	unsigned message_type = GET_1722_1_MSG_TYPE(((avb_1722_1_packet_header_t*)pkt));
 	guid_t zero_guid = { 0 };
@@ -914,11 +950,11 @@ avb_status_t avb_1722_1_process_packet(unsigned int buf0[], int len, chanend c_t
 
 		  switch (subtype) {
 		  case DEFAULT_1722_1_SDP_SUBTYPE:
-			  return process_avb_1722_1_sdp_packet((avb_1722_1_sdp_packet_t*)pkt);
+			  return process_avb_1722_1_sdp_packet((avb_1722_1_sdp_packet_t*)pkt, c_tx);
 		  case DEFAULT_1722_1_SEC_SUBTYPE:
-			  return process_avb_1722_1_sec_packet((avb_1722_1_sec_packet_t*)pkt);
+			  return process_avb_1722_1_sec_packet((avb_1722_1_sec_packet_t*)pkt, c_tx);
 		  case DEFAULT_1722_1_SCM_SUBTYPE:
-			  return process_avb_1722_1_scm_packet((avb_1722_1_scm_packet_t*)pkt);
+			  return process_avb_1722_1_scm_packet((avb_1722_1_scm_packet_t*)pkt, c_tx);
 		  default:
 			  return AVB_NO_STATUS;
 		  }
