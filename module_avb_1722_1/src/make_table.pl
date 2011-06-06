@@ -82,6 +82,14 @@ my %types = (
   'gaindb' => [11, 4, 'fixed']
 );
 
+# Names of the bit fields in the address word
+my @field_names = (
+ 'section/subsection',
+ 'subsubsection',
+ 'subaddress',
+ 'item'
+);
+
 #
 # Functions
 #
@@ -165,7 +173,7 @@ sub build_data {
     if ($e->[0] == 1) {
       if ($e->[3] eq 'f') {
         my $func_entry = scalar(@{$func});
-        push @{$func}, "getset_".$e->[4];
+        push @{$func}, "avb_1722_1_getset_".$e->[4];
         $e->[4] = $func_entry;
         $e->[3] = 1;
         $e->[2] = ($e->[2] eq 'rw') ? 1 : 0;
@@ -222,20 +230,29 @@ build_data( \@list, \@function_table, \@data_block );
 # Print out results
 #
 
+print "// AVB 1722.1 SEC Parse Table\n//\n// This file was autogrenerated by the make_table.pl script.\n\n\n";
+
 
 # Print out parse tree
 print "unsigned int avb_1722_1_sec_parse_tree[] = {\n";
 foreach my $e (@list) {
   if ($e->[0] == 0) {
     my $v = ($e->[5]<<31) + ($e->[6]<<30) + ($e->[2]<<28) + ($e->[4]<<22) + ($e->[1]<<16) + ($e->[3]<<0);
-    printf "  0x%08x, // compare %x value %x for %x\n", $v, $e->[2], $e->[1], $e->[4];
+    printf "  0x%08x, // compare %s to range (0x%x, 0x%x)\n", $v, $field_names[$e->[2]], $e->[1], $e->[1]+$e->[4]-1;
   } else {
     my $v = ($e->[3]<<31) + ($e->[2]<<30) + ($e->[1]<<24) + ($e->[4]<<0);
-    printf "  0x%08x, // %s\n", $v, $e->[5];
+    printf "  0x%08x, // %s (%s at 0x%x)\n", $v, $e->[5], ($e->[3] ? "Function" : "Data"), $e->[4];
   }
 }
 print "};\n\n";
 
+# Print function pre-declaractions
+my $n=0;
+foreach my $e (@function_table) {
+  print "extern unsigned int $e(unsigned item_number, unsigned set, char *data);\n";
+  $n++;
+}
+print "\n\n";
 
 # Print function table
 print "unsigned avb_1722_1_sec_dispatch(unsigned func_num, unsigned item_number, unsigned set, char* data)\n{\n";
