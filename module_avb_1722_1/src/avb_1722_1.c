@@ -44,6 +44,9 @@ static guid_t my_guid;
 //! The GUID whose information we are currently trying to discover
 static guid_t discover_guid;
 
+// External function for SEC parsing
+extern unsigned int avb_1722_1_walk_tree(unsigned int address, unsigned set, char* data);
+
 //! Enumerations for state variables
 enum { SDP_ADVERTISE_IDLE,
 	   SDP_ADVERTISE_ADVERTISE_1,
@@ -283,7 +286,7 @@ static void avb_1722_1_create_1722_1_header(unsigned char* dest_addr, int subtyp
 //----------------------------------------------------------------------------------------
 
 
-static void avb_1722_1_create_sec_packet(int message_type, avb_1722_1_sec_packet_t* cmd_pkt)
+static char* avb_1722_1_create_sec_packet(int message_type, avb_1722_1_sec_packet_t* cmd_pkt)
 {
 	struct ethernet_hdr_t *hdr = (ethernet_hdr_t*) &avb_1722_1_buf[0];
 	avb_1722_1_sec_packet_t *pkt = (avb_1722_1_sec_packet_t*) (hdr + 1);
@@ -291,6 +294,8 @@ static void avb_1722_1_create_sec_packet(int message_type, avb_1722_1_sec_packet
 	avb_1722_1_create_1722_1_header(avb_1722_1_sec_dest_addr, DEFAULT_1722_1_SEC_SUBTYPE, message_type, 0, 40, hdr);
 
 	memcpy(pkt->target_guid, cmd_pkt->target_guid, (pkt->data.payload - pkt->target_guid));
+
+	return pkt->data.payload;
 }
 
 static avb_status_t process_avb_1722_1_sec_packet(avb_1722_1_sec_packet_t* pkt, chanend c_tx)
@@ -302,18 +307,37 @@ static avb_status_t process_avb_1722_1_sec_packet(avb_1722_1_sec_packet_t* pkt, 
 	case SEC_CMD_AVDECC_MSG_COMMAND: {
 		unsigned int len = (((unsigned)(pkt->data.avdecc.mode_len & 0xF)) << 8) + (unsigned)(pkt->data.avdecc.lower_len);
 		unsigned int d_index = 0;
-		avb_1722_1_create_sec_packet(SEC_CMD_AVDECC_MSG_RESPONSE, pkt);
-		while (d_index < len) {
-			unsigned msg_byte_len = (pkt->data.avdecc.mode_specific_data[d_index+0] << 16) +
-									(pkt->data.avdecc.mode_specific_data[d_index+1] << 8) +
-									(pkt->data.avdecc.mode_specific_data[d_index+2] << 0);
-			unsigned address = 	(pkt->data.avdecc.mode_specific_data[d_index+3] << 24) +
-								(pkt->data.avdecc.mode_specific_data[d_index+4] << 16) +
-								(pkt->data.avdecc.mode_specific_data[d_index+5] << 8) +
-								(pkt->data.avdecc.mode_specific_data[d_index+6] << 0);
-			d_index += 7;
+		unsigned int s_index = 0;
+		avb_1722_1_sec_avdecc_msg_t* payload = (avb_1722_1_sec_avdecc_msg_t*)avb_1722_1_create_sec_packet(SEC_CMD_AVDECC_MSG_RESPONSE, pkt);
 
-			d_index += msg_byte_len;
+		while (s_index < len) {
+
+			unsigned src_byte_len = (pkt->data.avdecc.mode_specific_data[s_index+0] << 16) +
+									(pkt->data.avdecc.mode_specific_data[s_index+1] << 8) +
+									(pkt->data.avdecc.mode_specific_data[s_index+2] << 0);
+			unsigned address = 	(pkt->data.avdecc.mode_specific_data[s_index+3] << 24) +
+								(pkt->data.avdecc.mode_specific_data[s_index+4] << 16) +
+								(pkt->data.avdecc.mode_specific_data[s_index+5] << 8) +
+								(pkt->data.avdecc.mode_specific_data[s_index+6] << 0);
+			unsigned dst_byte_len = 0;
+
+			// Write address into the output
+			payload->mode_specific_data[d_index+3] = pkt->data.avdecc.mode_specific_data[s_index+3];
+			payload->mode_specific_data[d_index+4] = pkt->data.avdecc.mode_specific_data[s_index+4];
+			payload->mode_specific_data[d_index+5] = pkt->data.avdecc.mode_specific_data[s_index+5];
+			payload->mode_specific_data[d_index+6] = pkt->data.avdecc.mode_specific_data[s_index+6];
+
+			// Write data into the output
+			dst_byte_len = avb_1722_1_walk_tree(address, 0, &payload->mode_specific_data[d_index+7]);
+
+			// Update the length
+			payload->mode_specific_data[d_index+0] = (dst_byte_len >> 16) & 0xff;
+			payload->mode_specific_data[d_index+1] = (dst_byte_len >> 8)  & 0xff;
+		    payload->mode_specific_data[d_index+2] = (dst_byte_len >> 0)  & 0xff;
+
+			d_index += 7 + ((dst_byte_len+3)&0xFFFFFFFC);
+
+			s_index += 7 + ((src_byte_len+3)&0xFFFFFFFC);
 		}
 		break;
 	}
