@@ -423,25 +423,20 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 			} while (avb_status != AVB_NO_STATUS);
 
 			{
-				static int counter=500; // 40Hz
+				static int counter=5000; // 4Hz
 				--counter;
 				if (counter==0) {
-					counter = 500;
+					counter = 5000; // 4Hz
 
 					if (slew != 0)
 					{
-						sample_rate_delta += 10;
-						if (sample_rate_delta > 4000) sample_rate_delta = -4000;
-						set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_DISABLED);
-						set_device_media_clock_rate(0, sample_rate + sample_rate_delta);
-						set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_ENABLED);
+						if (sample_rate_delta < 4000) sample_rate_delta += 1;
+					} else {
+						if (sample_rate_delta > 0) sample_rate_delta -= 1;
 					}
-					else
-					{
-						set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_DISABLED);
-						set_device_media_clock_rate(0, sample_rate);
-						set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_ENABLED);
-					}
+					set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_DISABLED);
+					set_device_media_clock_rate(0, sample_rate + sample_rate_delta);
+					set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_ENABLED);
 				}
 			}
 
