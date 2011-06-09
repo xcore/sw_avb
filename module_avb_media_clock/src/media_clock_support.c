@@ -208,7 +208,7 @@ unsigned int update_media_clock(chanend ptp_svr,
 					- clock_info->stream_info1.local_ts;
 
 			ierror = (signed) clock_info->stream_info2.outgoing_ptp_ts -
-                     (signed) clock_info->stream_info2.presentation_ts;
+					 (signed) clock_info->stream_info2.presentation_ts;
 
 			ierror = ierror << WORDLEN_FRACTIONAL_BITS;
 
@@ -221,7 +221,7 @@ unsigned int update_media_clock(chanend ptp_svr,
 			clock_info->ierror = ierror;
 
 			// Kp = 32, Ki = 1 (originally)
-			clock_info->wordlen = clock_info->wordlen - (perror / diff_local) * 64 - (ierror / diff_local) / 64;
+			clock_info->wordlen = clock_info->wordlen - (perror / diff_local) * 4 - (ierror / diff_local) / 64;
 
 			clock_info->stream_info1 = clock_info->stream_info2;
 			clock_info->stream_info2.valid = 0;
