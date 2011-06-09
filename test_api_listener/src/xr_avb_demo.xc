@@ -331,19 +331,28 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 					switch (sample_rate)
 					{
 					case 8000:
-						sample_rate = 16000;
+						sample_rate = 96000;
 						break;
 					case 16000:
-						sample_rate = 32000;
+						sample_rate = 8000;
 						break;
 					case 32000:
-						sample_rate = 44100;
+						sample_rate = 16000;
 						break;
 					case 44100:
-						sample_rate = 48000;
+						sample_rate = 32000;
 						break;
 					case 48000:
-						sample_rate = 8000;
+						sample_rate = 44100;
+						break;
+					case 64000:
+						sample_rate = 48000;
+						break;
+					case 88200:
+						sample_rate = 64000;
+						break;
+					case 96000:
+						sample_rate = 88200;
 						break;
 					}
 					simple_printf("Frequency set to %d Hz\n", sample_rate);

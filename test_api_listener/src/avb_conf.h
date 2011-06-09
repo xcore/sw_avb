@@ -34,6 +34,9 @@
 /* Media clock configuration */
 #define AVB_NUM_MEDIA_CLOCKS 1
 
+/* Allow for high sample rates */
+#define AVB_MAX_AUDIO_SAMPLE_RATE 96000
+
 /* Add synths from channels 3/4 upwards in I2S for this demo */
 #define I2S_SYNTH_FROM 1
 
