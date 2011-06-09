@@ -19,6 +19,7 @@
     <location>git@github.com:xcore/sw_avb.git</location>
     <maintainer>DavidNorman</maintainer>
     <name>sw_avb</name>
+    <release parenthash = "c0e2eedbd5609978063be5c43ab2c671bb7d5030" version = "5.1.0beta0"></release>
     <scope>reference design</scope>
     <vendor>XMOS</vendor>
     <xpd_version>1.0</xpd_version>
