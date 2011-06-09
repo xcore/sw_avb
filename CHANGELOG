@@ -1,7 +1,18 @@
+13th June 2011 (v5.1.0)
+-----------------------
+  * 802.1Qat support
+  * Partial (beta) 1722.1 support
+  * Clock recovery corrections for 8kHz and >48kHz
+  * 1722 packet format corrections
+  * 1722 timestamp corrections
+  * Stream lock/unlock more predictable
+  * Test harnesses for various features
+  * SRP state machine corrections
+  * SRP state machine drives stream transmission
+
 17th Dec 2010
 -------------
   * 5v0 major release
-  * 802.1Qat support
   * New control API
   * 1722 MAAP support
   * Standard updates

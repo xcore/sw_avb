@@ -1,7 +1,7 @@
 AVB Software Stack
 ..................
 
-:Stable release:  Development
+:Stable release:  5.1.0
 
 :Status:  Reference Software
 
@@ -19,12 +19,11 @@ Key Features
 * PTP server and protocol
 * Audio interface for I2S and TDM
 * Clock recovery and interface to PLL clock source
+* Partial support for 1722.1 draft 0.12
 
 To Do
 =====
 
-* Finish 1722.1 beta
-* Empty talker audio fifo of packets when going from idle to active
 * Firmware update over the wire
 
 Firmware Overview
@@ -38,9 +37,7 @@ information through 802.1 network infrastructure.
 Known Issues
 ============
 
-* Multiple talkers and listeners on the same network can cause clock instability in eack other
 * The listener does not respond to the withdrawal of a talker advertise message
-* The talker may transmit some invalid timestamps 
 
 Required Repositories
 ================
