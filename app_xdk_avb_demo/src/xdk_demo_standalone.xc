@@ -201,7 +201,7 @@ int main(void) {
       on stdcore[3]: lcd_text_display(txt_data, lcd_data[1]);
       
       // Frequency spectrum analyser      
-      on stdcore[2]: freq(equalizer, audio_monitor, lcd_data[0], ptp_link[1]);
+      on stdcore[1]: freq(equalizer, audio_monitor, lcd_data[0], ptp_link[1]);
 
       // Touchscreen interface
       on stdcore[3]: touch(equalizer, filter_ctl);
