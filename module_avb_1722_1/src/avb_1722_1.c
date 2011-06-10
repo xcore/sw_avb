@@ -23,14 +23,9 @@ typedef union {
 
 static unsigned char my_mac_addr[6];
 
-/*
 static unsigned char avb_1722_1_sdp_dest_addr[6] =  {0x91, 0xe0, 0xf0, 0x00, 0xff, 0x01};
 static unsigned char avb_1722_1_scm_dest_addr[6] =  {0x91, 0xe0, 0xf0, 0x00, 0xff, 0x01};
 static unsigned char avb_1722_1_sec_dest_addr[6] =  {0x91, 0xe0, 0xf0, 0x00, 0xff, 0x01};
-*/
-static unsigned char avb_1722_1_sdp_dest_addr[6] =  {0x01, 0x50, 0x43, 0xff, 0x00, 0x00};
-static unsigned char avb_1722_1_scm_dest_addr[6] =  {0x01, 0x50, 0x43, 0xff, 0x00, 0x00};
-static unsigned char avb_1722_1_sec_dest_addr[6] =  {0x01, 0x50, 0x43, 0xff, 0x00, 0x00};
 
 //! Buffer for constructing 1722.1 transmit packets
 static unsigned int avb_1722_1_buf[(sizeof(avb_1722_1_packet_t)+sizeof(ethernet_hdr_t)+3)/4];
