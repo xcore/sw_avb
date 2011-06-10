@@ -208,6 +208,7 @@ void ptp_timestamp_offset(REFERENCE_PARAM(ptp_timestamp, ts), int offset);
                             
 void ptp_set_legacy_mode(chanend c, int mode);
 
+void ptp_get_current_grandmaster(chanend ptp_server, char grandmaster[8]);
 
 
 extern timer ptp_timer;   

@@ -219,6 +219,10 @@ media_output_fifo_strided_push(media_output_fifo_t s0,
     sample = __builtin_bswap32(sample);
     sample_ptr += stride;
     sample = sample * zero;
+#if AVB_1722_SAF
+    sample = sample >> 8;
+#endif
+    sample &= 0xffffff;
       
     new_wrptr = wrptr+1;
     

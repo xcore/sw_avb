@@ -94,3 +94,15 @@ void ptp_set_legacy_mode(chanend c, int mode)
   send_cmd(c, PTP_SET_LEGACY_MODE);
   c <: mode;
 }
+
+void ptp_get_current_grandmaster(chanend ptp_server, char grandmaster[8])
+{
+	send_cmd(ptp_server, PTP_GET_GRANDMASTER);
+	slave
+	{
+		for(int i = 0; i < 8; i++)
+		{
+			ptp_server :> grandmaster[i];
+		}
+	}
+}

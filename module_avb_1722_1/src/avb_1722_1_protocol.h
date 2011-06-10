@@ -34,7 +34,8 @@ typedef struct {
 	short listener_capabilites;
 	char controller_capabilities[4];
 	char boot_id[4];
-	char reserved[12];
+	char as_grandmaster_id[8];
+	char reserved[4];
 } avb_1722_1_sdp_packet_t;
 
 /**
@@ -160,10 +161,10 @@ typedef union {
 
 #define SET_WORD_CONST(member, data) \
 	do { \
-		member[0] = ((data >> 24) & 0xffff); \
-		member[1] = ((data >> 16) & 0xffff); \
-		member[2] = ((data >> 8 ) & 0xffff); \
-		member[3] = ((data >> 0 ) & 0xffff); \
+		member[0] = ((data >> 24) & 0xff); \
+		member[1] = ((data >> 16) & 0xff); \
+		member[2] = ((data >> 8 ) & 0xff); \
+		member[3] = ((data >> 0 ) & 0xff); \
 	} while(0);
 
 #define SET_LONG_WORD(member, data) \

@@ -188,7 +188,7 @@ int main(void) {
       on stdcore[1]: ptp_server(rx_link[0], tx_link[0], 
                                 ptp_link,
                                 5,
-                                PTP_GRANDMASTER_CAPABLE);
+                                PTP_SLAVE_ONLY);
 
       // Debugging
       on stdcore[0]: xlog_server_chan(debug_stream);

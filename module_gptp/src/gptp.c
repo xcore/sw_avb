@@ -1345,3 +1345,11 @@ void ptp_periodic(chanend c_tx, unsigned t) {
   return;
 }
 
+void ptp_current_grandmaster(char grandmaster[8])
+{
+	int i;
+	for (i = 7; i >= 0; i--)
+	{
+		grandmaster[i] = best_announce_msg.grandmasterIdentity.data[7-i];
+	}
+}

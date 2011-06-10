@@ -20,11 +20,12 @@
 #endif
 
 #ifndef AVB_1722_1_SDP_VALID_TIME
-#define AVB_1722_1_SDP_VALID_TIME (30)  // 30*2 = 60 seconds validity time
+#define AVB_1722_1_SDP_VALID_TIME (31)  // 31*2 = 62 seconds validity time
+#define AVB_1722_1_SDP_REPEAT_TIME (AVB_1722_1_SDP_VALID_TIME/2)
 #endif
 
 #ifndef AVB_1722_1_SDP_VENDOR_ID
-#define AVB_1722_1_SDP_VENDOR_ID 0
+#define AVB_1722_1_SDP_VENDOR_ID 0x00229700u
 #endif
 
 #ifndef AVB_1722_1_SDP_MODEL_ID
@@ -90,7 +91,7 @@ void avb_1722_1_init(unsigned char macaddr[6], unsigned char serial_number[2]);
  *
  *  This function performs periodic processing. It must be called frequently
  */
-avb_status_t avb_1722_1_periodic(chanend c_tx);
+avb_status_t avb_1722_1_periodic(chanend tx, chanend c_ptp);
 
 /** \fn avb_1722_1_process_packet
  *
@@ -121,6 +122,12 @@ void avb_1722_1_sdp_discover(unsigned guid[]);
  *  Ask to discover all available entities
  */
 void avb_1722_1_sdp_discover_all();
+
+/** \fn avb_1722_1_sdp_change_ptp_grandmaster
+ *
+ *  Set the current PTP grandmaster used by SDP when it changes
+ */
+void avb_1722_1_sdp_change_ptp_grandmaster(char grandmaster[8]);
 
 /** \fn avb_1722_1_scm_get_talker_connection_info
  *

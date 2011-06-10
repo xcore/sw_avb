@@ -12,6 +12,7 @@
 #include <string.h>
 #include <print.h>
 #include <xs1.h>
+#include "avb_conf.h"
 
 #ifdef AVB_1722_RECORD_ERRORS
 static unsigned avb_1722_listener_dbc_discontinuity = 0;
@@ -37,10 +38,16 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
    int num_channels = stream_info->num_channels;
    media_output_fifo_t *map = &stream_info->map[0];
    int stride;   
-   int dbc_diff;
+#if !AVB_1722_SAF
+  int dbc_diff;
+#endif
 
    // sanity check on number bytes in payload
-   if (numBytes <= avb_ethernet_hdr_size + AVB_TP_HDR_SIZE + AVB_AVB1722_HDR_SIZE)
+#if AVB_1722_SAF
+   if (numBytes <= avb_ethernet_hdr_size + AVB_TP_HDR_SIZE)
+#else
+   if (numBytes <= avb_ethernet_hdr_size + AVB_TP_HDR_SIZE + AVB_CIP_HDR_SIZE)
+#endif
    {
       printstr("ERROR: 1722 Invalid packet size.\n");     
       return (0);
@@ -57,14 +64,20 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
    }
 
 
+#if !AVB_1722_SAF
    dbc_value = (int) pAVB1722Hdr->DBC;
    dbc_diff = dbc_value - stream_info->dbc;
    stream_info->dbc = dbc_value;
 
    if (dbc_diff < 0) dbc_diff += 0x100;
+#endif
 
    pktDataLength = NTOH_U16(pAVBHdr->packet_data_length);
+#if AVB_1722_SAF
+   num_samples_in_payload = pktDataLength>>2;
+#else
    num_samples_in_payload = (pktDataLength-8)>>2;
+#endif
 
    int prev_num_samples = stream_info->prev_num_samples;
    stream_info->prev_num_samples = num_samples_in_payload;
@@ -74,10 +87,16 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
    if (stream_info->chan_lock < 10) {
      int num_channels;
 
-     if (!prev_num_samples || dbc_diff == 0) 
+#if !AVB_1722_SAF
+   if (!prev_num_samples || dbc_diff == 0)
        return 0;
+#endif
      
+#if AVB_1722_SAF
+     num_channels = AVBTP_PROTOCOL_SPECIFIC(pAVBHdr);
+#else
      num_channels = prev_num_samples / dbc_diff;
+#endif
      
      if (!stream_info->num_channels_in_payload || 
          stream_info->num_channels_in_payload != num_channels)  {
@@ -96,7 +115,11 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
 #endif
 
 
+#if AVB_1722_SAF
+   if ((AVBTP_TV(pAVBHdr)==1)) {
+#else
    if ((AVBTP_TV(pAVBHdr)==1) && (dbc_value & 7)==0) {
+#endif
 	   unsigned int timestamp = AVBTP_TIMESTAMP(pAVBHdr);
 
 	   // register timestamp
@@ -114,11 +137,15 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
 
 
   // now send the samples
+#if AVB_1722_SAF
+  sample_ptr = (unsigned char *) &Buf[(avb_ethernet_hdr_size +
+                                      AVB_TP_HDR_SIZE)];
+#else
   sample_ptr = (unsigned char *) &Buf[(avb_ethernet_hdr_size + 
                                       AVB_TP_HDR_SIZE +
-                                      AVB_AVB1722_HDR_SIZE)];
+                                      AVB_CIP_HDR_SIZE)];
+#endif
 
-  
    num_channels_in_payload = stream_info->num_channels_in_payload;   
  
    stride = num_channels_in_payload;

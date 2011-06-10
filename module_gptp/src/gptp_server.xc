@@ -12,6 +12,7 @@ void ptp_recv(chanend, unsigned char buf[], unsigned ts);
 void ptp_periodic(chanend, unsigned);
 void ptp_server_set_legacy_mode(int legacy_mode);
 void ptp_get_reference_ptp_ts_mod_64(unsigned &hi, unsigned &lo);
+void ptp_current_grandmaster(char grandmaster[8]);
 
 #define MAX_PTP_MESG_LENGTH 100
 
@@ -123,7 +124,19 @@ void ptp_process_client_request(chanend c)
       ptp_server_set_legacy_mode(mode);                          
       break;            
     }
-    }      
+    case PTP_GET_GRANDMASTER: {
+    	char grandmaster[8];
+    	ptp_current_grandmaster(grandmaster);
+    	master
+    	{
+    		for(int i = 0; i < 8; i++)
+			{
+				c <: grandmaster[i];
+			}
+    	}
+    	break;
+    }
+    }
 }
 
 

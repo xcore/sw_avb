@@ -43,15 +43,11 @@
 #define AVB_DEFAULT_VLAN                   (2)
 
 // AVB1722 Header Size.
-#define AVB_AVB1722_HDR_SIZE    (10)
+#define AVB_CIP_HDR_SIZE    				(8)
 
 // 61883-6/AVB1722 CIP Header definations.
 typedef struct 
 {
-  unsigned char tag_channel;     // bit 0-1 : tag
-                                 // bit 2-7 : channel
-  unsigned char tcode_sy;        // bot 0-3 : tcode
-                                 // bit 4-7 : sy (application specific 
   unsigned char SID;             // bit 0,1 are fixed 00;
   unsigned char DBS;              
   unsigned char FN_QPC_SPH;      // bit 0-1 : Fraction Number
@@ -68,11 +64,12 @@ typedef struct
 //                                                                                      
 // Macros for 61883 header
 //
-#define SET_AVB1722_CIP_TAG(x, a)              (x->tag_channel |= (a & 0x3) << 6)
+#define SET_AVB1722_CIP_TAG(x, a)              (x->protocol_specific[0] |= (a & 0x3) << 6)
 
-#define SET_AVB1722_CIP_CHANNEL(x, a)          (x->tag_channel |= (a & 0x3F))
-#define SET_AVB1722_CIP_TCODE(x, a)            (x->tcode_sy |= (a & 0xF) << 4)
-#define SET_AVB1722_CIP_SY(x, a)               (x->tcode_sy |= (a & 0xF))
+#define SET_AVB1722_CIP_CHANNEL(x, a)          (x->protocol_specific[0] |= (a & 0x3F))
+#define SET_AVB1722_CIP_TCODE(x, a)            (x->protocol_specific[1] |= (a & 0xF) << 4)
+#define SET_AVB1722_CIP_SY(x, a)               (x->protocol_specific[1] |= (a & 0xF))
+
 #define SET_AVB1722_CIP_SID(x, a)              (x->SID |= (a & 0x3F))
 #define SET_AVB1722_CIP_EOH1(x, a)             (x->SID |= (a & 0x3) << 6)   
 #define SET_AVB1722_CIP_DBS(x, a)              (x->DBS = a)

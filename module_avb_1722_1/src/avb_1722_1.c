@@ -7,9 +7,9 @@
 #include "ethernet_tx_client.h"
 #include "nettypes.h"
 #include "misc_timer.h"
-#include "simple_printf.h"
 #include <print.h>
 #include <string.h>
+#include "gptp.h"
 
 typedef union {
 	unsigned long long l;
@@ -23,6 +23,11 @@ typedef union {
 
 static unsigned char my_mac_addr[6];
 
+/*
+static unsigned char avb_1722_1_sdp_dest_addr[6] =  {0x91, 0xe0, 0xf0, 0x00, 0xff, 0x01};
+static unsigned char avb_1722_1_scm_dest_addr[6] =  {0x91, 0xe0, 0xf0, 0x00, 0xff, 0x01};
+static unsigned char avb_1722_1_sec_dest_addr[6] =  {0x91, 0xe0, 0xf0, 0x00, 0xff, 0x01};
+*/
 static unsigned char avb_1722_1_sdp_dest_addr[6] =  {0x01, 0x50, 0x43, 0xff, 0x00, 0x00};
 static unsigned char avb_1722_1_scm_dest_addr[6] =  {0x01, 0x50, 0x43, 0xff, 0x00, 0x00};
 static unsigned char avb_1722_1_sec_dest_addr[6] =  {0x01, 0x50, 0x43, 0xff, 0x00, 0x00};
@@ -34,6 +39,7 @@ static unsigned int avb_1722_1_buf[(sizeof(avb_1722_1_packet_t)+sizeof(ethernet_
 static avb_timer sdp_advertise_timer;
 static avb_timer sdp_readvertise_timer;
 static avb_timer sdp_discovery_timer;
+static avb_timer ptp_monitor_timer;
 
 //! Counts two second intervals
 static unsigned sdp_two_second_counter = 0;
@@ -43,12 +49,14 @@ static guid_t my_guid;
 
 //! The GUID whose information we are currently trying to discover
 static guid_t discover_guid;
+static guid_t as_grandmaster_id;
 
 // External function for SEC parsing
 extern unsigned int avb_1722_1_walk_tree(unsigned int address, unsigned set, char* data);
 
 //! Enumerations for state variables
 enum { SDP_ADVERTISE_IDLE,
+	   SDP_ADVERTISE_ADVERTISE_0,
 	   SDP_ADVERTISE_ADVERTISE_1,
 	   SDP_ADVERTISE_ADVERTISE_2,
 	   SDP_ADVERTISE_WAITING,
@@ -157,38 +165,24 @@ avb_1722_1_scm_rcvd_cmd_resp scm_talker_rcvd_cmd_resp;
 avb_1722_1_scm_rcvd_cmd_resp scm_listener_rcvd_cmd_resp;
 
 
-void print_guid()
-{
-	simple_printf("1722.1: GUID=%x.%x.%x.%x.%x.%x.%x.%x\n",
-			my_guid.c[0],
-			my_guid.c[1],
-			my_guid.c[2],
-			my_guid.c[3],
-			my_guid.c[4],
-			my_guid.c[5],
-			my_guid.c[6],
-			my_guid.c[7]);
-}
-
 void avb_1722_1_init(unsigned char macaddr[6], unsigned char serial_number[2])
 {
   for (int i=0;i<6;i++)
     my_mac_addr[i] = macaddr[i];
 
-	my_guid.c[0] = serial_number[1];
-	my_guid.c[1] = serial_number[0];
-	my_guid.c[2] = macaddr[5];
-	my_guid.c[3] = macaddr[4];
-	my_guid.c[4] = macaddr[3];
+	my_guid.c[0] = macaddr[5];
+	my_guid.c[1] =  macaddr[4];
+	my_guid.c[2] = macaddr[3];
+	my_guid.c[3] = 0xfe;
+	my_guid.c[4] = 0xff;
 	my_guid.c[5] = macaddr[2];
 	my_guid.c[6] = macaddr[1];
 	my_guid.c[7] = macaddr[0];
 
-	print_guid(my_guid);
-
 	init_avb_timer(&sdp_advertise_timer, 1);
 	init_avb_timer(&sdp_readvertise_timer, 100);
 	init_avb_timer(&sdp_discovery_timer, 200);
+	init_avb_timer(&ptp_monitor_timer, 100);
 
 	sdp_discovery_state = SDP_DISCOVERY_WAITING;
 	start_avb_timer(&sdp_discovery_timer, 1);
@@ -515,7 +509,7 @@ static avb_status_t process_avb_1722_1_scm_talker_packet(unsigned message_type, 
 static avb_status_t process_avb_1722_1_scm_listener_packet(unsigned message_type, avb_1722_1_scm_packet_t* pkt)
 {
 	if (compare_guid(pkt->listener_guid, &my_guid)==0) return AVB_1722_1_OK;
-	if (scm_talker_state!=SCM_LISTENER_WAITING) { return AVB_1722_1_OK; }
+	if (scm_listener_state!=SCM_LISTENER_WAITING) { return AVB_1722_1_OK; }
 
 	store_rcvd_cmd_resp(&scm_listener_rcvd_cmd_resp, pkt);
 
@@ -630,10 +624,11 @@ static avb_status_t avb_1722_1_scm_listener_periodic(chanend c_tx)
 		if (!scm_listener_valid_listener_unique()) {
 			scm_listener_tx_response(SCM_CMD_CONNECT_RX_RESPONSE, SCM_STATUS_LISTENER_UNKNOWN_ID, c_tx);
 		} else {
-			if (!scm_listener_listener_is_connected()) {
+			//if (!scm_listener_listener_is_connected())
+			{
 				scm_listener_tx_command(SCM_CMD_CONNECT_TX_COMMAND, 2000, c_tx);
-			} else {
-				scm_listener_tx_response(SCM_CMD_CONNECT_RX_RESPONSE, SCM_STATUS_LISTENER_EXCLUSIVE, c_tx);
+			//} else {
+			//	scm_listener_tx_response(SCM_CMD_CONNECT_RX_RESPONSE, SCM_STATUS_LISTENER_EXCLUSIVE, c_tx);
 			}
 		}
 		scm_listener_state = SCM_LISTENER_WAITING;
@@ -689,8 +684,8 @@ unsigned avb_1722_1_scm_get_listener_connection_info(short *listener, char addre
 {
 	*listener = scm_listener_rcvd_cmd_resp.listener_unique_id;
 	for (unsigned c=0; c<6; ++c) address[c] = scm_listener_rcvd_cmd_resp.stream_dest_mac[c];
-	streamId[0] = (unsigned)(scm_listener_rcvd_cmd_resp.stream_id.l >> 0);
-	streamId[1] = (unsigned)(scm_listener_rcvd_cmd_resp.stream_id.l >> 32);
+	streamId[1] = (unsigned)(scm_listener_rcvd_cmd_resp.stream_id.l >> 0);
+	streamId[0] = (unsigned)(scm_listener_rcvd_cmd_resp.stream_id.l >> 32);
 	*vlan = 2;
 	return 1;
 }
@@ -743,7 +738,7 @@ void avb_1722_1_talker_set_stream_id(unsigned talker_unique_id, unsigned streamI
 {
 	if (talker_unique_id < AVB_1722_1_MAX_TALKERS)
 	{
-		scm_talker_streams[talker_unique_id].stream_id.l = (unsigned long long)streamId[0] + (((unsigned long long)streamId[1]) << 32);
+		scm_talker_streams[talker_unique_id].stream_id.l = (unsigned long long)streamId[1] + (((unsigned long long)streamId[0]) << 32);
 	}
 }
 
@@ -807,6 +802,14 @@ static void avb_1722_1_create_sdp_packet(int message_type, guid_t guid)
 		  pkt->controller_capabilities[1] = 0;
 		  pkt->boot_id[0] = 0;
 		  pkt->boot_id[1] = 0;
+		  pkt->as_grandmaster_id[0] = 0;
+		  pkt->as_grandmaster_id[1] = 0;
+		  pkt->as_grandmaster_id[2] = 0;
+		  pkt->as_grandmaster_id[3] = 0;
+		  pkt->as_grandmaster_id[4] = 0;
+		  pkt->as_grandmaster_id[5] = 0;
+		  pkt->as_grandmaster_id[6] = 0;
+		  pkt->as_grandmaster_id[7] = 0;
 	  } else {
 		  SET_WORD_CONST(pkt->vendor_id, AVB_1722_1_SDP_VENDOR_ID);
 		  SET_WORD_CONST(pkt->model_id, AVB_1722_1_SDP_MODEL_ID);
@@ -817,13 +820,12 @@ static void avb_1722_1_create_sdp_packet(int message_type, guid_t guid)
 		  pkt->listener_capabilites = AVB_1722_1_SDP_LISTENER_CAPABILITIES;
 		  SET_WORD_CONST(pkt->controller_capabilities, AVB_1722_1_SDP_CONTROLLER_CAPABILITIES);
 		  SET_WORD_CONST(pkt->boot_id, AVB_1722_1_SDP_BOOT_ID);
+		  SET_LONG_WORD(pkt->as_grandmaster_id, as_grandmaster_id);
 	  }
 	  pkt->reserved[0] = 0;
 	  pkt->reserved[1] = 0;
 	  pkt->reserved[2] = 0;
 	  pkt->reserved[3] = 0;
-	  pkt->reserved[4] = 0;
-	  pkt->reserved[5] = 0;
 }
 
 static avb_status_t avb_1722_1_sdp_discovery_periodic(chanend c_tx)
@@ -844,7 +846,7 @@ static avb_status_t avb_1722_1_sdp_discovery_periodic(chanend c_tx)
 
 	case SDP_DISCOVERY_DISCOVER: {
 			avb_1722_1_create_sdp_packet(ENTITY_DISCOVER, discover_guid);
-			mac_tx(c_tx, avb_1722_1_buf, 60, ETH_BROADCAST);
+			mac_tx(c_tx, avb_1722_1_buf, 66, ETH_BROADCAST);
 			sdp_discovery_state = SDP_DISCOVERY_WAITING;
 		}
 		break;
@@ -861,15 +863,24 @@ static avb_status_t avb_1722_1_sdp_discovery_periodic(chanend c_tx)
 	return AVB_NO_STATUS;
 }
 
-static avb_status_t avb_1722_1_sdp_advertising_periodic(chanend c_tx)
+static avb_status_t avb_1722_1_sdp_advertising_periodic(chanend c_tx, chanend ptp)
 {
 	switch (sdp_advertise_state) {
 	case SDP_ADVERTISE_IDLE:
 		break;
 
+	case SDP_ADVERTISE_ADVERTISE_0:
+		{
+			guid_t ptp_current;
+			avb_1722_1_sdp_change_ptp_grandmaster(ptp_current.c);
+			start_avb_timer(&ptp_monitor_timer, 1); //Every second
+			sdp_advertise_state = SDP_ADVERTISE_ADVERTISE_1;
+		}
+		//We just immediatley fall through so it will send immediatley
+
 	case SDP_ADVERTISE_ADVERTISE_1:
 		avb_1722_1_create_sdp_packet(ENTITY_AVAILABLE, my_guid);
-		mac_tx(c_tx, avb_1722_1_buf, 60, ETH_BROADCAST);
+		mac_tx(c_tx, avb_1722_1_buf, 66, ETH_BROADCAST);
 		start_avb_timer(&sdp_advertise_timer, 3); // 3 centiseconds
 		sdp_advertise_state = SDP_ADVERTISE_ADVERTISE_2;
 		break;
@@ -877,8 +888,8 @@ static avb_status_t avb_1722_1_sdp_advertising_periodic(chanend c_tx)
 	case SDP_ADVERTISE_ADVERTISE_2:
 		if (avb_timer_expired(&sdp_advertise_timer)) {
 			avb_1722_1_create_sdp_packet(ENTITY_AVAILABLE, my_guid);
-			mac_tx(c_tx, avb_1722_1_buf, 60, ETH_BROADCAST);
-			start_avb_timer(&sdp_readvertise_timer, AVB_1722_1_SDP_VALID_TIME);
+			mac_tx(c_tx, avb_1722_1_buf, 66, ETH_BROADCAST);
+			start_avb_timer(&sdp_readvertise_timer, AVB_1722_1_SDP_REPEAT_TIME);
 			sdp_advertise_state = SDP_ADVERTISE_WAITING;
 		}
 		break;
@@ -891,7 +902,7 @@ static avb_status_t avb_1722_1_sdp_advertising_periodic(chanend c_tx)
 
 	case SDP_ADVERTISE_DEPARTING_1:
 		avb_1722_1_create_sdp_packet(ENTITY_DEPARTING, my_guid);
-		mac_tx(c_tx, avb_1722_1_buf, 60, ETH_BROADCAST);
+		mac_tx(c_tx, avb_1722_1_buf, 66, ETH_BROADCAST);
 		start_avb_timer(&sdp_advertise_timer, 3); // 3 centiseconds
 		sdp_advertise_state = SDP_ADVERTISE_DEPARTING_2;
 		break;
@@ -899,7 +910,7 @@ static avb_status_t avb_1722_1_sdp_advertising_periodic(chanend c_tx)
 	case SDP_ADVERTISE_DEPARTING_2:
 		if (avb_timer_expired(&sdp_advertise_timer)) {
 			avb_1722_1_create_sdp_packet(ENTITY_DEPARTING, my_guid);
-			mac_tx(c_tx, avb_1722_1_buf, 60, ETH_BROADCAST);
+			mac_tx(c_tx, avb_1722_1_buf, 66, ETH_BROADCAST);
 			sdp_advertise_state = SDP_ADVERTISE_IDLE;
 		}
 		break;
@@ -908,12 +919,27 @@ static avb_status_t avb_1722_1_sdp_advertising_periodic(chanend c_tx)
 		break;
 	}
 
+	if(SDP_ADVERTISE_IDLE != sdp_advertise_state)
+	{
+		if(avb_timer_expired(&ptp_monitor_timer))
+		{
+			guid_t ptp_current;
+			ptp_get_current_grandmaster(ptp, ptp_current.c);
+			if(as_grandmaster_id.l != ptp_current.l)
+			{
+				avb_1722_1_sdp_change_ptp_grandmaster(ptp_current.c);
+				sdp_advertise_state = SDP_ADVERTISE_ADVERTISE_1;
+			}
+			start_avb_timer(&ptp_monitor_timer, 1); //Every second
+		}
+	}
+
 	return AVB_NO_STATUS;
 }
 
 void avb_1722_1_sdp_announce()
 {
-	if (sdp_advertise_state == SDP_ADVERTISE_IDLE) sdp_advertise_state = SDP_ADVERTISE_ADVERTISE_1;
+	if (sdp_advertise_state == SDP_ADVERTISE_IDLE) sdp_advertise_state = SDP_ADVERTISE_ADVERTISE_0;
 }
 
 
@@ -934,6 +960,15 @@ void avb_1722_1_sdp_discover_all()
 {
 	unsigned guid[2] = {0,0};
 	avb_1722_1_sdp_discover(guid);
+}
+
+void avb_1722_1_sdp_change_ptp_grandmaster(char grandmaster[8])
+{
+	int i;
+	for(i = 0; i < 8; i++)
+	{
+		as_grandmaster_id.c[i] = grandmaster[i];
+	}
 }
 
 //----------------------------------------------------------------------------------------
@@ -987,10 +1022,10 @@ avb_status_t avb_1722_1_process_packet(unsigned int buf0[], int len, chanend c_t
 	  return AVB_NO_STATUS;
 }
 
-avb_status_t avb_1722_1_periodic(chanend c_tx)
+avb_status_t avb_1722_1_periodic(chanend c_tx, chanend c_ptp)
 {
 	avb_status_t res;
-	res = avb_1722_1_sdp_advertising_periodic(c_tx);
+	res = avb_1722_1_sdp_advertising_periodic(c_tx, c_ptp);
 	if (res != AVB_NO_STATUS) return res;
 	res = avb_1722_1_sdp_discovery_periodic(c_tx);
 	if (res != AVB_NO_STATUS) return res;

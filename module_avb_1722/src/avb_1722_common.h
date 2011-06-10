@@ -27,7 +27,7 @@
 
 // Frame Header size in bytes definations.                             
 #define AVB_ETHERNET_HDR_SIZE    (18)
-#define AVB_TP_HDR_SIZE          (22)                            
+#define AVB_TP_HDR_SIZE          (24)
 
 // number of bytes in MAC address
 #define MAC_ADRS_BYTE_COUNT      (6)
@@ -88,6 +88,13 @@ typedef struct
   unsigned char gateway_info[4];  // 
   unsigned char packet_data_length[2];  // length of data following the protocol specific packet header.
                                         // Max value 1476                                        
+  unsigned char protocol_specific[2];
+  //For 61883
+  //unsigned char tag_channel;     // bit 0-1 : tag
+  //                               // bit 2-7 : channel
+  //unsigned char tcode_sy;        // bot 0-3 : tcode
+  //                               // bit 4-7 : sy (application specific
+
 } AVB_DataHeader_t;
 
 
@@ -116,6 +123,8 @@ typedef struct
                                         (x->stream_id[5] << 16) | \
                                         (x->stream_id[6] << 8) | \
                                         (x->stream_id[7]))
+#define AVBTP_PROTOCOL_SPECIFIC(x)      ((x->protocol_specific[0] << 8) | \
+                                        (x->protocol_specific[1]))
 
 
 // Macros to set the AVBTP transport layer.
@@ -149,6 +158,8 @@ typedef struct
                                            x->gateway_info[3] = (a & 0xFF); } while (0)
 #define SET_AVBTP_PACKET_DATA_LENGTH(x, a)  do {x->packet_data_length[0] = a >> 8; \
                                                 x->packet_data_length[1] = a & 0xFF; } while (0)
+#define SET_AVBTP_PROTOCOL_SPECIFIC(x, a)   do {x->protocol_specific[0] = a >> 8; \
+                                                x->protocol_specific[1] = a & 0xFF; } while (0)
                                                                                       
 // constants.
 #define AVBTP_CD_DATA      (0)
