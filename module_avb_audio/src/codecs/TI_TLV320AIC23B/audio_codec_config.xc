@@ -21,17 +21,17 @@
 #define DEVICE_ADRS                    (0x34)
 
 // Valid register address.
-#define LIVCTL_REG                     (0x00)
-#define RIVCTL_REG                     (0x01)
-#define LHPVCTL_REG                    (0x02)
-#define RHPVCTL_REG                    (0x03)
-#define AAPCTL_REG                     (0x04)
-#define DAPCTL_REG                     (0x05)
-#define PDCTL_REG                      (0x06)
-#define DAIF_REG                       (0x07)
-#define SRC_REG                        (0x08)
-#define DIA_REG                        (0x09)
-#define RESET_REG                      (0x0F)
+#define LIVCTL_REG                     (0x00) // Left line input channel volume
+#define RIVCTL_REG                     (0x01) // Right line input channel volume
+#define LHPVCTL_REG                    (0x02) // Left channel headphone volume
+#define RHPVCTL_REG                    (0x03) // Right channel headphone volume
+#define AAPCTL_REG                     (0x04) // Analogue audio path
+#define DAPCTL_REG                     (0x05) // Digital audio path
+#define PDCTL_REG                      (0x06) // Power down
+#define DAIF_REG                       (0x07) // Digital audio interface format
+#define SRC_REG                        (0x08) // Sample rate
+#define DIA_REG                        (0x09) // Digital interface activation
+#define RESET_REG                      (0x0F) // Reset
 
 // Register indexes
 #define CODEC_LEFT_LINE_IN_CTL_REG     (0x0)
@@ -46,154 +46,8 @@
 #define CODEC_DIF_IF_ACT_CTL_REG       (0x9)
 #define CODEC_RESET_REG                (0x0f)
 
-/** This send simple write command to the DAC chip via 2wire interface.
- */
-int swc_audio_codec_ctl_reg_wr(port AUD_SCLK, port AUD_SDIN,
-                               int Adrs, int WrData)
-{
-   int Result;
-   timer gt;
-   unsigned time;
-   int Temp, CtlAdrsData, i;
-   // three device ACK
-   int DeviceACK[3]; 
-   
-   // sanity checking
-   // only 9bits of data.
-   if ((WrData & 0xFFFFFE00) != 0)
-   {
-      return(0);
-   }
-   // only valid address.
-   switch (Adrs)
-   {
-      case LIVCTL_REG: case RIVCTL_REG: case LHPVCTL_REG: case RHPVCTL_REG:
-      case AAPCTL_REG: case DAPCTL_REG: case PDCTL_REG: case DAIF_REG:
-      case SRC_REG: case DIA_REG: case RESET_REG:
-         break;
-      default:
-         return(0);      
-         break;
-   }   
-   // initial values.
-   AUD_SCLK <: 1;
-   AUD_SDIN  <: 1;
-   sync(AUD_SDIN);
-   gt :> time;
-   time += CTL_SCLK_PERIOD_HIGH_TICKS + CTL_SCLK_PERIOD_LOW_TICKS;
-   gt when timerafter(time) :> time;
-   // start bit on SDI
-   AUD_SCLK <: 1;
-   AUD_SDIN  <: 0;
-   gt :> time;
-   time += CTL_SCLK_PERIOD_HIGH_TICKS;
-   gt when timerafter(time) :> time;
-   AUD_SCLK <: 0;   
-   // shift 7bits of address and 1bit R/W (fixed to write).
-   // WARNING: Assume MSB first.
-   for (i = 0; i < 8; i += 1)
-   {
-      Temp = (DEVICE_ADRS >> (7 - i)) & 0x1;
-      AUD_SDIN <: Temp;
-      gt :> time;
-      time += CTL_SCLK_PERIOD_HIGH_TICKS;
-      gt when timerafter(time) :> time;
-      AUD_SCLK <: 1;
-      gt :> time;
-      time += CTL_SCLK_PERIOD_HIGH_TICKS;
-      gt when timerafter(time) :> time;
-      AUD_SCLK <: 0;      
-   }
-   // turn the data to input
-   AUD_SDIN :> Temp;
-   gt :> time;
-   time += CTL_SCLK_PERIOD_HIGH_TICKS;
-   gt when timerafter(time) :> time;
-   AUD_SCLK <: 1;
-   // sample first ACK.
-   AUD_SDIN :> DeviceACK[0];
-   gt :> time;
-   time += CTL_SCLK_PERIOD_HIGH_TICKS;
-   gt when timerafter(time) :> time;
-   AUD_SCLK <: 0;      
-   // this build funny TI data format
-   CtlAdrsData = ((Adrs & 0x7F) << 9) | (WrData & 0x1FF);
-   // shift first 8 bits.
-   for (i = 0; i < 8; i += 1)
-   {
-      Temp = (CtlAdrsData >> (15 - i)) & 0x1;
-      AUD_SDIN <: Temp;
-      gt :> time;
-      time += CTL_SCLK_PERIOD_HIGH_TICKS;
-      gt when timerafter(time) :> time;
-      AUD_SCLK <: 1;
-      gt :> time;
-      time += CTL_SCLK_PERIOD_HIGH_TICKS;
-      gt when timerafter(time) :> time;
-      AUD_SCLK <: 0;      
-   }   
-   // turn the data to input
-   AUD_SDIN :> Temp;
-   gt :> time;
-   time += CTL_SCLK_PERIOD_HIGH_TICKS;
-   gt when timerafter(time) :> time;
-   AUD_SCLK <: 1;
-   // sample second ACK.
-   AUD_SDIN :> DeviceACK[1];
-   gt :> time;
-   time += CTL_SCLK_PERIOD_HIGH_TICKS;
-   gt when timerafter(time) :> time;
-   AUD_SCLK <: 0;      
-   
 
-
-   // shift second 8 bits.
-   for (i = 0; i < 8; i += 1)
-   {
-      Temp = (CtlAdrsData >> (7 - i)) & 0x1;
-      AUD_SDIN <: Temp;
-      gt :> time;
-      time += CTL_SCLK_PERIOD_HIGH_TICKS;
-      gt when timerafter(time) :> time;
-      AUD_SCLK <: 1;
-      gt :> time;
-      time += CTL_SCLK_PERIOD_HIGH_TICKS;
-      gt when timerafter(time) :> time;
-      AUD_SCLK <: 0;      
-   }    
-   // turn the data to input
-   AUD_SDIN :> Temp;
-   gt :> time;
-   time += CTL_SCLK_PERIOD_HIGH_TICKS;
-   gt when timerafter(time) :> time;
-   AUD_SCLK <: 1;
-   // sample second ACK.
-   AUD_SDIN :> DeviceACK[2];
-   gt :> time;
-   time += CTL_SCLK_PERIOD_HIGH_TICKS;
-   gt when timerafter(time) :> time;
-   AUD_SCLK <: 0;  
-   gt :> time;
-   time += CTL_SCLK_PERIOD_HIGH_TICKS;
-   gt when timerafter(time) :> time;
-   AUD_SCLK <: 1;
-   // put the data to a good value for next round.
-   AUD_SDIN  <: 1;
-   // validate all items are ACK properly.
-   Result = 1;
-   for (i = 0; i < 3; i += 1)
-   {
-      if (DeviceACK[i] != 0)
-      {
-         Result = 0;
-      }
-   }   
-   
-   return(Result);        
-}
-
-
-/** This configure the Ti's TLV320AIC23B Audio Codec for followings:
+/** This configures the Ti's TLV320AIC23B Audio Codec for followings:
  *  1. Crystal clock 12.288 MHz, 48kHz sample rate, 24bits per sample (left/right channels).
  *  2. Only ADC & DAC is enabled (all other inputs/outputs are muted).
  *
@@ -208,11 +62,9 @@ int audio_TI_TLV320AIC23B_init(struct r_i2c &r_i2c, int makeSlave)
    data.master_num = 0;
    data.data_len = 1;
    data.clock_mul = 1;
-   
-   // Initialise the ports.  
-   r_i2c.scl <: 1;
-   r_i2c.sda <: 1;       
- 
+
+   i2c_master_init(r_i2c);
+
    error = 0;
 
    // write to codec with reset register.

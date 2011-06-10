@@ -377,6 +377,8 @@ void audio_codec_CS42448_init(out port AUD_RESET_N,
    
    printstr("CS42448 CODEC initializing\n");
 
+   i2c_master_init(r_i2c);
+
    // Reset the codec
    AUD_RESET_N <: 0;
    t :> time;

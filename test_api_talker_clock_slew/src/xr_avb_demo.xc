@@ -131,6 +131,7 @@ int main(void) {
 		// AVB - PTP
 		on stdcore[1]:
 		{
+
 			// We need to initiate the PLL from core 1, so do it here before
 			// launching  the main function of the thread
 			audio_clock_CS2300CP_init(r_i2c, MASTER_TO_WORDCLOCK_RATIO);
