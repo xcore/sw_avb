@@ -40,5 +40,4 @@
 
 #define AVB_NUM_MEDIA_CLOCKS 1
 
-
 #endif
