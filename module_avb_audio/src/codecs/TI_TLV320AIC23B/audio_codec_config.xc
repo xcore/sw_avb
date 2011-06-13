@@ -61,7 +61,7 @@ int audio_TI_TLV320AIC23B_init(struct r_i2c &r_i2c, int makeSlave)
    struct i2c_data_info data;
    data.master_num = 0;
    data.data_len = 1;
-   data.clock_mul = 1;
+   data.clock_mul = 5;
 
    i2c_master_init(r_i2c);
 

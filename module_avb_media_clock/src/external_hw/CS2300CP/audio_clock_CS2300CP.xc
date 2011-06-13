@@ -127,7 +127,7 @@ void audio_clock_CS2300CP_init(struct r_i2c &r_i2c, unsigned mclks_per_wordclk)
 
    data.data_len = 1;
    data.master_num = 0;
-   data.clock_mul = 1;
+   data.clock_mul = 5;
 
    mult = mult/2;
    mult = mult << 12;
