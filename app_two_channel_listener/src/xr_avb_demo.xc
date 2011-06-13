@@ -231,30 +231,33 @@ void ptp_server_and_gpio(chanend c_rx, chanend c_tx, chanend ptp_link[],
 			do_ptp_server(c_rx, c_tx, ptp_link, num_ptp);
 
 			case buttons_active =>
-			p_buttons when pinsneq(button_val) :> unsigned new_button_val:
-			if ((button_val & 0x1) == 1 && (new_button_val & 0x1) == 0) {
-				c <: STREAM_SEL;
-				buttons_active = 0;
-			}
-			if ((button_val & 0x2) == 2 && (new_button_val & 0x2) == 0) {
-				c <: REMOTE_SEL;
-				buttons_active = 0;
-			}
-			if ((button_val & 0x4) == 4 && (new_button_val & 0x4) == 0) {
-				c <: CHAN_SEL;
-				buttons_active = 0;
-			}
-			if (!buttons_active) {
-				tmr :> buttons_timeout;
-				buttons_timeout += BUTTON_TIMEOUT_PERIOD;
-			}
-			button_val = new_button_val;
-			break;
-			case !buttons_active => tmr when timerafter(buttons_timeout) :> void:
-			buttons_active = 1;
-			p_buttons :> button_val;
-			break;
+				p_buttons when pinsneq(button_val) :> unsigned new_button_val:
+				if ((button_val & 0x1) == 1 && (new_button_val & 0x1) == 0) {
+					c <: STREAM_SEL;
+					buttons_active = 0;
+				}
+				if ((button_val & 0x2) == 2 && (new_button_val & 0x2) == 0) {
+					c <: REMOTE_SEL;
+					buttons_active = 0;
+				}
+				if ((button_val & 0x4) == 4 && (new_button_val & 0x4) == 0) {
+					c <: CHAN_SEL;
+					buttons_active = 0;
+				}
+				if (!buttons_active) {
+					tmr :> buttons_timeout;
+					buttons_timeout += BUTTON_TIMEOUT_PERIOD;
+				}
+				button_val = new_button_val;
+				break;
+				case !buttons_active => tmr when timerafter(buttons_timeout) :> void:
+				buttons_active = 1;
+				p_buttons :> button_val;
+				break;
 
+			case c :> unsigned led_command:
+				p_chan_leds <: (~led_command);
+				break;
 		}
 	}
 }
@@ -266,6 +269,7 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 	int avb_status = 0;
 	unsigned timeout;
 	unsigned sample_rate = 48000;
+	unsigned active_channels = 0;
 
 	// Initialize the media clock (a ptp derived clock)
 	set_device_media_clock_type(0, MEDIA_FIFO_DERIVED);
@@ -354,6 +358,9 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 			    set_avb_sink_addr(stream_index, addr, 6);
 
 				set_avb_sink_state(stream_index, AVB_SINK_STATE_POTENTIAL);
+
+				active_channels |= (1 << stream_index);
+				c_gpio_ctl <: active_channels;
 			  }
 			}
 
