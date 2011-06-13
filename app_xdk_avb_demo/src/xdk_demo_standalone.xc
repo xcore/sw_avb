@@ -313,7 +313,7 @@ void xdk_demo(chanend listener_ctl[], chanend talker_ctl[],
            c_rx, c_tx,c_ptp);
 
   // Set avb to be in "legacy" mode 
-  avb_set_legacy_mode(1);
+  //avb_set_legacy_mode(1);
 
   mdns_init(tcp_svr);
 

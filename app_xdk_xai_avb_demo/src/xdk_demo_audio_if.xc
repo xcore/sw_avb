@@ -256,7 +256,7 @@ void demo(chanend listener_ctl[], chanend talker_ctl[],
            c_rx, c_tx, c_ptp);
 
   // Set AVB to be in "legacy" mode
-  avb_set_legacy_mode(1);
+  //avb_set_legacy_mode(1);
 
   // Initialize Zeroconf
   mdns_init(tcp_svr);
