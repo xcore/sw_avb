@@ -41,7 +41,7 @@
 # the directories containing buildable applications (usually
 # prefixed with the app_ prefix)
 BUILD_SUBDIRS  = app_xr_avb_lc_demo app_xc2_avb_demo app_xdk_avb_demo app_xdk_xai_avb_demo 
-BUILD_SUBDIRS += app_1722_1_listener app_1722_1_talker
+BUILD_SUBDIRS += app_1722_1_listener app_1722_1_talker app_two_channel_listener app_two_channel_talker
 
 # This variable should contain a space separated list of all
 # the directories containing buildable plugins (usually
