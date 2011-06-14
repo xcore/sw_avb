@@ -24,6 +24,8 @@
 void set_avb_source_presentation(unsigned source_num, unsigned offset);
 
 /** Get the presentation time offset of an AVB source.
+ *  \param source_num the local source number to set
+ *  \param offset the presentation offset in ms
  */
 void get_avb_source_presentation(unsigned source_num, unsigned& offset);
 
@@ -45,6 +47,11 @@ void get_avb_source_presentation(unsigned source_num, unsigned& offset);
 void set_avb_source_map(unsigned source_num, unsigned map[], unsigned len);
 
 /** Get the channel map of an avb source.
+ *  \param source_num the local source number to set
+ *  \param map the map, an array of integers giving the input FIFOs that
+ *             make up the stream
+ *  \param len the length of the map; should be equal to the number of channels
+ *             in the stream
  */
 void get_avb_source_map(unsigned source_num, unsigned map[], unsigned& len);
 
@@ -62,6 +69,9 @@ void get_avb_source_map(unsigned source_num, unsigned map[], unsigned& len);
 void set_avb_source_dest(unsigned source_num, char addr[], unsigned len);
 
 /** Get the destination address of an avb source.
+ *  \param source_num the local source number
+ *  \param addr the destination address as an array of 6 bytes
+ *  \param len the length of the address, should always be equal to 6
  */
 void get_avb_source_dest(unsigned source_num, char addr[], unsigned& len);
 
@@ -80,8 +90,10 @@ void get_avb_source_dest(unsigned source_num, char addr[], unsigned& len);
  */
 void set_avb_source_format(unsigned source_num, unsigned format, unsigned rate);
 
-/** get_avb_source_format
- *
+/** Get the format of an AVB source.
+ *  \param source_num the local source number
+ *  \param format     the format of the stream
+ *  \param rate       the sample rate of the stream in Hz
  */
 void get_avb_source_format(unsigned source_num, unsigned format, unsigned& rate);
 
@@ -97,7 +109,9 @@ void get_avb_source_format(unsigned source_num, unsigned format, unsigned& rate)
  */
 void set_avb_source_channels(unsigned source_num, unsigned n);
 
-/** get_avb_source_channels
+/** Get the channel count of an AVB source.
+ *  \param source_num the local source number
+ *  \param n          the number of channels
  */
 void get_avb_source_channels(unsigned source_num, unsigned& n);
 
@@ -110,7 +124,9 @@ void get_avb_source_channels(unsigned source_num, unsigned& n);
  */
 void set_avb_source_sync(unsigned source_num, unsigned mclock);
 
-/** get_avb_source_sync
+/** Get the media clock of an AVB source.
+ *  \param source_num the local source number
+ *  \param mclock     the media clock number
  */
 void get_avb_source_sync(unsigned source_num, unsigned& mclock);
 
@@ -124,7 +140,9 @@ void get_avb_source_sync(unsigned source_num, unsigned& mclock);
  */
 void set_avb_source_name(unsigned source_num, char name[]);
 
-/** get_avb_source_name
+/** Get the name of an AVB source.
+ *  \param source_num the local source number
+ *  \param name       the string containing the name
  */
 void get_avb_source_name(unsigned source_num, char name[]);
 
@@ -141,7 +159,9 @@ void get_avb_source_name(unsigned source_num, char name[]);
  */
 void set_avb_source_vlan(unsigned source_num, unsigned vlan);
 
-/** get_avb_source_vlan
+/** Get the destination vlan of an AVB source.
+ *  \param source_num the local source number
+ *  \param vlan       the destination vlan id, The media clock number
  */
 void get_avb_source_vlan(unsigned source_num, unsigned& vlan);
 
@@ -157,7 +177,9 @@ void get_avb_source_vlan(unsigned source_num, unsigned& vlan);
  */
 void set_avb_source_state(unsigned source_num, avb_source_state_t state);
 
-/** get_avb_source_state
+/** Get the current state of an AVB source.
+ *  \param source_num the local source number
+ *  \param state      the state of the source
  */
 void get_avb_source_state(unsigned source_num, avb_source_state_t& state);
 
@@ -176,7 +198,12 @@ void get_avb_source_state(unsigned source_num, avb_source_state_t& state);
  */
 void set_avb_sink_map(unsigned sink_num, unsigned map[], unsigned len);
 
-/** get_avb_sink_map
+/** Get the map of an AVB sink.
+ * \param sink_num   the number of the sink
+ * \param map        array containing the media output FIFOs that the
+ *                   stream will be split into
+ * \param len        the length of the map; should equal to the number
+ *                   of channels in the stream
  */
 void get_avb_sink_map(unsigned sink_num, unsigned map[], unsigned& len);
 
@@ -193,7 +220,9 @@ void get_avb_sink_map(unsigned sink_num, unsigned map[], unsigned& len);
  */
 void set_avb_sink_channels(unsigned sink_num, unsigned n);
 
-/** get_avb_sink_channels
+/** Get the number of channels of an AVB sink.
+ *  \param sink_num the number of the sink
+ *  \param n the number of channels
  */
 void get_avb_sink_channels(unsigned sink_num, unsigned& n);
 
@@ -210,7 +239,9 @@ void get_avb_sink_channels(unsigned sink_num, unsigned& n);
  */
 void set_avb_sink_sync(unsigned sink_num, unsigned sync);
 
-/** get_avb_sink_sync
+/** Get the media clock sync of an AVB sink.
+ * \param sink_num the number of the sink
+ * \param sync     the media clock number of the sink
  */
 void get_avb_sink_sync(unsigned sink_num, unsigned& sync);
 
@@ -227,7 +258,9 @@ void get_avb_sink_sync(unsigned sink_num, unsigned& sync);
  */
 void set_avb_sink_vlan(unsigned sink_num, unsigned vlan);
 
-/** get_avb_sink_vlan
+/** Get the virtual lan id of an AVB sink.
+ * \param sink_num the number of the sink
+ * \param vlan     the vlan id of the sink
  */
 void get_avb_sink_vlan(unsigned sink_num, unsigned& vlan);
 
@@ -247,7 +280,10 @@ void get_avb_sink_vlan(unsigned sink_num, unsigned& vlan);
  **/
 void set_avb_sink_addr(unsigned sink_num, char addr[], unsigned len);
 
-/** get_avb_sink_addr
+/** Get the incoming destination mac address of an avb sink.
+ *  \param sink_num The local sink number
+ *  \param addr The mac address as an array of 6 bytes.
+ *  \param len The length of the address, should always be equal to 6.
  */
 void get_avb_sink_addr(unsigned sink_num, char addr[], unsigned& len);
 
@@ -262,7 +298,10 @@ void get_avb_sink_addr(unsigned sink_num, char addr[], unsigned& len);
  */
 void set_avb_sink_name(unsigned sink_num, char name[]);
 
-/** get_avb_sink_name
+/** Get the name of an AVB sink.
+ *
+ *  \param sink_num the number of the sink
+ *  \param name     the name string
  */
 void get_avb_sink_name(unsigned sink_num, char name[]);
 
@@ -274,13 +313,14 @@ void get_avb_sink_name(unsigned sink_num, char name[]);
  *  state moves from disabled to potential.
  *
  * \param sink_num  the number of the sink
- * \param streamId  int array containing the 64-bit of the 
- *                  stream
+ * \param streamId  int array containing the 64-bit of the stream
  *
  */
 void set_avb_sink_id(unsigned sink_num, unsigned streamId[]);
 
-/** get_avb_sink_id
+/** Get the stream id that an AVB sink listens to.
+ * \param sink_num  the number of the sink
+ * \param streamId  int array containing the 64-bit of the stream
  */
 void get_avb_sink_id(unsigned sink_num, unsigned streamId[]);
 
@@ -297,8 +337,9 @@ void get_avb_sink_id(unsigned sink_num, unsigned streamId[]);
  */
 void set_avb_sink_state(unsigned sink_num, avb_sink_state_t state);
 
-/** get_avb_sink_state
- *
+/** Get the state of an AVB sink.
+ * \param sink_num the number of the sink
+ * \param state the state of the sink
  */
 void get_avb_sink_state(unsigned sink_num, avb_sink_state_t state);
 
@@ -355,7 +396,9 @@ int get_device_identity_serial(char serial_no_string[]);
  **/
 int set_device_media_clock_source(unsigned clock_num, device_media_clock_state_t source);
 
-/** get_device_media_clock_source
+/** Get the source of a media clock.
+ *  \param clock_num the number of the media clock
+ *  \param source the output FIFO number to base the clock on
  */
 int get_device_media_clock_source(unsigned clock_num, device_media_clock_state_t& source);
 
@@ -370,6 +413,8 @@ int get_device_media_clock_source(unsigned clock_num, device_media_clock_state_t
 int set_device_media_clock_rate(int clock_num, int rate);
 
 /** Get the rate of a media clock.
+ *  \param clock_num the number of the media clock
+ *  \param rate the rate of the clock in Hz
  */
 int get_device_media_clock_rate(int clock_num, int& rate);
 
@@ -398,6 +443,8 @@ int get_device_media_clock_type(int clock_num, device_media_clock_type_t& clock_
 int set_device_media_clock_state(int clock_num, device_media_clock_state_t state);
 
 /** Get the state of a media clock.
+ *  \param clock_num the number of the media clock
+ *  \param state the state of the clock
  */
 int get_device_media_clock_state(int clock_num, device_media_clock_state_t& state);
 

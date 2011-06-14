@@ -90,7 +90,7 @@ media_input_fifo_init(media_input_fifo_t media_input_fifo, int stream_num);
  *  \brief Start storing samples/packets in the FIFO
  *
  *  \param media_input_fifo the media fifo
- *  \param the rate in Hz
+ *  \param rate the rate in Hz
  *  \return the number of samples in each audio packet
  */
 int

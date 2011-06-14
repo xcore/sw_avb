@@ -31,11 +31,12 @@
   \param p_din      array of ports to input data from
   \param num_channels     number of input and output ports
   \param c_listener  chanend connector to a listener component
-  \param local_talker_streams  a map from the inputs to local talker streams.
+  \param input_fifos           a map from the inputs to local talker streams.
                                The channels of the inputs are interleaved,
 							   for example, if you have two input ports, the map
                                {0,1,0,1} would map to the two stereo local
                                talker streams 0 and 1.
+  \param media_ctl the media control channel
   \param clk_ctl_index the index of the clk_ctl channel array that
                        controls the master clock fo the codec
  */

@@ -40,7 +40,7 @@ void i2s_master_configure_ports(const clock mclk,
 
   \param mclk      clock block that clocks the system clock of the codec;  
                    needs to be configured before the function call
-  \param blck      clock block that clocks the bit clock; configured 
+  \param bclk      clock block that clocks the bit clock; configured
                    within the i2s_master function
   \param p_bclk    the port to output the bit clock to
   \param p_lrclk   the port to output the word clock to
@@ -52,11 +52,12 @@ void i2s_master_configure_ports(const clock mclk,
                                      to the word clock; must be one
                                      of 128, 256 or 512
   \param c_listener  chanend connector to a listener component
-  \param local_talker_streams  a map from the inputs to local talker streams.
+  \param input_fifos           a map from the inputs to local talker streams.
                                The channels of the inputs are interleaved,
 							   for example, if you have two input ports, the map
                                {0,1,0,1} would map to the two stereo local
                                talker streams 0 and 1.
+  \param media_ctl the media fifo control channel
   \param clk_ctl_index the index of the clk_ctl channel array that
                        controls the master clock fo the codec
  */

@@ -37,7 +37,7 @@ void avb_1722_talker(chanend ptp_svr,
  *  \param buf_ctl          buffer control link to the media clock server
  *  \param listener_ctl     channel to configure the listener (given
  *                          to avb_init())
- *  \param num_stream       the number of streams the unit will handle
+ *  \param num_streams      the number of streams the unit will handle
  */
 void avb_1722_listener(chanend ethernet_rx_svr,
                        chanend ethernet_tx_svr,

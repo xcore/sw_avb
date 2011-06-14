@@ -111,7 +111,7 @@ void media_output_fifo_to_xc_channel(chanend media_ctl,
  *                              are pulled from the other end of the channel).
  *                              This should be -1 if the pull rate is not
  *                              controlled by the media clock server.
- *  \param ofifos               array of media output fifos to pull from
+ *  \param output_fifos         array of media output fifos to pull from
  *  \param num_channels         the number of channels (or FIFOs)
  **/
 void 

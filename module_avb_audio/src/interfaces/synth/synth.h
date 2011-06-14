@@ -7,11 +7,11 @@
  *  synthesized beeps to local talker streams. It is useful for testing.
  *  
  *  \param period               - the period of the sinewave used (in samples)
+ *  \param media_ctl            - the media control channel
  *  \param clk_ctl              - a link to the media clock server
- *  \param clk_cll_index         - The index of the clk_ctl channel in the array * passed to the media clock server
- *  \param input_fifos            - array of media input FIFOs - 
-                                   - one for each channel
- *  \parma num_channels            - the number of channels
+ *  \param clk_ctl_index        - The index of the clk_ctl channel in the array * passed to the media clock server
+ *  \param ififos               - array of media input FIFOs, one for each channel
+ *  \parma num_channels         - the number of channels
  */
 void synth(int period, 
            chanend media_ctl,
