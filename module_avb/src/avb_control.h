@@ -9,9 +9,9 @@
 
 /** \fn set_avb_source_presentation
  *
- *  Get/set the presentation time offset of an AVB source.
+ *  Set the presentation time offset of an AVB source.
  *
- *  Gets/sets the presentation time offset of a source i.e. the 
+ *  Sets the presentation time offset of a source i.e. the
  *  time after sampling that the stream should be played. The default
  *  value for this is 2ms.
  * 
@@ -25,11 +25,16 @@
  **/
 void set_avb_source_presentation(unsigned source_num, unsigned offset);
 
+/** \fn get_avb_source_presentation
+ *
+ */
+void get_avb_source_presentation(unsigned source_num, unsigned& offset);
+
 /** \fn set_avb_source_map
  *
- *  Get/set the channel map of an avb source.
+ *  Set the channel map of an avb source.
  *
- *  Gets/sets the channel map of a source i.e. the list of
+ *  Sets the channel map of a source i.e. the list of
  *  input FIFOs that constitute the stream.
  *
  *  This setting will not take effect until the next time the source
@@ -44,11 +49,16 @@ void set_avb_source_presentation(unsigned source_num, unsigned offset);
  **/
 void set_avb_source_map(unsigned source_num, unsigned map[], unsigned len);
 
+/** \fn get_avb_source_map
+ *
+ */
+void get_avb_source_map(unsigned source_num, unsigned map[], unsigned& len);
+
 /** \fn set_avb_source_dest
  *
- *  Get/set the destination address of an avb source.
+ *  Set the destination address of an avb source.
  *
- *  Gets/sets the destination MAC address of a source. 
+ *  Sets the destination MAC address of a source.
  *  This setting will not take effect until the next time the source
  *  state moves from disabled to potential.
  *
@@ -57,11 +67,16 @@ void set_avb_source_map(unsigned source_num, unsigned map[], unsigned len);
  *  \param len the length of the address, should always be equal to 6
  *
  **/
-void set_avb_source_dest(unsigned source_num, char addr[], usnigned len);
+void set_avb_source_dest(unsigned source_num, char addr[], unsigned len);
+
+/** \fn set_avb_source_dest
+ *
+ */
+void get_avb_source_dest(unsigned source_num, char addr[], unsigned& len);
 
 /** \fn set_avb_source_format
  *
- *  Get/Set the format of an AVB source.
+ *  Set the format of an AVB source.
  *
  *  The AVB source format covers the encoding and sample rate of the source.
  *  Currently the format is limited to a single encoding MBLA 24 bit signed
@@ -76,11 +91,16 @@ void set_avb_source_dest(unsigned source_num, char addr[], usnigned len);
  */
 void set_avb_source_format(unsigned source_num, unsigned format, unsigned rate);
 
+/** \fn get_avb_source_format
+ *
+ */
+void get_avb_source_format(unsigned source_num, unsigned format, unsigned& rate);
+
 /** \fn set_avb_source_channels
  *
- *  Get/Set the channel count of an AVB source.
+ *  Set the channel count of an AVB source.
  *
- *  Gets/sets the number of channels in the stream.
+ *  Sets the number of channels in the stream.
  *
  *  This setting will not take effect until the next time the source
  *  state moves from disabled to potential.
@@ -90,22 +110,30 @@ void set_avb_source_format(unsigned source_num, unsigned format, unsigned rate);
  */
 void set_avb_source_channels(unsigned source_num, unsigned n);
 
+/** \fn get_avb_source_channels
+ */
+void get_avb_source_channels(unsigned source_num, unsigned& n);
+
 /** \fn set_avb_source_sync
  *
- *  Get/Set the media clock of an AVB source.
+ *  Set the media clock of an AVB source.
  *
- *  Gets/sets the media clock of the stream.
+ *  Sets the media clock of the stream.
  *  
  *  \param source_num the local source number
  *  \param mclock     the media clock number
  */
 void set_avb_source_sync(unsigned source_num, unsigned mclock);
 
+/** \fn get_avb_source_sync
+ */
+void get_avb_source_sync(unsigned source_num, unsigned& mclock);
+
 /** \fn set_avb_source_name
  *
- *  Get/Set the name of an AVB source.
+ *  Set the name of an AVB source.
  *
- *  Gets/sets a human readable name for the stream. This name 
+ *  Sets a human readable name for the stream. This name
  *  must be fewer than ``AVB_MAX_NAME_LEN`` which can be set in ``avb_conf.h``.
  *  
  *  \param source_num the local source number
@@ -113,11 +141,15 @@ void set_avb_source_sync(unsigned source_num, unsigned mclock);
  */
 void set_avb_source_name(unsigned source_num, char name[]);
 
+/** \fn get_avb_source_name
+ */
+void get_avb_source_name(unsigned source_num, char name[]);
+
 /** \fn set_avb_source_vlan
  *
- *  Get/set the destination vlan of an AVB source.
+ *  Set the destination vlan of an AVB source.
  *
- *  Gets/sets the vlan that the source will transmit on. This defaults 
+ *  Sets the vlan that the source will transmit on. This defaults
  *  to 2.
  *
  *  This setting will not take effect until the next time the source
@@ -128,11 +160,15 @@ void set_avb_source_name(unsigned source_num, char name[]);
  */
 void set_avb_source_vlan(unsigned source_num, unsigned vlan);
 
+/** \fn get_avb_source_vlan
+ */
+void get_avb_source_vlan(unsigned source_num, unsigned& vlan);
+
 /** \fn set_avb_source_state
  *
- *  Get/set the current state of an AVB source.
+ *  Set the current state of an AVB source.
  *
- *  Gets/sets the current state of an AVB source. You cannot set the
+ *  Sets the current state of an AVB source. You cannot set the
  *  state to ``ENABLED``. Changing the state to ``POTENTIAL`` turns the stream
  *  on and it will automatically change to ``ENABLED`` when connected to 
  *  a listener and streaming.
@@ -142,11 +178,15 @@ void set_avb_source_vlan(unsigned source_num, unsigned vlan);
  */
 void set_avb_source_state(unsigned source_num, avb_source_state_t state);
 
+/** \fn get_avb_source_state
+ */
+void get_avb_source_state(unsigned source_num, avb_source_state_t& state);
+
 /** \fn set_avb_sink_map
  *
- *  Get/set the map of an AVB sink.
+ *  Set the map of an AVB sink.
  *
- *  Gets/sets the map i.e. the mapping from the 1722 stream to output FIFOs.
+ *  Sets the map i.e. the mapping from the 1722 stream to output FIFOs.
  *
  *  This setting will not take effect until the next time the sink
  *  state moves from disabled to potential.
@@ -159,11 +199,15 @@ void set_avb_source_state(unsigned source_num, avb_source_state_t state);
  */
 void set_avb_sink_map(unsigned sink_num, unsigned map[], unsigned len);
 
+/** \fn get_avb_sink_map
+ */
+void get_avb_sink_map(unsigned sink_num, unsigned map[], unsigned& len);
+
 /** \fn set_avb_sink_channels
  *
- *  Get/set the number of channels of an AVB sink.
+ *  Set the number of channels of an AVB sink.
  *
- *  Gets/sets the number of channels of an AVB sink.
+ *  Sets the number of channels of an AVB sink.
  *
  *  This setting will not take effect until the next time the sink
  *  state moves from disabled to potential.
@@ -174,11 +218,15 @@ void set_avb_sink_map(unsigned sink_num, unsigned map[], unsigned len);
  */
 void set_avb_sink_channels(unsigned sink_num, unsigned n);
 
+/** \fn get_avb_sink_channels
+ */
+void get_avb_sink_channels(unsigned sink_num, unsigned& n);
+
 /** \fn set_avb_sink_sync
  *
- *  Get/set the media clock sync of an AVB sink.
+ *  Set the media clock sync of an AVB sink.
  *
- *  Gets/sets which media clock is used to synchronize the incoming stream.
+ *  Sets which media clock is used to synchronize the incoming stream.
  *
  *  This setting will not take effect until the next time the sink
  *  state moves from disabled to potential.
@@ -189,11 +237,15 @@ void set_avb_sink_channels(unsigned sink_num, unsigned n);
  */
 void set_avb_sink_sync(unsigned sink_num, unsigned sync);
 
+/** \fn get_avb_sink_sync
+ */
+void get_avb_sink_sync(unsigned sink_num, unsigned& sync);
+
 /** \fn set_avb_sink_vlan
  *
- *  Get/set the virtual lan id of an AVB sink.
+ *  Set the virtual lan id of an AVB sink.
  *
- *  Gets/sets the vlan id of the incoming stream.
+ *  Sets the vlan id of the incoming stream.
  *
  *  This setting will not take effect until the next time the sink
  *  state moves from disabled to potential.
@@ -204,11 +256,15 @@ void set_avb_sink_sync(unsigned sink_num, unsigned sync);
  */
 void set_avb_sink_vlan(unsigned sink_num, unsigned vlan);
 
+/** \fn get_avb_sink_vlan
+ */
+void get_avb_sink_vlan(unsigned sink_num, unsigned& vlan);
+
 /** \fn set_avb_sink_addr
  *
- *  Get/set the incoming destination mac address of an avb sink.
+ *  Set the incoming destination mac address of an avb sink.
  *
- *  Get/set the incoming destination mac address of a sink. 
+ *  Set the incoming destination mac address of a sink.
  *  This needs to be set if the address is a multicast address so
  *  the endpoint can register for that multicast group with the switch.
  *
@@ -222,11 +278,15 @@ void set_avb_sink_vlan(unsigned sink_num, unsigned vlan);
  **/
 void set_avb_sink_addr(unsigned sink_num, char addr[], unsigned len);
 
+/** \fn get_avb_sink_addr
+ */
+void get_avb_sink_addr(unsigned sink_num, char addr[], unsigned& len);
+
 /** \fn set_avb_sink_name
  *
- *  Get/set the name of an AVB sink.
+ *  Set the name of an AVB sink.
  *
- *  Gets/sets the name of the sink (to be reported by higher level 
+ *  Sets the name of the sink (to be reported by higher level
  *  protocols).
  *
  *  \param sink_num the number of the sink
@@ -235,11 +295,15 @@ void set_avb_sink_addr(unsigned sink_num, char addr[], unsigned len);
  */
 void set_avb_sink_name(unsigned sink_num, char name[]);
 
+/** \fn get_avb_sink_name
+ */
+void get_avb_sink_name(unsigned sink_num, char name[]);
+
 /** \fn set_avb_sink_id
  *
- *  Get/set the stream id that an AVB sink listens to.
+ *  Set the stream id that an AVB sink listens to.
  *
- *  Gets/sets the stream id that an AVB sink listens to.
+ *  Sets the stream id that an AVB sink listens to.
  *
  *  This setting will not take effect until the next time the sink
  *  state moves from disabled to potential.
@@ -251,11 +315,15 @@ void set_avb_sink_name(unsigned sink_num, char name[]);
  */
 void set_avb_sink_id(unsigned sink_num, unsigned streamId[]);
 
+/** \fn get_avb_sink_id
+ */
+void get_avb_sink_id(unsigned sink_num, unsigned streamId[]);
+
 /** \fn set_avb_sink_state
  *
- *  Get/set the state of an AVB sink.
+ *  Set the state of an AVB sink.
  *
- *  Gets/sets the current state of an AVB sink. You cannot set the
+ *  Sets the current state of an AVB sink. You cannot set the
  *  state to ``ENABLED``. Changing the state to ``POTENTIAL`` turns the stream
  *  on and it will automatically change to ``ENABLED`` when connected to 
  *  a talker and receiving samples.
@@ -265,6 +333,11 @@ void set_avb_sink_id(unsigned sink_num, unsigned streamId[]);
  *
  */
 void set_avb_sink_state(unsigned sink_num, avb_sink_state_t state);
+
+/** \fn get_avb_sink_state
+ *
+ */
+void get_avb_sink_state(unsigned sink_num, avb_sink_state_t state);
 
 /** \fn get_device_name
  *
@@ -312,6 +385,7 @@ int get_device_identity_product(char product_string[]);
  * 
  *  \param version_string array to be filled with the version
  **/
+int get_device_identity_version(char version_string);
 
 /** \fn get_device_identity_serial
  *
@@ -323,7 +397,7 @@ int get_device_identity_serial(char serial_no_string[]);
 
 /** \fn set_device_media_clock_source
  *
- *  Get/set the source of a media clock.
+ *  Set the source of a media clock.
  *
  *  For clocks that are derived from an output FIFO. This function
  *  gets/sets which FIFO the clock should be derived from.
@@ -336,7 +410,7 @@ int set_device_media_clock_source(unsigned clock_num, device_media_clock_state_t
 
 /** \fn set_device_media_clock_rate
  *
- *  Get/set the rate of a media clock.
+ *  Set the rate of a media clock.
  *
  *  Sets the rate of the media clock.
  *
@@ -348,13 +422,22 @@ int set_device_media_clock_rate(int clock_num, int rate);
 
 /** \fn set_device_media_clock_type
  *
- *  Get/set the type of a media clock.
+ *  Set the type of a media clock.
  *
  *  \param clock_num the number of the media clock
  *  \param clock_type the type of the clock 
  * 
  **/
 int set_device_media_clock_type(int clock_num, device_media_clock_type_t clock_type);
+
+/** \fn get_device_media_clock_type
+ *
+ *  Get the type of a media clock.
+ *
+ *  \param clock_num the number of the media clock
+ *  \param clock_type the type of the clock
+ */
+int get_device_media_clock_type(int clock_num, device_media_clock_type_t& clock_type);
 
 /** \fn set_device_media_clock_state
  *
