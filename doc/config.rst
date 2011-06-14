@@ -52,8 +52,8 @@ endpoints on the network. For example:
    them (sample rate, description, global clock synchronization
    participation *etc.*).
 
-To aid discovery the AVB software stack includes an implementation of
-the zeroconf standards multicast DNS and DNS-SD.
+The XMOS TCP/IP implementation canbe used with the AVB solution to
+provide services such as MDNS.
 
 The control part controls the device. For example it controls:
 
@@ -62,8 +62,8 @@ The control part controls the device. For example it controls:
  * Other non-audio aspects.
 
 A control stack will link into the control thread to provide a bridge
-to the local control API. To aid implementation of this, a TCP/IP
-stack is provided. A demonstration control API is provided for
+to the local control API. To aid implementation of this, a the XMOS TCP/IP
+stack can be used. A demonstration control API is provided for
 the XR-AVB-LC-BRD, for more details see [AttQS10]_.
 
 TCP/IP Stack

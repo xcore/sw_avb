@@ -91,12 +91,12 @@ co-ordinate this, the program sets some #defines relating to the sample
 rate: 
 
 .. literalinclude:: app_xr_avb_lc_demo/src/xr_avb_demo.xc
-   :start-after: /* Defines to determine the sample rate
-   :end-before: void demo
+   :start-after: // this is the sample rate
+   :end-before: // Set the period inbetween
 
-Here, ``PLL_INPUT_RATE`` controls the rate at which the XCore drives the
-PLL. This is multiplied up to make ``MCLK_FREQUENCY``. This frequency
-is divided down by ``BCLK_RATIO`` to give the bit clock of the audio. 
+Here, ``MASTER_TO_WORDCLOCK_RATIO`` controls the ratio between the master
+clock and the wordclock, which must match the setting in the clock generation
+PLL.
 
 The next part of the file (not shown) declares the ports for ethernet, audio
 CODECs and the PLL.
@@ -130,7 +130,8 @@ The next components that are run are also core components of an AVB
 application, namely the PTP server and the media clock server. Note
 that the initialization of the PLL is run before the PTP server simply
 because it must be initialized on core 1. The actual code that
-drives the PLL is on core 0.
+drives the PLL is on core 0. In order to save threads, the GPIO and the
+PTP servers are combined into a single thread.
 
 .. literalinclude:: app_xr_avb_lc_demo/src/xr_avb_demo.xc
    :start-after: // AVB - PTP
@@ -163,13 +164,14 @@ The resulting print statements can be viewed using ``xrun`` with the
    :start-after: // Xlog
    :end-before: // Application
 
-Finally, the application has two application specific control
-threads. The ``gpio`` function is not listed here but reads button
-presses from the board. It then signals to the main control thread
-(int the ``demo`` function) over an XC channel. It can either signal
-that a button has been pressed to change the steam being listened to,
-or that a button has been pressed to change which channels within the
-current stream are being listened to.
+Finally, the application has an application specific control
+thread. 
+
+First the AVB system must be initialized with a call to
+:c:func:`avb_init`.  This call is needed before any other AVB API calls.
+
+This function takes channels connected to all the different components
+of the system to be able to control them. 
 
 .. literalinclude:: app_xr_avb_lc_demo/src/xr_avb_demo.xc
    :start-after: // Application threads
@@ -185,16 +187,7 @@ The main control thread is implemented in the function ``demo``:
    :start-after: /** The main application
    :end-before: timer
 
-This function takes channels connected to all the different components
-of the system to be able to control them. First
-the AVB system must be initialized with a call to
-:c:func:`avb_init`.  This call is needed before any other AVB API calls.
-
-.. literalinclude:: app_xr_avb_lc_demo/src/xr_avb_demo.xc
-   :start-after: // First initialize
-   :end-before: // Set AVB to be in "legacy"
-
-This demo also uses Zeroconf to advertise a configuration
+This demo uses Zeroconf to advertise a configuration
 protocol. The name is registered as ``xmos_attero_endpoint``, so on the local
 network it will have a DNS name of  ``xmos_attero_endpoint.local``. The server ``attero-cfg`` which is a configuration service
 over UDP on port ``ATTERO_CFG_PORT`` (with the value 40404) is also advertised. This service can be discovered by the AtteroTech host configuration utility
@@ -214,25 +207,7 @@ is derived from the same AVB stream.
 
 .. literalinclude:: app_xr_avb_lc_demo/src/xr_avb_demo.xc
    :start-after: // Initialize the media clock
-   :end-before: // Configure the source stream
-
-The following section configures the eight channel source according to
-the API detailed in Section :ref:`sec_avb_api`. There is a single
-stream consisting of eight channels made up of media inputs zero to
-seven. The source is the clock of the single media clock (media clock 0):
-
-.. literalinclude:: app_xr_avb_lc_demo/src/xr_avb_demo.xc
-   :start-after: // Configure the source stream
-   :end-before: // Request a multicast
-
-Note that the stream is not enabled yet as there is no destination address for it. The following call to
-:c:func:`avb_1722_maap_request_addresses`) asks for a single multicast
-address to use. Later in the running of the program the addresses will
-be reserved and the talker can be started.
-
-.. literalinclude:: app_xr_avb_lc_demo/src/xr_avb_demo.xc
-   :start-after: // Request a multicast 
-   :end-before: while (1)
+   :end-before: // Main loop
 
 After the initial configuration the application enters its main
 control loop. This is in the standard XC form of a "while (1), select"

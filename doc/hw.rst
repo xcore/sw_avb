@@ -30,4 +30,5 @@ For developing an application specific board for AVB please
 refer to the hardware guides for the above boards which contain example
 schematics, BOMs, design guidelines etc.
 
-
+It is also recommended that an AVB compatible network switch be obtained and used while developing the system. While
+the XMOS AVB solution can use a non-AVB switch, some of the features will need to be disabled.

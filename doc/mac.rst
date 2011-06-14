@@ -7,7 +7,7 @@ to the XCore ports to provide an 100 Mbps MII interface. The XS1
 device is also capable of implementing a dual 100 Mbps interface and
 a gigabit GMII interface [#]_.
 
-.. [#] Dual MII and gigabit GMII code is not included with the 5v0
+.. [#] Dual MII and gigabit GMII code is not included with the 5v1
        software release. Contact XMOS for more information about the 
        device capability and software.
 

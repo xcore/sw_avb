@@ -6,8 +6,7 @@ Precise Timing Protocol Component
 The precise timing protocol component (PTP) provides a system with a
 notion of global time on a network. The component supports the *AVB
 802.1as* timing protocol. It allows synchronization of the
-presentation and playback 
-rate of media streams across a network.
+presentation and playback rate of media streams across a network.
 
 .. only:: latex
 

@@ -29,22 +29,48 @@ different hardware:
      interface board
  * - app_xc2_avb_demo
    - XC-2 development kit
- 
+ * - app_1722_1_listner
+   - An LC board listener that uses the 1722.1 protocol for control
+ * - app_1722_1_talker
+   - An LC board talker that uses the 1722.1 protocol for control
+ * - app_two_channel_listener
+   - An LC board test application with a listener that combines two single channel streams
+ * - app_two_channel_talker
+   - An LC board test application with a talker that produces two single channel streams
+ * - test_api_listener
+   - A simple LC board stereo channel listener
+ * - test_api_talker
+   - A simple LC board stereo channel talker
+
 Each of these applications uses different modules. 
 
-The ethernet handling modules are:
+Some support modules originate in other repositories:
 
 .. list-table:: 
  :header-rows: 1
 
  * - Directory
    - Description
+   - Repository
  * - module_ethernet
    - Ethernet MAC
+   - sc_ethernet
  * - module_xtcp
    - XTCP TCP/IP stack
+   - sc_xtcp
  * - module_zeroconf
-   - Zeroconf/Multicast=DNS stack
+   - Zeroconf/Multicast=DNS stack. 
+   - sc_xtcp
+ * - module_i2c
+   - Two wire configuration protocol code.
+   - sc_i2c
+ * - module_xlog
+   - A logging server for redirecting prints over UART or an XC
+     channel. 
+   - sc_xlog
+ * - module_xmos_common
+   - Common build infrastructure.
+   - xcommon
 
 The following modules contain the core AVB code and are needed by
 every application:
@@ -60,6 +86,8 @@ every application:
    - IEEE P1722 transport (listener and talker functionality).
  * - module_avb_1722_maap
    - IEEE P1722 MAAP - Multicast address allocation code.
+ * - module_avb_1722_1
+   - IEEE P1722.1 AVB control protocol.
  * - module_avb_srp
    - 802.1Qat stream reservation code.
  * - module_osc
@@ -88,24 +116,9 @@ demos for other functionality:
 
  * - Directory
    - Description
- * - module_i2c
-   - Two wire configuration protocol code.
  * - module_xdk_avb_common
    - A selection of code used in XDK AVB demos.
- * - module_xlog
-   - A logging server for redirecting prints over UART or an XC
-     channel. 
      
-Finally, the following module is needed by every application to
-provide a common Makefile build system:
-
-.. list-table:: 
- :header-rows: 1
-
- * - Directory
-   - Description
- * - module_xmos_common
-   - Common build infrastructure.
 
 Key Files
 +++++++++

@@ -28,7 +28,7 @@ IEC 61883-6
 
 *IEC 61883-6* defines an audio data format that is contained in *IEEE P1722* streams.
 
-The XMOS AVB solution uses *IEC 61883-6* to convey audio sample streams.
+The XMOS AVB solution uses *IEC 61883-6* to convey audio sample streams.  Alternatively, the solution can use the *Simple Audio Format*.
 
 IEEE P1722
 ----------
@@ -36,3 +36,11 @@ IEEE P1722
 *IEEE P1722* defines an encapsulation protocol to transport audio streams over ethernet. It is complementary to the AVB standards and in particular allows timestamping of a stream based on the *802.1as* global clock. 
 
 The XMOS AVB solution handles both transmission and receipt of audio streams using *IEEE P1722*. In addition it can use the *802.1as* timestamps to accurately recover the sample rate clock of the audio to match on the listener side.
+
+IEEE P1722.1
+------------
+
+*IEEE P1722.1* is a system control protocol, used for discovery of AVB endpoints, connection management between endpoints, and enumeration and control of parameters exposed by the endpoints.
+
+The XMOS AVB solution supports this emerging standard.
+

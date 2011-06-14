@@ -4,17 +4,18 @@ XMOS AVB Specification
  +-------------------------------------------------------------------+
  |                        **Functionality**                          |
  +-------------------------------------------------------------------+
- |  Provides ethernet interface, audio transport,                    |
- |  precise timing protocol clock synchronize and media clock        |
+ |  Provides hardware interfaces, audio transport,                   |
+ |  precise timing protocol clock synchronization and media clock    |
  |  recovery to streamed audio over ethernet.                        |
  +-------------------------------------------------------------------+
  |                       **Supported Standards**                     |
  +---------------------------------+---------------------------------+
- | | Ethernet                      | | IEEE 802.3 (vai MII)          |
+ | | Ethernet                      | | IEEE 802.3 (via MII)          |
  | | AVB QoS                       | | IEEE 802.1Qav, 802.1Qat       |
  | | Precise Timing Protocol       | | IEEE 802.1as                  |
  | | AVB Audio Over Ethernet       | | IEEE P1722                    |
  | | Audio Streaming               | | IEC 61883-6                   |
+ | | Control Protocol              | | IEEE P1722.1                  |
  +---------------------------------+---------------------------------+
  |                       **Supported Devices**                       |
  +---------------------------------+---------------------------------+

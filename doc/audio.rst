@@ -5,7 +5,7 @@ AVB Streams, Channels, Talkers and Listeners
 ++++++++++++++++++++++++++++++++++++++++++++
 
 Audio is transported in streams of data, where each stream may have multiple
-channels. Endpoints producing the streams are called *Talkers* and
+channels. Endpoints producing streams are called *Talkers* and
 those receiving them are called *Listeners*. Each stream on the
 network has a unique 64-bit stream ID. 
 

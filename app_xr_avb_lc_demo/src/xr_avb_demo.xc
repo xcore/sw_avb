@@ -139,7 +139,10 @@ int main(void) {
 		on stdcore[1]:
 		{
 			int mac_address[2];
-			ethernet_getmac_otp(otp_data, otp_addr, otp_ctrl, (mac_address, char[]));
+			ethernet_getmac_otp(otp_data,
+                                            otp_addr,
+                                            otp_ctrl,
+                                            (mac_address, char[]));
 			phy_init(clk_smi, p_mii_resetn,
 					smi,
 					mii);
@@ -153,7 +156,11 @@ int main(void) {
 		// TCP/IP stack
 		on stdcore[1]:
 		{
-			uip_server(rx_link[1], tx_link[2], xtcp, 1, null, connect_status);
+			uip_server(rx_link[1],
+                                   tx_link[2],
+                                   xtcp, 1,
+                                   null,
+                                   connect_status);
 		}
 
 		// AVB - PTP
@@ -351,6 +358,7 @@ void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl) {
 	set_avb_source_format(0, AVB_SOURCE_FORMAT_MBLA_24BIT, SAMPLE_RATE);
 	set_avb_source_sync(0, 0); // use the media_clock defined above
 
+	// Main loop
 	tmr	:> timeout;
 	while (1) {
 		unsigned char tmp;
