@@ -1,6 +1,12 @@
 #ifndef _avb_control_h_
 #define _avb_control_h_
 
+/*
+ *  This file is for the benefit of Doxygen - don't remove the predeclarations.
+ */
+
+
+
 /** \fn set_avb_source_presentation
  *
  *  Get/set the presentation time offset of an AVB source.
@@ -17,6 +23,7 @@
  *
  *
  **/
+void set_avb_source_presentation(unsigned source_num, unsigned offset);
 
 /** \fn set_avb_source_map
  *
@@ -35,6 +42,7 @@
  *             in the stream
  *
  **/
+void set_avb_source_map(unsigned source_num, unsigned map[], unsigned len);
 
 /** \fn set_avb_source_dest
  *
@@ -49,6 +57,7 @@
  *  \param len the length of the address, should always be equal to 6
  *
  **/
+void set_avb_source_dest(unsigned source_num, char addr[], usnigned len);
 
 /** \fn set_avb_source_format
  *
@@ -65,6 +74,7 @@
  *  \param format     the format of the stream
  *  \param rate       the sample rate of the stream in Hz
  */
+void set_avb_source_format(unsigned source_num, unsigned format, unsigned rate);
 
 /** \fn set_avb_source_channels
  *
@@ -78,6 +88,7 @@
  *  \param source_num the local source number
  *  \param n          the number of channels
  */
+void set_avb_source_channels(unsigned source_num, unsigned n);
 
 /** \fn set_avb_source_sync
  *
@@ -88,6 +99,7 @@
  *  \param source_num the local source number
  *  \param mclock     the media clock number
  */
+void set_avb_source_sync(unsigned source_num, unsigned mclock);
 
 /** \fn set_avb_source_name
  *
@@ -99,6 +111,7 @@
  *  \param source_num the local source number
  *  \param name       the string containing the name
  */
+void set_avb_source_name(unsigned source_num, char name[]);
 
 /** \fn set_avb_source_vlan
  *
@@ -113,6 +126,7 @@
  *  \param source_num the local source number
  *  \param vlan       the destination vlan id, The media clock number
  */
+void set_avb_source_vlan(unsigned source_num, unsigned vlan);
 
 /** \fn set_avb_source_state
  *
@@ -126,6 +140,7 @@
  *  \param source_num the local source number
  *  \param state      the state of the source
  */
+void set_avb_source_state(unsigned source_num, avb_source_state_t state);
 
 /** \fn set_avb_sink_map
  *
@@ -142,6 +157,7 @@
  * \param len        the length of the map; should equal to the number
  *                   of channels in the stream
  */
+void set_avb_sink_map(unsigned sink_num, unsigned map[], unsigned len);
 
 /** \fn set_avb_sink_channels
  *
@@ -156,6 +172,7 @@
  *  \param n the number of channels
  *
  */
+void set_avb_sink_channels(unsigned sink_num, unsigned n);
 
 /** \fn set_avb_sink_sync
  *
@@ -170,6 +187,7 @@
  * \param sync     the media clock number of the sink
  *
  */
+void set_avb_sink_sync(unsigned sink_num, unsigned sync);
 
 /** \fn set_avb_sink_vlan
  *
@@ -184,6 +202,7 @@
  * \param vlan     the vlan id of the sink
  *
  */
+void set_avb_sink_vlan(unsigned sink_num, unsigned vlan);
 
 /** \fn set_avb_sink_addr
  *
@@ -201,6 +220,7 @@
  *  \param len The length of the address, should always be equal to 6.
  *
  **/
+void set_avb_sink_addr(unsigned sink_num, char addr[], unsigned len);
 
 /** \fn set_avb_sink_name
  *
@@ -213,6 +233,7 @@
  *  \param name     the name string 
  *
  */
+void set_avb_sink_name(unsigned sink_num, char name[]);
 
 /** \fn set_avb_sink_id
  *
@@ -228,6 +249,7 @@
  *                  stream
  *
  */
+void set_avb_sink_id(unsigned sink_num, unsigned streamId[]);
 
 /** \fn set_avb_sink_state
  *
@@ -242,6 +264,7 @@
  * \param state the state of the sink
  *
  */
+void set_avb_sink_state(unsigned sink_num, avb_sink_state_t state);
 
 /** \fn get_device_name
  *
@@ -249,6 +272,7 @@
  * 
  *  \param device_name_string array to be filled with the device name
  **/
+int get_device_name(char device_name_string[]);
 
 /** \fn get_device_system
  *
@@ -256,6 +280,7 @@
  * 
  *  \param device_name_string array to be filled with the system name
  **/
+int get_device_system(char device_name_string[]);
 
 /** \fn get_device_identity_vendor
  *
@@ -263,6 +288,7 @@
  * 
  *  \param vendor_name_string array to be filled with the vendor name
  **/
+int get_device_identity_vendor(char vendor_name_string[]);
 
 /** \fn get_device_identity_vendor_id
  *
@@ -270,6 +296,7 @@
  * 
  *  \param vendor_id_string array to be filled with the vendor id
  **/
+int get_device_identity_vendor_id(char vendor_id_string[]);
 
 /** \fn get_device_identity_product
  *
@@ -277,6 +304,7 @@
  * 
  *  \param product_string array to be filled with the product name
  **/
+int get_device_identity_product(char product_string[]);
 
 /** \fn get_device_identity_version
  *
@@ -291,6 +319,7 @@
  * 
  *  \param serial_no_string array to be filled with the serial number
  **/
+int get_device_identity_serial(char serial_no_string[]);
 
 /** \fn set_device_media_clock_source
  *
@@ -303,6 +332,7 @@
  *  \param source the output FIFO number to base the clock on
  *
  **/
+int set_device_media_clock_source(unsigned clock_num, device_media_clock_state_t source);
 
 /** \fn set_device_media_clock_rate
  *
@@ -314,6 +344,7 @@
  *  \param rate the rate of the clock in Hz
  *
  **/
+int set_device_media_clock_rate(int clock_num, int rate);
 
 /** \fn set_device_media_clock_type
  *
@@ -323,6 +354,7 @@
  *  \param clock_type the type of the clock 
  * 
  **/
+int set_device_media_clock_type(int clock_num, device_media_clock_type_t clock_type);
 
 /** \fn set_device_media_clock_state
  *
@@ -333,6 +365,8 @@
  *  \param clock_num the number of the media clock
  *  \param state the state of the clock
  **/
+int set_device_media_clock_state(int clock_num, device_media_clock_state_t state);
+
 
 #endif // _avb_control_h_
 
