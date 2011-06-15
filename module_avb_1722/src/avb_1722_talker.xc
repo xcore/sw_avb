@@ -86,6 +86,7 @@ static void configure_stream(chanend avb1722_tx_config,
 	stream.dbc = -1;
 	stream.active = 1;
 	stream.transmit_ok = 1;
+	stream.sequence_number = 0;
 }
 
 static void disable_stream(avb1722_Talker_StreamConfig_t &stream) {

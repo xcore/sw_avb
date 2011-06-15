@@ -80,7 +80,7 @@ typedef struct
                                   // bit 5   : lp. late presentation field valid.
                                   // bit 6   : gv. gateway info field valid
                                   // bit 7   : tv. timestamp field valid    
-  unsigned char sd_reserved2;     // reserved.                               
+  unsigned char sequence_number;  //
   unsigned char gm_discontinunity_holdover; // bit 0-6 : GM Discontinunity counter.
                                             // bit 7   : h. holdover.
   unsigned char stream_id[8];     // 802.1Qat Stream ID
@@ -109,6 +109,7 @@ typedef struct
 #define AVBTP_LATE_PRESENTATION(x)     ((x->version_flags >> 2) & 0x1)
 #define AVBTP_GV(x)                    ((x->version_flags >> 1) & 0x1)
 #define AVBTP_TV(x)                    (x->version_flags & 0x1)
+#define AVBTP_SEQUENCE_NUMBER(x)       (x->sequence_number)
 #define AVBTP_GM_DISCONTINUNITY(x)     (x->gm_discontinunity_holdover >> 1)
 #define AVBTP_HOLDOVER(x)              (x->gm_discontinunity_holdover & 1)
 #define AVBTP_TIMESTAMP(x)             ((x->avb_timestamp[0] << 24) | \
@@ -138,6 +139,7 @@ typedef struct
 #define SET_AVBTP_LATE_PRESENTATION(x, a) (x->version_flags |= (a & 0x1) << 2)
 #define SET_AVBTP_GV(x, a)                (x->version_flags |= (a & 0x1) << 1)
 #define SET_AVBTP_TV(x, a)                (x->version_flags = (x->version_flags & ~0x1) | (a & 0x1))
+#define SET_AVBTP_SEQUENCE_NUMBER(x, a)   (x->sequence_number = (a & 0xff))
 #define SET_AVBTP_GM_DISCONTINUNITY(x, a) (x->gm_discontinunity_holdover |= (a & 0x7F) << 1)
 #define SET_AVBTP_HOLDOVER(x, a)          (x->gm_discontinunity_holdover |= a & 0x1)                                           
 #define SET_AVBTP_TIMESTAMP(x, a)        do {x->avb_timestamp[0] = (a >> 24) & 0xFF; \

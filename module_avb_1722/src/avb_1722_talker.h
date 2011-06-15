@@ -59,6 +59,8 @@ typedef struct avb1722_Talker_StreamConfig_t
   unsigned transmit_ok;
   //! the internal clock count when the last 1722 packet was transmitted
   int last_transmit_time;
+  //! a transmitted packet sequence counter
+  char sequence_number;
 } avb1722_Talker_StreamConfig_t;
 
 

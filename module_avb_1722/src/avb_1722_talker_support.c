@@ -40,6 +40,7 @@ static inline void AVB1722_AVBTP_HeaderGen(unsigned char Buf[],
 		int valid_ts,
 		unsigned avbtp_ts,
 		int numAudioSamples,
+		int sequence_number,
 		const unsigned stream_id0)
 {
 	int pkt_data_length;
@@ -64,6 +65,9 @@ static inline void AVB1722_AVBTP_HeaderGen(unsigned char Buf[],
 	// update stream ID by adding stream number to preloaded stream ID
 	// (ignoring the fact that talkerStreamIdExt is stored MSB-first - it's just an ID)
 	SET_AVBTP_STREAM_ID0(pAVBHdr, stream_id0);
+
+	// update the
+	SET_AVBTP_SEQUENCE_NUMBER(pAVBHdr, sequence_number);
 }
 
 /** This populates the Ethernet frame header of PTP payload.
@@ -315,7 +319,7 @@ int avb1722_create_packet(unsigned char Buf0[],
 	}
 
 	// Update timestamp value and valid flag.
-	AVB1722_AVBTP_HeaderGen(Buf, timerValid, ptp_ts, num_audio_samples,	stream_id0);
+	AVB1722_AVBTP_HeaderGen(Buf, timerValid, ptp_ts, num_audio_samples,stream_info->sequence_number, stream_id0);
 
 #if AVB_1722_SAF
 	pktSize = AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + (num_audio_samples << 2);
@@ -325,6 +329,7 @@ int avb1722_create_packet(unsigned char Buf0[],
 
 	stream_info->last_transmit_time = time;
 	stream_info->transmit_ok = 0;
+	stream_info->sequence_number++;
 	return (pktSize);
 }
 
