@@ -24,6 +24,7 @@ amount of buffering needed for the audio.
 .. literalinclude:: app_xr_avb_lc_demo/src/avb_conf.h
    :start-after: ethernet 
    :end-before: AVB configuration
+   :strip-leading-whitespace:
 
 Some general settings are needed for memory allocation across the
 whole AVB code base. Here the maximum name length (use for
@@ -32,18 +33,21 @@ remote control identification) and the maximum channels per stream are set:
 .. literalinclude:: app_xr_avb_lc_demo/src/avb_conf.h
    :start-after: AVB configuration
    :end-before: Listener configuration
+   :strip-leading-whitespace:
 
 The application can listen to a single eight channel stream. This requires a single sink that can be handled by a single listener unit:
 
 .. literalinclude:: app_xr_avb_lc_demo/src/avb_conf.h
    :start-after: Listener configuration 
    :end-before: Talker configuration
+   :strip-leading-whitespace:
 
 The application will produce a single eight channel stream. This requires a single source that can be handled by a single talker unit:
 
 .. literalinclude:: app_xr_avb_lc_demo/src/avb_conf.h
    :start-after: Talker configuration
    :end-before: Media configuration
+   :strip-leading-whitespace:
 
 The audio I/O side of the application must be configured. The board has eight digital I/Os in and out so this
 determines the number of input/output FIFOs. In addition the
@@ -54,6 +58,7 @@ works, two media units are required (one for input and one for output).
 .. literalinclude:: app_xr_avb_lc_demo/src/avb_conf.h
    :start-after: Media configuration
    :end-before: Media clock configuration
+   :strip-leading-whitespace:
 
 The demo is synchronous in that it has one clock for both the input
 and output (this will end up being a clock divided down from the PTP
@@ -62,6 +67,7 @@ clock).
 .. literalinclude:: app_xr_avb_lc_demo/src/avb_conf.h
    :start-after: Media clock configuration
    :end-before: Add synths
+   :strip-leading-whitespace:
 
 Finally, the XR-AVB-LC-BRD has eight digital inputs but only two of
 them are connected to an ADC on board. For this demo another setting is added, which causes the I2S component to ignore the input on
@@ -71,6 +77,7 @@ waves to these inputs:
 .. literalinclude:: app_xr_avb_lc_demo/src/avb_conf.h
    :start-after: Add synths
    :end-before: endif
+   :strip-leading-whitespace:
 
 
 The toplevel main
@@ -93,6 +100,7 @@ rate:
 .. literalinclude:: app_xr_avb_lc_demo/src/xr_avb_demo.xc
    :start-after: // this is the sample rate
    :end-before: // Set the period inbetween
+   :strip-leading-whitespace:
 
 Here, ``MASTER_TO_WORDCLOCK_RATIO`` controls the ratio between the master
 clock and the wordclock, which must match the setting in the clock generation
@@ -125,6 +133,7 @@ ethernet and TCP/IP stack:
 .. literalinclude:: app_xr_avb_lc_demo/src/xr_avb_demo.xc
    :start-after: // AVB - Ethernet
    :end-before: // AVB - PTP
+   :strip-leading-whitespace:
 
 The next components that are run are also core components of an AVB
 application, namely the PTP server and the media clock server. Note
@@ -136,6 +145,7 @@ PTP servers are combined into a single thread.
 .. literalinclude:: app_xr_avb_lc_demo/src/xr_avb_demo.xc
    :start-after: // AVB - PTP
    :end-before: // AVB - Audio
+   :strip-leading-whitespace:
 
 As mentioned previously, the application has one outgoing stream which
 is handled by a single talker unit. The talker unit is instantiated
@@ -144,6 +154,7 @@ next with a call to :c:func:`avb_1722_talker`:
 .. literalinclude:: app_xr_avb_lc_demo/src/xr_avb_demo.xc
    :start-after: // AVB Talker
    :end-before: // AVB Listener
+   :strip-leading-whitespace:
 
 There is also a single listener unit, which takes incoming packets
 and splits them into media FIFOs. However, the I2S component takes
@@ -152,6 +163,7 @@ samples to play over an XC channel. So :c:func:`media_output_to_xc_channel_split
 .. literalinclude:: app_xr_avb_lc_demo/src/xr_avb_demo.xc
    :start-after: // AVB Listener
    :end-before: // Xlog
+   :strip-leading-whitespace:
 
 The above components comprise the core of the AVB system. In addition
 there is a debugging thread and a couple of control threads. The
@@ -163,6 +175,7 @@ The resulting print statements can be viewed using ``xrun`` with the
 .. literalinclude:: app_xr_avb_lc_demo/src/xr_avb_demo.xc
    :start-after: // Xlog
    :end-before: // Application
+   :strip-leading-whitespace:
 
 Finally, the application has an application specific control
 thread. 
@@ -176,6 +189,7 @@ of the system to be able to control them.
 .. literalinclude:: app_xr_avb_lc_demo/src/xr_avb_demo.xc
    :start-after: // Application threads
    :end-before: }
+   :strip-leading-whitespace:
 
 
 The main control thread
@@ -186,6 +200,7 @@ The main control thread is implemented in the function ``demo``:
 .. literalinclude:: app_xr_avb_lc_demo/src/xr_avb_demo.xc
    :start-after: /** The main application
    :end-before: timer
+   :strip-leading-whitespace:
 
 This demo uses Zeroconf to advertise a configuration
 protocol. The name is registered as ``xmos_attero_endpoint``, so on the local
@@ -196,6 +211,7 @@ over UDP on port ``ATTERO_CFG_PORT`` (with the value 40404) is also advertised. 
 .. literalinclude:: app_xr_avb_lc_demo/src/xr_avb_demo.xc
    :start-after: // Initialize Zeroconf
    :end-before: // Initialize the media clock
+   :strip-leading-whitespace:
 
 The next section of code configures the clocking and the source
 streams the demo will transmit. Firstly, as mentioned earlier in the
@@ -208,6 +224,7 @@ is derived from the same AVB stream.
 .. literalinclude:: app_xr_avb_lc_demo/src/xr_avb_demo.xc
    :start-after: // Initialize the media clock
    :end-before: // Main loop
+   :strip-leading-whitespace:
 
 After the initial configuration the application enters its main
 control loop. This is in the standard XC form of a "while (1), select"
@@ -237,6 +254,7 @@ and places the packet in the array ``buf``.
 .. literalinclude:: app_xr_avb_lc_demo/src/xr_avb_demo.xc
    :start-after: // Receive any incoming AVB packets
    :end-before: // Process AVB
+   :strip-leading-whitespace:
 
 
 This packet may be an 802.1Qat packet or a 1722 MAAP packet. First we
@@ -246,6 +264,7 @@ if it is not a relevant protocol).
 .. literalinclude:: app_xr_avb_lc_demo/src/xr_avb_demo.xc
    :start-after: // Process AVB
    :end-before: }
+   :strip-leading-whitespace:
 
 
 This result of this processing may be a report of a failed route which
@@ -259,6 +278,7 @@ The next event the main loop responds to is an incoming TCP/IP packet.
 .. literalinclude:: app_xr_avb_lc_demo/src/xr_avb_demo.xc
    :start-after: // Process TCP/IP
    :end-before: // Receive any events
+   :strip-leading-whitespace:
 
 
 Here, two handlers are called. One to handle any Zeroconf packets and
@@ -274,6 +294,7 @@ the main control thread of certain events. The next case handles this:
 .. literalinclude:: app_xr_avb_lc_demo/src/xr_avb_demo.xc
    :start-after: // Receive any events from user button
    :end-before: // Periodic
+   :strip-leading-whitespace:
 
 One possibility is that the ``STREAM_SEL`` button is pressed to
 change the stream being listened to. This just sets the
@@ -291,6 +312,7 @@ occurs via an XCore timer. This event happens once every 50us.
 .. literalinclude:: app_xr_avb_lc_demo/src/xr_avb_demo.xc
    :start-after: // Periodic processing
    :end-before: // Call the stream manager
+   :strip-leading-whitespace:
 
 The :c:func:`avb_periodic` function performs general AVB periodic
 processing and may return a report that the MAAP addresses that were
@@ -305,6 +327,7 @@ listened to.
 .. literalinclude:: app_xr_avb_lc_demo/src/xr_avb_demo.xc
    :start-after: // what is being
    :end-before: break;
+   :strip-leading-whitespace:
 
 The demo stream manager
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -317,6 +340,7 @@ via the function :c:func:`avb_check_for_new_stream`.
 .. literalinclude:: app_xr_avb_lc_demo/src/demo_stream_manager.xc
    :start-after: // check if there is a new 
    :end-before: // if so
+   :strip-leading-whitespace:
 
 If there is no current stream and a new stream is seen, or if the
 ``change_stream`` variable is set (due to a button press, see the
@@ -326,4 +350,9 @@ This is done by reconfiguring the sink in this section of code:
 .. literalinclude:: app_xr_avb_lc_demo/src/demo_stream_manager.xc
    :start-after: map the new stream
    :end-before: }
+   :strip-leading-whitespace:
+
+
+
+
 
