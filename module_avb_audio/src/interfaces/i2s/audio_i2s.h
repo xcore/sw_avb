@@ -11,6 +11,11 @@
 #include <xclib.h>
 #ifdef __XC__
 
+// By defining this, all channels are filled with an increasing counter
+// value instead of the samples themselves.  Useful to check the channel
+// synchronization using a network monitor
+//#define SAMPLE_COUNTER_TEST
+
 #define I2S_SINE_TABLE_SIZE 100
 
 extern unsigned int i2s_sine[I2S_SINE_TABLE_SIZE];
@@ -79,6 +84,10 @@ inline void i2s_master(const clock mclk,
   int mclk_to_bclk_ratio = master_to_word_clock_ratio / 64;
   unsigned int bclk_val;
   unsigned int lrclk_val = 0;
+
+#ifdef SAMPLE_COUNTER_TEST
+  unsigned int sample_counter=0;
+#endif
 
   // This is the master timing clock for the audio system.  Its value is sent
   // to the input and output fifos and is converted into presentation time for
@@ -176,16 +185,20 @@ inline void i2s_master(const clock mclk,
         p_bclk <: bclk_val;
 
         if (k < num_in>>1) {
-          unsigned int sample_in;
-          asm("in %0, res[%1]":"=r"(sample_in):"r"(p_din[k]));
+#ifdef SAMPLE_COUNTER_TEST
+			media_input_fifo_push_sample(input_fifos[j+k*2], sample_counter, timestamp);
+#else
+            unsigned int sample_in;
+            asm("in %0, res[%1]":"=r"(sample_in):"r"(p_din[k]));
 
-          sample_in = (bitrev(sample_in) >> 8);        
+            sample_in = (bitrev(sample_in) >> 8);
 #ifdef I2S_SYNTH_FROM
-          if (k >= I2S_SYNTH_FROM) {
-            sample_in = i2s_sine[sine_count[k]>>8];
-          }
+            if (k >= I2S_SYNTH_FROM) {
+              sample_in = i2s_sine[sine_count[k]>>8];
+            }
 #endif
-          media_input_fifo_push_sample(input_fifos[j+k*2], sample_in, timestamp);
+			media_input_fifo_push_sample(input_fifos[j+k*2], sample_in, timestamp);
+#endif
         }
         
         if (k < num_out>>1) {
@@ -198,6 +211,11 @@ inline void i2s_master(const clock mclk,
         
       }
     }
+
+#ifdef SAMPLE_COUNTER_TEST
+    sample_counter++;
+#endif
+
   }
 }
 
