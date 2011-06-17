@@ -234,8 +234,17 @@ int avb1722_create_packet(unsigned char Buf0[],
 	unsigned ptp_ts = 0;
 	int dbc;
 
-	if (media_input_fifo_empty(map[0]))
-		return 0;
+	// Check to see if there is something that can be transmitted.  If there is not, then we give up
+	// transmitting this packet, because there may be other streams serviced by this thread which
+	// can be serviced.  Since a packet on the wire is always shorter than a packet in the fifo,
+	// we know that having a packet in the fifo is enough to transmit one on the wire.
+	//
+	// There is a slight issue here, that because wire packets are potentially shorter than fifo
+	// packets, that we will occasionally not transmit when we could do. The period of this is
+	// 1/(ceil(rate/8000)-(rate/8000))
+	for (i = 0; i < num_channels; i++) {
+	    if (media_input_fifo_empty(map[i])) return 0;
+	}
 
 	// Figure out if it is time to transmit a packet
 	if (!stream_info->transmit_ok) {
