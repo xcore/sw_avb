@@ -246,6 +246,9 @@ int avb1722_create_packet(unsigned char Buf0[],
 	    if (media_input_fifo_empty(map[i])) return 0;
 	}
 
+	// If the FIFOs are not being filled then also do not process the packet
+	if ((media_input_fifo_enable_ind_state() & stream_info->fifo_mask) == 0) return 0;
+
 	// Figure out if it is time to transmit a packet
 	if (!stream_info->transmit_ok) {
 		int elapsed = time - stream_info->last_transmit_time;
@@ -273,12 +276,6 @@ int avb1722_create_packet(unsigned char Buf0[],
 
 	// Get the audio data packet information
 	if (stream_info->initial != 0) {
-		// Starting up - flush the fifos then start reading the next packet from each
-		// note: don't flush and get packet in for each fifo in turn, as the 'get packet'
-		// operation is blocking
-		for (i = 0; i < num_channels; i++) {
-			media_input_fifo_flush(map[i]);
-		}
 		for (i = 0; i < num_channels; i++) {
 			int *src = (int *) media_input_fifo_get_packet(map[i], &presentationTime, &(stream_info->dbc));
 			media_input_fifo_set_ptr(map[i], src);

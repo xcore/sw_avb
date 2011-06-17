@@ -36,7 +36,9 @@ typedef struct avb1722_Talker_StreamConfig_t
   //! number of channels in the stream
   unsigned int  num_channels;
   //! map from media fifos to channels in the stream
-  media_input_fifo_t map[AVB_MAX_CHANNELS_PER_STREAM];  
+  media_input_fifo_t map[AVB_MAX_CHANNELS_PER_STREAM];
+  //! word containing the bit flags for the fifo map above
+  unsigned int fifo_mask;
   //! the type of samples in the stream
   unsigned int sampleType;
   //! Data Block Count (count of samples transmitted in the stream)

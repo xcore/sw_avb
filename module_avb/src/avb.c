@@ -381,8 +381,11 @@ int getset_avb_source_state(int set,
 
         if (valid) {
           chanend c = source->talker_ctl;
+          unsigned fifo_mask = 0;
+
           for (int i=0;i<source->stream.num_channels;i++) {
             inputs[source->stream.map[i]].mapped_to = source_num;
+            fifo_mask |= (1 << source->stream.map[i]);
           }
           
           xc_abi_outuint(c, AVB1722_CONFIGURE_TALKER_STREAM);
@@ -393,6 +396,7 @@ int getset_avb_source_state(int set,
           }
           xc_abi_outuint(c, source_num);
           xc_abi_outuint(c, source->stream.num_channels);
+          xc_abi_outuint(c, fifo_mask);
           for (int i=0;i<source->stream.num_channels;i++) {
             xc_abi_outuint(c, inputs[source->stream.map[i]].fifo);
           }

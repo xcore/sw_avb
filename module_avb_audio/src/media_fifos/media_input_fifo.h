@@ -137,6 +137,56 @@ int media_input_fifo_empty(media_input_fifo_t media_input_fifo0);
  */
 void media_input_fifo_flush(media_input_fifo_t media_input_fifo);
 
+/**
+ * \brief Enable a set of input fifos
+ *
+ * The talker threads use this to start the set of fifos which make up
+ * a stream.  Before doing this, they should make sure that the FIFOs
+ * are not enabled already by checking the indicated fifo state using
+ * media_input_fifo_enable_ind_state.
+ */
+void media_input_fifo_enable_fifos(unsigned int enable);
+
+/**
+ * \brief Disable a set of input fifos
+ *
+ * The talker threads use this to stop a set of fifos from being filled.
+ *
+ */
+void media_input_fifo_disable_fifos(unsigned int enable);
+
+/**
+ * \brief Get the enable state for a set of Fifos.
+ *
+ * The talker threads use this to determine the current enable state
+ * of the fifos. After asking for the enable state of a set of fifos
+ * to change, the talkers should not take any further action until
+ * the enable state is reflected in this word, indicating that the
+ * FIFO filling threads (I2S threads typically) has responded to the
+ * request to start or stop filling the FIFO
+ */
+unsigned int media_input_fifo_enable_ind_state();
+
+/**
+ * \brief Check the requested enable state for the FIFOs
+ *
+ * The FIFO filling threads (I2S, TDM etc) threads can read the requested
+ * enable state of the FIFOs and respond appropriately.  After they have
+ * completed a sample input for each of the enabled channels, and emptied
+ * the fifos for each of the non-active channels, then it should update
+ * the FIFO enabled indication word by calling the function
+ * media_input_fifo_update_enable_ind_state
+ */
+unsigned int media_input_fifo_enable_req_state();
+
+/**
+ * \brief Update the FIFO enabled indication state
+ *
+ * The FIFO filling threads should indicate that they have acted upon the
+ * fifo enabled request state by calling this function once they have
+ * completed a pass of sample input.
+ */
+void media_input_fifo_update_enable_ind_state(unsigned int enable, unsigned int mask);
 
 #ifndef __XC__
 

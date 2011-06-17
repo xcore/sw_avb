@@ -1,6 +1,46 @@
 #include "media_input_fifo.h"
+#include "hwlock.h"
 #include "avb_1722_def.h"
 #include "simple_printf.h"
+
+static hwlock_t enable_lock;
+unsigned int enable_request_state = 0;
+unsigned int enable_indication_state = 0;
+
+void media_input_fifo_enable_fifos(unsigned int enable)
+{
+	if (!enable_lock) return;
+	__hwlock_acquire(enable_lock);
+	enable_request_state |= enable;
+	__hwlock_release(enable_lock);
+}
+
+void media_input_fifo_disable_fifos(unsigned int enable)
+{
+	if (!enable_lock) return;
+	__hwlock_acquire(enable_lock);
+	enable_request_state &= ~enable;
+	__hwlock_release(enable_lock);
+}
+
+unsigned int media_input_fifo_enable_ind_state()
+{
+	return enable_indication_state;
+}
+
+unsigned int media_input_fifo_enable_req_state()
+{
+	return enable_request_state;
+}
+
+void media_input_fifo_update_enable_ind_state(unsigned int enable, unsigned int mask)
+{
+	if (!enable_lock) return;
+	__hwlock_acquire(enable_lock);
+	enable_indication_state = (enable_indication_state & ~mask) | enable;
+	__hwlock_release(enable_lock);
+}
+
 
 void media_input_fifo_init(media_input_fifo_t media_input_fifo0, int stream_num)
 {
@@ -26,12 +66,11 @@ int media_input_fifo_enable(media_input_fifo_t media_input_fifo0,
   media_input_fifo->rdIndex = (int) &media_input_fifo->buf[0]; 
   media_input_fifo->wrIndex = (int) &media_input_fifo->buf[0]; 
   media_input_fifo->startIndex = (int) &media_input_fifo->buf[0]; 
-  // add on 2 for the dbc and timestamp
   media_input_fifo->dbc = 0;
   media_input_fifo->fifoEnd = (int) &media_input_fifo->buf[MEDIA_INPUT_FIFO_SAMPLE_FIFO_SIZE-1];
   media_input_fifo->sampleCountInPacket = 0;
   media_input_fifo->ptr = 0;
-  media_input_fifo->packetSize = packetSize + 2;
+  media_input_fifo->packetSize = packetSize + 2; // two for the DBC and timestamp
   return packetSize;
 }
 
@@ -98,15 +137,12 @@ int media_input_fifo_empty(media_input_fifo_t media_input_fifo0)
 void media_input_fifo_flush(media_input_fifo_t media_input_fifo0)
 {
 	volatile ififo_t *media_input_fifo =  (ififo_t *) media_input_fifo0;
-	int *rdIndex = (int *) media_input_fifo->rdIndex;
-
-	if (rdIndex==0) return;
-
-	while (rdIndex != (int *) media_input_fifo->startIndex)
-	{
-		media_input_fifo_release_packet(media_input_fifo0);
-	}
-
+	media_input_fifo->rdIndex = (int) &media_input_fifo->buf[0];
+	media_input_fifo->wrIndex = (int) &media_input_fifo->buf[0];
+	media_input_fifo->startIndex = (int) &media_input_fifo->buf[0];
+	media_input_fifo->dbc = 0;
+	media_input_fifo->sampleCountInPacket = 0;
+	media_input_fifo->ptr = 0;
 }
 
 unsigned int *
@@ -150,9 +186,10 @@ init_media_input_fifos(media_input_fifo_t ififos[],
                        media_input_fifo_data_t ififo_data[],
                        int n)
 {
-  for(int i=0;i<n;i++) {
-    ififos[i] = (unsigned int) &ififo_data[i];
-  }
+	enable_lock = __hwlock_init();
+	for(int i=0;i<n;i++) {
+		ififos[i] = (unsigned int) &ififo_data[i];
+	}
 }
 
 extern inline void 

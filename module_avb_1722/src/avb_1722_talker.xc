@@ -60,15 +60,15 @@ static void configure_stream(chanend avb1722_tx_config,
 
 	avb1722_tx_config :> stream.num_channels;
 
+	avb1722_tx_config :> stream.fifo_mask;
+
 	for (int i=0;i<stream.num_channels;i++) {
-		int id;
 		avb1722_tx_config :> stream.map[i];
 	}
 
 	avb1722_tx_config :> rate;
 
 	for (int i=0;i<stream.num_channels;i++) {
-		int id;
 		samplesPerPacket = media_input_fifo_enable(stream.map[i], rate);
 	}
 
@@ -94,6 +94,8 @@ static void disable_stream(avb1722_Talker_StreamConfig_t &stream) {
 	stream.streamId[1] = 0;
 	stream.streamId[0] = 0;
 
+	media_input_fifo_disable_fifos(stream.fifo_mask);
+
 	for (int i=0;i<stream.num_channels;i++) {
 		media_input_fifo_disable(stream.map[i]);
 	}
@@ -101,13 +103,26 @@ static void disable_stream(avb1722_Talker_StreamConfig_t &stream) {
 	stream.active = 0;
 }
 
+static void start_stream(avb1722_Talker_StreamConfig_t &stream) {
+	media_input_fifo_enable_fifos(stream.fifo_mask);
+	stream.samples_left_in_fifo_packet = 0;
+	stream.sequence_number = 0;
+	stream.initial = 1;
+	stream.active = 2;
+}
+
+static void stop_stream(avb1722_Talker_StreamConfig_t &stream) {
+	media_input_fifo_disable_fifos(stream.fifo_mask);
+	stream.active = 1;
+}
+
 #define TIMEINFO_UPDATE_INTERVAL 50000000
-/** This packetize Audio samples int AVB payload and transmit it across
+/** This packetizes Audio samples into an AVB payload and transmit it across
  *  Ethernet.
  *
  *  1. Get audio samples from ADC fifo.
- *  2. Convert the local timer value to golobal timestamp.
- *  3. AVB payload generation and transmit it Ethernet.
+ *  2. Convert the local timer value to global PTP timestamp.
+ *  3. AVB payload generation and transmit to Ethernet.
  */
 void avb_1722_talker(chanend ptp_svr, chanend ethernet_tx_svr,
 		chanend talker_ctl, int num_streams) {
@@ -179,7 +194,7 @@ void avb_1722_talker(chanend ptp_svr, chanend ethernet_tx_svr,
 				{
 					int stream_num;
 					talker_ctl :> stream_num;
-					talker_streams[stream_num].active = 2;
+					start_stream(talker_streams[stream_num]);
 					talker_ctl <: AVB1722_ACK;
 				}
 				break;
@@ -187,7 +202,7 @@ void avb_1722_talker(chanend ptp_svr, chanend ethernet_tx_svr,
 				{
 					int stream_num;
 					talker_ctl :> stream_num;
-					talker_streams[stream_num].active = 1;
+					stop_stream(talker_streams[stream_num]);
 					talker_ctl <: AVB1722_ACK;
 				}
 				break;

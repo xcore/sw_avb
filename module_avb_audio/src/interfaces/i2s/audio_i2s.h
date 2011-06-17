@@ -161,6 +161,8 @@ inline void i2s_master(const clock mclk,
 
 	  unsigned int timestamp;
 
+	  unsigned int active_fifos = media_input_fifo_enable_req_state();
+
 #ifdef I2S_SYNTH_FROM
     for (int k=I2S_SYNTH_FROM;k<num_in>>1;k++) {
       sine_count[k] += sine_inc[k];
@@ -186,7 +188,11 @@ inline void i2s_master(const clock mclk,
 
         if (k < num_in>>1) {
 #ifdef SAMPLE_COUNTER_TEST
-			media_input_fifo_push_sample(input_fifos[j+k*2], sample_counter, timestamp);
+        	if (active_fifos & (1 << (j+k*2))) {
+			  media_input_fifo_push_sample(input_fifos[j+k*2], sample_counter, timestamp);
+        	} else {
+        	  media_input_fifo_flush(input_fifos[j+k*2]);
+        	}
 #else
             unsigned int sample_in;
             asm("in %0, res[%1]":"=r"(sample_in):"r"(p_din[k]));
@@ -197,7 +203,11 @@ inline void i2s_master(const clock mclk,
               sample_in = i2s_sine[sine_count[k]>>8];
             }
 #endif
-			media_input_fifo_push_sample(input_fifos[j+k*2], sample_in, timestamp);
+            if (active_fifos & (1 << (j+k*2))) {
+			  media_input_fifo_push_sample(input_fifos[j+k*2], sample_in, timestamp);
+            } else {
+              media_input_fifo_flush(input_fifos[j+k*2]);
+            }
 #endif
         }
         
@@ -216,6 +226,7 @@ inline void i2s_master(const clock mclk,
     sample_counter++;
 #endif
 
+    media_input_fifo_update_enable_ind_state(active_fifos, 0xFFFFFFFF);
   }
 }
 

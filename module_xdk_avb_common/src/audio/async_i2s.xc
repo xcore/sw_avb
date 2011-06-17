@@ -102,6 +102,7 @@ static void inline i2s_master(clock bclk,
   wordTime -= baseLength-30;
   //  lrc = !lrc;
   while (1) {
+	unsigned int active_fifos = media_input_fifo_enable_req_state();
     tmr :> timestamp;
     if (!lrc) {
       samples_in <: timestamp;
@@ -148,10 +149,12 @@ static void inline i2s_master(clock bclk,
     	val <<= 3;
     	val >>= 8;
     	val &= 0xffffff;
-        //         val = 0xabcdef; // for debugging
-        media_input_fifo_push_sample(input_fifos[i+lrc],
-                                     val, 
-                                     timestamp);        
+
+    	if (active_fifos & (1 << (i+lrc))) {
+          media_input_fifo_push_sample(input_fifos[i+lrc], val, timestamp);
+    	} else {
+          media_input_fifo_flush(input_fifos[i+lrc]);
+    	}
         if (monitor_val == lrc && !isnull(audio_monitor)) 
           audio_monitor <: val;
     }
@@ -182,7 +185,7 @@ static void inline i2s_master(clock bclk,
 
     lrc = 1-lrc;
 
-
+    media_input_fifo_update_enable_ind_state(active_fifos, 0xFFFFFFFF);
   }
 }
 

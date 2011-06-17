@@ -85,8 +85,10 @@ void synth(int period,
   wordTime += baseLength;
   while (1) {
     int outData;
+    int active_fifos;
     select {
     case tmr when timerafter(wordTime) :> int _:
+      active_fifos = media_input_fifo_enable_req_state();
       rand = a*rand+c;
       wordTime += baseLength;
 
@@ -99,8 +101,13 @@ void synth(int period,
       else
         outData = 0;
 
-      for (int i=0;i<num_channels;i++)
-        media_input_fifo_push_sample(input_fifos[i], outData, wordTime);
+      for (int i=0;i<num_channels;i++) {
+    	  if (active_fifos & (1 << i)) {
+            media_input_fifo_push_sample(input_fifos[i], outData, wordTime);
+    	  } else {
+    		media_input_fifo_flush(input_fifos[i]);
+    	  }
+      }
         
       i++;
       if (i==step) {
@@ -118,6 +125,8 @@ void synth(int period,
       count++;
       if (count == 96000)
         count = 0;
+
+      media_input_fifo_update_enable_ind_state(active_fifos, 0xFFFFFFFF);
       break;
     case slave { clk_ctl :> clk_cmd; clk_ctl :> clk_arg; }:
       switch (clk_cmd)

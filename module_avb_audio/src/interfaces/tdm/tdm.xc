@@ -134,6 +134,7 @@ void tdm_master(
 
   while (1)
   {
+	unsigned int active_fifos = media_input_fifo_enable_req_state();
     tmr :> timestamp;
     c_listener <: timestamp;
     for (int n = 0; n < num_channels; n++)
@@ -142,11 +143,16 @@ void tdm_master(
       c_listener :> x;
       p_dout <: bitrev(x << (32 - RESOLUTION)) & 0xffffff;
       p_din :> x;
-      x = (bitrev(x) >> (32-RESOLUTION)) & 0xffffff;    
-      media_input_fifo_push_sample(input_fifos[n], x, timestamp);
+      x = (bitrev(x) >> (32-RESOLUTION)) & 0xffffff;
+      if (active_fifos & (1 << n)) {
+        media_input_fifo_push_sample(input_fifos[n], x, timestamp);
+      } else {
+    	  media_input_fifo_flush(input_fifos[n]);
+      }
     }
     t += num_channels * CLOCKS_PER_CHANNEL;
     p_wck @ t <: 0b0001;
+    media_input_fifo_update_enable_ind_state(active_fifos, 0xFFFFFFFF);
   }
 }
 
