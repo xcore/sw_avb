@@ -217,30 +217,33 @@ void ptp_server_and_gpio(chanend c_rx, chanend c_tx, chanend ptp_link[],
 		{
 			do_ptp_server(c_rx, c_tx, ptp_link, num_ptp);
 
-			case buttons_active =>
-			p_buttons when pinsneq(button_val) :> unsigned new_button_val:
-			if ((button_val & 0x1) == 1 && (new_button_val & 0x1) == 0) {
-				c <: STREAM_SEL;
-				buttons_active = 0;
-			}
-			if ((button_val & 0x2) == 2 && (new_button_val & 0x2) == 0) {
-				c <: REMOTE_SEL;
-				buttons_active = 0;
-			}
-			if ((button_val & 0x4) == 4 && (new_button_val & 0x4) == 0) {
-				c <: CHAN_SEL;
-				buttons_active = 0;
-			}
-			if (!buttons_active) {
-				tmr :> buttons_timeout;
-				buttons_timeout += BUTTON_TIMEOUT_PERIOD;
-			}
-			button_val = new_button_val;
-			break;
+			case buttons_active => p_buttons when pinsneq(button_val) :> unsigned new_button_val:
+				if ((button_val & 0x1) == 1 && (new_button_val & 0x1) == 0) {
+					c <: STREAM_SEL;
+					buttons_active = 0;
+				}
+				if ((button_val & 0x2) == 2 && (new_button_val & 0x2) == 0) {
+					c <: REMOTE_SEL;
+					buttons_active = 0;
+				}
+				if ((button_val & 0x4) == 4 && (new_button_val & 0x4) == 0) {
+					c <: CHAN_SEL;
+					buttons_active = 0;
+				}
+				if (!buttons_active) {
+					tmr :> buttons_timeout;
+					buttons_timeout += BUTTON_TIMEOUT_PERIOD;
+				}
+				button_val = new_button_val;
+				break;
 			case !buttons_active => tmr when timerafter(buttons_timeout) :> void:
-			buttons_active = 1;
-			p_buttons :> button_val;
-			break;
+				buttons_active = 1;
+				p_buttons :> button_val;
+				break;
+
+			case c :> unsigned led_command:
+				p_chan_leds <: (~led_command);
+				break;
 
 		}
 	}
@@ -344,11 +347,13 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 					set_avb_source_state(0, AVB_SOURCE_STATE_DISABLED);
 					talker_active = 0;
 					simple_printf("Talker disabled\n");
+					c_gpio_ctl <: 0;
 				}
 				else if (talker_ok_to_start)
 				{
 					set_avb_source_state(0, AVB_SOURCE_STATE_POTENTIAL);
 					talker_active = 1;
+					c_gpio_ctl <: 1;
 					simple_printf("Talker enabled\n");
 				}
 			}

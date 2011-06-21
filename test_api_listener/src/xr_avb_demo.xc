@@ -230,30 +230,33 @@ void ptp_server_and_gpio(chanend c_rx, chanend c_tx, chanend ptp_link[],
 		{
 			do_ptp_server(c_rx, c_tx, ptp_link, num_ptp);
 
-			case buttons_active =>
-			p_buttons when pinsneq(button_val) :> unsigned new_button_val:
-			if ((button_val & 0x1) == 1 && (new_button_val & 0x1) == 0) {
-				c <: STREAM_SEL;
-				buttons_active = 0;
-			}
-			if ((button_val & 0x2) == 2 && (new_button_val & 0x2) == 0) {
-				c <: REMOTE_SEL;
-				buttons_active = 0;
-			}
-			if ((button_val & 0x4) == 4 && (new_button_val & 0x4) == 0) {
-				c <: CHAN_SEL;
-				buttons_active = 0;
-			}
-			if (!buttons_active) {
-				tmr :> buttons_timeout;
-				buttons_timeout += BUTTON_TIMEOUT_PERIOD;
-			}
-			button_val = new_button_val;
-			break;
+			case buttons_active => p_buttons when pinsneq(button_val) :> unsigned new_button_val:
+				if ((button_val & 0x1) == 1 && (new_button_val & 0x1) == 0) {
+					c <: STREAM_SEL;
+					buttons_active = 0;
+				}
+				if ((button_val & 0x2) == 2 && (new_button_val & 0x2) == 0) {
+					c <: REMOTE_SEL;
+					buttons_active = 0;
+				}
+				if ((button_val & 0x4) == 4 && (new_button_val & 0x4) == 0) {
+					c <: CHAN_SEL;
+					buttons_active = 0;
+				}
+				if (!buttons_active) {
+					tmr :> buttons_timeout;
+					buttons_timeout += BUTTON_TIMEOUT_PERIOD;
+				}
+				button_val = new_button_val;
+				break;
 			case !buttons_active => tmr when timerafter(buttons_timeout) :> void:
-			buttons_active = 1;
-			p_buttons :> button_val;
-			break;
+				buttons_active = 1;
+				p_buttons :> button_val;
+				break;
+
+			case c :> unsigned led_command:
+				p_chan_leds <: (~led_command);
+				break;
 
 		}
 	}
@@ -315,12 +318,14 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 						set_avb_sink_state(0, AVB_SINK_STATE_DISABLED);
 						listener_active = 0;
 						simple_printf("Listener disabled\n");
+						c_gpio_ctl <: 1;
 					}
 					else if (listener_ready)
 					{
 						set_avb_sink_state(0, AVB_SINK_STATE_POTENTIAL);
 						listener_active = 1;
 						simple_printf("Listener enabled\n");
+						c_gpio_ctl <: 2;
 					}
 				}
 				break;
@@ -403,6 +408,7 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 			    set_avb_sink_addr(0, addr, 6);
 
 			    listener_ready = 1;
+			    c_gpio_ctl <: 1;
 			  }
 			}
 
