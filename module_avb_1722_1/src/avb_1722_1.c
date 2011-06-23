@@ -320,13 +320,23 @@ static avb_status_t process_avb_1722_1_aecp_packet(avb_1722_1_aecp_packet_t* pkt
 
 	switch (message_type) {
 	case AECP_CMD_AVDECC_MSG_COMMAND: {
+		unsigned ret;
+
 		avb_1722_1_aecp_avdecc_msg_t* payload = (avb_1722_1_aecp_avdecc_msg_t*)avb_1722_1_create_aecp_packet(AECP_CMD_AVDECC_MSG_RESPONSE, pkt);
 
 		// Copy address into the output
 		memcpy(payload->oui, pkt->data.avdecc.oui, 16);
 
 		// Write data into the output
-		avb_1722_1_walk_tree(pkt->data.avdecc.oui, pkt->data.avdecc.oui_sect_flags[0]&0x2, payload->mode_specific_data);
+		ret = avb_1722_1_walk_tree(pkt->data.avdecc.oui, pkt->data.avdecc.oui_sect_flags[0]&0x2, payload->mode_specific_data);
+		if (ret) {
+
+		} else {
+			if (pkt->data.avdecc.oui_sect_flags[0]&0x4) {
+				// NACK required
+				payload->oui_sect_flags[0] |= 0x8;
+			}
+		}
 
 		break;
 	}
