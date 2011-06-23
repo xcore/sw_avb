@@ -18,7 +18,7 @@ typedef struct avb_1722_1_packet_header_t {
 } avb_1722_1_packet_header_t;
 
 /**
- *  A 1722.1 Simple Discovery Protocol packet
+ *  A 1722.1 AVDECC Discovery Protocol packet
  *
  *  \note all elements 16 bit aligned
  */
@@ -33,13 +33,15 @@ typedef struct {
 	short listener_stream_sinks;
 	short listener_capabilites;
 	char controller_capabilities[4];
-	char boot_id[4];
+	char available_index[4];
 	char as_grandmaster_id[8];
-	char reserved[4];
-} avb_1722_1_sdp_packet_t;
+	char default_audio_format[4];
+	char default_video_format[4];
+	char association_id[8];
+} avb_1722_1_adp_packet_t;
 
 /**
- *  A 1722.1 Simple Connection Management packet
+ *  A 1722.1 AVDECC Connection Management packet
  *
  * \note all elements 16 bit aligned
  */
@@ -55,7 +57,7 @@ typedef struct {
 	short connection_count;
 	short sequence_id;
 	short flags;
-} avb_1722_1_scm_packet_t;
+} avb_1722_1_acmp_packet_t;
 
 /**
  * 1722.1 SEC AVDECC command format
@@ -64,7 +66,7 @@ typedef struct {
 	char mode_len;
 	char lower_len;
 	char mode_specific_data[1];
-} avb_1722_1_sec_avdecc_msg_t;
+} avb_1722_1_aecp_avdecc_msg_t;
 
 /**
  * 1722.1 SEC Address access format
@@ -73,7 +75,7 @@ typedef struct {
 	char mode_len;
 	char lower_len;
 	char mode_specific_data[1];
-} avb_1722_1_sec_address_access_t;
+} avb_1722_1_aecp_address_access_t;
 
 /**
  * 1722.1m SEC Legacy AV/C command format
@@ -81,7 +83,7 @@ typedef struct {
 typedef struct {
 	char length[2];
 	char avc_data[512];
-} avb_1722_1_sec_avc_t;
+} avb_1722_1_aecp_avc_t;
 
 /**
  * 1722.1 SEC Vendor specific command format
@@ -89,7 +91,7 @@ typedef struct {
 typedef struct {
 	char protocol_id[6];
 	char payload_data[1];
-} avb_1722_1_sec_vendor_t;
+} avb_1722_1_aecp_vendor_t;
 
 /**
  *  A 1722.1 Simple Enumeration and Control packet
@@ -102,26 +104,26 @@ typedef struct {
 	char controller_guid[8];
 	short sequence_id;
 	union {
-		avb_1722_1_sec_avdecc_msg_t avdecc;
-		avb_1722_1_sec_address_access_t address;
-		avb_1722_1_sec_avc_t avc;
-		avb_1722_1_sec_vendor_t vendor;
+		avb_1722_1_aecp_avdecc_msg_t avdecc;
+		avb_1722_1_aecp_address_access_t address;
+		avb_1722_1_aecp_avc_t avc;
+		avb_1722_1_aecp_vendor_t vendor;
 		char payload[514];
 	} data;
-} avb_1722_1_sec_packet_t;
+} avb_1722_1_aecp_packet_t;
 
 typedef union {
-	avb_1722_1_sdp_packet_t sdp;
-	avb_1722_1_scm_packet_t scm;
-	avb_1722_1_sec_packet_t sem;
+	avb_1722_1_adp_packet_t sdp;
+	avb_1722_1_acmp_packet_t scm;
+	avb_1722_1_aecp_packet_t sem;
 } avb_1722_1_packet_t;
 
 #define DEFAULT_1722_1_CD_FLAG (1)
 #define DEFAULT_1722_1_AVB_VERSION (0x0)
 
-#define DEFAULT_1722_1_SDP_SUBTYPE (0x7a)
-#define DEFAULT_1722_1_SEC_SUBTYPE (0x7b)
-#define DEFAULT_1722_1_SCM_SUBTYPE (0x7c)
+#define DEFAULT_1722_1_ADP_SUBTYPE 	(0x7a)
+#define DEFAULT_1722_1_AECP_SUBTYPE (0x7b)
+#define DEFAULT_1722_1_ACMP_SUBTYPE (0x7c)
 
 #define GET_1722_1_CD_FLAG(pkt) ((pkt)->cd_subtype >> 7)
 #define GET_1722_1_SUBTYPE(pkt) ((pkt)->cd_subtype & 0x7f)
@@ -161,10 +163,10 @@ typedef union {
 
 #define SET_WORD_CONST(member, data) \
 	do { \
-		member[0] = ((data >> 24) & 0xff); \
-		member[1] = ((data >> 16) & 0xff); \
-		member[2] = ((data >> 8 ) & 0xff); \
-		member[3] = ((data >> 0 ) & 0xff); \
+		member[0] = (((data) >> 24) & 0xff); \
+		member[1] = (((data) >> 16) & 0xff); \
+		member[2] = (((data) >> 8 ) & 0xff); \
+		member[3] = (((data) >> 0 ) & 0xff); \
 	} while(0);
 
 #define SET_LONG_WORD(member, data) \
@@ -200,78 +202,80 @@ typedef enum {
 	ENTITY_DISCOVER = 2
 } avb_1722_1_sdp_message_type;
 
-#define AVB_1722_1_SDP_ENTITY_CAPABILITES_17221_IP         		(0x00000001)
-#define AVB_1722_1_SDP_ENTITY_CAPABILITES_ZERO_CONF        		(0x00000002)
-#define AVB_1722_1_SDP_ENTITY_CAPABILITES_BRIDGED_ENTITY   		(0x00000004)
-#define AVB_1722_1_SDP_ENTITY_CAPABILITES_17221_CONTROL    		(0x00000008)
-#define AVB_1722_1_SDP_ENTITY_CAPABILITES_LEGACY_AVB       		(0x00000010)
+#define AVB_1722_1_ADP_ENTITY_CAPABILITIES_AVDECC_IP         			(0x00000001)
+#define AVB_1722_1_ADP_ENTITY_CAPABILITIES_ZERO_CONF        			(0x00000002)
+#define AVB_1722_1_ADP_ENTITY_CAPABILITIES_BRIDGED_ENTITY   			(0x00000004)
+#define AVB_1722_1_ADP_ENTITY_CAPABILITIES_AVDECC_CONTROL    			(0x00000008)
+#define AVB_1722_1_ADP_ENTITY_CAPABILITIES_LEGACY_AVB       			(0x00000010)
+#define AVB_1722_1_ADP_ENTITY_CAPIBILITIES_ASSOCIATION_ID_SUPPORTED		(0x00000020)
+#define AVB_1722_1_ADP_ENTITY_CAPIBILITIES_ASSOCIATION_ID_VALID			(0x00000040)
 
-#define AVB_1722_1_SDP_TALKER_CAPABILITES_IMPLEMENTED      		(0x0001)
-#define AVB_1722_1_SDP_TALKER_CAPABILITES_AUDIO_SOURCE     		(0x4000)
-#define AVB_1722_1_SDP_TALKER_CAPABILITES_VIDEO_SOURCE     		(0x8000)
+#define AVB_1722_1_ADP_TALKER_CAPABILITES_IMPLEMENTED      				(0x0001)
+#define AVB_1722_1_ADP_TALKER_CAPABILITES_AUDIO_SOURCE     				(0x4000)
+#define AVB_1722_1_ADP_TALKER_CAPABILITES_VIDEO_SOURCE     				(0x8000)
 
-#define AVB_1722_1_SDP_LISTENER_CAPABILITES_IMPLEMENTED    		(0x0001)
-#define AVB_1722_1_SDP_LISTENER_CAPABILITES_AUDIO_SOURCE   		(0x4000)
-#define AVB_1722_1_SDP_LISTENER_CAPABILITES_VIDEO_SOURCE  	 	(0x8000)
+#define AVB_1722_1_ADP_LISTENER_CAPABILITES_IMPLEMENTED    				(0x0001)
+#define AVB_1722_1_ADP_LISTENER_CAPABILITES_AUDIO_SOURCE   				(0x4000)
+#define AVB_1722_1_ADP_LISTENER_CAPABILITES_VIDEO_SOURCE  	 			(0x8000)
 
-#define AVB_1722_1_SDP_CONTROLLER_CAPABILITES_IMPLEMENTED  		(0x0001)
-#define AVB_1722_1_SDP_CONTROLLER_CAPABILITES_LAYER3_PROXY 		(0x0002)
+#define AVB_1722_1_ADP_CONTROLLER_CAPABILITES_IMPLEMENTED  				(0x0001)
+#define AVB_1722_1_ADP_CONTROLLER_CAPABILITES_LAYER3_PROXY 				(0x0002)
 
-
-typedef enum {
-	SCM_CMD_CONNECT_TX_COMMAND = 0,
-	SCM_CMD_CONNECT_TX_RESPONSE	= 1,
-	SCM_CMD_DISCONNECT_TX_COMMAND = 2,
-	SCM_CMD_DISCONNECT_TX_RESPONSE = 3,
-	SCM_CMD_GET_TX_STATE_COMMAND = 4,
-	SCM_CMD_GET_TX_STATE_RESPONSE = 5,
-	SCM_CMD_CONNECT_RX_COMMAND	= 6,
-	SCM_CMD_CONNECT_RX_RESPONSE	= 7,
-	SCM_CMD_DISCONNECT_RX_COMMAND = 8,
-	SCM_CMD_DISCONNECT_RX_RESPONSE = 9,
-	SCM_CMD_GET_RX_STATE_COMMAND = 10,
-	SCM_CMD_GET_RX_STATE_RESPONSE = 11,
-	SCM_CMD_GET_TX_CONNECTION_COMMAND = 12,
-	SCM_CMD_GET_TX_CONNECTION_RESPONSE = 13
-} avb_1722_1_scm_message_type;
 
 typedef enum {
-	SCM_STATUS_SUCCESS = 0,
-	SCM_STATUS_LISTENER_UNKNOWN_ID = 1,
-	SCM_STATUS_TALKER_UNKNOWN_ID = 2,
-	SCM_STATUS_TALKER_DEST_MAC_FAIL = 3,
-	SCM_STATUS_TALKER_NO_STREAM_INDEX = 4,
-	SCM_STATUS_TALKER_NO_BANDWIDTH = 5,
-	SCM_STATUS_TALKER_EXCLUSIVE = 6,
-	SCM_STATUS_LISTENER_TALKER_TIMEOUT = 7,
-	SCM_STATUS_LISTENER_EXCLUSIVE = 8,
-	SCM_STATUS_STATE_UNAVAILABLE = 9,
-	SCM_STATUS_NOT_CONNECTED = 10,
-	SCM_STATUS_NO_SUCH_CONNECTION = 11,
-	SCM_STATUS_COULD_NOT_SEND_MESSAGE = 12,
-	SCM_STATUS_NOT_SUPPORTED = 31
-} avb_1722_1_scm_status_type;
+	ACMP_CMD_CONNECT_TX_COMMAND = 0,
+	ACMP_CMD_CONNECT_TX_RESPONSE = 1,
+	ACMP_CMD_DISCONNECT_TX_COMMAND = 2,
+	ACMP_CMD_DISCONNECT_TX_RESPONSE = 3,
+	ACMP_CMD_GET_TX_STATE_COMMAND = 4,
+	ACMP_CMD_GET_TX_STATE_RESPONSE = 5,
+	ACMP_CMD_CONNECT_RX_COMMAND	= 6,
+	ACMP_CMD_CONNECT_RX_RESPONSE = 7,
+	ACMP_CMD_DISCONNECT_RX_COMMAND = 8,
+	ACMP_CMD_DISCONNECT_RX_RESPONSE = 9,
+	ACMP_CMD_GET_RX_STATE_COMMAND = 10,
+	ACMP_CMD_GET_RX_STATE_RESPONSE = 11,
+	ACMP_CMD_GET_TX_CONNECTION_COMMAND = 12,
+	ACMP_CMD_GET_TX_CONNECTION_RESPONSE = 13
+} avb_1722_1_acmp_message_type;
 
 typedef enum {
-	SEC_CMD_AVDECC_MSG_COMMAND = 0,
-	SEC_CMD_AVDECC_MSG_RESPONSE = 1,
-	SEC_CMD_ADDRESS_ACCESS_COMMAND = 2,
-	SEC_CMD_ADDRESS_ACCESS_RESPONSE = 3,
-	SEC_CMD_AVC_COMMAND = 4,
-	SEC_CMD_AVC_RESPONSE = 5,
-	SEC_CMD_VENDOR_UNIQUE_COMMAND = 6,
-	SEC_CMD_VENDOR_UNIQUE_RESPONSE = 7,
-	SEC_CMD_EXTENDED_COMMAND = 14,
-	SEC_CMD_EXTENDED_RESPONSE = 15
-} avb_1722_1_sec_message_type;
+	ACMP_STATUS_SUCCESS = 0,
+	ACMP_STATUS_LISTENER_UNKNOWN_ID = 1,
+	ACMP_STATUS_TALKER_UNKNOWN_ID = 2,
+	ACMP_STATUS_TALKER_DEST_MAC_FAIL = 3,
+	ACMP_STATUS_TALKER_NO_STREAM_INDEX = 4,
+	ACMP_STATUS_TALKER_NO_BANDWIDTH = 5,
+	ACMP_STATUS_TALKER_EXCLUSIVE = 6,
+	ACMP_STATUS_LISTENER_TALKER_TIMEOUT = 7,
+	ACMP_STATUS_LISTENER_EXCLUSIVE = 8,
+	ACMP_STATUS_STATE_UNAVAILABLE = 9,
+	ACMP_STATUS_NOT_CONNECTED = 10,
+	ACMP_STATUS_NO_SUCH_CONNECTION = 11,
+	ACMP_STATUS_COULD_NOT_SEND_MESSAGE = 12,
+	ACMP_STATUS_NOT_SUPPORTED = 31
+} avb_1722_1_acmp_status_type;
 
 typedef enum {
-	SEC_STATUS_SUCCESS = 0,
-	SEC_STATUS_NOT_IMPLEMENTED = 1
-} avb_1722_1_sec_status_type;
+	AECP_CMD_AVDECC_MSG_COMMAND = 0,
+	AECP_CMD_AVDECC_MSG_RESPONSE = 1,
+	AECP_CMD_ADDRESS_ACCESS_COMMAND = 2,
+	AECP_CMD_ADDRESS_ACCESS_RESPONSE = 3,
+	AECP_CMD_AVC_COMMAND = 4,
+	AECP_CMD_AVC_RESPONSE = 5,
+	AECP_CMD_VENDOR_UNIQUE_COMMAND = 6,
+	AECP_CMD_VENDOR_UNIQUE_RESPONSE = 7,
+	AECP_CMD_EXTENDED_COMMAND = 14,
+	AECP_CMD_EXTENDED_RESPONSE = 15
+} avb_1722_1_aecp_message_type;
 
-#define AVB_1722_1_SCM_FLAGS_CLASS_B							(0x0001)
-#define AVB_1722_1_SCM_FLAGS_FAST_CONNECT						(0x0002)
-#define AVB_1722_1_SCM_FLAGS_SAVED_STATE						(0x0004)
+typedef enum {
+	AECP_STATUS_SUCCESS = 0,
+	AECP_STATUS_NOT_IMPLEMENTED = 1
+} avb_1722_1_aecp_status_type;
+
+#define AVB_1722_1_ACMP_FLAGS_CLASS_B				(0x0001)
+#define AVB_1722_1_ACMP_FLAGS_FAST_CONNECT			(0x0002)
+#define AVB_1722_1_ACMP_FLAGS_SAVED_STATE			(0x0004)
 
 #endif // __AVB_1722_1_PROTOCOL_H__

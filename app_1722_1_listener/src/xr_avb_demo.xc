@@ -275,10 +275,6 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 	set_device_media_clock_rate(0, sample_rate);
 	set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_ENABLED);
 
-	avb_start();
-
-	avb_1722_1_sdp_announce();
-
 	tmr	:> timeout;
 	while (1) {
 		unsigned char tmp;
@@ -290,6 +286,18 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 
 		select
 		{
+			// Check ethernet link status
+			case inuchar_byref(connect_status, ifnum):
+	        {
+				int status;
+				status = inuchar(connect_status);
+				(void) inuchar(connect_status);
+				(void) inct(connect_status);
+				avb_start();
+
+				avb_1722_1_adp_announce();
+	        }
+			break;
 
 			// Receive any incoming AVB packets (802.1Qat, 1722_MAAP)
 			case avb_get_control_packet(c_rx, buf, nbytes):
@@ -324,7 +332,7 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 					unsigned char addr[6];
 					int map[2] = { 0 ,  1 };
 
-					avb_1722_1_scm_get_listener_connection_info(listener, addr, streamId, vlan);
+					avb_1722_1_acmp_get_listener_connection_info(listener, addr, streamId, vlan);
 					simple_printf("1722.1 request to connect to stream %x.%x, address %x:%x:%x:%x:%x:%x, vlan %d\n",
 							streamId[0], streamId[1],
 							addr[0], addr[1], addr[2], addr[3], addr[4], addr[5],
@@ -338,13 +346,13 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 					set_avb_sink_addr(0, addr, 6);
 					set_avb_sink_state(0, AVB_SINK_STATE_POTENTIAL);
 
-					avb_1722_1_scm_listener_connection_complete(listener, c_tx);
+					avb_1722_1_acmp_listener_connection_complete(listener, c_tx);
 				}
 				break;
 			case AVB_1722_1_DISCONNECT_LISTENER:
 				simple_printf("1722.1 request to disconnect listener\n");
 				set_avb_sink_state(0, AVB_SINK_STATE_DISABLED);
-				avb_1722_1_scm_listener_connection_complete(0, c_tx);
+				avb_1722_1_acmp_listener_connection_complete(0, c_tx);
 				break;
 			default:
 				break;

@@ -300,10 +300,6 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 	// Request a multicast addresses for stream transmission
 	avb_1722_maap_request_addresses(AVB_NUM_SOURCES, null);
 	
-	//avb_start();
-	
-	//avb_1722_1_sdp_announce();
-	
 	tmr	:> timeout;
 	while (1) {
 		unsigned char tmp;
@@ -324,7 +320,7 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 				(void) inct(connect_status);
 				avb_start();
 				
-				avb_1722_1_sdp_announce();
+				avb_1722_1_adp_announce();
 	        }
 			break;
 			
@@ -384,14 +380,14 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 						avb_1722_1_talker_set_stream_id(0, streamId);
 						simple_printf("1722.1 request to advertise %x.%x\n", streamId[0], streamId[1]);
 						set_avb_source_state(0, AVB_SOURCE_STATE_POTENTIAL);
-						avb_1722_1_scm_talker_connection_complete(0, c_tx);
+						avb_1722_1_acmp_talker_connection_complete(0, c_tx);
 						break;
 					}
 						
 					case AVB_1722_1_DISCONNECT_TALKER:
 						simple_printf("1722.1 request to disconnect talker\n");
 						set_avb_source_state(0, AVB_SOURCE_STATE_DISABLED);
-						avb_1722_1_scm_talker_connection_complete(0, c_tx);
+						avb_1722_1_acmp_talker_connection_complete(0, c_tx);
 						break;
 					case AVB_1722_1_CONNECT_LISTENER: {
 						short listener;
@@ -400,7 +396,7 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 						unsigned char addr[6];
 						int map[2] = { 0 ,  1 };
 	
-						avb_1722_1_scm_get_listener_connection_info(listener, addr, streamId, vlan);
+						avb_1722_1_acmp_get_listener_connection_info(listener, addr, streamId, vlan);
 						simple_printf("1722.1 request to connect to stream %x.%x, address %x:%x:%x:%x:%x:%x, vlan %d\n",
 								streamId[0], streamId[1],
 								addr[0], addr[1], addr[2], addr[3], addr[4], addr[5],
@@ -414,13 +410,13 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 						set_avb_sink_addr(0, addr, 6);
 						set_avb_sink_state(0, AVB_SINK_STATE_POTENTIAL);
 	
-						avb_1722_1_scm_listener_connection_complete(listener, c_tx);
+						avb_1722_1_acmp_listener_connection_complete(listener, c_tx);
 					}
 						break;
 					case AVB_1722_1_DISCONNECT_LISTENER:
 						simple_printf("1722.1 request to disconnect listener\n");
 						set_avb_sink_state(0, AVB_SINK_STATE_DISABLED);
-						avb_1722_1_scm_listener_connection_complete(0, c_tx);
+						avb_1722_1_acmp_listener_connection_complete(0, c_tx);
 						break;
 					default:
 						break;

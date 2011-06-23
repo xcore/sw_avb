@@ -277,10 +277,6 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 	// Request a multicast addresses for stream transmission
 	avb_1722_maap_request_addresses(AVB_NUM_SOURCES, null);
 
-	avb_start();
-
-	avb_1722_1_sdp_announce();
-
 	tmr	:> timeout;
 	while (1) {
 		unsigned char tmp;
@@ -300,6 +296,8 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 				(void) inuchar(connect_status);
 				(void) inct(connect_status);
 				avb_start();
+
+				avb_1722_1_adp_announce();
 	        }
 			break;
 
@@ -359,14 +357,14 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 					avb_1722_1_talker_set_stream_id(0, streamId);
 					simple_printf("1722.1 request to advertise %x.%x\n", streamId[0], streamId[1]);
 					set_avb_source_state(0, AVB_SOURCE_STATE_POTENTIAL);
-					avb_1722_1_scm_talker_connection_complete(0, c_tx);
+					avb_1722_1_acmp_talker_connection_complete(0, c_tx);
 					break;
 				}
 
 				case AVB_1722_1_DISCONNECT_TALKER:
 					simple_printf("1722.1 request to disconnect talker\n");
 					set_avb_source_state(0, AVB_SOURCE_STATE_DISABLED);
-					avb_1722_1_scm_talker_connection_complete(0, c_tx);
+					avb_1722_1_acmp_talker_connection_complete(0, c_tx);
 					break;
 			}
 			} while (avb_status != AVB_NO_STATUS);

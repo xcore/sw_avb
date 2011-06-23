@@ -23,69 +23,74 @@ typedef union {
 
 static unsigned char my_mac_addr[6];
 
-static unsigned char avb_1722_1_sdp_dest_addr[6] =  {0x91, 0xe0, 0xf0, 0x00, 0xff, 0x01};
-static unsigned char avb_1722_1_scm_dest_addr[6] =  {0x91, 0xe0, 0xf0, 0x00, 0xff, 0x01};
-static unsigned char avb_1722_1_sec_dest_addr[6] =  {0x91, 0xe0, 0xf0, 0x00, 0xff, 0x01};
+static unsigned char avb_1722_1_adp_dest_addr[6]  =  {0x91, 0xe0, 0xf0, 0x00, 0xff, 0x01};
+static unsigned char avb_1722_1_acmp_dest_addr[6] =  {0x91, 0xe0, 0xf0, 0x00, 0xff, 0x01};
+static unsigned char avb_1722_1_aecp_dest_addr[6] =  {0x91, 0xe0, 0xf0, 0x00, 0xff, 0x01};
 
 //! Buffer for constructing 1722.1 transmit packets
 static unsigned int avb_1722_1_buf[(sizeof(avb_1722_1_packet_t)+sizeof(ethernet_hdr_t)+3)/4];
 
 //! Timers for various parts of the state machines
-static avb_timer sdp_advertise_timer;
-static avb_timer sdp_readvertise_timer;
-static avb_timer sdp_discovery_timer;
+static avb_timer adp_advertise_timer;
+static avb_timer adp_readvertise_timer;
+static avb_timer adp_discovery_timer;
 static avb_timer ptp_monitor_timer;
 
 //! Counts two second intervals
-static unsigned sdp_two_second_counter = 0;
+static unsigned adp_two_second_counter = 0;
 
 //! The GUID of this device
 static guid_t my_guid;
 
 //! The GUID whose information we are currently trying to discover
 static guid_t discover_guid;
+
+//! Thr GUID for the PTP grandmaster server
 static guid_t as_grandmaster_id;
 
 // External function for SEC parsing
 extern unsigned int avb_1722_1_walk_tree(unsigned int address, unsigned set, char* data);
 
+//! The ADP available index counter
+static unsigned long avb_1722_1_available_index = 0;
+
 //! Enumerations for state variables
-enum { SDP_ADVERTISE_IDLE,
-	   SDP_ADVERTISE_ADVERTISE_0,
-	   SDP_ADVERTISE_ADVERTISE_1,
-	   SDP_ADVERTISE_ADVERTISE_2,
-	   SDP_ADVERTISE_WAITING,
-	   SDP_ADVERTISE_DEPARTING_1,
-	   SDP_ADVERTISE_DEPARTING_2
-} sdp_advertise_state = SDP_ADVERTISE_IDLE;
+enum { ADP_ADVERTISE_IDLE,
+	   ADP_ADVERTISE_ADVERTISE_0,
+	   ADP_ADVERTISE_ADVERTISE_1,
+	   ADP_ADVERTISE_ADVERTISE_2,
+	   ADP_ADVERTISE_WAITING,
+	   ADP_ADVERTISE_DEPARTING_1,
+	   ADP_ADVERTISE_DEPARTING_2
+} adp_advertise_state = ADP_ADVERTISE_IDLE;
 
-enum { SDP_DISCOVERY_IDLE,
-	   SDP_DISCOVERY_WAITING,
-	   SDP_DISCOVERY_DISCOVER,
-	   SDP_DISCOVERY_ADDED,
-	   SDP_DISCOVERY_REMOVED
-} sdp_discovery_state = SDP_DISCOVERY_IDLE;
+enum { ADP_DISCOVERY_IDLE,
+	   ADP_DISCOVERY_WAITING,
+	   ADP_DISCOVERY_DISCOVER,
+	   ADP_DISCOVERY_ADDED,
+	   ADP_DISCOVERY_REMOVED
+} adp_discovery_state = ADP_DISCOVERY_IDLE;
 
-enum { SCM_TALKER_IDLE,
-	   SCM_TALKER_WAITING,
-	   SCM_TALKER_CONNECT,
-	   SCM_TALKER_DISCONNECT,
-	   SCM_TALKER_GET_STATE,
-	   SCM_TALKER_GET_CONNECTION,
-	   SCM_TALKER_WAITING_FOR_CONNECT,
-	   SCM_TALKER_WAITING_FOR_DISCONNECT
-} scm_talker_state = SCM_TALKER_IDLE;
+enum { ACMP_TALKER_IDLE,
+	   ACMP_TALKER_WAITING,
+	   ACMP_TALKER_CONNECT,
+	   ACMP_TALKER_DISCONNECT,
+	   ACMP_TALKER_GET_STATE,
+	   ACMP_TALKER_GET_CONNECTION,
+	   ACMP_TALKER_WAITING_FOR_CONNECT,
+	   ACMP_TALKER_WAITING_FOR_DISCONNECT
+} acmp_talker_state = ACMP_TALKER_IDLE;
 
-enum { SCM_LISTENER_IDLE,
-	   SCM_LISTENER_WAITING,
-	   SCM_LISTENER_CONNECT_RX_COMMAND,
-	   SCM_LISTENER_DISCONNECT_RX_COMMAND,
-	   SCM_LISTENER_CONNECT_TX_RESPONSE,
-	   SCM_LISTENER_DISCONNECT_TX_RESPONSE,
-	   SCM_LISTENER_GET_STATE,
-	   SCM_LISTENER_WAITING_FOR_CONNECT,
-	   SCM_LISTENER_WAITING_FOR_DISCONNECT
-} scm_listener_state = SCM_LISTENER_IDLE;
+enum { ACMP_LISTENER_IDLE,
+	   ACMP_LISTENER_WAITING,
+	   ACMP_LISTENER_CONNECT_RX_COMMAND,
+	   ACMP_LISTENER_DISCONNECT_RX_COMMAND,
+	   ACMP_LISTENER_CONNECT_TX_RESPONSE,
+	   ACMP_LISTENER_DISCONNECT_TX_RESPONSE,
+	   ACMP_LISTENER_GET_STATE,
+	   ACMP_LISTENER_WAITING_FOR_CONNECT,
+	   ACMP_LISTENER_WAITING_FOR_DISCONNECT
+} acmp_listener_state = ACMP_LISTENER_IDLE;
 
 //! Record for entries in the SRP entity database
 typedef struct {
@@ -108,20 +113,20 @@ typedef struct {
 	char stream_dest_mac[6];
 	char message_type;
 	char status;
-} avb_1722_1_scm_rcvd_cmd_resp;
+} avb_1722_1_acmp_rcvd_cmd_resp;
 
 typedef struct {
 	guid_t guid;
 	short unique_id;
 	short padding;
-} avb_1722_1_scm_listener_pair;
+} avb_1722_1_acmp_listener_pair;
 
 typedef struct {
     stream_t stream_id;
 	short connection_count;
 	char destination_mac[6];
-	avb_1722_1_scm_listener_pair listeners[AVB_1722_1_MAX_LISTENERS_PER_TALKER];
-} avb_1722_1_scm_talker_stream_info;
+	avb_1722_1_acmp_listener_pair listeners[AVB_1722_1_MAX_LISTENERS_PER_TALKER];
+} avb_1722_1_acmp_talker_stream_info;
 
 typedef struct {
 	guid_t talker_guid;
@@ -130,7 +135,7 @@ typedef struct {
 	stream_t stream_id;
 	char destination_mac[6];
 	short padding;
-} avb_1722_1_scm_listener_stream_info;
+} avb_1722_1_acmp_listener_stream_info;
 
 typedef struct {
 	unsigned timeout;
@@ -138,26 +143,26 @@ typedef struct {
 	short command;
 	short original_sequence_id;
 	short dummy;
-} avb_1722_1_scm_inflight_command;
+} avb_1722_1_acmp_inflight_command;
 
 
 //! Entity database
 avb_1722_1_entity_record entities[AVB_1722_1_MAX_ENTITIES];
 
 //! Listener stream database
-avb_1722_1_scm_listener_stream_info scm_listener_streams[AVB_1722_1_MAX_LISTENERS];
+avb_1722_1_acmp_listener_stream_info acmp_listener_streams[AVB_1722_1_MAX_LISTENERS];
 
 //! Talker stream database
-avb_1722_1_scm_talker_stream_info scm_talker_streams[AVB_1722_1_MAX_TALKERS];
+avb_1722_1_acmp_talker_stream_info acmp_talker_streams[AVB_1722_1_MAX_TALKERS];
 
 //! Listener in-flight command database
-avb_1722_1_scm_inflight_command scm_inflight_commands[AVB_1722_1_MAX_INFLIGHT_COMMANDS];
+avb_1722_1_acmp_inflight_command acmp_inflight_commands[AVB_1722_1_MAX_INFLIGHT_COMMANDS];
 
 //! Talker's rcvdCmdResp
-avb_1722_1_scm_rcvd_cmd_resp scm_talker_rcvd_cmd_resp;
+avb_1722_1_acmp_rcvd_cmd_resp acmp_talker_rcvd_cmd_resp;
 
 //! Listener's rcvdCmdResp
-avb_1722_1_scm_rcvd_cmd_resp scm_listener_rcvd_cmd_resp;
+avb_1722_1_acmp_rcvd_cmd_resp acmp_listener_rcvd_cmd_resp;
 
 
 void avb_1722_1_init(unsigned char macaddr[6], unsigned char serial_number[2])
@@ -174,21 +179,21 @@ void avb_1722_1_init(unsigned char macaddr[6], unsigned char serial_number[2])
 	my_guid.c[6] = macaddr[1];
 	my_guid.c[7] = macaddr[0];
 
-	init_avb_timer(&sdp_advertise_timer, 1);
-	init_avb_timer(&sdp_readvertise_timer, 100);
-	init_avb_timer(&sdp_discovery_timer, 200);
+	init_avb_timer(&adp_advertise_timer, 1);
+	init_avb_timer(&adp_readvertise_timer, 100);
+	init_avb_timer(&adp_discovery_timer, 200);
 	init_avb_timer(&ptp_monitor_timer, 100);
 
-	sdp_discovery_state = SDP_DISCOVERY_WAITING;
-	start_avb_timer(&sdp_discovery_timer, 1);
+	adp_discovery_state = ADP_DISCOVERY_WAITING;
+	start_avb_timer(&adp_discovery_timer, 1);
 
-	scm_talker_state = SCM_TALKER_WAITING;
-	scm_listener_state = SCM_LISTENER_WAITING;
+	acmp_talker_state = ACMP_TALKER_WAITING;
+	acmp_listener_state = ACMP_LISTENER_WAITING;
 }
 
 
 
-static void avb_1722_1_entity_database_add(avb_1722_1_sdp_packet_t* pkt)
+static void avb_1722_1_entity_database_add(avb_1722_1_adp_packet_t* pkt)
 {
 	guid_t guid;
 	unsigned int found_slot_index = AVB_1722_1_MAX_ENTITIES;
@@ -205,12 +210,12 @@ static void avb_1722_1_entity_database_add(avb_1722_1_sdp_packet_t* pkt)
 
 	if (found_slot_index != AVB_1722_1_MAX_ENTITIES) {
 		entities[found_slot_index].guid.l = guid.l;
-		entities[found_slot_index].timeout = GET_1722_1_VALID_TIME(&pkt->header) + sdp_two_second_counter;
+		entities[found_slot_index].timeout = GET_1722_1_VALID_TIME(&pkt->header) + adp_two_second_counter;
 		return;
 	}
 }
 
-static void avb_1722_1_entity_database_remove(avb_1722_1_sdp_packet_t* pkt)
+static void avb_1722_1_entity_database_remove(avb_1722_1_adp_packet_t* pkt)
 {
 	guid_t guid;
 	GET_LONG_WORD(guid, pkt->entity_guid);
@@ -227,7 +232,7 @@ static unsigned avb_1722_1_entity_database_check_timeout()
 	for (unsigned i=0; i<AVB_1722_1_MAX_ENTITIES; ++i) {
 		if (entities[i].guid.l==0) continue;
 
-		if (entities[i].timeout < sdp_two_second_counter) {
+		if (entities[i].timeout < adp_two_second_counter) {
 			entities[i].guid.l=0;
 			return 1;
 		}
@@ -275,29 +280,29 @@ static void avb_1722_1_create_1722_1_header(unsigned char* dest_addr, int subtyp
 //----------------------------------------------------------------------------------------
 
 
-static char* avb_1722_1_create_sec_packet(int message_type, avb_1722_1_sec_packet_t* cmd_pkt)
+static char* avb_1722_1_create_aecp_packet(int message_type, avb_1722_1_aecp_packet_t* cmd_pkt)
 {
 	struct ethernet_hdr_t *hdr = (ethernet_hdr_t*) &avb_1722_1_buf[0];
-	avb_1722_1_sec_packet_t *pkt = (avb_1722_1_sec_packet_t*) (hdr + 1);
+	avb_1722_1_aecp_packet_t *pkt = (avb_1722_1_aecp_packet_t*) (hdr + 1);
 
-	avb_1722_1_create_1722_1_header(avb_1722_1_sec_dest_addr, DEFAULT_1722_1_SEC_SUBTYPE, message_type, 0, 40, hdr);
+	avb_1722_1_create_1722_1_header(avb_1722_1_aecp_dest_addr, DEFAULT_1722_1_AECP_SUBTYPE, message_type, 0, 40, hdr);
 
 	memcpy(pkt->target_guid, cmd_pkt->target_guid, (pkt->data.payload - pkt->target_guid));
 
 	return pkt->data.payload;
 }
 
-static avb_status_t process_avb_1722_1_sec_packet(avb_1722_1_sec_packet_t* pkt, chanend c_tx)
+static avb_status_t process_avb_1722_1_aecp_packet(avb_1722_1_aecp_packet_t* pkt, chanend c_tx)
 {
 	unsigned message_type = GET_1722_1_MSG_TYPE(((avb_1722_1_packet_header_t*)pkt));
 	if (compare_guid(pkt->target_guid, &my_guid)==0) return AVB_1722_1_OK;
 
 	switch (message_type) {
-	case SEC_CMD_AVDECC_MSG_COMMAND: {
+	case AECP_CMD_AVDECC_MSG_COMMAND: {
 		unsigned int len = (((unsigned)(pkt->data.avdecc.mode_len & 0xF)) << 8) + (unsigned)(pkt->data.avdecc.lower_len);
 		unsigned int d_index = 0;
 		unsigned int s_index = 0;
-		avb_1722_1_sec_avdecc_msg_t* payload = (avb_1722_1_sec_avdecc_msg_t*)avb_1722_1_create_sec_packet(SEC_CMD_AVDECC_MSG_RESPONSE, pkt);
+		avb_1722_1_aecp_avdecc_msg_t* payload = (avb_1722_1_aecp_avdecc_msg_t*)avb_1722_1_create_aecp_packet(AECP_CMD_AVDECC_MSG_RESPONSE, pkt);
 
 		while (s_index < len) {
 
@@ -330,16 +335,16 @@ static avb_status_t process_avb_1722_1_sec_packet(avb_1722_1_sec_packet_t* pkt, 
 		}
 		break;
 	}
-	case SEC_CMD_ADDRESS_ACCESS_COMMAND: {
+	case AECP_CMD_ADDRESS_ACCESS_COMMAND: {
 		break;
 	}
-	case SEC_CMD_AVC_COMMAND: {
+	case AECP_CMD_AVC_COMMAND: {
 		break;
 	}
-	case SEC_CMD_VENDOR_UNIQUE_COMMAND: {
+	case AECP_CMD_VENDOR_UNIQUE_COMMAND: {
 		break;
 	}
-	case SEC_CMD_EXTENDED_COMMAND: {
+	case AECP_CMD_EXTENDED_COMMAND: {
 		break;
 	}
 	default:
@@ -351,44 +356,44 @@ static avb_status_t process_avb_1722_1_sec_packet(avb_1722_1_sec_packet_t* pkt, 
 
 //----------------------------------------------------------------------------------------
 
-static unsigned scm_listener_valid_listener_unique()
+static unsigned acmp_listener_valid_listener_unique()
 {
-	return scm_listener_rcvd_cmd_resp.listener_unique_id < AVB_1722_1_MAX_LISTENERS;
+	return acmp_listener_rcvd_cmd_resp.listener_unique_id < AVB_1722_1_MAX_LISTENERS;
 }
 
-static unsigned scm_listener_listener_is_connected()
+static unsigned acmp_listener_listener_is_connected()
 {
 	enum avb_sink_state_t state;
-	get_avb_sink_state(scm_listener_rcvd_cmd_resp.listener_unique_id, &state);
+	get_avb_sink_state(acmp_listener_rcvd_cmd_resp.listener_unique_id, &state);
 	return state != AVB_SINK_STATE_DISABLED;
 }
 
-static avb_1722_1_scm_status_type scm_listener_get_state()
+static avb_1722_1_acmp_status_type acmp_listener_get_state()
 {
-	return SCM_STATUS_SUCCESS;
+	return ACMP_STATUS_SUCCESS;
 }
 
-static unsigned scm_talker_valid_talker_unique()
+static unsigned acmp_talker_valid_talker_unique()
 {
-	return scm_talker_rcvd_cmd_resp.listener_unique_id < AVB_1722_1_MAX_TALKERS;
+	return acmp_talker_rcvd_cmd_resp.listener_unique_id < AVB_1722_1_MAX_TALKERS;
 }
 
-static avb_1722_1_scm_status_type scm_talker_get_state()
+static avb_1722_1_acmp_status_type acmp_talker_get_state()
 {
-	return SCM_STATUS_SUCCESS;
+	return ACMP_STATUS_SUCCESS;
 }
 
-static avb_1722_1_scm_status_type scm_talker_get_connection()
+static avb_1722_1_acmp_status_type acmp_talker_get_connection()
 {
-	return SCM_STATUS_SUCCESS;
+	return ACMP_STATUS_SUCCESS;
 }
 
-static void avb_1722_1_create_scm_packet(avb_1722_1_scm_rcvd_cmd_resp* rcr)
+static void avb_1722_1_create_acmp_packet(avb_1722_1_acmp_rcvd_cmd_resp* rcr)
 {
 	struct ethernet_hdr_t *hdr = (ethernet_hdr_t*) &avb_1722_1_buf[0];
-	avb_1722_1_scm_packet_t *pkt = (avb_1722_1_scm_packet_t*) (hdr + 1);
+	avb_1722_1_acmp_packet_t *pkt = (avb_1722_1_acmp_packet_t*) (hdr + 1);
 
-	avb_1722_1_create_1722_1_header(avb_1722_1_scm_dest_addr, DEFAULT_1722_1_SCM_SUBTYPE, rcr->message_type, rcr->status, 40, hdr);
+	avb_1722_1_create_1722_1_header(avb_1722_1_acmp_dest_addr, DEFAULT_1722_1_ACMP_SUBTYPE, rcr->message_type, rcr->status, 40, hdr);
 
 	SET_LONG_WORD(pkt->stream_id, rcr->stream_id);
 	SET_LONG_WORD(pkt->controller_guid, rcr->controller_guid);
@@ -408,53 +413,53 @@ static void avb_1722_1_create_scm_packet(avb_1722_1_scm_rcvd_cmd_resp* rcr)
 
 }
 
-static void scm_listener_tx_command(unsigned message_type, unsigned timeout_ms, chanend c_tx)
+static void acmp_listener_tx_command(unsigned message_type, unsigned timeout_ms, chanend c_tx)
 {
-	scm_listener_rcvd_cmd_resp.message_type = message_type;
-	scm_listener_rcvd_cmd_resp.status = SCM_STATUS_SUCCESS;
-	avb_1722_1_create_scm_packet(&scm_listener_rcvd_cmd_resp);
+	acmp_listener_rcvd_cmd_resp.message_type = message_type;
+	acmp_listener_rcvd_cmd_resp.status = ACMP_STATUS_SUCCESS;
+	avb_1722_1_create_acmp_packet(&acmp_listener_rcvd_cmd_resp);
 	mac_tx(c_tx, avb_1722_1_buf, 66, ETH_BROADCAST);
 
 	// set up inflight command
 }
 
-static void scm_listener_tx_response(unsigned type, unsigned error_code, chanend c_tx)
+static void acmp_listener_tx_response(unsigned type, unsigned error_code, chanend c_tx)
 {
-	scm_listener_rcvd_cmd_resp.message_type = type;
-	scm_listener_rcvd_cmd_resp.status = error_code;
-	avb_1722_1_create_scm_packet(&scm_listener_rcvd_cmd_resp);
+	acmp_listener_rcvd_cmd_resp.message_type = type;
+	acmp_listener_rcvd_cmd_resp.status = error_code;
+	avb_1722_1_create_acmp_packet(&acmp_listener_rcvd_cmd_resp);
 	mac_tx(c_tx, avb_1722_1_buf, 66, ETH_BROADCAST);
 }
 
-static void scm_talker_tx_response(unsigned type, unsigned error_code, chanend c_tx)
+static void acmp_talker_tx_response(unsigned type, unsigned error_code, chanend c_tx)
 {
-	unsigned talker = scm_talker_rcvd_cmd_resp.talker_unique_id;
-	scm_talker_rcvd_cmd_resp.message_type = type;
-	scm_talker_rcvd_cmd_resp.status = error_code;
+	unsigned talker = acmp_talker_rcvd_cmd_resp.talker_unique_id;
+	acmp_talker_rcvd_cmd_resp.message_type = type;
+	acmp_talker_rcvd_cmd_resp.status = error_code;
 
-	scm_talker_rcvd_cmd_resp.stream_id = scm_talker_streams[talker].stream_id;
+	acmp_talker_rcvd_cmd_resp.stream_id = acmp_talker_streams[talker].stream_id;
 	for (unsigned c=0; c<6; ++c)
-		scm_talker_rcvd_cmd_resp.stream_dest_mac[c] = scm_talker_streams[talker].destination_mac[c];
+		acmp_talker_rcvd_cmd_resp.stream_dest_mac[c] = acmp_talker_streams[talker].destination_mac[c];
 
-	avb_1722_1_create_scm_packet(&scm_talker_rcvd_cmd_resp);
+	avb_1722_1_create_acmp_packet(&acmp_talker_rcvd_cmd_resp);
 	mac_tx(c_tx, avb_1722_1_buf, 66, ETH_BROADCAST);
 }
 
-static void scm_listener_remove_inflight()
+static void acmp_listener_remove_inflight()
 {
 	for (unsigned int i=0; i<AVB_1722_1_MAX_INFLIGHT_COMMANDS; ++i) {
 		//inflight_commands[i];
 	}
 }
 
-static void scm_listener_check_inflight_command_timeouts()
+static void acmp_listener_check_inflight_command_timeouts()
 {
 	for (unsigned int i=0; i<AVB_1722_1_MAX_INFLIGHT_COMMANDS; ++i) {
 		//inflight_commands[i];
 	}
 }
 
-static void store_rcvd_cmd_resp(avb_1722_1_scm_rcvd_cmd_resp* store, avb_1722_1_scm_packet_t* pkt)
+static void store_rcvd_cmd_resp(avb_1722_1_acmp_rcvd_cmd_resp* store, avb_1722_1_acmp_packet_t* pkt)
 {
 	GET_LONG_WORD(store->stream_id, pkt->stream_id);
 	GET_LONG_WORD(store->controller_guid, pkt->controller_guid);
@@ -475,227 +480,224 @@ static void store_rcvd_cmd_resp(avb_1722_1_scm_rcvd_cmd_resp* store, avb_1722_1_
 	store->status = GET_1722_1_VALID_TIME(&(pkt->header));
 }
 
-static avb_status_t process_avb_1722_1_scm_talker_packet(unsigned message_type, avb_1722_1_scm_packet_t* pkt)
+static avb_status_t process_avb_1722_1_acmp_talker_packet(unsigned message_type, avb_1722_1_acmp_packet_t* pkt)
 {
 	if (compare_guid(pkt->talker_guid, &my_guid)==0) return AVB_1722_1_OK;
-	if (scm_talker_state!=SCM_TALKER_WAITING) { return AVB_1722_1_OK; }
+	if (acmp_talker_state!=ACMP_TALKER_WAITING) { return AVB_1722_1_OK; }
 
-	store_rcvd_cmd_resp(&scm_talker_rcvd_cmd_resp, pkt);
+	store_rcvd_cmd_resp(&acmp_talker_rcvd_cmd_resp, pkt);
 
 	switch (message_type)
 	{
-	case SCM_CMD_CONNECT_TX_COMMAND:
-		scm_talker_state = SCM_TALKER_CONNECT;
+	case ACMP_CMD_CONNECT_TX_COMMAND:
+		acmp_talker_state = ACMP_TALKER_CONNECT;
 		break;
-	case SCM_CMD_DISCONNECT_TX_COMMAND:
-		scm_talker_state = SCM_TALKER_DISCONNECT;
+	case ACMP_CMD_DISCONNECT_TX_COMMAND:
+		acmp_talker_state = ACMP_TALKER_DISCONNECT;
 		break;
-	case SCM_CMD_GET_TX_STATE_COMMAND:
-		scm_talker_state = SCM_TALKER_GET_STATE;
+	case ACMP_CMD_GET_TX_STATE_COMMAND:
+		acmp_talker_state = ACMP_TALKER_GET_STATE;
 		break;
-	case SCM_CMD_GET_TX_CONNECTION_COMMAND:
-		scm_talker_state = SCM_TALKER_GET_CONNECTION;
+	case ACMP_CMD_GET_TX_CONNECTION_COMMAND:
+		acmp_talker_state = ACMP_TALKER_GET_CONNECTION;
 		break;
 	}
 
 	return AVB_1722_1_OK;
 }
 
-static avb_status_t process_avb_1722_1_scm_listener_packet(unsigned message_type, avb_1722_1_scm_packet_t* pkt)
+static avb_status_t process_avb_1722_1_acmp_listener_packet(unsigned message_type, avb_1722_1_acmp_packet_t* pkt)
 {
 	if (compare_guid(pkt->listener_guid, &my_guid)==0) return AVB_1722_1_OK;
-	if (scm_listener_state!=SCM_LISTENER_WAITING) { return AVB_1722_1_OK; }
+	if (acmp_listener_state!=ACMP_LISTENER_WAITING) { return AVB_1722_1_OK; }
 
-	store_rcvd_cmd_resp(&scm_listener_rcvd_cmd_resp, pkt);
+	store_rcvd_cmd_resp(&acmp_listener_rcvd_cmd_resp, pkt);
 
 	switch (message_type)
 	{
-	case SCM_CMD_CONNECT_TX_RESPONSE:
-		scm_listener_state = SCM_LISTENER_CONNECT_TX_RESPONSE;
+	case ACMP_CMD_CONNECT_TX_RESPONSE:
+		acmp_listener_state = ACMP_LISTENER_CONNECT_TX_RESPONSE;
 		break;
-	case SCM_CMD_DISCONNECT_TX_RESPONSE:
-		scm_listener_state = SCM_LISTENER_DISCONNECT_TX_RESPONSE;
+	case ACMP_CMD_DISCONNECT_TX_RESPONSE:
+		acmp_listener_state = ACMP_LISTENER_DISCONNECT_TX_RESPONSE;
 		break;
-	case SCM_CMD_CONNECT_RX_COMMAND:
-		scm_listener_state = SCM_LISTENER_CONNECT_RX_COMMAND;
+	case ACMP_CMD_CONNECT_RX_COMMAND:
+		acmp_listener_state = ACMP_LISTENER_CONNECT_RX_COMMAND;
 		break;
-	case SCM_CMD_DISCONNECT_RX_COMMAND:
-		scm_listener_state = SCM_LISTENER_DISCONNECT_RX_COMMAND;
+	case ACMP_CMD_DISCONNECT_RX_COMMAND:
+		acmp_listener_state = ACMP_LISTENER_DISCONNECT_RX_COMMAND;
 		break;
-	case SCM_CMD_GET_RX_STATE_COMMAND:
-		scm_listener_state = SCM_LISTENER_GET_STATE;
+	case ACMP_CMD_GET_RX_STATE_COMMAND:
+		acmp_listener_state = ACMP_LISTENER_GET_STATE;
 		break;
 	}
 
 	return AVB_1722_1_OK;
 }
 
-static avb_status_t process_avb_1722_1_scm_packet(avb_1722_1_scm_packet_t* pkt, chanend c_tx)
+static avb_status_t process_avb_1722_1_acmp_packet(avb_1722_1_acmp_packet_t* pkt, chanend c_tx)
 {
 	unsigned message_type = GET_1722_1_MSG_TYPE(((avb_1722_1_packet_header_t*)pkt));
 
 	switch (message_type) {
 
 	// Talker messages
-	case SCM_CMD_CONNECT_TX_COMMAND:
-	case SCM_CMD_DISCONNECT_TX_COMMAND:
-	case SCM_CMD_GET_TX_STATE_COMMAND:
-	case SCM_CMD_GET_TX_CONNECTION_COMMAND:
-		return process_avb_1722_1_scm_talker_packet(message_type, pkt);
+	case ACMP_CMD_CONNECT_TX_COMMAND:
+	case ACMP_CMD_DISCONNECT_TX_COMMAND:
+	case ACMP_CMD_GET_TX_STATE_COMMAND:
+	case ACMP_CMD_GET_TX_CONNECTION_COMMAND:
+		return process_avb_1722_1_acmp_talker_packet(message_type, pkt);
 
 	// Listener messages
-	case SCM_CMD_CONNECT_TX_RESPONSE:
-	case SCM_CMD_DISCONNECT_TX_RESPONSE:
-	case SCM_CMD_CONNECT_RX_COMMAND:
-	case SCM_CMD_DISCONNECT_RX_COMMAND:
-	case SCM_CMD_GET_RX_STATE_COMMAND:
-		return process_avb_1722_1_scm_listener_packet(message_type, pkt);
+	case ACMP_CMD_CONNECT_TX_RESPONSE:
+	case ACMP_CMD_DISCONNECT_TX_RESPONSE:
+	case ACMP_CMD_CONNECT_RX_COMMAND:
+	case ACMP_CMD_DISCONNECT_RX_COMMAND:
+	case ACMP_CMD_GET_RX_STATE_COMMAND:
+		return process_avb_1722_1_acmp_listener_packet(message_type, pkt);
 	}
 
 	return AVB_1722_1_OK;
 }
 
-static avb_status_t avb_1722_1_scm_talker_periodic(chanend c_tx)
+static avb_status_t avb_1722_1_acmp_talker_periodic(chanend c_tx)
 {
-	switch (scm_talker_state) {
-	case SCM_TALKER_IDLE:
-	case SCM_TALKER_WAITING:
-	case SCM_TALKER_WAITING_FOR_CONNECT:
-	case SCM_TALKER_WAITING_FOR_DISCONNECT:
+	switch (acmp_talker_state) {
+	case ACMP_TALKER_IDLE:
+	case ACMP_TALKER_WAITING:
+	case ACMP_TALKER_WAITING_FOR_CONNECT:
+	case ACMP_TALKER_WAITING_FOR_DISCONNECT:
 		return AVB_NO_STATUS;
 
-	case SCM_TALKER_CONNECT:
-		if (!scm_talker_valid_talker_unique(1)) {
-			scm_talker_tx_response(SCM_CMD_CONNECT_TX_RESPONSE, SCM_STATUS_TALKER_UNKNOWN_ID, c_tx);
-			scm_talker_state = SCM_TALKER_WAITING;
+	case ACMP_TALKER_CONNECT:
+		if (!acmp_talker_valid_talker_unique(1)) {
+			acmp_talker_tx_response(ACMP_CMD_CONNECT_TX_RESPONSE, ACMP_STATUS_TALKER_UNKNOWN_ID, c_tx);
+			acmp_talker_state = ACMP_TALKER_WAITING;
 			return AVB_NO_STATUS;
 		} else {
-			scm_talker_state = SCM_TALKER_WAITING_FOR_CONNECT;
+			acmp_talker_state = ACMP_TALKER_WAITING_FOR_CONNECT;
 			return AVB_1722_1_CONNECT_TALKER;
 		}
 		break;
-	case SCM_TALKER_DISCONNECT:
-		if (!scm_talker_valid_talker_unique(1)) {
-			scm_talker_tx_response(SCM_CMD_DISCONNECT_TX_RESPONSE, SCM_STATUS_TALKER_UNKNOWN_ID, c_tx);
-			scm_talker_state = SCM_TALKER_WAITING;
+	case ACMP_TALKER_DISCONNECT:
+		if (!acmp_talker_valid_talker_unique(1)) {
+			acmp_talker_tx_response(ACMP_CMD_DISCONNECT_TX_RESPONSE, ACMP_STATUS_TALKER_UNKNOWN_ID, c_tx);
+			acmp_talker_state = ACMP_TALKER_WAITING;
 			return AVB_NO_STATUS;
 		} else {
-			scm_talker_state = SCM_TALKER_WAITING_FOR_DISCONNECT;
+			acmp_talker_state = ACMP_TALKER_WAITING_FOR_DISCONNECT;
 			return AVB_1722_1_DISCONNECT_TALKER;
 		}
 		break;
-	case SCM_TALKER_GET_STATE:
-		if (!scm_talker_valid_talker_unique(1)) {
-			scm_talker_tx_response(SCM_CMD_GET_TX_STATE_RESPONSE, SCM_STATUS_TALKER_UNKNOWN_ID, c_tx);
+	case ACMP_TALKER_GET_STATE:
+		if (!acmp_talker_valid_talker_unique(1)) {
+			acmp_talker_tx_response(ACMP_CMD_GET_TX_STATE_RESPONSE, ACMP_STATUS_TALKER_UNKNOWN_ID, c_tx);
 		} else {
-			scm_talker_tx_response(SCM_CMD_GET_TX_STATE_RESPONSE, scm_talker_get_state(), c_tx);
+			acmp_talker_tx_response(ACMP_CMD_GET_TX_STATE_RESPONSE, acmp_talker_get_state(), c_tx);
 		}
-		scm_talker_state = SCM_TALKER_WAITING;
+		acmp_talker_state = ACMP_TALKER_WAITING;
 		return AVB_NO_STATUS;
-	case SCM_TALKER_GET_CONNECTION:
-		if (!scm_talker_valid_talker_unique(1)) {
-			scm_talker_tx_response(SCM_CMD_GET_TX_CONNECTION_RESPONSE, SCM_STATUS_TALKER_UNKNOWN_ID, c_tx);
+	case ACMP_TALKER_GET_CONNECTION:
+		if (!acmp_talker_valid_talker_unique(1)) {
+			acmp_talker_tx_response(ACMP_CMD_GET_TX_CONNECTION_RESPONSE, ACMP_STATUS_TALKER_UNKNOWN_ID, c_tx);
 		} else {
-			scm_talker_tx_response(SCM_CMD_GET_TX_CONNECTION_RESPONSE, scm_talker_get_connection(), c_tx);
+			acmp_talker_tx_response(ACMP_CMD_GET_TX_CONNECTION_RESPONSE, acmp_talker_get_connection(), c_tx);
 		}
-		scm_talker_state = SCM_TALKER_WAITING;
+		acmp_talker_state = ACMP_TALKER_WAITING;
 		return AVB_NO_STATUS;
 	}
 
 	return AVB_NO_STATUS;
 }
 
-static avb_status_t avb_1722_1_scm_listener_periodic(chanend c_tx)
+static avb_status_t avb_1722_1_acmp_listener_periodic(chanend c_tx)
 {
-	switch (scm_listener_state) {
-	case SCM_LISTENER_IDLE:
-	case SCM_LISTENER_WAITING_FOR_CONNECT:
-	case SCM_LISTENER_WAITING_FOR_DISCONNECT:
+	switch (acmp_listener_state) {
+	case ACMP_LISTENER_IDLE:
+	case ACMP_LISTENER_WAITING_FOR_CONNECT:
+	case ACMP_LISTENER_WAITING_FOR_DISCONNECT:
 		break;
-	case SCM_LISTENER_WAITING:
-		scm_listener_check_inflight_command_timeouts();
+	case ACMP_LISTENER_WAITING:
+		acmp_listener_check_inflight_command_timeouts();
 		break;
-	case SCM_LISTENER_CONNECT_RX_COMMAND:
-		if (!scm_listener_valid_listener_unique()) {
-			scm_listener_tx_response(SCM_CMD_CONNECT_RX_RESPONSE, SCM_STATUS_LISTENER_UNKNOWN_ID, c_tx);
+	case ACMP_LISTENER_CONNECT_RX_COMMAND:
+		if (!acmp_listener_valid_listener_unique()) {
+			acmp_listener_tx_response(ACMP_CMD_CONNECT_RX_RESPONSE, ACMP_STATUS_LISTENER_UNKNOWN_ID, c_tx);
 		} else {
-			//if (!scm_listener_listener_is_connected())
 			{
-				scm_listener_tx_command(SCM_CMD_CONNECT_TX_COMMAND, 2000, c_tx);
-			//} else {
-			//	scm_listener_tx_response(SCM_CMD_CONNECT_RX_RESPONSE, SCM_STATUS_LISTENER_EXCLUSIVE, c_tx);
+				acmp_listener_tx_command(ACMP_CMD_CONNECT_TX_COMMAND, 2000, c_tx);
 			}
 		}
-		scm_listener_state = SCM_LISTENER_WAITING;
+		acmp_listener_state = ACMP_LISTENER_WAITING;
 		break;
-	case SCM_LISTENER_DISCONNECT_RX_COMMAND:
-		if (!scm_listener_valid_listener_unique()) {
-			scm_listener_tx_response(SCM_CMD_DISCONNECT_RX_RESPONSE, SCM_STATUS_LISTENER_UNKNOWN_ID, c_tx);
+	case ACMP_LISTENER_DISCONNECT_RX_COMMAND:
+		if (!acmp_listener_valid_listener_unique()) {
+			acmp_listener_tx_response(ACMP_CMD_DISCONNECT_RX_RESPONSE, ACMP_STATUS_LISTENER_UNKNOWN_ID, c_tx);
 		} else {
-			if (scm_listener_listener_is_connected()) {
-				scm_listener_tx_command(SCM_CMD_DISCONNECT_TX_COMMAND, 200, c_tx);
+			if (acmp_listener_listener_is_connected()) {
+				acmp_listener_tx_command(ACMP_CMD_DISCONNECT_TX_COMMAND, 200, c_tx);
 			} else {
-				scm_listener_tx_response(SCM_CMD_DISCONNECT_RX_RESPONSE, SCM_STATUS_NOT_CONNECTED, c_tx);
+				acmp_listener_tx_response(ACMP_CMD_DISCONNECT_RX_RESPONSE, ACMP_STATUS_NOT_CONNECTED, c_tx);
 			}
 		}
-		scm_listener_state = SCM_LISTENER_WAITING;
+		acmp_listener_state = ACMP_LISTENER_WAITING;
 		break;
-	case SCM_LISTENER_CONNECT_TX_RESPONSE:
-		if (scm_listener_valid_listener_unique()) {
-			scm_listener_tx_response(SCM_CMD_CONNECT_RX_RESPONSE, 0, c_tx);
-			scm_listener_remove_inflight();
-			scm_listener_state = SCM_LISTENER_WAITING_FOR_CONNECT;
+	case ACMP_LISTENER_CONNECT_TX_RESPONSE:
+		if (acmp_listener_valid_listener_unique()) {
+			acmp_listener_tx_response(ACMP_CMD_CONNECT_RX_RESPONSE, 0, c_tx);
+			acmp_listener_remove_inflight();
+			acmp_listener_state = ACMP_LISTENER_WAITING_FOR_CONNECT;
 			return AVB_1722_1_CONNECT_LISTENER;
 		}
 		break;
-	case SCM_LISTENER_DISCONNECT_TX_RESPONSE:
-		if (scm_listener_valid_listener_unique()) {
-			scm_listener_tx_response(SCM_CMD_DISCONNECT_RX_RESPONSE, 0, c_tx);
-			scm_listener_remove_inflight();
-			scm_listener_state = SCM_LISTENER_WAITING_FOR_DISCONNECT;
+	case ACMP_LISTENER_DISCONNECT_TX_RESPONSE:
+		if (acmp_listener_valid_listener_unique()) {
+			acmp_listener_tx_response(ACMP_CMD_DISCONNECT_RX_RESPONSE, 0, c_tx);
+			acmp_listener_remove_inflight();
+			acmp_listener_state = ACMP_LISTENER_WAITING_FOR_DISCONNECT;
 			return AVB_1722_1_DISCONNECT_LISTENER;
 		}
 		break;
-	case SCM_LISTENER_GET_STATE:
-		if (!scm_listener_valid_listener_unique()) {
-			scm_listener_tx_response(SCM_CMD_GET_RX_STATE_RESPONSE, SCM_STATUS_LISTENER_UNKNOWN_ID, c_tx);
+	case ACMP_LISTENER_GET_STATE:
+		if (!acmp_listener_valid_listener_unique()) {
+			acmp_listener_tx_response(ACMP_CMD_GET_RX_STATE_RESPONSE, ACMP_STATUS_LISTENER_UNKNOWN_ID, c_tx);
 		} else {
-			scm_listener_tx_response(SCM_CMD_GET_RX_STATE_RESPONSE, scm_listener_get_state(), c_tx);
+			acmp_listener_tx_response(ACMP_CMD_GET_RX_STATE_RESPONSE, acmp_listener_get_state(), c_tx);
 		}
-		scm_listener_state = SCM_LISTENER_WAITING;
+		acmp_listener_state = ACMP_LISTENER_WAITING;
 		break;
 	}
 
 	return AVB_NO_STATUS;
 }
 
-unsigned avb_1722_1_scm_get_talker_connection_info(short *talker)
+unsigned avb_1722_1_acmp_get_talker_connection_info(short *talker)
 {
-	*talker = scm_talker_rcvd_cmd_resp.talker_unique_id;
+	*talker = acmp_talker_rcvd_cmd_resp.talker_unique_id;
 	return 1;
 }
 
-unsigned avb_1722_1_scm_get_listener_connection_info(short *listener, char address[6], unsigned streamId[2], unsigned* vlan)
+unsigned avb_1722_1_acmp_get_listener_connection_info(short *listener, char address[6], unsigned streamId[2], unsigned* vlan)
 {
-	*listener = scm_listener_rcvd_cmd_resp.listener_unique_id;
-	for (unsigned c=0; c<6; ++c) address[c] = scm_listener_rcvd_cmd_resp.stream_dest_mac[c];
-	streamId[1] = (unsigned)(scm_listener_rcvd_cmd_resp.stream_id.l >> 0);
-	streamId[0] = (unsigned)(scm_listener_rcvd_cmd_resp.stream_id.l >> 32);
+	*listener = acmp_listener_rcvd_cmd_resp.listener_unique_id;
+	for (unsigned c=0; c<6; ++c) address[c] = acmp_listener_rcvd_cmd_resp.stream_dest_mac[c];
+	streamId[1] = (unsigned)(acmp_listener_rcvd_cmd_resp.stream_id.l >> 0);
+	streamId[0] = (unsigned)(acmp_listener_rcvd_cmd_resp.stream_id.l >> 32);
 	*vlan = 2;
 	return 1;
 }
 
-void avb_1722_1_scm_talker_connection_complete(short code, chanend c_tx)
+void avb_1722_1_acmp_talker_connection_complete(short code, chanend c_tx)
 {
-	switch (scm_talker_state)
+	switch (acmp_talker_state)
 	{
-	case SCM_TALKER_WAITING_FOR_CONNECT:
-		scm_talker_tx_response(SCM_CMD_CONNECT_TX_RESPONSE, code, c_tx);
-		scm_talker_state = SCM_TALKER_WAITING;
+	case ACMP_TALKER_WAITING_FOR_CONNECT:
+		acmp_talker_tx_response(ACMP_CMD_CONNECT_TX_RESPONSE, code, c_tx);
+		acmp_talker_state = ACMP_TALKER_WAITING;
 		break;
-	case SCM_TALKER_WAITING_FOR_DISCONNECT:
-		scm_talker_tx_response(SCM_CMD_DISCONNECT_TX_RESPONSE, code, c_tx);
-		scm_talker_state = SCM_TALKER_WAITING;
+	case ACMP_TALKER_WAITING_FOR_DISCONNECT:
+		acmp_talker_tx_response(ACMP_CMD_DISCONNECT_TX_RESPONSE, code, c_tx);
+		acmp_talker_state = ACMP_TALKER_WAITING;
 		break;
 	default:
 		break;
@@ -703,17 +705,17 @@ void avb_1722_1_scm_talker_connection_complete(short code, chanend c_tx)
 }
 
 
-void avb_1722_1_scm_listener_connection_complete(short code, chanend c_tx)
+void avb_1722_1_acmp_listener_connection_complete(short code, chanend c_tx)
 {
-	switch (scm_listener_state)
+	switch (acmp_listener_state)
 	{
-	case SCM_LISTENER_WAITING_FOR_CONNECT:
-		scm_listener_rcvd_cmd_resp.status = code;
-		scm_listener_state = SCM_LISTENER_WAITING;
+	case ACMP_LISTENER_WAITING_FOR_CONNECT:
+		acmp_listener_rcvd_cmd_resp.status = code;
+		acmp_listener_state = ACMP_LISTENER_WAITING;
 		break;
-	case SCM_LISTENER_WAITING_FOR_DISCONNECT:
-		scm_listener_rcvd_cmd_resp.status = code;
-		scm_listener_state = SCM_LISTENER_WAITING;
+	case ACMP_LISTENER_WAITING_FOR_DISCONNECT:
+		acmp_listener_rcvd_cmd_resp.status = code;
+		acmp_listener_state = ACMP_LISTENER_WAITING;
 		break;
 	default:
 		break;
@@ -725,7 +727,7 @@ void avb_1722_1_talker_set_mac_address(unsigned talker_unique_id, char macaddr[]
 	if (talker_unique_id < AVB_1722_1_MAX_TALKERS)
 	{
 		for (unsigned i=0; i<6; ++i)
-			scm_talker_streams[talker_unique_id].destination_mac[i] = macaddr[i];
+			acmp_talker_streams[talker_unique_id].destination_mac[i] = macaddr[i];
 	}
 }
 
@@ -733,14 +735,14 @@ void avb_1722_1_talker_set_stream_id(unsigned talker_unique_id, unsigned streamI
 {
 	if (talker_unique_id < AVB_1722_1_MAX_TALKERS)
 	{
-		scm_talker_streams[talker_unique_id].stream_id.l = (unsigned long long)streamId[1] + (((unsigned long long)streamId[0]) << 32);
+		acmp_talker_streams[talker_unique_id].stream_id.l = (unsigned long long)streamId[1] + (((unsigned long long)streamId[0]) << 32);
 	}
 }
 
 
 //----------------------------------------------------------------------------------------
 
-avb_status_t process_avb_1722_1_sdp_packet(avb_1722_1_sdp_packet_t* pkt, chanend c_tx)
+avb_status_t process_avb_1722_1_adp_packet(avb_1722_1_adp_packet_t* pkt, chanend c_tx)
 {
 	unsigned message_type = GET_1722_1_MSG_TYPE(((avb_1722_1_packet_header_t*)pkt));
 	guid_t zero_guid = { 0 };
@@ -749,21 +751,21 @@ avb_status_t process_avb_1722_1_sdp_packet(avb_1722_1_sdp_packet_t* pkt, chanend
 	case ENTITY_DISCOVER: {
 		if ( compare_guid(pkt->entity_guid, &my_guid) || compare_guid(pkt->entity_guid, &zero_guid) )
 		{
-			if (sdp_advertise_state == SDP_ADVERTISE_WAITING)
-				sdp_advertise_state = SDP_ADVERTISE_ADVERTISE_1;
+			if (adp_advertise_state == ADP_ADVERTISE_WAITING)
+				adp_advertise_state = ADP_ADVERTISE_ADVERTISE_1;
 		}
 		return AVB_1722_1_OK;
 	}
 
 	case ENTITY_AVAILABLE: {
 		avb_1722_1_entity_database_add(pkt);
-		sdp_discovery_state = SDP_DISCOVERY_ADDED;
+		adp_discovery_state = ADP_DISCOVERY_ADDED;
 		return AVB_1722_1_OK;
 	}
 
 	case ENTITY_DEPARTING: {
 		avb_1722_1_entity_database_remove(pkt);
-		sdp_discovery_state = SDP_DISCOVERY_REMOVED;
+		adp_discovery_state = ADP_DISCOVERY_REMOVED;
 		return AVB_1722_1_OK;
 	}
 
@@ -772,141 +774,118 @@ avb_status_t process_avb_1722_1_sdp_packet(avb_1722_1_sdp_packet_t* pkt, chanend
 	return AVB_1722_1_OK;
 }
 
-static void avb_1722_1_create_sdp_packet(int message_type, guid_t guid)
+static void avb_1722_1_create_adp_packet(int message_type, guid_t guid)
 {
 	  ethernet_hdr_t *hdr = (ethernet_hdr_t*) &avb_1722_1_buf[0];
-	  avb_1722_1_sdp_packet_t *pkt = (avb_1722_1_sdp_packet_t*) (hdr + 1);
+	  avb_1722_1_adp_packet_t *pkt = (avb_1722_1_adp_packet_t*) (hdr + 1);
 
-	  avb_1722_1_create_1722_1_header(avb_1722_1_sdp_dest_addr, DEFAULT_1722_1_SDP_SUBTYPE, message_type,
-			  (message_type==ENTITY_AVAILABLE)?AVB_1722_1_SDP_VALID_TIME:0, 40, hdr);
+	  memset(pkt, 0, sizeof(avb_1722_1_adp_packet_t));
+
+	  avb_1722_1_create_1722_1_header(avb_1722_1_adp_dest_addr, DEFAULT_1722_1_ADP_SUBTYPE, message_type,
+			  (message_type==ENTITY_AVAILABLE)?AVB_1722_1_ADP_VALID_TIME:0, 40, hdr);
 
 	  SET_LONG_WORD(pkt->entity_guid, guid);
 
-	  if (message_type==ENTITY_DISCOVER) {
-		  pkt->vendor_id[0] = 0;
-		  pkt->vendor_id[1] = 0;
-		  pkt->model_id[0] = 0;
-		  pkt->model_id[1] = 0;
-		  pkt->entity_capabilities[0] = 0;
-		  pkt->entity_capabilities[1] = 0;
-		  pkt->talker_stream_sources = 0;
-		  pkt->talker_capabilities = 0;
-		  pkt->listener_stream_sinks = 0;
-		  pkt->listener_capabilites = 0;
-		  pkt->controller_capabilities[0] = 0;
-		  pkt->controller_capabilities[1] = 0;
-		  pkt->boot_id[0] = 0;
-		  pkt->boot_id[1] = 0;
-		  pkt->as_grandmaster_id[0] = 0;
-		  pkt->as_grandmaster_id[1] = 0;
-		  pkt->as_grandmaster_id[2] = 0;
-		  pkt->as_grandmaster_id[3] = 0;
-		  pkt->as_grandmaster_id[4] = 0;
-		  pkt->as_grandmaster_id[5] = 0;
-		  pkt->as_grandmaster_id[6] = 0;
-		  pkt->as_grandmaster_id[7] = 0;
-	  } else {
-		  SET_WORD_CONST(pkt->vendor_id, AVB_1722_1_SDP_VENDOR_ID);
-		  SET_WORD_CONST(pkt->model_id, AVB_1722_1_SDP_MODEL_ID);
-		  SET_WORD_CONST(pkt->entity_capabilities, AVB_1722_1_SDP_ENTITY_CAPABILITIES);
-		  pkt->talker_stream_sources = AVB_1722_1_SDP_TALKER_STREAM_SOURCES;
-		  pkt->talker_capabilities = AVB_1722_1_SDP_TALKER_CAPABILITIES;
-		  pkt->listener_stream_sinks = AVB_1722_1_SDP_LISTENER_STREAM_SINKS;
-		  pkt->listener_capabilites = AVB_1722_1_SDP_LISTENER_CAPABILITIES;
-		  SET_WORD_CONST(pkt->controller_capabilities, AVB_1722_1_SDP_CONTROLLER_CAPABILITIES);
-		  SET_WORD_CONST(pkt->boot_id, AVB_1722_1_SDP_BOOT_ID);
+	  if (message_type!=ENTITY_DISCOVER) {
+		  SET_WORD_CONST(pkt->vendor_id, AVB_1722_1_ADP_VENDOR_ID);
+		  SET_WORD_CONST(pkt->model_id, AVB_1722_1_ADP_MODEL_ID);
+		  SET_WORD_CONST(pkt->entity_capabilities, AVB_1722_1_ADP_ENTITY_CAPABILITIES);
+		  pkt->talker_stream_sources = AVB_1722_1_ADP_TALKER_STREAM_SOURCES;
+		  pkt->talker_capabilities = AVB_1722_1_ADP_TALKER_CAPABILITIES;
+		  pkt->listener_stream_sinks = AVB_1722_1_ADP_LISTENER_STREAM_SINKS;
+		  pkt->listener_capabilites = AVB_1722_1_ADP_LISTENER_CAPABILITIES;
+		  SET_WORD_CONST(pkt->controller_capabilities, AVB_1722_1_ADP_CONTROLLER_CAPABILITIES);
+		  SET_WORD_CONST(pkt->available_index, avb_1722_1_available_index);
 		  SET_LONG_WORD(pkt->as_grandmaster_id, as_grandmaster_id);
 	  }
-	  pkt->reserved[0] = 0;
-	  pkt->reserved[1] = 0;
-	  pkt->reserved[2] = 0;
-	  pkt->reserved[3] = 0;
 }
 
-static avb_status_t avb_1722_1_sdp_discovery_periodic(chanend c_tx)
+static avb_status_t avb_1722_1_adp_discovery_periodic(chanend c_tx)
 {
-	switch (sdp_discovery_state) {
-	case SDP_DISCOVERY_IDLE:
+	switch (adp_discovery_state) {
+	case ADP_DISCOVERY_IDLE:
 		break;
 
-	case SDP_DISCOVERY_WAITING: {
+	case ADP_DISCOVERY_WAITING: {
 			unsigned lost=0;
-			if (avb_timer_expired(&sdp_discovery_timer)) {
-				sdp_two_second_counter++;
+			if (avb_timer_expired(&adp_discovery_timer)) {
+				adp_two_second_counter++;
 				lost = avb_1722_1_entity_database_check_timeout();
-				start_avb_timer(&sdp_discovery_timer, 1);
+				start_avb_timer(&adp_discovery_timer, 1);
 			}
 			return (lost > 0) ? AVB_1722_1_ENTITY_REMOVED : AVB_NO_STATUS;
 		}
 
-	case SDP_DISCOVERY_DISCOVER: {
-			avb_1722_1_create_sdp_packet(ENTITY_DISCOVER, discover_guid);
+	case ADP_DISCOVERY_DISCOVER: {
+			avb_1722_1_create_adp_packet(ENTITY_DISCOVER, discover_guid);
 			mac_tx(c_tx, avb_1722_1_buf, 66, ETH_BROADCAST);
-			sdp_discovery_state = SDP_DISCOVERY_WAITING;
+			adp_discovery_state = ADP_DISCOVERY_WAITING;
 		}
 		break;
 
-	case SDP_DISCOVERY_ADDED:
-		sdp_discovery_state = SDP_DISCOVERY_WAITING;
+	case ADP_DISCOVERY_ADDED:
+		adp_discovery_state = ADP_DISCOVERY_WAITING;
 		return AVB_1722_1_ENTITY_ADDED;
 
-	case SDP_DISCOVERY_REMOVED:
-		sdp_discovery_state = SDP_DISCOVERY_WAITING;
+	case ADP_DISCOVERY_REMOVED:
+		adp_discovery_state = ADP_DISCOVERY_WAITING;
 		return AVB_1722_1_ENTITY_REMOVED;
 	}
 
 	return AVB_NO_STATUS;
 }
 
-static avb_status_t avb_1722_1_sdp_advertising_periodic(chanend c_tx, chanend ptp)
+static avb_status_t avb_1722_1_adp_advertising_periodic(chanend c_tx, chanend ptp)
 {
-	switch (sdp_advertise_state) {
-	case SDP_ADVERTISE_IDLE:
+	switch (adp_advertise_state) {
+	case ADP_ADVERTISE_IDLE:
 		break;
 
-	case SDP_ADVERTISE_ADVERTISE_0:
+	case ADP_ADVERTISE_ADVERTISE_0:
 		{
 			guid_t ptp_current;
-			avb_1722_1_sdp_change_ptp_grandmaster(ptp_current.c);
+			avb_1722_1_adp_change_ptp_grandmaster(ptp_current.c);
 			start_avb_timer(&ptp_monitor_timer, 1); //Every second
-			sdp_advertise_state = SDP_ADVERTISE_ADVERTISE_1;
+			adp_advertise_state = ADP_ADVERTISE_ADVERTISE_1;
 		}
 		//We just immediatley fall through so it will send immediatley
 
-	case SDP_ADVERTISE_ADVERTISE_1:
-		avb_1722_1_create_sdp_packet(ENTITY_AVAILABLE, my_guid);
+	case ADP_ADVERTISE_ADVERTISE_1:
+		avb_1722_1_create_adp_packet(ENTITY_AVAILABLE, my_guid);
 		mac_tx(c_tx, avb_1722_1_buf, 66, ETH_BROADCAST);
-		start_avb_timer(&sdp_advertise_timer, 3); // 3 centiseconds
-		sdp_advertise_state = SDP_ADVERTISE_ADVERTISE_2;
+		start_avb_timer(&adp_advertise_timer, 3); // 3 centiseconds
+		adp_advertise_state = ADP_ADVERTISE_ADVERTISE_2;
 		break;
 
-	case SDP_ADVERTISE_ADVERTISE_2:
-		if (avb_timer_expired(&sdp_advertise_timer)) {
-			avb_1722_1_create_sdp_packet(ENTITY_AVAILABLE, my_guid);
+	case ADP_ADVERTISE_ADVERTISE_2:
+		if (avb_timer_expired(&adp_advertise_timer)) {
+			avb_1722_1_create_adp_packet(ENTITY_AVAILABLE, my_guid);
 			mac_tx(c_tx, avb_1722_1_buf, 66, ETH_BROADCAST);
-			start_avb_timer(&sdp_readvertise_timer, AVB_1722_1_SDP_REPEAT_TIME);
-			sdp_advertise_state = SDP_ADVERTISE_WAITING;
+			start_avb_timer(&adp_readvertise_timer, AVB_1722_1_ADP_REPEAT_TIME);
+			adp_advertise_state = ADP_ADVERTISE_WAITING;
+			avb_1722_1_available_index++;
 		}
 		break;
 
-	case SDP_ADVERTISE_WAITING:
-		if (avb_timer_expired(&sdp_readvertise_timer)) {
-			sdp_advertise_state = SDP_ADVERTISE_ADVERTISE_1;
+	case ADP_ADVERTISE_WAITING:
+		if (avb_timer_expired(&adp_readvertise_timer)) {
+			adp_advertise_state = ADP_ADVERTISE_ADVERTISE_1;
 		}
 		break;
 
-	case SDP_ADVERTISE_DEPARTING_1:
-		avb_1722_1_create_sdp_packet(ENTITY_DEPARTING, my_guid);
+	case ADP_ADVERTISE_DEPARTING_1:
+		avb_1722_1_create_adp_packet(ENTITY_DEPARTING, my_guid);
 		mac_tx(c_tx, avb_1722_1_buf, 66, ETH_BROADCAST);
-		start_avb_timer(&sdp_advertise_timer, 3); // 3 centiseconds
-		sdp_advertise_state = SDP_ADVERTISE_DEPARTING_2;
+		start_avb_timer(&adp_advertise_timer, 3); // 3 centiseconds
+		adp_advertise_state = ADP_ADVERTISE_DEPARTING_2;
 		break;
 
-	case SDP_ADVERTISE_DEPARTING_2:
-		if (avb_timer_expired(&sdp_advertise_timer)) {
-			avb_1722_1_create_sdp_packet(ENTITY_DEPARTING, my_guid);
+	case ADP_ADVERTISE_DEPARTING_2:
+		if (avb_timer_expired(&adp_advertise_timer)) {
+			avb_1722_1_create_adp_packet(ENTITY_DEPARTING, my_guid);
 			mac_tx(c_tx, avb_1722_1_buf, 66, ETH_BROADCAST);
-			sdp_advertise_state = SDP_ADVERTISE_IDLE;
+			adp_advertise_state = ADP_ADVERTISE_IDLE;
+			avb_1722_1_available_index=0;
 		}
 		break;
 
@@ -914,7 +893,7 @@ static avb_status_t avb_1722_1_sdp_advertising_periodic(chanend c_tx, chanend pt
 		break;
 	}
 
-	if(SDP_ADVERTISE_IDLE != sdp_advertise_state)
+	if(ADP_ADVERTISE_IDLE != adp_advertise_state)
 	{
 		if(avb_timer_expired(&ptp_monitor_timer))
 		{
@@ -922,8 +901,8 @@ static avb_status_t avb_1722_1_sdp_advertising_periodic(chanend c_tx, chanend pt
 			ptp_get_current_grandmaster(ptp, ptp_current.c);
 			if(as_grandmaster_id.l != ptp_current.l)
 			{
-				avb_1722_1_sdp_change_ptp_grandmaster(ptp_current.c);
-				sdp_advertise_state = SDP_ADVERTISE_ADVERTISE_1;
+				avb_1722_1_adp_change_ptp_grandmaster(ptp_current.c);
+				adp_advertise_state = ADP_ADVERTISE_ADVERTISE_1;
 			}
 			start_avb_timer(&ptp_monitor_timer, 1); //Every second
 		}
@@ -932,32 +911,32 @@ static avb_status_t avb_1722_1_sdp_advertising_periodic(chanend c_tx, chanend pt
 	return AVB_NO_STATUS;
 }
 
-void avb_1722_1_sdp_announce()
+void avb_1722_1_adp_announce()
 {
-	if (sdp_advertise_state == SDP_ADVERTISE_IDLE) sdp_advertise_state = SDP_ADVERTISE_ADVERTISE_0;
+	if (adp_advertise_state == ADP_ADVERTISE_IDLE) adp_advertise_state = ADP_ADVERTISE_ADVERTISE_0;
 }
 
 
-void avb_1722_1_sdp_depart()
+void avb_1722_1_adp_depart()
 {
-	if (sdp_advertise_state == SDP_ADVERTISE_IDLE) sdp_advertise_state = SDP_ADVERTISE_DEPARTING_1;
+	if (adp_advertise_state == ADP_ADVERTISE_IDLE) adp_advertise_state = ADP_ADVERTISE_DEPARTING_1;
 }
 
-void avb_1722_1_sdp_discover(unsigned guid[])
+void avb_1722_1_adp_discover(unsigned guid[])
 {
-	if (sdp_discovery_state == SDP_DISCOVERY_WAITING) {
-		sdp_discovery_state = SDP_DISCOVERY_DISCOVER;
+	if (adp_discovery_state == ADP_DISCOVERY_WAITING) {
+		adp_discovery_state = ADP_DISCOVERY_DISCOVER;
 		discover_guid.l = (unsigned long long)guid[0] + ((unsigned long long)guid[1] << 32);
 	}
 }
 
-void avb_1722_1_sdp_discover_all()
+void avb_1722_1_adp_discover_all()
 {
 	unsigned guid[2] = {0,0};
-	avb_1722_1_sdp_discover(guid);
+	avb_1722_1_adp_discover(guid);
 }
 
-void avb_1722_1_sdp_change_ptp_grandmaster(char grandmaster[8])
+void avb_1722_1_adp_change_ptp_grandmaster(char grandmaster[8])
 {
 	int i;
 	for(i = 0; i < 8; i++)
@@ -1003,12 +982,12 @@ avb_status_t avb_1722_1_process_packet(unsigned int buf0[], int len, chanend c_t
 		  unsigned subtype = GET_1722_1_SUBTYPE(pkt);
 
 		  switch (subtype) {
-		  case DEFAULT_1722_1_SDP_SUBTYPE:
-			  return process_avb_1722_1_sdp_packet((avb_1722_1_sdp_packet_t*)pkt, c_tx);
-		  case DEFAULT_1722_1_SEC_SUBTYPE:
-			  return process_avb_1722_1_sec_packet((avb_1722_1_sec_packet_t*)pkt, c_tx);
-		  case DEFAULT_1722_1_SCM_SUBTYPE:
-			  return process_avb_1722_1_scm_packet((avb_1722_1_scm_packet_t*)pkt, c_tx);
+		  case DEFAULT_1722_1_ADP_SUBTYPE:
+			  return process_avb_1722_1_adp_packet((avb_1722_1_adp_packet_t*)pkt, c_tx);
+		  case DEFAULT_1722_1_AECP_SUBTYPE:
+			  return process_avb_1722_1_aecp_packet((avb_1722_1_aecp_packet_t*)pkt, c_tx);
+		  case DEFAULT_1722_1_ACMP_SUBTYPE:
+			  return process_avb_1722_1_acmp_packet((avb_1722_1_acmp_packet_t*)pkt, c_tx);
 		  default:
 			  return AVB_NO_STATUS;
 		  }
@@ -1020,13 +999,13 @@ avb_status_t avb_1722_1_process_packet(unsigned int buf0[], int len, chanend c_t
 avb_status_t avb_1722_1_periodic(chanend c_tx, chanend c_ptp)
 {
 	avb_status_t res;
-	res = avb_1722_1_sdp_advertising_periodic(c_tx, c_ptp);
+	res = avb_1722_1_adp_advertising_periodic(c_tx, c_ptp);
 	if (res != AVB_NO_STATUS) return res;
-	res = avb_1722_1_sdp_discovery_periodic(c_tx);
+	res = avb_1722_1_adp_discovery_periodic(c_tx);
 	if (res != AVB_NO_STATUS) return res;
-	res = avb_1722_1_scm_listener_periodic(c_tx);
+	res = avb_1722_1_acmp_listener_periodic(c_tx);
 	if (res != AVB_NO_STATUS) return res;
-	return avb_1722_1_scm_talker_periodic(c_tx);
+	return avb_1722_1_acmp_talker_periodic(c_tx);
 }
 
 
