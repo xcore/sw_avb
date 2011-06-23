@@ -797,6 +797,8 @@ static void avb_1722_1_create_adp_packet(int message_type, guid_t guid)
 		  SET_WORD_CONST(pkt->controller_capabilities, AVB_1722_1_ADP_CONTROLLER_CAPABILITIES);
 		  SET_WORD_CONST(pkt->available_index, avb_1722_1_available_index);
 		  SET_LONG_WORD(pkt->as_grandmaster_id, as_grandmaster_id);
+		  SET_WORD_CONST(pkt->default_audio_format, AVB_1722_1_ADP_DEFAULT_AUDIO_FORMAT);
+		  SET_WORD_CONST(pkt->default_video_format, AVB_1722_1_ADP_DEFAULT_VIDEO_FORMAT);
 	  }
 }
 
