@@ -54,14 +54,17 @@ extern unsigned int avb_1722_1_walk_tree(char* address, unsigned set, char* data
 //! The ADP available index counter
 static unsigned long avb_1722_1_available_index = 0;
 
+//! The channel counts defined by each bit in the ACMP default audio format word
 static unsigned char avb_1722_1_acmp_default_format_channel_counts[] = {
 	1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 16, 18, 20, 22, 24
 };
 
+//! The sample rates defined by each bit in the ACMP default audio format word
 static unsigned int avb_1722_1_acmp_default_format_frequency[] = {
 	44100, 48000, 88200, 96000, 176400, 192000
 };
 
+//! The length of each parameter type defined by AECP
 static unsigned char avb_1722_1_aecp_parameter_length[] = {
 0, 2, 2, 8, 2, 2, 2, 4, 1, 1, 2, 2, 4, 4, 4, 6, 8, 8, 8, 8, 8,
 4, 8, 6, 4, 16, 8, 16, 4, 32, 64, 128, 4, 4, 4, 4, 4, 1, 1, 184,
