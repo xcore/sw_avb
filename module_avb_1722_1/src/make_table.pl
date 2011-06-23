@@ -249,18 +249,18 @@ print "};\n\n";
 # Print function pre-declaractions
 my $n=0;
 foreach my $e (@function_table) {
-  print "extern unsigned int $e(unsigned item_number, unsigned set, char *data);\n";
+  print "extern unsigned int $e(char* address, unsigned set, char *data);\n";
   $n++;
 }
 print "\n\n";
 
 # Print function table
-print "unsigned avb_1722_1_sec_dispatch(unsigned func_num, unsigned item_number, unsigned set, char* data)\n{\n";
+print "unsigned avb_1722_1_sec_dispatch(unsigned func_num, char* address, unsigned set, char* data)\n{\n";
 print "  switch (func_num) {\n";
 
 my $n=0;
 foreach my $e (@function_table) {
-  print "  case $n:\n    return $e(item_number, set, data);\n";
+  print "  case $n:\n    return $e(address, set, data);\n";
   $n++;
 }
 print "  }  return 0;\n}\n\n";

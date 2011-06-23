@@ -66,6 +66,13 @@ typedef struct {
 typedef struct {
 	char mode_len;
 	char lower_len;
+	char oui[4];
+	char oui_sect_flags[2];
+	char type_code_flags[2];
+	char index0[2];
+	char subaddress[2];
+	char index1[2];
+	char index2[2];
 	char mode_specific_data[1];
 } avb_1722_1_aecp_avdecc_msg_t;
 

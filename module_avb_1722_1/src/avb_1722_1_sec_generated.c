@@ -125,44 +125,44 @@ unsigned int avb_1722_1_sec_parse_tree[] = {
   0x010000de, // Meter format code for each meter slot in a specific listener stream (Data at 0xde)
 };
 
-extern unsigned int avb_1722_1_getset_actuation_time(unsigned item_number, unsigned set, char *data);
-extern unsigned int avb_1722_1_getset_device_guid(unsigned item_number, unsigned set, char *data);
-extern unsigned int avb_1722_1_getset_boot_id(unsigned item_number, unsigned set, char *data);
-extern unsigned int avb_1722_1_getset_device_name(unsigned item_number, unsigned set, char *data);
-extern unsigned int avb_1722_1_getset_device_wink(unsigned item_number, unsigned set, char *data);
-extern unsigned int avb_1722_1_getset_device_mac_addr(unsigned item_number, unsigned set, char *data);
-extern unsigned int avb_1722_1_getset_device_ptp_gm(unsigned item_number, unsigned set, char *data);
-extern unsigned int avb_1722_1_getset_source_name(unsigned item_number, unsigned set, char *data);
-extern unsigned int avb_1722_1_getset_source_stream_name(unsigned item_number, unsigned set, char *data);
-extern unsigned int avb_1722_1_getset_sink_name(unsigned item_number, unsigned set, char *data);
-extern unsigned int avb_1722_1_getset_sink_stream_name(unsigned item_number, unsigned set, char *data);
+extern unsigned int avb_1722_1_getset_actuation_time(char* address, unsigned set, char *data);
+extern unsigned int avb_1722_1_getset_device_guid(char* address, unsigned set, char *data);
+extern unsigned int avb_1722_1_getset_boot_id(char* address, unsigned set, char *data);
+extern unsigned int avb_1722_1_getset_device_name(char* address, unsigned set, char *data);
+extern unsigned int avb_1722_1_getset_device_wink(char* address, unsigned set, char *data);
+extern unsigned int avb_1722_1_getset_device_mac_addr(char* address, unsigned set, char *data);
+extern unsigned int avb_1722_1_getset_device_ptp_gm(char* address, unsigned set, char *data);
+extern unsigned int avb_1722_1_getset_source_name(char* address, unsigned set, char *data);
+extern unsigned int avb_1722_1_getset_source_stream_name(char* address, unsigned set, char *data);
+extern unsigned int avb_1722_1_getset_sink_name(char* address, unsigned set, char *data);
+extern unsigned int avb_1722_1_getset_sink_stream_name(char* address, unsigned set, char *data);
 
 
-unsigned avb_1722_1_sec_dispatch(unsigned func_num, unsigned item_number, unsigned set, char* data)
+unsigned avb_1722_1_sec_dispatch(unsigned func_num, char* address, unsigned set, char* data)
 {
   switch (func_num) {
   case 0:
-    return avb_1722_1_getset_actuation_time(item_number, set, data);
+    return avb_1722_1_getset_actuation_time(address, set, data);
   case 1:
-    return avb_1722_1_getset_device_guid(item_number, set, data);
+    return avb_1722_1_getset_device_guid(address, set, data);
   case 2:
-    return avb_1722_1_getset_boot_id(item_number, set, data);
+    return avb_1722_1_getset_boot_id(address, set, data);
   case 3:
-    return avb_1722_1_getset_device_name(item_number, set, data);
+    return avb_1722_1_getset_device_name(address, set, data);
   case 4:
-    return avb_1722_1_getset_device_wink(item_number, set, data);
+    return avb_1722_1_getset_device_wink(address, set, data);
   case 5:
-    return avb_1722_1_getset_device_mac_addr(item_number, set, data);
+    return avb_1722_1_getset_device_mac_addr(address, set, data);
   case 6:
-    return avb_1722_1_getset_device_ptp_gm(item_number, set, data);
+    return avb_1722_1_getset_device_ptp_gm(address, set, data);
   case 7:
-    return avb_1722_1_getset_source_name(item_number, set, data);
+    return avb_1722_1_getset_source_name(address, set, data);
   case 8:
-    return avb_1722_1_getset_source_stream_name(item_number, set, data);
+    return avb_1722_1_getset_source_stream_name(address, set, data);
   case 9:
-    return avb_1722_1_getset_sink_name(item_number, set, data);
+    return avb_1722_1_getset_sink_name(address, set, data);
   case 10:
-    return avb_1722_1_getset_sink_stream_name(item_number, set, data);
+    return avb_1722_1_getset_sink_stream_name(address, set, data);
   }  return 0;
 }
 

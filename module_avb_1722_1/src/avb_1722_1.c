@@ -49,7 +49,7 @@ static guid_t discover_guid;
 static guid_t as_grandmaster_id;
 
 // External function for SEC parsing
-extern unsigned int avb_1722_1_walk_tree(unsigned int address, unsigned set, char* data);
+extern unsigned int avb_1722_1_walk_tree(char* address, unsigned set, char* data);
 
 //! The ADP available index counter
 static unsigned long avb_1722_1_available_index = 0;
@@ -320,40 +320,14 @@ static avb_status_t process_avb_1722_1_aecp_packet(avb_1722_1_aecp_packet_t* pkt
 
 	switch (message_type) {
 	case AECP_CMD_AVDECC_MSG_COMMAND: {
-		unsigned int len = (((unsigned)(pkt->data.avdecc.mode_len & 0xF)) << 8) + (unsigned)(pkt->data.avdecc.lower_len);
-		unsigned int d_index = 0;
-		unsigned int s_index = 0;
 		avb_1722_1_aecp_avdecc_msg_t* payload = (avb_1722_1_aecp_avdecc_msg_t*)avb_1722_1_create_aecp_packet(AECP_CMD_AVDECC_MSG_RESPONSE, pkt);
 
-		while (s_index < len) {
+		// Copy address into the output
+		memcpy(payload->oui, pkt->data.avdecc.oui, 16);
 
-			unsigned src_byte_len = (pkt->data.avdecc.mode_specific_data[s_index+0] << 16) +
-									(pkt->data.avdecc.mode_specific_data[s_index+1] << 8) +
-									(pkt->data.avdecc.mode_specific_data[s_index+2] << 0);
-			unsigned address = 	(pkt->data.avdecc.mode_specific_data[s_index+3] << 24) +
-								(pkt->data.avdecc.mode_specific_data[s_index+4] << 16) +
-								(pkt->data.avdecc.mode_specific_data[s_index+5] << 8) +
-								(pkt->data.avdecc.mode_specific_data[s_index+6] << 0);
-			unsigned dst_byte_len = 0;
+		// Write data into the output
+		avb_1722_1_walk_tree(pkt->data.avdecc.oui, 0, payload->mode_specific_data);
 
-			// Write address into the output
-			payload->mode_specific_data[d_index+3] = pkt->data.avdecc.mode_specific_data[s_index+3];
-			payload->mode_specific_data[d_index+4] = pkt->data.avdecc.mode_specific_data[s_index+4];
-			payload->mode_specific_data[d_index+5] = pkt->data.avdecc.mode_specific_data[s_index+5];
-			payload->mode_specific_data[d_index+6] = pkt->data.avdecc.mode_specific_data[s_index+6];
-
-			// Write data into the output
-			dst_byte_len = avb_1722_1_walk_tree(address, 0, &payload->mode_specific_data[d_index+7]);
-
-			// Update the length
-			payload->mode_specific_data[d_index+0] = (dst_byte_len >> 16) & 0xff;
-			payload->mode_specific_data[d_index+1] = (dst_byte_len >> 8)  & 0xff;
-		    payload->mode_specific_data[d_index+2] = (dst_byte_len >> 0)  & 0xff;
-
-			d_index += 7 + ((dst_byte_len+3)&0xFFFFFFFC);
-
-			s_index += 7 + ((src_byte_len+3)&0xFFFFFFFC);
-		}
 		break;
 	}
 	case AECP_CMD_ADDRESS_ACCESS_COMMAND: {
