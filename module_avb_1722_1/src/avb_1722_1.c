@@ -173,15 +173,16 @@ avb_1722_1_acmp_rcvd_cmd_resp acmp_talker_rcvd_cmd_resp;
 //! Listener's rcvdCmdResp
 avb_1722_1_acmp_rcvd_cmd_resp acmp_listener_rcvd_cmd_resp;
 
-static unsigned qlog2(unsigned n)
+static int qlog2(unsigned n)
 {
-	unsigned l=0;
-	if (n==0) return 0;
+	int l=0;
+	if (n==0) return -1;
 	while ((n & 1) == 0)
 	{
 		n >>= 1;
 		l++;
 	}
+	if ((n >> 1) != 0) return -1;
 	return l;
 }
 
@@ -763,10 +764,17 @@ void avb_1722_1_talker_set_stream_id(unsigned talker_unique_id, unsigned streamI
 
 short avb_1722_1_acmp_configure_source(unsigned talker_unique_id, unsigned int default_format)
 {
-	unsigned number_of_channels = avb_1722_1_acmp_default_format_channel_counts[qlog2(default_format & 0xFFFF)];
-	unsigned sample_rate = avb_1722_1_acmp_default_format_frequency[qlog2((default_format&0xFC000000)>>26)];
+	unsigned number_of_channels;
+	unsigned sample_rate;
 	unsigned state=0;
 	int associated_clock=0;
+
+	int channel_index = qlog2(default_format & 0xFFFF);
+	int rate_index = qlog2((default_format&0xFC000000)>>26);
+	if (channel_index==-1 || rate_index==-1) return ACMP_STATUS_TALKER_DEFAULT_FORMAT_INVALID;
+
+	number_of_channels = avb_1722_1_acmp_default_format_channel_counts[channel_index];
+	sample_rate = avb_1722_1_acmp_default_format_frequency[rate_index];
 
 	if (talker_unique_id > AVB_NUM_LISTENER_UNITS) return ACMP_STATUS_TALKER_UNKNOWN_ID;
 
@@ -800,10 +808,17 @@ short avb_1722_1_acmp_configure_source(unsigned talker_unique_id, unsigned int d
 
 short avb_1722_1_acmp_configure_sink(unsigned listener_unique_id, unsigned int default_format)
 {
-	unsigned number_of_channels = avb_1722_1_acmp_default_format_channel_counts[qlog2(default_format & 0xFFFF)];
-	unsigned sample_rate = avb_1722_1_acmp_default_format_frequency[qlog2((default_format&0xFC000000)>>26)];
+	unsigned number_of_channels;
+	unsigned sample_rate;
 	unsigned state=0;
 	int associated_clock=0;
+
+	int channel_index = qlog2(default_format & 0xFFFF);
+	int rate_index = qlog2((default_format&0xFC000000)>>26);
+	if (channel_index==-1 || rate_index==-1) return ACMP_STATUS_LISTENER_DEFAULT_FORMAT_INVALID;
+
+	number_of_channels = avb_1722_1_acmp_default_format_channel_counts[channel_index];
+	sample_rate = avb_1722_1_acmp_default_format_frequency[rate_index];
 
 	if (listener_unique_id > AVB_NUM_LISTENER_UNITS) return ACMP_STATUS_LISTENER_UNKNOWN_ID;
 
