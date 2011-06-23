@@ -57,6 +57,7 @@ typedef struct {
 	short connection_count;
 	short sequence_id;
 	short flags;
+	char default_format[4];
 } avb_1722_1_acmp_packet_t;
 
 /**
@@ -167,6 +168,14 @@ typedef union {
 		member[1] = (((data) >> 16) & 0xff); \
 		member[2] = (((data) >> 8 ) & 0xff); \
 		member[3] = (((data) >> 0 ) & 0xff); \
+	} while(0);
+
+#define GET_WORD(data, member) \
+	do { \
+		data = (member[0] << 24) + \
+		       (member[1] << 16) + \
+		       (member[2] << 8) + \
+		       (member[3] << 0);\
 	} while(0);
 
 #define SET_LONG_WORD(member, data) \
@@ -281,6 +290,9 @@ typedef enum {
 	ACMP_STATUS_NOT_CONNECTED = 10,
 	ACMP_STATUS_NO_SUCH_CONNECTION = 11,
 	ACMP_STATUS_COULD_NOT_SEND_MESSAGE = 12,
+	ACMP_STATUS_LISTENER_DEFAULT_FORMAT_INVALID = 13,
+	ACMP_STATUS_TALKER_DEFAULT_FORMAT_INVALID = 14,
+	ACMP_STATUS_DEFAULT_SET_DIFFERENT = 15,
 	ACMP_STATUS_NOT_SUPPORTED = 31
 } avb_1722_1_acmp_status_type;
 

@@ -105,6 +105,7 @@ typedef struct {
 	guid_t controller_guid;
 	guid_t listener_guid;
 	guid_t talker_guid;
+	unsigned int default_format;
 	short talker_unique_id;
 	short listener_unique_id;
 	short connection_count;
@@ -399,6 +400,7 @@ static void avb_1722_1_create_acmp_packet(avb_1722_1_acmp_rcvd_cmd_resp* rcr)
 	SET_LONG_WORD(pkt->controller_guid, rcr->controller_guid);
 	SET_LONG_WORD(pkt->listener_guid, rcr->listener_guid);
 	SET_LONG_WORD(pkt->talker_guid, rcr->talker_guid);
+	SET_WORD_CONST(pkt->default_format, rcr->default_format);
 	pkt->talker_unique_id = rcr->talker_unique_id;
 	pkt->listener_unique_id = rcr->listener_unique_id;
 	pkt->connection_count = rcr->connection_count;
@@ -465,6 +467,7 @@ static void store_rcvd_cmd_resp(avb_1722_1_acmp_rcvd_cmd_resp* store, avb_1722_1
 	GET_LONG_WORD(store->controller_guid, pkt->controller_guid);
 	GET_LONG_WORD(store->listener_guid, pkt->listener_guid);
 	GET_LONG_WORD(store->talker_guid, pkt->talker_guid);
+	GET_WORD(store->default_format, pkt->default_format);
 	store->talker_unique_id = pkt->talker_unique_id;
 	store->listener_unique_id = pkt->listener_unique_id;
 	store->connection_count = pkt->connection_count;
