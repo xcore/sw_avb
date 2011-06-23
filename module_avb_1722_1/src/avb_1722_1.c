@@ -23,9 +23,9 @@ typedef union {
 
 static unsigned char my_mac_addr[6];
 
-static unsigned char avb_1722_1_adp_dest_addr[6]  =  {0x91, 0xe0, 0xf0, 0x00, 0xff, 0x01};
-static unsigned char avb_1722_1_acmp_dest_addr[6] =  {0x91, 0xe0, 0xf0, 0x00, 0xff, 0x01};
-static unsigned char avb_1722_1_aecp_dest_addr[6] =  {0x91, 0xe0, 0xf0, 0x00, 0xff, 0x01};
+static const unsigned char avb_1722_1_adp_dest_addr[6]  =  {0x91, 0xe0, 0xf0, 0x00, 0xff, 0x01};
+static const unsigned char avb_1722_1_acmp_dest_addr[6] =  {0x91, 0xe0, 0xf0, 0x00, 0xff, 0x01};
+static const unsigned char avb_1722_1_aecp_dest_addr[6] =  {0x91, 0xe0, 0xf0, 0x00, 0xff, 0x01};
 
 //! Buffer for constructing 1722.1 transmit packets
 static unsigned int avb_1722_1_buf[(sizeof(avb_1722_1_packet_t)+sizeof(ethernet_hdr_t)+3)/4];
@@ -55,17 +55,17 @@ extern unsigned int avb_1722_1_walk_tree(char* address, unsigned set, char* data
 static unsigned long avb_1722_1_available_index = 0;
 
 //! The channel counts defined by each bit in the ACMP default audio format word
-static unsigned char avb_1722_1_acmp_default_format_channel_counts[] = {
+static const unsigned char avb_1722_1_acmp_default_format_channel_counts[] = {
 	1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 16, 18, 20, 22, 24
 };
 
 //! The sample rates defined by each bit in the ACMP default audio format word
-static unsigned int avb_1722_1_acmp_default_format_frequency[] = {
+static const unsigned int avb_1722_1_acmp_default_format_frequency[] = {
 	44100, 48000, 88200, 96000, 176400, 192000
 };
 
 //! The length of each parameter type defined by AECP
-static unsigned char avb_1722_1_aecp_parameter_length[] = {
+static const unsigned char avb_1722_1_aecp_parameter_length[] = {
 0, 2, 2, 8, 2, 2, 2, 4, 1, 1, 2, 2, 4, 4, 4, 6, 8, 8, 8, 8, 8,
 4, 8, 6, 4, 16, 8, 16, 4, 32, 64, 128, 4, 4, 4, 4, 4, 1, 1, 184,
 4, 4, 8, 16, 4, 4, 8, 8, 142, 8, 84, 84, 2, 2, 38, 40, 40, 40,
@@ -287,7 +287,7 @@ static unsigned compare_guid(char* a, guid_t* b)
 			a[7]==b->c[0]);
 }
 
-static void avb_1722_1_create_1722_1_header(unsigned char* dest_addr, int subtype, int message_type, char valid_time_status, unsigned data_len, ethernet_hdr_t *hdr)
+static void avb_1722_1_create_1722_1_header(const unsigned char* dest_addr, int subtype, int message_type, char valid_time_status, unsigned data_len, ethernet_hdr_t *hdr)
 {
 	avb_1722_1_packet_header_t *pkt = (avb_1722_1_packet_header_t *) (hdr + 1);
 
