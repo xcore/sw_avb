@@ -420,7 +420,7 @@ static void acmp_listener_tx_command(unsigned message_type, unsigned timeout_ms,
 	acmp_listener_rcvd_cmd_resp.message_type = message_type;
 	acmp_listener_rcvd_cmd_resp.status = ACMP_STATUS_SUCCESS;
 	avb_1722_1_create_acmp_packet(&acmp_listener_rcvd_cmd_resp);
-	mac_tx(c_tx, avb_1722_1_buf, 66, ETH_BROADCAST);
+	mac_tx(c_tx, avb_1722_1_buf, sizeof(ethernet_hdr_t)+sizeof(avb_1722_1_acmp_packet_t), ETH_BROADCAST);
 
 	// set up inflight command
 }
@@ -430,7 +430,7 @@ static void acmp_listener_tx_response(unsigned type, unsigned error_code, chanen
 	acmp_listener_rcvd_cmd_resp.message_type = type;
 	acmp_listener_rcvd_cmd_resp.status = error_code;
 	avb_1722_1_create_acmp_packet(&acmp_listener_rcvd_cmd_resp);
-	mac_tx(c_tx, avb_1722_1_buf, 66, ETH_BROADCAST);
+	mac_tx(c_tx, avb_1722_1_buf, sizeof(ethernet_hdr_t)+sizeof(avb_1722_1_acmp_packet_t), ETH_BROADCAST);
 }
 
 static void acmp_talker_tx_response(unsigned type, unsigned error_code, chanend c_tx)
@@ -444,7 +444,7 @@ static void acmp_talker_tx_response(unsigned type, unsigned error_code, chanend 
 		acmp_talker_rcvd_cmd_resp.stream_dest_mac[c] = acmp_talker_streams[talker].destination_mac[c];
 
 	avb_1722_1_create_acmp_packet(&acmp_talker_rcvd_cmd_resp);
-	mac_tx(c_tx, avb_1722_1_buf, 66, ETH_BROADCAST);
+	mac_tx(c_tx, avb_1722_1_buf, sizeof(ethernet_hdr_t)+sizeof(avb_1722_1_acmp_packet_t), ETH_BROADCAST);
 }
 
 static void acmp_listener_remove_inflight()
@@ -823,7 +823,7 @@ static avb_status_t avb_1722_1_adp_discovery_periodic(chanend c_tx)
 
 	case ADP_DISCOVERY_DISCOVER: {
 			avb_1722_1_create_adp_packet(ENTITY_DISCOVER, discover_guid);
-			mac_tx(c_tx, avb_1722_1_buf, 66, ETH_BROADCAST);
+			mac_tx(c_tx, avb_1722_1_buf, sizeof(ethernet_hdr_t)+sizeof(avb_1722_1_adp_packet_t), ETH_BROADCAST);
 			adp_discovery_state = ADP_DISCOVERY_WAITING;
 		}
 		break;
@@ -857,7 +857,7 @@ static avb_status_t avb_1722_1_adp_advertising_periodic(chanend c_tx, chanend pt
 
 	case ADP_ADVERTISE_ADVERTISE_1:
 		avb_1722_1_create_adp_packet(ENTITY_AVAILABLE, my_guid);
-		mac_tx(c_tx, avb_1722_1_buf, 66, ETH_BROADCAST);
+		mac_tx(c_tx, avb_1722_1_buf, sizeof(ethernet_hdr_t)+sizeof(avb_1722_1_adp_packet_t), ETH_BROADCAST);
 		start_avb_timer(&adp_advertise_timer, 3); // 3 centiseconds
 		adp_advertise_state = ADP_ADVERTISE_ADVERTISE_2;
 		break;
@@ -865,7 +865,7 @@ static avb_status_t avb_1722_1_adp_advertising_periodic(chanend c_tx, chanend pt
 	case ADP_ADVERTISE_ADVERTISE_2:
 		if (avb_timer_expired(&adp_advertise_timer)) {
 			avb_1722_1_create_adp_packet(ENTITY_AVAILABLE, my_guid);
-			mac_tx(c_tx, avb_1722_1_buf, 66, ETH_BROADCAST);
+			mac_tx(c_tx, avb_1722_1_buf, sizeof(ethernet_hdr_t)+sizeof(avb_1722_1_adp_packet_t), ETH_BROADCAST);
 			start_avb_timer(&adp_readvertise_timer, AVB_1722_1_ADP_REPEAT_TIME);
 			adp_advertise_state = ADP_ADVERTISE_WAITING;
 			avb_1722_1_available_index++;
@@ -880,7 +880,7 @@ static avb_status_t avb_1722_1_adp_advertising_periodic(chanend c_tx, chanend pt
 
 	case ADP_ADVERTISE_DEPARTING_1:
 		avb_1722_1_create_adp_packet(ENTITY_DEPARTING, my_guid);
-		mac_tx(c_tx, avb_1722_1_buf, 66, ETH_BROADCAST);
+		mac_tx(c_tx, avb_1722_1_buf, sizeof(ethernet_hdr_t)+sizeof(avb_1722_1_adp_packet_t), ETH_BROADCAST);
 		start_avb_timer(&adp_advertise_timer, 3); // 3 centiseconds
 		adp_advertise_state = ADP_ADVERTISE_DEPARTING_2;
 		break;
@@ -888,7 +888,7 @@ static avb_status_t avb_1722_1_adp_advertising_periodic(chanend c_tx, chanend pt
 	case ADP_ADVERTISE_DEPARTING_2:
 		if (avb_timer_expired(&adp_advertise_timer)) {
 			avb_1722_1_create_adp_packet(ENTITY_DEPARTING, my_guid);
-			mac_tx(c_tx, avb_1722_1_buf, 66, ETH_BROADCAST);
+			mac_tx(c_tx, avb_1722_1_buf, sizeof(ethernet_hdr_t)+sizeof(avb_1722_1_adp_packet_t), ETH_BROADCAST);
 			adp_advertise_state = ADP_ADVERTISE_IDLE;
 			avb_1722_1_available_index=0;
 		}
