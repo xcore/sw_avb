@@ -326,7 +326,7 @@ static avb_status_t process_avb_1722_1_aecp_packet(avb_1722_1_aecp_packet_t* pkt
 		memcpy(payload->oui, pkt->data.avdecc.oui, 16);
 
 		// Write data into the output
-		avb_1722_1_walk_tree(pkt->data.avdecc.oui, 0, payload->mode_specific_data);
+		avb_1722_1_walk_tree(pkt->data.avdecc.oui, pkt->data.avdecc.oui_sect_flags[0]&0x2, payload->mode_specific_data);
 
 		break;
 	}
