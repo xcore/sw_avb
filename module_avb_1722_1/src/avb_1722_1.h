@@ -183,6 +183,31 @@ void avb_1722_1_talker_set_mac_address(unsigned talker_unique_id, char macaddr[]
  */
 void avb_1722_1_talker_set_stream_id(unsigned talker_unique_id, unsigned streamId[2]);
 
+
+/** \fn avb_1722_1_acmp_configure_source
+ *
+ *  Utility function to configure a source according to the value of the ACMP
+ *  default format parameter.  Returns a status which can be passed back into
+ *  the code parameter of the avb_1722_1_acmp_talker_connection_complete function
+ *
+ *  \param talker_unique_id the index of the talker source
+ *  \param default_format the default format from the 1722.1 ACMP message
+ *  \returns a 1722.1 ACMP status code
+ */
+short avb_1722_1_acmp_configure_source(unsigned talker_unique_id, unsigned int default_format);
+
+/** \fn avb_1722_1_acmp_configure_sink
+ *
+ *  Utility function to configure a sink according to the value of the ACMP
+ *  default format parameter.  Returns a status which can be passed back into
+ *  the code parameter of the avb_1722_1_acmp_listener_connection_complete function
+ *
+ *  \param listener_unique_id the index of the listener sink
+ *  \param default_format the default format from the 1722.1 ACMP message
+ *  \returns a 1722.1 ACMP status code
+ */
+short avb_1722_1_acmp_configure_sink(unsigned listener_unique_id, unsigned int default_format);
+
 #endif
 
 

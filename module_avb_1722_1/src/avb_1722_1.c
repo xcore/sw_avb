@@ -54,6 +54,14 @@ extern unsigned int avb_1722_1_walk_tree(unsigned int address, unsigned set, cha
 //! The ADP available index counter
 static unsigned long avb_1722_1_available_index = 0;
 
+static unsigned char avb_1722_1_acmp_default_format_channel_counts[] = {
+	1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 16, 18, 20, 22, 24
+};
+
+static unsigned int avb_1722_1_acmp_default_format_frequency[] = {
+	44100, 48000, 88200, 96000, 176400, 192000
+};
+
 //! Enumerations for state variables
 enum { ADP_ADVERTISE_IDLE,
 	   ADP_ADVERTISE_ADVERTISE_0,
@@ -165,6 +173,17 @@ avb_1722_1_acmp_rcvd_cmd_resp acmp_talker_rcvd_cmd_resp;
 //! Listener's rcvdCmdResp
 avb_1722_1_acmp_rcvd_cmd_resp acmp_listener_rcvd_cmd_resp;
 
+static unsigned qlog2(unsigned n)
+{
+	unsigned l=0;
+	if (n==0) return 0;
+	while ((n & 1) == 0)
+	{
+		n >>= 1;
+		l++;
+	}
+	return l;
+}
 
 void avb_1722_1_init(unsigned char macaddr[6], unsigned char serial_number[2])
 {
@@ -742,6 +761,78 @@ void avb_1722_1_talker_set_stream_id(unsigned talker_unique_id, unsigned streamI
 	}
 }
 
+short avb_1722_1_acmp_configure_source(unsigned talker_unique_id, unsigned int default_format)
+{
+	unsigned number_of_channels = avb_1722_1_acmp_default_format_channel_counts[qlog2(default_format & 0xFFFF)];
+	unsigned sample_rate = avb_1722_1_acmp_default_format_frequency[qlog2((default_format&0xFC000000)>>26)];
+	unsigned state=0;
+	int associated_clock=0;
+
+	if (talker_unique_id > AVB_NUM_LISTENER_UNITS) return ACMP_STATUS_TALKER_UNKNOWN_ID;
+
+	if (number_of_channels > AVB_NUM_MEDIA_INPUTS)
+	{
+		return ACMP_STATUS_TALKER_DEFAULT_FORMAT_INVALID;
+	}
+
+	get_avb_source_sync(talker_unique_id, &associated_clock);
+
+	get_avb_source_state(talker_unique_id, &state);
+	if (state != AVB_SOURCE_STATE_DISABLED)
+	{
+		int current_number_of_channels=0;
+		int current_sample_rate=0;
+		get_device_media_clock_rate(associated_clock, &current_sample_rate);
+		get_avb_source_channels(talker_unique_id, &current_number_of_channels);
+		if (sample_rate != current_sample_rate) return ACMP_STATUS_DEFAULT_SET_DIFFERENT;
+		if (number_of_channels != current_number_of_channels) return ACMP_STATUS_DEFAULT_SET_DIFFERENT;
+	}
+	else
+	{
+		int channel_map[16] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+		set_avb_source_channels(talker_unique_id, number_of_channels);
+		set_avb_source_format(talker_unique_id, AVB_SOURCE_FORMAT_MBLA_24BIT, sample_rate);
+		set_avb_source_map(talker_unique_id, channel_map, number_of_channels);
+		set_device_media_clock_rate(associated_clock, sample_rate);
+	}
+	return ACMP_STATUS_SUCCESS;
+}
+
+short avb_1722_1_acmp_configure_sink(unsigned listener_unique_id, unsigned int default_format)
+{
+	unsigned number_of_channels = avb_1722_1_acmp_default_format_channel_counts[qlog2(default_format & 0xFFFF)];
+	unsigned sample_rate = avb_1722_1_acmp_default_format_frequency[qlog2((default_format&0xFC000000)>>26)];
+	unsigned state=0;
+	int associated_clock=0;
+
+	if (listener_unique_id > AVB_NUM_LISTENER_UNITS) return ACMP_STATUS_LISTENER_UNKNOWN_ID;
+
+	if (number_of_channels > AVB_NUM_MEDIA_OUTPUTS)
+	{
+		return ACMP_STATUS_LISTENER_DEFAULT_FORMAT_INVALID;
+	}
+
+	get_avb_sink_sync(listener_unique_id, &associated_clock);
+
+	get_avb_source_state(listener_unique_id, &state);
+	if (state != AVB_SINK_STATE_DISABLED)
+	{
+		int current_number_of_channels=0;
+		int current_sample_rate=0;
+		get_device_media_clock_rate(associated_clock, &current_sample_rate);
+		get_avb_sink_channels(listener_unique_id, &current_number_of_channels);
+		if (sample_rate != current_sample_rate) return ACMP_STATUS_DEFAULT_SET_DIFFERENT;
+		if (number_of_channels != current_number_of_channels) return ACMP_STATUS_DEFAULT_SET_DIFFERENT;
+	}
+	else
+	{
+		int channel_map[16] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+		set_avb_sink_channels(listener_unique_id, number_of_channels);
+		set_avb_sink_map(listener_unique_id, channel_map, number_of_channels);
+		set_device_media_clock_rate(associated_clock, sample_rate);
+	}
+	return ACMP_STATUS_SUCCESS;
+}
 
 //----------------------------------------------------------------------------------------
 
