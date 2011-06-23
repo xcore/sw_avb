@@ -62,6 +62,13 @@ static unsigned int avb_1722_1_acmp_default_format_frequency[] = {
 	44100, 48000, 88200, 96000, 176400, 192000
 };
 
+static unsigned char avb_1722_1_aecp_parameter_length[] = {
+0, 2, 2, 8, 2, 2, 2, 4, 1, 1, 2, 2, 4, 4, 4, 6, 8, 8, 8, 8, 8,
+4, 8, 6, 4, 16, 8, 16, 4, 32, 64, 128, 4, 4, 4, 4, 4, 1, 1, 184,
+4, 4, 8, 16, 4, 4, 8, 8, 142, 8, 84, 84, 2, 2, 38, 40, 40, 40,
+42, 46, 46, 52, 52, 52, 64, 64, 64, 38, 12
+};
+
 //! Enumerations for state variables
 enum { ADP_ADVERTISE_IDLE,
 	   ADP_ADVERTISE_ADVERTISE_0,
@@ -326,6 +333,10 @@ static avb_status_t process_avb_1722_1_aecp_packet(avb_1722_1_aecp_packet_t* pkt
 		{
 			avb_1722_1_aecp_avdecc_msg_t* payload = (avb_1722_1_aecp_avdecc_msg_t*)avb_1722_1_create_aecp_packet(AECP_CMD_AVDECC_MSG_RESPONSE, pkt);
 
+			unsigned type_code = (pkt->data.avdecc.type_code_flags[0]&0x7f)<<8 |
+					              pkt->data.avdecc.type_code_flags[1];
+			unsigned length_of_data = avb_1722_1_aecp_parameter_length[type_code];
+
 			// Copy address into the output
 			memcpy(payload->oui, pkt->data.avdecc.oui, 16);
 
@@ -334,6 +345,12 @@ static avb_status_t process_avb_1722_1_aecp_packet(avb_1722_1_aecp_packet_t* pkt
 			if (ret) {
 				// set as positive acknoledgement
 				payload->oui_sect_flags[0] |= 0x4;
+
+				// zero off rest of data
+				if (ret < length_of_data)
+					memset(&payload->mode_specific_data[ret], 0, length_of_data-ret);
+				else
+					length_of_data = ret;
 			} else {
 				if (pkt->data.avdecc.oui_sect_flags[0]&0x4) {
 					// set as negative acknowledgement
@@ -343,12 +360,14 @@ static avb_status_t process_avb_1722_1_aecp_packet(avb_1722_1_aecp_packet_t* pkt
 			}
 
 			if (ret) {
+
 				// set as an acknowledgement
 				payload->oui_sect_flags[0] &= ~0x8;
 
 				// copy source address to destination
 				// add our address as source
 				// transmit result
+				mac_tx(c_tx, avb_1722_1_buf, sizeof(ethernet_hdr_t)+sizeof(avb_1722_1_packet_header_t)+36+length_of_data, ETH_BROADCAST);
 			}
 		}
 		break;
