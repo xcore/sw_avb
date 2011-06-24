@@ -10,6 +10,7 @@
 #include "audio_codec_config.h"
 #include "print.h"
 #include "i2c.h"
+#include "i2c_tlv320.h"
 
 // Device address and R/W fixed to write only.
 // 0011_0100
@@ -30,17 +31,7 @@
 
 static unsigned i2c_tx(unsigned int reg, unsigned int data, struct r_i2c &r_i2c)
 {
-    unsigned addr = reg << 1;
-
-	struct i2c_data_info i2c_data;
-	i2c_data.master_num = 0;
-	i2c_data.data_len = 1;
-	i2c_data.clock_mul = 5;
-
-	addr |= ((data&0x100) ? 1 : 0);
-	i2c_data.data[0] = (data&0xff);
-
-	return i2c_master_tx(DEVICE_ADRS, addr, i2c_data, r_i2c);
+	return i2c_tlv320_tx(r_i2c, DEVICE_ADRS, reg, data);
 }
 
 /** This configures the Ti's TLV320AIC23B Audio Codec for followings:
