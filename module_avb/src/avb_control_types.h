@@ -63,6 +63,9 @@ typedef enum avb_status_t {
                                       Use avb_srp_get_failed_stream() to
                                       find the streamID of the failed stream.
                                  */
+  AVB_SRP_INDICATION,            /*!< One of the SRP indications has occured.
+								      The stream flags will be marked appropriately.
+								 */
   AVB_MAAP_ADDRESSES_RESERVED,   /*!< Multicast addresses have been 
                                       successfully been reserved after
                                       a called to 

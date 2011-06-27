@@ -34,4 +34,7 @@
 /* Media clock configuration */
 #define AVB_NUM_MEDIA_CLOCKS 1
 
+// Defining this makes SRP auto-start and auto-stop a stream when listeners come and go
+#define SRP_AUTO_TALKER_STREAM_CONTROL
+
 #endif

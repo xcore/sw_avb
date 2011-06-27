@@ -68,6 +68,7 @@ static void register_talkers(chanend talker_ctl[])
       source->talker_ctl = talker_ctl[i];
       source->stream.core_id = core_id;
       source->stream.local_id = j;
+      source->stream.flags = 0;
       source->stream.streamId[0] = (mac_addr[0] << 24) | (mac_addr[1] << 16) | (mac_addr[2] <<  8) | (mac_addr[3] <<  0);
       source->stream.streamId[1] = (mac_addr[4] << 24) | (mac_addr[5] << 16) | ((source->stream.local_id & 0xffff)<<0);
       source->presentation = AVB_DEFAULT_PRESENTATION_TIME_DELAY_NS;
@@ -99,6 +100,7 @@ static void register_listeners(chanend listener_ctl[])
       sink->listener_ctl = listener_ctl[i];
       sink->stream.core_id = core_id;
       sink->stream.local_id = j;
+      sink->stream.flags = 0;
       sink->stream.vlan = AVB_DEFAULT_VLAN;
       sink->stream.srp_talker_attr = mrp_get_attr();
       sink->stream.srp_talker_failed_attr = mrp_get_attr();
@@ -218,14 +220,13 @@ void avb_init(chanend media_ctl[],
 }
 
 avb_status_t avb_periodic(void) {
-  mrp_periodic();
+	avb_status_t res = mrp_periodic();
+	if (res != AVB_NO_STATUS) return res;
 #ifdef USE_1722_1
-  {
-	  avb_status_t res = avb_1722_1_periodic(c_mac_tx, c_ptp);
-	  if (res != AVB_NO_STATUS) return res;
-  }
+	res = avb_1722_1_periodic(c_mac_tx, c_ptp);
+	if (res != AVB_NO_STATUS) return res;
 #endif
-  return avb_1722_maap_periodic(c_mac_tx);  
+	return avb_1722_maap_periodic(c_mac_tx);
 }
 
 void avb_start(void) {
@@ -968,4 +969,22 @@ int get_avb_ptp_rateratio(int *a0)
 int get_avb_ptp_port_pdelay(int h0,int *a0)
 {
   return 0;
+}
+
+unsigned avb_get_source_stream_index_from_pointer(void* ptr)
+{
+	avb_source_info_t* p = (avb_source_info_t*)ptr;
+	for (unsigned i=0; i<AVB_NUM_SOURCES; ++i) {
+		if (p == &sources[i]) return i;
+	}
+	return -1u;
+}
+
+unsigned avb_get_sink_stream_index_from_pointer(void* ptr)
+{
+	avb_sink_info_t* p = (avb_sink_info_t*)ptr;
+	for (unsigned i=0; i<AVB_NUM_SINKS; ++i) {
+		if (p == &sinks[i]) return i;
+	}
+	return -1u;
 }

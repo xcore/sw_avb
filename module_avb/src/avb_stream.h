@@ -10,14 +10,15 @@ typedef struct avb_stream_info_t
 	struct mrp_attribute_state* srp_talker_attr;
 	struct mrp_attribute_state* srp_talker_failed_attr;
 	struct mrp_attribute_state* srp_listener_attr;
-	int core_id;
-	int local_id;
-	int num_channels;
+	char core_id;
+	char local_id;
+	char num_channels;
+	char format;
 	int map[AVB_MAX_CHANNELS_PER_STREAM];
-	int format;
 	int rate;
-	int sync;
-	int vlan;
+	char sync;
+	char vlan;
+	short flags;
 } avb_stream_info_t;
 
 typedef struct avb_source_info_t

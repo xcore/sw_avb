@@ -39,4 +39,7 @@
 /* Add synths from channels 7/8 */
 #define I2S_SYNTH_FROM 3
 
+// Defining this makes SRP auto-start and auto-stop a stream when listeners come and go
+#define SRP_AUTO_TALKER_STREAM_CONTROL
+
 #endif

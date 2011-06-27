@@ -221,7 +221,7 @@ void mrp_mad_leave(mrp_attribute_state *st);
    
        mrp_init
  */
-void mrp_periodic();
+avb_status_t mrp_periodic();
 
 int mrp_is_observer(mrp_attribute_state *st);
 

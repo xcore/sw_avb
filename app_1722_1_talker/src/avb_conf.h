@@ -43,4 +43,7 @@
 #define AVB_1722_1_SDP_TALKER_STREAM_SOURCES 	1
 #define AVB_1722_1_SDP_TALKER_CAPABILITIES 		(AVB_1722_1_SDP_TALKER_CAPABILITES_IMPLEMENTED|AVB_1722_1_SDP_TALKER_CAPABILITES_AUDIO_SOURCE)
 
+// Defining this makes SRP auto-start and auto-stop a stream when listeners come and go
+#define SRP_AUTO_TALKER_STREAM_CONTROL
+
 #endif

@@ -30,12 +30,12 @@ int avb_srp_match_talker_advertise(mrp_attribute_state *attr,
                                    char *fv,
                                    int i)
 {
-  avb_source_info_t *source_info = (avb_source_info_t *) attr->attribute_info;
+  avb_stream_info_t *source_info = (avb_stream_info_t *) attr->attribute_info;
   unsigned long long stream_id=0, my_stream_id=0;
   srp_talker_first_value *first_value = (srp_talker_first_value *) fv;
 
-  my_stream_id = source_info->stream.streamId[0];
-  my_stream_id = (my_stream_id << 32) + source_info->stream.streamId[1];
+  my_stream_id = source_info->streamId[0];
+  my_stream_id = (my_stream_id << 32) + source_info->streamId[1];
 
   for (int i=0;i<8;i++) {
     stream_id = (stream_id << 8) + first_value->StreamId[i];
@@ -51,7 +51,7 @@ int avb_srp_match_listener(mrp_attribute_state *attr,
                            int i,
                            int four_packed_event)
 {
-  avb_sink_info_t *sink_info = (avb_sink_info_t *) attr->attribute_info;
+  avb_stream_info_t *sink_info = (avb_stream_info_t *) attr->attribute_info;
   unsigned long long stream_id=0, my_stream_id=0;
   srp_listener_first_value *first_value = (srp_listener_first_value *) fv;
 
@@ -59,8 +59,8 @@ int avb_srp_match_listener(mrp_attribute_state *attr,
   if (four_packed_event != AVB_SRP_FOUR_PACKED_EVENT_READY)
     return 0;
 
-  my_stream_id = sink_info->stream.streamId[0];
-  my_stream_id = (my_stream_id << 32) + sink_info->stream.streamId[1];
+  my_stream_id = sink_info->streamId[0];
+  my_stream_id = (my_stream_id << 32) + sink_info->streamId[1];
 
   for (int i=0;i<8;i++) {
     stream_id = (stream_id << 8) + first_value->StreamId[i];
@@ -89,42 +89,38 @@ avb_srp_process_listener(char *fv,
 
 void avb_srp_listener_join_ind(mrp_attribute_state *attr, int new, int four_packed_event)
 {
-	avb_stream_info_t* stream_info = attr->attribute_info;
-	//simple_printf("SRP: Listener registered for stream %x%x\n", stream_info->streamId[0], stream_info->streamId[1]);
-    for(int i=0;i<AVB_NUM_SOURCES;i++) {
-        enum avb_source_state_t state;
-        get_avb_source_state(i, &state);
-        if (state == AVB_SOURCE_STATE_POTENTIAL) {
-          unsigned int lstreamId[2];
-          get_avb_source_id(i, lstreamId);
-          if (stream_info->streamId[0] == lstreamId[0] &&
-              stream_info->streamId[1] == lstreamId[1]) {
+    enum avb_source_state_t state;
+	unsigned stream = avb_get_sink_stream_index_from_pointer(attr->attribute_info);
+	if (stream == -1u) return;
 
-             if (four_packed_event == AVB_SRP_FOUR_PACKED_EVENT_READY ||
-                 four_packed_event == AVB_SRP_FOUR_PACKED_EVENT_READY_FAILED) {
-                 set_avb_source_state(i, AVB_SOURCE_STATE_ENABLED);
-             }
-           }
-        }
-    }
+	get_avb_source_state(stream, &state);
+	if (state == AVB_SOURCE_STATE_POTENTIAL) {
+		if (four_packed_event == AVB_SRP_FOUR_PACKED_EVENT_READY ||
+			four_packed_event == AVB_SRP_FOUR_PACKED_EVENT_READY_FAILED) {
+#ifdef SRP_AUTO_TALKER_STREAM_CONTROL
+			set_avb_source_state(stream, AVB_SOURCE_STATE_ENABLED);
+#else
+#endif
+		}
+	}
 }
 
 void avb_srp_listener_leave_ind(mrp_attribute_state *attr, int four_packed_event)
 {
-	avb_stream_info_t* stream_info = attr->attribute_info;
-	//simple_printf("SRP: Listener unregistered for stream %x%x\n", stream_info->streamId[0], stream_info->streamId[1]);
-    for(int i=0;i<AVB_NUM_SOURCES;i++) {
-      enum avb_source_state_t state;
-      get_avb_source_state(i, &state);
-      if (state == AVB_SOURCE_STATE_ENABLED) {
-        unsigned int lstreamId[2];
-        get_avb_source_id(i, lstreamId);
-        if (stream_info->streamId[0] == lstreamId[0] &&
-            stream_info->streamId[1] == lstreamId[1]) {
-          set_avb_source_state(i, AVB_SOURCE_STATE_POTENTIAL);
-        }
-      }
-    }
+    enum avb_source_state_t state;
+	unsigned stream = avb_get_sink_stream_index_from_pointer(attr->attribute_info);
+	if (stream == -1u) return;
+
+	get_avb_source_state(stream, &state);
+	if (state == AVB_SOURCE_STATE_ENABLED) {
+		if (four_packed_event == AVB_SRP_FOUR_PACKED_EVENT_READY ||
+			four_packed_event == AVB_SRP_FOUR_PACKED_EVENT_READY_FAILED) {
+#ifdef SRP_AUTO_TALKER_STREAM_CONTROL
+			set_avb_source_state(stream, AVB_SOURCE_STATE_POTENTIAL);
+#else
+#endif
+		}
+	}
 }
 
 
@@ -141,17 +137,6 @@ avb_srp_process_talker(int mrp_attribute_type,
 
   unsigned int lstreamId[2];
   unsigned long long streamId;
-
-#if 0
-  printhex(packet->StreamId[0]);
-  printhex(packet->StreamId[1]);
-  printhex(packet->StreamId[2]);
-  printhex(packet->StreamId[3]);
-  printhex(packet->StreamId[4]);
-  printhex(packet->StreamId[5]);
-  printhex(packet->StreamId[6]);
-  printhexln(packet->StreamId[7]);
-#endif
 
   for (int i=0;i<8;i++)
     streamId = (streamId << 8) + packet->StreamId[i];
@@ -174,28 +159,13 @@ avb_srp_process_talker(int mrp_attribute_type,
     }          
 #endif
 
-
-    
-
+  // Check if we already know about this stream
   for(int i=0;i<AVB_NUM_SINKS;i++) {
     get_avb_sink_id(i, lstreamId);
     if (pdu_streamId[0] == lstreamId[0] &&
-        pdu_streamId[1] == lstreamId[1]) { 
-
-      unsigned latency;
-
-      latency = 
-        ((unsigned) packet->AccumulatedLatency[0] << 24) +
-        ((unsigned) packet->AccumulatedLatency[1] << 16) +
-        ((unsigned) packet->AccumulatedLatency[2] << 8) +
-        ((unsigned) packet->AccumulatedLatency[3] << 0);
+        pdu_streamId[1] == lstreamId[1]) {
       
       registered = 1;
-      switch (mrp_attribute_type)
-        {
-        case AVB_SRP_ATTRIBUTE_TYPE_TALKER_FAILED:
-          break;
-        }
     }
   }                   
 
@@ -206,7 +176,7 @@ avb_srp_process_talker(int mrp_attribute_type,
       avb_add_detected_stream(pdu_streamId, vlan, packet->DestMacAddr, num);
     }
 #else
-  avb_add_detected_stream(pdu_streamId, 2, packet->DestMacAddr, num);
+    avb_add_detected_stream(pdu_streamId, 2, packet->DestMacAddr, num);
 #endif
 
   return;
@@ -214,15 +184,18 @@ avb_srp_process_talker(int mrp_attribute_type,
 
 void avb_srp_talker_join_ind(mrp_attribute_state *attr, int new)
 {
-	// a talker has advertised the stream
-	//avb_stream_info_t* stream_info = attr->attribute_info;
-	//simple_printf("SRP: Stream %x%x advertised\n", stream_info->streamId[0], stream_info->streamId[1]);
+	unsigned stream = avb_get_source_stream_index_from_pointer(attr->attribute_info);
+	if (stream != -1u) {
+
+	}
 }
 
 void avb_srp_talker_leave_ind(mrp_attribute_state *attr)
 {
-	//avb_stream_info_t* stream_info = attr->attribute_info;
-	//simple_printf("SRP: Stream %x%x withdrawn\n", stream_info->streamId[0], stream_info->streamId[1]);
+	unsigned stream = avb_get_source_stream_index_from_pointer(attr->attribute_info);
+	if (stream != -1u) {
+
+	}
 }
 
 
@@ -242,7 +215,7 @@ void avb_srp_get_failed_stream(unsigned int streamId[2])
 }
 
 static int check_listener_merge(char *buf, 
-                                avb_sink_info_t *sink_info)
+                                avb_stream_info_t *sink_info)
 {
   mrp_vector_header *hdr = (mrp_vector_header *) (buf + sizeof(mrp_msg_header));  
   int num_values = hdr->NumberOfValuesLow;
@@ -251,8 +224,8 @@ static int check_listener_merge(char *buf,
     (srp_listener_first_value *) (buf + sizeof(mrp_msg_header) + sizeof(mrp_vector_header));
 
   // check if we can merge
-  my_stream_id = sink_info->stream.streamId[0];
-  my_stream_id = (my_stream_id << 32) + sink_info->stream.streamId[1];
+  my_stream_id = sink_info->streamId[0];
+  my_stream_id = (my_stream_id << 32) + sink_info->streamId[1];
 
   for (int i=0;i<8;i++) {
     stream_id = (stream_id << 8) + first_value->StreamId[i];
@@ -277,7 +250,7 @@ static int merge_listener_message(char *buf,
   mrp_vector_header *hdr = 
     (mrp_vector_header *) (buf + sizeof(mrp_msg_header));  
   int merge = 0;
-  avb_sink_info_t *sink_info = st->attribute_info;       
+  avb_stream_info_t *sink_info = st->attribute_info;
 
   int num_values;
 
@@ -295,7 +268,7 @@ static int merge_listener_message(char *buf,
   if (merge) {
     srp_listener_first_value *first_value = 
       (srp_listener_first_value *) (buf + sizeof(mrp_msg_header) + sizeof(mrp_vector_header));
-    unsigned * streamId = sink_info->stream.streamId;
+    unsigned * streamId = sink_info->streamId;
 
     if (num_values == 0) {
       first_value->StreamId[0] = (unsigned char) (streamId[0] >> 24);
@@ -528,25 +501,24 @@ int avb_srp_merge_message(char *buf,
 int avb_srp_compare_talker_attributes(mrp_attribute_state *a,
                                       mrp_attribute_state *b)
 {
-  avb_source_info_t *source_info_a = (avb_source_info_t *) a->attribute_info;
-  avb_source_info_t *source_info_b = (avb_source_info_t *) b->attribute_info; 
-
-  return (source_info_a->stream.local_id < source_info_b->stream.local_id);
+	avb_stream_info_t *source_info_a = (avb_stream_info_t *) a->attribute_info;
+	avb_stream_info_t *source_info_b = (avb_stream_info_t *) b->attribute_info;
+	return (source_info_a->local_id < source_info_b->local_id);
 }
 
 int avb_srp_compare_listener_attributes(mrp_attribute_state *a,
                                        mrp_attribute_state *b)
 {
-  avb_sink_info_t *sink_info_a = (avb_sink_info_t *) a->attribute_info;       
-  avb_sink_info_t *sink_info_b = (avb_sink_info_t *) b->attribute_info;       
-  unsigned int *sA = sink_info_a->stream.streamId;
-  unsigned int *sB = sink_info_b->stream.streamId;
-  for (int i=0;i<2;i++) {
-    if (sA[i] < sB[i])
-      return 1;
-    if (sB[i] < sA[i])
-      return 0;
-  }
-  return 0;
+	avb_stream_info_t *sink_info_a = (avb_stream_info_t *) a->attribute_info;
+	avb_stream_info_t *sink_info_b = (avb_stream_info_t *) b->attribute_info;
+	unsigned int *sA = sink_info_a->streamId;
+	unsigned int *sB = sink_info_b->streamId;
+	for (int i=0;i<2;i++) {
+		if (sA[i] < sB[i])
+			return 1;
+		if (sB[i] < sA[i])
+			return 0;
+	}
+	return 0;
 }
 

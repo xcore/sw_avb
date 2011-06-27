@@ -67,6 +67,6 @@ TEST_SUBDIRS = test_api_listener test_api_talker
 
 all: $(foreach x, $(BUILD_SUBDIRS), $x.all) 
 plugins: $(foreach x, $(PLUGIN_SUBDIRS), $x.all) 
-clean: $(foreach x, $(BUILD_SUBDIRS), $x.clean)
+clean: $(foreach x, $(BUILD_SUBDIRS) $(TEST_SUBDIRS), $x.clean)
 clean_plugins: $(foreach x, $(PLUGIN_SUBDIRS), $x.clean) 
 test: $(foreach x, $(TEST_SUBDIRS), $x.test)

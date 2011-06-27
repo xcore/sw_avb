@@ -525,8 +525,8 @@ static void update_path_delay(ptp_timestamp *master_ingress_ts,
 		count = 0;
 		i = avb_itoa(pd, buf, 10, 0);
 		strcpy(&buf[i]," ns");
-		avnu_log(AVNU_TESTPOINT_PDELAY, NULL, buf);
-		
+		//avnu_log(AVNU_TESTPOINT_PDELAY, NULL, buf);
+		printstr(buf);
 	  }
   }
 #endif

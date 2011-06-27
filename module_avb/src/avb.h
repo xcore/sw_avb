@@ -164,6 +164,20 @@ avb_status_t avb_process_control_packet(unsigned int buf[], int len,
  **/
 void avb_set_legacy_mode(int mode);
 
+#ifndef __XC__
 
+/** Utility function to get the index of a source stream based on its
+ * pointer.  This is used by SRP, which stores a pointer to the stream
+ * structure rather than an index.
+ */
+unsigned avb_get_source_stream_index_from_pointer(void* ptr);
+
+/** Utility function to get the index of a sink stream based on its
+ * pointer.  This is used by SRP, which stores a pointer to the stream
+ * structure rather than an index.
+ */
+unsigned avb_get_sink_stream_index_from_pointer(void* ptr);
+
+#endif
 
 #endif // _avb_h_
