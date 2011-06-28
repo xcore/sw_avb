@@ -62,7 +62,11 @@ int media_input_fifo_enable(media_input_fifo_t media_input_fifo0,
   volatile ififo_t *media_input_fifo =  (ififo_t *) media_input_fifo0;
   int packetSize;
 
+#ifndef AVB_1722_SAF
+  packetSize = (((rate+(AVB1722_PACKET_RATE-1))/AVB1722_PACKET_RATE) * 4) / 3;
+#else
   packetSize = ((rate+(AVB1722_PACKET_RATE-1))/AVB1722_PACKET_RATE);
+#endif
   media_input_fifo->rdIndex = (int) &media_input_fifo->buf[0]; 
   media_input_fifo->wrIndex = (int) &media_input_fifo->buf[0]; 
   media_input_fifo->startIndex = (int) &media_input_fifo->buf[0]; 
