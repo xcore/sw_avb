@@ -26,6 +26,7 @@ unsigned int AVB1722_audioSampleType = MBLA_24BIT;
  *  \para   buf[] buffer array to be populated.
  *  \para   startOffset start byte offset within the buffer for 61883 CIP Header.
  *  \para   dbc DBC value of CIP header to be populated.
+ *  \para   dbs DBS value
  *  \return none.
  */
 static inline void AVB1722_CIP_HeaderGen(unsigned char Buf[], int dbc, unsigned numAudioSamples)
@@ -285,7 +286,9 @@ int avb1722_create_packet(unsigned char Buf0[],
 		dbc = stream_info->dbc;
 		stream_info->samples_left_in_fifo_packet = samples_per_fifo_packet;
 	} else {
+#ifdef TIMESTAMP_BLOCK_MODE
 		if (stream_info->samples_left_in_fifo_packet == 0) timerValid = 1;
+#endif
 
 		if (stream_info->samples_left_in_fifo_packet < samples_in_packet) {
 			// Not enough samples left in fifo packet to fill the 1722 packet
@@ -297,6 +300,9 @@ int avb1722_create_packet(unsigned char Buf0[],
 				src = (int *) media_input_fifo_get_packet(map[i], &presentationTime, &(stream_info->dbc));
 				media_input_fifo_set_ptr(map[i], src);
 				dest += 1;
+#ifndef TIMESTAMP_BLOCK_MODE
+				timerValid = 1;
+#endif
 			}
 			dest += (stream_info->samples_left_in_fifo_packet - 1) * num_channels;
 			samples_in_packet -= stream_info->samples_left_in_fifo_packet;
