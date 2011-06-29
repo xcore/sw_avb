@@ -195,14 +195,14 @@ int static decode_attr_type(int etype, int atype) {
     case AVB_MMRP_ETHERTYPE:
       switch (atype) 
         {
-        case AVB_MMRP_ATTRIBUTE_TYPE:
+        case AVB_MMRP_MAC_VECTOR_ATTRIBUTE_TYPE:
           return MMRP_MAC_VECTOR;
         }
       break;
     case AVB_MVRP_ETHERTYPE:
       switch (atype) 
         {
-        case AVB_MVRP_ATTRIBUTE_TYPE:
+        case AVB_MVRP_VID_VECTOR_ATTRIBUTE_TYPE:
           return MVRP_VID_VECTOR;
         }
       break;   
@@ -227,10 +227,10 @@ static int encode_attr_type(mrp_attribute_type attr)
     return AVB_SRP_ATTRIBUTE_TYPE_DOMAIN;
     break;
   case MMRP_MAC_VECTOR:
-    return AVB_MMRP_ATTRIBUTE_TYPE;
+    return AVB_MMRP_MAC_VECTOR_ATTRIBUTE_TYPE;
     break;
   case MVRP_VID_VECTOR:
-    return AVB_MVRP_ATTRIBUTE_TYPE;
+    return AVB_MVRP_VID_VECTOR_ATTRIBUTE_TYPE;
     break;
   default:
     return 0;
@@ -1040,9 +1040,9 @@ static int msg_match(mrp_attribute_type attr_type,
   case MSRP_DOMAIN_VECTOR:
     return avb_srp_match_domain(attr, msg, i);
   case MMRP_MAC_VECTOR:
-    return avb_mmrp_match(attr, msg, i);
+    return avb_mmrp_match_mac_vector(attr, msg, i);
   case MVRP_VID_VECTOR:
-    return avb_mvrp_match(attr, msg, i);
+    return avb_mvrp_match_vid_vector(attr, msg, i);
   default:
 	return 0;
   }
@@ -1067,10 +1067,10 @@ static void process(mrp_attribute_type attr_type,
     avb_srp_process_domain(msg, i);
     return;
   case MMRP_MAC_VECTOR:
-    avb_mmrp_process(msg, i);
+    avb_mmrp_process_mac_vector(msg, i);
     return;
   case MVRP_VID_VECTOR:
-    avb_mvrp_process(msg, i);
+    avb_mvrp_process_vid_vector(msg, i);
     return;
   default:
 	return;
@@ -1139,6 +1139,7 @@ avb_status_t avb_mrp_process_packet(unsigned int buf[], int len)
           has_fourpacked_events(attr_type)?(numvalues+3)/4:0;
         int len = sizeof(mrp_vector_header) + first_value_len + threepacked_len + fourpacked_len;
 
+        //! TODO Validate len/numvalues field against defined/sensible attribute lengths
         
         if (leave_all) {
           attribute_type_event(attr_type, MRP_EVENT_RECEIVE_LEAVE_ALL);

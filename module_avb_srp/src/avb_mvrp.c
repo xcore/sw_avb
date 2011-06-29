@@ -72,7 +72,7 @@ void avb_leave_vlan(int vlan)
 }
 
 
-void avb_mvrp_process(char *buf, int num)
+void avb_mvrp_process_vid_vector(char *buf, int num)
 {
   return;
 }
@@ -88,7 +88,7 @@ int avb_mvrp_merge_message(char *buf,
     (mrp_vector_header *) (buf + sizeof(mrp_msg_header));  
   int merge = 0;
   int num_values;
-  if (mrp_hdr->AttributeType != AVB_MVRP_ATTRIBUTE_TYPE)
+  if (mrp_hdr->AttributeType != AVB_MVRP_VID_VECTOR_ATTRIBUTE_TYPE)
     return 0;
 
   num_values = hdr->NumberOfValuesLow;
@@ -97,8 +97,8 @@ int avb_mvrp_merge_message(char *buf,
     merge = 1;
 
   if (merge) {
-    mvrp_first_value *first_value = 
-      (mvrp_first_value *) (buf + sizeof(mrp_msg_header) + sizeof(mrp_vector_header));
+    mvrp_vid_vector_first_value *first_value =
+      (mvrp_vid_vector_first_value *) (buf + sizeof(mrp_msg_header) + sizeof(mrp_vector_header));
     int *vlan = (int*) st->attribute_info;
 
     first_value->vlan[0] = (*vlan >> 8) & 0xff;
@@ -115,14 +115,14 @@ int avb_mvrp_merge_message(char *buf,
 
 
 
-int avb_mvrp_match(mrp_attribute_state *attr,
+int avb_mvrp_match_vid_vector(mrp_attribute_state *attr,
                    char *fv,
                    int i)
 {
 
   int vlan;
   int *my_vlan = (int*) attr->attribute_info;
-  mvrp_first_value *first_value =  (mvrp_first_value *) fv;
+  mvrp_vid_vector_first_value *first_value =  (mvrp_vid_vector_first_value *) fv;
 
   vlan = (first_value->vlan[0] << 8) + first_value->vlan[1] + i;
 

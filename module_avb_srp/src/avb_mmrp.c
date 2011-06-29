@@ -79,7 +79,7 @@ void avb_leave_multicast_group(unsigned char addr[6])
   }
 }
 
-void avb_mmrp_process(char *buf, int num)
+void avb_mmrp_process_mac_vector(char *buf, int num)
 {
   return;
 }
@@ -94,7 +94,7 @@ int avb_mmrp_merge_message(char *buf,
     (mrp_vector_header *) (buf + sizeof(mrp_msg_header));  
   int merge = 0;
   int num_values;
-  if (mrp_hdr->AttributeType != AVB_MMRP_ATTRIBUTE_TYPE)
+  if (mrp_hdr->AttributeType != AVB_MMRP_MAC_VECTOR_ATTRIBUTE_TYPE)
     return 0;
 
   num_values = hdr->NumberOfValuesLow;
@@ -103,8 +103,8 @@ int avb_mmrp_merge_message(char *buf,
     merge = 1;
 
   if (merge) {
-    mmrp_first_value *first_value = 
-      (mmrp_first_value *) (buf + sizeof(mrp_msg_header) + sizeof(mrp_vector_header));
+	  mmrp_mac_vector_first_value *first_value =
+      (mmrp_mac_vector_first_value *) (buf + sizeof(mrp_msg_header) + sizeof(mrp_vector_header));
     char *addr = (char *) st->attribute_info;
 
     for (int i=0;i<6;i++)   
@@ -121,7 +121,7 @@ int avb_mmrp_merge_message(char *buf,
 
 
 
-int avb_mmrp_match(mrp_attribute_state *attr,
+int avb_mmrp_match_mac_vector(mrp_attribute_state *attr,
                    char *fv,
                    int i)
 {
@@ -129,7 +129,7 @@ int avb_mmrp_match(mrp_attribute_state *attr,
   unsigned long long addr=0, my_addr=0;
 
   char *a = (char *) attr->attribute_info;
-  mmrp_first_value *first_value = (mmrp_first_value *) fv;
+  mmrp_mac_vector_first_value *first_value = (mmrp_mac_vector_first_value *) fv;
 
   for (int i=0;i<6;i++) {
     my_addr = (my_addr << 8) + (unsigned char) a[i];

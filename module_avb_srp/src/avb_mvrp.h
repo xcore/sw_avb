@@ -16,7 +16,6 @@
 
 //! The MVRP Multicast MAC address
 #define AVB_MVRP_MACADDR { 0x01, 0x80, 0xc2, 0x00, 0x00, 0x21 }
-//#define AVB_MVRP_MACADDR { 0x01, 0x80, 0xc2, 0x00, 0x00, 0xe }
 
 /** Join a VLAN.
  *
@@ -52,7 +51,7 @@ void avb_mvrp_init(void);
 #ifndef __XC__
 
 //! Callback when the MRP has an MVRP packet to process
-void avb_mvrp_process(char *buf, int num);
+void avb_mvrp_process_vid_vector(char *buf, int num);
 
 //! Callback because MRP is merging some attributes into a Tx packet
 int avb_mvrp_merge_message(char *buf,
@@ -60,7 +59,7 @@ int avb_mvrp_merge_message(char *buf,
                            int vector);
 
 //! Callback when the MRP module is checking whether an atribute matches something that we are looking for
-int avb_mvrp_match(mrp_attribute_state *attr,
+int avb_mvrp_match_vid_vector(mrp_attribute_state *attr,
                    char *msg,
                    int i);
 

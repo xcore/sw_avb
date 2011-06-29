@@ -93,8 +93,8 @@ typedef enum {
     sizeof(srp_talker_failed_first_value),\
     sizeof(srp_listener_first_value),\
     sizeof(srp_domain_first_value),\
-    sizeof(mmrp_first_value),\
-    sizeof(mvrp_first_value)\
+    sizeof(mmrp_mac_vector_first_value),\
+    sizeof(mvrp_vid_vector_first_value)\
   }
 
 

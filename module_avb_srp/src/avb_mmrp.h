@@ -40,7 +40,7 @@ void avb_leave_multicast_group(unsigned char addr[6]);
 #ifndef __XC__
 
 //! Callback from MRP because it is processing a received packet
-void avb_mmrp_process(char *buf, int num);
+void avb_mmrp_process_mac_vector(char *buf, int num);
 
 //! Callback from MRP because it is merging several attribute sets into one TX packet
 int avb_mmrp_merge_message(char *buf,
@@ -48,7 +48,7 @@ int avb_mmrp_merge_message(char *buf,
                           int vector);
 
 //! Callback from MRP because it is checking if an MMRP attribute matches something we are looking for
-int avb_mmrp_match(mrp_attribute_state *attr,
+int avb_mmrp_match_mac_vector(mrp_attribute_state *attr,
                    char *msg,
                    int i);
 #endif
