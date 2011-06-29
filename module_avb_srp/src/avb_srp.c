@@ -90,7 +90,8 @@ avb_srp_process_listener(char *fv,
 void avb_srp_listener_join_ind(mrp_attribute_state *attr, int new, int four_packed_event)
 {
     enum avb_source_state_t state;
-	unsigned stream = avb_get_sink_stream_index_from_pointer(attr->attribute_info);
+	unsigned stream = avb_get_source_stream_index_from_pointer(attr->attribute_info);
+	simple_printf("SRP: listener join stream %d\n", stream);
 	if (stream == -1u) return;
 
 	get_avb_source_state(stream, &state);
@@ -108,7 +109,8 @@ void avb_srp_listener_join_ind(mrp_attribute_state *attr, int new, int four_pack
 void avb_srp_listener_leave_ind(mrp_attribute_state *attr, int four_packed_event)
 {
     enum avb_source_state_t state;
-	unsigned stream = avb_get_sink_stream_index_from_pointer(attr->attribute_info);
+	unsigned stream = avb_get_source_stream_index_from_pointer(attr->attribute_info);
+	simple_printf("SRP: listener leave stream %d\n", stream);
 	if (stream == -1u) return;
 
 	get_avb_source_state(stream, &state);
@@ -184,7 +186,7 @@ avb_srp_process_talker(int mrp_attribute_type,
 
 void avb_srp_talker_join_ind(mrp_attribute_state *attr, int new)
 {
-	unsigned stream = avb_get_source_stream_index_from_pointer(attr->attribute_info);
+	unsigned stream = avb_get_sink_stream_index_from_pointer(attr->attribute_info);
 	if (stream != -1u) {
 
 	}
@@ -192,7 +194,7 @@ void avb_srp_talker_join_ind(mrp_attribute_state *attr, int new)
 
 void avb_srp_talker_leave_ind(mrp_attribute_state *attr)
 {
-	unsigned stream = avb_get_source_stream_index_from_pointer(attr->attribute_info);
+	unsigned stream = avb_get_sink_stream_index_from_pointer(attr->attribute_info);
 	if (stream != -1u) {
 
 	}
