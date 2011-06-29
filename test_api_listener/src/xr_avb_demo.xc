@@ -279,8 +279,6 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 	set_device_media_clock_rate(0, sample_rate);
 	set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_ENABLED);
 
-	avb_start();
-
 	tmr	:> timeout;
 	while (1) {
 		unsigned char tmp;
@@ -292,6 +290,16 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 
 		select
 		{
+			// Check ethernet link status
+			case inuchar_byref(connect_status, ifnum):
+	        {
+				int status;
+				status = inuchar(connect_status);
+				(void) inuchar(connect_status);
+				(void) inct(connect_status);
+				if (status != 0) avb_start();
+	        }
+			break;
 
 			// Receive any incoming AVB packets (802.1Qat, 1722_MAAP)
 			case avb_get_control_packet(c_rx, buf, nbytes):

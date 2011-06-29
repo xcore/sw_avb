@@ -295,9 +295,10 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 				status = inuchar(connect_status);
 				(void) inuchar(connect_status);
 				(void) inct(connect_status);
-				avb_start();
-
-				avb_1722_1_adp_announce();
+				if (status != 0) {
+				  avb_start();
+				  avb_1722_1_adp_announce();
+				}
 	        }
 			break;
 
