@@ -369,18 +369,10 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 
 				// check if there is a new stream and display if one is spotted
 				if (avb_check_for_new_stream(streamId, vlan, addr)) {
-				    simple_printf("Found stream %x.%x, address %x:%x:%x:%x:%x:%x, vlan %d\n.",
+				    simple_printf("Found stream %x.%x, address %x:%x:%x:%x:%x:%x, vlan %d\n",
 				    		streamId[0], streamId[1],
 				    		addr[0], addr[1], addr[2], addr[3], addr[4], addr[5],
 				    		vlan);
-
-//					set_avb_sink_sync(0, 0);
-//					set_avb_sink_channels(0, 2);
-//					set_avb_sink_map(0, map, 2);
-//					set_avb_sink_id(0, streamId);
-//					set_avb_sink_vlan(0, vlan);
-//					set_avb_sink_addr(0, addr, 6);
-//					set_avb_sink_state(0, AVB_SINK_STATE_POTENTIAL);
 				}
 			}
 

@@ -401,12 +401,15 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 			  // check if there is a new stream
 			  int res = avb_check_for_new_stream(streamId, vlan, addr);
 
+			  if (res) {
+				    simple_printf("Found stream %x.%x, address %x:%x:%x:%x:%x:%x, vlan %d\n",
+				    		streamId[0], streamId[1],
+				    		addr[0], addr[1], addr[2], addr[3], addr[4], addr[5],
+				    		vlan);
+			  }
+
 			  // if so, add it to the stream table
 			  if (res && listener_ready==0) {
-			    simple_printf("Found stream %x.%x, address %x:%x:%x:%x:%x:%x, vlan %d\n.",
-			    		streamId[0], streamId[1],
-			    		addr[0], addr[1], addr[2], addr[3], addr[4], addr[5],
-			    		vlan);
 			    set_avb_sink_sync(0, 0);
 			    set_avb_sink_channels(0, 2);
 			    set_avb_sink_map(0, map, 2);

@@ -349,7 +349,7 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 
 			  // if so, add it to the stream table
 			  if (res) {
-			    simple_printf("Found stream %x.%x, address %x:%x:%x:%x:%x:%x, vlan %d\n.",
+			    simple_printf("Found stream %x.%x, address %x:%x:%x:%x:%x:%x, vlan %d\n",
 			    		streamId[0], streamId[1],
 			    		addr[0], addr[1], addr[2], addr[3], addr[4], addr[5],
 			    		vlan);
