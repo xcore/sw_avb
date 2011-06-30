@@ -42,8 +42,10 @@ typedef struct avb1722_Talker_StreamConfig_t
   //! the type of samples in the stream
   unsigned int sampleType;
   //! Data Block Count (count of samples transmitted in the stream)
+  //! From 61883: "A data block contains all data arriving at the transmitter within
+  //! an audio sample period. The data block contains all the data which make up an event
   unsigned int dbc;
-  //! Number of samples per packet in the audio fifo
+  //! Number of samples per packet in the audio fifo (known as the SYT_INTERVAL in 61883)
   unsigned int samples_per_fifo_packet;
   //! Number of samples per 1722 packet (integer part)
   unsigned int samples_per_packet_base;

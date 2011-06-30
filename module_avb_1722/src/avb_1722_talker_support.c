@@ -195,7 +195,7 @@ static void sample_copy_strided(int *src, unsigned int *dest, int stride, int n)
 #if AVB_1722_SAF
 		unsigned sample = *src << 8;
 #else
-		unsigned sample = (*src & 0xffffff) | 0x40000000;
+		unsigned sample = (*src & 0xffffff) | AVB1722_audioSampleType;
 #endif
 		sample = __builtin_bswap32(sample);
 		*dest = sample;

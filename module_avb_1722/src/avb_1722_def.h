@@ -49,7 +49,9 @@
 typedef struct 
 {
   unsigned char SID;             // bit 0,1 are fixed 00;
-  unsigned char DBS;             // Data block size
+  unsigned char DBS;             // Data block size. In 61883 a data block is all information arriving
+								 // at the transmitter in one sample period. Thus is our case it is the
+                                 // size of one sample multiplied by the number of channels (in quadlets)
   unsigned char FN_QPC_SPH;      // bit 0-1 : Fraction Number
                                  // bit 2-4 : quadlet padding count
                                  // bit 5   : source packet header
@@ -85,10 +87,17 @@ typedef struct
 #define SET_AVB1722_CIP_SYT(x, a)              do {x->SYT[0] = a >> 8; \
                                                  x->SYT[1] = a & 0xFF; } while (0)
 
-// Audio MBLA definations
-#define MBLA_24BIT                           (0x40)
-#define MBLA_20BIT                           (0x41)
-#define MBLA_16BIT                           (0x42)                                                 
+// Audio MBLA definitions (top 8 bits for easy combination with sample)
+//   From 61883:
+//   0100---- = multibit linear audio
+//   ----00-- = raw audio sample
+//   ------00 = 24 bit
+//   ------01 = 20 bit
+//   ------10 = 16 bit
+//   ------11 = undefined
+#define MBLA_24BIT                           (0x40000000)
+#define MBLA_20BIT                           (0x41000000)
+#define MBLA_16BIT                           (0x42000000)
 
 // Generic configuration
 #define ENABLE_AVB1722_TALKER                 (0x800000A5)
