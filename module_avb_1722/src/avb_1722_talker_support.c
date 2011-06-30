@@ -26,15 +26,14 @@ unsigned int AVB1722_audioSampleType = MBLA_24BIT;
  *  \para   buf[] buffer array to be populated.
  *  \para   startOffset start byte offset within the buffer for 61883 CIP Header.
  *  \para   dbc DBC value of CIP header to be populated.
- *  \para   dbs DBS value
+ *  \para   blockSize DBS value
  *  \return none.
  */
-static inline void AVB1722_CIP_HeaderGen(unsigned char Buf[], int dbc, unsigned numAudioSamples)
+static inline void AVB1722_CIP_HeaderGen(unsigned char Buf[], int dbc)
 {
 	AVB_AVB1722_CIP_Header_t *pAVB1722Hdr = (AVB_AVB1722_CIP_Header_t *) &(Buf[AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE]);
 
 	SET_AVB1722_CIP_DBC(pAVB1722Hdr, dbc);
-	SET_AVB1722_CIP_DBS(pAVB1722Hdr, numAudioSamples);
 }
 
 static inline void AVB1722_AVBTP_HeaderGen(unsigned char Buf[],
@@ -109,22 +108,27 @@ void AVB1722_Talker_bufInit(unsigned char Buf0[],
 	AVB_DataHeader_t *pAVBHdr = (AVB_DataHeader_t *) &(Buf[AVB_ETHERNET_HDR_SIZE]);
 	AVB_AVB1722_CIP_Header_t *pAVB1722Hdr = (AVB_AVB1722_CIP_Header_t *) &(Buf[AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE]);
 
+	unsigned data_block_size;
 
 	// store the sample type
 	switch (pStreamConfig->sampleType)
 	{
 	case MBLA_20BIT:
 		AVB1722_audioSampleType = MBLA_20BIT;
+		data_block_size = pStreamConfig->num_channels * 1;
 		break;
 	case MBLA_16BIT:
 		AVB1722_audioSampleType = MBLA_16BIT;
+		data_block_size = pStreamConfig->num_channels / 2;
 		break;
 	case MBLA_24BIT:
 		AVB1722_audioSampleType = MBLA_24BIT;
+		data_block_size = pStreamConfig->num_channels * 1;
 		break;
 	default:
 		//printstr("ERROR: AVB1722_Talker_bufInit : Unsupported audio MBLA type.\n");
 		AVB1722_audioSampleType = MBLA_24BIT;
+		data_block_size = pStreamConfig->num_channels * 1;
 		break;
 	}
 
@@ -170,7 +174,7 @@ void AVB1722_Talker_bufInit(unsigned char Buf0[],
 
 	SET_AVB1722_CIP_EOH1(pAVB1722Hdr, AVB1722_DEFAULT_EOH1);
 	SET_AVB1722_CIP_SID(pAVB1722Hdr, AVB1722_DEFAULT_SID);
-	SET_AVB1722_CIP_DBS(pAVB1722Hdr, AVB1722_DEFAULT_DBS);
+	SET_AVB1722_CIP_DBS(pAVB1722Hdr, data_block_size);
 
 	SET_AVB1722_CIP_FN(pAVB1722Hdr, AVB1722_DEFAULT_FN);
 	SET_AVB1722_CIP_QPC(pAVB1722Hdr, AVB1722_DEFAULT_QPC);
@@ -322,7 +326,7 @@ int avb1722_create_packet(unsigned char Buf0[],
 	dbc &= 0xff;
 
 #if !AVB_1722_SAF
-	AVB1722_CIP_HeaderGen(Buf, dbc, num_audio_samples);
+	AVB1722_CIP_HeaderGen(Buf, dbc);
 #endif
 	// perform required updates to header
 	if (timerValid) {

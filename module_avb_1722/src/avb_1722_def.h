@@ -45,11 +45,11 @@
 // AVB1722 Header Size.
 #define AVB_CIP_HDR_SIZE    				(8)
 
-// 61883-6/AVB1722 CIP Header definations.
+// 61883-6/AVB1722 CIP Header definitions.
 typedef struct 
 {
   unsigned char SID;             // bit 0,1 are fixed 00;
-  unsigned char DBS;              
+  unsigned char DBS;             // Data block size
   unsigned char FN_QPC_SPH;      // bit 0-1 : Fraction Number
                                  // bit 2-4 : quadlet padding count
                                  // bit 5   : source packet header
@@ -60,6 +60,8 @@ typedef struct
   
 } AVB_AVB1722_CIP_Header_t;
 
+// NOTE: It is worth pointing out that the 'data block' in 61886-3 means a sample (or
+// a collection of samples one for each channel)
 
 //                                                                                      
 // Macros for 61883 header

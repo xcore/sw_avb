@@ -114,11 +114,19 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
    }
 #endif
 
+#define TIMESTAMP_BLOCK_MODE 1
 
 #if AVB_1722_SAF
    if ((AVBTP_TV(pAVBHdr)==1)) {
-#else
+	   unsigned sample_num = 0;
+#elif TIMESTAMP_BLOCK_MODE
    if ((AVBTP_TV(pAVBHdr)==1) && (dbc_value & 7)==0) {
+	   unsigned sample_num = 0;
+#else
+   if ((AVBTP_TV(pAVBHdr)==1)) {
+	   // this is wrong - need to figure out which sample the timestamp is on based on
+	   // the DBC correctly
+	   unsigned sample_num = dbc_value & 7;
 #endif
 	   unsigned int timestamp = AVBTP_TIMESTAMP(pAVBHdr);
 
@@ -126,7 +134,7 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
 	  if (timestamp != 0) {
 		  int i;
 		  for (i=0;i<num_channels;i++)  {
-			  media_output_fifo_set_ptp_timestamp(map[i], timestamp);
+			  media_output_fifo_set_ptp_timestamp(map[i], timestamp, sample_num);
 		  }
 	  }
    }

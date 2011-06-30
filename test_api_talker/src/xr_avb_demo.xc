@@ -351,10 +351,12 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 				}
 				else if (talker_ok_to_start)
 				{
+					unsigned id[2];
+					get_avb_source_id(0, id);
 					set_avb_source_state(0, AVB_SOURCE_STATE_POTENTIAL);
 					talker_active = 1;
 					c_gpio_ctl <: 1;
-					simple_printf("Talker enabled\n");
+					simple_printf("Talker enabled (%x.%x)\n", id[0], id[1]);
 				}
 			}
 			break;

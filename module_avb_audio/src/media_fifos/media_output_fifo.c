@@ -92,7 +92,8 @@ int get_media_output_fifo_num(media_output_fifo_t s0)
 
 // 1722 thread
 void media_output_fifo_set_ptp_timestamp(media_output_fifo_t s0,
-                                         unsigned int ptp_ts)
+                                         unsigned int ptp_ts,
+                                         unsigned sample_number)
 {
   struct ofifo_t *s = 
     (struct ofifo_t *) s0;
@@ -101,8 +102,8 @@ void media_output_fifo_set_ptp_timestamp(media_output_fifo_t s0,
 	if (ptp_ts==0) ptp_ts = 1;
     s->ptp_ts = ptp_ts;
     s->local_ts = 0;
-    s->sample_count_at_timestamp = s->sample_count;
-    s->marker = s->wrptr;
+    s->sample_count_at_timestamp = s->sample_count + sample_number;
+    s->marker = s->wrptr + sample_number;
   }
 }
 

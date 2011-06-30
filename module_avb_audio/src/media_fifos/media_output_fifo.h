@@ -183,7 +183,8 @@ media_output_fifo_pull_sample(media_output_fifo_t s,
 
 
 void media_output_fifo_set_ptp_timestamp(media_output_fifo_t s0,
-                                         unsigned int timestamp);
+                                         unsigned int timestamp,
+                                         unsigned sample_number);
 
 
 void
