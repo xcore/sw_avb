@@ -12,6 +12,15 @@
 #include "gptp.h"
 #include "avb_control_types.h"
 
+#define DEBUG_MEDIA_CLOCK
+
+#define STABLE_THRESHOLD 32
+#define LOCK_COUNT_THRESHOLD 400
+#define ACCEPTABLE_FILL_ADJUST 50000
+#define LOST_LOCK_THRESHOLD 24
+#define MIN_FILL_LEVEL 5
+#define MAX_SAMPLES_PER_1722_PACKET 12
+
 static media_clock_t media_clocks[MAX_NUM_MEDIA_CLOCKS];
 
 void clk_ctl_set_rate(chanend clk_ctl, int wordLength)
@@ -22,13 +31,6 @@ void clk_ctl_set_rate(chanend clk_ctl, int wordLength)
     clk_ctl <: wordLength;
   }
 }
-
-
-#define STABLE_THRESHOLD 32
-#define LOCK_COUNT_THRESHOLD 400
-#define ACCEPTABLE_FILL_ADJUST 50000
-#define LOST_LOCK_THRESHOLD 24
-#define MIN_FILL_LEVEL 5
 
 typedef struct buf_info_t {
   int lock_count;
@@ -197,14 +199,18 @@ static void manage_buffer(buf_info_t &b,
   }
 
   if (!locked && (b.stability_count > STABLE_THRESHOLD)) {
-      if (sample_diff < -MEDIA_OUTPUT_FIFO_SAMPLE_FIFO_SIZE*1/4) {
-        printstr("Presentation time compensation too large\n");
+      if (fill - sample_diff > MEDIA_OUTPUT_FIFO_SAMPLE_FIFO_SIZE-MAX_SAMPLES_PER_1722_PACKET) {
+#ifdef DEBUG_MEDIA_CLOCK
+    	simple_printf("Media output %d compensation too large: %d samples\n", index, sample_diff);
+#endif
         b.adjust = 0;
         buf_ctl <: b.fifo;
         buf_ctl <: BUF_CTL_RESET;
         inct(buf_ctl);
       } else {
-        simple_printf("Media output %d locked: buffer %d samples shorter\n", index, sample_diff);
+#ifdef DEBUG_MEDIA_CLOCK
+        simple_printf("Media output %d locked: %d samples shorter\n", index, sample_diff);
+#endif
         inform_media_clocks_of_lock(index);
         b.lock_count = 0;
         buf_ctl <: b.fifo;
@@ -218,7 +224,9 @@ static void manage_buffer(buf_info_t &b,
             sample_diff < -LOST_LOCK_THRESHOLD ||
             fill < MIN_FILL_LEVEL))
   {
+#ifdef DEBUG_MEDIA_CLOCK
       simple_printf("Media output %d lost lock\n", index);
+#endif
       b.adjust = 0;
       buf_ctl <: b.fifo;
       buf_ctl <: BUF_CTL_RESET;
@@ -425,7 +433,6 @@ void media_clock_server(chanend media_clock_ctl,
             }
             break;
           default:
-            printstr("clk_ctl_server: unknown cmd\n");
             break;            
           }
         break;
