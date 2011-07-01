@@ -125,14 +125,9 @@ media_output_fifo_to_xc_channel_split_lr(chanend media_ctl,
 void media_output_fifo_ctl(streaming chanend samples_out);
 
 /**
- * \brief Get the number of the FIFO from a pointer to the structure
- */
-int get_media_output_fifo_num(media_output_fifo_t s);
-
-/**
  * \brief Intiialise a FIFO
  */
-void media_output_fifo_init(media_output_fifo_t s, int stream_num);
+void media_output_fifo_init(media_output_fifo_t s, unsigned stream_num);
 
 /**
  * \brief Disable a FIFO

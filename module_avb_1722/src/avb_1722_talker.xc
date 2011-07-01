@@ -212,7 +212,6 @@ void avb_1722_talker(chanend ptp_svr, chanend ethernet_tx_svr,
 				avb1722_set_buffer_vlan(vlan,(TxBuf,unsigned char[]));
 				break;
 				default:
-				printstr("ERROR: avb1722_talker: Unsupported command.\n");
 				talker_ctl <: AVB1722_NACK;
 				break;
 			}

@@ -62,6 +62,7 @@ int media_input_fifo_enable(media_input_fifo_t media_input_fifo0,
   volatile ififo_t *media_input_fifo =  (ififo_t *) media_input_fifo0;
   int packetSize;
 
+  // This is the calculation of the SYT_INTERVAL
 #ifndef AVB_1722_SAF
   packetSize = (((rate+(AVB1722_PACKET_RATE-1))/AVB1722_PACKET_RATE) * 4) / 3;
 #else

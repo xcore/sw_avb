@@ -25,7 +25,6 @@ typedef struct ofifo_t {
   unsigned int * zero_marker;
   ofifo_state_t state;
   int last_notification_time;
-  int stream_num;
   int media_clock;
   int pending_init_notification;
   unsigned int sample_count_at_timestamp;
@@ -35,7 +34,7 @@ typedef struct ofifo_t {
 
 
 void
-media_output_fifo_init(int s0, int stream_num) 
+media_output_fifo_init(int s0, unsigned stream_num)
 {
   struct ofifo_t *s = 
     (struct ofifo_t *) s0;
@@ -44,7 +43,6 @@ media_output_fifo_init(int s0, int stream_num)
   s->dptr = START_OF_FIFO(s);
   s->wrptr = START_OF_FIFO(s);
   s->media_clock = -1;
-  s->stream_num = stream_num;
   s->pending_init_notification = 0;
   s->last_notification_time = 0;
 }
@@ -81,15 +79,6 @@ enable_media_output_fifo(int s0, int media_clock)
 }
 
 
-
-
-int get_media_output_fifo_num(media_output_fifo_t s0)
-{
-  struct ofifo_t *s = 
-    (struct ofifo_t *) s0;
-  return s->stream_num;
-}
-
 // 1722 thread
 void media_output_fifo_set_ptp_timestamp(media_output_fifo_t s0,
                                          unsigned int ptp_ts,
@@ -99,11 +88,14 @@ void media_output_fifo_set_ptp_timestamp(media_output_fifo_t s0,
     (struct ofifo_t *) s0;
 
   if (s->marker == 0) {
+	unsigned int* new_marker = s->wrptr + sample_number;
+	if (new_marker > END_OF_FIFO(s)) new_marker -= MEDIA_OUTPUT_FIFO_SAMPLE_FIFO_SIZE;
+
 	if (ptp_ts==0) ptp_ts = 1;
     s->ptp_ts = ptp_ts;
     s->local_ts = 0;
     s->sample_count_at_timestamp = s->sample_count + sample_number;
-    s->marker = s->wrptr + sample_number;
+    s->marker = new_marker;
   }
 }
 

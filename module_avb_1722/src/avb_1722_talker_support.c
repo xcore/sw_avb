@@ -75,20 +75,6 @@ static inline void AVB1722_AVBTP_HeaderGen(unsigned char Buf[],
 	SET_AVBTP_SEQUENCE_NUMBER(pAVBHdr, sequence_number);
 }
 
-/** This populates the Ethernet frame header of PTP payload.
- *  NOTE: 
- *  1. All fields in function is constants, hence, could be improved for speed.
- *  2. Source & Destination MAC address can be set via AVB1722_SetMACAdrs(..)
- *     
- *  \para   buf[] buffer array to be populated.
- */
-/*
- static void AVB1722_Ethernet_HeaderGen(unsigned char Buf[])
- {
- // Nothing to do.
- }
- */
-
 
 void avb1722_set_buffer_vlan(int vlan,
 		unsigned char Buf[])
@@ -286,6 +272,11 @@ int avb1722_create_packet(unsigned char Buf0[],
 	dbc += samples_per_fifo_packet - stream_info->samples_left_in_fifo_packet;
 
 	// Get the audio data packet information
+	// Note: see 61883-6 section 6.2 which explains that the timestamps coming out
+	// of the FIFO should refer to the data blocks which are equal to zero mod
+	// the SYT_INTERVAL.  this is implicit in our implementation, because each
+	// fifo packet is a group of data blocks, and the first sample, which carries
+	// the timestamp is index 0
 	if (stream_info->initial != 0) {
 		for (i = 0; i < num_channels; i++) {
 			int *src = (int *) media_input_fifo_get_packet(map[i], &presentationTime, &(stream_info->dbc));
@@ -296,10 +287,6 @@ int avb1722_create_packet(unsigned char Buf0[],
 		dbc = stream_info->dbc;
 		stream_info->samples_left_in_fifo_packet = samples_per_fifo_packet;
 	} else {
-#ifdef TIMESTAMP_BLOCK_MODE
-		if (stream_info->samples_left_in_fifo_packet == 0) timerValid = 1;
-#endif
-
 		if (stream_info->samples_left_in_fifo_packet < samples_in_packet) {
 			// Not enough samples left in fifo packet to fill the 1722 packet
 			// therefore pull out remaining samples and get the next packet
@@ -310,9 +297,7 @@ int avb1722_create_packet(unsigned char Buf0[],
 				src = (int *) media_input_fifo_get_packet(map[i], &presentationTime, &(stream_info->dbc));
 				media_input_fifo_set_ptr(map[i], src);
 				dest += 1;
-#ifndef TIMESTAMP_BLOCK_MODE
 				timerValid = 1;
-#endif
 			}
 			dest += (stream_info->samples_left_in_fifo_packet - 1) * num_channels;
 			samples_in_packet -= stream_info->samples_left_in_fifo_packet;
