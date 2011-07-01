@@ -42,16 +42,6 @@ void avb_srp_process_talker(int attribute_type,
                             char *fv, 
                             int num);
 
-void avb_srp_process_talker_failed(char *fv, 
-                                     int num);
-
-void avb_srp_process_listener(char *fv, 
-                             int num,
-                             int four_packed_event);
-
-void avb_srp_process_domain(char *fv, 
-                            int num);
-
 int avb_srp_compare_talker_attributes(mrp_attribute_state *a,
                                       mrp_attribute_state *b);
 
@@ -77,11 +67,17 @@ int avb_srp_match_domain(mrp_attribute_state *attr,
                          char *msg,
                          int i);
 
+//!@{
+//! \name Indications from the MRP state machine
 void avb_srp_listener_join_ind(mrp_attribute_state *attr, int new, int four_packed_event);
 void avb_srp_listener_leave_ind(mrp_attribute_state *attr, int four_packed_event);
 
 void avb_srp_talker_join_ind(mrp_attribute_state *attr, int new);
 void avb_srp_talker_leave_ind(mrp_attribute_state *attr);
+
+void avb_srp_domain_join_ind(mrp_attribute_state *attr, int new);
+void avb_srp_domain_leave_ind(mrp_attribute_state *attr);
+//!@}
 
 #endif
 

@@ -6,6 +6,8 @@
 #include <xccompat.h>
 #include "avb_internal.h"
 
+#ifdef AVB_INCLUDE_MMRP
+
 void *memcpy(void *dest, const void *src, int n);
 
 struct mmrp_entry {
@@ -79,11 +81,6 @@ void avb_leave_multicast_group(unsigned char addr[6])
   }
 }
 
-void avb_mmrp_process_mac_vector(char *buf, int num)
-{
-  return;
-}
-
 #define MIN_ETHERNET_FRAME_SIZE (64)
 int avb_mmrp_merge_message(char *buf,
                           mrp_attribute_state *st,
@@ -140,5 +137,15 @@ int avb_mmrp_match_mac_vector(mrp_attribute_state *attr,
 
   return (addr == my_addr);
 }
+
+void avb_mmrp_mac_vector_join_ind(mrp_attribute_state *attr, int new)
+{
+}
+
+void avb_mmrp_mac_vector_leave_ind(mrp_attribute_state *attr)
+{
+}
+
+#endif
 
 

@@ -71,27 +71,16 @@ int avb_srp_match_listener(mrp_attribute_state *attr,
   return (my_stream_id == stream_id);
 }
 
-int avb_srp_match_domain(mrp_attribute_state *attr,
-                         char *fv,
-                         int i)
+int avb_srp_match_domain(mrp_attribute_state *attr,char *fv,int i)
 {
-  return 0;
-}
-
-
-void
-avb_srp_process_listener(char *fv,
-                         int num,
-                         int four_packed_event) 
-{
-  return;
+	// This returns zero becauase we don't expect to have to merge/aggragate domain messages
+	return 0;
 }
 
 void avb_srp_listener_join_ind(mrp_attribute_state *attr, int new, int four_packed_event)
 {
     enum avb_source_state_t state;
 	unsigned stream = avb_get_source_stream_index_from_pointer(attr->attribute_info);
-	simple_printf("SRP: listener join stream %d\n", stream);
 	if (stream == -1u) return;
 
 	get_avb_source_state(stream, &state);
@@ -110,26 +99,20 @@ void avb_srp_listener_leave_ind(mrp_attribute_state *attr, int four_packed_event
 {
     enum avb_source_state_t state;
 	unsigned stream = avb_get_source_stream_index_from_pointer(attr->attribute_info);
-	simple_printf("SRP: listener leave stream %d\n", stream);
 	if (stream == -1u) return;
 
 	get_avb_source_state(stream, &state);
 	if (state == AVB_SOURCE_STATE_ENABLED) {
-		if (four_packed_event == AVB_SRP_FOUR_PACKED_EVENT_READY ||
-			four_packed_event == AVB_SRP_FOUR_PACKED_EVENT_READY_FAILED) {
 #ifdef SRP_AUTO_TALKER_STREAM_CONTROL
-			set_avb_source_state(stream, AVB_SOURCE_STATE_POTENTIAL);
+		set_avb_source_state(stream, AVB_SOURCE_STATE_POTENTIAL);
 #else
 #endif
-		}
 	}
 }
 
 
 void
-avb_srp_process_talker(int mrp_attribute_type,
-                       char *fv,
-                       int num)
+avb_srp_process_talker(int mrp_attribute_type, char *fv, int num)
 {
   // place the streamId in the failed_streamId global in
   // case it is a failed message
@@ -188,7 +171,7 @@ void avb_srp_talker_join_ind(mrp_attribute_state *attr, int new)
 {
 	unsigned stream = avb_get_sink_stream_index_from_pointer(attr->attribute_info);
 	if (stream != -1u) {
-
+		// This could be used to report talker advertising instead of the snooping scheme above
 	}
 }
 
@@ -196,17 +179,9 @@ void avb_srp_talker_leave_ind(mrp_attribute_state *attr)
 {
 	unsigned stream = avb_get_sink_stream_index_from_pointer(attr->attribute_info);
 	if (stream != -1u) {
-
+		// This could be used to report talker advertising instead of the snooping scheme above
 	}
 }
-
-
-void
-avb_srp_process_domain(char *fv,
-                       int num)
-{
-  return;
-} 
 
 
 void avb_srp_get_failed_stream(unsigned int streamId[2]) 
@@ -293,9 +268,19 @@ static int merge_listener_message(char *buf,
   return merge;
 }
 
+void avb_srp_domain_join_ind(mrp_attribute_state *attr, int new)
+{
+	printstr("SRP Domain join ind\n");
+}
+
+void avb_srp_domain_leave_ind(mrp_attribute_state *attr)
+{
+	printstr("SRP domain leave ind\n");
+}
 
 static int check_domain_merge(char *buf) {
-  return 0;
+	// We never both to merge domain attribute together
+	return 0;
 }
 
 static int merge_domain_message(char *buf,

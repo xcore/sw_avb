@@ -211,8 +211,13 @@ void avb_init(chanend media_ctl[],
   domain_attr = mrp_get_attr();
   mrp_attribute_init(domain_attr, MSRP_DOMAIN_VECTOR, NULL);
 
+#ifdef AVB_INCLUDE_MMRP
   avb_mmrp_init();
+#endif
+
+#ifndef AVB_EXCLUDE_MVRP
   avb_mvrp_init();
+#endif
 
   xc_abi_outuint(c_mac_tx, ETHERNET_TX_INIT_AVB_ROUTER);
 
@@ -231,9 +236,7 @@ avb_status_t avb_periodic(void) {
 
 void avb_start(void) {
   avb_1722_maap_rerequest_addresses();
-  
-  
-  //  avb_srp_domain_start();
+
   mrp_mad_begin(domain_attr);
   mrp_mad_join(domain_attr, 1);
 }
@@ -425,10 +428,10 @@ int getset_avb_source_state(int set,
             xc_abi_outuint(c, source->stream.local_id);
             (void) xc_abi_inuint(c); //ACK
 
-            simple_printf("Stream #%d active\n", source_num);
+            simple_printf("Stream #%d on\n", source_num);
           }
 #else
-          simple_printf("Stream #%d prepared\n", source_num);
+          simple_printf("Stream #%d ready\n", source_num);
 #endif
 
         }
@@ -442,13 +445,13 @@ int getset_avb_source_state(int set,
           xc_abi_outuint(c, source->stream.local_id);
           (void) xc_abi_inuint(c); //ACK
 
-          simple_printf("Stream #%d idle\n", source_num);
+          simple_printf("Stream #%d off\n", source_num);
       }
       else if (source->stream.state == AVB_SOURCE_STATE_POTENTIAL &&
                *state == AVB_SOURCE_STATE_ENABLED) {
         // start transmitting
 
-        simple_printf("Stream #%d active\n", source_num);
+        simple_printf("Stream #%d on\n", source_num);
         chanend c = source->talker_ctl;
         xc_abi_outuint(c, AVB1722_TALKER_GO);
         xc_abi_outuint(c, source->stream.local_id);
@@ -677,12 +680,12 @@ int getset_avb_sink_state(int set,
                                       sink->stream.local_id);
         }
 
-#ifndef AVB_NO_MVRP
+#ifndef AVB_EXCLUDE_MVRP
         if (sink->stream.vlan)
           avb_join_vlan(sink->stream.vlan);
 #endif
 
-#ifndef AVB_NO_MMRP
+#ifdef AVB_INCLUDE_MMRP
         if (sink->addr[0] & 1) 
           avb_join_multicast_group(sink->addr);
 #endif
@@ -702,12 +705,12 @@ int getset_avb_sink_state(int set,
 
     	  mrp_mad_leave(sink->stream.srp_listener_attr);
 
-#ifndef AVB_NO_MMRP
+#ifdef AVB_INCLUDE_MMRP
         if (sink->addr[0] & 1)
           avb_leave_multicast_group(sink->addr);
 #endif
 
-#ifndef AVB_NO_MVRP
+#ifndef AVB_EXCLUDE_MVRP
         if (sink->stream.vlan)
           avb_leave_vlan(sink->stream.vlan);
 #endif

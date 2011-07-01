@@ -9,13 +9,11 @@
 #include "avb_srp_pdu.h"
 #include "misc_timer.h"
 #include "ethernet_tx_client.h"
-#include <print.h>
-#include "simple_printf.h"
 #include "avb_internal.h"
 #include <string.h>
 
 /** \file avb_mrp.c
- *
+ *  \brief the core of the MRP protocols
  */
 
 #define MAX_MRP_MSG_SIZE (sizeof(mrp_msg_header) + sizeof(srp_talker_first_value) + 1 /* for event vector */ + sizeof(mrp_msg_footer))
@@ -23,75 +21,61 @@
 // The size of the send buffer - currently a full ethernet frame
 #define MRP_SEND_BUFFER_SIZE (1518)
 
-// Lengths of the first values for each attribute type
+//! Lengths of the first values for each attribute type
 static int first_value_lengths[MRP_NUM_ATTRIBUTE_TYPES] = FIRST_VALUE_LENGTHS;
 
+//!@{
+//! \name MAC addresses for the various protocols
+#ifdef AVB_INCLUDE_MMRP
 static unsigned char mmrp_dest_mac[6] = AVB_MMRP_MACADDR;
+#endif
+#ifndef AVB_EXCLUDE_MVRP
 static unsigned char mvrp_dest_mac[6] = AVB_MVRP_MACADDR;
+#endif
 static unsigned char srp_proper_dest_mac[6] = AVB_SRP_MACADDR;
 static unsigned char srp_legacy_dest_mac[6] = AVB_SRP_LEGACY_MACADDR;
+//!@}
 
-// Buffer for constructing MRPDUs.  Note: It doesn't necessarily have to be this big,
-// we could always make it shorter and just send more packets.
+//! Buffer for constructing MRPDUs.  Note: It doesn't necessarily have to be this big,
+//! we could always make it shorter and just send more packets.
 static char send_buf[MRP_SEND_BUFFER_SIZE];
 
-// Array of attribute control structures
+//! Array of attribute control structures
 static mrp_attribute_state attrs[MRP_MAX_ATTRS];
 
-// when sorting the attributes, this points to the head of the list.  attributes
-// need to be sorted so that they can be merged into vectors in the MRP messages
+//! when sorting the attributes, this points to the head of the list.  attributes
+//! need to be sorted so that they can be merged into vectors in the MRP messages
 static mrp_attribute_state *first_attr = &attrs[0];
 
-// The end of the under-construction MRP packet
+//! The end of the under-construction MRP packet
 static char *send_ptr= &send_buf[0] + sizeof(mrp_ethernet_hdr) + sizeof(mrp_header);
 
-// The ethertype of the packet under construction - we could probably eliminate this
-// since the information is in the packet anyway
+//! The ethertype of the packet under construction - we could probably eliminate this
+//! since the information is in the packet anyway
 static int current_etype = 0;
 
-// Legacy mode changes the destination MAC addresses
+//! Legacy mode changes the destination MAC addresses
 static int legacy_mode = 0;
 
+//!@{
+//! \name Timers for the MRP state machines
 static avb_timer periodic_timer;
 static avb_timer joinTimer;
 static avb_timer leaveall_timer;
+//!@}
 
 
 
 
 
-static void configure_send_buffer_msrp() {
+static void configure_send_buffer(unsigned char* addr, short etype) {
   mrp_ethernet_hdr* hdr = (mrp_ethernet_hdr *) &send_buf[0];
-
-  if (legacy_mode) 
-    memcpy(&hdr->dest_addr, srp_legacy_dest_mac, 6);
-  else
-    memcpy(&hdr->dest_addr, srp_proper_dest_mac, 6);
-  
-  hdr->ethertype[0] = (AVB_SRP_ETHERTYPE >> 8);
-  hdr->ethertype[1] = AVB_SRP_ETHERTYPE & 0xff;
-  current_etype = AVB_SRP_ETHERTYPE;
+  memcpy(&hdr->dest_addr, addr, 6);
+  hdr->ethertype[0] = (etype >> 8);
+  hdr->ethertype[1] = etype & 0xff;
+  current_etype = etype;
 }
 
-static void configure_send_buffer_mmrp() {
-  mrp_ethernet_hdr* hdr = (mrp_ethernet_hdr *) &send_buf[0];
-
-  memcpy(&hdr->dest_addr, mmrp_dest_mac, 6);
-  
-  hdr->ethertype[0] = (AVB_MMRP_ETHERTYPE >> 8);
-  hdr->ethertype[1] = AVB_MMRP_ETHERTYPE & 0xff;
-  current_etype = AVB_MMRP_ETHERTYPE;
-}
-
-static void configure_send_buffer_mvrp() {
-  mrp_ethernet_hdr* hdr = (mrp_ethernet_hdr *) &send_buf[0];
-
-  memcpy(&hdr->dest_addr, mvrp_dest_mac, 6);
-  
-  hdr->ethertype[0] = (AVB_MVRP_ETHERTYPE >> 8);
-  hdr->ethertype[1] = AVB_MVRP_ETHERTYPE & 0xff;
-  current_etype = AVB_MVRP_ETHERTYPE;
-}
 
 // in legacy mode we use different destination mac addresses
 void avb_mrp_set_legacy_mode(int mode)
@@ -108,7 +92,7 @@ unsigned attribute_length_length(mrp_msg_header* hdr)
 // fields.  we build the packets with these fields present (simpler
 // to do) then strip them afterwards.  MVRP and MMRP are two
 // protocols that do not contain these fields.
-void strip_attribute_list_length_fields()
+static void strip_attribute_list_length_fields()
 {
 	if (current_etype != AVB_SRP_ETHERTYPE) {
 		char *msg = &send_buf[0]+sizeof(mrp_ethernet_hdr)+sizeof(mrp_header);
@@ -208,7 +192,6 @@ static unsigned int makeTxEvent(mrp_event e, mrp_attribute_state *st, int leave_
     case MRP_AN:
       //sN
       firstEvent = MRP_ATTRIBUTE_EVENT_NEW;
-      //      __asm__("ecallf %0"::"r"(0));
       break;
     case MRP_LA:
       //sL
@@ -295,15 +278,7 @@ static int encode_attr_type(mrp_attribute_type attr)
 }
 
 static int has_fourpacked_events(mrp_attribute_type attr) {
-  switch (attr) {  
-  case MSRP_LISTENER:
-    return 1;
-    break;
-  default:
-    return 0;
-    break;
-  }
-  return 0;
+  return (attr == MSRP_LISTENER) ? 1 : 0;
 }
 
 static int encode_three_packed(int event, int i, int vector)
@@ -421,12 +396,16 @@ static int merge_msg(char *msg, mrp_attribute_state* st, int vector)
     case MSRP_DOMAIN_VECTOR:             
       return avb_srp_merge_message(msg, st, vector);
       break;
+#ifdef AVB_INCLUDE_MMRP
     case MMRP_MAC_VECTOR:
       return avb_mmrp_merge_message(msg, st, vector);
       break;
+#endif
+#ifndef AVB_EXCLUDE_MVRP
     case MVRP_VID_VECTOR:
       return avb_mvrp_merge_message(msg, st, vector);
       break;
+#endif
   }
   return 0;
 }
@@ -717,8 +696,6 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
     default:
       break;
     }
-
-  //  simple_printf("Update state out: %d\n", st->applicant_state);
 }
 
 
@@ -930,6 +907,19 @@ static void send_join_indication(mrp_attribute_state *st, int new, int four_pack
   case MSRP_LISTENER:
 	  avb_srp_listener_join_ind(st, new, four_packed_event);
 	  break;
+  case MSRP_DOMAIN_VECTOR:
+	  avb_srp_domain_join_ind(st, new);
+	  break;
+#ifdef AVB_INCLUDE_MMRP
+  case MMRP_MAC_VECTOR:
+	  avb_mmrp_mac_vector_join_ind(st, new);
+	  break;
+#endif
+#ifndef AVB_EXCLUDE_MVRP
+  case MVRP_VID_VECTOR:
+	  avb_mvrp_vid_vector_join_ind(st, new);
+	  break;
+#endif
   }
 }
 
@@ -945,6 +935,19 @@ static void send_leave_indication(mrp_attribute_state *st, int four_packed_event
   case MSRP_LISTENER:
 	  avb_srp_listener_leave_ind(st, four_packed_event);
 	  break;
+  case MSRP_DOMAIN_VECTOR:
+	  avb_srp_domain_leave_ind(st);
+	  break;
+#ifdef AVB_INCLUDE_MMRP
+  case MMRP_MAC_VECTOR:
+	  avb_mmrp_mac_vector_leave_ind(st);
+	  break;
+#endif
+#ifndef AVB_EXCLUDE_MVRP
+  case MVRP_VID_VECTOR:
+	  avb_mvrp_vid_vector_leave_ind(st);
+	  break;
+#endif
   }
 }
 
@@ -971,7 +974,8 @@ avb_status_t mrp_periodic()
 		mrp_event tx_event = leave_all ? MRP_EVENT_TX_LEAVE_ALL : MRP_EVENT_TX;
 		start_avb_timer(&joinTimer, MRP_JOINTIMER_PERIOD_CENTISECONDS);
 		sort_attrs();
-		configure_send_buffer_msrp();
+
+		configure_send_buffer(legacy_mode==1?srp_legacy_dest_mac:srp_proper_dest_mac, AVB_SRP_ETHERTYPE);
 		if (leave_all) {
 			create_empty_msg(MSRP_TALKER_ADVERTISE, 1);  send(c_tx);
 			create_empty_msg(MSRP_TALKER_FAILED, 1);  send(c_tx);
@@ -983,19 +987,24 @@ avb_status_t mrp_periodic()
 		attribute_type_event(MSRP_DOMAIN_VECTOR, tx_event);
 		force_send(c_tx);
 
-		configure_send_buffer_mmrp();
+#ifdef AVB_INCLUDE_MMRP
+		configure_send_buffer(mmrp_dest_mac,AVB_MMRP_ETHERTYPE);
 		if (leave_all) {
 			create_empty_msg(MMRP_MAC_VECTOR, 1); send(c_tx);
 		}
 		attribute_type_event(MMRP_MAC_VECTOR, tx_event);
 		force_send(c_tx);
+#endif
 
-		configure_send_buffer_mvrp();
+#ifndef AVB_EXCLUDE_MVRP
+		configure_send_buffer(mvrp_dest_mac, AVB_MVRP_ETHERTYPE);
 		if (leave_all) {
 			create_empty_msg(MVRP_VID_VECTOR, 1); send(c_tx);
 		}
 		attribute_type_event(MVRP_VID_VECTOR, tx_event);
 		force_send(c_tx);
+#endif
+
 		leave_all = 0;
 	}
 
@@ -1087,10 +1096,14 @@ static int msg_match(mrp_attribute_type attr_type,
     return avb_srp_match_listener(attr, msg, i, four_packed_event);
   case MSRP_DOMAIN_VECTOR:
     return avb_srp_match_domain(attr, msg, i);
+#ifdef AVB_INCLUDE_MMRP
   case MMRP_MAC_VECTOR:
     return avb_mmrp_match_mac_vector(attr, msg, i);
+#endif
+#ifndef AVB_EXCLUDE_MVRP
   case MVRP_VID_VECTOR:
     return avb_mvrp_match_vid_vector(attr, msg, i);
+#endif
   default:
 	return 0;
   }
@@ -1107,18 +1120,6 @@ static void process(mrp_attribute_type attr_type,
   case MSRP_TALKER_ADVERTISE:   
   case MSRP_TALKER_FAILED:
     avb_srp_process_talker(attr_type, msg, i);
-    return;
-  case MSRP_LISTENER:
-    avb_srp_process_listener(msg, i, four_packed_event);
-    return;
-  case MSRP_DOMAIN_VECTOR:
-    avb_srp_process_domain(msg, i);
-    return;
-  case MMRP_MAC_VECTOR:
-    avb_mmrp_process_mac_vector(msg, i);
-    return;
-  case MVRP_VID_VECTOR:
-    avb_mvrp_process_vid_vector(msg, i);
     return;
   default:
 	return;
@@ -1152,7 +1153,6 @@ avb_status_t avb_mrp_process_packet(unsigned int buf[], int len)
   char *end = (char *) &buf[0] + len;
   char *msg = (char *) &buf[0] + sizeof(mrp_ethernet_hdr) + sizeof(mrp_header);
   avb_status_t status = AVB_NO_STATUS;
-  int invalid_message = 0;
 
   if (etype == AVB_SRP_ETHERTYPE ||
       etype == AVB_MMRP_ETHERTYPE ||
@@ -1181,32 +1181,32 @@ avb_status_t avb_mrp_process_packet(unsigned int buf[], int len)
         int threepacked_len = (numvalues+2)/3;
         int fourpacked_len = has_fourpacked_events(attr_type)?(numvalues+3)/4:0;
         int len = sizeof(mrp_vector_header) + first_value_len + threepacked_len + fourpacked_len;
-
-        //! TODO Validate len/numvalues field against defined/sensible attribute lengths
         
+        // Check to see that it isn't asking us to overrun the buffer
+        if (msg + len > end) return status;
+
         if (leave_all) {
           attribute_type_event(attr_type, MRP_EVENT_RECEIVE_LEAVE_ALL);
         }
         
-        for (int i=0;i<numvalues && !invalid_message;i++) {       
-          int three_packed_event = 
-            decode_threepacked(*(first_value + first_value_len + i/3), i%3);
-          int four_packed_event = 
-            has_fourpacked_events(attr_type) ?
-            decode_fourpacked(*(first_value + first_value_len + threepacked_len + i/4),
-                              i%4):
-            0;
+        for (int i=0;i<numvalues;i++) {
 
-          process(attr_type, first_value, i, 
-                  three_packed_event, four_packed_event);
+        	// Get the three packed data out of the vector
+        	int three_packed_event = decode_threepacked(*(first_value + first_value_len + i/3), i%3);
 
-          for (int j=0;j<MRP_MAX_ATTRS;j++) {
-            if (msg_match(attr_type, &attrs[j], first_value, i, 
-                          three_packed_event,
-                          four_packed_event)) {
-              mrp_in(three_packed_event, four_packed_event, &attrs[j]);
-            }
-          }
+        	// Get the four packed data out of the vector
+        	int four_packed_event = has_fourpacked_events(attr_type) ?
+        		decode_fourpacked(*(first_value + first_value_len + threepacked_len + i/4),i%4) : 0;
+
+        	// This allows various modules to snoop on the individual message
+        	process(attr_type, first_value, i, three_packed_event, four_packed_event);
+
+        	// This allows the application state machines to respond to the message
+        	for (int j=0;j<MRP_MAX_ATTRS;j++) {
+        		if (msg_match(attr_type, &attrs[j], first_value, i, three_packed_event, four_packed_event)) {
+        			mrp_in(three_packed_event, four_packed_event, &attrs[j]);
+        		}
+        	}
         }
         msg = msg + len;
       }

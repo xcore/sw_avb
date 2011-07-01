@@ -7,6 +7,8 @@
 #include "avb_internal.h"
 #include "print.h"
 
+#ifndef AVB_EXCLUDE_MVRP
+
 void *memcpy(void *dest, const void *src, int n);
 
 struct mvrp_entry {
@@ -71,14 +73,6 @@ void avb_leave_vlan(int vlan)
   }
 }
 
-
-void avb_mvrp_process_vid_vector(char *buf, int num)
-{
-  return;
-}
-
-
-
 int avb_mvrp_merge_message(char *buf,
                           mrp_attribute_state *st,
                           int vector)
@@ -128,4 +122,14 @@ int avb_mvrp_match_vid_vector(mrp_attribute_state *attr,
 
   return (vlan == *my_vlan);
 }
+
+void avb_mvrp_vid_vector_join_ind(mrp_attribute_state *attr, int new)
+{
+}
+
+void avb_mvrp_vid_vector_leave_ind(mrp_attribute_state *attr)
+{
+}
+
+#endif
 
