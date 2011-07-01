@@ -32,6 +32,13 @@ static char *send_ptr= &send_buf[0] + sizeof(mrp_ethernet_hdr) + sizeof(mrp_head
 static int current_etype = 0;
 static int legacy_mode = 0;
 
+static avb_timer periodic_timer;
+static avb_timer joinTimer;
+static avb_timer leaveall_timer;
+
+
+
+
 
 static void configure_send_buffer_msrp() {
   mrp_ethernet_hdr* hdr = (mrp_ethernet_hdr *) &send_buf[0];
@@ -66,12 +73,16 @@ static void configure_send_buffer_mvrp() {
   current_etype = AVB_MVRP_ETHERTYPE;
 }
 
+// in legacy mode we use different destination mac addresses
 void avb_mrp_set_legacy_mode(int mode)
 {
   legacy_mode = 1;
 } 
 
 
+// this forces the sending of the current PDU.  this happens when
+// that PDU has had all of the attributes that it is going to get,
+// or when adding an attribute has filled the PDU up.
 static void force_send(chanend c_tx)
 {
   char *buf = &send_buf[0];
@@ -88,6 +99,9 @@ static void force_send(chanend c_tx)
   return;
 }
 
+// this considers whether the send a PDU after an attribute has been
+// added, but does not if other attributes could potentially be added
+// to it.
 static void send(chanend c_tx)
 {
   int max_msg_size = MAX_MRP_MSG_SIZE;
@@ -99,15 +113,7 @@ static void send(chanend c_tx)
   }
 }
 
-static avb_timer periodic_timer;
-static avb_timer joinTimer;
 
-#ifdef MRP_FULL_PARTICIPANT
-static avb_timer leaveall_timer;
-#endif
-
-
- 
 static unsigned int makeTxEvent(mrp_event e, mrp_attribute_state *st, int leave_all)
 {
   int firstEvent = 0;

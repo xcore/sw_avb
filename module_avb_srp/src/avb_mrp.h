@@ -13,12 +13,14 @@
  *  MRP (from 802.1ak) is the Multiple Registration Protocol which
  *  allows units in an 802.1 LAN to register attributes with other
  *  nodes.  It is used, in this case, for registering membership of
- *  VLANs and Multicast groups.
+ *  VLANs and Multicast groups, and making and withdrawing stream
+ *  reservations.
  *
  *  Switches in the LAN will respond to this protocol and update
  *  whatever tables are necessary to ensure that the node receives
  *  the correct traffic.
  */
+
 #ifndef MRP_MAX_ATTRS
 // There are 3 attributes per stream (talker_advertise, talker_failed
 // and listener). Therefore the number of attributes needed is:
