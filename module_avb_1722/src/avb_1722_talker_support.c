@@ -49,8 +49,13 @@ static inline void AVB1722_AVBTP_HeaderGen(unsigned char Buf[],
 	// work out the packet data length
 	// **** WARNING ****
 	// Assume FOUR bytes is used to represent one audio sample, regardless of
-	// actual sample bits, valid for 61883-6/AVB1722
-	pkt_data_length = 8 + (numAudioSamples << 2);
+	// actual sample bits, valid for 61883-6/AVB1722.  This should probably
+	// be a lookup in a table based on the format identifier.
+#ifdef AVB_1722_SAF
+	pkt_data_length = (numAudioSamples << 2);
+#else
+	pkt_data_length = AVB_CIP_HDR_SIZE + (numAudioSamples << 2);
+#endif
 	HTON_U16(pAVBHdr->packet_data_length, pkt_data_length);
 
 	// only stamp the AVBTP timestamp when required.
@@ -66,7 +71,7 @@ static inline void AVB1722_AVBTP_HeaderGen(unsigned char Buf[],
 	// (ignoring the fact that talkerStreamIdExt is stored MSB-first - it's just an ID)
 	SET_AVBTP_STREAM_ID0(pAVBHdr, stream_id0);
 
-	// update the
+	// update the ...
 	SET_AVBTP_SEQUENCE_NUMBER(pAVBHdr, sequence_number);
 }
 
@@ -154,6 +159,7 @@ void AVB1722_Talker_bufInit(unsigned char Buf0[],
 	SET_AVBTP_SV(pAVBHdr, 1); // set stream ID to valid.
 	SET_AVBTP_STREAM_ID0(pAVBHdr, pStreamConfig->streamId[0]);
 	SET_AVBTP_STREAM_ID1(pAVBHdr, pStreamConfig->streamId[1]);
+
 	// set pkt data length.
 	SET_AVBTP_PACKET_DATA_LENGTH(pAVBHdr, AVB1722_DEFAULT_AVB_PKT_DATA_LENGTH);
 
