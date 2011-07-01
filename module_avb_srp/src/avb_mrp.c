@@ -14,22 +14,42 @@
 #include "avb_internal.h"
 #include <string.h>
 
+/** \file avb_mrp.c
+ *
+ */
 
 #define MAX_MRP_MSG_SIZE (sizeof(mrp_msg_header) + sizeof(srp_talker_first_value) + 1 /* for event vector */ + sizeof(mrp_msg_footer))
 
+// The size of the send buffer - currently a full ethernet frame
+#define MRP_SEND_BUFFER_SIZE (1518)
+
+// Lengths of the first values for each attribute type
 static int first_value_lengths[MRP_NUM_ATTRIBUTE_TYPES] = FIRST_VALUE_LENGTHS;
 
 static unsigned char mmrp_dest_mac[6] = AVB_MMRP_MACADDR;
 static unsigned char mvrp_dest_mac[6] = AVB_MVRP_MACADDR;
 static unsigned char srp_proper_dest_mac[6] = AVB_SRP_MACADDR;
 static unsigned char srp_legacy_dest_mac[6] = AVB_SRP_LEGACY_MACADDR;
-static char send_buf[1518];
 
+// Buffer for constructing MRPDUs.  Note: It doesn't necessarily have to be this big,
+// we could always make it shorter and just send more packets.
+static char send_buf[MRP_SEND_BUFFER_SIZE];
+
+// Array of attribute control structures
 static mrp_attribute_state attrs[MRP_MAX_ATTRS];
+
+// when sorting the attributes, this points to the head of the list.  attributes
+// need to be sorted so that they can be merged into vectors in the MRP messages
 static mrp_attribute_state *first_attr = &attrs[0];
 
+// The end of the under-construction MRP packet
 static char *send_ptr= &send_buf[0] + sizeof(mrp_ethernet_hdr) + sizeof(mrp_header);
+
+// The ethertype of the packet under construction - we could probably eliminate this
+// since the information is in the packet anyway
 static int current_etype = 0;
+
+// Legacy mode changes the destination MAC addresses
 static int legacy_mode = 0;
 
 static avb_timer periodic_timer;
@@ -77,8 +97,34 @@ static void configure_send_buffer_mvrp() {
 void avb_mrp_set_legacy_mode(int mode)
 {
   legacy_mode = 1;
-} 
+}
 
+unsigned attribute_length_length(mrp_msg_header* hdr)
+{
+    return (hdr->AttributeListLength[0]<<8) + hdr->AttributeListLength[1];
+}
+
+// some MRP based applications do not have attribute list length
+// fields.  we build the packets with these fields present (simpler
+// to do) then strip them afterwards.  MVRP and MMRP are two
+// protocols that do not contain these fields.
+void strip_attribute_list_length_fields()
+{
+	if (current_etype != AVB_SRP_ETHERTYPE) {
+		char *msg = &send_buf[0]+sizeof(mrp_ethernet_hdr)+sizeof(mrp_header);
+		char *end = send_ptr;
+		while (msg < end && (msg[0]!=0 || msg[1]!=0)) {
+			mrp_msg_header* hdr = (mrp_msg_header*)msg;
+			char* next = (char*)(hdr+1) + attribute_length_length(hdr);
+
+			for (char* c=(char*)hdr->AttributeListLength; c<end-2; ++c) *c = *(c+2);
+
+			end -= 2;
+			msg = next - 2;
+		}
+		send_ptr = end;
+	}
+}
 
 // this forces the sending of the current PDU.  this happens when
 // that PDU has had all of the attributes that it is going to get,
@@ -87,12 +133,20 @@ static void force_send(chanend c_tx)
 {
   char *buf = &send_buf[0];
   char *ptr = send_ptr;
+
+  // Strip out attribute length fields for MMRP and MVRP
+  strip_attribute_list_length_fields();
+
   if (ptr != buf+sizeof(mrp_ethernet_hdr)+sizeof(mrp_header)) {
+
+	// Check that the buffer is long enough for a valid ethernet packet
     char *end = ptr + 4;
-    if (end < buf + 64)
-      end = buf + 64;
-    for (char *p = ptr;p<end;p++)
-      *p = 0;
+    if (end < buf + 64) end = buf + 64;
+
+    // Pad with zero if necessary
+    for (char *p = ptr;p<end;p++) *p = 0;
+
+    // Transmit
     mac_tx(c_tx, (unsigned int *) buf, end - buf, ETH_BROADCAST);
   }
   send_ptr = buf+sizeof(mrp_ethernet_hdr)+sizeof(mrp_header);
@@ -104,11 +158,8 @@ static void force_send(chanend c_tx)
 // to it.
 static void send(chanend c_tx)
 {
-  int max_msg_size = MAX_MRP_MSG_SIZE;
-  int bufsize = 1518;
-  char *buf = &send_buf[0];
-  char *ptr = send_ptr;
-  if (buf + bufsize < ptr + max_msg_size + sizeof(mrp_footer)) {
+  // Send only when the buffer is full
+  if (send_buf + MRP_SEND_BUFFER_SIZE < send_ptr + MAX_MRP_MSG_SIZE + sizeof(mrp_footer)) {
     force_send(c_tx);
   }
 }
@@ -273,9 +324,7 @@ void mrp_encode_three_packed_event(char *buf,
   int first_value_length =  first_value_lengths[attr];  
   char *vector = buf + sizeof(mrp_msg_header) + sizeof(mrp_vector_header) + first_value_length + num_values/3;
   int shift_required = (num_values % 3 == 0);
-  unsigned attr_list_length = (hdr->AttributeListLength[0]<<8) + 
-    hdr->AttributeListLength[1];
-
+  unsigned attr_list_length = attribute_length_length(hdr);
 
 
   if (shift_required) {
@@ -314,8 +363,7 @@ void mrp_encode_four_packed_event(char *buf,
   int first_value_length =  first_value_lengths[attr];  
   char *vector = buf + sizeof(mrp_msg_header) + sizeof(mrp_vector_header) + first_value_length + (num_values+3)/3 + num_values/4 ;
   int shift_required = (num_values % 4 == 0);
-  unsigned attr_list_length = (hdr->AttributeListLength[0]<<8) + 
-    hdr->AttributeListLength[1];
+  unsigned attr_list_length = attribute_length_length(hdr);
 
 
 
@@ -343,7 +391,6 @@ static void create_empty_msg(mrp_attribute_type attr, int leave_all) {
   mrp_msg_header *hdr = (mrp_msg_header *) send_ptr;  
   mrp_vector_header *vector_hdr = (mrp_vector_header *) (send_ptr + sizeof(mrp_msg_header));
   int hdr_length = sizeof(mrp_msg_header);
-  //  int vector_length = has_fourpacked_events(attr) ? 2 : 1;
   int vector_length = 0;
   int first_value_length =  first_value_lengths[attr];
   int attr_list_length = first_value_length + sizeof(mrp_vector_header)  + vector_length + sizeof(mrp_footer);
@@ -395,16 +442,11 @@ static void doTx(mrp_attribute_state *st,
   while (!merged &&
          msg < end && 
          (*msg != 0 || *(msg+1) != 0)) {      
-    mrp_msg_header *hdr = (mrp_msg_header *) &msg[0];     
-    unsigned attr_list_len;
+    mrp_msg_header *hdr = (mrp_msg_header *) &msg[0];
 
     merged = merge_msg(msg, st, vector);
-
-    attr_list_len = 
-      (hdr->AttributeListLength[0]<<8) + 
-      hdr->AttributeListLength[1];
     
-    msg = msg + sizeof(mrp_msg_header) + attr_list_len;
+    msg = msg + sizeof(mrp_msg_header) + attribute_length_length(hdr);
   }   
 
   if (!merged) {
@@ -1117,23 +1159,19 @@ avb_status_t avb_mrp_process_packet(unsigned int buf[], int len)
       etype == AVB_MVRP_ETHERTYPE) {
 	status = AVB_1722_1_OK;
 
-    while (!invalid_message && 
-           msg < end && 
-           (*msg != 0 || *(msg+1) != 0)) {      
+    while (msg < end && (msg[0]!=0 || msg[1]!=0)) {
       mrp_msg_header *hdr = (mrp_msg_header *) &msg[0];     
-      unsigned attr_list_len = (hdr->AttributeListLength[0]<<8) + 
-                                hdr->AttributeListLength[1];
+
       unsigned first_value_len = hdr->AttributeLength;
-      char *next_msg = msg + sizeof(mrp_msg_header) + attr_list_len;
       int attr_type = decode_attr_type(etype, hdr->AttributeType);
+      if (attr_type==-1) return status;
+
       msg = msg + sizeof(mrp_msg_header);
 
-      if (attr_type==-1)
-        invalid_message = 1;
+      // non-SRP headers don't contain the AttributeListLength
+      if (etype != AVB_SRP_ETHERTYPE) msg -= 2;
       
-      while (!invalid_message && 
-             msg < next_msg && 
-             (*msg != 0 || *(msg+1) != 0)) {
+      while (msg < end && (msg[0]!=0 || msg[1]!=0)) {
         mrp_vector_header *vector_hdr = (mrp_vector_header *) msg;
         char *first_value = msg + sizeof(mrp_vector_header);
         int numvalues = 
@@ -1141,8 +1179,7 @@ avb_status_t avb_mrp_process_packet(unsigned int buf[], int len)
           (vector_hdr->NumberOfValuesLow);
         int leave_all = (vector_hdr->LeaveAllEventNumberOfValuesHigh & 0xe0)>>5;
         int threepacked_len = (numvalues+2)/3;
-        int fourpacked_len = 
-          has_fourpacked_events(attr_type)?(numvalues+3)/4:0;
+        int fourpacked_len = has_fourpacked_events(attr_type)?(numvalues+3)/4:0;
         int len = sizeof(mrp_vector_header) + first_value_len + threepacked_len + fourpacked_len;
 
         //! TODO Validate len/numvalues field against defined/sensible attribute lengths
@@ -1173,7 +1210,7 @@ avb_status_t avb_mrp_process_packet(unsigned int buf[], int len)
         }
         msg = msg + len;
       }
-      msg = next_msg;
+      msg += 2;
     }
   }
  
