@@ -64,6 +64,7 @@ unsigned int REGRD(unsigned reg, struct r_i2c &r_i2c)
 	return data.data[0];
 }
 
+static const char error_msg[] = "CS42448 Config Failed";
 
 void audio_codec_CS42448_init(out port AUD_RESET_N, 
                               struct r_i2c &r_i2c,
@@ -92,7 +93,7 @@ void audio_codec_CS42448_init(out port AUD_RESET_N,
    }
    
    if (res == 0) {
-	   printstr("CS42448 CODEC Failed on CODEC_FUNCTIONAL_MODE\n");
+	   printstr(error_msg);
 	   return;
    }
 
@@ -108,7 +109,7 @@ void audio_codec_CS42448_init(out port AUD_RESET_N,
    }
    
    if (res == 0) {
-	   printstr("CS42448 CODEC Failed on CODEC_INTERFACE_FORMATS\n");
+	   printstr(error_msg);
 	   return;
    }
 
@@ -122,28 +123,28 @@ void audio_codec_CS42448_init(out port AUD_RESET_N,
    // AIN6_MUX = 0
    res = REGWR(CODEC_ADC_CONTROL, 0b00011100, r_i2c);
    if (res == 0) {
-	   printstr("CS42448 CODEC Failed on CODEC_ADC_CONTROL\n");
+	   printstr(error_msg);
 	   return;
    }
 
    // -10dB attenuation for input
    res = REGWR(CODEC_ADC_CONTROL, 0b11101100, r_i2c);
    if (res == 0) {
-	   printstr("CS42448 CODEC Failed on CODEC_ADC_CONTROL\n");
+	   printstr(error_msg);
 	   return;
    }
 
    // Use same volume control for all inputs and all outputs
    res = REGWR(CODEC_TRANSITION_CONTROL, 0b10110101, r_i2c);
    if (res == 0) {
-	   printstr("CS42448 CODEC Failed on CODEC_TRANSITION_CONTROL\n");
+	   printstr(error_msg);
 	   return;
    }
 
    // -3dB attenuation on inputs
    res = REGWR(CODEC_VOL_AIN_1, 0b11111010, r_i2c);
    if (res == 0) {
-	   printstr("CS42448 CODEC Failed on CODEC_VOL_AIN_1\n");
+	   printstr(error_msg);
 	   return;
    }
 }

@@ -18,7 +18,6 @@
 #include "avb_unit.h"
 #include "mac_custom_filter.h"
 #include "avb_conf.h"
-#include "simple_printf.h"
 
 // Max. packet size for AVB AVB1722 listener
 #if AVB_1722_SAF

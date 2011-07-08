@@ -9,7 +9,6 @@
 #include "hwlock.h"
 #include "string.h"
 #include "avb_1722_router_table.h"
-#include "simple_printf.h"
 
 typedef struct avb_1722_router_table_entry_t 
 {

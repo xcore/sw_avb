@@ -5,7 +5,6 @@
 #include "avb_srp_pdu.h"
 #include "avb_stream.h"
 #include "avb_1722_talker.h"
-#include "simple_printf.h"
 #include <print.h>
 #include "avb_stream_detect.h"
 #include "avb_control_types.h"
@@ -270,12 +269,12 @@ static int merge_listener_message(char *buf,
 
 void avb_srp_domain_join_ind(mrp_attribute_state *attr, int new)
 {
-	printstr("SRP Domain join ind\n");
+	//printstr("SRP Domain join ind\n");
 }
 
 void avb_srp_domain_leave_ind(mrp_attribute_state *attr)
 {
-	printstr("SRP domain leave ind\n");
+	//printstr("SRP domain leave ind\n");
 }
 
 static int check_domain_merge(char *buf) {

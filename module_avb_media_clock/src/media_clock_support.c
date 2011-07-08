@@ -23,7 +23,6 @@
 #include "media_clock_client.h"
 #include "misc_timer.h"
 #include <print.h>
-#include "simple_printf.h"
 
 #define NANO_SECOND 1000000000
 

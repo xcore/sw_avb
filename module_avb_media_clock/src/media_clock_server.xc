@@ -327,7 +327,6 @@ void media_clock_server(chanend media_clock_ctl,
               (void) inct(buf_ctl[i]);
               break;
             default:
-              printstr("buf_ctl_server: unknown cmd\n");
               break;
             }
           break;          

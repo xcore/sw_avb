@@ -1,7 +1,6 @@
 #include <xs1.h>
 #include "gptp.h"
 #include "gptp_cmd.h"
-#include "simple_printf.h"
 
 static void send_cmd(chanend c, char cmd)
 {

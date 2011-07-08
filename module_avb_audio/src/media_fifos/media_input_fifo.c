@@ -1,7 +1,6 @@
 #include "media_input_fifo.h"
 #include "hwlock.h"
 #include "avb_1722_def.h"
-#include "simple_printf.h"
 
 static hwlock_t enable_lock;
 unsigned int enable_request_state = 0;

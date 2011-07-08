@@ -924,37 +924,7 @@ static void send_ptp_sync_msg(chanend c_tx)
   // populate the time in packet
   local_to_ptp_ts(&ptp_egress_ts, local_egress_ts);
   
-  /** DEBUG **/
-#if 0
-  {
-	  static int last_local_egress_ts=0;
-	  static ptp_timestamp last_ptp_egress_ts;
-	  int fail=0;
-	  if (((int)local_egress_ts - last_local_egress_ts) > (200000000>>3))
-	  {
-		  fail =1;
-	  }
-	  if (ptp_egress_ts.seconds[0] - last_ptp_egress_ts.seconds[0] > 1 ||
-	      ptp_egress_ts.seconds[1] - last_ptp_egress_ts.seconds[1] > 1)
-	  {
-		  fail = 1;
-	  }
-	  if (fail)
-	  {
-		  simple_printf("PTP FAILURE: Port egress times: this->%d  last->%d\n", local_egress_ts, last_local_egress_ts);
-
-		  simple_printf("             PTP egress times: this->%d,%d,%d  last->%d,%d,%d\n",
-				  ptp_egress_ts.seconds[0], ptp_egress_ts.seconds[1], ptp_egress_ts.nanoseconds,
-				  last_ptp_egress_ts.seconds[0], last_ptp_egress_ts.seconds[1], last_ptp_egress_ts.nanoseconds
-				  );
-	  }
-	  last_local_egress_ts = local_egress_ts;
-	  last_ptp_egress_ts = ptp_egress_ts;
-  }
-#endif
-
-  timestamp_to_network(&pFollowUpMesg->preciseOriginTimestamp,
-                       &ptp_egress_ts);
+  timestamp_to_network(&pFollowUpMesg->preciseOriginTimestamp, &ptp_egress_ts);
 
   // Fill in follow up fields as per 802.1as section 11.4.4.2
   pFollowUpMesg->tlvType = hton16(0x3);
@@ -1316,30 +1286,6 @@ void ptp_periodic(chanend c_tx, unsigned t) {
     send_ptp_pdelay_req_msg(c_tx);
     last_pdelay_req_time = t;
   }
-
-
-
-#ifdef GPTP_DEBUG
-  if (timeafter(t, last_debug_time + 400000000)) {
-
-    simple_printf("\n\nref local_ts: %d\nref ptp_ts: %d.%d\n\n\n",
-                  ptp_reference_local_ts,
-                  ptp_reference_ptp_ts.seconds[0],
-                  ptp_reference_ptp_ts.nanoseconds);
-                  
-
-    if (ptp_path_delay_valid) {
-      long long ptp_adjust_frac;
-      int abs_adjust;
-
-      abs_adjust = ptp_adjust < 0 ? -ptp_adjust : ptp_adjust;
-
-      printstr("  delay:   ");printintln(ptp_path_delay);
-      printstr("  adjust:   ");printhexln(ptp_adjust);
-    }
-    last_debug_time = t;
-  }
-#endif  
 
   periodic_update_reference_timestamps(t);
   return;

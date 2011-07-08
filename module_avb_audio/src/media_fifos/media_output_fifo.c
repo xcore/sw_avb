@@ -3,7 +3,6 @@
 #include "media_output_fifo.h"
 #include "avb_1722_def.h"
 #include "media_clock_client.h"
-#include "simple_printf.h"
 
 #define OUTPUT_DURING_LOCK 1
 #define NOTIFICATION_PERIOD 250
@@ -304,7 +303,6 @@ media_output_fifo_handle_buf_ctl(chanend buf_ctl,
       *buf_ctl_notified = 0;
       break;
     default:
-      printstr("media_output_fifo_buffer: unknown buf_ctl command!\n");
       break;
     }            
   return;

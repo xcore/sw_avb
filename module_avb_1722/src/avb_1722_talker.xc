@@ -16,7 +16,6 @@
 #include "ethernet_rx_client.h"
 #include "avb_srp.h"
 #include "avb_unit.h"
-#include "simple_printf.h"
 #include "avb_conf.h"
 
 #if AVB_NUM_SOURCES != 0

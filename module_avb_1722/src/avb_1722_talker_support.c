@@ -9,7 +9,6 @@
 #include <string.h>
 #include <print.h>
 #include <xccompat.h>
-#include "simple_printf.h"
 #include "avb_conf.h"
 
 // Min frame size for sanity check.

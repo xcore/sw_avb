@@ -8,7 +8,6 @@
 #include "gptp.h"
 #include "avb_1722_def.h"
 #include "media_output_fifo.h"
-#include "simple_printf.h"
 #include <string.h>
 #include <print.h>
 #include <xs1.h>
