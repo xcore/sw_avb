@@ -124,6 +124,7 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
 	   // TODO this is hardcoded to SYT_INTERVAL=8.
 	   unsigned sample_num = (8 - (dbc_value & 7)) & 7;
 #endif
+	   if (sample_num == 0)
 	   // register timestamp
 	   for (int i=0;i<num_channels;i++)  {
 		   media_output_fifo_set_ptp_timestamp(map[i], AVBTP_TIMESTAMP(pAVBHdr), sample_num);
