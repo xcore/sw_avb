@@ -44,7 +44,6 @@ typedef struct buf_info_t {
 
 
 void update_stream_derived_clocks(int source_num,
-                                  unsigned int sample_count,
                                   unsigned int local_ts,
                                   unsigned int ptp_outgoing_actual,
                                   unsigned int presentation_timestamp,
@@ -57,7 +56,6 @@ void update_stream_derived_clocks(int source_num,
         media_clocks[i].source == source_num) 
       {
         update_media_clock_stream_info(i, 
-                                       sample_count,
                                        local_ts,
                                        ptp_outgoing_actual,
                                        presentation_timestamp,
@@ -115,7 +113,6 @@ static void manage_buffer(buf_info_t &b,
   ptp_time_info_mod64 timeInfo;
   unsigned int ptp_outgoing_actual;
   int diff, sample_diff;
-  unsigned int sample_count;
   unsigned int wordLength;
   int rdptr,wrptr,fill;
   timer tmr;
@@ -140,7 +137,6 @@ static void manage_buffer(buf_info_t &b,
     buf_ctl :> locked;
     buf_ctl :> presentation_timestamp;    
     buf_ctl :> outgoing_timestamp_local;
-    buf_ctl :> sample_count;
     buf_ctl :> rdptr;
     buf_ctl :> wrptr;
     buf_ctl :> server_core_id;
@@ -166,7 +162,6 @@ static void manage_buffer(buf_info_t &b,
   diff = (signed) ptp_outgoing_actual - (signed) presentation_timestamp;
 
   update_stream_derived_clocks(index,
-                               sample_count,
                                outgoing_timestamp_local,
                                ptp_outgoing_actual,
                                presentation_timestamp,

@@ -39,7 +39,6 @@
  */
 typedef struct stream_info_t {
 	int valid;
-	unsigned int sample_count;
 	unsigned int local_ts;
 	unsigned int outgoing_ptp_ts;
 	unsigned int presentation_ts;
@@ -103,7 +102,6 @@ void init_media_clock_recovery(chanend ptp_svr,
 }
 
 void update_media_clock_stream_info(int clock_index,
-									unsigned int sample_count,
 									unsigned int local_ts,
 									unsigned int outgoing_ptp_ts,
 									unsigned int presentation_ts,
@@ -111,7 +109,6 @@ void update_media_clock_stream_info(int clock_index,
 									int fill) {
 	clock_info_t *clock_info = &clock_states[clock_index];
 
-	clock_info->stream_info2.sample_count = sample_count;
 	clock_info->stream_info2.local_ts = local_ts;
 	clock_info->stream_info2.outgoing_ptp_ts = outgoing_ptp_ts;
 	clock_info->stream_info2.presentation_ts = presentation_ts;

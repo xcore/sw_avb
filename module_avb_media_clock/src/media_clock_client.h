@@ -36,7 +36,6 @@ int get_buf_ctl_adjust(chanend buf_ctl);
 int get_buf_ctl_cmd(chanend buf_ctl);
 void send_buf_ctl_info(chanend buf_ctl, 
                        int active, 
-                       unsigned int sample_count,
                        unsigned int ptp_ts, 
                        unsigned int local_ts,
                        unsigned int rdptr,

@@ -41,7 +41,6 @@ unsigned int update_media_clock(chanend ptp_svr,
 
 
 void update_media_clock_stream_info(int clock_index, 
-                                    unsigned int sample_count,
                                     unsigned int local_ts,
                                     unsigned int outgoing_ptp_ts,
                                     unsigned int presentation_ts,

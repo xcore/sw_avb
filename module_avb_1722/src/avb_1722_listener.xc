@@ -43,7 +43,6 @@ static void configure_stream(chanend c,
 	s.chan_lock = 0;
 	s.prev_num_samples = 0;
 	s.dbc = -1;
-	s.count = 0;
 }
 
 static void disable_stream(avb_1722_stream_info_t &s)
@@ -79,7 +78,6 @@ void avb_1722_listener(chanend ethernet_rx_svr,
 
    for (int i=0;i<MAX_AVB_STREAMS_PER_LISTENER;i++) {
      listener_streams[i].active = 0;
-     listener_streams[i].count = 0;
    }
    
    // initialisation

@@ -26,7 +26,6 @@ typedef struct ofifo_t {
   int last_notification_time;
   int media_clock;
   int pending_init_notification;
-  unsigned int sample_count_at_timestamp;
   unsigned int fifo[MEDIA_OUTPUT_FIFO_SAMPLE_FIFO_SIZE];
 } ofifo_t;
 
@@ -88,12 +87,11 @@ void media_output_fifo_set_ptp_timestamp(media_output_fifo_t s0,
 
   if (s->marker == 0) {
 	unsigned int* new_marker = s->wrptr + sample_number;
-	if (new_marker > END_OF_FIFO(s)) new_marker -= MEDIA_OUTPUT_FIFO_SAMPLE_FIFO_SIZE;
+	if (new_marker >= END_OF_FIFO(s)) new_marker -= MEDIA_OUTPUT_FIFO_SAMPLE_FIFO_SIZE;
 
 	if (ptp_ts==0) ptp_ts = 1;
     s->ptp_ts = ptp_ts;
     s->local_ts = 0;
-    s->sample_count_at_timestamp = s->sample_count + sample_number;
     s->marker = new_marker;
   }
 }
@@ -218,8 +216,7 @@ media_output_fifo_strided_push(media_output_fifo_t s0,
       
     new_wrptr = wrptr+1;
     
-    if (new_wrptr == END_OF_FIFO(s))
-      new_wrptr = START_OF_FIFO(s);
+    if (new_wrptr == END_OF_FIFO(s)) new_wrptr = START_OF_FIFO(s);
         
     if (new_wrptr != s->dptr) {
       *wrptr = sample;
@@ -247,7 +244,6 @@ media_output_fifo_handle_buf_ctl(chanend buf_ctl,
     case BUF_CTL_REQUEST_INFO: {
       send_buf_ctl_info(buf_ctl,                         
                         s->state == LOCKED,
-                        s->sample_count_at_timestamp,
                         s->ptp_ts,
                         s->local_ts,
                         s->dptr - START_OF_FIFO(s),

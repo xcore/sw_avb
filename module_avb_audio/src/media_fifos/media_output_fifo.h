@@ -43,7 +43,6 @@ struct media_output_fifo_data_t {
   int stream_num;							//!<
   int media_clock;							//!<
   int pending_init_notification;			//!<
-  unsigned int sample_count_at_timestamp;	//!<
   unsigned int fifo[MEDIA_OUTPUT_FIFO_SAMPLE_FIFO_SIZE];
 };
 

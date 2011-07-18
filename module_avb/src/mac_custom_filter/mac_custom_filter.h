@@ -12,7 +12,7 @@
 #define MAC_FILTER_ARPIP 0x4
 #define MAC_FILTER_AVB_CONTROL  0x8
 
-#define ROUTER_LINK(n) (1 << (16+n))
+#define ROUTER_LINK(n) (1 << (4+n))
 
 #define HTONS(x) ((x>>8)|(((x&0xff)<<8)))
 
@@ -74,7 +74,6 @@ inline int mac_custom_filter(unsigned int buf[])
           if (lookup) {
             buf[0] = hash << 16;
             buf[1] = 0x0;
-            //            buf[2] = 0xbadf00d;
             result = ROUTER_LINK(link);
           }
 

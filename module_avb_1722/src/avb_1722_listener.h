@@ -27,13 +27,12 @@
 
 
 typedef struct avb_1722_stream_info_t {
-  int active;
+  int active;                      //!< 1-bit flag to say if the stream is active
+  int chan_lock;                   //!< Counter for locking onto a data stream
+  int prev_num_samples;            //!< Number of samples in last received 1722 packet
+  int num_channels_in_payload;     //!< The number of channels in the 1722 payloads
   int num_channels;
   int dbc;
-  int count;
-  int chan_lock;
-  int prev_num_samples;
-  int num_channels_in_payload;
   media_output_fifo_t map[AVB_MAX_CHANNELS_PER_STREAM];
 } avb_1722_stream_info_t;
 

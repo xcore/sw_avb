@@ -39,7 +39,6 @@ int get_buf_ctl_cmd(chanend buf_ctl) {
 
 void send_buf_ctl_info(chanend buf_ctl, 
                        int active, 
-                       unsigned int sample_count, 
                        unsigned int ptp_ts, 
                        unsigned int local_ts,
                        unsigned int rdptr,
@@ -54,7 +53,6 @@ void send_buf_ctl_info(chanend buf_ctl,
     buf_ctl <: active;
     buf_ctl <: ptp_ts;
     buf_ctl <: local_ts;
-    buf_ctl <: sample_count;
     buf_ctl <: rdptr;
     buf_ctl <: wrptr;
     buf_ctl <: core_id;
