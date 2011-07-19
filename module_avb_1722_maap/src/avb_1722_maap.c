@@ -178,6 +178,10 @@ void avb_1722_maap_rerequest_addresses()
   }
 }
 
+void avb_1722_maap_relinquish_addresses()
+{
+	maap_addr.state = MAAP_DISABLED;
+}
 
 void avb_1722_maap_get_offset_address(unsigned char addr[6], int offset)
 {  
