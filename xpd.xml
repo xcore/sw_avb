@@ -1,10 +1,20 @@
 <?xml version="1.0" ?>
 <xpd>
-    <dependency repo = "sc_xlog"></dependency>
-    <dependency repo = "sc_i2c"></dependency>
-    <dependency repo = "sc_xtcp"></dependency>
-    <dependency repo = "xcommon"></dependency>
-    <dependency repo = "sc_ethernet"></dependency>
+    <dependency repo = "sc_xlog">
+        <githash>1c94e6e30efd3786c522f5c42aa30c1c029ced35</githash>
+    </dependency>
+    <dependency repo = "sc_i2c">
+        <githash>ffe0c94314b73a2d5086008864e0dbc354fc1e69</githash>
+    </dependency>
+    <dependency repo = "sc_xtcp">
+        <githash>e6cbea0d033f31dde91a3fc17238b79c6d85977c</githash>
+    </dependency>
+    <dependency repo = "xcommon">
+        <githash>fd0a7bd1dd56741e00f418b0fe9ff50e4231ed76</githash>
+    </dependency>
+    <dependency repo = "sc_ethernet">
+        <githash>d7046e8750101e56c0b7f5fc3bfd35d60e49350e</githash>
+    </dependency>
     <description>AVB software stack</description>
     <location>git@github.com:xcore/sw_avb.git</location>
     <name>sw_avb</name>
