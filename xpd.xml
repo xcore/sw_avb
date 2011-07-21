@@ -1,24 +1,14 @@
 <?xml version="1.0" ?>
 <xpd>
-    <dependency repo = "sc_xlog">
-        <githash>1c94e6e30efd3786c522f5c42aa30c1c029ced35</githash>
-    </dependency>
-    <dependency repo = "sc_i2c">
-        <githash>ffe0c94314b73a2d5086008864e0dbc354fc1e69</githash>
-    </dependency>
-    <dependency repo = "sc_xtcp">
-        <githash>155d5ceb172d5bf3b72d398d575c918dbc568b40</githash>
-    </dependency>
-    <dependency repo = "xcommon">
-        <githash>e0768cf16ffd9a3642ae2ff41fd266f45ebf3396</githash>
-    </dependency>
-    <dependency repo = "sc_ethernet">
-        <githash>88af08ec4a36baec5757019e9507e3e55a453821</githash>
-    </dependency>
+    <dependency repo = "sc_xlog"></dependency>
+    <dependency repo = "sc_i2c"></dependency>
+    <dependency repo = "sc_xtcp"></dependency>
+    <dependency repo = "xcommon"></dependency>
+    <dependency repo = "sc_ethernet"></dependency>
     <description>AVB software stack</description>
     <location>git@github.com:xcore/sw_avb.git</location>
-    <maintainer>DavidNorman</maintainer>
     <name>sw_avb</name>
+    <maintainer>DavidNorman</maintainer>
     <release parenthash = "c0e2eedbd5609978063be5c43ab2c671bb7d5030" version = "5.1.0beta0" githash = "f41d7b41abbc158ddf61ae895c35475ee4d1f41b"></release>
     <release parenthash = "c5f4fd52b8d824979950bfd4616013ab83649727" version = "5.1.0beta1" githash = "f16649adbf9d90dc003732416b9b430ca6644581"></release>
     <scope>reference design</scope>
