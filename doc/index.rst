@@ -12,11 +12,12 @@ XMOS AVB Documentation
    :maxdepth: 3
 
    Xmos AVB Solution Overview <overview>
-   Hardware platforms <hw>
-   System Description <system>
-   Programming Guide <programming>
-   API Reference <api>
-   Appendices <appendices>
+   hw
+   system
+   programming
+   api
+   bandwidth
+
 
 
 

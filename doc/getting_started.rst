@@ -5,41 +5,51 @@ The following instructions show how to build the demo for the
 XR-AVB-LC-BRD endpoint. The same method holds for the other
 applications.
 
-Building with the XDE
-~~~~~~~~~~~~~~~~~~~~~
+.. only:: xdehtml
 
-To install the software, open the XDE (XMOS Development Tools) and
-follow these steps:
+   .. raw:: html
+ 
+     <div class="xde-inside">
+     <ul class="iconmenu">
+       <li class="xde"><a href="http://www.xmos.com/automate?automate=ImportComponent&partnum=XR-000008-SW">Import AVB Reference Design</a></li>
+     </ul>
+     </div>
 
-#. Choose `File` |submenu| `Import`.
+  To build, select the ``app_usb_aud_l1`` or ``app_usb_aud_l2`` project in the
+  Project Explorer and click the **Build** icon.
 
-#. Choose `General` |submenu| `Existing Projects into Workspace` and
-   click **Next**.
+.. cssclass:: xde-outside
 
-#. Click **Browse** next to `Select archive file` and select
-   the file firmware ZIP file.
+  To install the software, open the XDE (XMOS Development Tools) and
+  follow these steps:
 
-#. Make sure the projects you want to import are ticked in the
-   `Projects` list. Import all the components and whichever
-   applications you are interested in.
+  #. Choose `File` |submenu| `Import`.
 
-#. Click **Finish**.
+  #. Choose `General` |submenu| `Existing Projects into Workspace` and
+     click **Next**.
 
+  #. Click **Browse** next to `Select archive file` and select
+     the file firmware ZIP file.
 
-To build, select the ``app_xr_avb_lc_demo`` project in the
-Project Explorer and click the **Build** icon.
+  #. Make sure the projects you want to import are ticked in the
+     `Projects` list. Import all the components and whichever
+     applications you are interested in.
+   
+  #. Click **Finish**.
 
-Building from the command line
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  To build, select the ``app_xr_avb_lc_demo`` project in the
+  Project Explorer and click the **Build** icon.
 
-To install, unzip the package zip.
+.. cssclass:: cmd-only
 
-To build, change into the ``app_xr_avb_lc_demo`` directory and
-execute the command:
+  From the command line, you can follow these steps:
 
-::
+  #. To install, unzip the pacakge zipfile
 
-       xmake all
+  #. To build, change into the ``app_xr_avb_lc_demo`` directory and
+     execute the command::
+
+          xmake all
 
 Makefiles
 ~~~~~~~~~

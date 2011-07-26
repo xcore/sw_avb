@@ -206,7 +206,7 @@ This demo uses Zeroconf to advertise a configuration
 protocol. The name is registered as ``xmos_attero_endpoint``, so on the local
 network it will have a DNS name of  ``xmos_attero_endpoint.local``. The server ``attero-cfg`` which is a configuration service
 over UDP on port ``ATTERO_CFG_PORT`` (with the value 40404) is also advertised. This service can be discovered by the AtteroTech host configuration utility
-(see [AttQS10]_). The control API server itself must be initialized so that it can handle requests to this port.
+(see the `AtteroTech/XMOS XR-AVB-LC-BRD Quickstart Guide <http://www.atterotech.com/cobranet-oem-products/xmos-avb-module/>`_). The control API server itself must be initialized so that it can handle requests to this port.
 
 .. literalinclude:: app_xr_avb_lc_demo/src/xr_avb_demo.xc
    :start-after: // Initialize Zeroconf

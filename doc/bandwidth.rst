@@ -1,5 +1,5 @@
-1722 Bandwidth Usage
-====================
+IEEE 1722 Bandwidth Usage
+=========================
 
 The AVB standard requires audio data to be split into packets to be
 transmitted over ethernet along with meta-information specified by the

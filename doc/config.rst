@@ -64,7 +64,7 @@ The control part controls the device. For example it controls:
 A control stack will link into the control thread to provide a bridge
 to the local control API. To aid implementation of this, a the XMOS TCP/IP
 stack can be used. A demonstration control API is provided for
-the XR-AVB-LC-BRD, for more details see [AttQS10]_.
+the XR-AVB-LC-BRD, for more details see the `AtteroTech/XMOS XR-AVB-LC-BRD Quickstart Guide <http://www.atterotech.com/cobranet-oem-products/xmos-avb-module/>`_.
 
 TCP/IP Stack
 ++++++++++++
@@ -72,7 +72,7 @@ TCP/IP Stack
 The AVB software solution includes a port of the uIP protocol stack
 which is a small memory footprint stack that can be used for UDP/TCP
 communication to aid implementation of an upper layer configuration
-protocol. For details on this stack see [XTCP10]_.
+protocol. For details on this stack see the `XTCP Component Guide <http://github.xcore.com/sc_xtcp/index.html>`_.
 
 Zeroconf
 ++++++++

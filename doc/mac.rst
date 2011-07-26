@@ -40,8 +40,7 @@ control which packets are conveyed to it via that channel.
 
 All configuration of the channel is managed by a client C/XC API, which
 configures and registers the filters. Details of the API used to
-configure MAC channels can be found in the ethernet MAC component
-design guide [XEth10]_. This API is used for direct (layer-2) access to the
+configure MAC channels can be found in the `ethernet MAC component design guide <http://github.xcore.com/sc_ethernet/index.html>`_. This API is used for direct (layer-2) access to the
 MAC. For AVB applications it is more likely that interaction with the
 ethernet stack will be via the main AVB API (see Section
 :ref:`sec_avb_api`).

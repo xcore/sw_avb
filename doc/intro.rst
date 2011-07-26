@@ -40,7 +40,7 @@ XMOS AVB Specification
  |                       **Licensing and Support**                   |
  +-------------------------------------------------------------------+
  | | Reference code provided without charge under license from XMOS. |
- | | Contact support@xmos.com for details.                           |
+ | | Support via http://www.xmos.com/secure/tickets.                 |
  | | Reference code is maintained by XMOS Limited.                   |
  +-------------------------------------------------------------------+
 

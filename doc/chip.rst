@@ -75,25 +75,3 @@ XS1-L2 Device - 100Mbit/s
     - 4 in/4 out
 
 
-
-.. XS1-G4 Device - Gigabit
-.. ~~~~~~~~~~~~~~~~~~~~~~~
-
-..     {\\tabcolsep}{0.2cm}{\\arraystretch}{1.25}
-
-..         {Sample Rate} & {AVB Streams} & {Audio channels}
-..         48Khz & 20 in/20 out & 72 in/72 out
-..         96Khz & 10 in/10 out & 36 in/36 out
-
-
-
-.. 2 x XS1-G4 Device - Gigabit
-.. ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-..     {\\tabcolsep}{0.2cm}{\\arraystretch}{1.25}
-
-..         {Sample Rate} & {AVB Streams} & {Audio channels}
-..         48Khz & 40 in/40 out & 120 in/120 out
-..         96Khz & 20 in/20 out & 60 in/60 out
-
-
