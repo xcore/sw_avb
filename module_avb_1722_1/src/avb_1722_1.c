@@ -433,18 +433,18 @@ static void avb_1722_1_create_acmp_packet(avb_1722_1_acmp_rcvd_cmd_resp* rcr)
 	struct ethernet_hdr_t *hdr = (ethernet_hdr_t*) &avb_1722_1_buf[0];
 	avb_1722_1_acmp_packet_t *pkt = (avb_1722_1_acmp_packet_t*) (hdr + 1);
 
-	avb_1722_1_create_1722_1_header(avb_1722_1_acmp_dest_addr, DEFAULT_1722_1_ACMP_SUBTYPE, rcr->message_type, rcr->status, 40, hdr);
+	avb_1722_1_create_1722_1_header(avb_1722_1_acmp_dest_addr, DEFAULT_1722_1_ACMP_SUBTYPE, rcr->message_type, rcr->status, 44, hdr);
 
 	SET_LONG_WORD(pkt->stream_id, rcr->stream_id);
 	SET_LONG_WORD(pkt->controller_guid, rcr->controller_guid);
 	SET_LONG_WORD(pkt->listener_guid, rcr->listener_guid);
 	SET_LONG_WORD(pkt->talker_guid, rcr->talker_guid);
 	HTON_U32(pkt->default_format, rcr->default_format);
-	pkt->talker_unique_id = rcr->talker_unique_id;
-	pkt->listener_unique_id = rcr->listener_unique_id;
-	pkt->connection_count = rcr->connection_count;
-	pkt->sequence_id = rcr->sequence_id;
-	pkt->flags = rcr->flags;
+	HTON_U16(pkt->talker_unique_id, rcr->talker_unique_id);
+	HTON_U16(pkt->listener_unique_id, rcr->listener_unique_id);
+	HTON_U16(pkt->connection_count, rcr->connection_count);
+	HTON_U16(pkt->sequence_id, rcr->sequence_id);
+	HTON_U16(pkt->flags, rcr->flags);
 	pkt->dest_mac[0] = rcr->stream_dest_mac[0];
 	pkt->dest_mac[1] = rcr->stream_dest_mac[1];
 	pkt->dest_mac[2] = rcr->stream_dest_mac[2];
@@ -507,11 +507,11 @@ static void store_rcvd_cmd_resp(avb_1722_1_acmp_rcvd_cmd_resp* store, avb_1722_1
 	GET_LONG_WORD(store->listener_guid, pkt->listener_guid);
 	GET_LONG_WORD(store->talker_guid, pkt->talker_guid);
 	GET_WORD(store->default_format, pkt->default_format);
-	store->talker_unique_id = pkt->talker_unique_id;
-	store->listener_unique_id = pkt->listener_unique_id;
-	store->connection_count = pkt->connection_count;
-	store->sequence_id = pkt->sequence_id;
-	store->flags = pkt->flags;
+	store->talker_unique_id = NTOH_U16(pkt->talker_unique_id);
+	store->listener_unique_id = NTOH_U16(pkt->listener_unique_id);
+	store->connection_count = NTOH_U16(pkt->connection_count);
+	store->sequence_id = NTOH_U16(pkt->sequence_id);
+	store->flags = NTOH_U16(pkt->flags);
 	store->stream_dest_mac[0] = pkt->dest_mac[0];
 	store->stream_dest_mac[1] = pkt->dest_mac[1];
 	store->stream_dest_mac[2] = pkt->dest_mac[2];

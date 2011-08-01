@@ -52,12 +52,12 @@ typedef struct {
 	char controller_guid[8];
 	char talker_guid[8];
 	char listener_guid[8];
-	short talker_unique_id;
-	short listener_unique_id;
+	char talker_unique_id[2];
+	char listener_unique_id[2];
 	char dest_mac[6];
-	short connection_count;
-	short sequence_id;
-	short flags;
+	char connection_count[2];
+	char sequence_id[2];
+	char flags[2];
 	char default_format[4];
 } avb_1722_1_acmp_packet_t;
 
