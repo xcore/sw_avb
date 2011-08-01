@@ -439,7 +439,7 @@ static void avb_1722_1_create_acmp_packet(avb_1722_1_acmp_rcvd_cmd_resp* rcr)
 	SET_LONG_WORD(pkt->controller_guid, rcr->controller_guid);
 	SET_LONG_WORD(pkt->listener_guid, rcr->listener_guid);
 	SET_LONG_WORD(pkt->talker_guid, rcr->talker_guid);
-	SET_WORD_CONST(pkt->default_format, rcr->default_format);
+	HTON_U32(pkt->default_format, rcr->default_format);
 	pkt->talker_unique_id = rcr->talker_unique_id;
 	pkt->listener_unique_id = rcr->listener_unique_id;
 	pkt->connection_count = rcr->connection_count;
@@ -914,21 +914,22 @@ static void avb_1722_1_create_adp_packet(int message_type, guid_t guid)
 
 	  SET_LONG_WORD(pkt->entity_guid, guid);
 
-	  if (message_type!=ENTITY_DISCOVER) {
-		  SET_WORD_CONST(pkt->vendor_id, AVB_1722_1_ADP_VENDOR_ID);
-		  SET_WORD_CONST(pkt->model_id, AVB_1722_1_ADP_MODEL_ID);
-		  SET_WORD_CONST(pkt->entity_capabilities, AVB_1722_1_ADP_ENTITY_CAPABILITIES);
-		  pkt->talker_stream_sources = AVB_1722_1_ADP_TALKER_STREAM_SOURCES;
-		  pkt->talker_capabilities = AVB_1722_1_ADP_TALKER_CAPABILITIES;
-		  pkt->listener_stream_sinks = AVB_1722_1_ADP_LISTENER_STREAM_SINKS;
-		  pkt->listener_capabilites = AVB_1722_1_ADP_LISTENER_CAPABILITIES;
-		  SET_WORD_CONST(pkt->controller_capabilities, AVB_1722_1_ADP_CONTROLLER_CAPABILITIES);
-		  SET_WORD_CONST(pkt->available_index, avb_1722_1_available_index);
+	  if (message_type!=ENTITY_DISCOVER)
+	  {
+		  HTON_U32(pkt->vendor_id, AVB_1722_1_ADP_VENDOR_ID);
+		  HTON_U32(pkt->model_id, AVB_1722_1_ADP_MODEL_ID);
+		  HTON_U32(pkt->entity_capabilities, AVB_1722_1_ADP_ENTITY_CAPABILITIES);
+		  HTON_U16(pkt->talker_stream_sources, AVB_1722_1_ADP_TALKER_STREAM_SOURCES);
+		  HTON_U16(pkt->talker_capabilities, AVB_1722_1_ADP_TALKER_CAPABILITIES);
+		  HTON_U16(pkt->listener_stream_sinks, AVB_1722_1_ADP_LISTENER_STREAM_SINKS);
+		  HTON_U16(pkt->listener_capabilites, AVB_1722_1_ADP_LISTENER_CAPABILITIES);
+		  HTON_U32(pkt->controller_capabilities, AVB_1722_1_ADP_CONTROLLER_CAPABILITIES);
+		  HTON_U32(pkt->available_index, avb_1722_1_available_index);
 		  SET_LONG_WORD(pkt->as_grandmaster_id, as_grandmaster_id);
-		  SET_WORD_CONST(pkt->default_audio_format, AVB_1722_1_ADP_DEFAULT_AUDIO_FORMAT);
-		  SET_WORD_CONST(pkt->default_video_format, AVB_1722_1_ADP_DEFAULT_VIDEO_FORMAT);
-		  SET_WORD_CONST(pkt->association_id, AVB_1722_1_ADP_ASSOCIATION_ID);
-		  SET_WORD_CONST(pkt->entity_type, AVB_1722_1_ADP_ENTITY_TYPE_OTHER);
+		  HTON_U32(pkt->default_audio_format, AVB_1722_1_ADP_DEFAULT_AUDIO_FORMAT);
+		  HTON_U32(pkt->default_video_format, AVB_1722_1_ADP_DEFAULT_VIDEO_FORMAT);
+		  HTON_U32(pkt->association_id, AVB_1722_1_ADP_ASSOCIATION_ID);
+		  HTON_U32(pkt->entity_type, AVB_1722_1_ADP_ENTITY_TYPE_OTHER);
 	  }
 }
 

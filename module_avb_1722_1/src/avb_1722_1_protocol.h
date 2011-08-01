@@ -28,10 +28,10 @@ typedef struct {
 	char vendor_id[4];
 	char model_id[4];
 	char entity_capabilities[4];
-	short talker_stream_sources;
-	short talker_capabilities;
-	short listener_stream_sinks;
-	short listener_capabilites;
+	char talker_stream_sources[2];
+	char talker_capabilities[2];
+	char listener_stream_sinks[2];
+	char listener_capabilites[2];
 	char controller_capabilities[4];
 	char available_index[4];
 	char as_grandmaster_id[8];
