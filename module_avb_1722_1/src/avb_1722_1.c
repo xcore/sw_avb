@@ -910,7 +910,7 @@ static void avb_1722_1_create_adp_packet(int message_type, guid_t guid)
 	  memset(pkt, 0, sizeof(avb_1722_1_adp_packet_t));
 
 	  avb_1722_1_create_1722_1_header(avb_1722_1_adp_dest_addr, DEFAULT_1722_1_ADP_SUBTYPE, message_type,
-			  (message_type==ENTITY_AVAILABLE)?AVB_1722_1_ADP_VALID_TIME:0, 40, hdr);
+			  (message_type==ENTITY_AVAILABLE)?AVB_1722_1_ADP_VALID_TIME:0, 52, hdr);
 
 	  SET_LONG_WORD(pkt->entity_guid, guid);
 
@@ -927,6 +927,8 @@ static void avb_1722_1_create_adp_packet(int message_type, guid_t guid)
 		  SET_LONG_WORD(pkt->as_grandmaster_id, as_grandmaster_id);
 		  SET_WORD_CONST(pkt->default_audio_format, AVB_1722_1_ADP_DEFAULT_AUDIO_FORMAT);
 		  SET_WORD_CONST(pkt->default_video_format, AVB_1722_1_ADP_DEFAULT_VIDEO_FORMAT);
+		  SET_WORD_CONST(pkt->association_id, AVB_1722_1_ADP_ASSOCIATION_ID);
+		  SET_WORD_CONST(pkt->entity_type, AVB_1722_1_ADP_ENTITY_TYPE_OTHER);
 	  }
 }
 
