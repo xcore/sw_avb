@@ -11,12 +11,12 @@ XMOS AVB Documentation
 .. toctree::
    :maxdepth: 3
 
-   Xmos AVB Solution Overview <overview>
-   hw
-   system
-   programming
-   api
-   bandwidth
+   overview, 14642
+   hw, 14643
+   system, 14644
+   programming, 14645
+   api, 14646
+   bandwidth, 14647
 
 
 
