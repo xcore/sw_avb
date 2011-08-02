@@ -4,7 +4,9 @@ Component functions
 ===================
 
 The following functions provide components that can be combined in the
-top-level main. For details on the ethernet and TCP/IP components see [XEth10]_ and [XTCP10]_.
+top-level main. For details on the ethernet and TCP/IP components see
+the `Ethernet Component Guide
+<http://github.xcore.com/sc_ethernet/index.html>`_ and the `XTCP Component Guide <http://github.xcore.com/sc_xtcp/index.html>`_.
 
 Core Components
 ~~~~~~~~~~~~~~~

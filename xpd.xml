@@ -7,18 +7,18 @@
         <githash>ffe0c94314b73a2d5086008864e0dbc354fc1e69</githash>
     </dependency>
     <dependency repo = "sc_xtcp">
-        <githash>155d5ceb172d5bf3b72d398d575c918dbc568b40</githash>
+        <githash>e6cbea0d033f31dde91a3fc17238b79c6d85977c</githash>
     </dependency>
     <dependency repo = "xcommon">
-        <githash>e0768cf16ffd9a3642ae2ff41fd266f45ebf3396</githash>
+        <githash>fd0a7bd1dd56741e00f418b0fe9ff50e4231ed76</githash>
     </dependency>
     <dependency repo = "sc_ethernet">
-        <githash>88af08ec4a36baec5757019e9507e3e55a453821</githash>
+        <githash>d7046e8750101e56c0b7f5fc3bfd35d60e49350e</githash>
     </dependency>
     <description>AVB software stack</description>
     <location>git@github.com:xcore/sw_avb.git</location>
-    <maintainer>DavidNorman</maintainer>
     <name>sw_avb</name>
+    <maintainer>DavidNorman</maintainer>
     <release parenthash = "c0e2eedbd5609978063be5c43ab2c671bb7d5030" version = "5.1.0beta0" githash = "f41d7b41abbc158ddf61ae895c35475ee4d1f41b"></release>
     <release parenthash = "c5f4fd52b8d824979950bfd4616013ab83649727" version = "5.1.0beta1" githash = "f16649adbf9d90dc003732416b9b430ca6644581"></release>
     <scope>reference design</scope>
