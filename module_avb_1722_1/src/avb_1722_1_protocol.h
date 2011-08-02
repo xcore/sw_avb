@@ -122,7 +122,7 @@ typedef struct {
 } avb_1722_1_aecp_packet_t;
 
 typedef union {
-	avb_1722_1_adp_packet_t sdp;
+	avb_1722_1_adp_packet_t adp;
 	avb_1722_1_acmp_packet_t scm;
 	avb_1722_1_aecp_packet_t sem;
 } avb_1722_1_packet_t;
@@ -217,7 +217,7 @@ typedef enum {
 	ENTITY_AVAILABLE = 0,
 	ENTITY_DEPARTING = 1,
 	ENTITY_DISCOVER = 2
-} avb_1722_1_sdp_message_type;
+} avb_1722_1_adp_message_type;
 
 #define AVB_1722_1_ADP_ENTITY_CAPABILITIES_AVDECC_IP         			(0x00000001)
 #define AVB_1722_1_ADP_ENTITY_CAPABILITIES_ZERO_CONF        			(0x00000002)

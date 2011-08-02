@@ -135,7 +135,7 @@ void avb_1722_1_adp_discover_all();
 
 /** \fn avb_1722_1_adp_change_ptp_grandmaster
  *
- *  Set the current PTP grandmaster used by SDP when it changes
+ *  Set the current PTP grandmaster used by ADP when it changes
  */
 void avb_1722_1_adp_change_ptp_grandmaster(char grandmaster[8]);
 
