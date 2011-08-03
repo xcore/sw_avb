@@ -139,7 +139,7 @@ typedef union {
 #define GET_1722_1_SV(pkt) ((pkt)->sv_avb_version_msg_type >> 7)
 #define GET_1722_1_AVB_VERSION(pkt) (((pkt)->sv_avb_version_msg_type & 0x70) >> 4)
 #define GET_1722_1_MSG_TYPE(pkt) ((pkt)->sv_avb_version_msg_type & 0x0f)
-#define GET_1722_1_VALID_TIME(pkt) ((pkt)->valid_time_data_length_hi & 0xf8 >> 3)
+#define GET_1722_1_VALID_TIME(pkt) (((pkt)->valid_time_data_length_hi & 0xf8) >> 3)
 #define GET_1722_1_DATALENGTH(pkt) \
    ((((pkt)->valid_time_data_length_hi & 0x7) << 8) + \
           (((pkt)->data_length_lo) << 8))
