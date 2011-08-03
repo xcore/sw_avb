@@ -90,6 +90,12 @@
 #define AVB_1722_1_MAX_INFLIGHT_COMMANDS 2
 #endif
 
+/* Debug defines */
+/*
+#ifndef AVB_1722_1_ADP_DEBUG_ENTITY_REMOVAL
+#define AVB_1722_1_ADP_DEBUG_ENTITY_REMOVAL
+#endif
+*/
 
 /** \fn avb_1722_1_init
  *

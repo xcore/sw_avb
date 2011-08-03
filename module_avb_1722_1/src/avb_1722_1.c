@@ -252,6 +252,10 @@ static void avb_1722_1_entity_database_remove(avb_1722_1_adp_packet_t* pkt)
 	for (unsigned i=0; i<AVB_1722_1_MAX_ENTITIES; ++i) {
 		if (entities[i].guid.l==guid.l) {
 			entities[i].guid.l=0;
+#ifdef AVB_1722_1_ADP_DEBUG_ENTITY_REMOVAL
+			printstr("ADP: Removing entity who advertised departing -> GUID ");
+			printhexln(guid.l);
+#endif
 		}
 	}
 }
@@ -262,6 +266,10 @@ static unsigned avb_1722_1_entity_database_check_timeout()
 		if (entities[i].guid.l==0) continue;
 
 		if (entities[i].timeout < adp_two_second_counter) {
+#ifdef AVB_1722_1_ADP_DEBUG_ENTITY_REMOVAL
+			printstr("ADP: Removing entity who timed out -> GUID ");
+			printhexln(entities[i].guid.l);
+#endif
 			entities[i].guid.l=0;
 			return 1;
 		}
@@ -1036,7 +1044,7 @@ void avb_1722_1_adp_announce()
 
 void avb_1722_1_adp_depart()
 {
-	if (adp_advertise_state == ADP_ADVERTISE_IDLE) adp_advertise_state = ADP_ADVERTISE_DEPARTING;
+	if (adp_advertise_state == ADP_ADVERTISE_WAITING) adp_advertise_state = ADP_ADVERTISE_DEPARTING;
 }
 
 void avb_1722_1_adp_discover(unsigned guid[])
