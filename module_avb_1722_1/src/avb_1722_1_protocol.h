@@ -24,21 +24,21 @@ typedef struct avb_1722_1_packet_header_t {
  */
 typedef struct {
 	avb_1722_1_packet_header_t header;
-	char entity_guid[8];
-	char vendor_id[4];
-	char model_id[4];
-	char entity_capabilities[4];
-	char talker_stream_sources[2];
-	char talker_capabilities[2];
-	char listener_stream_sinks[2];
-	char listener_capabilites[2];
-	char controller_capabilities[4];
-	char available_index[4];
-	char as_grandmaster_id[8];
-	char default_audio_format[4];
-	char default_video_format[4];
-	char association_id[8];
-	char entity_type[4];
+	unsigned char entity_guid[8];
+	unsigned char vendor_id[4];
+	unsigned char model_id[4];
+	unsigned char entity_capabilities[4];
+	unsigned char talker_stream_sources[2];
+	unsigned char talker_capabilities[2];
+	unsigned char listener_stream_sinks[2];
+	unsigned char listener_capabilites[2];
+	unsigned char controller_capabilities[4];
+	unsigned char available_index[4];
+	unsigned char as_grandmaster_id[8];
+	unsigned char default_audio_format[4];
+	unsigned char default_video_format[4];
+	unsigned char association_id[8];
+	unsigned char entity_type[4];
 } avb_1722_1_adp_packet_t;
 
 /**
@@ -48,58 +48,58 @@ typedef struct {
  */
 typedef struct {
 	avb_1722_1_packet_header_t header;
-	char stream_id[8];
-	char controller_guid[8];
-	char talker_guid[8];
-	char listener_guid[8];
-	char talker_unique_id[2];
-	char listener_unique_id[2];
-	char dest_mac[6];
-	char connection_count[2];
-	char sequence_id[2];
-	char flags[2];
-	char default_format[4];
+	unsigned char stream_id[8];
+	unsigned char controller_guid[8];
+	unsigned char talker_guid[8];
+	unsigned char listener_guid[8];
+	unsigned char talker_unique_id[2];
+	unsigned char listener_unique_id[2];
+	unsigned char dest_mac[6];
+	unsigned char connection_count[2];
+	unsigned char sequence_id[2];
+	unsigned char flags[2];
+	unsigned char default_format[4];
 } avb_1722_1_acmp_packet_t;
 
 /**
  * 1722.1 SEC AVDECC command format
  */
 typedef struct {
-	char mode_len;
-	char lower_len;
-	char oui[4];
-	char oui_sect_flags[2];
-	char type_code_flags[2];
-	char index0[2];
-	char subaddress[2];
-	char index1[2];
-	char index2[2];
-	char mode_specific_data[1];
+	unsigned char mode_len;
+	unsigned char lower_len;
+	unsigned char oui[4];
+	unsigned char oui_sect_flags[2];
+	unsigned char type_code_flags[2];
+	unsigned char index0[2];
+	unsigned char subaddress[2];
+	unsigned char index1[2];
+	unsigned char index2[2];
+	unsigned char mode_specific_data[1];
 } avb_1722_1_aecp_avdecc_msg_t;
 
 /**
  * 1722.1 SEC Address access format
  */
 typedef struct {
-	char mode_len;
-	char lower_len;
-	char mode_specific_data[1];
+	unsigned char mode_len;
+	unsigned char lower_len;
+	unsigned char mode_specific_data[1];
 } avb_1722_1_aecp_address_access_t;
 
 /**
  * 1722.1m SEC Legacy AV/C command format
  */
 typedef struct {
-	char length[2];
-	char avc_data[512];
+	unsigned char length[2];
+	unsigned char avc_data[512];
 } avb_1722_1_aecp_avc_t;
 
 /**
  * 1722.1 SEC Vendor specific command format
  */
 typedef struct {
-	char protocol_id[6];
-	char payload_data[1];
+	unsigned char protocol_id[6];
+	unsigned char payload_data[1];
 } avb_1722_1_aecp_vendor_t;
 
 /**
@@ -109,15 +109,15 @@ typedef struct {
  */
 typedef struct {
 	avb_1722_1_packet_header_t header;
-	char target_guid[8];
-	char controller_guid[8];
+	unsigned char target_guid[8];
+	unsigned char controller_guid[8];
 	short sequence_id;
 	union {
 		avb_1722_1_aecp_avdecc_msg_t avdecc;
 		avb_1722_1_aecp_address_access_t address;
 		avb_1722_1_aecp_avc_t avc;
 		avb_1722_1_aecp_vendor_t vendor;
-		char payload[514];
+		unsigned char payload[514];
 	} data;
 } avb_1722_1_aecp_packet_t;
 

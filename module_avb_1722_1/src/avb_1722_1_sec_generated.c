@@ -125,20 +125,20 @@ unsigned int avb_1722_1_sec_parse_tree[] = {
   0x010000de, // Meter format code for each meter slot in a specific listener stream (Data at 0xde)
 };
 
-extern unsigned int avb_1722_1_getset_actuation_time(char* address, unsigned set, char *data);
-extern unsigned int avb_1722_1_getset_device_guid(char* address, unsigned set, char *data);
-extern unsigned int avb_1722_1_getset_boot_id(char* address, unsigned set, char *data);
-extern unsigned int avb_1722_1_getset_device_name(char* address, unsigned set, char *data);
-extern unsigned int avb_1722_1_getset_device_wink(char* address, unsigned set, char *data);
-extern unsigned int avb_1722_1_getset_device_mac_addr(char* address, unsigned set, char *data);
-extern unsigned int avb_1722_1_getset_device_ptp_gm(char* address, unsigned set, char *data);
-extern unsigned int avb_1722_1_getset_source_name(char* address, unsigned set, char *data);
-extern unsigned int avb_1722_1_getset_source_stream_name(char* address, unsigned set, char *data);
-extern unsigned int avb_1722_1_getset_sink_name(char* address, unsigned set, char *data);
-extern unsigned int avb_1722_1_getset_sink_stream_name(char* address, unsigned set, char *data);
+extern unsigned int avb_1722_1_getset_actuation_time(unsigned char *address, unsigned set, unsigned char *data);
+extern unsigned int avb_1722_1_getset_device_guid(unsigned char *address, unsigned set, unsigned char *data);
+extern unsigned int avb_1722_1_getset_boot_id(unsigned char *address, unsigned set, unsigned char *data);
+extern unsigned int avb_1722_1_getset_device_name(unsigned char *address, unsigned set, unsigned char *data);
+extern unsigned int avb_1722_1_getset_device_wink(unsigned char *address, unsigned set, unsigned char *data);
+extern unsigned int avb_1722_1_getset_device_mac_addr(unsigned char *address, unsigned set, unsigned char *data);
+extern unsigned int avb_1722_1_getset_device_ptp_gm(unsigned char *address, unsigned set, unsigned char *data);
+extern unsigned int avb_1722_1_getset_source_name(unsigned char *address, unsigned set, unsigned char *data);
+extern unsigned int avb_1722_1_getset_source_stream_name(unsigned char *address, unsigned set, unsigned char *data);
+extern unsigned int avb_1722_1_getset_sink_name(unsigned char *address, unsigned set, unsigned char *data);
+extern unsigned int avb_1722_1_getset_sink_stream_name(unsigned char *address, unsigned set, unsigned char *data);
 
 
-unsigned avb_1722_1_sec_dispatch(unsigned func_num, char* address, unsigned set, char* data)
+unsigned avb_1722_1_sec_dispatch(unsigned func_num, unsigned char *address, unsigned set, unsigned char *data)
 {
   switch (func_num) {
   case 0:

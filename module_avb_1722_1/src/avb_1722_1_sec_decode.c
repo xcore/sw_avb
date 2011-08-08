@@ -3,68 +3,68 @@
 // Data structures and functions from the generated file
 extern unsigned char avb_1722_1_sec_constant_data[];
 extern unsigned int avb_1722_1_sec_data_type_length_t[];
-extern unsigned avb_1722_1_sec_dispatch(unsigned func_num, char* address, unsigned set, char* data);
+extern unsigned avb_1722_1_sec_dispatch(unsigned func_num, unsigned char *address, unsigned set, unsigned char *data);
 extern unsigned int avb_1722_1_sec_parse_tree[];
 
 // Callbacks from the generated function table
-unsigned int avb_1722_1_getset_actuation_time(char* address, unsigned set, char *data)
+unsigned int avb_1722_1_getset_actuation_time(unsigned char *address, unsigned set, unsigned char *data)
 {
 	return 0;
 }
 
-unsigned int avb_1722_1_getset_device_guid(char* address, unsigned set, char *data)
+unsigned int avb_1722_1_getset_device_guid(unsigned char *address, unsigned set, unsigned char *data)
 {
 	return 0;
 }
 
-unsigned int avb_1722_1_getset_boot_id(char* address, unsigned set, char *data)
+unsigned int avb_1722_1_getset_boot_id(unsigned char *address, unsigned set, unsigned char *data)
 {
 	return 0;
 }
 
-unsigned int avb_1722_1_getset_device_name(char* address, unsigned set, char *data)
+unsigned int avb_1722_1_getset_device_name(unsigned char *address, unsigned set, unsigned char *data)
 {
 	return 0;
 }
 
-unsigned int avb_1722_1_getset_device_wink(char* address, unsigned set, char *data)
+unsigned int avb_1722_1_getset_device_wink(unsigned char *address, unsigned set, unsigned char *data)
 {
 	return 0;
 }
 
-unsigned int avb_1722_1_getset_device_mac_addr(char* address, unsigned set, char *data)
+unsigned int avb_1722_1_getset_device_mac_addr(unsigned char *address, unsigned set, unsigned char *data)
 {
 	return 0;
 }
 
-unsigned int avb_1722_1_getset_device_ptp_gm(char* address, unsigned set, char *data)
+unsigned int avb_1722_1_getset_device_ptp_gm(unsigned char *address, unsigned set, unsigned char *data)
 {
 	return 0;
 }
 
-unsigned int avb_1722_1_getset_source_name(char* address, unsigned set, char *data)
+unsigned int avb_1722_1_getset_source_name(unsigned char *address, unsigned set, unsigned char *data)
 {
 	return 0;
 }
 
-unsigned int avb_1722_1_getset_source_stream_name(char* address, unsigned set, char *data)
+unsigned int avb_1722_1_getset_source_stream_name(unsigned char *address, unsigned set, unsigned char *data)
 {
 	return 0;
 }
 
-unsigned int avb_1722_1_getset_sink_name(char* address, unsigned set, char *data)
+unsigned int avb_1722_1_getset_sink_name(unsigned char *address, unsigned set, unsigned char *data)
 {
 	return 0;
 }
 
-unsigned int avb_1722_1_getset_sink_stream_name(char* address, unsigned set, char *data)
+unsigned int avb_1722_1_getset_sink_stream_name(unsigned char *address, unsigned set, unsigned char *data)
 {
 	return 0;
 }
 
 
 // Function for parsing a 1722.1 SEC address
-unsigned int avb_1722_1_walk_tree(char* address, unsigned set, char* data)
+unsigned int avb_1722_1_walk_tree(unsigned char *address, unsigned set, unsigned char *data)
 {
 	unsigned int *node = &avb_1722_1_sec_parse_tree[0];
 	unsigned int done = 0;

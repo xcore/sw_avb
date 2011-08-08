@@ -281,7 +281,7 @@ static unsigned avb_1722_1_entity_database_check_timeout()
 //----------------------------------------------------------------------------------------
 
 
-static unsigned compare_guid(char* a, guid_t* b)
+static unsigned compare_guid(unsigned char* a, guid_t* b)
 {
 	return (a[0]==b->c[7] &&
 			a[1]==b->c[6] &&
@@ -317,7 +317,7 @@ static void avb_1722_1_create_1722_1_header(const unsigned char* dest_addr, int 
 //----------------------------------------------------------------------------------------
 
 
-static char* avb_1722_1_create_aecp_packet(int message_type, avb_1722_1_aecp_packet_t* cmd_pkt)
+static unsigned char* avb_1722_1_create_aecp_packet(int message_type, avb_1722_1_aecp_packet_t* cmd_pkt)
 {
 	struct ethernet_hdr_t *hdr = (ethernet_hdr_t*) &avb_1722_1_buf[0];
 	avb_1722_1_aecp_packet_t *pkt = (avb_1722_1_aecp_packet_t*) (hdr + 1);
@@ -407,7 +407,7 @@ static unsigned acmp_listener_valid_listener_unique()
 	return acmp_listener_rcvd_cmd_resp.listener_unique_id < AVB_1722_1_MAX_LISTENERS;
 }
 
-static unsigned acmp_listener_listener_is_connected()
+static unsigned acmp_listener_is_connected()
 {
 	enum avb_sink_state_t state;
 	get_avb_sink_state(acmp_listener_rcvd_cmd_resp.listener_unique_id, &state);
@@ -669,9 +669,17 @@ static avb_status_t avb_1722_1_acmp_listener_periodic(chanend c_tx)
 		acmp_listener_check_inflight_command_timeouts();
 		break;
 	case ACMP_LISTENER_CONNECT_RX_COMMAND:
-		if (!acmp_listener_valid_listener_unique()) {
+		if (!acmp_listener_valid_listener_unique())
+		{
 			acmp_listener_tx_response(ACMP_CMD_CONNECT_RX_RESPONSE, ACMP_STATUS_LISTENER_UNKNOWN_ID, c_tx);
-		} else {
+		}
+		else
+		{
+			if (acmp_listener_is_connected())
+			{
+				acmp_listener_tx_response(ACMP_CMD_CONNECT_RX_RESPONSE, ACMP_STATUS_LISTENER_EXCLUSIVE, c_tx);
+			}
+			else
 			{
 				acmp_listener_tx_command(ACMP_CMD_CONNECT_TX_COMMAND, 2000, c_tx);
 			}
@@ -679,19 +687,26 @@ static avb_status_t avb_1722_1_acmp_listener_periodic(chanend c_tx)
 		acmp_listener_state = ACMP_LISTENER_WAITING;
 		break;
 	case ACMP_LISTENER_DISCONNECT_RX_COMMAND:
-		if (!acmp_listener_valid_listener_unique()) {
+		if (!acmp_listener_valid_listener_unique())
+		{
 			acmp_listener_tx_response(ACMP_CMD_DISCONNECT_RX_RESPONSE, ACMP_STATUS_LISTENER_UNKNOWN_ID, c_tx);
-		} else {
-			if (acmp_listener_listener_is_connected()) {
+		}
+		else
+		{
+			if (acmp_listener_is_connected())
+			{
 				acmp_listener_tx_command(ACMP_CMD_DISCONNECT_TX_COMMAND, 200, c_tx);
-			} else {
+			}
+			else
+			{
 				acmp_listener_tx_response(ACMP_CMD_DISCONNECT_RX_RESPONSE, ACMP_STATUS_NOT_CONNECTED, c_tx);
 			}
 		}
 		acmp_listener_state = ACMP_LISTENER_WAITING;
 		break;
 	case ACMP_LISTENER_CONNECT_TX_RESPONSE:
-		if (acmp_listener_valid_listener_unique()) {
+		if (acmp_listener_valid_listener_unique())
+		{
 			acmp_listener_tx_response(ACMP_CMD_CONNECT_RX_RESPONSE, 0, c_tx);
 			acmp_listener_remove_inflight();
 			acmp_listener_state = ACMP_LISTENER_WAITING_FOR_CONNECT;
@@ -699,7 +714,8 @@ static avb_status_t avb_1722_1_acmp_listener_periodic(chanend c_tx)
 		}
 		break;
 	case ACMP_LISTENER_DISCONNECT_TX_RESPONSE:
-		if (acmp_listener_valid_listener_unique()) {
+		if (acmp_listener_valid_listener_unique())
+		{
 			acmp_listener_tx_response(ACMP_CMD_DISCONNECT_RX_RESPONSE, 0, c_tx);
 			acmp_listener_remove_inflight();
 			acmp_listener_state = ACMP_LISTENER_WAITING_FOR_DISCONNECT;
@@ -707,9 +723,12 @@ static avb_status_t avb_1722_1_acmp_listener_periodic(chanend c_tx)
 		}
 		break;
 	case ACMP_LISTENER_GET_STATE:
-		if (!acmp_listener_valid_listener_unique()) {
+		if (!acmp_listener_valid_listener_unique())
+		{
 			acmp_listener_tx_response(ACMP_CMD_GET_RX_STATE_RESPONSE, ACMP_STATUS_LISTENER_UNKNOWN_ID, c_tx);
-		} else {
+		}
+		else
+		{
 			acmp_listener_tx_response(ACMP_CMD_GET_RX_STATE_RESPONSE, acmp_listener_get_state(), c_tx);
 		}
 		acmp_listener_state = ACMP_LISTENER_WAITING;
