@@ -13,7 +13,8 @@
 #include "audio_codec_CS42448.h"
 #include "simple_printf.h"
 #include "media_fifo.h"
-#include "avb_1722_1.h"
+#include "avb_1722_1_adp.h"
+#include "avb_1722_1_acmp.h"
 
 // This is the number of master clocks in a word clock
 #define MASTER_TO_WORDCLOCK_RATIO 512

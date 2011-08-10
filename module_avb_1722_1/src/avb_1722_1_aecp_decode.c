@@ -1,4 +1,5 @@
 #include <string.h>
+#include "avb_1722_1_aecp.h"
 
 // Data structures and functions from the generated file
 extern unsigned char avb_1722_1_sec_constant_data[];

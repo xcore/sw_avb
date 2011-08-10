@@ -171,7 +171,6 @@ typedef struct
 #define AVB_DEFAULT_CFI    (0x0)
 #define AVB_DEFAULT_VID    (0x2)
 #define AVB_ETYPE          (0x22f0)
-//#define AVB_ETYPE          (0x88b5)
 
 // Default to 2ms delay.
 #define AVB_DEFAULT_PRESENTATION_TIME_DELAY_NS              (2000000)
