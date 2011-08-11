@@ -196,7 +196,7 @@ avb_status_t process_avb_1722_1_adp_packet(avb_1722_1_adp_packet_t* pkt, chanend
 static void avb_1722_1_create_adp_packet(int message_type, guid_t guid)
 {
 	  ethernet_hdr_t *hdr = (ethernet_hdr_t*) &avb_1722_1_buf[0];
-	  avb_1722_1_adp_packet_t *pkt = (avb_1722_1_adp_packet_t*) (hdr + 1);
+	  avb_1722_1_adp_packet_t *pkt = (avb_1722_1_adp_packet_t*) (hdr + AVB_1722_1_PACKET_BODY_POINTER_OFFSET);
 
 	  memset(pkt, 0, sizeof(avb_1722_1_adp_packet_t));
 

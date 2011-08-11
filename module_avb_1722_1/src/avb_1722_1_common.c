@@ -35,7 +35,7 @@ void avb_1722_1_create_1722_1_header(	const unsigned char* dest_addr,
 										unsigned data_len,
 										ethernet_hdr_t *hdr)
 {
-	avb_1722_1_packet_header_t *pkt = (avb_1722_1_packet_header_t *) (hdr + 1);
+	avb_1722_1_packet_header_t *pkt = (avb_1722_1_packet_header_t *) (hdr + AVB_1722_1_PACKET_BODY_POINTER_OFFSET);
 
 	for (int i=0;i<6;i++)
 	{

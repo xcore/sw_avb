@@ -12,6 +12,8 @@ typedef struct avb_1722_1_packet_header_t {
 
 } avb_1722_1_packet_header_t;
 
+#define AVB_1722_1_PACKET_BODY_POINTER_OFFSET 	1	// sizeof(avb_1722_1_packet_header_t) = 4 bytes
+
 typedef union {
 #ifndef __XC__
 	unsigned long long l;
