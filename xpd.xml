@@ -4,7 +4,8 @@
         <githash>1c94e6e30efd3786c522f5c42aa30c1c029ced35</githash>
     </dependency>
     <dependency repo = "sc_i2c">
-        <githash>ffe0c94314b73a2d5086008864e0dbc354fc1e69</githash>
+        <githash>045a0e4d4a19484016300c1f635258b5d11dce0f</githash>
+        <version>2.0.0beta0</version>
     </dependency>
     <dependency repo = "sc_xtcp">
         <githash>e6cbea0d033f31dde91a3fc17238b79c6d85977c</githash>
@@ -13,7 +14,7 @@
         <githash>fd0a7bd1dd56741e00f418b0fe9ff50e4231ed76</githash>
     </dependency>
     <dependency repo = "sc_ethernet">
-        <githash>d7046e8750101e56c0b7f5fc3bfd35d60e49350e</githash>
+        <githash>3ff20a3b669eb6635d629b925a3238b37c04a2de</githash>
     </dependency>
     <description>AVB software stack</description>
     <location>git@github.com:xcore/sw_avb.git</location>
@@ -21,6 +22,8 @@
     <maintainer>DavidNorman</maintainer>
     <release parenthash = "c0e2eedbd5609978063be5c43ab2c671bb7d5030" version = "5.1.0beta0" githash = "f41d7b41abbc158ddf61ae895c35475ee4d1f41b"></release>
     <release parenthash = "c5f4fd52b8d824979950bfd4616013ab83649727" version = "5.1.0beta1" githash = "f16649adbf9d90dc003732416b9b430ca6644581"></release>
+    <release parenthash = "f16649adbf9d90dc003732416b9b430ca6644581" version = "5.1.0rc0" githash = "c2dcbec12277cad45115212202c5c6be8b850ced"></release>
+    <release parenthash = "4c16b7a4fe7016f6e2f986aa925167293f8cc910" version = "5.1.0rc1"></release>
     <scope>reference design</scope>
     <vendor>XMOS</vendor>
     <xpd_version>1.0</xpd_version>
