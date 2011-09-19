@@ -3,6 +3,8 @@
 // University of Illinois/NCSA Open Source License posted in
 // LICENSE.txt and at <http://github.xcore.com/>
 
+#if 0
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Multichannel I2S_SLAVE slave receiver-transmitter
@@ -175,3 +177,7 @@ void i2s_slave(const clock mclk,
 
 	set_thread_fast_mode_off();
 }
+
+#endif
+
+
