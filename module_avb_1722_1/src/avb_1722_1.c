@@ -39,7 +39,15 @@ void avb_1722_1_init(unsigned char macaddr[6], unsigned char serial_number[2])
 	my_guid.c[7] = macaddr[0];
 
 	avb_1722_1_adp_init();
-	avb_1722_1_acmp_init();
+#if (AVB_1722_1_CONTROLLER_ENABLED)
+	avb_1722_1_acmp_controller_init();
+#endif
+#if (AVB_1722_1_TALKER_ENABLED)
+	avb_1722_1_acmp_talker_init();
+#endif
+#if (AVB_1722_1_LISTENER_ENABLED)
+	avb_1722_1_acmp_listener_init();
+#endif
 
 }
 
@@ -99,9 +107,19 @@ avb_status_t avb_1722_1_periodic(chanend c_tx, chanend c_ptp)
 	if (res != AVB_NO_STATUS) return res;
 	res = avb_1722_1_adp_discovery_periodic(c_tx);
 	if (res != AVB_NO_STATUS) return res;
+#if (AVB_1722_1_CONTROLLER_ENABLED)
+	res = avb_1722_1_acmp_controller_periodic(c_tx);
+	if (res != AVB_NO_STATUS) return res;
+#endif
+#if (AVB_1722_1_TALKER_ENABLED)
+	res = avb_1722_1_acmp_talker_periodic(c_tx);
+	if (res != AVB_NO_STATUS) return res;
+#endif
+#if (AVB_1722_1_LISTENER_ENABLED)
 	res = avb_1722_1_acmp_listener_periodic(c_tx);
 	if (res != AVB_NO_STATUS) return res;
-	return avb_1722_1_acmp_talker_periodic(c_tx);
+#endif
+	return AVB_NO_STATUS;
 }
 
 
