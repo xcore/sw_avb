@@ -19,14 +19,7 @@ typedef union {
 	unsigned long long l;
 #endif
 	unsigned char c[8];
-} guid_t;
-
-typedef union {
-#ifndef __XC__
-	unsigned long long l;
-#endif
-	unsigned char c[8];
-} stream_t;
+} guid_t, stream_t, gmid_t;
 
 #define DEFAULT_1722_1_CD_FLAG (1)
 #define DEFAULT_1722_1_AVB_VERSION (0x0)
