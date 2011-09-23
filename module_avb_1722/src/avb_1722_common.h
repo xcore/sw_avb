@@ -10,7 +10,8 @@
 
 // Network to/from Host conversion
 #define NTOH_U16(x) ( ((unsigned) x[0] << 8) | ((unsigned) x[1]) )
-#define NTOH_U32(x,i) ( ((unsigned) x[i] << 24) | ((unsigned) x[i+1] << 16) | ((unsigned) x[i+2] << 8) | ((unsigned) x[i+3]) )
+#define NTOH_U32(x) ( ((unsigned) x[0] << 24) | ((unsigned) x[1] << 16) | ((unsigned) x[2] << 8) | ((unsigned) x[3]) )
+#define NTOH_U32i(x,i) ( ((unsigned) x[i] << 24) | ((unsigned) x[i+1] << 16) | ((unsigned) x[i+2] << 8) | ((unsigned) x[i+3]) )
 
 
 #define HTON_U16(x, v) do { x[0] = (v >> 8) & 0xFF; \
