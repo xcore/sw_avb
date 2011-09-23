@@ -3,6 +3,11 @@
 
 extern unsigned char my_mac_addr[6];
 
+void set_guid(guid_t *guid, unsigned char *a)
+{
+	guid->l = (unsigned long long)a[0] + ((unsigned long long)a[1] << 32);
+}
+
 unsigned compare_guid(unsigned char *a, guid_t *b)
 {
 	return (a[0]==b->c[7] &&
