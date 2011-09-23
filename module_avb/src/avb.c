@@ -20,7 +20,7 @@
 #include "mac_custom_filter.h"
 #include "avb_1722_maap.h"
 
-#ifdef USE_1722_1
+#ifdef AVB_ENABLE_1722_1
 #include "avb_1722_1.h"
 #endif
 
@@ -197,7 +197,7 @@ void avb_init(chanend media_ctl[],
 
   avb_1722_maap_init(mac_addr);
 
-#ifdef USE_1722_1
+#ifdef AVB_ENABLE_1722_1
   {
 	  unsigned char serial_number[2] = { 0,1 };
 	  avb_1722_1_init(mac_addr, serial_number);
@@ -227,7 +227,7 @@ void avb_init(chanend media_ctl[],
 avb_status_t avb_periodic(void) {
 	avb_status_t res = mrp_periodic();
 	if (res != AVB_NO_STATUS) return res;
-#ifdef USE_1722_1
+#ifdef AVB_ENABLE_1722_1
 	res = avb_1722_1_periodic(c_mac_tx, c_ptp);
 	if (res != AVB_NO_STATUS) return res;
 #endif
@@ -926,7 +926,7 @@ avb_status_t avb_process_control_packet(unsigned int buf[],
   if (status != AVB_SRP_OK && status != AVB_NO_STATUS)
     return status;
 
-#ifdef USE_1722_1
+#ifdef AVB_ENABLE_1722_1
   status = avb_1722_1_process_packet(buf, nbytes, c_tx);
   if (status != AVB_SRP_OK && status != AVB_NO_STATUS)
     return status;
