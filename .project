@@ -3,6 +3,11 @@
 	<name>sw_avb</name>
 	<comment></comment>
 	<projects>
+		<project>sc_xtcp</project>
+		<project>sc_i2c</project>
+		<project>xcommon</project>
+		<project>sc_xlog</project>
+		<project>sc_ethernet</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
