@@ -11,6 +11,14 @@
 #define AVB_1722_1_ACMP_FLAGS_SAVED_STATE			(0x0004)
 #define AVB_1722_1_ACMP_FLAGS_STREAMING_WAIT		(0x0008)
 
+#define ACMP_TIMEOUT_CONNECT_TX_COMMAND				2000
+#define ACMP_TIMEOUT_DISCONNECT_TX_COMMAND			200
+#define ACMP_TIMEOUT_GET_TX_STATE_COMMAND			200
+#define ACMP_TIMEOUT_CONNECT_RX_COMMAND				4500
+#define ACMP_TIMEOUT_DISCONNECT_RX_COMMAND			500
+#define ACMP_TIMEOUT_GET_RX_STATE_COMMAND			200
+#define ACMP_TIMEOUT_GET_TX_CONNECTION_COMMAND		200
+
 /**
  *  A 1722.1 AVDECC Connection Management packet
  *
@@ -34,49 +42,49 @@ typedef struct {
 #define AVB_1722_1_ACMP_PACKET_SIZE (sizeof(ethernet_hdr_t)+sizeof(avb_1722_1_acmp_packet_t))
 
 typedef struct {
-	stream_t stream_id;
-	guid_t controller_guid;
-	guid_t listener_guid;
-	guid_t talker_guid;
-	unsigned int default_format;
-	short talker_unique_id;
-	short listener_unique_id;
-	short connection_count;
-	short sequence_id;
-	short flags;
-	unsigned char stream_dest_mac[6];
 	unsigned char message_type;
 	unsigned char status;
-} avb_1722_1_acmp_rcvd_cmd_resp;
+	stream_t stream_id;
+	guid_t controller_guid;
+	guid_t talker_guid;
+	guid_t listener_guid;
+	unsigned short talker_unique_id;
+	unsigned short listener_unique_id;
+	unsigned char stream_dest_mac[6];
+	unsigned short connection_count;
+	unsigned short sequence_id;
+	unsigned short flags;
+	unsigned int default_format;
+} avb_1722_1_acmp_cmd_resp;
 
 typedef struct {
 	guid_t guid;
-	short unique_id;
+	unsigned short unique_id;
 	short padding;
 } avb_1722_1_acmp_listener_pair;
 
 typedef struct {
     stream_t stream_id;
-	short connection_count;
+	int connection_count;
 	unsigned char destination_mac[6];
-	avb_1722_1_acmp_listener_pair listeners[AVB_1722_1_MAX_LISTENERS_PER_TALKER];
+	avb_1722_1_acmp_listener_pair connected_listeners[AVB_1722_1_MAX_LISTENERS_PER_TALKER];
 } avb_1722_1_acmp_talker_stream_info;
 
 typedef struct {
 	guid_t talker_guid;
-	short talker_unique_id;
-	short connected;
+	unsigned short talker_unique_id;
+	int connected;
 	stream_t stream_id;
 	unsigned char destination_mac[6];
-	short padding;
+	unsigned int default_format;
 } avb_1722_1_acmp_listener_stream_info;
 
 typedef struct {
-	unsigned timeout;
-	short retried;
-	short command;
-	short original_sequence_id;
-	short dummy;
+	int in_use;
+	unsigned int timeout;
+	unsigned int retried;
+	avb_1722_1_acmp_cmd_resp command;
+	unsigned short original_sequence_id;
 } avb_1722_1_acmp_inflight_command;
 
 typedef enum {

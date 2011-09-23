@@ -6,11 +6,16 @@
 
 #define AVB_1722_1_ACMP_DEST_MAC {0x91, 0xe0, 0xf0, 0x00, 0xff, 0x01};
 
-void avb_1722_1_acmp_init();
+void avb_1722_1_acmp_controller_init();
+void avb_1722_1_acmp_talker_init();
+void avb_1722_1_acmp_listener_init();
 
 avb_status_t process_avb_1722_1_acmp_packet(REFERENCE_PARAM(avb_1722_1_acmp_packet_t, pkt), chanend c_tx);
+avb_status_t avb_1722_1_acmp_controller_periodic(chanend c_tx);
 avb_status_t avb_1722_1_acmp_talker_periodic(chanend c_tx);
 avb_status_t avb_1722_1_acmp_listener_periodic(chanend c_tx);
+
+void acmp_controller_connect(REFERENCE_PARAM(guid_t, talker_guid), REFERENCE_PARAM(guid_t, listener_guid), chanend c_tx);
 
 
 unsigned avb_1722_1_acmp_get_talker_connection_info(REFERENCE_PARAM(short,talker));
