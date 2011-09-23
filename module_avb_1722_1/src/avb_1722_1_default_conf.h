@@ -4,8 +4,20 @@
 /* Must include avb_conf.h as it may redefine the default defines here */
 #include "avb_conf.h"
 
+#ifndef AVB_1722_1_CONTROLLER_ENABLED
+#define AVB_1722_1_CONTROLLER_ENABLED 1
+#endif
+
+#ifndef AVB_1722_1_TALKER_ENABLED
+#define AVB_1722_1_TALKER_ENABLED 1
+#endif
+
+#ifndef AVB_1722_1_LISTENER_ENABLED
+#define AVB_1722_1_LISTENER_ENABLED 1
+#endif
+
 #ifndef AVB_1722_1_ADP_VALID_TIME
-#define AVB_1722_1_ADP_VALID_TIME (31)  // 31*2 = 62 seconds validity time
+#define AVB_1722_1_ADP_VALID_TIME (10)  // 31*2 = 62 seconds validity time
 #define AVB_1722_1_ADP_REPEAT_TIME (AVB_1722_1_ADP_VALID_TIME/2)
 #endif
 
@@ -76,10 +88,10 @@
 #endif
 
 /* Debug defines */
-/*
+
 #ifndef AVB_1722_1_ADP_DEBUG_ENTITY_REMOVAL
 #define AVB_1722_1_ADP_DEBUG_ENTITY_REMOVAL
 #endif
-*/
+
 
 #endif /* AVB_1722_1_DEFAULT_CONF_H_ */
