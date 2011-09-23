@@ -35,6 +35,13 @@
 #define AVB_1722_1_ADP_CONTROLLER_CAPABILITIES_IMPLEMENTED  				(0x0001)
 #define AVB_1722_1_ADP_CONTROLLER_CAPABILITIES_LAYER3_PROXY 				(0x0002)
 
+/* Default audio formats fields */
+#define AVB_1722_1_ADP_DEFAULT_AUDIO_SAMPLE_RATES_MASK      			(0xFC000000)
+#define AVB_1722_1_ADP_DEFAULT_AUDIO_MAX_CHANS_MASK         			(0x03FC0000)
+#define AVB_1722_1_ADP_DEFAULT_AUDIO_SAF_MASK               			(0x00020000)
+#define AVB_1722_1_ADP_DEFAULT_AUDIO_FLOAT_MASK             			(0x00010000)
+#define AVB_1722_1_ADP_DEFAULT_AUDIO_CHAN_FORMATS_MASK					(0x0000FFFF)
+
 #define AVB_1722_1_ADP_DEFAULT_AUDIO_FORMAT_MONO						(0x00000001)
 #define AVB_1722_1_ADP_DEFAULT_AUDIO_FORMAT_2_CH						(0x00000002)
 #define AVB_1722_1_ADP_DEFAULT_AUDIO_FORMAT_3_CH						(0x00000004)
@@ -108,6 +115,25 @@ typedef struct {
 } avb_1722_1_adp_packet_t;
 
 #define AVB_1722_1_ADP_PACKET_SIZE (sizeof(ethernet_hdr_t)+sizeof(avb_1722_1_adp_packet_t))
+
+typedef struct {
+	guid_t guid;
+	unsigned int vendor_id;
+	unsigned int model_id;
+	unsigned int capabilities;
+	unsigned short talker_stream_sources;
+	unsigned short talker_capabilities;
+	unsigned short listener_stream_sinks;
+	unsigned short listener_capabilites;
+	unsigned int controller_capabilities;
+	unsigned int available_index;
+	gmid_t as_grandmaster_id;
+	unsigned int default_audio_format;
+	unsigned int default_video_format;
+	unsigned int association_id;
+	unsigned int type;
+	unsigned timeout;
+} avb_1722_1_entity_record;
 
 typedef enum {
 	ENTITY_AVAILABLE = 0,

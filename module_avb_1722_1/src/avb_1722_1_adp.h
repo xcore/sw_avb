@@ -11,6 +11,7 @@ void avb_1722_1_adp_init();
 avb_status_t process_avb_1722_1_adp_packet(REFERENCE_PARAM(avb_1722_1_adp_packet_t, pkt), chanend c_tx);
 avb_status_t avb_1722_1_adp_advertising_periodic(chanend c_tx, chanend ptp);
 avb_status_t avb_1722_1_adp_discovery_periodic(chanend c_tx);
+int avb_1722_1_get_latest_new_entity_idx();
 
 /** \fn avb_1722_1_adp_announce
  *
@@ -28,7 +29,7 @@ void avb_1722_1_adp_depart();
  *
  *  Ask to discover the information for a specific entity guid
  */
-void avb_1722_1_adp_discover(unsigned guid[]);
+void avb_1722_1_adp_discover(REFERENCE_PARAM(guid_t, guid));
 
 /** \fn avb_1722_1_adp_discover_all
  *
