@@ -14,7 +14,6 @@
 extern fl_SPIPorts p_flash;
 
 fl_DeviceSpec flash_devices[] = { FL_DEVICE_WINBOND_W25X40, FL_DEVICE_ATMEL_AT25DF041A };
-// fl_DeviceSpec flash_devices[] = {FL_DEVICE_ATMEL_AT25DF041A};
 
 int flash_cmd_enable_ports(void)
 {
@@ -41,7 +40,6 @@ int flash_cmd_enable_ports(void)
 	settw(p_flash.spiMOSI, 8);
 
 	result = fl_connectToDevice(&p_flash, flash_devices, sizeof(flash_devices) / sizeof(fl_DeviceSpec));
-	// result = fl_connect(&p_flash);
 
 	if (result) return 1;
 	else return 0;
