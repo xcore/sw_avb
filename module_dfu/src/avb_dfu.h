@@ -25,10 +25,8 @@ int avb_dfu_init(void);
 /**	The application can write an upgrade image to flash by calling this
  * 	function for each subsequent block of image data.
  *
- * 	NOTE: num_bytes must be >= to the flash page size, otherwise the
- * 	function will not write the data and return a failure. This is a
- * 	limitation that could be overcome by buffering data in the DFU
- * 	module until we have enough to write a whole page.
+ * 	NOTE: the block size (num_bytes) must be >= to the flash page size,
+ * 	apart from the very final block of the image, which may be less.
  *
  * 	\param data			A pointer to the data you wish to write to flash
  * 	\param num_bytes	The number of bytes to write (see note above)

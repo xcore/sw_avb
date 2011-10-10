@@ -99,7 +99,7 @@ int avb_dfu_init(void)
 
 int avb_dfu_data_block_write(unsigned char *data, int num_bytes)
 {
-	int i;
+	int i, pages;
 	int p = 0;
 
 	if (flash_page_size == 0)
@@ -108,15 +108,18 @@ int avb_dfu_data_block_write(unsigned char *data, int num_bytes)
 		return 1;
 	}
 
-	// The loop assumes that the number of bytes to write to flash is >= to
-	// the page size. We don't buffer at this level - the application is
-	// responsible.
+	// This function assumes that the number of bytes to write to flash is >= to
+	// the page size, apart from the very final block of the image.
 	if (num_bytes < flash_page_size)
 	{
-		return 1;
+		pages = 1;
+	}
+	else
+	{
+		pages = num_bytes / flash_page_size;
 	}
 
-	for (i = 0; i < num_bytes / flash_page_size; i++)
+	for (i = 0; i < pages; i++)
 	{
 		int result = fl_writeImagePage(&data[p]);
 
