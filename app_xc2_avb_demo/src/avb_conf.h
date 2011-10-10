@@ -34,7 +34,16 @@
 /* Media clock configuration */
 #define AVB_NUM_MEDIA_CLOCKS 1
 
-// Defining this makes SRP auto-start and auto-stop a stream when listeners come and go
+/* Defining this makes SRP auto-start and auto-stop a stream when listeners come and go */
 #define SRP_AUTO_TALKER_STREAM_CONTROL
+
+/* DFU over TFTP */
+#define AVB_ENABLE_TFTP_DFU
+
+#define AVB_DFU_UPGRADE_IMAGE_TEST 0
+
+#define TFTP_DEBUG_PRINT 0
+
+#define AVB_DFU_TRAP_ON_FLASH_ERROR 1
 
 #endif
