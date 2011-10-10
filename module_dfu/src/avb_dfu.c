@@ -30,7 +30,7 @@ int avb_dfu_device_reboot(void)
 	write_sswitch_reg(core_id, 6, x);
 #else
 	read_sswitch_reg(core_id, 6, &pllVal);
-	write_sswitch_reg_blind(core_id^0x8000, 6, pllVal);
+	write_sswitch_reg_blind(core_id ^ 0x8000, 6, pllVal);
 	write_sswitch_reg_blind(core_id, 6, pllVal);
 #endif
 	return 0;
@@ -39,52 +39,53 @@ int avb_dfu_device_reboot(void)
 int avb_dfu_init(void)
 {
 	int result;
-    fl_BootImageInfo image;
+	fl_BootImageInfo image;
 
-    if (!flash_device_open)
-    {
-        if (flash_cmd_enable_ports() != 0)
-        {
-            // Something went wrong when trying to connect to the flash
-        	FLASH_ERROR();
-            return 1;
-        }
-        else
-        {
-        	flash_device_open = 1;
-        }
-    }
+	if (!flash_device_open)
+	{
+		if (flash_cmd_enable_ports() != 0)
+		{
+			// Something went wrong when trying to connect to the flash
+			FLASH_ERROR();
+			return 1;
+		}
+		else
+		{
+			flash_device_open = 1;
+		}
+	}
 
-    flash_page_size = fl_getPageSize();
+	flash_page_size = fl_getPageSize();
 
-    // Check that the factory image is valid
-    if (fl_getFactoryImage(&image) != 0)
-    {
-    	FLASH_ERROR();
-        return 1;
-    }
-    factory_image = image;
+	// Check that the factory image is valid
+	if (fl_getFactoryImage(&image) != 0)
+	{
+		FLASH_ERROR();
+		return 1;
+	}
+	factory_image = image;
 
-    // Check if a valid upgrade image already exists
-    if (fl_getNextBootImage(&image) == 0)
-    {
-        upgrade_image_valid = 1;
-        upgrade_image = image;
-    }
+	// Check if a valid upgrade image already exists
+	if (fl_getNextBootImage(&image) == 0)
+	{
+		upgrade_image_valid = 1;
+		upgrade_image = image;
+	}
 
-    do
-    {
-    	// If an upgrade image already exists, replace it with the new one
-    	if (!upgrade_image_valid)
-    	{
-    		result = fl_startImageAdd(&factory_image, FLASH_MAX_UPGRADE_SIZE, 0);
-    	}
-    	else
-    	{
-    		result = fl_startImageReplace(&upgrade_image, FLASH_MAX_UPGRADE_SIZE);
-    	}
+	do
+	{
+		// If an upgrade image already exists, replace it with the new one
+		if (!upgrade_image_valid)
+		{
+			result = fl_startImageAdd(&factory_image, FLASH_MAX_UPGRADE_SIZE, 0);
+		}
+		else
+		{
+			result = fl_startImageReplace(&upgrade_image, FLASH_MAX_UPGRADE_SIZE);
+		}
 
-    } while (result > 0);
+	}
+	while (result > 0);
 
 	if (result < 0)
 	{
@@ -93,7 +94,7 @@ int avb_dfu_init(void)
 		return 1;
 	}
 
-    return 0;
+	return 0;
 }
 
 int avb_dfu_data_block_write(unsigned char *data, int num_bytes)
@@ -115,8 +116,7 @@ int avb_dfu_data_block_write(unsigned char *data, int num_bytes)
 		return 1;
 	}
 
-
-	for (i=0; i < num_bytes/flash_page_size; i++)
+	for (i = 0; i < num_bytes / flash_page_size; i++)
 	{
 		int result = fl_writeImagePage(&data[p]);
 
@@ -149,17 +149,17 @@ int avb_dfu_image_complete(void)
 int avb_dfu_deinit(void)
 {
 	int result;
-    if (!flash_device_open) return 0;
+	if (!flash_device_open) return 0;
 
-    result = flash_cmd_disable_ports();
+	result = flash_cmd_disable_ports();
 
-    if (!result)
-    {
-    	flash_device_open = 0;
-    	return 0;
-    }
-    else
-    {
-    	return 1;
-    }
+	if (!result)
+	{
+		flash_device_open = 0;
+		return 0;
+	}
+	else
+	{
+		return 1;
+	}
 }
