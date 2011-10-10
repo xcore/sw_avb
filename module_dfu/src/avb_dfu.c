@@ -36,51 +36,6 @@ int avb_dfu_device_reboot(void)
 	return 0;
 }
 
-int avb_dfu_image_complete(void)
-{
-	if (fl_endWriteImage() != 0)
-	{
-		FLASH_ERROR();
-		return 1;
-	}
-	else
-	{
-		return 0;
-	}
-}
-
-int avb_dfu_data_block_write(unsigned char *data, int num_bytes)
-{
-	int i;
-	int p = 0;
-
-	if (flash_page_size == 0)
-	{
-		FLASH_ERROR();
-		return 1;
-	}
-
-	for (i=0; i < num_bytes/flash_page_size; i++)
-	{
-		int result = fl_writeImagePage(&data[p]);
-
-		if (result)
-		{
-			// Error
-			FLASH_ERROR();
-			return 1;
-		}
-
-		p += flash_page_size;
-	}
-
-	return 0;
-}
-
-/*
- * Sets the SPI ports of the flash, opens a connection to it, then prepares it to receive
- * a new image.
- */
 int avb_dfu_init(void)
 {
 	int result;
@@ -139,6 +94,56 @@ int avb_dfu_init(void)
 	}
 
     return 0;
+}
+
+int avb_dfu_data_block_write(unsigned char *data, int num_bytes)
+{
+	int i;
+	int p = 0;
+
+	if (flash_page_size == 0)
+	{
+		FLASH_ERROR();
+		return 1;
+	}
+
+	// The loop assumes that the number of bytes to write to flash is >= to
+	// the page size. We don't buffer at this level - the application is
+	// responsible.
+	if (num_bytes < flash_page_size)
+	{
+		return 1;
+	}
+
+
+	for (i=0; i < num_bytes/flash_page_size; i++)
+	{
+		int result = fl_writeImagePage(&data[p]);
+
+		if (result)
+		{
+			// Error
+			FLASH_ERROR();
+			return 1;
+		}
+
+		p += flash_page_size;
+	}
+
+	return 0;
+}
+
+int avb_dfu_image_complete(void)
+{
+	if (fl_endWriteImage() != 0)
+	{
+		FLASH_ERROR();
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
 }
 
 int avb_dfu_deinit(void)
