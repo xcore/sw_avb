@@ -6,7 +6,7 @@
 #include "avb_flash_interface.h"
 #include "avb_dfu.h"
 
-#if 1
+#if AVB_DFU_TRAP_ON_FLASH_ERROR
 #define FLASH_ERROR() do { printstr("Error: line: "); printintln(__LINE__); __builtin_trap(); } while(0)
 #else
 #define FLASH_ERROR() do {} while(0)
