@@ -23,7 +23,9 @@
     <release parenthash = "c5f4fd52b8d824979950bfd4616013ab83649727" version = "5.1.0beta1" githash = "f16649adbf9d90dc003732416b9b430ca6644581"></release>
     <release parenthash = "f16649adbf9d90dc003732416b9b430ca6644581" version = "5.1.0rc0" githash = "c2dcbec12277cad45115212202c5c6be8b850ced"></release>
     <release parenthash = "4c16b7a4fe7016f6e2f986aa925167293f8cc910" version = "5.1.0rc1" githash = "3efb15eccb013e4dd1058955a9555a240b16e233"></release>
-    <release parenthash = "7f3b9a86d9d8cca5fda18ff5343cd1f55c5ea70a" version = "5.1.1rc0"></release>
+    <release parenthash = "7f3b9a86d9d8cca5fda18ff5343cd1f55c5ea70a" version = "5.1.1rc0" githash = "dc6f822b16674eafc0e32ed2ba24db5ec96cb397"></release>
+    <release parenthash = "7f3b9a86d9d8cca5fda18ff5343cd1f55c5ea70a" version = "5.1.1" githash = "dc6f822b16674eafc0e32ed2ba24db5ec96cb397"></release>
+    <release parenthash = "7f3b9a86d9d8cca5fda18ff5343cd1f55c5ea70a" version = "5.1.1" githash = "dc6f822b16674eafc0e32ed2ba24db5ec96cb397"></release>
     <scope>reference design</scope>
     <vendor>XMOS</vendor>
     <xpd_version>1.0</xpd_version>
