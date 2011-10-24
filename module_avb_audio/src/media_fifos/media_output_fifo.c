@@ -107,7 +107,10 @@ media_output_fifo_pull_sample(media_output_fifo_t s0,
   unsigned int *dptr = s->dptr;
   
   if (dptr == s->wrptr)
+  {
+    // Underflow
     return 0;
+  }
 
   sample = *dptr;
   if (dptr == s->marker && s->local_ts == 0) {
@@ -221,7 +224,10 @@ media_output_fifo_strided_push(media_output_fifo_t s0,
     if (new_wrptr != s->dptr) {
       *wrptr = sample;
       wrptr = new_wrptr;         
-    }   
+    }
+    else {
+        // Overflow
+    }
   }
 
   s->wrptr = wrptr;
