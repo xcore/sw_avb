@@ -107,6 +107,7 @@ media_output_fifo_pull_sample(media_output_fifo_t s0,
   unsigned int sample;
   unsigned int *dptr = s->dptr;
   
+#ifdef XSCOPE_OUTPUT_FIFO_PULL
   if (s->wrptr - dptr >= 0)
   {
     unsigned int size = s->wrptr - dptr;
@@ -117,6 +118,7 @@ media_output_fifo_pull_sample(media_output_fifo_t s0,
     unsigned int size = (END_OF_FIFO(s) - START_OF_FIFO(s)) + (s->wrptr - dptr);
     xscope_probe_data(0, size);
   }
+#endif
   
   if (dptr == s->wrptr)
   {
