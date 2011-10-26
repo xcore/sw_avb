@@ -4,9 +4,9 @@
 #include <xccompat.h>
 #include <stdio.h>
 #include <string.h>
+#include <xscope.h>
 #include "ethernet_server.h"
 #include "audio_i2s.h"
-#include "xlog_server.h"
 #include "i2c.h"
 #include "avb.h"
 #include "audio_clock_CS2300CP.h"
@@ -142,6 +142,11 @@ int main(void) {
 
 		on stdcore[1]:
 		{
+            // Enable XScope printing
+            xscope_register(0, 0, "", 0, "");
+
+            xscope_config_io(XSCOPE_IO_BASIC);
+            
 			media_clock_server(media_clock_ctl,
 					ptp_link[1],
 					null,
@@ -181,15 +186,14 @@ int main(void) {
 				talker_ctl[0],
 				AVB_NUM_SOURCES);
 
-		// Xlog server
-		on stdcore[0]:
-		{
-			xlog_server_uart(p_uart_tx);
-		}
-
 		// Application threads
 		on stdcore[0]:
 		{
+            // Enable XScope printing
+            xscope_register(0, 0, "", 0, "");
+
+            xscope_config_io(XSCOPE_IO_BASIC);
+            
 			// First initialize avb higher level protocols
 			avb_init(media_ctl, null, talker_ctl, media_clock_ctl, rx_link[1], tx_link[2], ptp_link[2]);
 

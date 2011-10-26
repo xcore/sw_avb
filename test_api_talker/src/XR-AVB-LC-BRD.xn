@@ -78,6 +78,11 @@ xsi:schemaLocation="http://www.xmos.com http://www.xmos.com">
   </Nodes>
 
   <Links>
+    <!-- XScope -->
+    <Link Encoding="2wire" Delays="4,4" Flags="SOD">
+      <LinkEndpoint NodeId="0" Link="X0LA"/>
+      <LinkEndpoint RoutingId="0x8000" Chanend="1"/>
+    </Link>
     <!-- L2 Internal -->
     <Link Encoding="5wire" Delays="0,1">
       <LinkEndpoint NodeId="0" Link="4"/>
