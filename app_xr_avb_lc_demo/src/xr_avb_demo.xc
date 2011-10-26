@@ -1,6 +1,5 @@
 #include <platform.h>
 #include <print.h>
-#include <assert.h>
 #include <xccompat.h>
 #include <stdio.h>
 #include <string.h>
@@ -12,7 +11,6 @@
 #include "avb.h"
 #include "audio_clock_CS2300CP.h"
 #include "audio_codec_CS42448.h"
-#include "simple_printf.h"
 #include "media_fifo.h"
 #include "mdns.h"
 #include "control_api_server.h"
@@ -402,49 +400,61 @@ void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl) {
 
 			// Process TCP/IP events
 			case xtcp_event(tcp_svr, conn):
-			if (conn.event == XTCP_IFUP) {
-				avb_start();
-
-				// Request a multicast addresses for stream transmission
-				avb_1722_maap_request_addresses(AVB_NUM_SOURCES, null);
-			}
-
 			{
-				mdns_event res;
-				res = mdns_xtcp_handler(tcp_svr, conn);
-				if (res & mdns_entry_lost)
+				if (conn.event == XTCP_IFUP)
 				{
-					printstr("Media clock: FIFO\n");
-					set_device_media_clock_type(0, MEDIA_FIFO_DERIVED);
+					avb_start();
+
+					// Request a multicast addresses for stream transmission
+					avb_1722_maap_request_addresses(AVB_NUM_SOURCES, null);
 				}
+				else if (conn.event == XTCP_IFDOWN)
+				{
+					for(int i=0; i<AVB_NUM_SOURCES; i++)
+					{
+						set_avb_source_state(i, AVB_SOURCE_STATE_DISABLED);
+					}
+				}
+
+				{
+					mdns_event res;
+					res = mdns_xtcp_handler(tcp_svr, conn);
+					if (res & mdns_entry_lost)
+					{
+						printstr("Media clock: FIFO\n");
+						set_device_media_clock_type(0, MEDIA_FIFO_DERIVED);
+					}
+				}
+
+				c_api_xtcp_handler(tcp_svr, conn);
+
+				// add any special tcp/ip packet handling here
 			}
-
-			c_api_xtcp_handler(tcp_svr, conn);
-
-			// add any special tcp/ip packet handling here
 			break;
 
 			// Receive any events from user button presses
 			case c_gpio_ctl :> int cmd:
-			switch (cmd)
 			{
-				case STREAM_SEL:
-				change_stream = 1;
-				break;
-				case CHAN_SEL:
+				switch (cmd)
 				{
-					enum avb_sink_state_t cur_state;
+					case STREAM_SEL:
+					change_stream = 1;
+					break;
+					case CHAN_SEL:
+					{
+						enum avb_sink_state_t cur_state;
 
-					c_gpio_ctl :> selected_chan;
-					get_avb_sink_state(0, cur_state);
-					set_avb_sink_state(0, AVB_SINK_STATE_DISABLED);
-					for (int j=0;j<8;j++)
-					map[j] = (j+selected_chan*2) & 0x7;
-					set_avb_sink_map(0, map, 8);
-					if (cur_state != AVB_SINK_STATE_DISABLED)
-					set_avb_sink_state(0, AVB_SINK_STATE_POTENTIAL);
+						c_gpio_ctl :> selected_chan;
+						get_avb_sink_state(0, cur_state);
+						set_avb_sink_state(0, AVB_SINK_STATE_DISABLED);
+						for (int j=0;j<8;j++)
+						map[j] = (j+selected_chan*2) & 0x7;
+						set_avb_sink_map(0, map, 8);
+						if (cur_state != AVB_SINK_STATE_DISABLED)
+						set_avb_sink_state(0, AVB_SINK_STATE_POTENTIAL);
+					}
+					break;
 				}
-				break;
 			}
 			break;
 
@@ -452,19 +462,20 @@ void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl) {
 			case tmr when timerafter(timeout) :> void:
 			timeout += PERIODIC_POLL_TIME;
 
-			do {
-			avb_status = avb_periodic();
-			switch (avb_status)
+			do
 			{
-				case AVB_MAAP_ADDRESSES_RESERVED:
-				for(int i=0;i<AVB_NUM_SOURCES;i++) {
-					avb_1722_maap_get_offset_address(macaddr, i);
-					// activate the source
-					set_avb_source_dest(i, macaddr, 6);
-					set_avb_source_state(i, AVB_SOURCE_STATE_POTENTIAL);
+				avb_status = avb_periodic();
+				switch (avb_status)
+				{
+					case AVB_MAAP_ADDRESSES_RESERVED:
+					for(int i=0;i<AVB_NUM_SOURCES;i++) {
+						avb_1722_maap_get_offset_address(macaddr, i);
+						// activate the source
+						set_avb_source_dest(i, macaddr, 6);
+						set_avb_source_state(i, AVB_SOURCE_STATE_POTENTIAL);
+					}
+					break;
 				}
-				break;
-			}
 			} while (avb_status != AVB_NO_STATUS);
 
 			// Call the stream manager to check for new streams/manage
