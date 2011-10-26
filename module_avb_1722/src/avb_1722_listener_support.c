@@ -81,7 +81,8 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
    int prev_num_samples = stream_info->prev_num_samples;
    stream_info->prev_num_samples = num_samples_in_payload;
 
-   if (stream_info->chan_lock < 10) {
+   if (stream_info->chan_lock < 16)
+   {
      int num_channels;
 
 #if !AVB_1722_SAF
@@ -96,12 +97,35 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
 #endif
      
      if (!stream_info->num_channels_in_payload || 
-         stream_info->num_channels_in_payload != num_channels)  {
+         stream_info->num_channels_in_payload != num_channels)
+     {
        stream_info->num_channels_in_payload = num_channels;
        stream_info->chan_lock = 0;
+       stream_info->rate = 0;
      }
+
+     stream_info->rate += num_samples_in_payload;
        
      stream_info->chan_lock++;
+
+#if !AVB_1722_SAF
+     if (stream_info->chan_lock == 16)
+     {
+    	 stream_info->rate = (stream_info->rate / stream_info->num_channels_in_payload / 16);
+
+    	 switch (stream_info->rate)
+    	 {
+    		 case 1: stream_info->rate = 8000; break;
+    		 case 2: stream_info->rate = 16000; break;
+    		 case 4: stream_info->rate = 32000; break;
+    		 case 5: stream_info->rate = 44100; break;
+    		 case 6: stream_info->rate = 48000; break;
+    		 case 11: stream_info->rate = 88200; break;
+    		 case 12: stream_info->rate = 96000; break;
+    		 default: stream_info->rate = 0; break;
+    	 }
+     }
+#endif
 
      return 0;
    }
@@ -119,8 +143,23 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
 	   // See 61883-6 section 6.2 which explains that the receiver can calculate
 	   // which data block (sample) the timestamp refers to using the formula:
 	   //   index = (SYT_INTERVAL - dbc % SYT_INTERVAL) % SYT_INTERVAL
-	   // TODO this is hardcoded to SYT_INTERVAL=8.
-	   unsigned sample_num = (8 - (dbc_value & 7)) & 7;
+
+	   unsigned syt_interval, sample_num;
+
+	   switch (stream_info->rate)
+	   {
+		   case 8000: 	syt_interval = 1; break;
+		   case 16000: 	syt_interval = 2; break;
+		   case 32000:	syt_interval = 8; break;
+		   case 44100:	syt_interval = 8; break;
+		   case 48000:	syt_interval = 8; break;
+		   case 88200:	syt_interval = 16; break;
+		   case 96000:	syt_interval = 16; break;
+		   case 176400:	syt_interval = 32; break;
+		   case 192000:	syt_interval = 32; break;
+		   default: printstrln("ERROR: Invalid sample rate"); break;
+	   }
+	   sample_num = (syt_interval - (dbc_value & (syt_interval-1))) & (syt_interval-1);
 #endif
 	   // register timestamp
 	   for (int i=0;i<num_channels;i++)  {

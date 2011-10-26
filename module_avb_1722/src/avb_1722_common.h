@@ -175,6 +175,5 @@ typedef struct
 
 // Default to 2ms delay.
 #define AVB_DEFAULT_PRESENTATION_TIME_DELAY_NS              (2000000)
-#define AVB_DEFAULT_PRESENTATION_TIME_DELAY_TIMER_TICKS     (200000)
 
 #endif
