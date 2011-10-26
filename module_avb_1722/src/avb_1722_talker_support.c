@@ -267,7 +267,7 @@ int avb1722_create_packet(unsigned char Buf0[],
 	num_audio_samples = samples_in_packet * num_channels;
 
 	// Find the DBC for the current stream
-	dbc = stream_info->dbc;
+	dbc = stream_info->dbc_at_start_of_last_fifo_packet;
 	dbc += samples_per_fifo_packet - stream_info->samples_left_in_fifo_packet;
 
 	// Get the audio data packet information
@@ -278,12 +278,12 @@ int avb1722_create_packet(unsigned char Buf0[],
 	// the timestamp is index 0
 	if (stream_info->initial != 0) {
 		for (i = 0; i < num_channels; i++) {
-			int *src = (int *) media_input_fifo_get_packet(map[i], &presentationTime, &(stream_info->dbc));
+			int *src = (int *) media_input_fifo_get_packet(map[i], &presentationTime, &(stream_info->dbc_at_start_of_last_fifo_packet));
 			media_input_fifo_set_ptr(map[i], src);
 		}
 		timerValid = 1;
 		stream_info->initial = 0;
-		dbc = stream_info->dbc;
+		dbc = stream_info->dbc_at_start_of_last_fifo_packet;
 		stream_info->samples_left_in_fifo_packet = samples_per_fifo_packet;
 	} else {
 		if (stream_info->samples_left_in_fifo_packet < samples_in_packet) {
@@ -293,7 +293,7 @@ int avb1722_create_packet(unsigned char Buf0[],
 				int *src = media_input_fifo_get_ptr(map[i]);
 				sample_copy_strided(src, dest, stride, stream_info->samples_left_in_fifo_packet);
 				media_input_fifo_release_packet(map[i]);
-				src = (int *) media_input_fifo_get_packet(map[i], &presentationTime, &(stream_info->dbc));
+				src = (int *) media_input_fifo_get_packet(map[i], &presentationTime, &(stream_info->dbc_at_start_of_last_fifo_packet));
 				media_input_fifo_set_ptr(map[i], src);
 				dest += 1;
 				timerValid = 1;

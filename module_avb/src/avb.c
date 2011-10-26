@@ -239,6 +239,7 @@ void avb_start(void) {
 
   mrp_mad_begin(domain_attr);
   mrp_mad_join(domain_attr, 1);
+
 }
 
 static void avb_set_talker_bandwidth() 
@@ -660,6 +661,7 @@ int getset_avb_sink_state(int set,
         xc_abi_outuint(c, AVB1722_CONFIGURE_LISTENER_STREAM);
         xc_abi_outuint(c, sink->stream.local_id);
         xc_abi_outuint(c, sink->stream.sync);
+        xc_abi_outuint(c, sink->stream.rate);
         xc_abi_outuint(c, sink->stream.num_channels);
         for (int i=0;i<sink->stream.num_channels;i++) {
           xc_abi_outuint(c, outputs[sink->stream.map[i]].fifo);

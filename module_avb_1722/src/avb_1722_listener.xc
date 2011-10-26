@@ -32,6 +32,7 @@ static void configure_stream(chanend c,
 	int media_clock;
 
 	c :> media_clock;
+	c :> s.rate;
 	c :> s.num_channels;
 	for(int i=0;i<s.num_channels;i++) {
 		c :> s.map[i];

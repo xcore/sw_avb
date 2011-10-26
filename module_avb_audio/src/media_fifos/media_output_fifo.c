@@ -152,7 +152,7 @@ media_output_fifo_maintain(media_output_fifo_t s0,
     case ZEROING:
       if (*s->zero_marker == 0) {
         // we have zero-ed the entire fifo
-        // set the wrptr so that the fifo size is 3/4 of the buffer size
+        // set the wrptr so that the fifo size is 1/2 of the buffer size
         int buf_len = (END_OF_FIFO(s) - START_OF_FIFO(s));
         unsigned int *new_wrptr;
         

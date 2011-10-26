@@ -380,11 +380,8 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 				case 48000:
 					sample_rate = 44100;
 					break;
-				case 64000:
-					sample_rate = 48000;
-					break;
 				case 88200:
-					sample_rate = 64000;
+					sample_rate = 48000;
 					break;
 				case 96000:
 					sample_rate = 88200;

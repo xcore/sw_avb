@@ -82,7 +82,7 @@ static void configure_stream(chanend avb1722_tx_config,
 
 	stream.samples_left_in_fifo_packet = 0;
 	stream.initial = 1;
-	stream.dbc = -1;
+	stream.dbc_at_start_of_last_fifo_packet = -1;
 	stream.active = 1;
 	stream.transmit_ok = 1;
 	stream.sequence_number = 0;

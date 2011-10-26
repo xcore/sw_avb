@@ -1,3 +1,4 @@
+#include <print.h>
 #include "media_input_fifo.h"
 #include "hwlock.h"
 #include "avb_1722_def.h"
@@ -63,7 +64,20 @@ int media_input_fifo_enable(media_input_fifo_t media_input_fifo0,
 
   // This is the calculation of the SYT_INTERVAL
 #ifndef AVB_1722_SAF
-  packetSize = (((rate+(AVB1722_PACKET_RATE-1))/AVB1722_PACKET_RATE) * 4) / 3;
+  // packetSize = (((rate+(AVB1722_PACKET_RATE-1))/AVB1722_PACKET_RATE) * 4) / 3;
+  switch (rate)
+  {
+	   case 8000: 	packetSize = 1; break;
+	   case 16000: 	packetSize = 2; break;
+	   case 32000:	packetSize = 8; break;
+	   case 44100:	packetSize = 8; break;
+	   case 48000:	packetSize = 8; break;
+	   case 88200:	packetSize = 16; break;
+	   case 96000:	packetSize = 16; break;
+	   case 176400:	packetSize = 32; break;
+	   case 192000:	packetSize = 32; break;
+	   default: printstrln("ERROR: Invalid sample rate"); break;
+  }
 #else
   packetSize = ((rate+(AVB1722_PACKET_RATE-1))/AVB1722_PACKET_RATE);
 #endif
