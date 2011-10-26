@@ -1,5 +1,6 @@
 #include <print.h>
 #include <xccompat.h>
+#include <xscope.h>
 #include "media_output_fifo.h"
 #include "avb_1722_def.h"
 #include "media_clock_client.h"
@@ -106,9 +107,21 @@ media_output_fifo_pull_sample(media_output_fifo_t s0,
   unsigned int sample;
   unsigned int *dptr = s->dptr;
   
+  if (s->wrptr - dptr >= 0)
+  {
+    unsigned int size = s->wrptr - dptr;
+    xscope_probe_data(0, size);
+  }
+  else
+  {
+    unsigned int size = (END_OF_FIFO(s) - START_OF_FIFO(s)) + (s->wrptr - dptr);
+    xscope_probe_data(0, size);
+  }
+  
   if (dptr == s->wrptr)
   {
     // Underflow
+    // printstrln("Media output FIFO underflow");
     return 0;
   }
 
@@ -227,6 +240,7 @@ media_output_fifo_strided_push(media_output_fifo_t s0,
     }
     else {
         // Overflow
+        // printstrln("Media output FIFO overflow");
     }
   }
 
