@@ -15,6 +15,7 @@
 #endif
 
 #define MIN_ETHERNET_FRAME_SIZE 64
+#define AVB_1722_PLUS_SIP_HEADER_SIZE (32)
 
 static unsigned int failed_streamId[2];
 
@@ -329,7 +330,7 @@ static int check_talker_merge(char *buf,
   int num_values = hdr->NumberOfValuesLow;
   unsigned long long stream_id=0, my_stream_id=0;
   unsigned long long dest_addr=0, my_dest_addr=0;
-  int framesize=0, my_framesize=0;
+  int framesize=0, my_framesize=0, samples_per_packet;
   int vlan, my_vlan;
   srp_talker_first_value *first_value = 
     (srp_talker_first_value *) (buf + sizeof(mrp_msg_header) + sizeof(mrp_vector_header));
@@ -366,7 +367,8 @@ static int check_talker_merge(char *buf,
   if (vlan != my_vlan)
     return 0;
   
-  my_framesize = 32 + (source_info->stream.num_channels * 6 * 4);
+  samples_per_packet = (source_info->stream.rate + (AVB1722_PACKET_RATE-1))/AVB1722_PACKET_RATE;
+  my_framesize = AVB_1722_PLUS_SIP_HEADER_SIZE + (source_info->stream.num_channels * samples_per_packet * 4);
 
   framesize = NTOH_U16(first_value->TSpecMaxFrameSize);  
 
@@ -436,7 +438,7 @@ static int merge_talker_message(char *buf,
         AVB_SRP_TSPEC_RESERVED_VALUE;
       
       samples_per_packet = (source_info->stream.rate + (AVB1722_PACKET_RATE-1))/AVB1722_PACKET_RATE;
-      framesize = 32 + (source_info->stream.num_channels * samples_per_packet * 4);
+      framesize = AVB_1722_PLUS_SIP_HEADER_SIZE + (source_info->stream.num_channels * samples_per_packet * 4);
 
   
 

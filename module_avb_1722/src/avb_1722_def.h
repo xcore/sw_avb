@@ -124,10 +124,11 @@ typedef struct
 // per physical layer timestamp 
 #define ADC_NUM_AUDIO_SAMPLES_PER_TS (8 * MAX_NUM_CHANNELS_PER_TALKER)
 
-#define TALKER_NUM_AUDIO_SAMPLES_PER_CHANNEL_PER_AVB1722_PKT 6
-
-
+// The rate of 1722 packets (8kHz)
 #define AVB1722_PACKET_RATE (8000)
+
+// The number of samples per stream in each 1722 packet
+#define TALKER_NUM_AUDIO_SAMPLES_PER_CHANNEL_PER_AVB1722_PKT (AVB_MAX_AUDIO_SAMPLE_RATE / AVB1722_PACKET_RATE)
 
 // We add a 2% fudge factor to handle clock difference in the stream transmission shaping
 #define AVB1722_PACKET_PERIOD_TIMER_TICKS (((100000000 / AVB1722_PACKET_RATE)*98)/100)
