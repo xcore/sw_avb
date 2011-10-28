@@ -48,7 +48,9 @@ media_output_fifo_to_xc_channel_split_lr(chanend media_ctl,
 {
   mo_ts = 0xbadf00d;
   
+#ifdef XSCOPE_OUTPUT_FIFO_PULL
   xscope_register(1, XSCOPE_DISCRETE, "Media Output FIFO", XSCOPE_UINT, "Samples");
+#endif
   
   media_ctl_register(media_ctl, 0, null, num_channels, output_fifos,
                      clk_ctl_index);  

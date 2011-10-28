@@ -43,4 +43,7 @@
 // Defining this makes SRP auto-start and auto-stop a stream when listeners come and go
 #define SRP_AUTO_TALKER_STREAM_CONTROL
 
+// XScope
+// #define XSCOPE_OUTPUT_FIFO_PULL
+
 #endif
