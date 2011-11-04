@@ -161,6 +161,7 @@ int main(void) {
 
 		// AVB - Audio
 		on stdcore[0]: {
+            init_media_output_fifos(ofifos, ofifo_data, AVB_NUM_MEDIA_OUTPUTS);
 			configure_clock_src(b_mclk, p_aud_mclk);
 			start_clock(b_mclk);
 			par
@@ -178,6 +179,7 @@ int main(void) {
 						MASTER_TO_WORDCLOCK_RATIO,
 						c_samples_to_codec,
 						null,
+                        ofifos,
 						media_ctl[0],
 						0);
 			}
@@ -189,15 +191,6 @@ int main(void) {
 				buf_ctl[0],
 				listener_ctl[0],
 				AVB_NUM_SINKS);
-
-		on stdcore[0]:
-		{	init_media_output_fifos(ofifos, ofifo_data, AVB_NUM_MEDIA_OUTPUTS);
-			media_output_fifo_to_xc_channel_split_lr(media_ctl[1],
-					c_samples_to_codec,
-					0, // clk_ctl index
-					ofifos,
-					AVB_NUM_MEDIA_OUTPUTS);
-		}
 
 		// Application threads
 		on stdcore[0]:

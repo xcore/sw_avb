@@ -5,7 +5,7 @@
 #include "avb_1722_def.h"
 #include "media_clock_client.h"
 
-#define OUTPUT_DURING_LOCK 1
+#define OUTPUT_DURING_LOCK 0
 #define NOTIFICATION_PERIOD 250
 
 #define START_OF_FIFO(s) ((unsigned int*)&((s)->fifo[0]))
