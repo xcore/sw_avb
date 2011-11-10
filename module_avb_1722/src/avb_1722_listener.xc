@@ -103,7 +103,15 @@ void avb_1722_listener(chanend ethernet_rx_svr,
                           src_port):
         { 
           pktByteCnt -= 4;
-          avb_hash = RxBuf[1];
+          avb_hash = 0;
+          #if 0
+          for (int i=0; i < pktByteCnt; i++)
+          {
+            printhex((RxBuf, unsigned char[])[i]);
+            printstr(" ");
+          }
+          printstrln("");
+          #endif
 
           // process the audio packet if enabled.
           if (avb_hash < MAX_AVB_STREAMS_PER_LISTENER &&

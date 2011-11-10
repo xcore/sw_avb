@@ -183,8 +183,10 @@ unsigned int update_media_clock(chanend ptp_svr,
 	}
 	case MEDIA_FIFO_DERIVED: {
 		long long ierror, perror;
-		if (!clock_info->stream_info2.valid)
+
+		if (!clock_info->stream_info2.valid) {
 			return local_wordlen_to_external_wordlen(clock_info->wordlen);
+        }
 
 		if (!clock_info->stream_info1.valid) {
 			clock_info->stream_info1 = clock_info->stream_info2;
@@ -202,9 +204,10 @@ unsigned int update_media_clock(chanend ptp_svr,
 		} else {
 			diff_local = clock_info->stream_info2.local_ts
 					- clock_info->stream_info1.local_ts;
-
+                    
 			ierror = (signed) clock_info->stream_info2.outgoing_ptp_ts -
-					 (signed) clock_info->stream_info2.presentation_ts;
+					 (signed) clock_info->stream_info2.presentation_ts;  
+                     
 
 			ierror = ierror << WORDLEN_FRACTIONAL_BITS;
 

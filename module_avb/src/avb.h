@@ -1,7 +1,7 @@
 #ifndef _avb_h_
 #define _avb_h_
 
-#include "ethernet_server.h"
+// #include "ethernet_server.h"
 #include "ethernet_rx_client.h"
 #include "ethernet_tx_client.h"
 #include "avb_1722.h"
@@ -9,7 +9,7 @@
 #include "avb_1722_maap.h"
 #include "avb_srp.h"
 #include "gptp.h"
-#include "getmac.h"
+// #include "getmac.h"
 #include "media_clock_server.h"
 #include "media_clock_client.h"
 #include "avb_control_types.h"

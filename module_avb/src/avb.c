@@ -219,7 +219,7 @@ void avb_init(chanend media_ctl[],
   avb_mvrp_init();
 #endif
 
-  xc_abi_outuint(c_mac_tx, ETHERNET_TX_INIT_AVB_ROUTER);
+  // xc_abi_outuint(c_mac_tx, ETHERNET_TX_INIT_AVB_ROUTER);
 
   mac_set_custom_filter(c_mac_rx, MAC_FILTER_AVB_CONTROL);
 }

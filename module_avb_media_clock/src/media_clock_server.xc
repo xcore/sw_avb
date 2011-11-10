@@ -105,7 +105,7 @@ int get_buf_info(int fifo)
 static void manage_buffer(buf_info_t &b,
                           chanend ptp_svr, 
                           chanend buf_ctl,
-                          int index) 
+                          int index)
 {
   unsigned outgoing_timestamp_local;
   unsigned presentation_timestamp;
@@ -115,8 +115,7 @@ static void manage_buffer(buf_info_t &b,
   int diff, sample_diff;
   unsigned int wordLength;
   int rdptr,wrptr,fill;
-  timer tmr;
-  int thiscore_now,othercore_now;
+  // int thiscore_now,othercore_now;
   unsigned server_core_id;
 
   if (b.media_clock == -1) {
@@ -132,8 +131,8 @@ static void manage_buffer(buf_info_t &b,
   buf_ctl <: BUF_CTL_REQUEST_INFO;
   master {
     buf_ctl <: 0;
-    buf_ctl :> othercore_now;
-    tmr :> thiscore_now;
+    // buf_ctl :> othercore_now;
+    // tmr :> thiscore_now;
     buf_ctl :> locked;
     buf_ctl :> presentation_timestamp;    
     buf_ctl :> outgoing_timestamp_local;
@@ -143,7 +142,7 @@ static void manage_buffer(buf_info_t &b,
   }
   if (server_core_id != get_core_id())
   {
-	  outgoing_timestamp_local = outgoing_timestamp_local - (othercore_now - thiscore_now);
+	  outgoing_timestamp_local = outgoing_timestamp_local; // - (othercore_now - thiscore_now);
   }
   outgoing_timestamp_local += b.adjust;
 
@@ -284,7 +283,7 @@ void media_clock_server(chanend media_clock_ctl,
                                  i,
                                  media_clocks[i],
                                  clk_time,
-                                 CLOCK_RECOVERY_PERIOD);            
+                                 CLOCK_RECOVERY_PERIOD);   
             for (int j=0;j<num_clk_ctl;j++) {
               if (registered[j]==i)
                 clk_ctl_set_rate(clk_ctl[j], media_clocks[i].wordLength);   
@@ -299,6 +298,7 @@ void media_clock_server(chanend media_clock_ctl,
         {
           int fifo, buf_index;
           unsigned x;
+
           x = inuchar(buf_ctl[i]);
           fifo = x<<8;
           x = inuchar(buf_ctl[i]);
@@ -307,6 +307,7 @@ void media_clock_server(chanend media_clock_ctl,
           (void) inct(buf_ctl[i]);
 
           buf_index = get_buf_info(fifo);
+
           switch (buf_ctl_cmd)
             {
             case BUF_CTL_GOT_INFO:
