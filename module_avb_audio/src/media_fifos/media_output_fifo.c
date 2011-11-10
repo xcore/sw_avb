@@ -153,6 +153,7 @@ media_output_fifo_maintain(media_output_fifo_t s0,
 {
   struct ofifo_t *s = (struct ofifo_t *) s0;
   unsigned time_since_last_notification;
+ 
     
   if (s->pending_init_notification && !(*notified_buf_ctl)) {
     notify_buf_ctl_of_new_stream(buf_ctl, s0);
