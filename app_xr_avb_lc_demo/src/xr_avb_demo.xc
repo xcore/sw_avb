@@ -318,7 +318,7 @@ void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl) {
 
 	timer tmr;
 	int avb_status = 0;
-	int map[8];
+	int map[AVB_NUM_MEDIA_INPUTS];
 	unsigned char macaddr[6];
 	int selected_chan = 0;
 	unsigned change_stream = 1;
@@ -347,12 +347,12 @@ void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl) {
 	set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_ENABLED);
 
 	// Configure the source stream
-	set_avb_source_name(0, "8 channel stream out");
+	set_avb_source_name(0, "multi channel stream out");
 
-	set_avb_source_channels(0, 8);
-	for (int i = 0; i < 8; i++)
+	set_avb_source_channels(0, AVB_NUM_MEDIA_INPUTS);
+	for (int i = 0; i < AVB_NUM_MEDIA_INPUTS; i++)
 		map[i] = i;
-	set_avb_source_map(0, map, 8);
+	set_avb_source_map(0, map, AVB_NUM_MEDIA_INPUTS);
 	set_avb_source_format(0, AVB_SOURCE_FORMAT_MBLA_24BIT, SAMPLE_RATE);
 	set_avb_source_sync(0, 0); // use the media_clock defined above
 
@@ -447,9 +447,9 @@ void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl) {
 						c_gpio_ctl :> selected_chan;
 						get_avb_sink_state(0, cur_state);
 						set_avb_sink_state(0, AVB_SINK_STATE_DISABLED);
-						for (int j=0;j<8;j++)
+						for (int j=0;j<AVB_NUM_MEDIA_INPUTS;j++)
 						map[j] = (j+selected_chan*2) & 0x7;
-						set_avb_sink_map(0, map, 8);
+						set_avb_sink_map(0, map, AVB_NUM_MEDIA_INPUTS);
 						if (cur_state != AVB_SINK_STATE_DISABLED)
 						set_avb_sink_state(0, AVB_SINK_STATE_POTENTIAL);
 					}
