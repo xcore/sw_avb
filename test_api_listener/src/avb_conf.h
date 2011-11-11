@@ -38,7 +38,7 @@
 #define AVB_MAX_AUDIO_SAMPLE_RATE 96000
 
 /* Add synths from channels 3/4 upwards in I2S for this demo */
-#define I2S_SYNTH_FROM 1
+//#define I2S_SYNTH_FROM 1
 
 // Defining this makes SRP auto-start and auto-stop a stream when listeners come and go
 #define SRP_AUTO_TALKER_STREAM_CONTROL

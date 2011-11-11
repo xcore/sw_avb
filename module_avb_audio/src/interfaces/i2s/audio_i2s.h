@@ -33,13 +33,20 @@ void i2s_master_configure_ports(const clock mclk,
  as master.
 
  This function implements a thread that can handle several synchronous 
- I2S interfaces. It inputs and outputs 24-bit data.
+ I2S interfaces. It inputs and outputs 24-bit data packed into 32 bits.
 
  The function will take input from the I2S interface and put the samples 
  directly into shared memory media input FIFOs. The output samples are 
  received over a channel. Every two word clock periods (i.e. once a
  sample) a timestamp is sent from this thread over the channel 
  and num_out samples are taken from the channel.
+
+ The master clock is generated externally by the PLL. A clock block clocks
+ the Bit clock port (aka serial clock or sclk), from the master clock, and we
+ write out a clock pattern on this port to generate the correct divided
+ BCLK.  Likewise, a clock block puts the BCLK as the clock for the LRCLK port.
+ We also write out data to the LRCLK port to generate a correct LRCLK pattern.
+
 
  This function can handle up to 8in and 8out at 48KHz. 
 
@@ -108,13 +115,13 @@ inline void i2s_master(const clock mclk,
   switch (mclk_to_bclk_ratio)
     {
     case 2:
-      bclk_val = 0xaaaaaaaa;
+      bclk_val = 0xaaaaaaaa; // 10
       break;
     case 4: 
-      bclk_val = 0xcccccccc;
+      bclk_val = 0xcccccccc; // 1100
       break;
     case 8:
-      bclk_val = 0xf0f0f0f0;
+      bclk_val = 0xf0f0f0f0; // 11110000
       break;
     default:
       // error - unknown master clock/word clock ratio
@@ -163,6 +170,8 @@ inline void i2s_master(const clock mclk,
 
 	  unsigned int active_fifos = media_input_fifo_enable_req_state();
 
+#pragma xta label "i2s_master_loop"
+
 #ifdef I2S_SYNTH_FROM
     for (int k=I2S_SYNTH_FROM;k<num_in>>1;k++) {
       sine_count[k] += sine_inc[k];
@@ -178,12 +187,15 @@ inline void i2s_master(const clock mclk,
     }
 
     for (int j=0;j<2;j++) {
+#pragma xta endpoint "i2s_master_lrclk_output"
+    	// This assumes that there are 32 BCLKs in one half of an LRCLK
     	p_lrclk <: lrclk_val;
     	lrclk_val = ~lrclk_val;
 
 #pragma loop unroll    
       for (int k=0;k<mclk_to_bclk_ratio;k++)  {
 
+#pragma xta endpoint "i2s_master_bclk_output"
         p_bclk <: bclk_val;
 
         if (k < num_in>>1) {
@@ -195,6 +207,7 @@ inline void i2s_master(const clock mclk,
         	}
 #else
             unsigned int sample_in;
+#pragma xta endpoint "i2s_master_sample_input"
             asm("in %0, res[%1]":"=r"(sample_in):"r"(p_din[k]));
 
             sample_in = (bitrev(sample_in) >> 8);
@@ -213,9 +226,9 @@ inline void i2s_master(const clock mclk,
         
         if (k < num_out>>1) {
           unsigned int sample_out;
-
           c_listener :> sample_out;
           sample_out = bitrev(sample_out << 8);
+#pragma xta endpoint "i2s_master_sample_output"
           p_dout[k] <: sample_out;
         }
         

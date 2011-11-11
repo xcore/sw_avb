@@ -923,7 +923,7 @@ avb_status_t avb_process_control_packet(unsigned int buf[],
                                         chanend c_tx)
 {
   avb_status_t status;
-  
+
   status = avb_mrp_process_packet(buf, nbytes);
   if (status != AVB_SRP_OK && status != AVB_NO_STATUS)
     return status;

@@ -111,14 +111,12 @@ void media_input_fifo_push_sample(media_input_fifo_t media_input_fifo0,
 
     spaceLeft &= (MEDIA_INPUT_FIFO_SAMPLE_FIFO_SIZE-1);
     
-    if (spaceLeft && (spaceLeft < media_input_fifo->packetSize)) return;
+    if (spaceLeft && (spaceLeft < packetSize)) return;
 
-    *wrIndex = ts;
-    wrIndex++;
-    *wrIndex = media_input_fifo->dbc;
-    wrIndex++;
-    *wrIndex = sample;
-    wrIndex++;
+    wrIndex[0] = ts;
+    wrIndex[1] = media_input_fifo->dbc;
+    wrIndex[2] = sample;
+    wrIndex += 3;
     media_input_fifo->wrIndex = (int) wrIndex;
 
     sampleCountInPacket = 3;
