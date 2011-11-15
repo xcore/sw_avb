@@ -46,6 +46,25 @@ static void configure_stream(chanend c,
 	s.dbc = -1;
 }
 
+static void adjust_stream(chanend c,
+        avb_1722_stream_info_t &s)
+{
+	int cmd;
+	c :> cmd;
+	switch (cmd) {
+	case AVB1722_ADJUST_LISTENER_VOLUME:
+		{
+			int volume;
+			for(int i=0;i<s.num_channels;i++) {
+				c :> volume;
+				media_output_fifo_set_volume(s.map[i], volume);
+			}
+		}
+		break;
+	}
+}
+
+
 static void disable_stream(avb_1722_stream_info_t &s)
 {
 	for(int i=0;i<s.num_channels;i++) {
@@ -140,14 +159,23 @@ void avb_1722_listener(chanend ethernet_rx_svr,
                 listener_ctl <: AVB1722_ACK;
                 break;
               }
+            case AVB1722_ADJUST_LISTENER_STREAM:
+              {
+            	int stream_num;
+            	listener_ctl :> stream_num;
+            	adjust_stream(listener_ctl,
+            			      listener_streams[stream_num]);
+            	listener_ctl <: AVB1722_ACK;
+                break;
+              }
             case AVB1722_DISABLE_LISTENER_STREAM:
               {
                 int stream_num;
                 listener_ctl :> stream_num;
                 disable_stream(listener_streams[stream_num]);
                 listener_ctl <: AVB1722_ACK;     
+                break;
               }
-            break;
             case AVB1722_GET_ROUTER_LINK:
               listener_ctl <: router_link;
               break;

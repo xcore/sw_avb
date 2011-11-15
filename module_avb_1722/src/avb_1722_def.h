@@ -109,6 +109,8 @@ typedef struct
 #define SET_AVB1722_STREAM                    (0x8015A51A)
 #define AVB1722_CONFIGURE_TALKER_STREAM       (0x800000B5)
 #define AVB1722_CONFIGURE_LISTENER_STREAM     (0x8000B51A)
+#define AVB1722_ADJUST_TALKER_STREAM          (0x800B5AB5)
+#define AVB1722_ADJUST_LISTENER_STREAM        (0x800B5A1A)
 #define AVB1722_DISABLE_TALKER_STREAM         (0x802233B5)
 #define AVB1722_DISABLE_LISTENER_STREAM       (0x8022441A)
 #define AVB1722_GET_ROUTER_LINK               (0x8522441A)
@@ -116,9 +118,11 @@ typedef struct
 #define AVB1722_TALKER_GO                     (0x8AAA0001)
 #define AVB1722_TALKER_STOP                   (0x8AAA0002)
 
-#define AVB1722_ACK                            (0x80000200)
-#define AVB1722_NACK                           (0x80000300)
+#define AVB1722_ACK                           (0x80000200)
+#define AVB1722_NACK                          (0x80000300)
 
+// Stream adjust specific commands
+#define AVB1722_ADJUST_LISTENER_VOLUME        (0x00000001)
 
 // Specify number of audio samples (left & right is considered as two samples)
 // per physical layer timestamp 

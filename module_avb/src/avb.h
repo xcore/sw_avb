@@ -162,6 +162,23 @@ avb_status_t avb_process_control_packet(unsigned int buf[], int len,
  **/
 void avb_set_legacy_mode(int mode);
 
+/**
+ *   \brief Set the volume multipliers for the audio channels
+ *
+ *   The number of channels in the array should be equal to the number
+ *   of channels set in the set_avb_source_map function call.
+ *
+ *   This function adjusts the stream channels while the stream is
+ *   active, and therefore cannot be called while the stream is
+ *   inactive.
+ *
+ *   \param sink_num the stream number to apply the change to
+ *   \param volumes a set of volume values in 2.30 signed fixed point linear format
+ *
+ */
+void set_avb_source_volumes(int sink_num, int volumes[]);
+
+
 #ifndef __XC__
 
 /** Utility function to get the index of a source stream based on its
