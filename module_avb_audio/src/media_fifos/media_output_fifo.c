@@ -11,6 +11,12 @@
 #define START_OF_FIFO(s) ((unsigned int*)&((s)->fifo[0]))
 #define END_OF_FIFO(s)   ((unsigned int*)&((s)->fifo[MEDIA_OUTPUT_FIFO_SAMPLE_FIFO_SIZE]))
 
+// Volume is represented as a 2.30 signed fixed point number.
+//    SIFFFFFF.FFFFFFFF.FFFFFFFF.FFFFFFFF
+//
+//    Clearly, apart from weird stuff, we should restrict the values to 0 -> 1, instead
+//    of -2 to 2
+#define MAX_VOLUME 0x40000000
 
 // IMPORTANT: This data structure must match the XC-friendly structure
 // defined in media_output_fifo.h
@@ -27,6 +33,7 @@ typedef struct ofifo_t {
   int last_notification_time;
   int media_clock;
   int pending_init_notification;
+  int volume;
   unsigned int fifo[MEDIA_OUTPUT_FIFO_SAMPLE_FIFO_SIZE];
 } ofifo_t;
 
@@ -44,6 +51,7 @@ media_output_fifo_init(int s0, unsigned stream_num)
   s->media_clock = -1;
   s->pending_init_notification = 0;
   s->last_notification_time = 0;
+  s->volume = MAX_VOLUME/4;
 }
 
 void
@@ -218,7 +226,7 @@ media_output_fifo_strided_push(media_output_fifo_t s0,
   unsigned int *new_wrptr;
   int i;
   int sample;
-  int zero = (s->state != ZEROING);
+  int volume = (s->state == ZEROING) ? 0 : s->volume;
   int count=0;
   
   for(i=0;i<n;i+=stride) {
@@ -226,12 +234,19 @@ media_output_fifo_strided_push(media_output_fifo_t s0,
     sample = *sample_ptr;
     sample = __builtin_bswap32(sample);
     sample_ptr += stride;
-    sample = sample * zero;
-#if AVB_1722_SAF
-    sample = sample >> 8;
+
+#ifndef AVB_1722_SAF
+    sample = sample << 8;
 #endif
-    sample &= 0xffffff;
-      
+
+    // Multiply volume into upper word of 64 bit result
+    {
+    	int h=0, l=0;
+		asm ("maccs %0,%1,%2,%3":"+r"(h),"+r"(l):"r"(sample),"r"(volume));
+		sample = h >> 6;
+	    sample &= 0xffffff;
+	}
+
     new_wrptr = wrptr+1;
     
     if (new_wrptr == END_OF_FIFO(s)) new_wrptr = START_OF_FIFO(s);
@@ -242,7 +257,6 @@ media_output_fifo_strided_push(media_output_fifo_t s0,
     }
     else {
         // Overflow
-        // printstrln("Media output FIFO overflow");
     }
   }
 
@@ -325,6 +339,15 @@ media_output_fifo_handle_buf_ctl(chanend buf_ctl,
     }            
   return;
 }
+
+void
+media_output_fifo_set_volume(media_output_fifo_t s0,
+                             unsigned int volume)
+{
+	  struct ofifo_t *s = (struct ofifo_t *) s0;
+	  s->volume = volume;
+}
+
 
 void
 init_media_output_fifos(media_output_fifo_t ofifos[],
