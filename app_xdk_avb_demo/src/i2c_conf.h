@@ -4,5 +4,5 @@
 // out of the ports.  Failure to do this will make the lines low (0) when we are
 // high impedance (supposed to be 1)
 
-#define SINGLE_MASTER
+#define I2C_SINGLE_MASTER
 
