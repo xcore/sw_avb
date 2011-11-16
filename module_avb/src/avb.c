@@ -766,15 +766,16 @@ int get_device_media_clocks(int *a0)
 }
 
 
-void set_avb_source_volumes(int sink_num, int volumes[])
+void set_avb_source_volumes(int sink_num, int volumes[], int count)
 {
-	if (sink_num < AVB_NUM_SINKS && sinks[sink_num].stream.state == AVB_SINK_STATE_ENABLED) {
+	if (sink_num < AVB_NUM_SINKS) {
 		  avb_sink_info_t *sink = &sinks[sink_num];
 		  chanend c = sink->listener_ctl;
 		  xc_abi_outuint(c, AVB1722_ADJUST_LISTENER_STREAM);
 		  xc_abi_outuint(c, sink->stream.local_id);
 		  xc_abi_outuint(c, AVB1722_ADJUST_LISTENER_VOLUME);
-	      for (int i=0;i<sink->stream.num_channels;i++) {
+		  xc_abi_outuint(c, count);
+	      for (int i=0;i<count;i++) {
 	          xc_abi_outuint(c, volumes[i]);
 	      }
 	}

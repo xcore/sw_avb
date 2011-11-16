@@ -174,9 +174,10 @@ void avb_set_legacy_mode(int mode);
  *
  *   \param sink_num the stream number to apply the change to
  *   \param volumes a set of volume values in 2.30 signed fixed point linear format
+ *   \param count the number of channels to set
  *
  */
-void set_avb_source_volumes(int sink_num, int volumes[]);
+void set_avb_source_volumes(int sink_num, int volumes[], int count);
 
 
 #ifndef __XC__

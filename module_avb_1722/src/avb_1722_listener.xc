@@ -54,10 +54,11 @@ static void adjust_stream(chanend c,
 	switch (cmd) {
 	case AVB1722_ADJUST_LISTENER_VOLUME:
 		{
-			int volume;
-			for(int i=0;i<s.num_channels;i++) {
+			int volume, count;
+			c :> count;
+			for(int i=0;i<count;i++) {
 				c :> volume;
-				media_output_fifo_set_volume(s.map[i], volume);
+				if (i < s.num_channels) media_output_fifo_set_volume(s.map[i], volume);
 			}
 		}
 		break;
