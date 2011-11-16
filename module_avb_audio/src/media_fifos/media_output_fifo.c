@@ -51,7 +51,7 @@ media_output_fifo_init(int s0, unsigned stream_num)
   s->media_clock = -1;
   s->pending_init_notification = 0;
   s->last_notification_time = 0;
-  s->volume = MAX_VOLUME/4;
+  s->volume = MAX_VOLUME;
 }
 
 void
