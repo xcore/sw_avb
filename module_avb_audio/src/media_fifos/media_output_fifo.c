@@ -226,7 +226,11 @@ media_output_fifo_strided_push(media_output_fifo_t s0,
   unsigned int *new_wrptr;
   int i;
   int sample;
+#ifdef MEDIA_OUTPUT_FIFO_VOLUME_CONTROL
   int volume = (s->state == ZEROING) ? 0 : s->volume;
+#else
+  int volume = (s->state == ZEROING) ? 0 : 1;
+#endif
   int count=0;
   
   for(i=0;i<n;i+=stride) {
@@ -239,13 +243,18 @@ media_output_fifo_strided_push(media_output_fifo_t s0,
     sample = sample << 8;
 #endif
 
-    // Multiply volume into upper word of 64 bit result
+#ifdef MEDIA_OUTPUT_FIFO_VOLUME_CONTROL
     {
+        // Multiply volume into upper word of 64 bit result
     	int h=0, l=0;
 		asm ("maccs %0,%1,%2,%3":"+r"(h),"+r"(l):"r"(sample),"r"(volume));
 		sample = h >> 6;
 	    sample &= 0xffffff;
 	}
+#else
+    sample *= volume;
+    sample = (sample * volume) >> 8;
+#endif
 
     new_wrptr = wrptr+1;
     
