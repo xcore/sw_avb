@@ -239,11 +239,10 @@ media_output_fifo_strided_push(media_output_fifo_t s0,
     sample = __builtin_bswap32(sample);
     sample_ptr += stride;
 
+#ifdef MEDIA_OUTPUT_FIFO_VOLUME_CONTROL
 #ifndef AVB_1722_SAF
     sample = sample << 8;
 #endif
-
-#ifdef MEDIA_OUTPUT_FIFO_VOLUME_CONTROL
     {
         // Multiply volume into upper word of 64 bit result
     	int h=0, l=0;
@@ -252,8 +251,11 @@ media_output_fifo_strided_push(media_output_fifo_t s0,
 	    sample &= 0xffffff;
 	}
 #else
-    sample *= volume;
-    sample = (sample * volume) >> 8;
+#ifdef AVB_1722_SAF
+    sample = sample >> 8;
+#endif
+    sample = (sample * volume);
+    sample &= 0xffffff;
 #endif
 
     new_wrptr = wrptr+1;
