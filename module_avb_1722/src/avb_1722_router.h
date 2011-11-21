@@ -7,8 +7,6 @@
 #define _avb_1722_router_h_
 #include <xccompat.h>
 #include "avb_conf.h"
-#include "avb_1722_listener.h"
-#include "avb_1722_talker.h"
 
 #ifndef MAX_CHANNELS_PER_AVB_STREAM 
 #define MAX_CHANNELS_PER_AVB_STREAM 16

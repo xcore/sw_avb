@@ -1,12 +1,12 @@
 #include <xs1.h>
 #include <xclib.h>
 #include "print.h"
+
 #include "avb_1722_def.h"
 #include "media_clock_client.h"
 #include "media_clock_server.h"
 #include "media_clock_internal.h"
-#include "avb_1722_router.h"
-#include <print.h>
+#include "media_output_fifo.h"
 #include "simple_printf.h"
 #include "avb_media_clock_def.h"
 #include "gptp.h"
