@@ -9,7 +9,7 @@
 #define NOTIFICATION_PERIOD 250
 
 #define START_OF_FIFO(s) ((unsigned int*)&((s)->fifo[0]))
-#define END_OF_FIFO(s)   ((unsigned int*)&((s)->fifo[MEDIA_OUTPUT_FIFO_SAMPLE_FIFO_SIZE]))
+#define END_OF_FIFO(s)   ((unsigned int*)&((s)->fifo[MEDIA_OUTPUT_FIFO_WORD_SIZE]))
 
 // Volume is represented as a 2.30 signed fixed point number.
 //    SIFFFFFF.FFFFFFFF.FFFFFFFF.FFFFFFFF
@@ -34,7 +34,7 @@ typedef struct ofifo_t {
   int media_clock;
   int pending_init_notification;
   int volume;
-  unsigned int fifo[MEDIA_OUTPUT_FIFO_SAMPLE_FIFO_SIZE];
+  unsigned int fifo[MEDIA_OUTPUT_FIFO_WORD_SIZE];
 } ofifo_t;
 
 
@@ -96,7 +96,7 @@ void media_output_fifo_set_ptp_timestamp(media_output_fifo_t s0,
 
   if (s->marker == 0) {
 	unsigned int* new_marker = s->wrptr + sample_number;
-	if (new_marker >= END_OF_FIFO(s)) new_marker -= MEDIA_OUTPUT_FIFO_SAMPLE_FIFO_SIZE;
+	if (new_marker >= END_OF_FIFO(s)) new_marker -= MEDIA_OUTPUT_FIFO_WORD_SIZE;
 
 	if (ptp_ts==0) ptp_ts = 1;
     s->ptp_ts = ptp_ts;

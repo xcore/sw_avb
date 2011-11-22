@@ -765,7 +765,7 @@ int get_device_media_clocks(int *a0)
   return 1;
 }
 
-
+#ifdef MEDIA_OUTPUT_FIFO_VOLUME_CONTROL
 void set_avb_source_volumes(int sink_num, int volumes[], int count)
 {
 	if (sink_num < AVB_NUM_SINKS) {
@@ -780,7 +780,7 @@ void set_avb_source_volumes(int sink_num, int volumes[], int count)
 	      }
 	}
 }
-
+#endif
 
 int getset_device_media_clock_rate(int set, int media_clock_num, int *a2)
 {

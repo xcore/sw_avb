@@ -150,7 +150,7 @@ static void manage_buffer(buf_info_t &b,
   fill = wrptr - rdptr;
 
   if (fill < 0)
-    fill += MEDIA_OUTPUT_FIFO_SAMPLE_FIFO_SIZE;
+    fill += MEDIA_OUTPUT_FIFO_WORD_SIZE;
 
 
 
@@ -194,7 +194,7 @@ static void manage_buffer(buf_info_t &b,
   }
 
   if (!locked && (b.stability_count > STABLE_THRESHOLD)) {
-      if (fill - sample_diff > MEDIA_OUTPUT_FIFO_SAMPLE_FIFO_SIZE-MAX_SAMPLES_PER_1722_PACKET) {
+      if (fill - sample_diff > MEDIA_OUTPUT_FIFO_WORD_SIZE-MAX_SAMPLES_PER_1722_PACKET) {
 #ifdef DEBUG_MEDIA_CLOCK
     	simple_printf("Media output %d compensation too large: %d samples\n", index, sample_diff);
 #endif

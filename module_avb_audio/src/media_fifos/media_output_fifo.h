@@ -17,8 +17,8 @@
 #define AVB_MAX_AUDIO_SAMPLE_RATE (48000)
 #endif
 
-#ifndef MEDIA_OUTPUT_FIFO_SAMPLE_FIFO_SIZE
-#define MEDIA_OUTPUT_FIFO_SAMPLE_FIFO_SIZE (AVB_MAX_AUDIO_SAMPLE_RATE/450)
+#ifndef MEDIA_OUTPUT_FIFO_WORD_SIZE
+#define MEDIA_OUTPUT_FIFO_WORD_SIZE (AVB_MAX_AUDIO_SAMPLE_RATE/450)
 #endif
 
 typedef enum ofifo_state_t {
@@ -43,7 +43,7 @@ struct media_output_fifo_data_t {
   int media_clock;							//!<
   int pending_init_notification;			//!<
   int volume;                               //!< The linear volume multipler in 2.30 signed fixed point format
-  unsigned int fifo[MEDIA_OUTPUT_FIFO_SAMPLE_FIFO_SIZE];
+  unsigned int fifo[MEDIA_OUTPUT_FIFO_WORD_SIZE];
 };
 
 /**
