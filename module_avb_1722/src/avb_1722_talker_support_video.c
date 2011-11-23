@@ -8,6 +8,8 @@
 
 #define streaming 
 #include <xccompat.h>
+#include <string.h>
+
 #include "avb_1722_talker.h"
 #include "gptp.h"
 #include "media_input_fifo.h"

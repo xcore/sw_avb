@@ -4,6 +4,8 @@
 #include "tsi_input.h"
 #include "avb_conf.h"
 
+#if AVB_NUM_MEDIA_INPUTS > 0
+
 // Uncomment this is you would like to check that the timing is good for 8 threads
 //#pragma xta command "config threads stdcore[0] 8"
 
@@ -92,4 +94,6 @@ void tsi_input(clock clk, in buffered port:32 p_data, in port p_clk, in buffered
 		}
 	}
 }
+
+#endif
 
