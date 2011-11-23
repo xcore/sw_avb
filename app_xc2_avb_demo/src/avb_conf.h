@@ -27,6 +27,7 @@
 #define AVB_NUM_TALKER_UNITS 1 
 
 /* Media configuration */
+#define AVB_1722_FORMAT_61883_6
 #define AVB_NUM_MEDIA_OUTPUTS 0
 #define AVB_NUM_MEDIA_INPUTS 2
 #define AVB_NUM_MEDIA_UNITS 1
@@ -39,11 +40,7 @@
 
 /* DFU over TFTP */
 #define AVB_ENABLE_TFTP_DFU
-
 #define AVB_DFU_UPGRADE_IMAGE_TEST 0
-
-#define TFTP_DEBUG_PRINT 0
-
 #define AVB_DFU_TRAP_ON_FLASH_ERROR 1
 
 #endif

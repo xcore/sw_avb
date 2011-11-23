@@ -91,4 +91,30 @@ int avb1722_create_packet(unsigned char Buf[],
                                           timeInfo),
                           int time);
 
+/** This generates the required CIP Header with specified DBC value.
+ *  It is called for every PDU and only updates the fields which
+ *  change for each PDU
+ *
+ *  \param   buf[] buffer array to be populated.
+ *  \param   dbc DBC value of CIP header to be populated.
+ */
+void AVB1722_CIP_HeaderGen(unsigned char Buf[], int dbc);
+
+/** Update fields in the 1722 header which change for each PDU
+ *
+ *  \param Buf the buffer containing the packet
+ *  \param valid_ts the timestamp is valid flag
+ *  \param avbtp_ts the 32 bit PTP timestamp
+ *  \param pkt_data_length the number of samples in the PDU
+ *  \param sequence_number the 1722 sequence number
+ *  \param stream_id0 the bottom 32 bits of the stream id
+ */
+void AVB1722_AVBTP_HeaderGen(unsigned char Buf[],
+		int valid_ts,
+		unsigned avbtp_ts,
+		int pkt_data_length,
+		int sequence_number,
+		const unsigned stream_id0);
+
+
 #endif

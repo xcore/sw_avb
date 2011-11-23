@@ -1,3 +1,12 @@
+23rd November 2011
+------------------
+  * Transport stream interface
+  * 1722/61883-4 packet encapsulation
+
+24th October 2011
+-----------------
+  * Field update module added
+
 13th June 2011 (v5.1.0)
 -----------------------
   * 802.1Qat support
