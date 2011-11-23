@@ -69,32 +69,30 @@ int media_input_fifo_enable(media_input_fifo_t media_input_fifo0,
 	return 0;
 }
 
-void media_input_fifo_push_sample(media_input_fifo_t media_input_fifo0,
-                                  unsigned int sample,
-                                  unsigned int ts)
-{
-}
-
 int media_input_fifo_empty(media_input_fifo_t media_input_fifo0)
 {
-	return 0;
+	volatile ififo_c_t *s =  (ififo_c_t *)media_input_fifo0;
+	return s->packet_wr == s->packet_rd;
 }
 
 void media_input_fifo_flush(media_input_fifo_t media_input_fifo0)
 {
+	volatile ififo_c_t *s =  (ififo_c_t *)media_input_fifo0;
+	s->packet_rd = s->packet_wr;
 }
 
 unsigned int *
-media_input_fifo_get_packet(media_input_fifo_t media_input_fifo0,
-                            unsigned int *ts,
-                            unsigned int *dbc)
+media_input_fifo_get_packet(media_input_fifo_t media_input_fifo0)
 {
-  return 0;
+	volatile ififo_c_t *s =  (ififo_c_t *)media_input_fifo0;
+	return &s->fifo[s->packet_rd];
 }
 
 void 
 media_input_fifo_release_packet(media_input_fifo_t media_input_fifo0)
 {
+	volatile ififo_c_t *s =  (ififo_c_t *)media_input_fifo0;
+	s->packet_rd += (192/4); // size of one packet plus timestamp
 }
 
 void
@@ -107,10 +105,3 @@ init_media_input_fifos(media_input_fifo_t ififos[],
 		ififos[i] = (unsigned int) &ififo_data[i];
 	}
 }
-
-extern inline void 
-media_input_fifo_set_ptr(media_input_fifo_t media_infput_fifo0,
-                         int *p);
-
-extern inline int *
-media_input_fifo_get_ptr(media_input_fifo_t media_infput_fifo0);

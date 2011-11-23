@@ -25,7 +25,7 @@ void AVB1722_AVBTP_HeaderGen(unsigned char Buf[],
 {
 	AVB_DataHeader_t *pAVBHdr = (AVB_DataHeader_t *) &(Buf[AVB_ETHERNET_HDR_SIZE]);
 
-	HTON_U16(pAVBHdr->packet_data_length, pkt_data_length);
+	SET_AVBTP_PACKET_DATA_LENGTH(pAVBHdr, pkt_data_length);
 
 	// only stamp the AVBTP timestamp when required.
 	if (valid_ts) {

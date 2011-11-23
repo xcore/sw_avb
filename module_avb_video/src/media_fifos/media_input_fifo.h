@@ -60,9 +60,7 @@ media_input_fifo_push_sample(media_input_fifo_t media_input_fifo,
  * \param media_input_fifo the media fifo
  */
 unsigned int *
-media_input_fifo_get_packet(media_input_fifo_t media_input_fifo,
-                               unsigned int *ts,
-                               unsigned int *dbc);
+media_input_fifo_get_packet(media_input_fifo_t media_input_fifo);
 #endif
 
 /**
@@ -185,40 +183,5 @@ unsigned int media_input_fifo_enable_req_state();
  * completed a pass of sample input.
  */
 void media_input_fifo_update_enable_ind_state(unsigned int enable, unsigned int mask);
-
-#ifndef __XC__
-
-/**
- *  \brief Update the current sample read pointer
- *
- *  This is used by the talker to store a pointer to the 'about to be
- *  written' sample in the audio packet.  1722 AVBTP packets do not
- *  necessarily line up with the packets of samples in the audio FIFOs.
- *
- *  This pointer is not the same as the packet read pointer in the
- *  FIFO structure, which points at the packet currently being read.
- *
- *  \param media_input_fifo0 The FIFO to update
- *  \param p The new value of the sample pointer
- */
-inline void media_input_fifo_set_ptr(media_input_fifo_t media_input_fifo0,
-                                     int *p)
-{
-}
-
-/**
- * \brief Get the current sample pointer from the FIFO
- *
- * The talker thread stores a pointer to the current sample as discussed in
- * the media_input_fifo_set_ptr function description.
- *
- * \param media_input_fifo0 the fifo to read the pointer from
- * \return the value of the sample read pointer
- */
-inline int *media_input_fifo_get_ptr(media_input_fifo_t media_input_fifo0)
-{
-	return 0;
-}
-#endif
 
 #endif

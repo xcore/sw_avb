@@ -21,7 +21,7 @@
 // AVB1722 default values
 #define AVB1722_DEFAULT_AVB_PKT_DATA_LENGTH    (0x38)
 
-// Default values
+// Default 61883-6 values
 #define AVB1722_DEFAULT_TAG                    (1)
 #define AVB1722_DEFAULT_CHANNEL                (31)
 #define AVB1722_DEFAULT_TCODE                  (0xA)
@@ -42,7 +42,7 @@
 
 #define AVB_DEFAULT_VLAN                   (2)
 
-// AVB1722 Header Size.
+// 61883-6 CIP header
 #define AVB_CIP_HDR_SIZE    				(8)
 
 // 61883-6/AVB1722 CIP Header definitions.

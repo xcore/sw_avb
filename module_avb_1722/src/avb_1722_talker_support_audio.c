@@ -28,8 +28,8 @@ void AVB1722_Talker_bufInit(unsigned char Buf0[],
 	int i;
 	unsigned char *Buf = &Buf0[2];
 	AVB_Frame_t *pEtherHdr = (AVB_Frame_t *) &(Buf[0]);
-	AVB_DataHeader_t *pAVBHdr = (AVB_DataHeader_t *) &(Buf[AVB_ETHERNET_HDR_SIZE]);
-	AVB_AVB1722_CIP_Header_t *pAVB1722Hdr = (AVB_AVB1722_CIP_Header_t *) &(Buf[AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE]);
+	AVB_DataHeader_t *p1722Hdr = (AVB_DataHeader_t *) &(Buf[AVB_ETHERNET_HDR_SIZE]);
+	AVB_AVB1722_CIP_Header_t *p61883Hdr = (AVB_AVB1722_CIP_Header_t *) &(Buf[AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE]);
 
 	unsigned data_block_size;
 
@@ -56,7 +56,7 @@ void AVB1722_Talker_bufInit(unsigned char Buf0[],
 	}
 
 	// clear all the bytes in header.
-	   memset( (void *) Buf, 0, (AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + AVB_CIP_HDR_SIZE));
+	memset( (void *) Buf, 0, (AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + AVB_CIP_HDR_SIZE));
 
 	//--------------------------------------------------------------------------
 	// 1. Initialaise the ethernet layer.
@@ -74,41 +74,38 @@ void AVB1722_Talker_bufInit(unsigned char Buf0[],
 	//--------------------------------------------------------------------------
 	// 2. Initialaise the AVB TP layer.
 	// NOTE: Since the data structure is cleared before we only set the requird bits.
-	SET_AVBTP_SV(pAVBHdr, 1); // set stream ID to valid.
-	SET_AVBTP_STREAM_ID0(pAVBHdr, pStreamConfig->streamId[0]);
-	SET_AVBTP_STREAM_ID1(pAVBHdr, pStreamConfig->streamId[1]);
-
-	// set pkt data length.
-	SET_AVBTP_PACKET_DATA_LENGTH(pAVBHdr, AVB1722_DEFAULT_AVB_PKT_DATA_LENGTH);
+	SET_AVBTP_SV(p1722Hdr, 1); // set stream ID to valid.
+	SET_AVBTP_STREAM_ID0(p1722Hdr, pStreamConfig->streamId[0]);
+	SET_AVBTP_STREAM_ID1(p1722Hdr, pStreamConfig->streamId[1]);
 
 	//--------------------------------------------------------------------------
 	// 3. Initialise the Simple Audio Format protocol specific part
 #if AVB_1722_FORMAT_SAF
-   //TODO://This is hardcoded for 48k 32 bit 32 bit samples 2 channels
-   SET_AVBTP_PROTOCOL_SPECIFIC(pAVBHdr, 2);
-   SET_AVBTP_GATEWAY_INFO(pAVBHdr, 0x02000920);
-   SET_AVBTP_SUBTYPE(pAVBHdr, 2);
+	//TODO://This is hardcoded for 48k 32 bit 32 bit samples 2 channels
+	SET_AVBTP_PROTOCOL_SPECIFIC(p1722Hdr, 2);
+	SET_AVBTP_GATEWAY_INFO(p1722Hdr, 0x02000920);
+	SET_AVBTP_SUBTYPE(p1722Hdr, 2);
 #else
 	//--------------------------------------------------------------------------
 	// 3. Initialaise the 61883 CIP protocol specific part
-	SET_AVB1722_CIP_TAG(pAVBHdr, AVB1722_DEFAULT_TAG);
-	SET_AVB1722_CIP_CHANNEL(pAVBHdr, AVB1722_DEFAULT_CHANNEL);
-	SET_AVB1722_CIP_TCODE(pAVBHdr, AVB1722_DEFAULT_TCODE);
-	SET_AVB1722_CIP_SY(pAVBHdr, AVB1722_DEFAULT_SY);
+	SET_AVB1722_CIP_TAG(p1722Hdr, AVB1722_DEFAULT_TAG);
+	SET_AVB1722_CIP_CHANNEL(p1722Hdr, AVB1722_DEFAULT_CHANNEL);
+	SET_AVB1722_CIP_TCODE(p1722Hdr, AVB1722_DEFAULT_TCODE);
+	SET_AVB1722_CIP_SY(p1722Hdr, AVB1722_DEFAULT_SY);
 
-	SET_AVB1722_CIP_EOH1(pAVB1722Hdr, AVB1722_DEFAULT_EOH1);
-	SET_AVB1722_CIP_SID(pAVB1722Hdr, AVB1722_DEFAULT_SID);
-	SET_AVB1722_CIP_DBS(pAVB1722Hdr, data_block_size);
+	SET_AVB1722_CIP_EOH1(p61883Hdr, AVB1722_DEFAULT_EOH1);
+	SET_AVB1722_CIP_SID(p61883Hdr, AVB1722_DEFAULT_SID);
+	SET_AVB1722_CIP_DBS(p61883Hdr, data_block_size);
 
-	SET_AVB1722_CIP_FN(pAVB1722Hdr, AVB1722_DEFAULT_FN);
-	SET_AVB1722_CIP_QPC(pAVB1722Hdr, AVB1722_DEFAULT_QPC);
-	SET_AVB1722_CIP_SPH(pAVB1722Hdr, AVB1722_DEFAULT_SPH);
-	SET_AVB1722_CIP_DBC(pAVB1722Hdr, AVB1722_DEFAULT_DBC);
+	SET_AVB1722_CIP_FN(p61883Hdr, AVB1722_DEFAULT_FN);
+	SET_AVB1722_CIP_QPC(p61883Hdr, AVB1722_DEFAULT_QPC);
+	SET_AVB1722_CIP_SPH(p61883Hdr, AVB1722_DEFAULT_SPH);
+	SET_AVB1722_CIP_DBC(p61883Hdr, AVB1722_DEFAULT_DBC);
 
-	SET_AVB1722_CIP_EOH2(pAVB1722Hdr, AVB1722_DEFAULT_EOH2);
-	SET_AVB1722_CIP_FMT(pAVB1722Hdr, AVB1722_DEFAULT_FMT);
-	SET_AVB1722_CIP_FDF(pAVB1722Hdr, AVB1722_DEFAULT_FDF);
-	SET_AVB1722_CIP_SYT(pAVB1722Hdr, AVB1722_DEFAULT_SYT);
+	SET_AVB1722_CIP_EOH2(p61883Hdr, AVB1722_DEFAULT_EOH2);
+	SET_AVB1722_CIP_FMT(p61883Hdr, AVB1722_DEFAULT_FMT);
+	SET_AVB1722_CIP_FDF(p61883Hdr, AVB1722_DEFAULT_FDF);
+	SET_AVB1722_CIP_SYT(p61883Hdr, AVB1722_DEFAULT_SYT);
 #endif
 
 }
@@ -145,8 +142,6 @@ int avb1722_create_packet(unsigned char Buf0[],
 	int samples_per_fifo_packet = stream_info->samples_per_fifo_packet;
 	int num_audio_samples;
 	int samples_in_packet;
-
-	// pull the required samples out of the fifo
 
 	// align packet 2 chars into the buffer so that samples are
 	// word align for fast copying.
