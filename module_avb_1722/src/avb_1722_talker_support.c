@@ -11,9 +11,6 @@
 #include <xccompat.h>
 #include "avb_conf.h"
 
-// Min frame size for sanity check.
-#define MIN_ETHERNET_FRAME_SIZE     (60)
-
 #define INVALID_DBC                 (0xF)
 
 // default audio sample type 24bits.

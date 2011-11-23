@@ -14,7 +14,6 @@
 #include "avnu_observability.h"
 #endif
 
-#define MIN_ETHERNET_FRAME_SIZE 64
 #define AVB_1722_PLUS_SIP_HEADER_SIZE (32)
 
 static unsigned int failed_streamId[2];
