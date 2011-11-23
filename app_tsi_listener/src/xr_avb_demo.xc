@@ -65,6 +65,7 @@ on stdcore[1]: struct r_i2c r_i2c = { PORT_I2C_SCL, PORT_I2C_SDA };
 
 //***** AVB TS-SPI ports ****
 on stdcore[0]: out port p_fs = PORT_SYNC_OUT;
+on stdcore[0]: clock clk_ts = XS1_CLKBLK_1;
 on stdcore[0]: in port p_ts_clk = PORT_SDATA_OUT1;
 on stdcore[0]: out port p_ts_valid = PORT_SDATA_OUT2;
 on stdcore[0]: out buffered port:4 p_ts_sync = PORT_SDATA_OUT3;
@@ -148,7 +149,7 @@ int main(void) {
 			{
 				audio_gen_CS2300CP_clock(p_fs, clk_ctl[0]);
 
-				tsi_output(media_ctl[0], p_ts_data, p_ts_clk, p_ts_sync, p_ts_valid, ofifos[0]);
+				tsi_output(clk_ts, p_ts_data, p_ts_clk, p_ts_sync, p_ts_valid, ofifo_data[0]);
 			}
 		}
 

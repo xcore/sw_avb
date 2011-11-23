@@ -89,7 +89,7 @@ media_output_fifo_handle_buf_ctl(chanend buf_ctl,
 
 void
 init_media_output_fifos(media_output_fifo_t ofifos[],
-						ofifo_t ofifo_data[],
+						media_output_fifo_data_t ofifo_data[],
 						int n)
 {
   for(int i=0;i<n;i++) {

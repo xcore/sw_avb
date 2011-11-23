@@ -124,10 +124,6 @@ typedef struct
 // Stream adjust specific commands
 #define AVB1722_ADJUST_LISTENER_VOLUME        (0x00000001)
 
-// Specify number of audio samples (left & right is considered as two samples)
-// per physical layer timestamp 
-#define ADC_NUM_AUDIO_SAMPLES_PER_TS (8 * MAX_NUM_CHANNELS_PER_TALKER)
-
 // The rate of 1722 packets (8kHz)
 #define AVB1722_PACKET_RATE (8000)
 

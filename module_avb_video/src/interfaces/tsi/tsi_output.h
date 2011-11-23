@@ -21,7 +21,7 @@
  *  \param output_fifo The media FIFO from which to draw samples
  */
 void tsi_output(clock clk, out buffered port:32 p_data, in port p_clk, out buffered port:4 p_sync, out port p_valid,
-		ofifo_t& output_fifo);
+		media_output_fifo_data_t& output_fifo);
 
 #endif
 

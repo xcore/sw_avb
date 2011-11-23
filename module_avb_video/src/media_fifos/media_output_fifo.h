@@ -23,17 +23,17 @@
 #define MEDIA_OUTPUT_FIFO_WORD_SIZE (TS_PACKET_SIZE*TS_OUTPUT_FIFO_SIZE)
 
 // This must match the C structure in media_output_fifo.c
-typedef struct ofifo_t {
+struct ofifo_t {
 	unsigned state;									//!< Various state flags
 	unsigned packet_wr;								//!< The packet being written
 	unsigned packet_rd;								//!< The packet being/about to be read
 	unsigned fifo[MEDIA_OUTPUT_FIFO_WORD_SIZE];		//!< The fifo of packets
-} ofifo_t;
+};
 
 /**
  * \brief This type provides the data structure used by a media output FIFO.
  */
-typedef struct media_output_fifo_data_t media_output_fifo_data_t;
+typedef struct ofifo_t media_output_fifo_data_t;
 
 /**
  * \brief This type provides a handle to a media output FIFO.
@@ -153,7 +153,7 @@ media_output_fifo_handle_buf_ctl(chanend buf_ctl,
  **/
 void
 init_media_output_fifos(media_output_fifo_t ofifos[],
-						ofifo_t ofifo_data[],
+						media_output_fifo_data_t ofifo_data[],
 						int n);
 
 #endif

@@ -4,7 +4,9 @@
 #include "tsi_input.h"
 #include "avb_conf.h"
 
-#pragma xta command "config threads stdcore[0] 6"
+// Uncomment this is you would like to check that the timing is good for 8 threads
+//#pragma xta command "config threads stdcore[0] 8"
+
 #pragma xta command "remove exclusion *"
 #pragma xta command "analyze endpoints ts_spi_input_first ts_spi_input_loop"
 #pragma xta command "set required - 148 ns"
@@ -52,6 +54,10 @@ void tsi_input(clock clk, in buffered port:32 p_data, in port p_clk, in buffered
 	while (1) {
 #pragma xta label "ts_spi_input_no_data"
 
+		// Only execute the packet receive when there is space in the
+		// buffer to accept it.  This form of loop in loop gives better
+		// critical path cost because the end branch of the critical
+		// inner loop is both the test and the branch back.
 		while (wr_ptr != ififo.packet_rd) {
 			unsigned h, l, v;
 
@@ -76,6 +82,10 @@ void tsi_input(clock clk, in buffered port:32 p_data, in port p_clk, in buffered
 			p_data :> v;
 			ififo.fifo[wr_ptr++] = v;
 
+			// In the XMOS architecture, the various test instructions
+			// return a value of 1 or 0 in a register, therefore the
+			// result of a comparison like '<' is 1 or 0, and therefore
+			// can be safely used as it is below
 			wr_ptr *= (wr_ptr < MEDIA_INPUT_FIFO_WORD_SIZE);
 
 			ififo.packet_wr = wr_ptr;

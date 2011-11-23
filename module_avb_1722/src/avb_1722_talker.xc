@@ -5,7 +5,7 @@
 #include <platform.h>
 #include <xs1.h>
 #include <xclib.h>
-#include <print.h>
+
 #include "avb_1722_def.h"
 #include "avb_1722.h"
 #include "avb_1722_listener.h"
@@ -21,11 +21,18 @@
 #if AVB_NUM_SOURCES != 0
 
 // Max. packet size for AVB 1722 talker
-#if AVB_1722_SAF
+#ifdef AVB_1722_FORMAT_SAF
 #define MAX_PKT_BUF_SIZE_TALKER (AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + TALKER_NUM_AUDIO_SAMPLES_PER_CHANNEL_PER_AVB1722_PKT * AVB_MAX_CHANNELS_PER_STREAM * 4 + 4)
-#else
+#endif
+
+#ifdef AVB_1722_FORMAT_TRANSPORT_STREAM
+#define MAX_PKT_BUF_SIZE_TALKER (AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + AVB_CIP_HDR_SIZE + 192*4 + 4)
+#endif
+
+#ifndef MAX_PKT_BUF_SIZE_TALKER
 #define MAX_PKT_BUF_SIZE_TALKER (AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + AVB_CIP_HDR_SIZE + TALKER_NUM_AUDIO_SAMPLES_PER_CHANNEL_PER_AVB1722_PKT * AVB_MAX_CHANNELS_PER_STREAM * 4 + 4)
 #endif
+
 
 static void configure_stream(chanend avb1722_tx_config,
 							 avb1722_Talker_StreamConfig_t &stream,
@@ -137,8 +144,6 @@ void avb_1722_talker(chanend ptp_svr, chanend ethernet_tx_svr,
 	int pending_timeinfo = 0;
 	int vlan = 2;
 	set_thread_fast_mode_on();
-
-	printstr("INFO: avb1722_talker: Started..\n");
 
 	// register how many streams this talker unit has
 	avb_register_talker_streams(talker_ctl, num_streams);

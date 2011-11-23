@@ -50,7 +50,7 @@ static inline void AVB1722_AVBTP_HeaderGen(unsigned char Buf[],
 	// Assume FOUR bytes is used to represent one audio sample, regardless of
 	// actual sample bits, valid for 61883-6/AVB1722.  This should probably
 	// be a lookup in a table based on the format identifier.
-#ifdef AVB_1722_SAF
+#ifdef AVB_1722_FORMAT_SAF
 	pkt_data_length = (numAudioSamples << 2);
 #else
 	pkt_data_length = AVB_CIP_HDR_SIZE + (numAudioSamples << 2);
@@ -150,7 +150,7 @@ void AVB1722_Talker_bufInit(unsigned char Buf0[],
 
 	//--------------------------------------------------------------------------
 	// 3. Initialise the Simple Audio Format protocol specific part
-#if AVB_1722_SAF
+#if AVB_1722_FORMAT_SAF
    //TODO://This is hardcoded for 48k 32 bit 32 bit samples 2 channels
    SET_AVBTP_PROTOCOL_SPECIFIC(pAVBHdr, 2);
    SET_AVBTP_GATEWAY_INFO(pAVBHdr, 0x02000920);
@@ -183,7 +183,7 @@ void AVB1722_Talker_bufInit(unsigned char Buf0[],
 static void sample_copy_strided(int *src, unsigned int *dest, int stride, int n) {
 	int i;
 	for (i = 0; i < n; i++) {
-#if AVB_1722_SAF
+#if AVB_1722_FORMAT_SAF
 		unsigned sample = *src << 8;
 #else
 		unsigned sample = (*src & 0xffffff) | AVB1722_audioSampleType;
@@ -220,7 +220,7 @@ int avb1722_create_packet(unsigned char Buf0[],
 	// word align for fast copying.
 	unsigned char *Buf = &Buf0[2];
 
-#if AVB_1722_SAF
+#if AVB_1722_FORMAT_SAF
 	unsigned int *dest = (unsigned int *) &Buf[(AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE)];
 #else
 	unsigned int *dest = (unsigned int *) &Buf[(AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + AVB_CIP_HDR_SIZE)];
@@ -315,7 +315,7 @@ int avb1722_create_packet(unsigned char Buf0[],
 
 	dbc &= 0xff;
 
-#if !AVB_1722_SAF
+#if !AVB_1722_FORMAT_SAF
 	AVB1722_CIP_HeaderGen(Buf, dbc);
 #endif
 	// perform required updates to header
@@ -327,7 +327,7 @@ int avb1722_create_packet(unsigned char Buf0[],
 	// Update timestamp value and valid flag.
 	AVB1722_AVBTP_HeaderGen(Buf, timerValid, ptp_ts, num_audio_samples,stream_info->sequence_number, stream_id0);
 
-#if AVB_1722_SAF
+#if AVB_1722_FORMAT_SAF
 	pktSize = AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + (num_audio_samples << 2);
 #else
 	pktSize = AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + AVB_CIP_HDR_SIZE + (num_audio_samples << 2);

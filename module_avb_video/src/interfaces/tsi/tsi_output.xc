@@ -3,7 +3,7 @@
 #include "avb_conf.h"
 
 void tsi_output(clock clk, out buffered port:32 p_data, in port p_clk, out buffered port:4 p_sync, out port p_valid,
-		ofifo_t& ofifo)
+		media_output_fifo_data_t& ofifo)
 {
 	unsigned rd_ptr = 0;
 

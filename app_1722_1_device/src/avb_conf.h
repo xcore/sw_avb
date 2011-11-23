@@ -27,6 +27,7 @@
 #define AVB_NUM_TALKER_UNITS 1
 
 /* Media configuration */
+#define AVB_1722_FORMAT_SAF 1
 #define AVB_NUM_MEDIA_OUTPUTS 2
 #define AVB_NUM_MEDIA_INPUTS 2
 #define AVB_NUM_MEDIA_UNITS 2
@@ -53,8 +54,6 @@
 /* 1722.1 Debug */
 #define AVB_1722_1_ACMP_DEBUG_INFLIGHT
 #define AVB_1722_1_ENABLE_ASSERTIONS
-
-#define AVB_1722_SAF 1
 
 // Defining this makes SRP auto-start and auto-stop a stream when listeners come and go
 #define SRP_AUTO_TALKER_STREAM_CONTROL

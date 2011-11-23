@@ -4,6 +4,9 @@
  */
 
 #include <platform.h>
+#include <xs1.h>
+#include <xclib.h>
+
 #include "avb_1722_def.h"
 #include "avb_1722.h"
 #include "avb_1722_listener.h"
@@ -11,20 +14,25 @@
 #include "ethernet_server_def.h"
 #include "ethernet_tx_client.h"
 #include "ethernet_rx_client.h"
-#include <xs1.h>
-#include <xclib.h>
-#include <print.h>
+
 #include "avb_srp.h"
 #include "avb_unit.h"
 #include "mac_custom_filter.h"
 #include "avb_conf.h"
 
 // Max. packet size for AVB AVB1722 listener
-#if AVB_1722_SAF
+#ifdef AVB_1722_FORMAT_SAF
 #define MAX_PKT_BUF_SIZE_LISTENER (AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + TALKER_NUM_AUDIO_SAMPLES_PER_CHANNEL_PER_AVB1722_PKT * AVB_MAX_CHANNELS_PER_STREAM * 4 + 4)
-#else
+#endif
+
+#ifdef AVB_1722_FORMAT_TRANSPORT_STREAM
+#define MAX_PKT_BUF_SIZE_LISTENER (AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + AVB_CIP_HDR_SIZE + 192*4 + 4)
+#endif
+
+#ifndef MAX_PKT_BUF_SIZE_LISTENER
 #define MAX_PKT_BUF_SIZE_LISTENER (AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + AVB_CIP_HDR_SIZE + TALKER_NUM_AUDIO_SAMPLES_PER_CHANNEL_PER_AVB1722_PKT * AVB_MAX_CHANNELS_PER_STREAM * 4 + 4)
 #endif
+
 
 static void configure_stream(chanend c,
                              avb_1722_stream_info_t &s)
@@ -111,8 +119,6 @@ void avb_1722_listener(chanend ethernet_rx_svr,
 
    ethernet_get_my_mac_adrs(ethernet_tx_svr, mac_addr);
 
-   printstr("INFO: AVB1722_EthernetRx : Started..\n");
-
    // main loop.
    while (1)
    {     
@@ -183,7 +189,6 @@ void avb_1722_listener(chanend ethernet_rx_svr,
               listener_ctl <: router_link;
               break;
             default:
-              printstr("ERROR: avb1722_listener: Unsupported command.\n");
               // sent NACK out
               listener_ctl <: AVB1722_NACK;
               break;

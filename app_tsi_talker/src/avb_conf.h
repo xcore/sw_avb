@@ -27,18 +27,14 @@
 #define AVB_NUM_TALKER_UNITS 1
 
 /* Media configuration */
+#define AVB_1722_FORMAT_TRANSPORT_STREAM
+#define AVB_TS_RATE 24000000
 #define AVB_NUM_MEDIA_OUTPUTS 0
 #define AVB_NUM_MEDIA_INPUTS 1
 #define AVB_NUM_MEDIA_UNITS 1
 
 /* Media clock configuration */
 #define AVB_NUM_MEDIA_CLOCKS 1
-
-/* Allow for high sample rates */
-#define AVB_MAX_AUDIO_SAMPLE_RATE 96000
-
-/* Add synths from channels 3/4 upwards in I2S for this demo */
-#define I2S_SYNTH_FROM 1
 
 // Defining this makes SRP auto-start and auto-stop a stream when listeners come and go
 #define SRP_AUTO_TALKER_STREAM_CONTROL
