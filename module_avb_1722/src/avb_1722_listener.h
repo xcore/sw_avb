@@ -11,6 +11,7 @@
 #include <xccompat.h>
 #include "avb_conf.h"
 #include "avb_1722_def.h"
+#include "gptp.h"
 #include "media_output_fifo.h"
 
 #ifndef MAX_INCOMING_AVB_STREAMS 
@@ -34,6 +35,7 @@ typedef struct avb_1722_stream_info_t {
   int num_channels_in_payload;     //!< The number of channels in the 1722 payloads
   int num_channels;
   int dbc;
+  int last_sequence;
   media_output_fifo_t map[AVB_MAX_CHANNELS_PER_STREAM];
 } avb_1722_stream_info_t;
 
@@ -43,8 +45,8 @@ int
 avb_1722_listener_process_packet(chanend buf_ctl,
                                  unsigned char Buf[], 
                                  int numBytes,
-                                 REFERENCE_PARAM(avb_1722_stream_info_t, 
-                                                 stream_info),
+                                 REFERENCE_PARAM(avb_1722_stream_info_t, stream_info),
+								 REFERENCE_PARAM(ptp_time_info_mod64, timeInfo),
                                  int index,
                                  REFERENCE_PARAM(int, notified_buf_ctl));
 

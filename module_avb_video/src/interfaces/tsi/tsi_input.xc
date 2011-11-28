@@ -16,7 +16,7 @@
 #pragma xta command "remove exclusion *"
 #pragma xta command "add exclusion ts_spi_input_loop"
 #pragma xta command "add exclusion ts_spi_input_no_data"
-#pragma xta command "analyze endpoints ts_spi_input_last ts_spi_input_first"
+#pragma xta command "analyze endpoints ts_spi_input_loop ts_spi_input_first"
 #pragma xta command "set required - 148 ns"
 
 // 0001 = 1 = correct (drop 4)
@@ -73,16 +73,11 @@ void tsi_input(clock clk, in buffered port:32 p_data, in port p_clk, in buffered
 
 			// loop for main block of words
 #pragma loop unroll
-			for (unsigned n=0; n<45; n++) {
+			for (unsigned n=0; n<46; n++) {
 #pragma xta endpoint "ts_spi_input_loop"
 				p_data :> v;
 				ififo.fifo[wr_ptr++] = v;
 			}
-
-			// Read final word
-#pragma xta endpoint "ts_spi_input_last"
-			p_data :> v;
-			ififo.fifo[wr_ptr++] = v;
 
 			// In the XMOS architecture, the various test instructions
 			// return a value of 1 or 0 in a register, therefore the

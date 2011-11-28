@@ -104,7 +104,7 @@ media_output_fifo_t ofifos[AVB_NUM_MEDIA_OUTPUTS];
 
 int main(void) {
 	// ethernet tx channels
-	chan tx_link[5];
+	chan tx_link[4];
 	chan rx_link[4];
 	chan connect_status;
 
@@ -147,7 +147,7 @@ int main(void) {
 
 			ethernet_server(mii, mac_address,
 					rx_link, 4,
-					tx_link, 5,
+					tx_link, 4,
 					smi, connect_status);
 		}
 
@@ -216,8 +216,8 @@ int main(void) {
 
 		// AVB Listener
 		on stdcore[0]: avb_1722_listener(rx_link[3],
-				tx_link[3],
 				buf_ctl[0],
+				null,
 				listener_ctl[0],
 				AVB_NUM_SINKS);
 
@@ -240,9 +240,9 @@ int main(void) {
 		on stdcore[0]:
 		{
 			// First initialize avb higher level protocols
-			avb_init(media_ctl, listener_ctl, talker_ctl, media_clock_ctl, rx_link[2], tx_link[4], ptp_link[2]);
+			avb_init(media_ctl, listener_ctl, talker_ctl, media_clock_ctl, rx_link[2], tx_link[3], ptp_link[2]);
 
-			demo(xtcp[0], rx_link[2], tx_link[4], c_gpio_ctl);
+			demo(xtcp[0], rx_link[2], tx_link[3], c_gpio_ctl);
 		}
 	}
 

@@ -91,7 +91,7 @@ media_output_fifo_t ofifos[AVB_NUM_MEDIA_OUTPUTS];
 int main(void)
 {
   // ethernet tx channels
-  chan tx_link[5];
+  chan tx_link[4];
   chan rx_link[4];
   chan connect_status;
 
@@ -130,7 +130,7 @@ par
 
     ethernet_server(mii, mac_address, 
                     rx_link, 4, 
-                    tx_link, 5,
+                    tx_link, 4,
                     smi, connect_status);
   }
 
@@ -194,8 +194,8 @@ par
 
   // AVB Listener
   on stdcore[1]: avb_1722_listener(rx_link[3],
-                                   tx_link[3],
                                    buf_ctl[0],
+                                   null,
                                    listener_ctl[0],
                                    AVB_NUM_SINKS);
 
@@ -217,7 +217,7 @@ par
   on stdcore[0]: demo(listener_ctl, talker_ctl, media_ctl, 
                       media_clock_ctl,   
                       ptp_link[2],
-                      xtcp[0], rx_link[2], tx_link[4]);
+                      xtcp[0], rx_link[2], tx_link[3]);
 
 
 

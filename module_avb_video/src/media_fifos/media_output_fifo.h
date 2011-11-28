@@ -90,37 +90,12 @@ media_output_fifo_maintain(media_output_fifo_t s,
  *
  *  \param s0 the FIFO to push samples into
  *  \param sample_ptr a pointer to a block of samples in the 1722 packet
- *  \param stride the number of words between successive samples for this FIFO
- *  \param n the number of samples to push into the buffer
+ *  \param index the index of the first word to write within the current packet
+ *  \param n the number of words to push into the buffer
  */
 void 
-media_output_fifo_strided_push(media_output_fifo_t s0,
-                               unsigned int *sample_ptr,
-                               int stride,
-                               int n);
+media_output_fifo_push(media_output_fifo_t s0, unsigned int *sample_ptr, int index, int n);
 #endif
-
-
-/**
- *  \brief Set the PTP timestamp on a specific sample in the buffer
- *
- *  When the 1722 thread unpacks a PDU, one of the samples in that
- *  PDU will have a PTP timestamp associated with it.  The 1722
- *  listener thread calls this to cause the FIFO to update control
- *  structures to record which sample is marked and the timestamp
- *  of that sample.
- *
- *  If the FIFO already has a marked timestamped sample within the
- *  buffer then it does not record the new timestamp.
- *
- *  \param s0 the media fifo which is being updated
- *  \param timestamp the 32 bit PTP timestamp
- *  \param the sample, counted from the end of the FIFO, which the timestamp applies to
- *
- */
-void media_output_fifo_set_ptp_timestamp(media_output_fifo_t s0,
-                                         unsigned int timestamp,
-                                         unsigned sample_number);
 
 
 /**

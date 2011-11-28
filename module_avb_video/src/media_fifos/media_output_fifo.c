@@ -51,30 +51,27 @@ enable_media_output_fifo(int s0, int media_clock)
 }
 
 
-// 1722 thread
-void media_output_fifo_set_ptp_timestamp(media_output_fifo_t s0,
-                                         unsigned int ptp_ts,
-                                         unsigned sample_number)
-{
-}
-
 
 // 1722 thread
 void 
-media_output_fifo_maintain(media_output_fifo_t s0,
-                           chanend buf_ctl,
-                           int *notified_buf_ctl)
+media_output_fifo_maintain(media_output_fifo_t s0, chanend buf_ctl, int *notified_buf_ctl)
 {
 }
 
 // 1722 thread
 void 
-media_output_fifo_strided_push(media_output_fifo_t s0,
-                                   unsigned int *sample_ptr,
-                                   int stride,
-                                   int n)
+media_output_fifo_push(media_output_fifo_t s0, unsigned int *sample_ptr, int index, int n)
 
 {
+	ofifo_c_t *s = (ofifo_c_t *) s0;
+	unsigned *dst = &s->packet_wr[index];
+	for (int i=0; i<n; i++) {
+		*dst++ = *sample_ptr++;
+	}
+
+	if (n + index == 8) {
+		s->packet_wr = dst;
+	}
 }
 
 

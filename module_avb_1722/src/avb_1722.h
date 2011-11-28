@@ -6,6 +6,7 @@
 #ifndef _AVB1722_TOP_H_ 
 #define _AVB1722_TOP_H_ 1
 
+#ifdef __XC__
 
 /** An AVB IEEE 1722 audio talker thread. 
  *  This thread implements a talker, taking
@@ -35,15 +36,18 @@ void avb_1722_talker(chanend ptp_svr,
  *  \param ethernet_rx_svr  receive link to the ethernet MAC
  *  \param ethernet_tx_svr  transmit link to the ethernet MAC
  *  \param buf_ctl          buffer control link to the media clock server
+ *  \param ptp_ctl          PTP server link for retreiving PTP time info
  *  \param listener_ctl     channel to configure the listener (given
  *                          to avb_init())
  *  \param num_streams      the number of streams the unit will handle
  */
 void avb_1722_listener(chanend ethernet_rx_svr,
-                       chanend ethernet_tx_svr,
-                       chanend buf_ctl,
+                       chanend? buf_ctl,
+                       chanend? ptp_ctl,
                        chanend listener_ctl,
                        int num_streams);
 
+
+#endif
 
 #endif

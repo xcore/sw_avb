@@ -162,6 +162,7 @@ void avb_1722_talker(chanend ptp_svr, chanend ethernet_tx_svr,
 	{
 		select
 		{
+			// Process commands from the AVB control/application thread
 			case talker_ctl :> int cmd:
 			switch (cmd)
 			{
@@ -220,18 +221,22 @@ void avb_1722_talker(chanend ptp_svr, chanend ethernet_tx_svr,
 				break;
 			}
 			break;
+
+			// Periodically ask the PTP server for new time information
 			case tmr when timerafter(t) :> t:
-			// update timeinfo structure asynchronously so that the
-			// ptp server cannot hold this thread up.
-			if (!pending_timeinfo) {
-				ptp_request_time_info_mod64(ptp_svr);
-				pending_timeinfo = 1;
-			}
-			t+=TIMEINFO_UPDATE_INTERVAL;
-			break;
+				if (!pending_timeinfo) {
+					ptp_request_time_info_mod64(ptp_svr);
+					pending_timeinfo = 1;
+				}
+				t+=TIMEINFO_UPDATE_INTERVAL;
+				break;
+
+			// The PTP server has sent new time information
 			case ptp_get_requested_time_info_mod64(ptp_svr, timeInfo):
-			pending_timeinfo = 0;
-			break;
+				pending_timeinfo = 0;
+				break;
+
+			// Call the 1722 packet construction
 			default:
 			if (max_active_avb_stream != -1 &&
 					talker_streams[cur_avb_stream].active==2) {

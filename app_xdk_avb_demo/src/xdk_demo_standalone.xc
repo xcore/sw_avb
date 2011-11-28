@@ -90,7 +90,7 @@ media_output_fifo_t ofifos[2];
 
 int main(void) {
   // ethernet
-  chan tx_link[5];
+  chan tx_link[4];
   chan rx_link[4];
   chan connect_status;
   
@@ -135,7 +135,7 @@ int main(void) {
 
         phy_init(clk_smi, p_mii_resetn, smi, mii);
         ethernet_server(mii, mac_address, rx_link,
-                        4, tx_link, 5, smi,
+                        4, tx_link, 4, smi,
                         connect_status);
       }
                 
@@ -169,8 +169,7 @@ int main(void) {
                                         clk_ctl,
                                         1);
      
-      on stdcore[0]: avb_1722_listener(rx_link[1], tx_link[3],    
-                                       buf_ctl[0], listener_ctl[0], 1);
+      on stdcore[0]: avb_1722_listener(rx_link[1], buf_ctl[0], null, listener_ctl[0], 1);
       
       on stdcore[0]: 
       { 
@@ -216,7 +215,7 @@ int main(void) {
                               ptp_link[3],
                               monitor_ctl,
                               txt_data, debug_stream, lcd_ctl,
-                              xtcp[0], rx_link[3], tx_link[4]);
+                              xtcp[0], rx_link[3], tx_link[3]);
 
       on stdcore[1]: output_test_clock(ptp_link[4]);
     }

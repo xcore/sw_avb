@@ -13,8 +13,9 @@
 #pragma xta command "remove exclusion *"
 #pragma xta command "add exclusion ts_spi_output_loop"
 #pragma xta command "add exclusion ts_spi_output_no_data"
-#pragma xta command "analyze endpoints ts_spi_output_last ts_spi_output_first"
+#pragma xta command "analyze endpoints ts_spi_output_loop ts_spi_output_first"
 #pragma xta command "set required - 148 ns"
+
 
 #pragma unsafe arrays
 void tsi_output(clock clk, out buffered port:32 p_data, in port p_clk, out buffered port:4 p_sync, out port p_valid,
@@ -49,16 +50,12 @@ void tsi_output(clock clk, out buffered port:32 p_data, in port p_clk, out buffe
 			p_sync <: 1;
 			p_data <: ofifo.fifo[rd_ptr++];
 
-			for (unsigned i=0; i<45; i++) {
+#pragma loop unroll
+			for (unsigned i=0; i<46; i++) {
 #pragma xta endpoint "ts_spi_output_loop"
 				p_sync <: 0;
 				p_data <: ofifo.fifo[rd_ptr++];
 			}
-
-			// Output last word
-#pragma xta endpoint "ts_spi_output_last"
-				p_sync <: 0;
-				p_data <: ofifo.fifo[rd_ptr++];
 
 			// In the XMOS architecture, the various test instructions
 			// return a value of 1 or 0 in a register, therefore the
