@@ -77,7 +77,6 @@ int media_input_fifo_empty(media_input_fifo_t media_input_fifo0)
 
 void media_input_fifo_flush(media_input_fifo_t media_input_fifo0)
 {
-	volatile ififo_c_t *s =  (ififo_c_t *)media_input_fifo0;
 	while (!media_input_fifo_empty(media_input_fifo0)) {
 		media_input_fifo_release_packet(media_input_fifo0);
 	}
@@ -86,7 +85,7 @@ void media_input_fifo_flush(media_input_fifo_t media_input_fifo0)
 unsigned int *
 media_input_fifo_get_packet(media_input_fifo_t media_input_fifo0)
 {
-	volatile ififo_c_t *s =  (ififo_c_t *)media_input_fifo0;
+	ififo_c_t *s =  (ififo_c_t *)media_input_fifo0;
 	return &s->fifo[s->packet_rd];
 }
 
