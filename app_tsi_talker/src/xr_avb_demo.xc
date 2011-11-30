@@ -65,8 +65,8 @@ on stdcore[1]: struct r_i2c r_i2c = { PORT_I2C_SCL, PORT_I2C_SDA };
 
 //***** AVB TS-SPI ports ****
 on stdcore[0]: out port p_fs = PORT_SYNC_OUT;
-on stdcore[0]: in port p_ts_clk = PORT_SDATA_OUT1;
-on stdcore[0]: in port p_ts_valid = PORT_SDATA_OUT2;
+on stdcore[0]: in port p_ts_clk = PORT_SDATA_OUT2;
+on stdcore[0]: in port p_ts_valid = PORT_SDATA_OUT1;
 on stdcore[0]: in buffered port:4 p_ts_sync = PORT_SDATA_OUT3;
 on stdcore[0]: in buffered port:32 p_ts_data = XS1_PORT_8B;
 on stdcore[0]: clock clk_ts = XS1_CLKBLK_1;

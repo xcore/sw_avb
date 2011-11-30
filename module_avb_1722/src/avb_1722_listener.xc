@@ -103,9 +103,13 @@ void avb_1722_listener(chanend ethernet_rx_svr,
 	int router_link = 0;
 	int notified_buf_ctl = 0;
 	unsigned int src_port;
+
+#if defined(AVB_1722_FORMAT_61883_4)
+	// Conditional due to compiler bug 11998.
 	timer tmr;
 	unsigned t;
 	int pending_timeinfo = 0;
+#endif
 
 	set_thread_fast_mode_on();
 
@@ -122,8 +126,11 @@ void avb_1722_listener(chanend ethernet_rx_svr,
 	mac_set_queue_size(ethernet_rx_svr, num_streams+2);
 	mac_set_custom_filter(ethernet_rx_svr, ROUTER_LINK(router_link));
 
+#if defined(AVB_1722_FORMAT_61883_4)
+	// Conditional due to compiler bug 11998.
 	tmr	:> t;
 	t+=TIMEINFO_UPDATE_INTERVAL;
+#endif
 
 	// main loop.
 	while (1) {
@@ -149,13 +156,15 @@ void avb_1722_listener(chanend ethernet_rx_svr,
           break;
         }
 
+#if !defined(AVB_1722_FORMAT_61883_4)
+		// Conditional due to compiler bug 11998.
 		case !isnull(buf_ctl) => buf_ctl :> int stream_num:
 			media_output_fifo_handle_buf_ctl(buf_ctl,  stream_num, notified_buf_ctl);
 			break;
+#endif
 
 #if defined(AVB_1722_FORMAT_61883_4)
 		// Conditional due to compiler bug 11998.
-		// Remove this conitional compile when the compiler doesn't generate instruction 'EET ptp_ctl, res[ptp_ctl]'
 
 		// Periodically ask the PTP server for new time information
 		case !isnull(ptp_ctl) => tmr when timerafter(t) :> t:

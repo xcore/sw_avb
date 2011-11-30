@@ -15,7 +15,7 @@
 #define TS_INPUT_FIFO_SIZE 6
 
 // Size of the FIFO in words
-#define MEDIA_INPUT_FIFO_WORD_SIZE (TS_PACKET_SIZE*TS_INPUT_FIFO_SIZE)
+#define MEDIA_INPUT_FIFO_WORD_SIZE ((TS_PACKET_SIZE*TS_INPUT_FIFO_SIZE)/4)
 
 typedef struct ififo_t {
 	unsigned state;

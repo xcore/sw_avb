@@ -23,7 +23,7 @@
 // 0010 = 2 = drop 3
 // 0100 = 4 = drop 2
 // 1000 = 8 = drop 1
-static const char align[16] = { 0, 0, 3, 0, 2, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 };
+static const char align[16] = { 32, 32, 24, 32, 16, 32, 32, 32, 8, 32, 32, 32, 32, 32, 32, 32 };
 
 #pragma unsafe arrays
 void tsi_input(clock clk, in buffered port:32 p_data, in port p_clk, in buffered port:4 p_sync, in port p_valid, ififo_t& ififo)

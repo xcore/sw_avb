@@ -20,7 +20,7 @@
 #define TS_OUTPUT_FIFO_SIZE 17
 
 // Size of the FIFO in words
-#define MEDIA_OUTPUT_FIFO_WORD_SIZE (TS_PACKET_SIZE*TS_OUTPUT_FIFO_SIZE)
+#define MEDIA_OUTPUT_FIFO_WORD_SIZE ((TS_PACKET_SIZE*TS_OUTPUT_FIFO_SIZE)/4)
 
 // This must match the C structure in media_output_fifo.c
 struct ofifo_t {

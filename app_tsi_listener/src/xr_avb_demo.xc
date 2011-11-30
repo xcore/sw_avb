@@ -66,8 +66,8 @@ on stdcore[1]: struct r_i2c r_i2c = { PORT_I2C_SCL, PORT_I2C_SDA };
 //***** AVB TS-SPI ports ****
 on stdcore[0]: out port p_fs = PORT_SYNC_OUT;
 on stdcore[0]: clock clk_ts = XS1_CLKBLK_1;
-on stdcore[0]: in port p_ts_clk = PORT_SDATA_OUT1;
-on stdcore[0]: out port p_ts_valid = PORT_SDATA_OUT2;
+on stdcore[0]: in port p_ts_clk = PORT_SDATA_OUT2;
+on stdcore[0]: out port p_ts_valid = PORT_SDATA_OUT1;
 on stdcore[0]: out buffered port:4 p_ts_sync = PORT_SDATA_OUT3;
 on stdcore[0]: out buffered port:32 p_ts_data = XS1_PORT_8B;
 
@@ -84,11 +84,10 @@ int main(void) {
 	chan connect_status;
 
 	//ptp channels
-	chan ptp_link[2];
+	chan ptp_link[3];
 
 	// avb unit control
 	chan listener_ctl[AVB_NUM_LISTENER_UNITS];
-	chan buf_ctl[AVB_NUM_LISTENER_UNITS];
 
 	// media control
 	chan media_ctl[AVB_NUM_MEDIA_UNITS];
@@ -122,7 +121,7 @@ int main(void) {
 			// launching  the main function of the thread
 			audio_clock_CS2300CP_init(r_i2c, MASTER_TO_WORDCLOCK_RATIO);
 
-			ptp_server_and_gpio(rx_link[0], tx_link[0], ptp_link, 2,
+			ptp_server_and_gpio(rx_link[0], tx_link[0], ptp_link, 3,
 					PTP_GRANDMASTER_CAPABLE,
 					c_gpio_ctl);
 		}
@@ -133,13 +132,6 @@ int main(void) {
             xscope_register(0, 0, "", 0, "");
 
             xscope_config_io(XSCOPE_IO_BASIC);
-            
-			media_clock_server(media_clock_ctl,
-					ptp_link[1],
-					buf_ctl,
-					AVB_NUM_LISTENER_UNITS,
-					clk_ctl,
-					AVB_NUM_MEDIA_CLOCKS);
 		}
 
 		// AVB - Audio
@@ -155,8 +147,8 @@ int main(void) {
 
 		// AVB Listener
 		on stdcore[0]: avb_1722_listener(rx_link[1],
-				buf_ctl[0],
 				null,
+				ptp_link[2],
 				listener_ctl[0],
 				AVB_NUM_SINKS);
 
