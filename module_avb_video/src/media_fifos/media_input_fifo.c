@@ -78,7 +78,9 @@ int media_input_fifo_empty(media_input_fifo_t media_input_fifo0)
 void media_input_fifo_flush(media_input_fifo_t media_input_fifo0)
 {
 	volatile ififo_c_t *s =  (ififo_c_t *)media_input_fifo0;
-	s->packet_rd = s->packet_wr;
+	while (!media_input_fifo_empty(media_input_fifo0)) {
+		media_input_fifo_release_packet(media_input_fifo0);
+	}
 }
 
 unsigned int *
@@ -92,6 +94,7 @@ void
 media_input_fifo_release_packet(media_input_fifo_t media_input_fifo0)
 {
 	volatile ififo_c_t *s =  (ififo_c_t *)media_input_fifo0;
+	s->fifo[s->packet_rd] = 0;
 	s->packet_rd += (192/4); // size of one packet plus timestamp
 }
 

@@ -60,7 +60,7 @@ void tsi_input(clock clk, in buffered port:32 p_data, in port p_clk, in buffered
 		// buffer to accept it.  This form of loop in loop gives better
 		// critical path cost because the end branch of the critical
 		// inner loop is both the test and the branch back.
-		while (wr_ptr != ififo.packet_rd) {
+		while (ififo.fifo[wr_ptr] == 0) {
 			unsigned h, l, v;
 
 			// Read first word
