@@ -62,7 +62,7 @@
 void avb_init(chanend media_ctl[],
               chanend ?listener_ctl[],
               chanend ?talker_ctl[],
-              chanend media_clock_ctl,
+              chanend ?media_clock_ctl,
               chanend c_mac_rx,
               chanend c_mac_tx,
               chanend c_ptp);

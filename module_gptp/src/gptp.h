@@ -13,6 +13,10 @@ typedef struct ptp_timestamp {
   unsigned int nanoseconds;
 } ptp_timestamp;
 
+/**
+ *  The ptp_ts field stores the seconds and nanoseconds fields separately
+ *  so the nanoseconds field is always in the range 0-999999999
+ */
 struct ptp_time_info {
   unsigned int local_ts; /*!< A local timestamp based on the 100MHz 
                               XCore reference clock */
@@ -32,7 +36,10 @@ struct ptp_time_info {
  **/
 typedef struct ptp_time_info ptp_time_info;
 
-
+/**
+ *  The time stored in the PTP low and high words is the PTP time in
+ *  nanoseconds.
+ */
 struct ptp_time_info_mod64 {
   unsigned int local_ts;
   unsigned int ptp_ts_hi;
@@ -42,7 +49,9 @@ struct ptp_time_info_mod64 {
 };
 
 /** This structure is used to relate local XCore time with the least
- *  significant 64 bits of gptp time.
+ *  significant 64 bits of gptp time. The 64 bits of time is the PTP
+ *  time in nanoseconds from the epoch.
+ *
  *  It can be retrieved from the PTP server using the ptp_get_time_info_mod64()
  *  function.
  **/
@@ -194,6 +203,18 @@ unsigned local_timestamp_to_ptp_mod32(unsigned local_ts,
  **/
 unsigned ptp_timestamp_to_local(REFERENCE_PARAM(ptp_timestamp, ts),
                                 REFERENCE_PARAM(ptp_time_info, info));
+
+/** Convert a PTP timestamp to a local XCore timestamp.
+ *
+ *  This function takes a PTP timestamp and converts it to a local
+ *  32-bit timestamp that is related to the XCore timer.
+ *
+ *  \param ts             the least significant 32 bits of a PTP timestamp to convert
+ *  \param info           a time information structure retrieved from the PTP
+ *                        server.
+ *  \returns              the local timestamp
+ **/
+unsigned ptp_mod32_timestamp_to_local(unsigned ts, REFERENCE_PARAM(ptp_time_info_mod64, info));
 
 /** Calculate an offset to a PTP timestamp.
  *

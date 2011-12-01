@@ -85,10 +85,7 @@ int avb1722_create_packet(unsigned char Buf0[],
 		ptp_time_info_mod64 *timeInfo,
 		int time)
 {
-	unsigned int presentationTime = 0;
-	int timerValid = 0;
 	int i;
-	int num_channels = stream_info->num_channels;
 	int stream_id0 = stream_info->streamId[0];
 	media_input_fifo_t *map = stream_info->map;
 
@@ -97,7 +94,6 @@ int avb1722_create_packet(unsigned char Buf0[],
 	unsigned char *Buf = &Buf0[2];
 	unsigned int *dest = (unsigned int *) &Buf[(AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + AVB_CIP_HDR_SIZE)];
 
-	unsigned ptp_ts = 0;
 	int dbc = stream_info->dbc_at_start_of_last_fifo_packet;
 	int pkt_data_length;
 

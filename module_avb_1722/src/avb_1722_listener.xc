@@ -164,7 +164,7 @@ void avb_1722_listener(chanend ethernet_rx_svr,
 #endif
 
 #if defined(AVB_1722_FORMAT_61883_4)
-		// Conditional due to compiler bug 11998.
+		// Conditional due to compiler bug 11998
 
 		// Periodically ask the PTP server for new time information
 		case !isnull(ptp_ctl) => tmr when timerafter(t) :> t:

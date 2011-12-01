@@ -196,13 +196,24 @@ static long long ptp_timestamp_diff(ptp_timestamp *a,
 unsigned ptp_timestamp_to_local(ptp_timestamp *ts,
                                 ptp_time_info *info)
 {
-  long long ptp_diff;
-  long long local_diff;
-  ptp_diff = ptp_timestamp_diff(ts, &info->ptp_ts);
+	  long long ptp_diff;
+	  long long local_diff;
+	  ptp_diff = ptp_timestamp_diff(ts, &info->ptp_ts);
 
-  local_diff = ptp_diff + ((ptp_diff * info->inv_ptp_adjust) >> PTP_ADJUST_PREC);
-  local_diff = local_diff / 10;
-  return (info->local_ts + local_diff);
+	  local_diff = ptp_diff + ((ptp_diff * info->inv_ptp_adjust) >> PTP_ADJUST_PREC);
+	  local_diff = local_diff / 10;
+	  return (info->local_ts + local_diff);
+}
+
+unsigned ptp_mod32_timestamp_to_local(unsigned ts, ptp_time_info_mod64* info)
+{
+	  long long ptp_diff;
+	  long long local_diff;
+	  ptp_diff = (signed) ts - (signed)info->ptp_ts_lo;
+
+	  local_diff = ptp_diff + ((ptp_diff * info->inv_ptp_adjust) >> PTP_ADJUST_PREC);
+	  local_diff = local_diff / 10;
+	  return (info->local_ts + local_diff);
 }
 
 static void _local_timestamp_to_ptp(ptp_timestamp *ptp_ts,

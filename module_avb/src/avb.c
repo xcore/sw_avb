@@ -1,4 +1,5 @@
 #include <xccompat.h>
+
 #define __AVB_C__
 #include "avb.h"
 #include "avb_srp.h"
@@ -25,6 +26,11 @@
 #endif
 
 //#define AVB_TRANSMIT_BEFORE_RESERVATION 1
+
+// Warning: The XC spec makes no assertions that a null chanend is numerically zero. There is
+//          no isnull function in C, so this makes up that deficiency, but it may need modifying
+//          if XC starts using some other value to mean a null
+#define isnull(A) (A == 0)
 
 #define UNMAPPED (-1)
 
@@ -162,11 +168,12 @@ static void register_media(chanend media_ctl[])
 
 static void init_media_clock_server(chanend media_clock_ctl)
 {
-  media_clock_svr = media_clock_ctl;
-  for (int i=0;i<AVB_NUM_MEDIA_OUTPUTS;i++) {
-    xc_abi_outuint(media_clock_svr, outputs[i].fifo);
-  }
-  
+	media_clock_svr = media_clock_ctl;
+	if (!isnull(media_clock_ctl)) {
+		for (int i=0;i<AVB_NUM_MEDIA_OUTPUTS;i++) {
+			xc_abi_outuint(media_clock_svr, outputs[i].fifo);
+		}
+	}
 
 }
 
@@ -420,7 +427,9 @@ int getset_avb_source_state(int set,
           mrp_mad_begin(source->stream.srp_listener_attr);
           mrp_mad_join(source->stream.srp_talker_attr, 1);
 
-          media_clock_register(media_clock_svr, clk_ctl, source->stream.sync);
+          if (!isnull(media_clock_svr)) {
+        	  media_clock_register(media_clock_svr, clk_ctl, source->stream.sync);
+          }
 
 #if defined(AVB_TRANSMIT_BEFORE_RESERVATION)
           {
@@ -669,7 +678,10 @@ int getset_avb_sink_state(int set,
         (void) xc_abi_inuint(c);
 
         clk_ctl = outputs[sink->stream.map[0]].clk_ctl;
-        media_clock_register(media_clock_svr, clk_ctl, sink->stream.sync);
+
+        if (!isnull(media_clock_svr)) {
+        	media_clock_register(media_clock_svr, clk_ctl, sink->stream.sync);
+        }
 
         { int router_link;
          
@@ -784,7 +796,7 @@ void set_avb_source_volumes(int sink_num, int volumes[], int count)
 
 int getset_device_media_clock_rate(int set, int media_clock_num, int *a2)
 {
-  if (media_clock_num < AVB_NUM_MEDIA_CLOCKS) {
+  if (media_clock_num < AVB_NUM_MEDIA_CLOCKS && !isnull(media_clock_svr)) {
     if (set) {
       media_clock_set_rate(media_clock_svr, media_clock_num, *a2);
     }
@@ -798,11 +810,11 @@ int getset_device_media_clock_rate(int set, int media_clock_num, int *a2)
 
 int getset_device_media_clock_state(int set, int media_clock_num, enum device_media_clock_state_t *a2) {
   // TODO: this doesn't maintain the state properly
-  if (media_clock_num < AVB_NUM_MEDIA_CLOCKS) {
+  if (media_clock_num < AVB_NUM_MEDIA_CLOCKS && !isnull(media_clock_svr)) {
     if (set) {
-      media_clock_set_state(media_clock_svr, media_clock_num, *a2);      
+      media_clock_set_state(media_clock_svr, media_clock_num, *a2);
     }
-    *a2 = media_clock_get_state(media_clock_svr, media_clock_num);      
+    *a2 = media_clock_get_state(media_clock_svr, media_clock_num);
     return 1;
   }
   else
@@ -812,7 +824,7 @@ int getset_device_media_clock_state(int set, int media_clock_num, enum device_me
 
 int getset_device_media_clock_source(int set, int media_clock_num, int *a0)
 {
-  if (media_clock_num < AVB_NUM_MEDIA_CLOCKS) {
+  if (media_clock_num < AVB_NUM_MEDIA_CLOCKS && !isnull(media_clock_svr)) {
     if (set) {
       media_clock_set_source(media_clock_svr, media_clock_num, *a0);
     }
@@ -825,7 +837,7 @@ int getset_device_media_clock_source(int set, int media_clock_num, int *a0)
 
 int getset_device_media_clock_type(int set, int media_clock_num, enum device_media_clock_type_t *a2)
 {
-  if (media_clock_num < AVB_NUM_MEDIA_CLOCKS) {
+  if (media_clock_num < AVB_NUM_MEDIA_CLOCKS && !isnull(media_clock_svr)) {
     if (set) {
       media_clock_set_type(media_clock_svr, media_clock_num, *a2);
     }

@@ -84,15 +84,13 @@ int main(void) {
 	chan connect_status;
 
 	//ptp channels
-	chan ptp_link[3];
+	chan ptp_link[2];
 
 	// avb unit control
 	chan listener_ctl[AVB_NUM_LISTENER_UNITS];
 
 	// media control
 	chan media_ctl[AVB_NUM_MEDIA_UNITS];
-	chan clk_ctl[AVB_NUM_MEDIA_CLOCKS];
-	chan media_clock_ctl;
 
 	// control channel from the GPIO buttons
 	chan c_gpio_ctl;
@@ -121,7 +119,7 @@ int main(void) {
 			// launching  the main function of the thread
 			audio_clock_CS2300CP_init(r_i2c, MASTER_TO_WORDCLOCK_RATIO);
 
-			ptp_server_and_gpio(rx_link[0], tx_link[0], ptp_link, 3,
+			ptp_server_and_gpio(rx_link[0], tx_link[0], ptp_link, 2,
 					PTP_GRANDMASTER_CAPABLE,
 					c_gpio_ctl);
 		}
@@ -130,25 +128,20 @@ int main(void) {
 		{
             // Enable XScope printing
             xscope_register(0, 0, "", 0, "");
-
             xscope_config_io(XSCOPE_IO_BASIC);
 		}
 
 		// AVB - Audio
 		on stdcore[0]: {
 			init_media_output_fifos(ofifos, ofifo_data, AVB_NUM_MEDIA_OUTPUTS);
-			par
-			{
-				audio_gen_CS2300CP_clock(p_fs, clk_ctl[0]);
-
-				tsi_output(clk_ts, p_ts_data, p_ts_clk, p_ts_sync, p_ts_valid, ofifo_data[0]);
-			}
+			media_ctl_register(media_ctl[0], 0, null, 1, ofifos, 0);
+			tsi_output(clk_ts, p_ts_data, p_ts_clk, p_ts_sync, p_ts_valid, ofifo_data[0]);
 		}
 
 		// AVB Listener
 		on stdcore[0]: avb_1722_listener(rx_link[1],
 				null,
-				ptp_link[2],
+				ptp_link[1],
 				listener_ctl[0],
 				AVB_NUM_SINKS);
 
@@ -161,7 +154,7 @@ int main(void) {
             xscope_config_io(XSCOPE_IO_BASIC);
             
 			// First initialize avb higher level protocols
-			avb_init(media_ctl, listener_ctl, null, media_clock_ctl, rx_link[2], tx_link[1], ptp_link[0]);
+			avb_init(media_ctl, listener_ctl, null, null, rx_link[2], tx_link[1], ptp_link[0]);
 
 			demo(rx_link[2], tx_link[1], c_gpio_ctl, connect_status);
 		}

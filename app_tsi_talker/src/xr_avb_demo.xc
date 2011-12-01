@@ -92,7 +92,6 @@ int main(void) {
 	// media control
 	chan media_ctl[AVB_NUM_MEDIA_UNITS];
 	chan clk_ctl[AVB_NUM_MEDIA_CLOCKS];
-	chan media_clock_ctl;
 
 	// control channel from the GPIO buttons
 	chan c_gpio_ctl;
@@ -130,27 +129,14 @@ int main(void) {
 		{
             // Enable XScope printing
             xscope_register(0, 0, "", 0, "");
-
             xscope_config_io(XSCOPE_IO_BASIC);
-            
-			media_clock_server(media_clock_ctl,
-					ptp_link[1],
-					null,
-					0,
-					clk_ctl,
-					1);
 		}
 
 		// AVB - Audio
 		on stdcore[0]: {
 			init_media_input_fifos(ififos, ififo_data, AVB_NUM_MEDIA_INPUTS);
 			media_ctl_register(media_ctl[0], 1, ififos, 0, null, 0);
-			par
-			{
-				audio_gen_CS2300CP_clock(p_fs, clk_ctl[0]);
-
-				tsi_input(clk_ts, p_ts_data, p_ts_clk, p_ts_sync, p_ts_valid, ififo_data[0]);
-			}
+			tsi_input(clk_ts, p_ts_data, p_ts_clk, p_ts_sync, p_ts_valid, ififo_data[0]);
 		}
 
 		// AVB Talker - must be on the same core as the audio interface
@@ -168,7 +154,7 @@ int main(void) {
             xscope_config_io(XSCOPE_IO_BASIC);
             
 			// First initialize avb higher level protocols
-			avb_init(media_ctl, null, talker_ctl, media_clock_ctl, rx_link[1], tx_link[2], ptp_link[2]);
+			avb_init(media_ctl, null, talker_ctl, null, rx_link[1], tx_link[2], ptp_link[2]);
 
 			demo(rx_link[1], tx_link[2], c_gpio_ctl, connect_status);
 		}
