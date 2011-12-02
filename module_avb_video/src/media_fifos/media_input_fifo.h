@@ -8,18 +8,16 @@
 #define _LOCAL_TALKER_STREAM_H_ 1
 #include "avb_conf.h"
 
-// A TS packet is 188 bytes, plus 4 bytes of timestamp
-#define TS_PACKET_SIZE (188+4)
+// A TS packet is a one word dummy space, 1 word timestamp, 188 bytes payload, plus 4 for an 'inuse' marker
+#define TS_INPUT_PACKET_SIZE (4+4+188+4)
 
 // The 61883-4, section 7, recommends this number of packets be stored
 #define TS_INPUT_FIFO_SIZE 6
 
 // Size of the FIFO in words
-#define MEDIA_INPUT_FIFO_WORD_SIZE ((TS_PACKET_SIZE*TS_INPUT_FIFO_SIZE)/4)
+#define MEDIA_INPUT_FIFO_WORD_SIZE ((TS_INPUT_PACKET_SIZE*TS_INPUT_FIFO_SIZE)/4)
 
 typedef struct ififo_t {
-	unsigned state;
-	unsigned packet_wr;
 	unsigned packet_rd;
 	unsigned int fifo[MEDIA_INPUT_FIFO_WORD_SIZE];
 } ififo_t;

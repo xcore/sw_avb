@@ -14,9 +14,6 @@
 #include "gptp.h"
 #include "media_input_fifo.h"
 
-// default audio sample type 24bits.
-unsigned int AVB1722_audioSampleType = MBLA_24BIT;
-
 /** This configure AVB Talker buffer for a given stream configuration.
  *  It updates the static portion of Ehternet/AVB transport layer headers.
  */
@@ -85,7 +82,6 @@ int avb1722_create_packet(unsigned char Buf0[],
 		ptp_time_info_mod64 *timeInfo,
 		int time)
 {
-	int i;
 	int stream_id0 = stream_info->streamId[0];
 	media_input_fifo_t *map = stream_info->map;
 
@@ -105,10 +101,7 @@ int avb1722_create_packet(unsigned char Buf0[],
 	// There is a slight issue here, that because wire packets are potentially shorter than fifo
 	// packets, that we will occasionally not transmit when we could do. The period of this is
 	// 1/(ceil(rate/8000)-(rate/8000))
-    if (media_input_fifo_empty(map[i])) return 0;
-
-	// If the FIFOs are not being filled then also do not process the packet
-	if ((media_input_fifo_enable_ind_state() & stream_info->fifo_mask) == 0) return 0;
+    if (media_input_fifo_empty(map[0])) return 0;
 
 	// Figure out if it is time to transmit a packet
 	if (!stream_info->transmit_ok) {
@@ -121,15 +114,14 @@ int avb1722_create_packet(unsigned char Buf0[],
 
 
 	// For all of the packets in the FIFO
-	while (!media_input_fifo_empty(map[i])) {
-		unsigned * data = media_input_fifo_get_packet(map[i]);
+	for (unsigned n=0; n<MAX_TS_PACKETS_PER_1722 && !media_input_fifo_empty(map[0]); ++n) {
+		unsigned * data = media_input_fifo_get_packet(map[0]);
 
 		// Adjust the timestamp from local to PTP
-		data[0] = local_timestamp_to_ptp_mod32(data[0], timeInfo);
-		data[0] += stream_info->presentation_delay;
+		*dest++ = local_timestamp_to_ptp_mod32(data[0], timeInfo) + stream_info->presentation_delay;
 
 		// Copy the whole TS packet
-		for (unsigned c=0; c<(192/4); ++c) {
+		for (unsigned c=1; c<(192/4); ++c) {
 			*dest++ = data[c];
 		}
 
@@ -137,7 +129,7 @@ int avb1722_create_packet(unsigned char Buf0[],
 		pkt_data_length += 192;
 		stream_info->dbc_at_start_of_last_fifo_packet += 8;
 
-		media_input_fifo_release_packet(map[i]);
+		media_input_fifo_release_packet(map[0]);
 	}
 
 #if !AVB_1722_FORMAT_SAF
@@ -150,7 +142,7 @@ int avb1722_create_packet(unsigned char Buf0[],
 	stream_info->last_transmit_time = time;
 	stream_info->transmit_ok = 0;
 	stream_info->sequence_number++;
-	return (AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + pkt_data_length);
+	return (AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + AVB_CIP_HDR_SIZE + pkt_data_length);
 }
 
 #endif

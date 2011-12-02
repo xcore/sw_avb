@@ -25,7 +25,7 @@
 #include "avb_1722_1.h"
 #endif
 
-//#define AVB_TRANSMIT_BEFORE_RESERVATION 1
+#define AVB_TRANSMIT_BEFORE_RESERVATION 1
 
 // Warning: The XC spec makes no assertions that a null chanend is numerically zero. There is
 //          no isnull function in C, so this makes up that deficiency, but it may need modifying

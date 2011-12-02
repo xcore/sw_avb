@@ -220,14 +220,6 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 	unsigned timeout;
 	unsigned listener_active = 0;
 	unsigned listener_ready = 0;
-	unsigned sample_rate = 48000;
-
-	// Initialize the media clock (a ptp derived clock)
-	set_device_media_clock_type(0, MEDIA_FIFO_DERIVED);
-	//set_device_media_clock_type(0, LOCAL_CLOCK);
-	//set_device_media_clock_type(0, PTP_DERIVED);
-	set_device_media_clock_rate(0, sample_rate);
-	set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_ENABLED);
 
 	tmr	:> timeout;
 	while (1) {
@@ -289,37 +281,6 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 				break;
 				case STREAM_SEL:
 				{
-					// Channel select switches the sample frequency
-					// The stream sel button cycles through frequency settings
-					switch (sample_rate)
-					{
-					case 8000:
-						sample_rate = 96000;
-						break;
-					case 16000:
-						sample_rate = 8000;
-						break;
-					case 32000:
-						sample_rate = 16000;
-						break;
-					case 44100:
-						sample_rate = 32000;
-						break;
-					case 48000:
-						sample_rate = 44100;
-						break;
-					case 88200:
-						sample_rate = 48000;
-						break;
-					case 96000:
-						sample_rate = 88200;
-						break;
-					}
-					simple_printf("Frequency set to %d Hz\n", sample_rate);
-
-					set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_DISABLED);
-					set_device_media_clock_rate(0, sample_rate);
-					set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_ENABLED);
 				}
 				break;
 			}

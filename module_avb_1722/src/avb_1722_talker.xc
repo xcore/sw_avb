@@ -26,7 +26,7 @@
 #endif
 
 #ifdef AVB_1722_FORMAT_61883_4
-#define MAX_PKT_BUF_SIZE_TALKER (AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + AVB_CIP_HDR_SIZE + 192*4 + 4)
+#define MAX_PKT_BUF_SIZE_TALKER (AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + AVB_CIP_HDR_SIZE + 192*MAX_TS_PACKETS_PER_1722 + 4)
 #endif
 
 #ifdef AVB_1722_FORMAT_61883_6
@@ -89,7 +89,7 @@ static void configure_stream(chanend avb1722_tx_config,
 
 	stream.samples_left_in_fifo_packet = 0;
 	stream.initial = 1;
-	stream.dbc_at_start_of_last_fifo_packet = -1;
+	stream.dbc_at_start_of_last_fifo_packet = 0;
 	stream.active = 1;
 	stream.transmit_ok = 1;
 	stream.sequence_number = 0;
@@ -144,6 +144,8 @@ void avb_1722_talker(chanend ptp_svr, chanend ethernet_tx_svr,
 	int pending_timeinfo = 0;
 	int vlan = 2;
 	set_thread_fast_mode_on();
+
+	for (unsigned n=0; n<(MAX_PKT_BUF_SIZE_TALKER + 3) / 4; ++n) TxBuf[n] = 0;
 
 	// register how many streams this talker unit has
 	avb_register_talker_streams(talker_ctl, num_streams);

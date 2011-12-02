@@ -84,14 +84,13 @@ int main(void) {
 	chan connect_status;
 
 	//ptp channels
-	chan ptp_link[3];
+	chan ptp_link[2];
 
 	// avb unit control
 	chan talker_ctl[AVB_NUM_TALKER_UNITS];
 
 	// media control
 	chan media_ctl[AVB_NUM_MEDIA_UNITS];
-	chan clk_ctl[AVB_NUM_MEDIA_CLOCKS];
 
 	// control channel from the GPIO buttons
 	chan c_gpio_ctl;
@@ -120,7 +119,7 @@ int main(void) {
 			// launching  the main function of the thread
 			audio_clock_CS2300CP_init(r_i2c, MASTER_TO_WORDCLOCK_RATIO);
 
-			ptp_server_and_gpio(rx_link[0], tx_link[0], ptp_link, 3,
+			ptp_server_and_gpio(rx_link[0], tx_link[0], ptp_link, 2,
 					PTP_GRANDMASTER_CAPABLE,
 					c_gpio_ctl);
 		}
@@ -154,7 +153,7 @@ int main(void) {
             xscope_config_io(XSCOPE_IO_BASIC);
             
 			// First initialize avb higher level protocols
-			avb_init(media_ctl, null, talker_ctl, null, rx_link[1], tx_link[2], ptp_link[2]);
+			avb_init(media_ctl, null, talker_ctl, null, rx_link[1], tx_link[2], ptp_link[1]);
 
 			demo(rx_link[1], tx_link[2], c_gpio_ctl, connect_status);
 		}
@@ -217,28 +216,18 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 
 	timer tmr;
 	int avb_status = 0;
-	int map[8];
+	int map[1];
 	unsigned char macaddr[6];
 	unsigned timeout;
 	unsigned talker_active = 0;
 	unsigned talker_ok_to_start = 0;
-	unsigned sample_rate = 48000;
-
-	// Initialize the media clock (a ptp derived clock)
-	//set_device_media_clock_type(0, MEDIA_FIFO_DERIVED);
-	set_device_media_clock_type(0, LOCAL_CLOCK);
-	//set_device_media_clock_type(0, PTP_DERIVED);
-	set_device_media_clock_rate(0, sample_rate);
-	set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_ENABLED);
 
 	// Configure the source stream
-	set_avb_source_name(0, "2 channel testing stream");
+	set_avb_source_name(0, "MPEG transport stream");
 
-	set_avb_source_channels(0, 2);
-	for (int i = 0; i < 2; i++)
-		map[i] = i;
-	set_avb_source_map(0, map, 2);
-	set_avb_source_format(0, AVB_SOURCE_FORMAT_MBLA_24BIT, sample_rate);
+	set_avb_source_channels(0, 1);
+	map[0] = 0;
+	set_avb_source_map(0, map, 1);
 	set_avb_source_sync(0, 0); // use the media_clock defined above
 
 	// Request a multicast addresses for stream transmission
@@ -325,39 +314,6 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 			break;
 			case STREAM_SEL:
 			{
-				// The stream sel button cycles through frequency settings
-				switch (sample_rate)
-				{
-				case 8000:
-					sample_rate = 96000;
-					break;
-				case 16000:
-					sample_rate = 8000;
-					break;
-				case 32000:
-					sample_rate = 16000;
-					break;
-				case 44100:
-					sample_rate = 32000;
-					break;
-				case 48000:
-					sample_rate = 44100;
-					break;
-				case 88200:
-					sample_rate = 48000;
-					break;
-				case 96000:
-					sample_rate = 88200;
-					break;
-				}
-				simple_printf("Frequency set to %d Hz\n", sample_rate);
-
-
-				set_avb_source_format(0, AVB_SOURCE_FORMAT_MBLA_24BIT, sample_rate);
-
-				set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_DISABLED);
-				set_device_media_clock_rate(0, sample_rate);
-				set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_ENABLED);
 			}
 			break;
 			default:

@@ -14,13 +14,13 @@
 #include "avb_conf.h"
 
 // A TS packet is 188 bytes, plus 4 bytes of timestamp
-#define TS_PACKET_SIZE (188+4)
+#define TS_OUTPUT_PACKET_SIZE (188+4)
 
 // The 61883-4, section 7, recommends this number of packets be stored
 #define TS_OUTPUT_FIFO_SIZE 17
 
 // Size of the FIFO in words
-#define MEDIA_OUTPUT_FIFO_WORD_SIZE ((TS_PACKET_SIZE*TS_OUTPUT_FIFO_SIZE)/4)
+#define MEDIA_OUTPUT_FIFO_WORD_SIZE ((TS_OUTPUT_PACKET_SIZE*TS_OUTPUT_FIFO_SIZE)/4)
 
 // This must match the C structure in media_output_fifo.c
 struct ofifo_t {
