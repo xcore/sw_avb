@@ -8,7 +8,19 @@
 #define _LOCAL_TALKER_STREAM_H_ 1
 #include "avb_conf.h"
 
-// A TS packet is a one word dummy space, 1 word timestamp, 188 bytes payload, plus 4 for an 'inuse' marker
+/*
+ *   The TS FIFO is a word buffer. Each packet within the buffer is layed out as:
+ *
+ *   1 word of dummy data.  during FIFO overflow, these dummy words are used for dumping an incoming packet
+ *   1 word of timestamp
+ *   188 bytes (47 words) of TS packet
+ *   1 word of inuse marker
+ *
+ *   The inuse marker is set to a non-zero value when the buffer preceeding it contains valid data, and
+ *   zero when it is available for reception.
+ */
+
+// A TS packet is a one word dummy space, 1 word timestamp, 188 bytes payload, plus 1 word for an 'inuse' marker
 #define TS_INPUT_PACKET_SIZE (4+4+188+4)
 
 // The 61883-4, section 7, recommends this number of packets be stored
@@ -17,13 +29,13 @@
 // Size of the FIFO in words
 #define MEDIA_INPUT_FIFO_WORD_SIZE ((TS_INPUT_PACKET_SIZE*TS_INPUT_FIFO_SIZE)/4)
 
+// Word index of inuse byte
+#define MEDIA_INPUT_FIFO_INUSE_OFFSET 49
+
 typedef struct ififo_t {
 	unsigned packet_rd;
 	unsigned int fifo[MEDIA_INPUT_FIFO_WORD_SIZE];
 } ififo_t;
-#define MEDIA_INPUT_FIFO_WRITE_PTR_OFFSET 4
-#define MEDIA_INPUT_FIFO_READ_PTR_OFFSET 8
-#define MEDIA_INPUT_FIFO_BUFFER_OFFSET 12
 
 /** This type provides the data structure used by a media input fifo.
  */

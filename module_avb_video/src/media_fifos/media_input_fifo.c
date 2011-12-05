@@ -51,7 +51,7 @@ int media_input_fifo_enable(media_input_fifo_t media_input_fifo0,
 int media_input_fifo_empty(media_input_fifo_t media_input_fifo0)
 {
 	volatile ififo_c_t *s =  (ififo_c_t *)media_input_fifo0;
-	return s->fifo[s->packet_rd+48] == 0;
+	return s->fifo[s->packet_rd+MEDIA_INPUT_FIFO_INUSE_OFFSET] == 0;
 }
 
 void media_input_fifo_flush(media_input_fifo_t media_input_fifo0)
@@ -72,7 +72,7 @@ void
 media_input_fifo_release_packet(media_input_fifo_t media_input_fifo0)
 {
 	ififo_c_t *s =  (ififo_c_t *)media_input_fifo0;
-	s->fifo[s->packet_rd+49] = 0;
+	s->fifo[s->packet_rd+MEDIA_INPUT_FIFO_INUSE_OFFSET] = 0;
 	s->packet_rd += (TS_INPUT_PACKET_SIZE/4); // size of one packet structure
 	s->packet_rd *= (s->packet_rd < MEDIA_INPUT_FIFO_WORD_SIZE);
 }

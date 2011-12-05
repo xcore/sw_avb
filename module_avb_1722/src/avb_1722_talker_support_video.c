@@ -91,7 +91,7 @@ int avb1722_create_packet(unsigned char Buf0[],
 	unsigned int *dest = (unsigned int *) &Buf[(AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + AVB_CIP_HDR_SIZE)];
 
 	int dbc = stream_info->dbc_at_start_of_last_fifo_packet;
-	int pkt_data_length;
+	int pkt_data_length = 0;
 
 	// Check to see if there is something that can be transmitted.  If there is not, then we give up
 	// transmitting this packet, because there may be other streams serviced by this thread which
@@ -142,6 +142,7 @@ int avb1722_create_packet(unsigned char Buf0[],
 	stream_info->last_transmit_time = time;
 	stream_info->transmit_ok = 0;
 	stream_info->sequence_number++;
+
 	return (AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + AVB_CIP_HDR_SIZE + pkt_data_length);
 }
 

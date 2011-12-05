@@ -65,7 +65,7 @@ void tsi_input(clock clk, in buffered port:32 p_data, in port p_clk, in buffered
 		p_data :> value;
 
 		// Check if this packet is free
-		advance = (ififo.fifo[wr_ptr+49] == 0);
+		advance = (ififo.fifo[wr_ptr+MEDIA_INPUT_FIFO_INUSE_OFFSET] == 0);
 		wr_ptr += advance;
 
 		t :> time;
