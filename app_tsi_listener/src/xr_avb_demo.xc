@@ -304,7 +304,7 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 			  unsigned int streamId[2];
 			  unsigned vlan;
 			  unsigned char addr[6];
-			  int map[2] = { 0 ,  1 };
+			  int map[1] = { 0 };
 
 			  // check if there is a new stream
 			  int res = avb_check_for_new_stream(streamId, vlan, addr);
@@ -319,8 +319,8 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 			  // if so, add it to the stream table
 			  if (res && listener_ready==0) {
 			    set_avb_sink_sync(0, 0);
-			    set_avb_sink_channels(0, 2);
-			    set_avb_sink_map(0, map, 2);
+			    set_avb_sink_channels(0, 1);
+			    set_avb_sink_map(0, map, 1);
 			    set_avb_sink_state(0, AVB_SINK_STATE_DISABLED);
 			    set_avb_sink_id(0, streamId);
 			    set_avb_sink_vlan(0, vlan);

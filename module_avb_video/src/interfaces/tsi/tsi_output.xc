@@ -41,20 +41,23 @@ void tsi_output(clock clk, out buffered port:32 p_data, in port p_clk, out buffe
 		while (ofifo.packet_wr != rd_ptr)
 		{
 			// Wait until it is time to transmit the packet
-			unsigned ts = ofifo.fifo[rd_ptr++];
-			t when timerafter (ts) :> void;
+			unsigned ts = ofifo.fifo[rd_ptr];
+			rd_ptr++;
+			//t when timerafter (ts) :> void;
 
 			// Transmit first word
 			sync(p_data);
 #pragma xta endpoint "ts_spi_output_first"
 			p_sync <: 1;
-			p_data <: ofifo.fifo[rd_ptr++];
+			p_data <: ofifo.fifo[rd_ptr];
+			rd_ptr++;
 
 #pragma loop unroll
 			for (unsigned i=0; i<46; i++) {
 #pragma xta endpoint "ts_spi_output_loop"
 				p_sync <: 0;
-				p_data <: ofifo.fifo[rd_ptr++];
+				p_data <: ofifo.fifo[rd_ptr];
+				rd_ptr++;
 			}
 
 			// In the XMOS architecture, the various test instructions
@@ -62,8 +65,6 @@ void tsi_output(clock clk, out buffered port:32 p_data, in port p_clk, out buffe
 			// result of a comparison like '<' is 1 or 0, and therefore
 			// can be safely used as it is below
 			rd_ptr *= (rd_ptr < MEDIA_OUTPUT_FIFO_WORD_SIZE);
-
-			ofifo.packet_rd = rd_ptr;
 		}
 	}
 }

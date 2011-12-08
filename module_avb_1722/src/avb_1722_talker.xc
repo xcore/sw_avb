@@ -130,6 +130,7 @@ static void stop_stream(avb1722_Talker_StreamConfig_t &stream) {
  *  2. Convert the local timer value to global PTP timestamp.
  *  3. AVB payload generation and transmit to Ethernet.
  */
+#pragma unsafe arrays
 void avb_1722_talker(chanend ptp_svr, chanend ethernet_tx_svr,
 		chanend talker_ctl, int num_streams) {
 	ptp_time_info_mod64 timeInfo;

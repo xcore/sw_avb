@@ -132,9 +132,7 @@ int avb1722_create_packet(unsigned char Buf0[],
 		media_input_fifo_release_packet(map[0]);
 	}
 
-#if !AVB_1722_FORMAT_SAF
 	AVB1722_CIP_HeaderGen(Buf, dbc);
-#endif
 
 	// Update timestamp value and valid flag.
 	AVB1722_AVBTP_HeaderGen(Buf, 0, 0, pkt_data_length, stream_info->sequence_number, stream_id0);

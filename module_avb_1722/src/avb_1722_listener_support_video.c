@@ -3,13 +3,15 @@
  * \brief IEC 61883-6/AVB1722 Listener support C functions
  */
 #define streaming
+#include <xs1.h>
+#include <string.h>
+#include <print.h>
+
 #include "avb_1722_listener.h"
 #include "avb_1722_common.h"
 #include "gptp.h"
 #include "avb_1722_def.h"
 #include "media_output_fifo.h"
-#include <string.h>
-#include <xs1.h>
 #include "avb_conf.h"
 
 #if defined (AVB_1722_FORMAT_61883_4)
@@ -47,29 +49,29 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
 
 	// If this is the start of a TS souce packet then ok, else we should discard this packet
 	// if it is not the next sequence
-	switch (stream_info->active) {
+	switch (stream_info->state) {
 	case 0:
 		// Initialise sequence number tracker
 		stream_info->last_sequence = p1722Hdr->sequence_number;
-		stream_info->active = 1;
+		stream_info->state = 1;
 		return 1;
 	case 1:
 		// Check for valid sequence number increase
 		if (p1722Hdr->sequence_number != stream_info->last_sequence + 1) {
-			stream_info->active = 0;
+			stream_info->state = 0;
 			return 1;
 		}
 		stream_info->last_sequence = p1722Hdr->sequence_number;
 
 		// Hunt for start of TS source packet
 		if ((dbc & 0x7) == 0) {
-			stream_info->active = 2;
+			stream_info->state = 2;
 		}
 		break;
 	case 2:
 		// Check for valid sequence number increase
 		if (p1722Hdr->sequence_number != stream_info->last_sequence + 1) {
-			stream_info->active = 0;
+			stream_info->state = 0;
 			return 1;
 		}
 		stream_info->last_sequence = p1722Hdr->sequence_number;
@@ -78,9 +80,6 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
 
 	pktDataLength = NTOH_U16(p1722Hdr->packet_data_length);
 	num_blocks_in_payload = pktDataLength / 24;
-
-
-	media_output_fifo_maintain(map[0], buf_ctl, notified_buf_ctl);
 
 	// 61883-4 says there can only certain numbers of blocks in a packet, depending on the
 	// DBC.  If the DBC is start of a whole 192 byte TS packet, then there can by any number of
@@ -114,7 +113,7 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
 				// Convert timestamp to local time
 				*sample_ptr = ptp_mod32_timestamp_to_local(*sample_ptr, timeInfo);
 
-				media_output_fifo_push(map[i], sample_ptr, 0, 8);
+				media_output_fifo_push(map[0], sample_ptr, 0, 8);
 				sample_ptr += 8;
 			}
 		}

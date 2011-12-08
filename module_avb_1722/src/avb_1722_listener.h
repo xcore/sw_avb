@@ -28,26 +28,35 @@
 
 
 typedef struct avb_1722_stream_info_t {
-  int active;                      //!< 1-bit flag to say if the stream is active
+  short active;                    //!< 1-bit flag to say if the stream is active
+  short state;                     //!< Generic state info
   int chan_lock;                   //!< Counter for locking onto a data stream
-  int rate;
+  int rate;                        //!< The estimated rate of the audio traffic
   int prev_num_samples;            //!< Number of samples in last received 1722 packet
   int num_channels_in_payload;     //!< The number of channels in the 1722 payloads
   int num_channels;
-  int dbc;
-  int last_sequence;
+  int dbc;                         //!< The DBC of the last seen packet
+  int last_sequence;               //!< The sequence number from the last 1722 packet
   media_output_fifo_t map[AVB_MAX_CHANNELS_PER_STREAM];
 } avb_1722_stream_info_t;
 
 
-
-int 
-avb_1722_listener_process_packet(chanend buf_ctl,
-                                 unsigned char Buf[], 
-                                 int numBytes,
-                                 REFERENCE_PARAM(avb_1722_stream_info_t, stream_info),
-								 REFERENCE_PARAM(ptp_time_info_mod64, timeInfo),
-                                 int index,
-                                 REFERENCE_PARAM(int, notified_buf_ctl));
+#ifdef __XC__
+int avb_1722_listener_process_packet(chanend? buf_ctl,
+                                     unsigned char Buf[],
+                                     int numBytes,
+                                     REFERENCE_PARAM(avb_1722_stream_info_t, stream_info),
+				                     REFERENCE_PARAM(ptp_time_info_mod64, timeInfo),
+                                     int index,
+                                     REFERENCE_PARAM(int, notified_buf_ctl));
+#else
+int avb_1722_listener_process_packet(chanend buf_ctl,
+                                     unsigned char Buf[],
+                                     int numBytes,
+                                     REFERENCE_PARAM(avb_1722_stream_info_t, stream_info),
+				                     REFERENCE_PARAM(ptp_time_info_mod64, timeInfo),
+                                     int index,
+                                     REFERENCE_PARAM(int, notified_buf_ctl));
+#endif
 
 #endif

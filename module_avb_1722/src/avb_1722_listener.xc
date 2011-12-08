@@ -28,7 +28,7 @@
 #endif
 
 #ifdef AVB_1722_FORMAT_61883_4
-#define MAX_PKT_BUF_SIZE_LISTENER (AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + AVB_CIP_HDR_SIZE + 192*4 + 4)
+#define MAX_PKT_BUF_SIZE_LISTENER (AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + AVB_CIP_HDR_SIZE + 192*MAX_TS_PACKETS_PER_1722 + 4)
 #endif
 
 #ifdef AVB_1722_FORMAT_61883_6
@@ -50,6 +50,7 @@ static void configure_stream(chanend c,
 	}
 
 	s.active = 1;
+	s.state = 0;
 	s.num_channels_in_payload = 0;
 	s.chan_lock = 0;
 	s.prev_num_samples = 0;
@@ -85,8 +86,10 @@ static void disable_stream(avb_1722_stream_info_t &s)
 	}
 
 	s.active = 0;
+	s.state = 0;
 }
 
+#pragma unsafe arrays
 void avb_1722_listener(chanend ethernet_rx_svr,
                        chanend? buf_ctl,
                        chanend? ptp_ctl,
@@ -103,12 +106,14 @@ void avb_1722_listener(chanend ethernet_rx_svr,
 	int router_link = 0;
 	int notified_buf_ctl = 0;
 	unsigned int src_port;
+	int valid_timeinfo = 1;
 
 #if defined(AVB_1722_FORMAT_61883_4)
 	// Conditional due to compiler bug 11998.
 	timer tmr;
 	unsigned t;
 	int pending_timeinfo = 0;
+	valid_timeinfo = 0;
 #endif
 
 	set_thread_fast_mode_on();
@@ -118,6 +123,7 @@ void avb_1722_listener(chanend ethernet_rx_svr,
 
 	for (int i=0;i<MAX_AVB_STREAMS_PER_LISTENER;i++) {
 		listener_streams[i].active = 0;
+		listener_streams[i].state = 0;
 	}
 
 	// initialisation
@@ -142,7 +148,7 @@ void avb_1722_listener(chanend ethernet_rx_svr,
 			avb_hash = RxBuf[1];
 
 			// process the audio packet if enabled.
-			if (avb_hash < MAX_AVB_STREAMS_PER_LISTENER && listener_streams[avb_hash].active)
+			if (avb_hash < MAX_AVB_STREAMS_PER_LISTENER && listener_streams[avb_hash].active && valid_timeinfo)
             {
 				// process the current packet
 				avb_1722_listener_process_packet(buf_ctl,
@@ -178,6 +184,7 @@ void avb_1722_listener(chanend ethernet_rx_svr,
 		// The PTP server has sent new time information
 		case !isnull(ptp_ctl) => ptp_get_requested_time_info_mod64(ptp_ctl, timeInfo):
 			pending_timeinfo = 0;
+			valid_timeinfo = 1;
 			break;
 #endif
 
