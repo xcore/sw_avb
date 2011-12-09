@@ -26,10 +26,13 @@
 // 1000 = 8 = drop 1
 static const char align_byte[16] = { 32, 32, 24, 32, 16, 32, 32, 32, 8, 32, 32, 32, 32, 32, 32, 32 };
 
+static unsigned overflow=0;
+static unsigned stream_start=0;
+
 #pragma unsafe arrays
 void tsi_input(clock clk, in buffered port:32 p_data, in port p_clk, in buffered port:4 p_sync, in port p_valid, ififo_t& ififo)
 {
-	unsigned wr_ptr = 0;
+	unsigned wr_ptr = 0, sync;
 	timer t;
 
 	// Intialise port, clearbufs and start clock last
@@ -49,8 +52,9 @@ void tsi_input(clock clk, in buffered port:32 p_data, in port p_clk, in buffered
 		// Read sync word until it is non-zero then use bit position to find shift multiplier
 		{
 			unsigned v;
-			p_sync when pinsneq(0) :> v;
-			partin(p_data, align_byte[v & 0x7]);
+			stream_start++;
+			p_sync when pinsneq(0) :> sync;
+			partin(p_data, align_byte[v & 0xF]);
 
 			for (unsigned n=0; n<46; n++) {
 				p_data :> unsigned;
@@ -71,7 +75,7 @@ void tsi_input(clock clk, in buffered port:32 p_data, in port p_clk, in buffered
 			{
 				unsigned s;
 				p_sync :> s;
-				if (!s) break;
+				if (s != sync) break;
 			}
 
 			// Check if this packet is free

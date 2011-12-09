@@ -38,7 +38,7 @@ void tsi_output(clock clk, out buffered port:32 p_data, in port p_clk, out buffe
 #pragma xta label "ts_spi_output_no_data"
 
 		// Wait for the next packet
-		while (ofifo.packet_wr != rd_ptr)
+		while (ofifo.fifo[rd_ptr+MEDIA_OUTPUT_FIFO_INUSE_OFFSET])
 		{
 			// Wait until it is time to transmit the packet
 			unsigned ts = ofifo.fifo[rd_ptr];
@@ -59,6 +59,9 @@ void tsi_output(clock clk, out buffered port:32 p_data, in port p_clk, out buffe
 				p_data <: ofifo.fifo[rd_ptr];
 				rd_ptr++;
 			}
+
+			ofifo.fifo[rd_ptr] = 0;
+			rd_ptr++;
 
 			// In the XMOS architecture, the various test instructions
 			// return a value of 1 or 0 in a register, therefore the

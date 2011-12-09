@@ -24,7 +24,7 @@
 #define TS_INPUT_PACKET_SIZE (4+4+188+4)
 
 // The 61883-4, section 7, recommends this number of packets be stored
-#define TS_INPUT_FIFO_SIZE 6
+#define TS_INPUT_FIFO_SIZE 16
 
 // Size of the FIFO in words
 #define MEDIA_INPUT_FIFO_WORD_SIZE ((TS_INPUT_PACKET_SIZE*TS_INPUT_FIFO_SIZE)/4)

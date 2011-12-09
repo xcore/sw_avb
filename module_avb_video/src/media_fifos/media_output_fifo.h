@@ -13,8 +13,8 @@
 #include <xccompat.h>
 #include "avb_conf.h"
 
-// A TS packet is 188 bytes, plus 4 bytes of timestamp
-#define TS_OUTPUT_PACKET_SIZE (188+4)
+// A TS packet is 1 word timestamp, 188 bytes, one word 'inuse'
+#define TS_OUTPUT_PACKET_SIZE (4+188+4)
 
 // The 61883-4, section 7, recommends this number of packets be stored
 #define TS_OUTPUT_FIFO_SIZE 17
@@ -22,11 +22,11 @@
 // Size of the FIFO in words
 #define MEDIA_OUTPUT_FIFO_WORD_SIZE ((TS_OUTPUT_PACKET_SIZE*TS_OUTPUT_FIFO_SIZE)/4)
 
+#define MEDIA_OUTPUT_FIFO_INUSE_OFFSET 48
+
 // This must match the C structure in media_output_fifo.c
 struct ofifo_t {
-	unsigned state;									//!< Various state flags
 	unsigned packet_wr;								//!< The packet being written
-	unsigned packet_rd;								//!< The packet being/about to be read
 	unsigned fifo[MEDIA_OUTPUT_FIFO_WORD_SIZE];		//!< The fifo of packets
 };
 
@@ -90,8 +90,8 @@ media_output_fifo_maintain(media_output_fifo_t s,
  *
  *  \param s0 the FIFO to push samples into
  *  \param sample_ptr a pointer to a block of samples in the 1722 packet
- *  \param index the index of the first word to write within the current packet
- *  \param n the number of words to push into the buffer
+ *  \param index the index of the first 6 word block to write within the current packet
+ *  \param n the number of 6 word blocks to push into the buffer
  */
 void 
 media_output_fifo_push(media_output_fifo_t s0, unsigned int *sample_ptr, int index, int n);
