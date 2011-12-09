@@ -44,6 +44,17 @@ Required Repositories
 * sc_i2c git\@github.com:xcore/sc_i2c.git
 * xcommon git\@github.com:xcore/xcommon.git
 
+To clone (read only):
+
+::
+
+  git clone git://github.com/xcore/sw_avb.git
+  git clone git://github.com/xcore/sc_ethernet.git
+  git clone git://github.com/xcore/sc_xtcp.git
+  git clone git://github.com/xcore/sc_xlog.git
+  git clone git://github.com/xcore/sc_i2c.git
+  git clone git://github.com/xcore/xcommon.git
+
 Support
 =======
 
