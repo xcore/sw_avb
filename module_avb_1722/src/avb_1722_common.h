@@ -177,5 +177,5 @@ typedef struct
 #define AVB_DEFAULT_PRESENTATION_TIME_DELAY_NS              (2000000)
 
 // Number of transport stream packets to allow in each 61883-4 encapsulation
-#define MAX_TS_PACKETS_PER_1722 6
+#define MAX_TS_PACKETS_PER_1722 4
 #endif

@@ -5,7 +5,6 @@
 #define streaming
 #include <xs1.h>
 #include <string.h>
-#include <print.h>
 
 #include "avb_1722_listener.h"
 #include "avb_1722_common.h"
@@ -18,6 +17,7 @@
 
 #ifdef AVB_1722_RECORD_ERRORS
 static unsigned avb_1722_listener_dbc_discontinuity = 0;
+static unsigned avb_1722_sequence_failure = 0;
 #endif
 
 int avb_1722_listener_process_packet(chanend buf_ctl,
@@ -57,7 +57,7 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
 		return 1;
 	case 1:
 		// Check for valid sequence number increase
-		if (p1722Hdr->sequence_number != stream_info->last_sequence + 1) {
+		if ((char)p1722Hdr->sequence_number != (char)(stream_info->last_sequence + 1)) {
 			stream_info->state = 0;
 			return 1;
 		}
@@ -70,7 +70,8 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
 		break;
 	case 2:
 		// Check for valid sequence number increase
-		if (p1722Hdr->sequence_number != stream_info->last_sequence + 1) {
+		if ((char)p1722Hdr->sequence_number != (char)(stream_info->last_sequence + 1)) {
+			avb_1722_sequence_failure++;
 			stream_info->state = 0;
 			return 1;
 		}
@@ -114,7 +115,7 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
 				*sample_ptr = ptp_mod32_timestamp_to_local(*sample_ptr, timeInfo);
 
 				media_output_fifo_push(map[0], sample_ptr, 0, 8);
-				sample_ptr += 8;
+				sample_ptr += 48;
 			}
 		}
 		stream_info->prev_num_samples = 0;

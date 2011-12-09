@@ -18,6 +18,17 @@
 
 static unsigned int failed_streamId[2];
 
+static unsigned avb_srp_calculate_max_framesize(avb_source_info_t *source_info)
+{
+#if defined(AVB_1722_FORMAT_61883_6) || defined(AVB_1722_FORMAT_SAF)
+	unsigned samples_per_packet = (source_info->stream.rate + (AVB1722_PACKET_RATE-1))/AVB1722_PACKET_RATE;
+	return AVB_1722_PLUS_SIP_HEADER_SIZE + (source_info->stream.num_channels * samples_per_packet * 4);
+#endif
+#if defined(AVB_1722_FORMAT_61883_4)
+	return AVB_1722_PLUS_SIP_HEADER_SIZE + (192 * MAX_TS_PACKETS_PER_1722);
+#endif
+}
+
 int avb_srp_match_talker_failed(mrp_attribute_state *attr,
                                 char *msg,
                                 int i)
@@ -329,7 +340,7 @@ static int check_talker_merge(char *buf,
   int num_values = hdr->NumberOfValuesLow;
   unsigned long long stream_id=0, my_stream_id=0;
   unsigned long long dest_addr=0, my_dest_addr=0;
-  int framesize=0, my_framesize=0, samples_per_packet;
+  int framesize=0, my_framesize=0;
   int vlan, my_vlan;
   srp_talker_first_value *first_value = 
     (srp_talker_first_value *) (buf + sizeof(mrp_msg_header) + sizeof(mrp_vector_header));
@@ -366,9 +377,7 @@ static int check_talker_merge(char *buf,
   if (vlan != my_vlan)
     return 0;
   
-  samples_per_packet = (source_info->stream.rate + (AVB1722_PACKET_RATE-1))/AVB1722_PACKET_RATE;
-  my_framesize = AVB_1722_PLUS_SIP_HEADER_SIZE + (source_info->stream.num_channels * samples_per_packet * 4);
-
+  my_framesize = avb_srp_calculate_max_framesize(source_info);
   framesize = NTOH_U16(first_value->TSpecMaxFrameSize);  
 
   if (framesize != my_framesize)
@@ -389,7 +398,6 @@ static int merge_talker_message(char *buf,
   int merge = 0;
   avb_source_info_t *source_info = st->attribute_info;       
   int num_values;
-  int samples_per_packet;
 
 
   if (mrp_hdr->AttributeType != AVB_SRP_ATTRIBUTE_TYPE_TALKER_ADVERTISE)
@@ -436,10 +444,7 @@ static int merge_talker_message(char *buf,
         AVB_SRP_TSPEC_RANK_DEFAULT << 4 |
         AVB_SRP_TSPEC_RESERVED_VALUE;
       
-      samples_per_packet = (source_info->stream.rate + (AVB1722_PACKET_RATE-1))/AVB1722_PACKET_RATE;
-      framesize = AVB_1722_PLUS_SIP_HEADER_SIZE + (source_info->stream.num_channels * samples_per_packet * 4);
-
-  
+      framesize = avb_srp_calculate_max_framesize(source_info);
 
       HTON_U16(first_value->TSpecMaxFrameSize, framesize);
       HTON_U16(first_value->TSpecMaxIntervalFrames,
