@@ -71,7 +71,9 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
 	case 2:
 		// Check for valid sequence number increase
 		if ((char)p1722Hdr->sequence_number != (char)(stream_info->last_sequence + 1)) {
+#ifdef AVB_1722_RECORD_ERRORS
 			avb_1722_sequence_failure++;
+#endif
 			stream_info->state = 0;
 			return 1;
 		}
