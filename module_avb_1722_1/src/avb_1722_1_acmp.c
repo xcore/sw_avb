@@ -978,10 +978,7 @@ avb_status_t avb_1722_1_acmp_listener_periodic(chanend c_tx)
 			}
 			else
 			{
-				int message_type = 0;
-
-				if (inflight->command.message_type == ACMP_CMD_CONNECT_RX_COMMAND) message_type = ACMP_CMD_CONNECT_TX_COMMAND;
-				else message_type = ACMP_CMD_DISCONNECT_TX_COMMAND;
+				int message_type = inflight->command.message_type;
 
 				acmp_send_command(LISTENER, message_type, &inflight->command, TRUE, i, c_tx);
 
