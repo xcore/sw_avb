@@ -146,9 +146,9 @@ int main(void) {
 			media_clock_server(media_clock_ctl,
 					ptp_link[1],
 					null,
-					0,
+					AVB_NUM_LISTENER_UNITS,
 					clk_ctl,
-					1);
+					AVB_NUM_MEDIA_CLOCKS);
 		}
 
 		// AVB - Audio
@@ -271,10 +271,10 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 	// Configure the source stream
 	set_avb_source_name(0, "2 channel testing stream");
 
-	set_avb_source_channels(0, 2);
-	for (int i = 0; i < 2; i++)
+	set_avb_source_channels(0, AVB_NUM_MEDIA_INPUTS);
+	for (int i = 0; i < AVB_NUM_MEDIA_INPUTS; i++)
 		map[i] = i;
-	set_avb_source_map(0, map, 2);
+	set_avb_source_map(0, map, AVB_NUM_MEDIA_INPUTS);
 	set_avb_source_format(0, AVB_SOURCE_FORMAT_MBLA_24BIT, sample_rate);
 	set_avb_source_sync(0, 0); // use the media_clock defined above
 

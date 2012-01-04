@@ -145,9 +145,9 @@ int main(void) {
 			media_clock_server(media_clock_ctl,
 					ptp_link[1],
 					null,
-					0,
+					AVB_NUM_LISTENER_UNITS,
 					clk_ctl,
-					1);
+					AVB_NUM_MEDIA_CLOCKS);
 		}
 
 		// AVB - Audio
@@ -251,7 +251,7 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 
 	timer tmr;
 	int avb_status = 0;
-	int map[8];
+	int map[AVB_NUM_MEDIA_INPUTS];
 	unsigned char macaddr[6];
 	unsigned timeout;
 	unsigned talker_active = 0;
