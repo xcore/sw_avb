@@ -5,8 +5,6 @@
 #include "avb_1722_1_aecp_pdu.h"
 #include "avb_control_types.h"
 
-#define AVB_1722_1_AECP_DEST_MAC {0x91, 0xe0, 0xf0, 0x00, 0xff, 0x01}
-
-avb_status_t process_avb_1722_1_aecp_packet(REFERENCE_PARAM(avb_1722_1_aecp_packet_t, pkt), chanend c_tx);
+avb_status_t process_avb_1722_1_aecp_packet(unsigned char dest_addr[6], REFERENCE_PARAM(avb_1722_1_aecp_packet_t, pkt), chanend c_tx);
 
 #endif /* AVB_1722_1_AECP_H_ */

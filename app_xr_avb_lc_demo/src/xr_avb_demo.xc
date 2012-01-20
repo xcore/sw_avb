@@ -178,9 +178,9 @@ int main(void) {
 			media_clock_server(media_clock_ctl,
 					ptp_link[1],
 					buf_ctl,
-					1,
+					AVB_NUM_LISTENER_UNITS,
 					clk_ctl,
-					1);
+					AVB_NUM_MEDIA_CLOCKS);
 		}
 
 		// AVB - Audio

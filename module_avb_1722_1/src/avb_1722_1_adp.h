@@ -4,7 +4,7 @@
 #include "avb_1722_1_adp_pdu.h"
 #include "avb_control_types.h"
 
-#define AVB_1722_1_ADP_DEST_MAC {0x91, 0xe0, 0xf0, 0x00, 0xff, 0x01};
+#define AVB_1722_1_ADP_DEST_MAC {0x91, 0xe0, 0xf0, 0x01, 0x00, 0x00};
 
 void avb_1722_1_adp_init();
 
