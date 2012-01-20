@@ -1,0 +1,2 @@
+MODULE_XCC_XC_FLAGS = $(XCC_FLAGS) -g -O3
+
