@@ -308,15 +308,8 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 			  // check if there is a new stream
 			  int res = avb_check_for_new_stream(streamId, vlan, addr);
 
-			  if (res && streamId[0] == 0x00049700) {
-				    simple_printf("Found stream %x.%x, address %x:%x:%x:%x:%x:%x, vlan %d\n",
-				    		streamId[0], streamId[1],
-				    		addr[0], addr[1], addr[2], addr[3], addr[4], addr[5],
-				    		vlan);
-			  }
-
 			  // if so, add it to the stream table
-			  if (res && listener_ready==0) {
+			  if (res && listener_ready==0 && streamId[0] == 0x00049700) {
 			    set_avb_sink_sync(0, 0);
 			    set_avb_sink_channels(0, 1);
 			    set_avb_sink_map(0, map, 1);
@@ -328,10 +321,10 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 			    listener_ready = 1;
 			    c_gpio_ctl <: 1;
 
-			set_avb_sink_state(0, AVB_SINK_STATE_POTENTIAL);
-			listener_active = 1;
-			simple_printf("Listener enabled\n");
-			c_gpio_ctl <: 2;
+			    set_avb_sink_state(0, AVB_SINK_STATE_POTENTIAL);
+			    listener_active = 1;
+			    simple_printf("Listener enabled\n");
+			    c_gpio_ctl <: 2;
 			  }
 			}
 
