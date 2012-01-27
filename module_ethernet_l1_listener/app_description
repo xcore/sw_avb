@@ -1,3 +1,3 @@
 A special version of the ethernet server which gives a similar interface to the standard
 5-thread server, but supports three channels of filtering specifically designed to support
-a low thread count AVB listener.
+a low thread count AVB listener, using the single thead ethernet driver.

@@ -127,8 +127,8 @@ int main(void) {
 		on stdcore[1]:
 		{
             // Enable XScope printing
-            xscope_register(0, 0, "", 0, "");
-            xscope_config_io(XSCOPE_IO_BASIC);
+            //xscope_register(0, 0, "", 0, "");
+            //xscope_config_io(XSCOPE_IO_BASIC);
 		}
 
 		// AVB - Audio
@@ -149,9 +149,8 @@ int main(void) {
 		on stdcore[0]:
 		{
             // Enable XScope printing
-            xscope_register(0, 0, "", 0, "");
-
-            xscope_config_io(XSCOPE_IO_BASIC);
+            //xscope_register(0, 0, "", 0, "");
+            //xscope_config_io(XSCOPE_IO_BASIC);
             
 			// First initialize avb higher level protocols
 			avb_init(media_ctl, listener_ctl, null, null, rx_link[2], tx_link[1], ptp_link[0]);
@@ -309,7 +308,7 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 			  // check if there is a new stream
 			  int res = avb_check_for_new_stream(streamId, vlan, addr);
 
-			  if (res) {
+			  if (res && streamId[0] == 0x00049700) {
 				    simple_printf("Found stream %x.%x, address %x:%x:%x:%x:%x:%x, vlan %d\n",
 				    		streamId[0], streamId[1],
 				    		addr[0], addr[1], addr[2], addr[3], addr[4], addr[5],
@@ -328,6 +327,11 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 
 			    listener_ready = 1;
 			    c_gpio_ctl <: 1;
+
+			set_avb_sink_state(0, AVB_SINK_STATE_POTENTIAL);
+			listener_active = 1;
+			simple_printf("Listener enabled\n");
+			c_gpio_ctl <: 2;
 			  }
 			}
 

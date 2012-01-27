@@ -102,6 +102,10 @@ int main(void) {
 		{
 			int mac_address[2];
 			ethernet_getmac_otp(otp_data, otp_addr, otp_ctrl, (mac_address, char[]));
+
+			// Override with a specific prefix
+			mac_address[0] = 0x00049700;
+
 			phy_init(clk_smi, p_mii_resetn,
 					smi,
 					mii);
@@ -127,8 +131,8 @@ int main(void) {
 		on stdcore[1]:
 		{
             // Enable XScope printing
-            xscope_register(0, 0, "", 0, "");
-            xscope_config_io(XSCOPE_IO_BASIC);
+            //xscope_register(0, 0, "", 0, "");
+            //xscope_config_io(XSCOPE_IO_BASIC);
 		}
 
 		// AVB - Audio
@@ -148,9 +152,8 @@ int main(void) {
 		on stdcore[0]:
 		{
             // Enable XScope printing
-            xscope_register(0, 0, "", 0, "");
-
-            xscope_config_io(XSCOPE_IO_BASIC);
+            //xscope_register(0, 0, "", 0, "");
+            //xscope_config_io(XSCOPE_IO_BASIC);
             
 			// First initialize avb higher level protocols
 			avb_init(media_ctl, null, talker_ctl, null, rx_link[1], tx_link[2], ptp_link[1]);
@@ -335,6 +338,7 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 				set_avb_source_dest(0, macaddr, 6);
 				talker_ok_to_start = 1;
 				simple_printf("Stream multicast address acquired (%x:%x:%x:%x:%x:%x)\nPress Channel Select to advertise stream.\n", macaddr[0], macaddr[1], macaddr[2], macaddr[3], macaddr[4], macaddr[5]);
+				set_avb_source_state(0, AVB_SOURCE_STATE_POTENTIAL);
 				break;
 			}
 			} while (avb_status != AVB_NO_STATUS);
