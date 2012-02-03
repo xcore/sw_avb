@@ -1,0 +1,339 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>PTP Client API &mdash; XMOS AVB Design Guide v5.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/xdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '5.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://mathjax.connectmv.com/MathJax.js"></script>
+    <script type="text/javascript" src="_static/xcomment.js"></script>
+    <link rel="top" title="XMOS AVB Design Guide v5.1.0 documentation" href="index.html" />
+    <link rel="up" title="API Reference" href="api.html" />
+    <link rel="next" title="MDNS/Bonjour API" href="mdns_api.html" />
+    <link rel="prev" title="AVB Sink Control" href="avb_sink_api.html" /> 
+
+<script>
+function setheight() {
+h1 = document.getElementById('d1').style.height;
+h2 = document.getElementById('d2').style.height;
+
+if (parseInt(h1) > parseInt(h2)) {
+document.getElementById('d2').style.height=h1 + "px";
+}
+else {
+document.getElementById('d1').style.height=h2 + "px";
+}
+
+}
+</script>
+</head>
+
+<body onload="setheight();">
+
+  
+
+    <div class="document" id='d1'>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+<div style="float: right">
+<a href="avb_sink_api.html"
+                        title="previous chapter"> &lt&lt </a>
+<a href="mdns_api.html"
+                        title="next chapter"> &gt&gt </a></p>
+</div>
+
+            
+  <div class="section" id="ptp-client-api">
+<span id="sec-ptp-api"></span><h1>PTP Client API<a class="headerlink" href="#ptp-client-api" title="Permalink to this headline">¶</a></h1>
+<p>The PTP client API can be used if you want extra information about the PTP
+time domain. An application does not need to directly use this to
+control the AVB endpoint since the talker, listener and media clock
+server units communicate with the PTP server directly.</p>
+<div class="section" id="time-data-structures">
+<h2>Time Data Structures<a class="headerlink" href="#time-data-structures" title="Permalink to this headline">¶</a></h2>
+<dl class="type">
+<dt id="ptp_timestamp">
+<tt class="descname">ptp_timestamp</tt><a class="headerlink" href="#ptp_timestamp" title="Permalink to this definition">¶</a></dt>
+<dd><p>This type represents a timestamp in the gptp clock domain.</p>
+<p><strong>Structure Members:</strong></p>
+<dl class="member">
+<dt id="ptp_timestamp.seconds">
+unsigned int <tt class="descname">seconds</tt><a class="headerlink" href="#ptp_timestamp.seconds" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="member">
+<dt id="ptp_timestamp.nanoseconds">
+unsigned int <tt class="descname">nanoseconds</tt><a class="headerlink" href="#ptp_timestamp.nanoseconds" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="getting-ptp-time-information">
+<h2>Getting PTP Time Information<a class="headerlink" href="#getting-ptp-time-information" title="Permalink to this headline">¶</a></h2>
+<dl class="type">
+<dt id="ptp_time_info">
+<tt class="descname">ptp_time_info</tt><a class="headerlink" href="#ptp_time_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>This type is used to relate local XCore time with gptp time.</p>
+<p>It can be retrieved from the PTP server using the <a class="reference internal" href="#ptp_get_time_info" title="ptp_get_time_info"><span>ptp_get_time_info()</span></a> function.</p>
+</dd></dl>
+
+<dl class="type">
+<dt id="ptp_time_info_mod64">
+<tt class="descname">ptp_time_info_mod64</tt><a class="headerlink" href="#ptp_time_info_mod64" title="Permalink to this definition">¶</a></dt>
+<dd><p>This structure is used to relate local XCore time with the least significant 64 bits of gptp time.</p>
+<p>The 64 bits of time is the PTP time in nanoseconds from the epoch.</p>
+<p>It can be retrieved from the PTP server using the <a class="reference internal" href="#ptp_get_time_info_mod64" title="ptp_get_time_info_mod64"><span>ptp_get_time_info_mod64()</span></a> function.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ptp_get_time_info">
+void <tt class="descname">ptp_get_time_info</tt><big>(</big>chanend<em>&nbsp;ptp_server</em>, <a class="reference internal" href="#ptp_time_info" title="ptp_time_info"><span>ptp_time_info</span></a><em>&nbsp;&amp;info</em><big>)</big><a class="headerlink" href="#ptp_get_time_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve time information from the ptp server.</p>
+<p>This function gets an up-to-date structure of type <cite>ptp_time_info</cite> to use to convert local time to PTP time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ptp_server</strong> &#8211; chanend connected to the ptp_server</li>
+<li><strong>info</strong> &#8211; structure to be filled with time information</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ptp_get_time_info_mod64">
+void <tt class="descname">ptp_get_time_info_mod64</tt><big>(</big>chanend<em>&nbsp;ptp_server</em>, <a class="reference internal" href="#ptp_time_info_mod64" title="ptp_time_info_mod64"><span>ptp_time_info_mod64</span></a><em>&nbsp;&amp;info</em><big>)</big><a class="headerlink" href="#ptp_get_time_info_mod64" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve time information from the ptp server.</p>
+<p>This function gets an up-to-date structure of type <cite>ptp_time_info_mod64</cite> to use to convert local time to ptp time (modulo 64 bits).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ptp_server</strong> &#8211; chanend connected to the ptp_server</li>
+<li><strong>info</strong> &#8211; structure to be filled with time information</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ptp_request_time_info">
+void <tt class="descname">ptp_request_time_info</tt><big>(</big>chanend<em>&nbsp;ptp_server</em><big>)</big><a class="headerlink" href="#ptp_request_time_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function requests a <cite>ptp_time_info</cite> structure from the PTP server.</p>
+<p>This is an asynchronous call so needs to be completed later with a call to <a class="reference internal" href="#ptp_get_requested_time_info" title="ptp_get_requested_time_info"><span>ptp_get_requested_time_info()</span></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ptp_server</strong> &#8211; chanend connecting to the ptp server</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ptp_request_time_info_mod64">
+void <tt class="descname">ptp_request_time_info_mod64</tt><big>(</big>chanend<em>&nbsp;ptp_server</em><big>)</big><a class="headerlink" href="#ptp_request_time_info_mod64" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function requests a <cite>ptp_time_info_mod64</cite> structure from the PTP server.</p>
+<p>This is an asynchronous call so needs to be completed later with a call to <a class="reference internal" href="#ptp_get_requested_time_info_mod64" title="ptp_get_requested_time_info_mod64"><span>ptp_get_requested_time_info_mod64()</span></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ptp_server</strong> &#8211; chanend connecting to the PTP server</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ptp_get_requested_time_info">
+void <tt class="descname">ptp_get_requested_time_info</tt><big>(</big>chanend<em>&nbsp;ptp_server</em>, <a class="reference internal" href="#ptp_time_info" title="ptp_time_info"><span>ptp_time_info</span></a><em>&nbsp;&amp;info</em><big>)</big><a class="headerlink" href="#ptp_get_requested_time_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function receives a <cite>ptp_time_info</cite> structure from the PTP server.</p>
+<p>This completes an asynchronous transaction initiated with a call to <a class="reference internal" href="#ptp_request_time_info" title="ptp_request_time_info"><span>ptp_request_time_info()</span></a>. The function can be placed in a select case which will activate when the PTP server is ready to send.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ptp_server</strong> &#8211; chanend connecting to the PTP server</li>
+<li><strong>info</strong> &#8211; a reference parameter to be filled with the time information structure</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ptp_get_requested_time_info_mod64">
+void <tt class="descname">ptp_get_requested_time_info_mod64</tt><big>(</big>chanend<em>&nbsp;ptp_server</em>, <a class="reference internal" href="#ptp_time_info_mod64" title="ptp_time_info_mod64"><span>ptp_time_info_mod64</span></a><em>&nbsp;&amp;info</em><big>)</big><a class="headerlink" href="#ptp_get_requested_time_info_mod64" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function receives a <cite>ptp_time_info_mod64</cite> structure from the PTP server.</p>
+<p>This completes an asynchronous transaction initiated with a call to <a class="reference internal" href="#ptp_request_time_info_mod64" title="ptp_request_time_info_mod64"><span>ptp_request_time_info_mod64()</span></a>. The function can be placed in a select case which will activate when the PTP server is ready to send.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ptp_server</strong> &#8211; chanend connecting to the PTP server</li>
+<li><strong>info</strong> &#8211; a reference parameter to be filled with the time information structure</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="converting-timestamps">
+<h2>Converting Timestamps<a class="headerlink" href="#converting-timestamps" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="local_timestamp_to_ptp">
+void <tt class="descname">local_timestamp_to_ptp</tt><big>(</big><a class="reference internal" href="#ptp_timestamp" title="ptp_timestamp"><span>ptp_timestamp</span></a><em>&nbsp;&amp;ptp_ts</em>, unsigned<em>&nbsp;local_ts</em>, <a class="reference internal" href="#ptp_time_info" title="ptp_time_info"><span>ptp_time_info</span></a><em>&nbsp;&amp;info</em><big>)</big><a class="headerlink" href="#local_timestamp_to_ptp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a timestamp from the local XCore timer to PTP time.</p>
+<p>This function takes a 32-bit timestamp taken from an XCore timer and converts it to PTP time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ptp_ts</strong> &#8211; the PTP timestamp structure to be filled with the converted time</li>
+<li><strong>local_ts</strong> &#8211; the local timestamp to be converted</li>
+<li><strong>info</strong> &#8211; a time information structure retrieved from the ptp server</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="local_timestamp_to_ptp_mod32">
+unsigned <tt class="descname">local_timestamp_to_ptp_mod32</tt><big>(</big>unsigned<em>&nbsp;local_ts</em>, <a class="reference internal" href="#ptp_time_info_mod64" title="ptp_time_info_mod64"><span>ptp_time_info_mod64</span></a><em>&nbsp;&amp;info</em><big>)</big><a class="headerlink" href="#local_timestamp_to_ptp_mod32" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a timestamp from the local XCore timer to the least significant 32 bits of PTP time.</p>
+<p>This function takes a 32-bit timestamp taken from an XCore timer and converts it to the least significant 32 bits of global PTP time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>local_ts</strong> &#8211; the local timestamp to be converted</li>
+<li><strong>info</strong> &#8211; a time information structure retrieved from the PTP server</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the least significant 32-bits of ptp time in nanoseconds</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ptp_timestamp_to_local">
+unsigned <tt class="descname">ptp_timestamp_to_local</tt><big>(</big><a class="reference internal" href="#ptp_timestamp" title="ptp_timestamp"><span>ptp_timestamp</span></a><em>&nbsp;&amp;ts</em>, <a class="reference internal" href="#ptp_time_info" title="ptp_time_info"><span>ptp_time_info</span></a><em>&nbsp;&amp;info</em><big>)</big><a class="headerlink" href="#ptp_timestamp_to_local" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a PTP timestamp to a local XCore timestamp.</p>
+<p>This function takes a PTP timestamp and converts it to a local 32-bit timestamp that is related to the XCore timer.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ts</strong> &#8211; the PTP timestamp to convert</li>
+<li><strong>info</strong> &#8211; a time information structure retrieved from the PTP server.</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the local timestamp</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" id='d2'>
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">XMOS AVB Design Guide (5.1.0)</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="hw.html">Hardware development platforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="system.html">System Description</a></li>
+<li class="toctree-l1"><a class="reference internal" href="programming.html">Programming Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="defines_api.html">Configuration Defines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="component_api.html">Component functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="avb_api.html">AVB API</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">PTP Client API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#time-data-structures">Time Data Structures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#getting-ptp-time-information">Getting PTP Time Information</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#converting-timestamps">Converting Timestamps</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mdns_api.html">MDNS/Bonjour API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bandwidth.html">IEEE 1722 Bandwidth Usage</a></li>
+</ul>
+
+<div id="searchbox" style="display: none;margin-bottom: 10px;">
+  <h3>Search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+
+
+    <div class="footer">
+    </div>
+  </body>
+</html>
+
+
+

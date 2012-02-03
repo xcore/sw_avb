@@ -1,0 +1,178 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Multicast Address Allocation &mdash; XMOS AVB Design Guide v5.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/xdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '5.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://mathjax.connectmv.com/MathJax.js"></script>
+    <script type="text/javascript" src="_static/xcomment.js"></script>
+    <link rel="top" title="XMOS AVB Design Guide v5.1.0 documentation" href="index.html" />
+    <link rel="up" title="AVB API" href="avb_api.html" />
+    <link rel="next" title="Stream Reservation" href="avb_srp_api.html" />
+    <link rel="prev" title="General Control Functions" href="avb_general_api.html" /> 
+
+<script>
+function setheight() {
+h1 = document.getElementById('d1').style.height;
+h2 = document.getElementById('d2').style.height;
+
+if (parseInt(h1) > parseInt(h2)) {
+document.getElementById('d2').style.height=h1 + "px";
+}
+else {
+document.getElementById('d1').style.height=h2 + "px";
+}
+
+}
+</script>
+</head>
+
+<body onload="setheight();">
+
+  
+
+    <div class="document" id='d1'>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+<div style="float: right">
+<a href="avb_general_api.html"
+                        title="previous chapter"> &lt&lt </a>
+<a href="avb_srp_api.html"
+                        title="next chapter"> &gt&gt </a></p>
+</div>
+
+            
+  <div class="section" id="multicast-address-allocation">
+<h1>Multicast Address Allocation<a class="headerlink" href="#multicast-address-allocation" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="avb_1722_maap_request_addresses">
+void <tt class="descname">avb_1722_maap_request_addresses</tt><big>(</big>int<em>&nbsp;num_addresses</em>, char<em>&nbsp;?start_address[]</em><big>)</big><a class="headerlink" href="#avb_1722_maap_request_addresses" title="Permalink to this definition">¶</a></dt>
+<dd><p>Request a range of multicast addresses.</p>
+<p>This function requests a range of multicast addresses to use as destination addresses for IEEE 1722 streams. It starts the reservation process according to the 1722 MAAP protocol. If the reservation is successful it is reported via the status return value of <a class="reference internal" href="avb_general_api.html#avb_periodic" title="avb_periodic"><span>avb_periodic()</span></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>num_addresses</strong> &#8211; number of addresses to try and reserve; will be reserved in a contiguous range</li>
+<li><strong>start_address</strong> &#8211; an optional six byte array specifying the required start address of the range; if argument is null then the start address will be picked at random</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="avb_1722_maap_get_base_address">
+void <tt class="descname">avb_1722_maap_get_base_address</tt><big>(</big>unsigned char<em>&nbsp;addr[6]</em><big>)</big><a class="headerlink" href="#avb_1722_maap_get_base_address" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the base address of the reserved range.</p>
+<p>This function returns the first address of the reserved multicast address range.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>addr</strong> &#8211; array to be filled with the 6-byte MAC address</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="avb_1722_maap_get_offset_address">
+void <tt class="descname">avb_1722_maap_get_offset_address</tt><big>(</big>unsigned char<em>&nbsp;addr[6]</em>, int<em>&nbsp;offset</em><big>)</big><a class="headerlink" href="#avb_1722_maap_get_offset_address" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the address offset into the reserved range.</p>
+<p>This function returns a specific address within the reserved multicast address range.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>addr</strong> &#8211; array to be filled with the 6-byte MAC address</li>
+<li><strong>offset</strong> &#8211; the offset into that range required</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" id='d2'>
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">XMOS AVB Design Guide (5.1.0)</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="hw.html">Hardware development platforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="system.html">System Description</a></li>
+<li class="toctree-l1"><a class="reference internal" href="programming.html">Programming Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="defines_api.html">Configuration Defines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="component_api.html">Component functions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="avb_api.html">AVB API</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="avb_general_api.html">General Control Functions</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="">Multicast Address Allocation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="avb_srp_api.html">Stream Reservation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="avb_device_api.html">Device Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="avb_media_clock_api.html">Media Clock Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="avb_source_api.html">AVB Source Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="avb_sink_api.html">AVB Sink Control</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ptp_api.html">PTP Client API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mdns_api.html">MDNS/Bonjour API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bandwidth.html">IEEE 1722 Bandwidth Usage</a></li>
+</ul>
+
+<div id="searchbox" style="display: none;margin-bottom: 10px;">
+  <h3>Search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+
+
+    <div class="footer">
+    </div>
+  </body>
+</html>
+
+
+

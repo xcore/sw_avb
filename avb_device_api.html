@@ -1,0 +1,242 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Device Control &mdash; XMOS AVB Design Guide v5.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/xdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '5.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://mathjax.connectmv.com/MathJax.js"></script>
+    <script type="text/javascript" src="_static/xcomment.js"></script>
+    <link rel="top" title="XMOS AVB Design Guide v5.1.0 documentation" href="index.html" />
+    <link rel="up" title="AVB API" href="avb_api.html" />
+    <link rel="next" title="Media Clock Control" href="avb_media_clock_api.html" />
+    <link rel="prev" title="Stream Reservation" href="avb_srp_api.html" /> 
+
+<script>
+function setheight() {
+h1 = document.getElementById('d1').style.height;
+h2 = document.getElementById('d2').style.height;
+
+if (parseInt(h1) > parseInt(h2)) {
+document.getElementById('d2').style.height=h1 + "px";
+}
+else {
+document.getElementById('d1').style.height=h2 + "px";
+}
+
+}
+</script>
+</head>
+
+<body onload="setheight();">
+
+  
+
+    <div class="document" id='d1'>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+<div style="float: right">
+<a href="avb_srp_api.html"
+                        title="previous chapter"> &lt&lt </a>
+<a href="avb_media_clock_api.html"
+                        title="next chapter"> &gt&gt </a></p>
+</div>
+
+            
+  <div class="section" id="device-control">
+<h1>Device Control<a class="headerlink" href="#device-control" title="Permalink to this headline">¶</a></h1>
+<p>These functions need to be supplied by the application.</p>
+<dl class="function">
+<dt id="get_device_name">
+int <tt class="descname">get_device_name</tt><big>(</big>char<em>&nbsp;device_name_string[]</em><big>)</big><a class="headerlink" href="#get_device_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the name of the device.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>device_name_string</strong> &#8211; array to be filled with the device name</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="get_device_system">
+int <tt class="descname">get_device_system</tt><big>(</big>char<em>&nbsp;device_name_string[]</em><big>)</big><a class="headerlink" href="#get_device_system" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the name of the system the device is part of.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>device_name_string</strong> &#8211; array to be filled with the system name</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="get_device_identity_vendor_id">
+int <tt class="descname">get_device_identity_vendor_id</tt><big>(</big>char<em>&nbsp;vendor_id_string[]</em><big>)</big><a class="headerlink" href="#get_device_identity_vendor_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the id of the vendor.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>vendor_id_string</strong> &#8211; array to be filled with the vendor id</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="get_device_identity_vendor">
+int <tt class="descname">get_device_identity_vendor</tt><big>(</big>char<em>&nbsp;vendor_name_string[]</em><big>)</big><a class="headerlink" href="#get_device_identity_vendor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the name of the device vendor.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>vendor_name_string</strong> &#8211; array to be filled with the vendor name</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="get_device_identity_product">
+int <tt class="descname">get_device_identity_product</tt><big>(</big>char<em>&nbsp;product_string[]</em><big>)</big><a class="headerlink" href="#get_device_identity_product" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the name of the product.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>product_string</strong> &#8211; array to be filled with the product name</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="get_device_identity_version">
+int <tt class="descname">get_device_identity_version</tt><big>(</big>char<em>&nbsp;version_string</em><big>)</big><a class="headerlink" href="#get_device_identity_version" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the version of the product.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>version_string</strong> &#8211; array to be filled with the version</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="get_device_identity_serial">
+int <tt class="descname">get_device_identity_serial</tt><big>(</big>char<em>&nbsp;serial_no_string[]</em><big>)</big><a class="headerlink" href="#get_device_identity_serial" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the serial number of the device.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>serial_no_string</strong> &#8211; array to be filled with the serial number</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" id='d2'>
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">XMOS AVB Design Guide (5.1.0)</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="hw.html">Hardware development platforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="system.html">System Description</a></li>
+<li class="toctree-l1"><a class="reference internal" href="programming.html">Programming Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="defines_api.html">Configuration Defines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="component_api.html">Component functions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="avb_api.html">AVB API</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="avb_general_api.html">General Control Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="avb_maap_api.html">Multicast Address Allocation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="avb_srp_api.html">Stream Reservation</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="">Device Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="avb_media_clock_api.html">Media Clock Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="avb_source_api.html">AVB Source Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="avb_sink_api.html">AVB Sink Control</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ptp_api.html">PTP Client API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mdns_api.html">MDNS/Bonjour API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bandwidth.html">IEEE 1722 Bandwidth Usage</a></li>
+</ul>
+
+<div id="searchbox" style="display: none;margin-bottom: 10px;">
+  <h3>Search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+
+
+    <div class="footer">
+    </div>
+  </body>
+</html>
+
+
+

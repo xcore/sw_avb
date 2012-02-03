@@ -1,0 +1,223 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Configuration Defines &mdash; XMOS AVB Design Guide v5.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/xdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '5.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://mathjax.connectmv.com/MathJax.js"></script>
+    <script type="text/javascript" src="_static/xcomment.js"></script>
+    <link rel="top" title="XMOS AVB Design Guide v5.1.0 documentation" href="index.html" />
+    <link rel="up" title="API Reference" href="api.html" />
+    <link rel="next" title="Component functions" href="component_api.html" />
+    <link rel="prev" title="API Reference" href="api.html" /> 
+
+<script>
+function setheight() {
+h1 = document.getElementById('d1').style.height;
+h2 = document.getElementById('d2').style.height;
+
+if (parseInt(h1) > parseInt(h2)) {
+document.getElementById('d2').style.height=h1 + "px";
+}
+else {
+document.getElementById('d1').style.height=h2 + "px";
+}
+
+}
+</script>
+</head>
+
+<body onload="setheight();">
+
+  
+
+    <div class="document" id='d1'>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+<div style="float: right">
+<a href="api.html"
+                        title="previous chapter"> &lt&lt </a>
+<a href="component_api.html"
+                        title="next chapter"> &gt&gt </a></p>
+</div>
+
+            
+  <div class="section" id="configuration-defines">
+<span id="sec-defines-api"></span><h1>Configuration Defines<a class="headerlink" href="#configuration-defines" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Each application using the AVB modules must include a file called
+<tt class="docutils literal"><span class="pre">avb_conf.h</span></tt> and this file must set the following values with
+#defines.</p>
+</div>
+<table border="1" class="docutils">
+<colgroup>
+<col width="42%" />
+<col width="58%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Define</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><tt class="docutils literal"><span class="pre">MAX_ETHERNET_PACKET_SIZE</span></tt></td>
+<td>The maximum ethernet packet size that can be received by the
+endpoint. Packets larger than this are truncated (default 1518).</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">NUM_MII_RX_BUF</span></tt></td>
+<td>Number of packet buffers for incoming packets.</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">NUM_MII_TX_BUF</span></tt></td>
+<td>Number of packet buffers for outgoing packets.</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">MAX_ETHERNET_CLIENTS</span></tt></td>
+<td>Maximum number of ethernet clients (i.e. threads connected to the
+ethernet server).</td>
+</tr>
+</tbody>
+</table>
+<table border="1" class="docutils">
+<colgroup>
+<col width="42%" />
+<col width="58%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Define</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><tt class="docutils literal"><span class="pre">AVB_MAX_NAME_LEN</span></tt></td>
+<td>The maximum length in characters of any text name used in the
+endpoint (e.g. the name of a source).</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">AVB_MAX_CHANNELS_PER_STREAM</span></tt></td>
+<td>The maximum allowed number of channels per AVB stream (incoming
+or outgoing).</td>
+</tr>
+</tbody>
+</table>
+<table border="1" class="docutils">
+<colgroup>
+<col width="42%" />
+<col width="58%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Define</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><tt class="docutils literal"><span class="pre">AVB_NUM_SINKS</span></tt></td>
+<td>The total number of AVB sinks (incoming streams that can be
+listened to).</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">AVB_NUM_LISTENER_UNITS</span></tt></td>
+<td>The total number or listener components (i.e. the number of
+threads running the  <a class="reference internal" href="component_api.html#avb_1722_listener" title="avb_1722_listener"><span>avb_1722_listener()</span></a> function).</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">AVB_NUM_SOURCES</span></tt></td>
+<td>The total number of AVB sources (streams that are to be transmitted).</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">AVB_NUM_TALKER_UNITS</span></tt></td>
+<td>The total number or talker components (i.e. the number of
+threads running the  <a class="reference internal" href="component_api.html#avb_1722_talker" title="avb_1722_talker"><span>avb_1722_talker()</span></a> function).</td>
+</tr>
+</tbody>
+</table>
+<table border="1" class="docutils">
+<colgroup>
+<col width="42%" />
+<col width="58%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Define</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><tt class="docutils literal"><span class="pre">AVB_NUM_MEDIA_OUTPUTS</span></tt></td>
+<td>The total number of media outputs (i.e. the number of media
+output FIFOs).</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">AVB_NUM_MEDIA_INPUTS</span></tt></td>
+<td>The total number of media inputs (i.e. the number of media
+input FIFOs).</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">AVB_NUM_MEDIA_UNITS</span></tt></td>
+<td>The number of components in the endpoint that will register and
+initialize media FIFOs (e.g. an audio interface component).</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">AVB_NUM_MEDIA_CLOCKS</span></tt></td>
+<td>The number of media clocks in the endpoint.</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" id='d2'>
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">XMOS AVB Design Guide (5.1.0)</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="hw.html">Hardware development platforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="system.html">System Description</a></li>
+<li class="toctree-l1"><a class="reference internal" href="programming.html">Programming Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="api.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="">Configuration Defines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="component_api.html">Component functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="avb_api.html">AVB API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ptp_api.html">PTP Client API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mdns_api.html">MDNS/Bonjour API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bandwidth.html">IEEE 1722 Bandwidth Usage</a></li>
+</ul>
+
+<div id="searchbox" style="display: none;margin-bottom: 10px;">
+  <h3>Search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+
+
+    <div class="footer">
+    </div>
+  </body>
+</html>
+
+
+

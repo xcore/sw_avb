@@ -1,0 +1,362 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>General Control Functions &mdash; XMOS AVB Design Guide v5.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/xdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '5.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://mathjax.connectmv.com/MathJax.js"></script>
+    <script type="text/javascript" src="_static/xcomment.js"></script>
+    <link rel="top" title="XMOS AVB Design Guide v5.1.0 documentation" href="index.html" />
+    <link rel="up" title="AVB API" href="avb_api.html" />
+    <link rel="next" title="Multicast Address Allocation" href="avb_maap_api.html" />
+    <link rel="prev" title="AVB API" href="avb_api.html" /> 
+
+<script>
+function setheight() {
+h1 = document.getElementById('d1').style.height;
+h2 = document.getElementById('d2').style.height;
+
+if (parseInt(h1) > parseInt(h2)) {
+document.getElementById('d2').style.height=h1 + "px";
+}
+else {
+document.getElementById('d1').style.height=h2 + "px";
+}
+
+}
+</script>
+</head>
+
+<body onload="setheight();">
+
+  
+
+    <div class="document" id='d1'>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+<div style="float: right">
+<a href="avb_api.html"
+                        title="previous chapter"> &lt&lt </a>
+<a href="avb_maap_api.html"
+                        title="next chapter"> &gt&gt </a></p>
+</div>
+
+            
+  <div class="section" id="general-control-functions">
+<h1>General Control Functions<a class="headerlink" href="#general-control-functions" title="Permalink to this headline">¶</a></h1>
+<dl class="type">
+<dt id="avb_status_t">
+<tt class="descname">avb_status_t</tt><a class="headerlink" href="#avb_status_t" title="Permalink to this definition">¶</a></dt>
+<dd><p>AVB Status Report Type.</p>
+<p>This type is returned by <a class="reference internal" href="#avb_periodic" title="avb_periodic"><span>avb_periodic()</span></a>, <tt class="xref c c-func docutils literal"><span class="pre">avb_srp_process_packet()</span></tt> and <tt class="xref c c-func docutils literal"><span class="pre">avb_1722_maap_process_packet()</span></tt>. and indicates any change in state of the AVB system.</p>
+<p><strong>Enum Values:</strong></p>
+<blockquote>
+<div><dl class="member">
+<dt id="avb_status_t.AVB_NO_STATUS">
+<tt class="descname">AVB_NO_STATUS</tt><a class="headerlink" href="#avb_status_t.AVB_NO_STATUS" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>-1</div></blockquote>
+<p>No status to report.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="avb_status_t.AVB_SRP_OK">
+<tt class="descname">AVB_SRP_OK</tt><a class="headerlink" href="#avb_status_t.AVB_SRP_OK" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>0</div></blockquote>
+<p>Status is ok (no change).</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="avb_status_t.AVB_SRP_TALKER_ROUTE_FAILED">
+<tt class="descname">AVB_SRP_TALKER_ROUTE_FAILED</tt><a class="headerlink" href="#avb_status_t.AVB_SRP_TALKER_ROUTE_FAILED" title="Permalink to this definition">¶</a></dt>
+<dd><p>A route from one of the devices sources has failed to reach an intended listener (probably due to lack of bandwidth).</p>
+<p>Use <a class="reference internal" href="avb_srp_api.html#avb_srp_get_failed_stream" title="avb_srp_get_failed_stream"><span>avb_srp_get_failed_stream()</span></a> to find the streamID of the failed stream.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="avb_status_t.AVB_SRP_LISTENER_ROUTE_FAILED">
+<tt class="descname">AVB_SRP_LISTENER_ROUTE_FAILED</tt><a class="headerlink" href="#avb_status_t.AVB_SRP_LISTENER_ROUTE_FAILED" title="Permalink to this definition">¶</a></dt>
+<dd><p>A route from to one of the devices sinks has failed to reach from an intended talker (probably due to lack of bandwidth).</p>
+<p>Use <a class="reference internal" href="avb_srp_api.html#avb_srp_get_failed_stream" title="avb_srp_get_failed_stream"><span>avb_srp_get_failed_stream()</span></a> to find the streamID of the failed stream.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="avb_status_t.AVB_SRP_INDICATION">
+<tt class="descname">AVB_SRP_INDICATION</tt><a class="headerlink" href="#avb_status_t.AVB_SRP_INDICATION" title="Permalink to this definition">¶</a></dt>
+<dd><p>One of the SRP indications has occured.</p>
+<p>The stream flags will be marked appropriately.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="avb_status_t.AVB_MAAP_ADDRESSES_RESERVED">
+<tt class="descname">AVB_MAAP_ADDRESSES_RESERVED</tt><a class="headerlink" href="#avb_status_t.AVB_MAAP_ADDRESSES_RESERVED" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multicast addresses have been successfully been reserved after a called to <a class="reference internal" href="avb_maap_api.html#avb_1722_maap_request_addresses" title="avb_1722_maap_request_addresses"><span>avb_1722_maap_request_addresses()</span></a>.</p>
+<p>Use <a class="reference internal" href="avb_maap_api.html#avb_1722_maap_get_base_address" title="avb_1722_maap_get_base_address"><span>avb_1722_maap_get_base_address()</span></a> or <a class="reference internal" href="avb_maap_api.html#avb_1722_maap_get_offset_address" title="avb_1722_maap_get_offset_address"><span>avb_1722_maap_get_offset_address()</span></a> to access the reserved addresses.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="avb_status_t.AVB_MAAP_ADDRESSES_LOST">
+<tt class="descname">AVB_MAAP_ADDRESSES_LOST</tt><a class="headerlink" href="#avb_status_t.AVB_MAAP_ADDRESSES_LOST" title="Permalink to this definition">¶</a></dt>
+<dd><p>Previously reserved multicast addresses have been lost.</p>
+<p>After this event the control thread should disable any streams using MAAP addresses and recall <a class="reference internal" href="avb_maap_api.html#avb_1722_maap_request_addresses" title="avb_1722_maap_request_addresses"><span>avb_1722_maap_request_addresses()</span></a></p>
+</dd></dl>
+
+<dl class="member">
+<dt id="avb_status_t.AVB_1722_1_OK">
+<tt class="descname">AVB_1722_1_OK</tt><a class="headerlink" href="#avb_status_t.AVB_1722_1_OK" title="Permalink to this definition">¶</a></dt>
+<dd><p>1722.1 status ok</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="avb_status_t.AVB_1722_1_ENTITY_ADDED">
+<tt class="descname">AVB_1722_1_ENTITY_ADDED</tt><a class="headerlink" href="#avb_status_t.AVB_1722_1_ENTITY_ADDED" title="Permalink to this definition">¶</a></dt>
+<dd><p>An entity has been added to the database by the discovery protocol.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="avb_status_t.AVB_1722_1_ENTITY_REMOVED">
+<tt class="descname">AVB_1722_1_ENTITY_REMOVED</tt><a class="headerlink" href="#avb_status_t.AVB_1722_1_ENTITY_REMOVED" title="Permalink to this definition">¶</a></dt>
+<dd><p>An entity has been removed from the database by the discovery protocol.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="avb_status_t.AVB_1722_1_CONNECT_TALKER">
+<tt class="descname">AVB_1722_1_CONNECT_TALKER</tt><a class="headerlink" href="#avb_status_t.AVB_1722_1_CONNECT_TALKER" title="Permalink to this definition">¶</a></dt>
+<dd><p>A connection management protocol message has been received indicating that a talker component should initiate a connection.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="avb_status_t.AVB_1722_1_DISCONNECT_TALKER">
+<tt class="descname">AVB_1722_1_DISCONNECT_TALKER</tt><a class="headerlink" href="#avb_status_t.AVB_1722_1_DISCONNECT_TALKER" title="Permalink to this definition">¶</a></dt>
+<dd><p>An SCM message indicates that a talker should release a connection.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="avb_status_t.AVB_1722_1_CONNECT_LISTENER">
+<tt class="descname">AVB_1722_1_CONNECT_LISTENER</tt><a class="headerlink" href="#avb_status_t.AVB_1722_1_CONNECT_LISTENER" title="Permalink to this definition">¶</a></dt>
+<dd><p>An SCM message indicates that a listener should initiate a connection.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="avb_status_t.AVB_1722_1_DISCONNECT_LISTENER">
+<tt class="descname">AVB_1722_1_DISCONNECT_LISTENER</tt><a class="headerlink" href="#avb_status_t.AVB_1722_1_DISCONNECT_LISTENER" title="Permalink to this definition">¶</a></dt>
+<dd><p>An SCM message indicates that a listener should release a connection.</p>
+</dd></dl>
+
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="avb_init">
+void <tt class="descname">avb_init</tt><big>(</big>chanend<em>&nbsp;media_ctl[]</em>, chanend<em>&nbsp;?listener_ctl[]</em>, chanend<em>&nbsp;?talker_ctl[]</em>, chanend<em>&nbsp;?media_clock_ctl</em>, chanend<em>&nbsp;c_mac_rx</em>, chanend<em>&nbsp;c_mac_tx</em>, chanend<em>&nbsp;c_ptp</em><big>)</big><a class="headerlink" href="#avb_init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the AVB control thread.</p>
+<p>This function initializes the AVB system. It needs to be called in the main user control thread before any other AVB control call. The function takes chanends connected to other parts of the system and registers all of these components.</p>
+<p>At this point the sinks, sources and media FIFOs are allocated numbers. The allocation is performed by registering numbers from 0 upwards working through the listener_ctl/talker_ctl/media_ctl arrays. Each component in this array may register several sink/sources/FIFOs. For example, if the listener_ctl array connects to two listener units each registering 3 sinks then the first unit will be allocated sink numbers 0,1,2 and the second 3,4,5.</p>
+<p>Note that this call does not start any protocols communicating over the network (e.g. advertising talkers via IEEE 802.1Qat). That is deferred until the call to <a class="reference internal" href="#avb_start" title="avb_start"><span>avb_start()</span></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>media_ctl</strong> &#8211; array of chanends connected to components that register/control media FIFOs</li>
+<li><strong>listener_ctl</strong> &#8211; array of chanends connected to components that register/control IEEE 1722 sinks</li>
+<li><strong>talker_ctl</strong> &#8211; array of chanends connected to components that register/control IEEE 1722 sources</li>
+<li><strong>media_clock_ctl</strong> &#8211; chanend connected to the media clock server</li>
+<li><strong>c_mac_rx</strong> &#8211; chanend connected to the ethernet server (RX)</li>
+<li><strong>c_mac_tx</strong> &#8211; chanend connected to the ethernet server (TX)</li>
+<li><strong>c_ptp</strong> &#8211; chanend connected to the ptp server</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="avb_start">
+void <tt class="descname">avb_start</tt><big>(</big>void<big>)</big><a class="headerlink" href="#avb_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start any AVB protocol state machines.</p>
+<p>This call starts any AVB protocol state machines running. It should be called after the ethernet link goes up.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="avb_periodic">
+<a class="reference internal" href="#avb_status_t" title="avb_status_t"><span>avb_status_t</span></a> <tt class="descname">avb_periodic</tt><big>(</big>void<big>)</big><a class="headerlink" href="#avb_periodic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform AVB periodic processing.</p>
+<p>This function performs AVB periodic processing. It should be called from the main control thread at least once each ms. If it returns a state other than AVB_NO_STATUS then it should be called again immediately.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">A status update from the periodic processing to indicate an event due to a timeout etc. (see <a class="reference internal" href="#avb_status_t" title="avb_status_t"><span>avb_status_t</span></a>)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="avb_get_control_packet">
+void <tt class="descname">avb_get_control_packet</tt><big>(</big>chanend<em>&nbsp;c_rx</em>, unsigned int<em>&nbsp;buf[]</em>, unsigned int<em>&nbsp;&amp;nbytes</em><big>)</big><a class="headerlink" href="#avb_get_control_packet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receives an 802.1Qat SRP packet or an IEEE P1722 MAAP packet.</p>
+<p>This function receives an AVB control packet from the ethernet MAC. It is selectable so can be used in a select statement as a case.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>c_rx</strong> &#8211; chanend connected to the ethernet component</li>
+<li><strong>buf</strong> &#8211; buffer to retrieve the packet into; buffer must have length at least <tt class="docutils literal"><span class="pre">MAX_AVB_CONTROL_PACKET_SZIE</span></tt> bytes</li>
+<li><strong>nbytes</strong> &#8211; a reference parameter that is filled with the length of the received packet</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="avb_process_control_packet">
+<a class="reference internal" href="#avb_status_t" title="avb_status_t"><span>avb_status_t</span></a> <tt class="descname">avb_process_control_packet</tt><big>(</big>unsigned int<em>&nbsp;buf[]</em>, int<em>&nbsp;len</em>, chanend<em>&nbsp;c_tx</em><big>)</big><a class="headerlink" href="#avb_process_control_packet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process an AVB control packet.</p>
+<p>This function processes an ethernet packet and if it is a 802.1Qat or IEEE 1722 MAAP packet will handle it.</p>
+<p>This function should always be called on the buffer filled by <a class="reference internal" href="#avb_get_control_packet" title="avb_get_control_packet"><span>avb_get_control_packet()</span></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>buf</strong> &#8211; the incoming message buffer</li>
+<li><strong>len</strong> &#8211; the length (in bytes) of the incoming buffer</li>
+<li><strong>c_tx</strong> &#8211; chanend connected to the ethernet mac (TX)</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><tt class="docutils literal"><span class="pre">AVB_SRP_TALKER_ROUTE_FAILED</span></tt> if the incoming packet reports a talker routing failure (i.e. a failure in getting an outgoing stream to its intended listener). <tt class="docutils literal"><span class="pre">AVB_SRP_LISTENER_ROUTE_FAILED</span></tt> if the incoming packet reports a listener routing failure (i.e. a failure in listening to a stream). If the packet causes a previously asked for, or reserved, multicast address range to be no longer available, then <tt class="docutils literal"><span class="pre">AVB_MAAP_ADDRESSES_LOST</span></tt> is returned.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="avb_check_for_new_stream">
+int <tt class="descname">avb_check_for_new_stream</tt><big>(</big>unsigned<em>&nbsp;streamId[2]</em>, unsigned<em>&nbsp;&amp;vlan</em>, unsigned char<em>&nbsp;addr[6]</em><big>)</big><a class="headerlink" href="#avb_check_for_new_stream" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether a new incoming AVB stream has been detected.</p>
+<p>This function checks whether a new IEEE 1722 stream has been detected. A new stream will be detected if an 802.1Qat talker advertise packet is received by the endpoint.</p>
+<p>Each new stream seen will be reported once by this function. Internally the AVB system keeps a history up to the size <tt class="docutils literal"><span class="pre">AVB_STREAM_HISTORY_SIZE</span></tt> which has a default value of 128 and can be set in <tt class="docutils literal"><span class="pre">avb_conf.h</span></tt></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>streamId</strong> &#8211; an array to be filled with the new stream id</li>
+<li><strong>vlan</strong> &#8211; a reference param to be filled with the vlan the detected stream is on</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a non-zero value if a new stream is detected, zero otherwise</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="avb_set_legacy_mode">
+void <tt class="descname">avb_set_legacy_mode</tt><big>(</big>int<em>&nbsp;mode</em><big>)</big><a class="headerlink" href="#avb_set_legacy_mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the endpoint into &#8220;legacy mode&#8221;.</p>
+<p>This function sets the endpoint into &#8220;legacy mode&#8221; to work with non-AVB switches for testing or demonstration purposes. In this mode the destination address of certain protocols change to become legacy (non-AVB) traffic and the PTP 802.1as protocol behaves in a slightly different manner. In this case:</p>
+<ul class="simple">
+<li>The protocols are non-longer AVB standard so will not work with any other AVB hardware. They will only work with other endpoints set to this mode.</li>
+<li>There is no longer any quality of service guarantee so audio may be disrupted. Furthermore the traffic from the endpoint may disrupt other non-AVB ethernet devices on the network.</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>mode</strong> &#8211; non-zero to set legacy mode, zero to unset it</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" id='d2'>
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">XMOS AVB Design Guide (5.1.0)</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="hw.html">Hardware development platforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="system.html">System Description</a></li>
+<li class="toctree-l1"><a class="reference internal" href="programming.html">Programming Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="defines_api.html">Configuration Defines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="component_api.html">Component functions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="avb_api.html">AVB API</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="">General Control Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="avb_maap_api.html">Multicast Address Allocation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="avb_srp_api.html">Stream Reservation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="avb_device_api.html">Device Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="avb_media_clock_api.html">Media Clock Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="avb_source_api.html">AVB Source Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="avb_sink_api.html">AVB Sink Control</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ptp_api.html">PTP Client API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mdns_api.html">MDNS/Bonjour API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bandwidth.html">IEEE 1722 Bandwidth Usage</a></li>
+</ul>
+
+<div id="searchbox" style="display: none;margin-bottom: 10px;">
+  <h3>Search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+
+
+    <div class="footer">
+    </div>
+  </body>
+</html>
+
+
+

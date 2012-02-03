@@ -1,0 +1,255 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Audio Components &mdash; XMOS AVB Design Guide v5.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/xdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '5.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://mathjax.connectmv.com/MathJax.js"></script>
+    <script type="text/javascript" src="_static/xcomment.js"></script>
+    <link rel="top" title="XMOS AVB Design Guide v5.1.0 documentation" href="index.html" />
+    <link rel="up" title="System Description" href="system.html" />
+    <link rel="next" title="Media Clocks" href="clocking.html" />
+    <link rel="prev" title="Precise Timing Protocol Component" href="ptp.html" /> 
+
+<script>
+function setheight() {
+h1 = document.getElementById('d1').style.height;
+h2 = document.getElementById('d2').style.height;
+
+if (parseInt(h1) > parseInt(h2)) {
+document.getElementById('d2').style.height=h1 + "px";
+}
+else {
+document.getElementById('d1').style.height=h2 + "px";
+}
+
+}
+</script>
+</head>
+
+<body onload="setheight();">
+
+  
+
+    <div class="document" id='d1'>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+<div style="float: right">
+<a href="ptp.html"
+                        title="previous chapter"> &lt&lt </a>
+<a href="clocking.html"
+                        title="next chapter"> &gt&gt </a></p>
+</div>
+
+            
+  <div class="section" id="audio-components">
+<h1>Audio Components<a class="headerlink" href="#audio-components" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="avb-streams-channels-talkers-and-listeners">
+<h2>AVB Streams, Channels, Talkers and Listeners<a class="headerlink" href="#avb-streams-channels-talkers-and-listeners" title="Permalink to this headline">¶</a></h2>
+<p>Audio is transported in streams of data, where each stream may have multiple
+channels. Endpoints producing streams are called <em>Talkers</em> and
+those receiving them are called <em>Listeners</em>. Each stream on the
+network has a unique 64-bit stream ID.</p>
+<p id="index-0">A single endpoint can be a Talker, a Listener or both. In general each
+endpoint will have a number of <em>sinks</em> with the capacity to receive
+a number of incoming streams and a number of <em>sources</em> with the
+capacity to transmit a number of streams.</p>
+<p>Routing is done using layer 2 ethernet addresses. Each stream is sent from a particular source MAC address to a particular
+destination MAC address. The destination MAC address may be a
+multicast address (that is several Listeners may receive it). In addition,
+AVB switches can reserve an end-to-end path with guaranteed bandwidth
+for a stream. This is done by the Talker endpoint advertising the
+stream to the switches and the Listener registering to receive it. If
+sufficient bandwidth is not available, this registration may fail.</p>
+<p>Streams carry their own <em>presentation time</em> (the time
+that samples are due to be output) allowing multiple Listeners that
+receive the same stream to output in sync.</p>
+<blockquote>
+<div><ul class="simple">
+<li>Streams are encoded using the 1722 AVB transport protocol.</li>
+<li>All channels in a stream must be synchronized to
+the same sample clock.</li>
+<li>All the channels in a stream must come from the same Talker.</li>
+<li>Routing of audio streams uses ethernet layer 2 routing, which can be either unicast (one-to-one) or multicast (one-to-many).</li>
+<li>Routing is done at the stream level. All channels within a
+stream must be routed to the same place. However, a stream can be
+multicast to several Listeners, each of which picks out different
+channels.</li>
+<li>A single end point can be both a Talker and Listener.</li>
+<li>The stream ID is the only information you can obtain about a stream before
+registering to listen to it. Any other information
+about the stream must be communicated by a higher level protocol
+(see Section <a class="reference internal" href="config.html#sec-config"><span>Configuration and application threads</span></a>).</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="internal-routing-media-fifos">
+<h2>Internal Routing, Media FIFOs<a class="headerlink" href="#internal-routing-media-fifos" title="Permalink to this headline">¶</a></h2>
+<img alt="_images/internal_routing.png" class="align-center" src="_images/internal_routing.png" />
+<p>As described in the previous section, an IEEE P1722 audio stream may
+consist of many channels. These channels need to be routed to
+particular audio I/Os on the endpoint. To achieve maximum flexibility
+the XMOS design uses intermediate media FIFOs to route
+audio.  Each FIFO contains a single channel of audio.</p>
+<p>The above figure shows the breakdown of 1722 streams
+into local FIFOs. The figure shows four points where
+transitions to and from media FIFOs occur. For audio being received by
+an endpoint:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>When a 1722 stream is received, its channels are mapped to output
+media FIFOs. This mapping can be configured
+dynamically so that it can be changed at runtime by the configuration component.</li>
+<li>The digital hardware interface maps media FIFOs to audio
+outputs. This mapping is fixed and is configured statically in the
+software.</li>
+</ol>
+</div></blockquote>
+<p>For audio being transmitted by an endpoint:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>The digital hardware interface maps digital audio inputs to
+local media FIFOs. This mapping is fixed and cannot be changed
+at runtime.</li>
+<li>Several input FIFOs can be combined into a 1722 stream. This
+mapping is dynamic.</li>
+</ol>
+</div></blockquote>
+<p>The configuration of the mappings is handled through the API describe
+in <a class="reference internal" href="avb_api.html#sec-avb-api"><span>AVB API</span></a>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Media FIFOs uses shared memory to move data between threads. So the
+filling and emptying of the FIFO must be on the same core.</p>
+</div>
+</div>
+<div class="section" id="talker-units">
+<h2>Talker Units<a class="headerlink" href="#talker-units" title="Permalink to this headline">¶</a></h2>
+<img alt="_images/talker-crop.png" class="align-center" src="_images/talker-crop.png" />
+<p>A talker unit consists of one thread which creates <em>IEEE P1722</em> packets and passes the audio samples onto the MAC. Audio
+samples are passed to this component via input media FIFOs.
+Samples are pushed into this FIFO from a different thread implementing the audio hardware interface. The packetizer thread removes the samples and combines them into <em>IEEE P1722</em> ethernet packets to be transmitted via the MAC component.</p>
+<p>When the packets are created the timestamps are converted to the time domain of the global clock provided by the PTP component, and a fixed offset is added to the timestamps to provide the <em>presentation time</em> of the samples (<em>i.e</em> the time at which the sample should be played by a listener).</p>
+<p>A system may have several talker units. However, since samples are
+passed via a shared memory interface a talker can only combine input FIFOs
+that are created on the same core as the talker. The instantiating of
+talker units is performed via the API described in Section
+<a class="reference internal" href="component_api.html#sec-component-api"><span>Component functions</span></a>. Once the talker unit starts, it registers
+with the main control thread and is control via the main AVB API
+described in Section <a class="reference internal" href="avb_api.html#sec-avb-api"><span>AVB API</span></a>.</p>
+</div>
+<div class="section" id="listener-units">
+<h2>Listener Units<a class="headerlink" href="#listener-units" title="Permalink to this headline">¶</a></h2>
+<img alt="_images/listener-crop.png" class="align-center" src="_images/listener-crop.png" />
+<p>A listener units takes <em>IEEE P1722</em> packets from the MAC
+and converts them into a sample stream to be fed into a media FIFOs.
+Each audio listener component can listen to several <em>IEEE P1722</em>
+streams.</p>
+<p>A system may have several listener units. The instantiating of
+listener units is performed via the API described in Section
+<a class="reference internal" href="component_api.html#sec-component-api"><span>Component functions</span></a>. Once the listener unit starts, it registers
+with the main control thread and is controlled via the main AVB API
+described in Section <a class="reference internal" href="avb_api.html#sec-avb-api"><span>AVB API</span></a>.</p>
+</div>
+<div class="section" id="media-fifos-to-xc-channels">
+<h2>Media FIFOs to XC Channels<a class="headerlink" href="#media-fifos-to-xc-channels" title="Permalink to this headline">¶</a></h2>
+<p>Sometimes it is useful to convert the audio stream in a media FIFO
+into a sample stream over an XC channel. This may be needed to move
+samples off core or if the audio interface thread requires samples
+over a channel. Several functions are provided to do this and are
+described in Section <a class="reference internal" href="component_api.html#sec-component-api"><span>Component functions</span></a>.</p>
+</div>
+<div class="section" id="audio-hardware-interfaces">
+<h2>Audio Hardware Interfaces<a class="headerlink" href="#audio-hardware-interfaces" title="Permalink to this headline">¶</a></h2>
+<p>The audio hardware interface components drive external audio hardware, pull
+audio out of media output FIFOs and push into media input FIFOs.</p>
+<p>Different interfaces interact in different ways, some
+directly push and pull from the media FIFOs, whereas some (for
+performance reasons) require samples to be provided of an XC
+channel.</p>
+<p>The following diagram shows the thread layout of the I2S component
+which pushes its input directly to media input FIFOs but takes output
+FIFOs from an XC channel. The diagram shows the supporting thread that
+takes samples out of the media output FIFOs and serializes them over
+an XC channel:</p>
+<img alt="_images/i2s-crop.png" class="align-center" src="_images/i2s-crop.png" />
+<p>Details on the available audio components can be found in Section <a class="reference internal" href="component_api.html#sec-component-api"><span>Component functions</span></a>.</p>
+</div>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" id='d2'>
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">XMOS AVB Design Guide (5.1.0)</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="hw.html">Hardware development platforms</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="system.html">System Description</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="architecture.html">System Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mac.html">Ethernet MAC Component</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ptp.html">Precise Timing Protocol Component</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">Audio Components</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#avb-streams-channels-talkers-and-listeners">AVB Streams, Channels, Talkers and Listeners</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#internal-routing-media-fifos">Internal Routing, Media FIFOs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#talker-units">Talker Units</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#listener-units">Listener Units</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#media-fifos-to-xc-channels">Media FIFOs to XC Channels</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#audio-hardware-interfaces">Audio Hardware Interfaces</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="clocking.html">Media Clocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config.html">Configuration and application threads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resource.html">Resource Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chip.html">Choosing the right chip</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="programming.html">Programming Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bandwidth.html">IEEE 1722 Bandwidth Usage</a></li>
+</ul>
+
+<div id="searchbox" style="display: none;margin-bottom: 10px;">
+  <h3>Search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+
+
+    <div class="footer">
+    </div>
+  </body>
+</html>
+
+
+

@@ -1,0 +1,168 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Ethernet MAC Component &mdash; XMOS AVB Design Guide v5.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/xdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '5.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://mathjax.connectmv.com/MathJax.js"></script>
+    <script type="text/javascript" src="_static/xcomment.js"></script>
+    <link rel="top" title="XMOS AVB Design Guide v5.1.0 documentation" href="index.html" />
+    <link rel="up" title="System Description" href="system.html" />
+    <link rel="next" title="Precise Timing Protocol Component" href="ptp.html" />
+    <link rel="prev" title="System Architecture" href="architecture.html" /> 
+
+<script>
+function setheight() {
+h1 = document.getElementById('d1').style.height;
+h2 = document.getElementById('d2').style.height;
+
+if (parseInt(h1) > parseInt(h2)) {
+document.getElementById('d2').style.height=h1 + "px";
+}
+else {
+document.getElementById('d1').style.height=h2 + "px";
+}
+
+}
+</script>
+</head>
+
+<body onload="setheight();">
+
+  
+
+    <div class="document" id='d1'>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+<div style="float: right">
+<a href="architecture.html"
+                        title="previous chapter"> &lt&lt </a>
+<a href="ptp.html"
+                        title="next chapter"> &gt&gt </a></p>
+</div>
+
+            
+  <div class="section" id="ethernet-mac-component">
+<h1>Ethernet MAC Component<a class="headerlink" href="#ethernet-mac-component" title="Permalink to this headline">¶</a></h1>
+<p>The MAC component provides ethernet connectivity to the AVB
+solution. To use the component, a physical interface must be attached
+to the XCore ports to provide an 100 Mbps MII interface. The XS1
+device is also capable of implementing a dual 100 Mbps interface and
+a gigabit GMII interface <a class="footnote-reference" href="#id2" id="id1">[1]</a>.</p>
+<table class="docutils footnote" frame="void" id="id2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Dual MII and gigabit GMII code is not included with the 5v1
+software release. Contact XMOS for more information about the
+device capability and software.</td></tr>
+</tbody>
+</table>
+<p>The MAC component supports two features that are necessary to
+implement  AVB standards with precise timing and quality constraints.</p>
+<blockquote>
+<div><ul>
+<li><p class="first"><em>Timestamping</em> - allows receipt and transmission of ethernet frames to be timestamped with respect to a clock (for example a 100 MHz reference clock can provide a resolution of 10 ns).</p>
+</li>
+<li><dl class="first docutils">
+<dt><em>Bandwidth control</em> - allows different channels to have different</dt>
+<dd><p class="first last">priorities and bandwidth restrictions to allow steady flow of
+outgoing media stream packets. The implementation provides flow
+control to satisfy the requirements of an AVB endpoint as
+specified in the IEEE <em>802.1Qav</em> standard.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<p>The single port 100 MBit component consists of five threads (each
+running at 50 MIPS or more) that must be run on the same core. These threads handle both the receiving and transmission of
+ethernet frames. The MAC component can be linked (via channels) to other components/threads in the system. Each link can set a filter to
+control which packets are conveyed to it via that channel.</p>
+<img alt="_images/single-100-mac.png" class="align-center" src="_images/single-100-mac.png" />
+<p>All configuration of the channel is managed by a client C/XC API, which
+configures and registers the filters. Details of the API used to
+configure MAC channels can be found in the <a class="reference external" href="http://github.xcore.com/sc_ethernet/index.html"><span>ethernet MAC component design guide</span></a>. This API is used for direct (layer-2) access to the
+MAC. For AVB applications it is more likely that interaction with the
+ethernet stack will be via the main AVB API (see Section
+<a class="reference internal" href="avb_api.html#sec-avb-api"><span>AVB API</span></a>).</p>
+<div class="section" id="packet-routing">
+<h2>1722 Packet Routing<a class="headerlink" href="#packet-routing" title="Permalink to this headline">¶</a></h2>
+<p>In the AVB stack the MAC also includes a <em>IEEE P1722</em> packet router
+that routes audio packets to the listener components in the system.
+It controls the routing by stream ID. This requires no configuration
+and is controlled implicitly via the AVB API described in Section
+<a class="reference internal" href="avb_api.html#sec-avb-api"><span>AVB API</span></a>.</p>
+</div>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" id='d2'>
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">XMOS AVB Design Guide (5.1.0)</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="hw.html">Hardware development platforms</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="system.html">System Description</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="architecture.html">System Architecture</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">Ethernet MAC Component</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#packet-routing">1722 Packet Routing</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ptp.html">Precise Timing Protocol Component</a></li>
+<li class="toctree-l2"><a class="reference internal" href="audio.html">Audio Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="clocking.html">Media Clocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config.html">Configuration and application threads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resource.html">Resource Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chip.html">Choosing the right chip</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="programming.html">Programming Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bandwidth.html">IEEE 1722 Bandwidth Usage</a></li>
+</ul>
+
+<div id="searchbox" style="display: none;margin-bottom: 10px;">
+  <h3>Search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+
+
+    <div class="footer">
+    </div>
+  </body>
+</html>
+
+
+

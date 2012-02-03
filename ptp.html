@@ -1,0 +1,137 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Precise Timing Protocol Component &mdash; XMOS AVB Design Guide v5.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/xdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '5.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://mathjax.connectmv.com/MathJax.js"></script>
+    <script type="text/javascript" src="_static/xcomment.js"></script>
+    <link rel="top" title="XMOS AVB Design Guide v5.1.0 documentation" href="index.html" />
+    <link rel="up" title="System Description" href="system.html" />
+    <link rel="next" title="Audio Components" href="audio.html" />
+    <link rel="prev" title="Ethernet MAC Component" href="mac.html" /> 
+
+<script>
+function setheight() {
+h1 = document.getElementById('d1').style.height;
+h2 = document.getElementById('d2').style.height;
+
+if (parseInt(h1) > parseInt(h2)) {
+document.getElementById('d2').style.height=h1 + "px";
+}
+else {
+document.getElementById('d1').style.height=h2 + "px";
+}
+
+}
+</script>
+</head>
+
+<body onload="setheight();">
+
+  
+
+    <div class="document" id='d1'>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+<div style="float: right">
+<a href="mac.html"
+                        title="previous chapter"> &lt&lt </a>
+<a href="audio.html"
+                        title="next chapter"> &gt&gt </a></p>
+</div>
+
+            
+  <div class="section" id="precise-timing-protocol-component">
+<span id="index-0"></span><h1>Precise Timing Protocol Component<a class="headerlink" href="#precise-timing-protocol-component" title="Permalink to this headline">¶</a></h1>
+<p>The precise timing protocol component (PTP) provides a system with a
+notion of global time on a network. The component supports the <em>AVB
+802.1as</em> timing protocol. It allows synchronization of the
+presentation and playback rate of media streams across a network.</p>
+<img alt="_images/ptp-crop.png" class="align-center" src="_images/ptp-crop.png" />
+<p>The timing component consists of two threads. It connects to the ethernet MAC component and provides channel ends for clients to query for timing information. The component interprets PTP packets from the MAC and maintains a notion of global time. The maintenance of global time requires no application interaction with the component.</p>
+<p>The PTP component can be configured at runtime to be a <em>PTP grandmaster</em> or a <em>PTP slave</em>. If the component is configured as a grandmaster, it supplies a clock source to the network. If the network has several grandmasters, the potential grandmasters negotiate between themselves to select a single grandmaster. Once a single grandmaster is selected, all units on the network synchronize a global time from this source and the other grandmasters stop providing timing information. Depending on the intermediate network, this synchronization can be to sub-microsecond level resolution.</p>
+<p>Client threads connect to the timing component via channels. The relationship between the local reference counter and global time is maintained across this channel, allowing a client to timestamp with a local timer very accurately and then convert it to global time, giving highly accurate global timestamps.</p>
+<p>Client threads can communicate with the server using the API described
+in Section <a class="reference internal" href="ptp_api.html#sec-ptp-api"><span>PTP Client API</span></a>.</p>
+<blockquote>
+<div><ul class="simple">
+<li>The PTP system in the endpoint is self-configuring, it runs
+automatically and gives each endpoint an accurate notion of a global clock.</li>
+<li>The global clock is <em>not</em> the same as the sample rate clock
+used to time audio (though it can be used to create the sample
+clock). An audio stream may be at a rate that is independent of the
+PTP clock but will contain timestamps that use the global PTP clock
+domain as a reference domain.</li>
+</ul>
+</div></blockquote>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" id='d2'>
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">XMOS AVB Design Guide (5.1.0)</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="hw.html">Hardware development platforms</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="system.html">System Description</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="architecture.html">System Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mac.html">Ethernet MAC Component</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">Precise Timing Protocol Component</a></li>
+<li class="toctree-l2"><a class="reference internal" href="audio.html">Audio Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="clocking.html">Media Clocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config.html">Configuration and application threads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resource.html">Resource Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chip.html">Choosing the right chip</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="programming.html">Programming Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bandwidth.html">IEEE 1722 Bandwidth Usage</a></li>
+</ul>
+
+<div id="searchbox" style="display: none;margin-bottom: 10px;">
+  <h3>Search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+
+
+    <div class="footer">
+    </div>
+  </body>
+</html>
+
+
+

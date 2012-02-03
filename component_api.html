@@ -1,0 +1,359 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Component functions &mdash; XMOS AVB Design Guide v5.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/xdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '5.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://mathjax.connectmv.com/MathJax.js"></script>
+    <script type="text/javascript" src="_static/xcomment.js"></script>
+    <link rel="top" title="XMOS AVB Design Guide v5.1.0 documentation" href="index.html" />
+    <link rel="up" title="API Reference" href="api.html" />
+    <link rel="next" title="AVB API" href="avb_api.html" />
+    <link rel="prev" title="Configuration Defines" href="defines_api.html" /> 
+
+<script>
+function setheight() {
+h1 = document.getElementById('d1').style.height;
+h2 = document.getElementById('d2').style.height;
+
+if (parseInt(h1) > parseInt(h2)) {
+document.getElementById('d2').style.height=h1 + "px";
+}
+else {
+document.getElementById('d1').style.height=h2 + "px";
+}
+
+}
+</script>
+</head>
+
+<body onload="setheight();">
+
+  
+
+    <div class="document" id='d1'>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+<div style="float: right">
+<a href="defines_api.html"
+                        title="previous chapter"> &lt&lt </a>
+<a href="avb_api.html"
+                        title="next chapter"> &gt&gt </a></p>
+</div>
+
+            
+  <div class="section" id="component-functions">
+<span id="sec-component-api"></span><h1>Component functions<a class="headerlink" href="#component-functions" title="Permalink to this headline">¶</a></h1>
+<p>The following functions provide components that can be combined in the
+top-level main. For details on the ethernet and TCP/IP components see
+the <a class="reference external" href="http://github.xcore.com/sc_ethernet/index.html"><span>Ethernet Component Guide</span></a> and the <a class="reference external" href="http://github.xcore.com/sc_xtcp/index.html"><span>XTCP Component Guide</span></a>.</p>
+<div class="section" id="core-components">
+<h2>Core Components<a class="headerlink" href="#core-components" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="ptp_server">
+void <tt class="descname">ptp_server</tt><big>(</big>chanend<em>&nbsp;mac_rx</em>, chanend<em>&nbsp;mac_tx</em>, chanend<em>&nbsp;client[]</em>, int<em>&nbsp;num_clients</em>, enum ptp_server_type<em>&nbsp;server_type</em><big>)</big><a class="headerlink" href="#ptp_server" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function runs the PTP server.</p>
+<p>It takes one thread and runs indefinitely</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>mac_rx</strong> &#8211; chanend connected to the ethernet server (receive)</li>
+<li><strong>mac_tx</strong> &#8211; chanend connected to the ethernet server (transmit)</li>
+<li><strong>client</strong> &#8211; an array of chanends to connect to clients of the ptp server</li>
+<li><strong>num_clients</strong> &#8211; The number of clients attached</li>
+<li><strong>server_type</strong> &#8211; The type of the server (<tt class="docutils literal"><span class="pre">PTP_GRANDMASTER_CAPABLE</span></tt> or <tt class="docutils literal"><span class="pre">PTP_SLAVE_ONLY</span></tt>)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="media_clock_server">
+void <tt class="descname">media_clock_server</tt><big>(</big>chanend<em>&nbsp;media_clock_ctl</em>, chanend<em>&nbsp;ptp_svr</em>, chanend<em>&nbsp;?buf_ctl[]</em>, int<em>&nbsp;buf_ctl_size</em>, chanend<em>&nbsp;?clk_ctl[]</em>, int<em>&nbsp;clk_ctl_size</em><big>)</big><a class="headerlink" href="#media_clock_server" title="Permalink to this definition">¶</a></dt>
+<dd><p>The media clock server.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>media_clock_ctl</strong> &#8211; chanend connected to the main control thread and passed into <a class="reference internal" href="avb_general_api.html#avb_init" title="avb_init"><span>avb_init()</span></a></li>
+<li><strong>ptp_svr</strong> &#8211; chanend connected to the PTP server</li>
+<li><strong>buf_ctl[]</strong> &#8211; array of links to listener components requiring buffer management</li>
+<li><strong>buf_ctl_size</strong> &#8211; size of the buf_ctl array</li>
+<li><strong>clk_ctl[]</strong> &#8211; array of links to components requiring a media clock</li>
+<li><strong>clk_ctl_size</strong> &#8211; size of the clk_ctl array</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="avb_1722_listener">
+void <tt class="descname">avb_1722_listener</tt><big>(</big>chanend<em>&nbsp;ethernet_rx_svr</em>, chanend<em>&nbsp;?buf_ctl</em>, chanend<em>&nbsp;?ptp_ctl</em>, chanend<em>&nbsp;listener_ctl</em>, int<em>&nbsp;num_streams</em><big>)</big><a class="headerlink" href="#avb_1722_listener" title="Permalink to this definition">¶</a></dt>
+<dd><p>An AVB IEEE 1722 audio listener thread.</p>
+<p>This thread implements a listener. It takes IEEE 1722 packets from the ethernet MAC and splits them into output FIFOs. The buffer fill level of these streams is set in conjunction with communication to the media clock server. This thread is dynamically configured using the AVB control API.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ethernet_rx_svr</strong> &#8211; receive link to the ethernet MAC</li>
+<li><strong>ethernet_tx_svr</strong> &#8211; transmit link to the ethernet MAC</li>
+<li><strong>buf_ctl</strong> &#8211; buffer control link to the media clock server</li>
+<li><strong>ptp_ctl</strong> &#8211; PTP server link for retreiving PTP time info</li>
+<li><strong>listener_ctl</strong> &#8211; channel to configure the listener (given to <a class="reference internal" href="avb_general_api.html#avb_init" title="avb_init"><span>avb_init()</span></a>)</li>
+<li><strong>num_streams</strong> &#8211; the number of streams the unit will handle</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="avb_1722_talker">
+void <tt class="descname">avb_1722_talker</tt><big>(</big>chanend<em>&nbsp;ptp_svr</em>, chanend<em>&nbsp;ethernet_tx_svr</em>, chanend<em>&nbsp;talker_ctl</em>, int<em>&nbsp;num_streams</em><big>)</big><a class="headerlink" href="#avb_1722_talker" title="Permalink to this definition">¶</a></dt>
+<dd><p>An AVB IEEE 1722 audio talker thread.</p>
+<p>This thread implements a talker, taking media input FIFOs and combining them into 1722 packets to be sent to the ethernet component. It is dynamically configured using the AVB control API.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ptp_svr</strong> &#8211; link to the PTP timing server</li>
+<li><strong>ethernet_tx_svr</strong> &#8211; transmit link to the ethernet MAC</li>
+<li><strong>talker_ctl</strong> &#8211; channel to configure the talker (given to <a class="reference internal" href="avb_general_api.html#avb_init" title="avb_init"><span>avb_init()</span></a>)</li>
+<li><strong>num_streams</strong> &#8211; the number of streams the unit controls</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="audio-components">
+<h2>Audio Components<a class="headerlink" href="#audio-components" title="Permalink to this headline">¶</a></h2>
+<p>The following types are used by the AVB audio components:</p>
+<dl class="type">
+<dt id="media_output_fifo_t">
+<tt class="descname">media_output_fifo_t</tt><a class="headerlink" href="#media_output_fifo_t" title="Permalink to this definition">¶</a></dt>
+<dd><p>This type provides a handle to a media output FIFO.</p>
+</dd></dl>
+
+<dl class="type">
+<dt id="media_output_fifo_data_t">
+<tt class="descname">media_output_fifo_data_t</tt><a class="headerlink" href="#media_output_fifo_data_t" title="Permalink to this definition">¶</a></dt>
+<dd><p>This type provides the data structure used by a media output FIFO.</p>
+</dd></dl>
+
+<dl class="type">
+<dt id="media_input_fifo_t">
+<tt class="descname">media_input_fifo_t</tt><a class="headerlink" href="#media_input_fifo_t" title="Permalink to this definition">¶</a></dt>
+<dd><p>This type provides a handle to a media input fifo.</p>
+</dd></dl>
+
+<dl class="type">
+<dt id="media_input_fifo_data_t">
+<tt class="descname">media_input_fifo_data_t</tt><a class="headerlink" href="#media_input_fifo_data_t" title="Permalink to this definition">¶</a></dt>
+<dd><p>This type provides the data structure used by a media input fifo.</p>
+</dd></dl>
+
+<p>The following functions implement AVB audio components:</p>
+<dl class="function">
+<dt id="init_media_input_fifos">
+void <tt class="descname">init_media_input_fifos</tt><big>(</big><a class="reference internal" href="#media_input_fifo_t" title="media_input_fifo_t"><span>media_input_fifo_t</span></a><em>&nbsp;ififos[]</em>, <a class="reference internal" href="#media_input_fifo_data_t" title="media_input_fifo_data_t"><span>media_input_fifo_data_t</span></a><em>&nbsp;ififo_data[]</em>, int<em>&nbsp;n</em><big>)</big><a class="headerlink" href="#init_media_input_fifos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize media input fifos.</p>
+<p>This function intializes media input FIFOs and ties the handles to their associated data structures. It should be called before the main component function on a thread to setup the FIFOs.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ififos</strong> &#8211; an array of media input FIFO handles to initialize</li>
+<li><strong>ififo_data</strong> &#8211; an array of associated data structures</li>
+<li><strong>n</strong> &#8211; the number of FIFOs to initialize</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="init_media_output_fifos">
+void <tt class="descname">init_media_output_fifos</tt><big>(</big><a class="reference internal" href="#media_output_fifo_t" title="media_output_fifo_t"><span>media_output_fifo_t</span></a><em>&nbsp;ofifos[]</em>, <a class="reference internal" href="#media_output_fifo_data_t" title="media_output_fifo_data_t"><span>media_output_fifo_data_t</span></a><em>&nbsp;ofifo_data[]</em>, int<em>&nbsp;n</em><big>)</big><a class="headerlink" href="#init_media_output_fifos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize media output FIFOs.</p>
+<p>This function initializes media output FIFOs and ties the handles to their associated data structures. It should be called before the main component function on a thread to setup the FIFOs.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ofifos</strong> &#8211; an array of media output FIFO handles to initialize</li>
+<li><strong>ofifo_data</strong> &#8211; an array of associated data structures</li>
+<li><strong>n</strong> &#8211; the number of FIFOs to initialize</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="i2s_master">
+void <tt class="descname">i2s_master</tt><big>(</big>const clock<em>&nbsp;mclk</em>, clock<em>&nbsp;bclk</em>, out buffered port:32<em>&nbsp;p_bclk</em>, out buffered port:32<em>&nbsp;p_lrclk</em>, out buffered port:32<em>&nbsp;p_dout[]</em>, int<em>&nbsp;num_out</em>, in buffered port:32<em>&nbsp;p_din[]</em>, int<em>&nbsp;num_in</em>, int<em>&nbsp;master_to_word_clock_ratio</em>, streaming chanend<em>&nbsp;?c_listener</em>, <a class="reference internal" href="#media_input_fifo_t" title="media_input_fifo_t"><span>media_input_fifo_t</span></a><em>&nbsp;?input_fifos[]</em>, chanend<em>&nbsp;media_ctl</em>, int<em>&nbsp;clk_ctl_index</em><big>)</big><a class="headerlink" href="#i2s_master" title="Permalink to this definition">¶</a></dt>
+<dd><p>Input and output audio data using I2S format with the XCore acting as master.</p>
+<p>This function implements a thread that can handle several synchronous I2S interfaces. It inputs and outputs 24-bit data packed into 32 bits.</p>
+<p>The function will take input from the I2S interface and put the samples directly into shared memory media input FIFOs. The output samples are received over a channel. Every two word clock periods (i.e. once a sample) a timestamp is sent from this thread over the channel and num_out samples are taken from the channel.</p>
+<p>The master clock is generated externally by the PLL. A clock block clocks the Bit clock port (aka serial clock or sclk), from the master clock, and we write out a clock pattern on this port to generate the correct divided BCLK. Likewise, a clock block puts the BCLK as the clock for the LRCLK port. We also write out data to the LRCLK port to generate a correct LRCLK pattern.</p>
+<p>This function can handle up to 8in and 8out at 48KHz.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>mclk</strong> &#8211; clock block that clocks the system clock of the codec; needs to be configured before the function call</li>
+<li><strong>bclk</strong> &#8211; clock block that clocks the bit clock; configured within the i2s_master function</li>
+<li><strong>p_bclk</strong> &#8211; the port to output the bit clock to</li>
+<li><strong>p_lrclk</strong> &#8211; the port to output the word clock to</li>
+<li><strong>p_dout</strong> &#8211; array of ports to output data to</li>
+<li><strong>num_out</strong> &#8211; number of output ports</li>
+<li><strong>p_din</strong> &#8211; array of ports to input data from</li>
+<li><strong>num_in</strong> &#8211; number of input ports</li>
+<li><strong>master_to_word_clock_ratio</strong> &#8211; the ratio of the master clock to the word clock; must be one of 128, 256 or 512</li>
+<li><strong>c_listener</strong> &#8211; chanend connector to a listener component</li>
+<li><strong>input_fifos</strong> &#8211; a map from the inputs to local talker streams. The channels of the inputs are interleaved, for example, if you have two input ports, the map                                {0,1,0,1} w would map to the two stereo local talker streams 0 and 1.</li>
+<li><strong>media_ctl</strong> &#8211; the media fifo control channel</li>
+<li><strong>clk_ctl_index</strong> &#8211; the index of the clk_ctl channel array that controls the master clock fo the codec</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="media_output_fifo_to_xc_channel">
+void <tt class="descname">media_output_fifo_to_xc_channel</tt><big>(</big>chanend<em>&nbsp;media_ctl</em>, streaming chanend<em>&nbsp;samples_out</em>, int<em>&nbsp;clk_ctl_index</em>, <a class="reference internal" href="#media_output_fifo_t" title="media_output_fifo_t"><span>media_output_fifo_t</span></a><em>&nbsp;ofifos[]</em>, int<em>&nbsp;num_channels</em><big>)</big><a class="headerlink" href="#media_output_fifo_to_xc_channel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Output audio streams from media fifos to an XC channel.</p>
+<p>This function outputs samples from several media output FIFOs over an XC channel over the streaming chanend <tt class="docutils literal"><span class="pre">samples_out</span></tt>.</p>
+<p>The protocol over the channel is that the thread expects a timestamp to be sent to it and then it will output <tt class="docutils literal"><span class="pre">num_channels</span></tt> samples, pulling from the <tt class="docutils literal"><span class="pre">ofifos</span></tt> array. It will then expect another timestamp before the next set of samples.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>media_ctl</strong> &#8211; chanend connected to the main control thread</li>
+<li><strong>samples_out</strong> &#8211; the chanend on which samples are output</li>
+<li><strong>clk_ctl_index</strong> &#8211; the index in the clk_ctl array passed to <a class="reference internal" href="#media_clock_server" title="media_clock_server"><span>media_clock_server()</span></a> that controls the rate of the FIFOs (i.e. the rate at which samples are pulled from the other end of the channel). This should be -1 if the pull rate is not controlled by the media clock server.</li>
+<li><strong>ofifos</strong> &#8211; array of media output FIFOs to pull from</li>
+<li><strong>num_channels</strong> &#8211; the number of channels (or FIFOs)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="media_output_fifo_to_xc_channel_split_lr">
+void <tt class="descname">media_output_fifo_to_xc_channel_split_lr</tt><big>(</big>chanend<em>&nbsp;media_ctl</em>, streaming chanend<em>&nbsp;samples_out</em>, int<em>&nbsp;clk_ctl_index</em>, <a class="reference internal" href="#media_output_fifo_t" title="media_output_fifo_t"><span>media_output_fifo_t</span></a><em>&nbsp;output_fifos[]</em>, int<em>&nbsp;num_channels</em><big>)</big><a class="headerlink" href="#media_output_fifo_to_xc_channel_split_lr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Output audio streams from media FIFOs to an XC channel, splitting left and right pairs.</p>
+<p>This function outputs samples from several media output FIFOs over an XC channel over the streaming chanend <tt class="docutils literal"><span class="pre">samples_out</span></tt>. The media FIFOs are assumed to be grouped in left/right stereo pairs which are then split.</p>
+<p>The protocol over the channel is that the thread expects a timestamp to be sent to it and then it will first output <tt class="docutils literal"><span class="pre">num_channels/2</span></tt> samples, pulling from all the even indexed elements of the <tt class="docutils literal"><span class="pre">ofifos</span></tt> array and then output all the odd elements. It will then expect another timestamp before the next set of samples.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>media_ctl</strong> &#8211; chanend connected to the main control thread</li>
+<li><strong>samples_out</strong> &#8211; the chanend on which samples are output</li>
+<li><strong>clk_ctl_index</strong> &#8211; the index in the clk_ctl array passed to <a class="reference internal" href="#media_clock_server" title="media_clock_server"><span>media_clock_server()</span></a> that controls the rate of the FIFOs (i.e. the rate at which samples are pulled from the other end of the channel). This should be -1 if the pull rate is not controlled by the media clock server.</li>
+<li><strong>output_fifos</strong> &#8211; array of media output fifos to pull from</li>
+<li><strong>num_channels</strong> &#8211; the number of channels (or FIFOs)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" id='d2'>
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">XMOS AVB Design Guide (5.1.0)</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="hw.html">Hardware development platforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="system.html">System Description</a></li>
+<li class="toctree-l1"><a class="reference internal" href="programming.html">Programming Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="defines_api.html">Configuration Defines</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">Component functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#core-components">Core Components</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#audio-components">Audio Components</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="avb_api.html">AVB API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ptp_api.html">PTP Client API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mdns_api.html">MDNS/Bonjour API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bandwidth.html">IEEE 1722 Bandwidth Usage</a></li>
+</ul>
+
+<div id="searchbox" style="display: none;margin-bottom: 10px;">
+  <h3>Search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+
+
+    <div class="footer">
+    </div>
+  </body>
+</html>
+
+
+

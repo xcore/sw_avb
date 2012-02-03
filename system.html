@@ -1,0 +1,170 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>System Description &mdash; XMOS AVB Design Guide v5.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/xdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '5.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://mathjax.connectmv.com/MathJax.js"></script>
+    <script type="text/javascript" src="_static/xcomment.js"></script>
+    <link rel="top" title="XMOS AVB Design Guide v5.1.0 documentation" href="index.html" />
+    <link rel="next" title="System Architecture" href="architecture.html" />
+    <link rel="prev" title="Hardware development platforms" href="hw.html" /> 
+
+<script>
+function setheight() {
+h1 = document.getElementById('d1').style.height;
+h2 = document.getElementById('d2').style.height;
+
+if (parseInt(h1) > parseInt(h2)) {
+document.getElementById('d2').style.height=h1 + "px";
+}
+else {
+document.getElementById('d1').style.height=h2 + "px";
+}
+
+}
+</script>
+</head>
+
+<body onload="setheight();">
+
+  
+
+    <div class="document" id='d1'>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+<div style="float: right">
+<a href="hw.html"
+                        title="previous chapter"> &lt&lt </a>
+<a href="architecture.html"
+                        title="next chapter"> &gt&gt </a></p>
+</div>
+
+            
+  <div class="section" id="system-description">
+<h1>System Description<a class="headerlink" href="#system-description" title="Permalink to this headline">¶</a></h1>
+<p>The following sections describe the system architecture of the XMOS
+AVB software platform.</p>
+<p>This software design guide assumes the reader is familiar with the XC
+language and XMOS XS1 devices.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">System Architecture</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#demo-applications">Demo Applications</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mac.html">Ethernet MAC Component</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mac.html#packet-routing">1722 Packet Routing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ptp.html">Precise Timing Protocol Component</a></li>
+<li class="toctree-l1"><a class="reference internal" href="audio.html">Audio Components</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="audio.html#avb-streams-channels-talkers-and-listeners">AVB Streams, Channels, Talkers and Listeners</a></li>
+<li class="toctree-l2"><a class="reference internal" href="audio.html#internal-routing-media-fifos">Internal Routing, Media FIFOs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="audio.html#talker-units">Talker Units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="audio.html#listener-units">Listener Units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="audio.html#media-fifos-to-xc-channels">Media FIFOs to XC Channels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="audio.html#audio-hardware-interfaces">Audio Hardware Interfaces</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="clocking.html">Media Clocks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="clocking.html#driving-an-external-clock-generator">Driving an external clock generator</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="config.html">Configuration and application threads</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="config.html#the-control-thread">The Control Thread</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="config.html#legacy-mode">Legacy Mode</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="config.html#remote-configuration">Remote Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config.html#tcp-ip-stack">TCP/IP Stack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config.html#zeroconf">Zeroconf</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="resource.html">Resource Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="resource.html#available-chip-resources">Available Chip Resources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resource.html#ethernet-component">Ethernet Component</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resource.html#ptp-component">PTP Component</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resource.html#media-clock-server">Media Clock Server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resource.html#audio-component-s">Audio Component(s)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resource.html#tcp-stack">TCP Stack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resource.html#configuration-control">Configuration/Control</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="chip.html">Choosing the right chip</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="chip.html#xs1-g4-device-100mbit-s">XS1-G4 Device - 100Mbit/s</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chip.html#xs1-l2-device-100mbit-s">XS1-L2 Device - 100Mbit/s</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" id='d2'>
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">XMOS AVB Design Guide (5.1.0)</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="hw.html">Hardware development platforms</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">System Description</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html">System Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mac.html">Ethernet MAC Component</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ptp.html">Precise Timing Protocol Component</a></li>
+<li class="toctree-l2"><a class="reference internal" href="audio.html">Audio Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="clocking.html">Media Clocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config.html">Configuration and application threads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resource.html">Resource Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chip.html">Choosing the right chip</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="programming.html">Programming Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bandwidth.html">IEEE 1722 Bandwidth Usage</a></li>
+</ul>
+
+<div id="searchbox" style="display: none;margin-bottom: 10px;">
+  <h3>Search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+
+
+    <div class="footer">
+    </div>
+  </body>
+</html>
+
+
+

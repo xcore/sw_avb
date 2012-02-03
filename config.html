@@ -1,0 +1,210 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Configuration and application threads &mdash; XMOS AVB Design Guide v5.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/xdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '5.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://mathjax.connectmv.com/MathJax.js"></script>
+    <script type="text/javascript" src="_static/xcomment.js"></script>
+    <link rel="top" title="XMOS AVB Design Guide v5.1.0 documentation" href="index.html" />
+    <link rel="up" title="System Description" href="system.html" />
+    <link rel="next" title="Resource Usage" href="resource.html" />
+    <link rel="prev" title="Media Clocks" href="clocking.html" /> 
+
+<script>
+function setheight() {
+h1 = document.getElementById('d1').style.height;
+h2 = document.getElementById('d2').style.height;
+
+if (parseInt(h1) > parseInt(h2)) {
+document.getElementById('d2').style.height=h1 + "px";
+}
+else {
+document.getElementById('d1').style.height=h2 + "px";
+}
+
+}
+</script>
+</head>
+
+<body onload="setheight();">
+
+  
+
+    <div class="document" id='d1'>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+<div style="float: right">
+<a href="clocking.html"
+                        title="previous chapter"> &lt&lt </a>
+<a href="resource.html"
+                        title="next chapter"> &gt&gt </a></p>
+</div>
+
+            
+  <div class="section" id="configuration-and-application-threads">
+<span id="sec-config"></span><h1>Configuration and application threads<a class="headerlink" href="#configuration-and-application-threads" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="the-control-thread">
+<h2>The Control Thread<a class="headerlink" href="#the-control-thread" title="Permalink to this headline">¶</a></h2>
+<p>As well as the components described in previous sections, an AVB
+endpoint application needs a thread to control and configure the
+system. This control thread varies across application and must
+be implemented by the application designer. To assist in this task a
+unified control API is presented in Section <a class="reference internal" href="avb_api.html#sec-avb-api"><span>AVB API</span></a>. The
+control thread can pass XC channels connected to other components into
+the <a class="reference internal" href="avb_general_api.html#avb_init" title="avb_init"><span>avb_init()</span></a> function and subsequently use the control API calls to
+configure the other components.</p>
+<p>For an example of how an application can use this API, see the example
+code walkthrough presented in Section <a class="reference internal" href="app_tutorial.html#sec-app-tutorial"><span>An XMOS AVB application (tutorial)</span></a>.</p>
+<div class="section" id="legacy-mode">
+<h3>Legacy Mode<a class="headerlink" href="#legacy-mode" title="Permalink to this headline">¶</a></h3>
+<p>AVB protocols require an AVB compatible switch to function correctly.
+For testing/demonstration purposes the software platform provides
+a &#8220;legacy&#8221; mode
+which alters the protocols to be non standard but function through
+non-AVB switches. In this mode the destination addresses of the
+protocols change to become legacy traffic and some of the PTP protocol
+behavior changes. In this case:</p>
+<blockquote>
+<div><ul class="simple">
+<li>The protocols are non-longer AVB standard so do not work with
+any other AVB hardware. They will work with other endpoints
+set to this mode.</li>
+<li>There is no longer any quality of service guarantee so audio
+may be disrupted. Furthermore the traffic from the endpoint may
+disrupt other non-AVB ethernet devices on the network.</li>
+</ul>
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="remote-configuration">
+<h2>Remote Configuration<a class="headerlink" href="#remote-configuration" title="Permalink to this headline">¶</a></h2>
+<p>The AVB standard protocols control the time synchronization, streaming
+and routing of audio data. However, it is likely that a higher level
+configuration protocol will be required to configure an AVB endpoint.</p>
+<p>Such a protocol needs two parts: discovery and control. The
+discovery part must determine higher level information about other
+endpoints on the network. For example:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Discover which other Talkers/Listeners are on the network.</li>
+<li>Discover which streams are available and meta-information about
+them (sample rate, description, global clock synchronization
+participation <em>etc.</em>).</li>
+</ul>
+</div></blockquote>
+<p>The XMOS TCP/IP implementation canbe used with the AVB solution to
+provide services such as MDNS.</p>
+<p>The control part controls the device. For example it controls:</p>
+<blockquote>
+<div><ul class="simple">
+<li>The streams the Talker outputs/Listener inputs.</li>
+<li>Audio input/output (including sample rate, gain, dsp).</li>
+<li>Other non-audio aspects.</li>
+</ul>
+</div></blockquote>
+<p>A control stack will link into the control thread to provide a bridge
+to the local control API. To aid implementation of this, a the XMOS TCP/IP
+stack can be used. A demonstration control API is provided for
+the XR-AVB-LC-BRD, for more details see the <a class="reference external" href="http://www.atterotech.com/cobranet-oem-products/xmos-avb-module/"><span>AtteroTech/XMOS XR-AVB-LC-BRD Quickstart Guide</span></a>.</p>
+</div>
+<div class="section" id="tcp-ip-stack">
+<h2>TCP/IP Stack<a class="headerlink" href="#tcp-ip-stack" title="Permalink to this headline">¶</a></h2>
+<p>The AVB software solution includes a port of the uIP protocol stack
+which is a small memory footprint stack that can be used for UDP/TCP
+communication to aid implementation of an upper layer configuration
+protocol. For details on this stack see the <a class="reference external" href="http://github.xcore.com/sc_xtcp/index.html"><span>XTCP Component Guide</span></a>.</p>
+</div>
+<div class="section" id="zeroconf">
+<h2>Zeroconf<a class="headerlink" href="#zeroconf" title="Permalink to this headline">¶</a></h2>
+<p>The Zeroconf stack (sometimes known as &#8220;Bonjour&#8221;) provides:</p>
+<blockquote>
+<div><ul class="simple">
+<li><strong>Multicast DNS</strong> - Allows endpoints to have a local name
+related to their IP address.</li>
+<li><strong>DNS Service Discovery</strong> - Allows endpoints to advertize a
+particular service (such as a configuration/control service over
+TCP/IP) for other entities on the network to discover.</li>
+</ul>
+</div></blockquote>
+<p>The stack is configured via the API described in Section <a class="reference internal" href="mdns_api.html#sec-mdns-api"><span>MDNS/Bonjour API</span></a>.</p>
+</div>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" id='d2'>
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">XMOS AVB Design Guide (5.1.0)</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="hw.html">Hardware development platforms</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="system.html">System Description</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="architecture.html">System Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mac.html">Ethernet MAC Component</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ptp.html">Precise Timing Protocol Component</a></li>
+<li class="toctree-l2"><a class="reference internal" href="audio.html">Audio Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="clocking.html">Media Clocks</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">Configuration and application threads</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#the-control-thread">The Control Thread</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#legacy-mode">Legacy Mode</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#remote-configuration">Remote Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tcp-ip-stack">TCP/IP Stack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#zeroconf">Zeroconf</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="resource.html">Resource Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chip.html">Choosing the right chip</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="programming.html">Programming Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bandwidth.html">IEEE 1722 Bandwidth Usage</a></li>
+</ul>
+
+<div id="searchbox" style="display: none;margin-bottom: 10px;">
+  <h3>Search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+
+
+    <div class="footer">
+    </div>
+  </body>
+</html>
+
+
+

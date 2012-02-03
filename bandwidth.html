@@ -1,0 +1,211 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>IEEE 1722 Bandwidth Usage &mdash; XMOS AVB Design Guide v5.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/xdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '5.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://mathjax.connectmv.com/MathJax.js"></script>
+    <script type="text/javascript" src="_static/xcomment.js"></script>
+    <link rel="top" title="XMOS AVB Design Guide v5.1.0 documentation" href="index.html" />
+    <link rel="prev" title="MDNS/Bonjour API" href="mdns_api.html" /> 
+
+<script>
+function setheight() {
+h1 = document.getElementById('d1').style.height;
+h2 = document.getElementById('d2').style.height;
+
+if (parseInt(h1) > parseInt(h2)) {
+document.getElementById('d2').style.height=h1 + "px";
+}
+else {
+document.getElementById('d1').style.height=h2 + "px";
+}
+
+}
+</script>
+</head>
+
+<body onload="setheight();">
+
+  
+
+    <div class="document" id='d1'>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+<div style="float: right">
+<a href="mdns_api.html"
+                        title="previous chapter"> &lt&lt </a>
+</div>
+
+            
+  <div class="section" id="ieee-1722-bandwidth-usage">
+<h1>IEEE 1722 Bandwidth Usage<a class="headerlink" href="#ieee-1722-bandwidth-usage" title="Permalink to this headline">¶</a></h1>
+<p>The AVB standard requires audio data to be split into packets to be
+transmitted over ethernet along with meta-information specified by the
+IEEE 1722 transport protocol. This meta-information incurs an
+overhead on the bandwidth of each stream of data.</p>
+<p>The protocol overhead is detailed in the following table:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Protocol</th>
+<th class="head">Overhead (bytes)</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>Interframe gap</td>
+<td>20</td>
+</tr>
+<tr><td>Ethernet header</td>
+<td>18</td>
+</tr>
+<tr><td>IEEE 1722 header</td>
+<td>24</td>
+</tr>
+<tr><td>61883-6 header</td>
+<td>8</td>
+</tr>
+<tr><td>CRC</td>
+<td>4</td>
+</tr>
+</tbody>
+</table>
+<p>Each stream of audio data can contain several multiplexed channels of
+audio. The higher the number of channels per stream, the more
+efficient the audio transport is in terms of bandwidth. Note that the
+IEC 61883-6 standard recommends transmitting single channel
+streams as stereo with the right channel blank.</p>
+<p>After the header in each packet, audio data is stored in AM824 format
+which pads 24-bit data to 4 byte quadlets. The frame rate is 8kHz so
+a 48kHz stream has 6 samples per packet, a 96kHz has 12
+samples per packet and so on.</p>
+<p>The following table shows the bandwidth for streams at
+different sample rates with different number of channels per
+stream.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Sample Rate (kHz)</th>
+<th class="head">Channels/Stream</th>
+<th class="head">Mbps</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>48</td>
+<td>1</td>
+<td>7.81</td>
+</tr>
+<tr><td>48</td>
+<td>2</td>
+<td>7.81</td>
+</tr>
+<tr><td>48</td>
+<td>4</td>
+<td>10.88</td>
+</tr>
+<tr><td>48</td>
+<td>8</td>
+<td>17.02</td>
+</tr>
+<tr><td>48</td>
+<td>16</td>
+<td>29.31</td>
+</tr>
+<tr><td>48</td>
+<td>32</td>
+<td>53.89</td>
+</tr>
+<tr><td>96</td>
+<td>1</td>
+<td>10.88</td>
+</tr>
+<tr><td>96</td>
+<td>2</td>
+<td>10.88</td>
+</tr>
+<tr><td>96</td>
+<td>4</td>
+<td>17.02</td>
+</tr>
+<tr><td>96</td>
+<td>8</td>
+<td>29.31</td>
+</tr>
+<tr><td>96</td>
+<td>16</td>
+<td>53.89</td>
+</tr>
+</tbody>
+</table>
+<p>Note that the higher the number of channels per stream, the better the
+bandwidth usage (e.g. 4 x 8 channels streams uses less
+bandwidth than 16 x 2 channel streams).
+The IEEE 1722 standard also specifies that only
+75% of available bandwidth can be used for AVB traffic.</p>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" id='d2'>
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">XMOS AVB Design Guide (5.1.0)</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="hw.html">Hardware development platforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="system.html">System Description</a></li>
+<li class="toctree-l1"><a class="reference internal" href="programming.html">Programming Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">IEEE 1722 Bandwidth Usage</a></li>
+</ul>
+
+<div id="searchbox" style="display: none;margin-bottom: 10px;">
+  <h3>Search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+
+
+    <div class="footer">
+    </div>
+  </body>
+</html>
+
+
+

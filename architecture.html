@@ -1,0 +1,166 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>System Architecture &mdash; XMOS AVB Design Guide v5.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/xdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '5.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://mathjax.connectmv.com/MathJax.js"></script>
+    <script type="text/javascript" src="_static/xcomment.js"></script>
+    <link rel="top" title="XMOS AVB Design Guide v5.1.0 documentation" href="index.html" />
+    <link rel="up" title="System Description" href="system.html" />
+    <link rel="next" title="Ethernet MAC Component" href="mac.html" />
+    <link rel="prev" title="System Description" href="system.html" /> 
+
+<script>
+function setheight() {
+h1 = document.getElementById('d1').style.height;
+h2 = document.getElementById('d2').style.height;
+
+if (parseInt(h1) > parseInt(h2)) {
+document.getElementById('d2').style.height=h1 + "px";
+}
+else {
+document.getElementById('d1').style.height=h2 + "px";
+}
+
+}
+</script>
+</head>
+
+<body onload="setheight();">
+
+  
+
+    <div class="document" id='d1'>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+<div style="float: right">
+<a href="system.html"
+                        title="previous chapter"> &lt&lt </a>
+<a href="mac.html"
+                        title="next chapter"> &gt&gt </a></p>
+</div>
+
+            
+  <div class="section" id="system-architecture">
+<h1>System Architecture<a class="headerlink" href="#system-architecture" title="Permalink to this headline">¶</a></h1>
+<p>The following diagram shows the overall structure of an XMOS AVB endpoint.</p>
+<div class="figure align-center">
+<img alt="_images/avbsystem.png" src="_images/avbsystem.png" />
+<p class="caption">AVB System Software Architecture</p>
+</div>
+<p>An endpoint consists of five main interacting components:</p>
+<blockquote>
+<div><ul class="simple">
+<li>The ethernet MAC</li>
+<li>The precise timing engine (PTP)</li>
+<li>Audio streaming components</li>
+<li>The media clock server</li>
+<li>Configuration and other application components</li>
+</ul>
+</div></blockquote>
+<div class="section" id="demo-applications">
+<h2>Demo Applications<a class="headerlink" href="#demo-applications" title="Permalink to this headline">¶</a></h2>
+<p>The software platform comes with four demo applications:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Directory</th>
+<th class="head">Platform</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>app_xr_avb_lc_demo</td>
+<td>XR-AVB-LC-BRD reference design kit
+(including a demo control protocol implementation that can be
+controlled by a Windows configuration application)</td>
+</tr>
+<tr><td>app_xdk_avb_demo</td>
+<td>XDK development kit</td>
+</tr>
+<tr><td>app_xdk_xai_avb_demo</td>
+<td>XDK development kit with XAI audio
+interface board</td>
+</tr>
+<tr><td>app_xc2_avb_demo</td>
+<td>XC-2 development kit</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" id='d2'>
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">XMOS AVB Design Guide (5.1.0)</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="hw.html">Hardware development platforms</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="system.html">System Description</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="">System Architecture</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#demo-applications">Demo Applications</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mac.html">Ethernet MAC Component</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ptp.html">Precise Timing Protocol Component</a></li>
+<li class="toctree-l2"><a class="reference internal" href="audio.html">Audio Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="clocking.html">Media Clocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config.html">Configuration and application threads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resource.html">Resource Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chip.html">Choosing the right chip</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="programming.html">Programming Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bandwidth.html">IEEE 1722 Bandwidth Usage</a></li>
+</ul>
+
+<div id="searchbox" style="display: none;margin-bottom: 10px;">
+  <h3>Search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+
+
+    <div class="footer">
+    </div>
+  </body>
+</html>
+
+
+

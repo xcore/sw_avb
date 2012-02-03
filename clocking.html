@@ -1,0 +1,165 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Media Clocks &mdash; XMOS AVB Design Guide v5.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/xdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '5.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://mathjax.connectmv.com/MathJax.js"></script>
+    <script type="text/javascript" src="_static/xcomment.js"></script>
+    <link rel="top" title="XMOS AVB Design Guide v5.1.0 documentation" href="index.html" />
+    <link rel="up" title="System Description" href="system.html" />
+    <link rel="next" title="Configuration and application threads" href="config.html" />
+    <link rel="prev" title="Audio Components" href="audio.html" /> 
+
+<script>
+function setheight() {
+h1 = document.getElementById('d1').style.height;
+h2 = document.getElementById('d2').style.height;
+
+if (parseInt(h1) > parseInt(h2)) {
+document.getElementById('d2').style.height=h1 + "px";
+}
+else {
+document.getElementById('d1').style.height=h2 + "px";
+}
+
+}
+</script>
+</head>
+
+<body onload="setheight();">
+
+  
+
+    <div class="document" id='d1'>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+<div style="float: right">
+<a href="audio.html"
+                        title="previous chapter"> &lt&lt </a>
+<a href="config.html"
+                        title="next chapter"> &gt&gt </a></p>
+</div>
+
+            
+  <div class="section" id="media-clocks">
+<h1>Media Clocks<a class="headerlink" href="#media-clocks" title="Permalink to this headline">¶</a></h1>
+<p>A media clock controls the rate at which information is passed to an
+external media playing device. For example, an audio sample clock that
+governs the rate at which samples should be passed to an audio CODEC.
+An XMOS AVB endpoint can keep track of several media clocks.</p>
+<p>A media clock can be synchronized to one of three sources:</p>
+<blockquote>
+<div><ul class="simple">
+<li>An incoming clock signal on a port.</li>
+<li>The rate of the incoming samples (provided by the <em>IEEE P1722</em>
+timestamps) on an incoming <em>IEEE P1722</em> audio stream.</li>
+<li>The global PTP clock.</li>
+</ul>
+</div></blockquote>
+<p>A hardware interface can be tied to a particular media
+clock, allowing the media output from the XMOS device to be
+synchronized with other devices on the network.</p>
+<p>All media clocks are maintained by the media clock server
+component. This component takes one thread of processing and maintains
+the current state of all the media clocks in the system. It then
+periodically updates other components with clock change information to
+keep the system synchronized. The set of media clocks is determined by
+an array passed to the server at startup.</p>
+<p>The media clock server component also receives information from the
+audio listener component to track timing information of incoming
+<em>IEEE P1722</em> streams. It then sends control information back to
+ensure the listening component honors the presentation time of the
+incoming stream.</p>
+<div class="section" id="driving-an-external-clock-generator">
+<h2>Driving an external clock generator<a class="headerlink" href="#driving-an-external-clock-generator" title="Permalink to this headline">¶</a></h2>
+<p>A high quality, low jitter master clock, which is required to drive an audio CODEC, must be synchronized with an AVB media clock.
+The XS1 chip cannot provide this clock directly but can provide a
+lower frequency source for a frequency synthesizer chip or external
+PLL chip.
+The frequency synthesizer chip must be able to generate a high
+frequency clock based on a lower frequency signal (e.g a chip such as
+the Cirrus Logic CS2300 or similar). The
+recommended configuration is as in the block diagram below:</p>
+<img alt="_images/ratectl.png" class="align-center" src="_images/ratectl.png" />
+<p>The XS1 device provides control to the frequency synthesizer (which is
+often a divided down clock to drive the higher required rate) and the
+frequency synthesizer provides the master clock to the CODEC. The
+sample bit clocks and word clocks are then provided to the CODEC by
+the XS1 device.</p>
+<p>To drive an external clock generator requires one thread connected to
+the media clock server. See src/audio/media_clocks/external for details.</p>
+</div>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" id='d2'>
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">XMOS AVB Design Guide (5.1.0)</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="hw.html">Hardware development platforms</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="system.html">System Description</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="architecture.html">System Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mac.html">Ethernet MAC Component</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ptp.html">Precise Timing Protocol Component</a></li>
+<li class="toctree-l2"><a class="reference internal" href="audio.html">Audio Components</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">Media Clocks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#driving-an-external-clock-generator">Driving an external clock generator</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="config.html">Configuration and application threads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resource.html">Resource Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chip.html">Choosing the right chip</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="programming.html">Programming Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bandwidth.html">IEEE 1722 Bandwidth Usage</a></li>
+</ul>
+
+<div id="searchbox" style="display: none;margin-bottom: 10px;">
+  <h3>Search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+
+
+    <div class="footer">
+    </div>
+  </body>
+</html>
+
+
+

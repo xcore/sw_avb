@@ -1,0 +1,451 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>AVB Sink Control &mdash; XMOS AVB Design Guide v5.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/xdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '5.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://mathjax.connectmv.com/MathJax.js"></script>
+    <script type="text/javascript" src="_static/xcomment.js"></script>
+    <link rel="top" title="XMOS AVB Design Guide v5.1.0 documentation" href="index.html" />
+    <link rel="up" title="AVB API" href="avb_api.html" />
+    <link rel="next" title="PTP Client API" href="ptp_api.html" />
+    <link rel="prev" title="AVB Source Control" href="avb_source_api.html" /> 
+
+<script>
+function setheight() {
+h1 = document.getElementById('d1').style.height;
+h2 = document.getElementById('d2').style.height;
+
+if (parseInt(h1) > parseInt(h2)) {
+document.getElementById('d2').style.height=h1 + "px";
+}
+else {
+document.getElementById('d1').style.height=h2 + "px";
+}
+
+}
+</script>
+</head>
+
+<body onload="setheight();">
+
+  
+
+    <div class="document" id='d1'>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+<div style="float: right">
+<a href="avb_source_api.html"
+                        title="previous chapter"> &lt&lt </a>
+<a href="ptp_api.html"
+                        title="next chapter"> &gt&gt </a></p>
+</div>
+
+            
+  <div class="section" id="avb-sink-control">
+<h1>AVB Sink Control<a class="headerlink" href="#avb-sink-control" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="get_avb_sink_channels">
+void <tt class="descname">get_avb_sink_channels</tt><big>(</big>unsigned<em>&nbsp;sink_num</em>, unsigned<em>&nbsp;&amp;n</em><big>)</big><a class="headerlink" href="#get_avb_sink_channels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the number of channels of an AVB sink.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sink_num</strong> &#8211; the number of the sink</li>
+<li><strong>n</strong> &#8211; the number of channels</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="set_avb_sink_channels">
+void <tt class="descname">set_avb_sink_channels</tt><big>(</big>unsigned<em>&nbsp;sink_num</em>, unsigned<em>&nbsp;n</em><big>)</big><a class="headerlink" href="#set_avb_sink_channels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the number of channels of an AVB sink.</p>
+<p>Sets the number of channels of an AVB sink.</p>
+<p>This setting will not take effect until the next time the sink state moves from disabled to potential.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sink_num</strong> &#8211; the number of the sink</li>
+<li><strong>n</strong> &#8211; the number of channels</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="get_avb_sink_map">
+void <tt class="descname">get_avb_sink_map</tt><big>(</big>unsigned<em>&nbsp;sink_num</em>, unsigned<em>&nbsp;map[]</em>, unsigned<em>&nbsp;&amp;len</em><big>)</big><a class="headerlink" href="#get_avb_sink_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the map of an AVB sink.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sink_num</strong> &#8211; the number of the sink</li>
+<li><strong>map</strong> &#8211; array containing the media output FIFOs that the stream will be split into</li>
+<li><strong>len</strong> &#8211; the length of the map; should equal to the number of channels in the stream</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="set_avb_sink_map">
+void <tt class="descname">set_avb_sink_map</tt><big>(</big>unsigned<em>&nbsp;sink_num</em>, unsigned<em>&nbsp;map[]</em>, unsigned<em>&nbsp;len</em><big>)</big><a class="headerlink" href="#set_avb_sink_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the map of an AVB sink.</p>
+<p>Sets the map i.e. the mapping from the 1722 stream to output FIFOs.</p>
+<p>This setting will not take effect until the next time the sink state moves from disabled to potential.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sink_num</strong> &#8211; the number of the sink</li>
+<li><strong>map</strong> &#8211; array containing the media output FIFOs that the stream will be split into</li>
+<li><strong>len</strong> &#8211; the length of the map; should equal to the number of channels in the stream</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="get_avb_sink_sync">
+void <tt class="descname">get_avb_sink_sync</tt><big>(</big>unsigned<em>&nbsp;sink_num</em>, unsigned<em>&nbsp;&amp;sync</em><big>)</big><a class="headerlink" href="#get_avb_sink_sync" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the media clock sync of an AVB sink.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sink_num</strong> &#8211; the number of the sink</li>
+<li><strong>sync</strong> &#8211; the media clock number of the sink</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="set_avb_sink_sync">
+void <tt class="descname">set_avb_sink_sync</tt><big>(</big>unsigned<em>&nbsp;sink_num</em>, unsigned<em>&nbsp;sync</em><big>)</big><a class="headerlink" href="#set_avb_sink_sync" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the media clock sync of an AVB sink.</p>
+<p>Sets which media clock is used to synchronize the incoming stream.</p>
+<p>This setting will not take effect until the next time the sink state moves from disabled to potential.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sink_num</strong> &#8211; the number of the sink</li>
+<li><strong>sync</strong> &#8211; the media clock number of the sink</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="get_avb_sink_name">
+void <tt class="descname">get_avb_sink_name</tt><big>(</big>unsigned<em>&nbsp;sink_num</em>, char<em>&nbsp;name[]</em><big>)</big><a class="headerlink" href="#get_avb_sink_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the name of an AVB sink.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sink_num</strong> &#8211; the number of the sink</li>
+<li><strong>name</strong> &#8211; the name string</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="set_avb_sink_name">
+void <tt class="descname">set_avb_sink_name</tt><big>(</big>unsigned<em>&nbsp;sink_num</em>, char<em>&nbsp;name[]</em><big>)</big><a class="headerlink" href="#set_avb_sink_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the name of an AVB sink.</p>
+<p>Sets the name of the sink (to be reported by higher level protocols).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sink_num</strong> &#8211; the number of the sink</li>
+<li><strong>name</strong> &#8211; the name string</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="get_avb_sink_id">
+void <tt class="descname">get_avb_sink_id</tt><big>(</big>unsigned<em>&nbsp;sink_num</em>, unsigned<em>&nbsp;streamId[]</em><big>)</big><a class="headerlink" href="#get_avb_sink_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the stream id that an AVB sink listens to.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sink_num</strong> &#8211; the number of the sink</li>
+<li><strong>streamId</strong> &#8211; int array containing the 64-bit of the stream</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="set_avb_sink_id">
+void <tt class="descname">set_avb_sink_id</tt><big>(</big>unsigned<em>&nbsp;sink_num</em>, unsigned<em>&nbsp;streamId[]</em><big>)</big><a class="headerlink" href="#set_avb_sink_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the stream id that an AVB sink listens to.</p>
+<p>Sets the stream id that an AVB sink listens to.</p>
+<p>This setting will not take effect until the next time the sink state moves from disabled to potential.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sink_num</strong> &#8211; the number of the sink</li>
+<li><strong>streamId</strong> &#8211; int array containing the 64-bit of the stream</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="get_avb_sink_addr">
+void <tt class="descname">get_avb_sink_addr</tt><big>(</big>unsigned<em>&nbsp;sink_num</em>, char<em>&nbsp;addr[]</em>, unsigned<em>&nbsp;&amp;len</em><big>)</big><a class="headerlink" href="#get_avb_sink_addr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the incoming destination mac address of an avb sink.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sink_num</strong> &#8211; The local sink number</li>
+<li><strong>addr</strong> &#8211; The mac address as an array of 6 bytes.</li>
+<li><strong>len</strong> &#8211; The length of the address, should always be equal to 6.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="set_avb_sink_addr">
+void <tt class="descname">set_avb_sink_addr</tt><big>(</big>unsigned<em>&nbsp;sink_num</em>, char<em>&nbsp;addr[]</em>, unsigned<em>&nbsp;len</em><big>)</big><a class="headerlink" href="#set_avb_sink_addr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the incoming destination mac address of an avb sink.</p>
+<p>Set the incoming destination mac address of a sink. This needs to be set if the address is a multicast address so the endpoint can register for that multicast group with the switch.</p>
+<p>This setting will not take effect until the next time the sink state moves from disabled to potential.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sink_num</strong> &#8211; The local sink number</li>
+<li><strong>addr</strong> &#8211; The mac address as an array of 6 bytes.</li>
+<li><strong>len</strong> &#8211; The length of the address, should always be equal to 6.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="get_avb_sink_vlan">
+void <tt class="descname">get_avb_sink_vlan</tt><big>(</big>unsigned<em>&nbsp;sink_num</em>, unsigned<em>&nbsp;&amp;vlan</em><big>)</big><a class="headerlink" href="#get_avb_sink_vlan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the virtual lan id of an AVB sink.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sink_num</strong> &#8211; the number of the sink</li>
+<li><strong>vlan</strong> &#8211; the vlan id of the sink</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="set_avb_sink_vlan">
+void <tt class="descname">set_avb_sink_vlan</tt><big>(</big>unsigned<em>&nbsp;sink_num</em>, unsigned<em>&nbsp;vlan</em><big>)</big><a class="headerlink" href="#set_avb_sink_vlan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the virtual lan id of an AVB sink.</p>
+<p>Sets the vlan id of the incoming stream.</p>
+<p>This setting will not take effect until the next time the sink state moves from disabled to potential.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sink_num</strong> &#8211; the number of the sink</li>
+<li><strong>vlan</strong> &#8211; the vlan id of the sink</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="type">
+<dt id="avb_sink_state_t">
+<tt class="descname">avb_sink_state_t</tt><a class="headerlink" href="#avb_sink_state_t" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>Enum Values:</strong></p>
+<blockquote>
+<div><dl class="member">
+<dt id="avb_sink_state_t.AVB_SINK_STATE_DISABLED">
+<tt class="descname">AVB_SINK_STATE_DISABLED</tt><a class="headerlink" href="#avb_sink_state_t.AVB_SINK_STATE_DISABLED" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="member">
+<dt id="avb_sink_state_t.AVB_SINK_STATE_POTENTIAL">
+<tt class="descname">AVB_SINK_STATE_POTENTIAL</tt><a class="headerlink" href="#avb_sink_state_t.AVB_SINK_STATE_POTENTIAL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="member">
+<dt id="avb_sink_state_t.AVB_SINK_STATE_ENABLED">
+<tt class="descname">AVB_SINK_STATE_ENABLED</tt><a class="headerlink" href="#avb_sink_state_t.AVB_SINK_STATE_ENABLED" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="get_avb_sink_state">
+void <tt class="descname">get_avb_sink_state</tt><big>(</big>unsigned<em>&nbsp;sink_num</em>, <a class="reference internal" href="#avb_sink_state_t" title="avb_sink_state_t"><span>avb_sink_state_t</span></a><em>&nbsp;state</em><big>)</big><a class="headerlink" href="#get_avb_sink_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the state of an AVB sink.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sink_num</strong> &#8211; the number of the sink</li>
+<li><strong>state</strong> &#8211; the state of the sink</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="set_avb_sink_state">
+void <tt class="descname">set_avb_sink_state</tt><big>(</big>unsigned<em>&nbsp;sink_num</em>, <a class="reference internal" href="#avb_sink_state_t" title="avb_sink_state_t"><span>avb_sink_state_t</span></a><em>&nbsp;state</em><big>)</big><a class="headerlink" href="#set_avb_sink_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the state of an AVB sink.</p>
+<p>Sets the current state of an AVB sink. You cannot set the state to <tt class="docutils literal"><span class="pre">ENABLED</span></tt>. Changing the state to <tt class="docutils literal"><span class="pre">POTENTIAL</span></tt> turns the stream on and it will automatically change to <tt class="docutils literal"><span class="pre">ENABLED</span></tt> when connected to a talker and receiving samples.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sink_num</strong> &#8211; the number of the sink</li>
+<li><strong>state</strong> &#8211; the state of the sink</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" id='d2'>
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">XMOS AVB Design Guide (5.1.0)</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="hw.html">Hardware development platforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="system.html">System Description</a></li>
+<li class="toctree-l1"><a class="reference internal" href="programming.html">Programming Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="defines_api.html">Configuration Defines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="component_api.html">Component functions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="avb_api.html">AVB API</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="avb_general_api.html">General Control Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="avb_maap_api.html">Multicast Address Allocation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="avb_srp_api.html">Stream Reservation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="avb_device_api.html">Device Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="avb_media_clock_api.html">Media Clock Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="avb_source_api.html">AVB Source Control</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="">AVB Sink Control</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ptp_api.html">PTP Client API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mdns_api.html">MDNS/Bonjour API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bandwidth.html">IEEE 1722 Bandwidth Usage</a></li>
+</ul>
+
+<div id="searchbox" style="display: none;margin-bottom: 10px;">
+  <h3>Search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+
+
+    <div class="footer">
+    </div>
+  </body>
+</html>
+
+
+

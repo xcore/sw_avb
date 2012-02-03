@@ -1,0 +1,179 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>XMOS AVB Specification &mdash; XMOS AVB Design Guide v5.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/xdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '5.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://mathjax.connectmv.com/MathJax.js"></script>
+    <script type="text/javascript" src="_static/xcomment.js"></script>
+    <link rel="top" title="XMOS AVB Design Guide v5.1.0 documentation" href="index.html" /> 
+
+<script>
+function setheight() {
+h1 = document.getElementById('d1').style.height;
+h2 = document.getElementById('d2').style.height;
+
+if (parseInt(h1) > parseInt(h2)) {
+document.getElementById('d2').style.height=h1 + "px";
+}
+else {
+document.getElementById('d1').style.height=h2 + "px";
+}
+
+}
+</script>
+</head>
+
+<body onload="setheight();">
+
+  
+
+    <div class="document" id='d1'>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+<div style="float: right">
+</div>
+
+            
+  <div class="section" id="xmos-avb-specification">
+<h1>XMOS AVB Specification<a class="headerlink" href="#xmos-avb-specification" title="Permalink to this headline">¶</a></h1>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<tbody valign="top">
+<tr><td colspan="2"><strong>Functionality</strong></td>
+</tr>
+<tr><td colspan="2">Provides hardware interfaces, audio transport,
+precise timing protocol clock synchronization and media clock
+recovery to streamed audio over ethernet.</td>
+</tr>
+<tr><td colspan="2"><strong>Supported Standards</strong></td>
+</tr>
+<tr><td><div class="first last line-block">
+<div class="line">Ethernet</div>
+<div class="line">AVB QoS</div>
+<div class="line">Precise Timing Protocol</div>
+<div class="line">AVB Audio Over Ethernet</div>
+<div class="line">Audio Streaming</div>
+<div class="line">Control Protocol</div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">IEEE 802.3 (via MII)</div>
+<div class="line">IEEE 802.1Qav, 802.1Qat</div>
+<div class="line">IEEE 802.1as</div>
+<div class="line">IEEE P1722</div>
+<div class="line">IEC 61883-6</div>
+<div class="line">IEEE P1722.1</div>
+</div>
+</td>
+</tr>
+<tr><td colspan="2"><strong>Supported Devices</strong></td>
+</tr>
+<tr><td>XMOS Devices</td>
+<td><div class="first last line-block">
+<div class="line">XS1-G4</div>
+<div class="line">XS1-L2</div>
+</div>
+</td>
+</tr>
+<tr><td colspan="2"><strong>Requirements</strong></td>
+</tr>
+<tr><td>Development Tools</td>
+<td>XMOS Desktop Tools v11.2 or
+later</td>
+</tr>
+<tr><td>Ethernet</td>
+<td><div class="first last line-block">
+<div class="line">1 x MII compatible 100Mbit PHY</div>
+</div>
+</td>
+</tr>
+<tr><td>Audio</td>
+<td><div class="first last line-block">
+<div class="line">Audio input/output device
+(e.g. ADC/DAC audio CODEC)</div>
+<div class="line">PLL/Frequency synthesizer
+chip to generate CODEC system
+clock</div>
+</div>
+</td>
+</tr>
+<tr><td>Boot/Storage</td>
+<td>Compatible SPI Flash Device</td>
+</tr>
+<tr><td colspan="2"><strong>Licensing and Support</strong></td>
+</tr>
+<tr><td colspan="2"><div class="first last line-block">
+<div class="line">Reference code provided without charge under license from XMOS.</div>
+<div class="line">Support via <a class="reference external" href="http://www.xmos.com/secure/tickets"><span>http://www.xmos.com/secure/tickets</span></a>.</div>
+<div class="line">Reference code is maintained by XMOS Limited.</div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" id='d2'>
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">XMOS AVB Design Guide (5.1.0)</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="hw.html">Hardware development platforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="system.html">System Description</a></li>
+<li class="toctree-l1"><a class="reference internal" href="programming.html">Programming Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bandwidth.html">IEEE 1722 Bandwidth Usage</a></li>
+</ul>
+
+<div id="searchbox" style="display: none;margin-bottom: 10px;">
+  <h3>Search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+
+
+    <div class="footer">
+    </div>
+  </body>
+</html>
+
+
+

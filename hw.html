@@ -1,0 +1,141 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Hardware development platforms &mdash; XMOS AVB Design Guide v5.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/xdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '5.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://mathjax.connectmv.com/MathJax.js"></script>
+    <script type="text/javascript" src="_static/xcomment.js"></script>
+    <link rel="top" title="XMOS AVB Design Guide v5.1.0 documentation" href="index.html" />
+    <link rel="next" title="System Description" href="system.html" />
+    <link rel="prev" title="XMOS AVB Documentation" href="index.html" /> 
+
+<script>
+function setheight() {
+h1 = document.getElementById('d1').style.height;
+h2 = document.getElementById('d2').style.height;
+
+if (parseInt(h1) > parseInt(h2)) {
+document.getElementById('d2').style.height=h1 + "px";
+}
+else {
+document.getElementById('d1').style.height=h2 + "px";
+}
+
+}
+</script>
+</head>
+
+<body onload="setheight();">
+
+  
+
+    <div class="document" id='d1'>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+<div style="float: right">
+<a href="index.html"
+                        title="previous chapter"> &lt&lt </a>
+<a href="system.html"
+                        title="next chapter"> &gt&gt </a></p>
+</div>
+
+            
+  <div class="section" id="hardware-development-platforms">
+<h1>Hardware development platforms<a class="headerlink" href="#hardware-development-platforms" title="Permalink to this headline">¶</a></h1>
+<p>For initial development of AVB applications the following XMOS
+development platforms are recommended for any low channel count
+application (using the XS1-L2 device):</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="http://www.xmos.com/products/reference-designs/avbl2"><span>XK-AVB-LC-SYS AVB Audio Endpoint</span></a></li>
+</ul>
+</div></blockquote>
+<p>In addition the following kit can be used for development:</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="http://www.xmos.com/products/development-kits/xs1-g-development-kit"><span>XDK XS1-G Development Kit</span></a></li>
+</ul>
+</div></blockquote>
+<p>To develop with this kit is is recommended to also use the following add
+on board:</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="http://www.xmos.com/products/development-kits/xai-multichannel-audio-interface"><span>XAI Multichannel Audio Interface</span></a></li>
+</ul>
+</div></blockquote>
+<p>Finally, the following board can also be used:</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="http://www.xmos.com/products/development-kits/xc-2-ethernet-kit"><span>XC-2 Ethernet Kit</span></a></li>
+</ul>
+</div></blockquote>
+<p>This board has no audio hardware built in; a CODEC and
+frequency generator must be added to the board.</p>
+<p>It is recommended to have at least two boards for developing streaming
+audio applications.</p>
+<p>For developing an application specific board for AVB please
+refer to the hardware guides for the above boards which contain example
+schematics, BOMs, design guidelines etc.</p>
+<p>It is also recommended that an AVB compatible network switch be obtained and used while developing the system. While
+the XMOS AVB solution can use a non-AVB switch, some of the features will need to be disabled.</p>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" id='d2'>
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">XMOS AVB Design Guide (5.1.0)</a></h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">Hardware development platforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="system.html">System Description</a></li>
+<li class="toctree-l1"><a class="reference internal" href="programming.html">Programming Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bandwidth.html">IEEE 1722 Bandwidth Usage</a></li>
+</ul>
+
+<div id="searchbox" style="display: none;margin-bottom: 10px;">
+  <h3>Search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+
+
+    <div class="footer">
+    </div>
+  </body>
+</html>
+
+
+

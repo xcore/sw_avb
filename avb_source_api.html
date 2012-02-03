@@ -1,0 +1,506 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>AVB Source Control &mdash; XMOS AVB Design Guide v5.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/xdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '5.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://mathjax.connectmv.com/MathJax.js"></script>
+    <script type="text/javascript" src="_static/xcomment.js"></script>
+    <link rel="top" title="XMOS AVB Design Guide v5.1.0 documentation" href="index.html" />
+    <link rel="up" title="AVB API" href="avb_api.html" />
+    <link rel="next" title="AVB Sink Control" href="avb_sink_api.html" />
+    <link rel="prev" title="Media Clock Control" href="avb_media_clock_api.html" /> 
+
+<script>
+function setheight() {
+h1 = document.getElementById('d1').style.height;
+h2 = document.getElementById('d2').style.height;
+
+if (parseInt(h1) > parseInt(h2)) {
+document.getElementById('d2').style.height=h1 + "px";
+}
+else {
+document.getElementById('d1').style.height=h2 + "px";
+}
+
+}
+</script>
+</head>
+
+<body onload="setheight();">
+
+  
+
+    <div class="document" id='d1'>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+<div style="float: right">
+<a href="avb_media_clock_api.html"
+                        title="previous chapter"> &lt&lt </a>
+<a href="avb_sink_api.html"
+                        title="next chapter"> &gt&gt </a></p>
+</div>
+
+            
+  <div class="section" id="avb-source-control">
+<h1>AVB Source Control<a class="headerlink" href="#avb-source-control" title="Permalink to this headline">¶</a></h1>
+<dl class="type">
+<dt id="avb_source_format_t">
+<tt class="descname">avb_source_format_t</tt><a class="headerlink" href="#avb_source_format_t" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>Enum Values:</strong></p>
+<blockquote>
+<div><dl class="member">
+<dt id="avb_source_format_t.AVB_SOURCE_FORMAT_MBLA_24BIT">
+<tt class="descname">AVB_SOURCE_FORMAT_MBLA_24BIT</tt><a class="headerlink" href="#avb_source_format_t.AVB_SOURCE_FORMAT_MBLA_24BIT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="get_avb_source_format">
+void <tt class="descname">get_avb_source_format</tt><big>(</big>unsigned<em>&nbsp;source_num</em>, unsigned<em>&nbsp;format</em>, unsigned<em>&nbsp;&amp;rate</em><big>)</big><a class="headerlink" href="#get_avb_source_format" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the format of an AVB source.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>source_num</strong> &#8211; the local source number</li>
+<li><strong>format</strong> &#8211; the format of the stream</li>
+<li><strong>rate</strong> &#8211; the sample rate of the stream in Hz</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="set_avb_source_format">
+void <tt class="descname">set_avb_source_format</tt><big>(</big>unsigned<em>&nbsp;source_num</em>, unsigned<em>&nbsp;format</em>, unsigned<em>&nbsp;rate</em><big>)</big><a class="headerlink" href="#set_avb_source_format" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the format of an AVB source.</p>
+<p>The AVB source format covers the encoding and sample rate of the source. Currently the format is limited to a single encoding MBLA 24 bit signed integers.</p>
+<p>This setting will not take effect until the next time the source state moves from disabled to potential.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>source_num</strong> &#8211; the local source number</li>
+<li><strong>format</strong> &#8211; the format of the stream</li>
+<li><strong>rate</strong> &#8211; the sample rate of the stream in Hz</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="get_avb_source_channels">
+void <tt class="descname">get_avb_source_channels</tt><big>(</big>unsigned<em>&nbsp;source_num</em>, unsigned<em>&nbsp;&amp;n</em><big>)</big><a class="headerlink" href="#get_avb_source_channels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the channel count of an AVB source.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>source_num</strong> &#8211; the local source number</li>
+<li><strong>n</strong> &#8211; the number of channels</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="set_avb_source_channels">
+void <tt class="descname">set_avb_source_channels</tt><big>(</big>unsigned<em>&nbsp;source_num</em>, unsigned<em>&nbsp;n</em><big>)</big><a class="headerlink" href="#set_avb_source_channels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the channel count of an AVB source.</p>
+<p>Sets the number of channels in the stream.</p>
+<p>This setting will not take effect until the next time the source state moves from disabled to potential.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>source_num</strong> &#8211; the local source number</li>
+<li><strong>n</strong> &#8211; the number of channels</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="get_avb_source_map">
+void <tt class="descname">get_avb_source_map</tt><big>(</big>unsigned<em>&nbsp;source_num</em>, unsigned<em>&nbsp;map[]</em>, unsigned<em>&nbsp;&amp;len</em><big>)</big><a class="headerlink" href="#get_avb_source_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the channel map of an avb source.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>source_num</strong> &#8211; the local source number to set</li>
+<li><strong>map</strong> &#8211; the map, an array of integers giving the input FIFOs that make up the stream</li>
+<li><strong>len</strong> &#8211; the length of the map; should be equal to the number of channels in the stream</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="set_avb_source_map">
+void <tt class="descname">set_avb_source_map</tt><big>(</big>unsigned<em>&nbsp;source_num</em>, unsigned<em>&nbsp;map[]</em>, unsigned<em>&nbsp;len</em><big>)</big><a class="headerlink" href="#set_avb_source_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the channel map of an avb source.</p>
+<p>Sets the channel map of a source i.e. the list of input FIFOs that constitute the stream.</p>
+<p>This setting will not take effect until the next time the source state moves from disabled to potential.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>source_num</strong> &#8211; the local source number to set</li>
+<li><strong>map</strong> &#8211; the map, an array of integers giving the input FIFOs that make up the stream</li>
+<li><strong>len</strong> &#8211; the length of the map; should be equal to the number of channels in the stream</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="get_avb_source_sync">
+void <tt class="descname">get_avb_source_sync</tt><big>(</big>unsigned<em>&nbsp;source_num</em>, unsigned<em>&nbsp;&amp;mclock</em><big>)</big><a class="headerlink" href="#get_avb_source_sync" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the media clock of an AVB source.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>source_num</strong> &#8211; the local source number</li>
+<li><strong>mclock</strong> &#8211; the media clock number</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="set_avb_source_sync">
+void <tt class="descname">set_avb_source_sync</tt><big>(</big>unsigned<em>&nbsp;source_num</em>, unsigned<em>&nbsp;mclock</em><big>)</big><a class="headerlink" href="#set_avb_source_sync" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the media clock of an AVB source.</p>
+<p>Sets the media clock of the stream.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>source_num</strong> &#8211; the local source number</li>
+<li><strong>mclock</strong> &#8211; the media clock number</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="get_avb_source_presentation">
+void <tt class="descname">get_avb_source_presentation</tt><big>(</big>unsigned<em>&nbsp;source_num</em>, unsigned<em>&nbsp;&amp;offset</em><big>)</big><a class="headerlink" href="#get_avb_source_presentation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the presentation time offset of an AVB source.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>source_num</strong> &#8211; the local source number to set</li>
+<li><strong>offset</strong> &#8211; the presentation offset in ms</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="set_avb_source_presentation">
+void <tt class="descname">set_avb_source_presentation</tt><big>(</big>unsigned<em>&nbsp;source_num</em>, unsigned<em>&nbsp;offset</em><big>)</big><a class="headerlink" href="#set_avb_source_presentation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the presentation time offset of an AVB source.</p>
+<p>Sets the presentation time offset of a source i.e. the time after sampling that the stream should be played. The default value for this is 2ms.</p>
+<p>This setting will not take effect until the next time the source state moves from disabled to potential.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>source_num</strong> &#8211; the local source number to set</li>
+<li><strong>offset</strong> &#8211; the presentation offset in ms</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="get_avb_source_name">
+void <tt class="descname">get_avb_source_name</tt><big>(</big>unsigned<em>&nbsp;source_num</em>, char<em>&nbsp;name[]</em><big>)</big><a class="headerlink" href="#get_avb_source_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the name of an AVB source.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>source_num</strong> &#8211; the local source number</li>
+<li><strong>name</strong> &#8211; the string containing the name</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="set_avb_source_name">
+void <tt class="descname">set_avb_source_name</tt><big>(</big>unsigned<em>&nbsp;source_num</em>, char<em>&nbsp;name[]</em><big>)</big><a class="headerlink" href="#set_avb_source_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the name of an AVB source.</p>
+<p>Sets a human readable name for the stream. This name must be fewer than <tt class="docutils literal"><span class="pre">AVB_MAX_NAME_LEN</span></tt> which can be set in <tt class="docutils literal"><span class="pre">avb_conf.h</span></tt>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>source_num</strong> &#8211; the local source number</li>
+<li><strong>name</strong> &#8211; the string containing the name</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="get_avb_source_dest">
+void <tt class="descname">get_avb_source_dest</tt><big>(</big>unsigned<em>&nbsp;source_num</em>, char<em>&nbsp;addr[]</em>, unsigned<em>&nbsp;&amp;len</em><big>)</big><a class="headerlink" href="#get_avb_source_dest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the destination address of an avb source.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>source_num</strong> &#8211; the local source number</li>
+<li><strong>addr</strong> &#8211; the destination address as an array of 6 bytes</li>
+<li><strong>len</strong> &#8211; the length of the address, should always be equal to 6</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="set_avb_source_dest">
+void <tt class="descname">set_avb_source_dest</tt><big>(</big>unsigned<em>&nbsp;source_num</em>, char<em>&nbsp;addr[]</em>, unsigned<em>&nbsp;len</em><big>)</big><a class="headerlink" href="#set_avb_source_dest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the destination address of an avb source.</p>
+<p>Sets the destination MAC address of a source. This setting will not take effect until the next time the source state moves from disabled to potential.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>source_num</strong> &#8211; the local source number</li>
+<li><strong>addr</strong> &#8211; the destination address as an array of 6 bytes</li>
+<li><strong>len</strong> &#8211; the length of the address, should always be equal to 6</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="get_avb_source_vlan">
+void <tt class="descname">get_avb_source_vlan</tt><big>(</big>unsigned<em>&nbsp;source_num</em>, unsigned<em>&nbsp;&amp;vlan</em><big>)</big><a class="headerlink" href="#get_avb_source_vlan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the destination vlan of an AVB source.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>source_num</strong> &#8211; the local source number</li>
+<li><strong>vlan</strong> &#8211; the destination vlan id, The media clock number</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="set_avb_source_vlan">
+void <tt class="descname">set_avb_source_vlan</tt><big>(</big>unsigned<em>&nbsp;source_num</em>, unsigned<em>&nbsp;vlan</em><big>)</big><a class="headerlink" href="#set_avb_source_vlan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the destination vlan of an AVB source.</p>
+<p>Sets the vlan that the source will transmit on. This defaults to 2.</p>
+<p>This setting will not take effect until the next time the source state moves from disabled to potential.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>source_num</strong> &#8211; the local source number</li>
+<li><strong>vlan</strong> &#8211; the destination vlan id, The media clock number</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="type">
+<dt id="avb_source_state_t">
+<tt class="descname">avb_source_state_t</tt><a class="headerlink" href="#avb_source_state_t" title="Permalink to this definition">¶</a></dt>
+<dd><p>The state of an AVB source.</p>
+<p><strong>Enum Values:</strong></p>
+<blockquote>
+<div><dl class="member">
+<dt id="avb_source_state_t.AVB_SOURCE_STATE_DISABLED">
+<tt class="descname">AVB_SOURCE_STATE_DISABLED</tt><a class="headerlink" href="#avb_source_state_t.AVB_SOURCE_STATE_DISABLED" title="Permalink to this definition">¶</a></dt>
+<dd><p>The source is disabled and will not transmit.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="avb_source_state_t.AVB_SOURCE_STATE_POTENTIAL">
+<tt class="descname">AVB_SOURCE_STATE_POTENTIAL</tt><a class="headerlink" href="#avb_source_state_t.AVB_SOURCE_STATE_POTENTIAL" title="Permalink to this definition">¶</a></dt>
+<dd><p>The source is enabled and will transmit if a listener requests it.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="avb_source_state_t.AVB_SOURCE_STATE_ENABLED">
+<tt class="descname">AVB_SOURCE_STATE_ENABLED</tt><a class="headerlink" href="#avb_source_state_t.AVB_SOURCE_STATE_ENABLED" title="Permalink to this definition">¶</a></dt>
+<dd><p>The source is enabled and transmitting.</p>
+</dd></dl>
+
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="get_avb_source_state">
+void <tt class="descname">get_avb_source_state</tt><big>(</big>unsigned<em>&nbsp;source_num</em>, <a class="reference internal" href="#avb_source_state_t" title="avb_source_state_t"><span>avb_source_state_t</span></a><em>&nbsp;&amp;state</em><big>)</big><a class="headerlink" href="#get_avb_source_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the current state of an AVB source.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>source_num</strong> &#8211; the local source number</li>
+<li><strong>state</strong> &#8211; the state of the source</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="set_avb_source_state">
+void <tt class="descname">set_avb_source_state</tt><big>(</big>unsigned<em>&nbsp;source_num</em>, <a class="reference internal" href="#avb_source_state_t" title="avb_source_state_t"><span>avb_source_state_t</span></a><em>&nbsp;state</em><big>)</big><a class="headerlink" href="#set_avb_source_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the current state of an AVB source.</p>
+<p>Sets the current state of an AVB source. You cannot set the state to <tt class="docutils literal"><span class="pre">ENABLED</span></tt>. Changing the state to <tt class="docutils literal"><span class="pre">POTENTIAL</span></tt> turns the stream on and it will automatically change to <tt class="docutils literal"><span class="pre">ENABLED</span></tt> when connected to a listener and streaming.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>source_num</strong> &#8211; the local source number</li>
+<li><strong>state</strong> &#8211; the state of the source</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" id='d2'>
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">XMOS AVB Design Guide (5.1.0)</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="hw.html">Hardware development platforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="system.html">System Description</a></li>
+<li class="toctree-l1"><a class="reference internal" href="programming.html">Programming Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="defines_api.html">Configuration Defines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="component_api.html">Component functions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="avb_api.html">AVB API</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="avb_general_api.html">General Control Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="avb_maap_api.html">Multicast Address Allocation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="avb_srp_api.html">Stream Reservation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="avb_device_api.html">Device Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="avb_media_clock_api.html">Media Clock Control</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="">AVB Source Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="avb_sink_api.html">AVB Sink Control</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ptp_api.html">PTP Client API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mdns_api.html">MDNS/Bonjour API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bandwidth.html">IEEE 1722 Bandwidth Usage</a></li>
+</ul>
+
+<div id="searchbox" style="display: none;margin-bottom: 10px;">
+  <h3>Search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+
+
+    <div class="footer">
+    </div>
+  </body>
+</html>
+
+
+

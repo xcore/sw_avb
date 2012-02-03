@@ -1,0 +1,330 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Source code structure &mdash; XMOS AVB Design Guide v5.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/xdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '5.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://mathjax.connectmv.com/MathJax.js"></script>
+    <script type="text/javascript" src="_static/xcomment.js"></script>
+    <link rel="top" title="XMOS AVB Design Guide v5.1.0 documentation" href="index.html" />
+    <link rel="up" title="Programming Guide" href="programming.html" />
+    <link rel="next" title="An XMOS AVB application (tutorial)" href="app_tutorial.html" />
+    <link rel="prev" title="Getting Started" href="getting_started.html" /> 
+
+<script>
+function setheight() {
+h1 = document.getElementById('d1').style.height;
+h2 = document.getElementById('d2').style.height;
+
+if (parseInt(h1) > parseInt(h2)) {
+document.getElementById('d2').style.height=h1 + "px";
+}
+else {
+document.getElementById('d1').style.height=h2 + "px";
+}
+
+}
+</script>
+</head>
+
+<body onload="setheight();">
+
+  
+
+    <div class="document" id='d1'>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+<div style="float: right">
+<a href="getting_started.html"
+                        title="previous chapter"> &lt&lt </a>
+<a href="app_tutorial.html"
+                        title="next chapter"> &gt&gt </a></p>
+</div>
+
+            
+  <div class="section" id="source-code-structure">
+<h1>Source code structure<a class="headerlink" href="#source-code-structure" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="directory-structure">
+<h2>Directory Structure<a class="headerlink" href="#directory-structure" title="Permalink to this headline">¶</a></h2>
+<p>The source code is split into several top-level directories (which are
+presented as separate projects in Eclipse). These are split into
+modules and applications. The applications build into a single
+executable using the source code from the modules. The modules used by
+an application are specified using the <tt class="docutils literal"><span class="pre">USED_MODULES</span></tt> variable in
+the application Makefile. For more details on this module structure
+please see the documentation in the <tt class="docutils literal"><span class="pre">module_xmos_common</span></tt> directory.</p>
+<p>The source package contains  demonstration applications for
+different hardware:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Directory</th>
+<th class="head">Platform</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>app_xr_avb_lc_demo</td>
+<td>XR-AVB-LC-BRD reference design kit</td>
+</tr>
+<tr><td>app_xdk_avb_demo</td>
+<td>XDK development kit</td>
+</tr>
+<tr><td>app_xdk_xai_avb_demo</td>
+<td>XDK development kit with XAI audio
+interface board</td>
+</tr>
+<tr><td>app_xc2_avb_demo</td>
+<td>XC-2 development kit</td>
+</tr>
+<tr><td>app_1722_1_listner</td>
+<td>An LC board listener that uses the 1722.1 protocol for control</td>
+</tr>
+<tr><td>app_1722_1_talker</td>
+<td>An LC board talker that uses the 1722.1 protocol for control</td>
+</tr>
+<tr><td>app_two_channel_listener</td>
+<td>An LC board test application with a listener that combines two single channel streams</td>
+</tr>
+<tr><td>app_two_channel_talker</td>
+<td>An LC board test application with a talker that produces two single channel streams</td>
+</tr>
+<tr><td>test_api_listener</td>
+<td>A simple LC board stereo channel listener</td>
+</tr>
+<tr><td>test_api_talker</td>
+<td>A simple LC board stereo channel talker</td>
+</tr>
+</tbody>
+</table>
+<p>Each of these applications uses different modules.</p>
+<p>Some support modules originate in other repositories:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Directory</th>
+<th class="head">Description</th>
+<th class="head">Repository</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>module_ethernet</td>
+<td>Ethernet MAC</td>
+<td>sc_ethernet</td>
+</tr>
+<tr><td>module_xtcp</td>
+<td>XTCP TCP/IP stack</td>
+<td>sc_xtcp</td>
+</tr>
+<tr><td>module_zeroconf</td>
+<td>Zeroconf/Multicast=DNS stack.</td>
+<td>sc_xtcp</td>
+</tr>
+<tr><td>module_i2c</td>
+<td>Two wire configuration protocol code.</td>
+<td>sc_i2c</td>
+</tr>
+<tr><td>module_xlog</td>
+<td>A logging server for redirecting prints over UART or an XC
+channel.</td>
+<td>sc_xlog</td>
+</tr>
+<tr><td>module_xmos_common</td>
+<td>Common build infrastructure.</td>
+<td>xcommon</td>
+</tr>
+</tbody>
+</table>
+<p>The following modules contain the core AVB code and are needed by
+every application:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Directory</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>module_avb</td>
+<td>Main AVB code for control and configuration.</td>
+</tr>
+<tr><td>module_avb_1722</td>
+<td>IEEE P1722 transport (listener and talker functionality).</td>
+</tr>
+<tr><td>module_avb_1722_maap</td>
+<td>IEEE P1722 MAAP - Multicast address allocation code.</td>
+</tr>
+<tr><td>module_avb_1722_1</td>
+<td>IEEE P1722.1 AVB control protocol.</td>
+</tr>
+<tr><td>module_avb_srp</td>
+<td>802.1Qat stream reservation code.</td>
+</tr>
+<tr><td>module_osc</td>
+<td>A module providing an Open Sound Control style tree hierarchy
+for settings. <strong>Note that no OSC protocol is currently
+implemented</strong>.</td>
+</tr>
+<tr><td>module_gptp</td>
+<td>802.1as code.</td>
+</tr>
+<tr><td>module_avb_audio</td>
+<td>Code for media FIFOs and audio hardware interfaces (I2S/TDM etc).</td>
+</tr>
+<tr><td>module_avb_media_clock</td>
+<td>Media clock server code.</td>
+</tr>
+<tr><td>module_avb_util</td>
+<td>General utility functions used by all modules.</td>
+</tr>
+<tr><td>module_locks</td>
+<td>A generic module for concurrency locking.</td>
+</tr>
+<tr><td>module_avb_attero_cfg</td>
+<td>Module containing UDP configuration code for communicating with
+the example Atterotech control application.</td>
+</tr>
+</tbody>
+</table>
+<p>In addition to the core AVB code the following modules are used by the
+demos for other functionality:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Directory</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>module_xdk_avb_common</td>
+<td>A selection of code used in XDK AVB demos.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="key-files">
+<h2>Key Files<a class="headerlink" href="#key-files" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">File</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><tt class="docutils literal"><span class="pre">avb.h</span></tt></td>
+<td>Header file containing declarations for all AVB component
+functions and the AVB control API.</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">xtcp_client.h</span></tt></td>
+<td>Header file for clients of the TCP/IP stack.</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">ethernet_rx_client.h</span></tt></td>
+<td>Header file for clients that require direct access to the ethernet MAC
+(RX).</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">ethernet_tx_client.h</span></tt></td>
+<td>Header file for clients that require direct access to the ethernet MAC
+(TX).</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">gptp.h</span></tt></td>
+<td>Header file for access to the PTP server.</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">mdns.h</span></tt></td>
+<td>Header file for clients wishing to register Zeroconf names/services.</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">audio_i2s.h</span></tt></td>
+<td>Header file containing the I2S audio component.</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">audio_tdm.h</span></tt></td>
+<td>Header file containing the TDM audio component.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" id='d2'>
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">XMOS AVB Design Guide (5.1.0)</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="hw.html">Hardware development platforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="system.html">System Description</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="programming.html">Programming Guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">Source code structure</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#directory-structure">Directory Structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#key-files">Key Files</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="app_tutorial.html">An XMOS AVB application (tutorial)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modification.html">Creating custom applications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modification.html#board-design">Board Design</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bandwidth.html">IEEE 1722 Bandwidth Usage</a></li>
+</ul>
+
+<div id="searchbox" style="display: none;margin-bottom: 10px;">
+  <h3>Search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+
+
+    <div class="footer">
+    </div>
+  </body>
+</html>
+
+
+

@@ -1,0 +1,170 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Ethernet Client API &mdash; XMOS AVB Design Guide v5.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/xdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '5.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://mathjax.connectmv.com/MathJax.js"></script>
+    <script type="text/javascript" src="_static/xcomment.js"></script>
+    <link rel="top" title="XMOS AVB Design Guide v5.1.0 documentation" href="index.html" /> 
+
+<script>
+function setheight() {
+h1 = document.getElementById('d1').style.height;
+h2 = document.getElementById('d2').style.height;
+
+if (parseInt(h1) > parseInt(h2)) {
+document.getElementById('d2').style.height=h1 + "px";
+}
+else {
+document.getElementById('d1').style.height=h2 + "px";
+}
+
+}
+</script>
+</head>
+
+<body onload="setheight();">
+
+  
+
+    <div class="document" id='d1'>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+<div style="float: right">
+</div>
+
+            
+  <div class="section" id="ethernet-client-api">
+<h1>Ethernet Client API<a class="headerlink" href="#ethernet-client-api" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="mac_rx">
+int <tt class="descname">mac_rx</tt><big>(</big>chanend<em>&nbsp;c_mac</em>, unsigned char<em>&nbsp;buffer[]</em>, unsigned int <em>&nbsp;&amp;src_port</em><big>)</big><a class="headerlink" href="#mac_rx" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function receives a complete frame (i.e. src/dest MAC address,
+type &amp; payload),  excluding pre-amble, SoF &amp; CRC32.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>c_mac</strong> &#8211; chanend connect to the ethernet server</li>
+<li><strong>buffer</strong> &#8211; The buffer to fill with the incoming packet</li>
+<li><strong>src_port</strong> &#8211; A reference parameter to be filled with the ethernet
+port the packet came from.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns</strong>:</p>
+<blockquote>
+<div>The number of bytes in the frame.</div></blockquote>
+<dl class="docutils">
+<dt><strong>Notes</strong>:</dt>
+<dd><ol class="first last arabic simple">
+<li>This function is a blocking call,
+(i.e. it will wait until a complete packet is
+received).</li>
+<li>Only the packets whih pass CRC32 are processed.</li>
+</ol>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mac_rx_timed">
+int <tt class="descname">mac_rx_timed</tt><big>(</big>chanend<em>&nbsp;c_mac</em>, unsigned char<em>&nbsp;buffer[]</em>, REFERENCE_PARAM(unsigned<em>&nbsp;int</em>, time), REFERENCE_PARAM(unsigned<em>&nbsp;int</em>, src_port)<big>)</big><a class="headerlink" href="#mac_rx_timed" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function receives a complete frame (i.e. src/dest MAC address,
+type &amp; payload),  excluding pre-amble, SoF &amp; CRC32. It also timestamps
+the arrival of the frame</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>c_mac</strong> &#8211; chanend connect to the ethernet server</li>
+<li><strong>buffer</strong> &#8211; The buffer to fill with the incoming packet</li>
+<li><strong>time</strong> &#8211; A reference parameter to be filled with the timestamp of
+the packet</li>
+<li><strong>src_port</strong> &#8211; A reference parameter to be filled with the ethernet
+port the packet came from.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns</strong>:</p>
+<blockquote>
+<div>The number of bytes in the frame.</div></blockquote>
+<dl class="docutils">
+<dt><strong>Notes</strong>:</dt>
+<dd><ol class="first last arabic simple">
+<li>This function is a blocking call,
+(i.e. it will wait until a complete packet is
+received).</li>
+<li>Only the packets whih pass CRC32 are processed.</li>
+</ol>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" id='d2'>
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">XMOS AVB Design Guide (5.1.0)</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="hw.html">Hardware development platforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="system.html">System Description</a></li>
+<li class="toctree-l1"><a class="reference internal" href="programming.html">Programming Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bandwidth.html">IEEE 1722 Bandwidth Usage</a></li>
+</ul>
+
+<div id="searchbox" style="display: none;margin-bottom: 10px;">
+  <h3>Search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+
+
+    <div class="footer">
+    </div>
+  </body>
+</html>
+
+
+

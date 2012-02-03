@@ -1,0 +1,597 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>An XMOS AVB application (tutorial) &mdash; XMOS AVB Design Guide v5.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/xdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '5.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://mathjax.connectmv.com/MathJax.js"></script>
+    <script type="text/javascript" src="_static/xcomment.js"></script>
+    <link rel="top" title="XMOS AVB Design Guide v5.1.0 documentation" href="index.html" />
+    <link rel="up" title="Programming Guide" href="programming.html" />
+    <link rel="next" title="Creating custom applications" href="modification.html" />
+    <link rel="prev" title="Source code structure" href="structure.html" /> 
+
+<script>
+function setheight() {
+h1 = document.getElementById('d1').style.height;
+h2 = document.getElementById('d2').style.height;
+
+if (parseInt(h1) > parseInt(h2)) {
+document.getElementById('d2').style.height=h1 + "px";
+}
+else {
+document.getElementById('d1').style.height=h2 + "px";
+}
+
+}
+</script>
+</head>
+
+<body onload="setheight();">
+
+  
+
+    <div class="document" id='d1'>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+<div style="float: right">
+<a href="structure.html"
+                        title="previous chapter"> &lt&lt </a>
+<a href="modification.html"
+                        title="next chapter"> &gt&gt </a></p>
+</div>
+
+            
+  <div class="section" id="an-xmos-avb-application-tutorial">
+<span id="sec-app-tutorial"></span><h1>An XMOS AVB application (tutorial)<a class="headerlink" href="#an-xmos-avb-application-tutorial" title="Permalink to this headline">¶</a></h1>
+<p>This tutorial walks through the application code for the XR-AVB-LC-BRD
+demonstration application. This application provides both a talker
+transmitting a single eight channel stream and a listener that can
+receive an eight channel stream.</p>
+<p>The code for this demo is found in the <tt class="docutils literal"><span class="pre">app_xr_avb_lc_demo/src</span></tt> directory.</p>
+<div class="section" id="avb-conf-h">
+<h2>avb_conf.h<a class="headerlink" href="#avb-conf-h" title="Permalink to this headline">¶</a></h2>
+<p>The <tt class="docutils literal"><span class="pre">avb_conf.h</span></tt> file sets the required defines for configuring the
+AVB system. Every application must include this file and the required
+and optional that can be set in this file are described in Section <a class="reference internal" href="defines_api.html#sec-defines-api"><span>Configuration Defines</span></a>.</p>
+<p>First, the file sets up the ethernet buffering. This is a balance
+between the required memory for the rest of the application and the
+amount of buffering needed for the audio.</p>
+<div class="highlight-none"><div class="highlight"><pre>#define PHY_ADDRESS 0x0
+#define MAX_ETHERNET_PACKET_SIZE (1518)
+#define NUM_MII_RX_BUF 6
+#define NUM_MII_TX_BUF 3
+#define ETHERNET_RX_HP_QUEUE 1
+#define MAX_ETHERNET_CLIENTS   5
+#define MII_RX_BUFSIZE_HIGH_PRIORITY (700)    
+#define MII_RX_BUFSIZE_LOW_PRIORITY (300)
+#define MII_TX_BUFSIZE_HIGH_PRIORITY (300)    
+#define MII_TX_BUFSIZE_LOW_PRIORITY (200)
+#define ETHERNET_MAX_TX_HP_PACKET_SIZE (300)
+</pre></div>
+</div>
+<p>Some general settings are needed for memory allocation across the
+whole AVB code base. Here the maximum name length (use for
+remote control identification) and the maximum channels per stream are set:</p>
+<div class="highlight-none"><div class="highlight"><pre>#define AVB_MAX_NAME_LEN 25
+#define AVB_MAX_CHANNELS_PER_STREAM 8
+</pre></div>
+</div>
+<p>The application can listen to a single eight channel stream. This requires a single sink that can be handled by a single listener unit:</p>
+<div class="highlight-none"><div class="highlight"><pre>#define AVB_NUM_SINKS 1
+#define AVB_NUM_LISTENER_UNITS 1
+</pre></div>
+</div>
+<p>The application will produce a single eight channel stream. This requires a single source that can be handled by a single talker unit:</p>
+<div class="highlight-none"><div class="highlight"><pre>#define AVB_NUM_SOURCES 1
+#define AVB_NUM_TALKER_UNITS 1 
+</pre></div>
+</div>
+<p>The audio I/O side of the application must be configured. The board has eight digital I/Os in and out so this
+determines the number of input/output FIFOs. In addition the
+maximum sample rate of these inputs is set. A media unit is one that controls
+media FIFOs. Due to the way the I2S component
+works, two media units are required (one for input and one for output).</p>
+<div class="highlight-none"><div class="highlight"><pre>#define AVB_1722_FORMAT_61883_6
+#define AVB_NUM_MEDIA_OUTPUTS 8
+#define AVB_NUM_MEDIA_INPUTS 8
+#define AVB_NUM_MEDIA_UNITS 2
+</pre></div>
+</div>
+<p>The demo is synchronous in that it has one clock for both the input
+and output (this will end up being a clock divided down from the PTP
+clock).</p>
+<div class="highlight-none"><div class="highlight"><pre>#define AVB_NUM_MEDIA_CLOCKS 1
+</pre></div>
+</div>
+<p>Finally, the XR-AVB-LC-BRD has eight digital inputs but only two of
+them are connected to an ADC on board. For this demo another setting is added, which causes the I2S component to ignore the input on
+every stereo pair but the first, and instead adds synthesized sine
+waves to these inputs:</p>
+<div class="highlight-none"><div class="highlight"><pre>#define I2S_SYNTH_FROM 1
+
+// Defining this makes SRP auto-start and auto-stop a stream when listeners come and go
+#define SRP_AUTO_TALKER_STREAM_CONTROL
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-toplevel-main">
+<h2>The toplevel main<a class="headerlink" href="#the-toplevel-main" title="Permalink to this headline">¶</a></h2>
+<p>The main file for the demo is <tt class="docutils literal"><span class="pre">xr_avb_demo.xc</span></tt>. This file contains
+three main parts:</p>
+<blockquote>
+<div><ul class="simple">
+<li>First, the file declares the ports needed by the application.</li>
+<li>Second, the top-level <tt class="docutils literal"><span class="pre">main()</span></tt> function runs the main
+components that make up the application.</li>
+<li>Finally, the <tt class="docutils literal"><span class="pre">demo()</span></tt> function implements the main control
+thread that implements the demo.</li>
+</ul>
+</div></blockquote>
+<p>The demo runs at a particular sample rate. This affects the AVB
+control thread and also the thread that drives the external PLL. To
+co-ordinate this, the program sets some #defines relating to the sample
+rate:</p>
+<div class="highlight-none"><div class="highlight"><pre>#define SAMPLE_RATE 48000
+
+// This is the number of master clocks in a word clock
+#define MASTER_TO_WORDCLOCK_RATIO 512
+</pre></div>
+</div>
+<p>Here, <tt class="docutils literal"><span class="pre">MASTER_TO_WORDCLOCK_RATIO</span></tt> controls the ratio between the master
+clock and the wordclock, which must match the setting in the clock generation
+PLL.</p>
+<p>The next part of the file (not shown) declares the ports for ethernet, audio
+CODECs and the PLL.</p>
+<p>The next part of the file contains the top-level main that runs the
+components of the application. It is of the form:</p>
+<div class="highlight-none"><div class="highlight"><pre>int main(void) {
+  channel declarations
+  ...
+  par {
+    ...
+    component functions
+    ...
+  }
+}
+</pre></div>
+</div>
+<p>The first component functions are the ethernet components: the
+ethernet MAC and the TCP/IP stack server. The ethernet component
+section reads the MAC address out of OTP and then runs the ethernet
+server based on this. The channel arrays <tt class="docutils literal"><span class="pre">rx_link</span></tt>, <tt class="docutils literal"><span class="pre">tx_link</span></tt> and
+<tt class="docutils literal"><span class="pre">xtcp</span></tt> are connected to other parts of the system that use the
+ethernet and TCP/IP stack:</p>
+<div class="highlight-none"><div class="highlight"><pre>on stdcore[1]:
+{
+	int mac_address[2];
+	ethernet_getmac_otp(otp_data,
+                                          otp_addr,
+                                          otp_ctrl,
+                                          (mac_address, char[]));
+	phy_init(clk_smi, p_mii_resetn,
+			smi,
+			mii);
+
+	ethernet_server(mii, mac_address,
+			rx_link, 4,
+			tx_link, 4,
+			smi, connect_status);
+}
+
+// TCP/IP stack
+on stdcore[1]:
+{
+	uip_server(rx_link[1],
+                                 tx_link[2],
+                                 xtcp, 1,
+                                 null,
+                                 connect_status);
+}
+</pre></div>
+</div>
+<p>The next components that are run are also core components of an AVB
+application, namely the PTP server and the media clock server. Note
+that the initialization of the PLL is run before the PTP server simply
+because it must be initialized on core 1. The actual code that
+drives the PLL is on core 0. In order to save threads, the GPIO and the
+PTP servers are combined into a single thread.</p>
+<div class="highlight-none"><div class="highlight"><pre>on stdcore[1]:
+{
+	// We need to initiate the PLL from core 1, so do it here before
+	// launching  the main function of the thread
+	audio_clock_CS2300CP_init(r_i2c, MASTER_TO_WORDCLOCK_RATIO);
+
+	ptp_server_and_gpio(rx_link[0], tx_link[0], ptp_link, 3,
+			PTP_GRANDMASTER_CAPABLE,
+			c_gpio_ctl);
+}
+
+on stdcore[1]:
+{
+	media_clock_server(media_clock_ctl,
+			ptp_link[1],
+			buf_ctl,
+			AVB_NUM_LISTENER_UNITS,
+			clk_ctl,
+			AVB_NUM_MEDIA_CLOCKS);
+}
+</pre></div>
+</div>
+<p>As mentioned previously, the application has one outgoing stream which
+is handled by a single talker unit. The talker unit is instantiated
+next with a call to <a class="reference internal" href="component_api.html#avb_1722_talker" title="avb_1722_talker"><span>avb_1722_talker()</span></a>:</p>
+<div class="highlight-none"><div class="highlight"><pre>on stdcore[0]: avb_1722_talker(ptp_link[0],
+		tx_link[1],
+		talker_ctl[0],
+		AVB_NUM_SOURCES);
+</pre></div>
+</div>
+<p>There is also a single listener unit, which takes incoming packets
+and splits them into media FIFOs. However, the I2S component takes
+samples to play over an XC channel. So <tt class="xref c c-func docutils literal"><span class="pre">media_output_to_xc_channel_split_lr()</span></tt> is called to take samples from the shared memory media FIFOs and output them over an XC channel.</p>
+<div class="highlight-none"><div class="highlight"><pre>on stdcore[0]: avb_1722_listener(rx_link[3],
+		buf_ctl[0],
+		null,
+		listener_ctl[0],
+		AVB_NUM_SINKS);
+
+on stdcore[0]:
+{	init_media_output_fifos(ofifos, ofifo_data, AVB_NUM_MEDIA_OUTPUTS);
+	media_output_fifo_to_xc_channel_split_lr(media_ctl[1],
+			c_samples_to_codec,
+			0, // clk_ctl index
+			ofifos,
+			AVB_NUM_MEDIA_OUTPUTS);
+}
+</pre></div>
+</div>
+<p>The above components comprise the core of the AVB system. In addition
+there is a debugging thread and a couple of control threads. The
+debugging thread calls the XLog server which redirects print
+statements across the system to pass over the UART port to the XTAG2.
+The resulting print statements can be viewed using <tt class="docutils literal"><span class="pre">xrun</span></tt> with the
+<tt class="docutils literal"><span class="pre">--uart</span></tt> option.</p>
+<div class="highlight-none"><div class="highlight"><pre>on stdcore[0]:
+{
+	xlog_server_uart(p_uart_tx);
+}
+</pre></div>
+</div>
+<p>Finally, the application has an application specific control
+thread.</p>
+<p>First the AVB system must be initialized with a call to
+<a class="reference internal" href="avb_general_api.html#avb_init" title="avb_init"><span>avb_init()</span></a>.  This call is needed before any other AVB API calls.</p>
+<p>This function takes channels connected to all the different components
+of the system to be able to control them.</p>
+<div class="highlight-none"><div class="highlight"><pre>on stdcore[0]:
+{
+	// First initialize avb higher level protocols
+	avb_init(media_ctl, listener_ctl, talker_ctl, media_clock_ctl, rx_link[2], tx_link[3], ptp_link[2]);
+
+	demo(xtcp[0], rx_link[2], tx_link[3], c_gpio_ctl);
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-main-control-thread">
+<h2>The main control thread<a class="headerlink" href="#the-main-control-thread" title="Permalink to this headline">¶</a></h2>
+<p>The main control thread is implemented in the function <tt class="docutils literal"><span class="pre">demo</span></tt>:</p>
+<div class="highlight-none"><div class="highlight"><pre>void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl) {
+</pre></div>
+</div>
+<p>This demo uses Zeroconf to advertise a configuration
+protocol. The name is registered as <tt class="docutils literal"><span class="pre">xmos_attero_endpoint</span></tt>, so on the local
+network it will have a DNS name of  <tt class="docutils literal"><span class="pre">xmos_attero_endpoint.local</span></tt>. The server <tt class="docutils literal"><span class="pre">attero-cfg</span></tt> which is a configuration service
+over UDP on port <tt class="docutils literal"><span class="pre">ATTERO_CFG_PORT</span></tt> (with the value 40404) is also advertised. This service can be discovered by the AtteroTech host configuration utility
+(see the <a class="reference external" href="http://www.atterotech.com/cobranet-oem-products/xmos-avb-module/"><span>AtteroTech/XMOS XR-AVB-LC-BRD Quickstart Guide</span></a>). The control API server itself must be initialized so that it can handle requests to this port.</p>
+<div class="highlight-none"><div class="highlight"><pre>mdns_init(tcp_svr);
+
+// Register all the zeroconf names
+mdns_register_canonical_name(&quot;xmos_attero_endpoint&quot;);
+mdns_register_service(&quot;XMOS/Attero AVB&quot;, &quot;_attero-cfg._udp&quot;,
+		ATTERO_CFG_PORT, &quot;&quot;);
+
+// Initialize the control api server
+c_api_server_init(tcp_svr);
+</pre></div>
+</div>
+<p>The next section of code configures the clocking and the source
+streams the demo will transmit. Firstly, as mentioned earlier in the
+walkthrough, this demo has one media clock which is derived from the
+global PTP clock. This allows all endpoints to run a talker and
+listener on the same clock with a minimum of configuration. Another
+possible scheme would be for every endpoint to have a media clock that
+is derived from the same AVB stream.</p>
+<div class="highlight-none"><div class="highlight"><pre>//printstr(&quot;Media clock: LOCAL\n&quot;);
+//set_device_media_clock_type(0, MEDIA_FIFO_DERIVED);
+set_device_media_clock_type(0, LOCAL_CLOCK);
+//set_device_media_clock_type(0, PTP_DERIVED);
+set_device_media_clock_rate(0, SAMPLE_RATE);
+set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_ENABLED);
+
+// Configure the source stream
+set_avb_source_name(0, &quot;multi channel stream out&quot;);
+
+set_avb_source_channels(0, AVB_NUM_MEDIA_INPUTS);
+for (int i = 0; i &lt; AVB_NUM_MEDIA_INPUTS; i++)
+	map[i] = i;
+set_avb_source_map(0, map, AVB_NUM_MEDIA_INPUTS);
+set_avb_source_format(0, AVB_SOURCE_FORMAT_MBLA_24BIT, SAMPLE_RATE);
+set_avb_source_sync(0, 0); // use the media_clock defined above
+</pre></div>
+</div>
+<p>After the initial configuration the application enters its main
+control loop. This is in the standard XC form of a &#8220;while (1), select&#8221;
+loop. The loop iterates and at each point selects one of the case
+statements to handle. The cases may be activated by an incoming packet, a
+timer event for periodic processing or some communication from the
+<tt class="docutils literal"><span class="pre">gpio</span></tt> thread.</p>
+<div class="highlight-none"><div class="highlight"><pre>while (1) {
+   ...
+   select {
+      case ...
+         break;
+      case ...
+         break;
+      ...
+   }
+}
+</pre></div>
+</div>
+<p>The first case handled is an incoming AVB control packet from the
+MAC. The <a class="reference internal" href="avb_general_api.html#avb_get_control_packet" title="avb_get_control_packet"><span>avb_get_control_packet()</span></a> function fires to this case
+and places the packet in the array <tt class="docutils literal"><span class="pre">buf</span></tt>.</p>
+<div class="highlight-none"><div class="highlight"><pre>case avb_get_control_packet(c_rx, buf, nbytes):
+</pre></div>
+</div>
+<p>This packet may be an 802.1Qat packet or a 1722 MAAP packet. First we
+pass it to the AVB packet handler (it will ignore the packet
+if it is not a relevant protocol).</p>
+<div class="highlight-none"><div class="highlight"><pre>avb_status = avb_process_control_packet(buf, nbytes, c_tx);
+switch (avb_status)
+{
+	case AVB_SRP_TALKER_ROUTE_FAILED:
+	avb_srp_get_failed_stream(streamId);
+	// handle a routing failure here
+	break;
+	case AVB_SRP_LISTENER_ROUTE_FAILED:
+	avb_srp_get_failed_stream(streamId);
+	// handle a routing failure here
+	break;
+	case AVB_MAAP_ADDRESSES_LOST:
+	// oh dear, someone else is using our multicast address
+	for (int i=0;i&lt;AVB_NUM_SOURCES;i++)
+	set_avb_source_state(i, AVB_SOURCE_STATE_DISABLED);
+
+	// request a different address
+	avb_1722_maap_request_addresses(AVB_NUM_SOURCES, null);
+	break;
+	default:
+	break;
+</pre></div>
+</div>
+<p>This result of this processing may be a report of a failed route which
+in this application is just ignored. Alternatively, the result may be
+that we have lost our reserved
+addresses (since some other node on the network has a claim to
+them). In this case we request new address for our streams.</p>
+<p>The next event the main loop responds to is an incoming TCP/IP packet.</p>
+<div class="highlight-none"><div class="highlight"><pre>case xtcp_event(tcp_svr, conn):
+{
+	if (conn.event == XTCP_IFUP)
+	{
+		avb_start();
+
+		// Request a multicast addresses for stream transmission
+		avb_1722_maap_request_addresses(AVB_NUM_SOURCES, null);
+	}
+	else if (conn.event == XTCP_IFDOWN)
+	{
+		for(int i=0; i&lt;AVB_NUM_SOURCES; i++)
+		{
+			set_avb_source_state(i, AVB_SOURCE_STATE_DISABLED);
+		}
+	}
+
+	{
+		mdns_event res;
+		res = mdns_xtcp_handler(tcp_svr, conn);
+		if (res &amp; mdns_entry_lost)
+		{
+			printstr(&quot;Media clock: FIFO\n&quot;);
+			set_device_media_clock_type(0, MEDIA_FIFO_DERIVED);
+		}
+	}
+
+	c_api_xtcp_handler(tcp_svr, conn);
+
+	// add any special tcp/ip packet handling here
+}
+break;
+</pre></div>
+</div>
+<p>Here, two handlers are called. One to handle any Zeroconf packets and
+one to handle any control protocol packets. The control protocol
+packets are used to communicate with the Atterotech PC control
+application. The code used to do this within the firmware is in the
+module <tt class="docutils literal"><span class="pre">module_avb_attero_cfg</span></tt>.</p>
+<p>The <tt class="docutils literal"><span class="pre">gpio</span></tt> thread controls the buttons on the device. It can signal
+the main control thread of certain events. The next case handles this:</p>
+<div class="highlight-none"><div class="highlight"><pre>case c_gpio_ctl :&gt; int cmd:
+{
+	switch (cmd)
+	{
+		case STREAM_SEL:
+		change_stream = 1;
+		break;
+		case CHAN_SEL:
+		{
+			enum avb_sink_state_t cur_state;
+
+			c_gpio_ctl :&gt; selected_chan;
+			get_avb_sink_state(0, cur_state);
+			set_avb_sink_state(0, AVB_SINK_STATE_DISABLED);
+			for (int j=0;j&lt;AVB_NUM_MEDIA_INPUTS;j++)
+			map[j] = (j+selected_chan*2) &amp; 0x7;
+			set_avb_sink_map(0, map, AVB_NUM_MEDIA_INPUTS);
+			if (cur_state != AVB_SINK_STATE_DISABLED)
+			set_avb_sink_state(0, AVB_SINK_STATE_POTENTIAL);
+		}
+		break;
+	}
+}
+break;
+</pre></div>
+</div>
+<p>One possibility is that the <tt class="docutils literal"><span class="pre">STREAM_SEL</span></tt> button is pressed to
+change the stream being listened to. This just sets the
+<tt class="docutils literal"><span class="pre">change_stream</span></tt> variable to be passed to the stream manager of the
+application later.</p>
+<p>The other possibility is that the <tt class="docutils literal"><span class="pre">CHAN_SEL</span></tt> button is pressed which
+changes the channels being listened to within the stream. This
+disables the listener sink, reconfigures the mapping between the
+incoming stream and the output FIFOs and then re-enables the stream.</p>
+<p>The final event that can be responded to is a periodic event that
+occurs via an XCore timer. This event happens once every 50us.</p>
+<div class="highlight-none"><div class="highlight"><pre>case tmr when timerafter(timeout) :&gt; void:
+timeout += PERIODIC_POLL_TIME;
+
+do
+{
+	avb_status = avb_periodic();
+	switch (avb_status)
+	{
+		case AVB_MAAP_ADDRESSES_RESERVED:
+		for(int i=0;i&lt;AVB_NUM_SOURCES;i++) {
+			avb_1722_maap_get_offset_address(macaddr, i);
+			// activate the source
+			set_avb_source_dest(i, macaddr, 6);
+			set_avb_source_state(i, AVB_SOURCE_STATE_POTENTIAL);
+		}
+		break;
+	}
+} while (avb_status != AVB_NO_STATUS);
+</pre></div>
+</div>
+<p>The <a class="reference internal" href="avb_general_api.html#avb_periodic" title="avb_periodic"><span>avb_periodic()</span></a> function performs general AVB periodic
+processing and may return a report that the MAAP addresses that were
+requested have been allocated. At this point we can set the
+destination of the talker stream and enable it.</p>
+<p>The other piece of periodic processing is to call the demo&#8217;s stream
+manager. This is a function contained in <tt class="docutils literal"><span class="pre">demo_stream_manager.xc</span></tt>,
+which manages the streams that have been seen and the stream that is being
+listened to.</p>
+<div class="highlight-none"><div class="highlight"><pre>demo_manage_listener_stream(change_stream, selected_chan);
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-demo-stream-manager">
+<h2>The demo stream manager<a class="headerlink" href="#the-demo-stream-manager" title="Permalink to this headline">¶</a></h2>
+<p>The demo stream manager is contained in the file
+<tt class="docutils literal"><span class="pre">demo_stream_manager.xc</span></tt>. It maintains a table of streams that have
+been seen in the array <tt class="docutils literal"><span class="pre">stream_table</span></tt>. A stream is first seen
+via the function <a class="reference internal" href="avb_general_api.html#avb_check_for_new_stream" title="avb_check_for_new_stream"><span>avb_check_for_new_stream()</span></a>.</p>
+<div class="highlight-none"><div class="highlight"><pre>res = avb_check_for_new_stream(streamId, vlan, addr);
+      
+</pre></div>
+</div>
+<p>If there is no current stream and a new stream is seen, or if the
+<tt class="docutils literal"><span class="pre">change_stream</span></tt> variable is set (due to a button press, see the
+preceding Section), then the current listened to stream is updated.
+This is done by reconfiguring the sink in this section of code:</p>
+<div class="highlight-none"><div class="highlight"><pre>curStreamId[0] = new_hi;
+curStreamId[1] = new_lo;
+simple_printf(&quot;Mapping %x%x ---&gt; %d\n&quot;, 
+              curStreamId[0],
+              curStreamId[1],
+              0);
+
+for (int j=0;j&lt;8;j++)
+  map[j] = (j+selected_chan*2) &amp; 0x7;
+
+set_avb_sink_sync(0, 0);
+set_avb_sink_channels(0, 8);
+set_avb_sink_map(0, map, 8);
+set_avb_sink_state(0, AVB_SINK_STATE_DISABLED);
+set_avb_sink_id(0, curStreamId);
+set_avb_sink_vlan(0, new_vlan);
+set_avb_sink_addr(0, addr, 6);
+set_avb_sink_state(0, AVB_SINK_STATE_POTENTIAL);
+
+change_stream = 0;
+</pre></div>
+</div>
+</div>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" id='d2'>
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">XMOS AVB Design Guide (5.1.0)</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="hw.html">Hardware development platforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="system.html">System Description</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="programming.html">Programming Guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="structure.html">Source code structure</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">An XMOS AVB application (tutorial)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#avb-conf-h">avb_conf.h</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-toplevel-main">The toplevel main</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-main-control-thread">The main control thread</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-demo-stream-manager">The demo stream manager</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="modification.html">Creating custom applications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modification.html#board-design">Board Design</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bandwidth.html">IEEE 1722 Bandwidth Usage</a></li>
+</ul>
+
+<div id="searchbox" style="display: none;margin-bottom: 10px;">
+  <h3>Search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+
+
+    <div class="footer">
+    </div>
+  </body>
+</html>
+
+
+

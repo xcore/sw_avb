@@ -1,0 +1,211 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>MDNS/Bonjour API &mdash; XMOS AVB Design Guide v5.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/xdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '5.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://mathjax.connectmv.com/MathJax.js"></script>
+    <script type="text/javascript" src="_static/xcomment.js"></script>
+    <link rel="top" title="XMOS AVB Design Guide v5.1.0 documentation" href="index.html" />
+    <link rel="up" title="API Reference" href="api.html" />
+    <link rel="next" title="IEEE 1722 Bandwidth Usage" href="bandwidth.html" />
+    <link rel="prev" title="PTP Client API" href="ptp_api.html" /> 
+
+<script>
+function setheight() {
+h1 = document.getElementById('d1').style.height;
+h2 = document.getElementById('d2').style.height;
+
+if (parseInt(h1) > parseInt(h2)) {
+document.getElementById('d2').style.height=h1 + "px";
+}
+else {
+document.getElementById('d1').style.height=h2 + "px";
+}
+
+}
+</script>
+</head>
+
+<body onload="setheight();">
+
+  
+
+    <div class="document" id='d1'>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+<div style="float: right">
+<a href="ptp_api.html"
+                        title="previous chapter"> &lt&lt </a>
+<a href="bandwidth.html"
+                        title="next chapter"> &gt&gt </a></p>
+</div>
+
+            
+  <div class="section" id="mdns-bonjour-api">
+<span id="sec-mdns-api"></span><h1>MDNS/Bonjour API<a class="headerlink" href="#mdns-bonjour-api" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="mdns_init">
+void <tt class="descname">mdns_init</tt><big>(</big>chanend<em>&nbsp;tcp_svr</em><big>)</big><a class="headerlink" href="#mdns_init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize Zeroconf.</p>
+<p>This function should be called before any other mdns functions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>tcp_svr</strong> &#8211; chanend connected to the xtcp server</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mdns_xtcp_handler">
+mdns_event <tt class="descname">mdns_xtcp_handler</tt><big>(</big>chanend<em>&nbsp;tcp_svr</em>, xtcp_connection_t<em>&nbsp;&amp;conn</em><big>)</big><a class="headerlink" href="#mdns_xtcp_handler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle a mdns TCP/IP event.</p>
+<p>This function will process a tcp/ip event (following a call to <tt class="xref c c-func docutils literal"><span class="pre">xtcp_event()</span></tt>). If the related connection is an MDNS connection it will handle the packet and set the connection event to <tt class="docutils literal"><span class="pre">ALREADY_HANDLED</span></tt>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>tcp_svr</strong> &#8211; chanend connected to the TCP/IP server.</li>
+<li><strong>conn</strong> &#8211; the connection data structure filled in by <tt class="xref c c-func docutils literal"><span class="pre">xtcp_event()</span></tt></li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">one of several constants describing events that have occurred</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mdns_register_name">
+void <tt class="descname">mdns_register_name</tt><big>(</big>char<em>&nbsp;name[]</em><big>)</big><a class="headerlink" href="#mdns_register_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a name for the host.</p>
+<p>This function registers a name for the host. After this call the zeroconf protocol will try and reserve this name. After that point you can refer to the host on the network with this name.</p>
+<p>If the name is already reserved by another node on the network, a unique number will be added to the name. For example, if the name &#8220;xc2.local&#8221; was requested and already exists on the network. The library will try and reserver &#8220;xc2-1.local&#8221; and then &#8220;xc2-2.local&#8221; etc.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> &#8211; the name to register</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mdns_register_canonical_name">
+void <tt class="descname">mdns_register_canonical_name</tt><big>(</big>char<em>&nbsp;name[]</em><big>)</big><a class="headerlink" href="#mdns_register_canonical_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register the canonical name for the host.</p>
+<p>This function registers the canonical name (i.e. the name returned as response to PTR requests) for the host.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> &#8211; the name to register</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mdns_register_service">
+void <tt class="descname">mdns_register_service</tt><big>(</big>char<em>&nbsp;name[]</em>, char<em>&nbsp;srv_type[]</em>, int<em>&nbsp;srv_port</em>, char<em>&nbsp;txt[]</em><big>)</big><a class="headerlink" href="#mdns_register_service" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a Zeroconf service.</p>
+<p>This function registers a service to advertise.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> &#8211; a human readable name of the service instance e.g. &#8220;My Web Server&#8221;</li>
+<li><strong>srv_type</strong> &#8211; the type of the service &#8220;_http._tcp&#8221;</li>
+<li><strong>srv_port</strong> &#8211; the port the service is to be advertised on</li>
+<li><strong>txt</strong> &#8211; the associated TXT record of the service.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" id='d2'>
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">XMOS AVB Design Guide (5.1.0)</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="hw.html">Hardware development platforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="system.html">System Description</a></li>
+<li class="toctree-l1"><a class="reference internal" href="programming.html">Programming Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="defines_api.html">Configuration Defines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="component_api.html">Component functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="avb_api.html">AVB API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ptp_api.html">PTP Client API</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">MDNS/Bonjour API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bandwidth.html">IEEE 1722 Bandwidth Usage</a></li>
+</ul>
+
+<div id="searchbox" style="display: none;margin-bottom: 10px;">
+  <h3>Search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+
+
+    <div class="footer">
+    </div>
+  </body>
+</html>
+
+
+

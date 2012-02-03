@@ -1,0 +1,502 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Resource Usage &mdash; XMOS AVB Design Guide v5.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/xdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '5.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://mathjax.connectmv.com/MathJax.js"></script>
+    <script type="text/javascript" src="_static/xcomment.js"></script>
+    <link rel="top" title="XMOS AVB Design Guide v5.1.0 documentation" href="index.html" />
+    <link rel="up" title="System Description" href="system.html" />
+    <link rel="next" title="Choosing the right chip" href="chip.html" />
+    <link rel="prev" title="Configuration and application threads" href="config.html" /> 
+
+<script>
+function setheight() {
+h1 = document.getElementById('d1').style.height;
+h2 = document.getElementById('d2').style.height;
+
+if (parseInt(h1) > parseInt(h2)) {
+document.getElementById('d2').style.height=h1 + "px";
+}
+else {
+document.getElementById('d1').style.height=h2 + "px";
+}
+
+}
+</script>
+</head>
+
+<body onload="setheight();">
+
+  
+
+    <div class="document" id='d1'>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+<div style="float: right">
+<a href="config.html"
+                        title="previous chapter"> &lt&lt </a>
+<a href="chip.html"
+                        title="next chapter"> &gt&gt </a></p>
+</div>
+
+            
+  <div class="section" id="resource-usage">
+<span id="sec-resource"></span><h1>Resource Usage<a class="headerlink" href="#resource-usage" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="available-chip-resources">
+<h2>Available Chip Resources<a class="headerlink" href="#available-chip-resources" title="Permalink to this headline">¶</a></h2>
+<p>Each XMOS device has a set of resources detailed in the following
+table. The resources are split amongst different cores on the device
+which may affect how resources can be used:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="26%" />
+<col width="19%" />
+<col width="19%" />
+<col width="19%" />
+<col width="19%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Device</th>
+<th class="head">Threads</th>
+<th class="head">MIPS</th>
+<th class="head">Memory (KB)</th>
+<th class="head">Ports</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>XS1-G4-512BGA</td>
+<td>32</td>
+<td>1600</td>
+<td>256</td>
+<td><div class="first last line-block">
+<div class="line">64 x 1bit</div>
+<div class="line">16 x 4bit</div>
+<div class="line">8 x 16bit</div>
+<div class="line">4 x 32bit</div>
+</div>
+</td>
+</tr>
+<tr><td>XS1-L2-124QFN-C5</td>
+<td>16</td>
+<td>500</td>
+<td>128</td>
+<td><div class="first last line-block">
+<div class="line">16 x 1bit</div>
+<div class="line">6 x 4bit</div>
+<div class="line">4 x 8bit</div>
+<div class="line">2 x 16bit</div>
+</div>
+</td>
+</tr>
+<tr><td>XS1-L2-124QFN-C4</td>
+<td>16</td>
+<td>400</td>
+<td>128</td>
+<td><div class="first last line-block">
+<div class="line">16 x 1bit</div>
+<div class="line">6 x 4bit</div>
+<div class="line">4 x 8bit</div>
+<div class="line">2 x 16bit</div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Note that some ports overlap on the device so, for example,
+using a 32 bit port makes some 1 bit ports unavailable. See
+the device datasheets for details.</p>
+</div>
+<p>The following sections detail the resource required for each
+component. Please note that the memory requirements for code size
+should be taken as a rough guide since exact memory usage depends
+on the integration of components (which components are on which
+core etc.) in the final build of the application.</p>
+</div>
+<div class="section" id="ethernet-component">
+<h2>Ethernet Component<a class="headerlink" href="#ethernet-component" title="Permalink to this headline">¶</a></h2>
+<p>Each endpoint requires a driver for the ethernet PHY.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Component</th>
+<th class="head">Threads</th>
+<th class="head">MIPS/Thread</th>
+<th class="head">Memory (KB)</th>
+<th class="head">Ports</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>Ethernet</td>
+<td>5</td>
+<td>50</td>
+<td><div class="first last line-block">
+<div class="line">15 code</div>
+<div class="line">1.5 per buffer</div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">6 x 1bit</div>
+<div class="line">2 x 4bit</div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="ptp-component">
+<h2>PTP Component<a class="headerlink" href="#ptp-component" title="Permalink to this headline">¶</a></h2>
+<p>Every AVB endpoint must include a PTP component.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Component</th>
+<th class="head">Threads</th>
+<th class="head">MIPS/Thread</th>
+<th class="head">Memory (KB)</th>
+<th class="head">Ports</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>PTP</td>
+<td>1</td>
+<td>50</td>
+<td>7</td>
+<td>None</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="media-clock-server">
+<h2>Media Clock Server<a class="headerlink" href="#media-clock-server" title="Permalink to this headline">¶</a></h2>
+<p>Every AVB endpoint must include a media clock server.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Component</th>
+<th class="head">Threads</th>
+<th class="head">MIPS/Thread</th>
+<th class="head">Memory (KB)</th>
+<th class="head">Ports</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>Media Clock Server</td>
+<td>1</td>
+<td>50</td>
+<td>1</td>
+<td>None</td>
+</tr>
+</tbody>
+</table>
+<p>If the endpoint drives an external PLL, a PLL driver component
+is required.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Component</th>
+<th class="head">Threads</th>
+<th class="head">MIPS/Thread</th>
+<th class="head">Memory (KB)</th>
+<th class="head">Ports</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>PLL driver</td>
+<td>1</td>
+<td>50</td>
+<td>0.5</td>
+<td><div class="first last line-block">
+<div class="line">1 x 1bit</div>
+<div class="line">+ ports to configure PLL</div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="audio-component-s">
+<h2>Audio Component(s)<a class="headerlink" href="#audio-component-s" title="Permalink to this headline">¶</a></h2>
+<p>Each endpoint may have several listener and talker components. Each
+listener/talker component is capable of handling eight IEEE P1722
+streams and up to 24 channels of audio.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="25%" />
+<col width="14%" />
+<col width="21%" />
+<col width="21%" />
+<col width="18%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Component</th>
+<th class="head">Threads</th>
+<th class="head">MIPS/Thread</th>
+<th class="head">Memory (KB)</th>
+<th class="head">Ports</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>1722 listener unit</td>
+<td>1</td>
+<td>50</td>
+<td>5</td>
+<td>None</td>
+</tr>
+<tr><td>1722 talker unit</td>
+<td>1</td>
+<td>50</td>
+<td>5</td>
+<td>None</td>
+</tr>
+</tbody>
+</table>
+<p>The amount of resource required for audio processing depends on the
+interface and the number of audio channels required. The overheads
+for the interface are:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="18%" />
+<col width="13%" />
+<col width="20%" />
+<col width="18%" />
+<col width="30%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Component</th>
+<th class="head">Threads</th>
+<th class="head">MIPS/Thread</th>
+<th class="head">Memory(KB)</th>
+<th class="head">Ports</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>I2S</td>
+<td>1</td>
+<td>50</td>
+<td>0.5</td>
+<td><div class="first last line-block">
+<div class="line">3 x 1bit</div>
+<div class="line">1 x 1bit per stereo channel</div>
+</div>
+</td>
+</tr>
+<tr><td>TDM</td>
+<td>1</td>
+<td>50</td>
+<td>0.5</td>
+<td><div class="first last line-block">
+<div class="line">3 x 1bit</div>
+<div class="line">1 x 1bit per 8 channels</div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The following table shows that number of channels an interface can
+handle per thread:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Component</th>
+<th class="head">Sample Rate (kHz)</th>
+<th class="head">Channels</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>I2S</td>
+<td>44.1/48</td>
+<td>8 in and 8 out</td>
+</tr>
+<tr><td>I2S</td>
+<td>88.2/96</td>
+<td>4 in and 4 out</td>
+</tr>
+<tr><td>TDM</td>
+<td>48</td>
+<td>8 in and 8 out</td>
+</tr>
+</tbody>
+</table>
+<p>Note that several instances of the audio interface component
+can be made <em>e.g.</em> you could use 2 threads to handle 16 channels
+of I2S. The following table shows how much buffering
+memory is required depending on the number of audio channels.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Sample Rate (kHz)</th>
+<th class="head">Audio Channels</th>
+<th class="head">Memory (KB)</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>44.1</td>
+<td>n in/m out</td>
+<td>0.5 x (n+m)</td>
+</tr>
+<tr><td>48</td>
+<td>n in/m out</td>
+<td>0.5 x (n+m)</td>
+</tr>
+<tr><td>88.2</td>
+<td>n in/m out</td>
+<td>1 x (n+m)</td>
+</tr>
+<tr><td>96</td>
+<td>n in/m out</td>
+<td>1 x (n+m)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="tcp-stack">
+<h2>TCP Stack<a class="headerlink" href="#tcp-stack" title="Permalink to this headline">¶</a></h2>
+<p>The uIP IP/UDP/TCP stack requires the following resource.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Component</th>
+<th class="head">Threads</th>
+<th class="head">MIPS/Thread</th>
+<th class="head">Memory (KB)</th>
+<th class="head">Ports</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>uIP server</td>
+<td>1</td>
+<td>50</td>
+<td>30</td>
+<td>None</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="configuration-control">
+<h2>Configuration/Control<a class="headerlink" href="#configuration-control" title="Permalink to this headline">¶</a></h2>
+<p>In addition to the other components
+there are application dependant threads that control
+other I/O. For general configuration and slow I/O a minimum of
+1 thread (50 MIPS) should be reserved.</p>
+</div>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" id='d2'>
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">XMOS AVB Design Guide (5.1.0)</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="hw.html">Hardware development platforms</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="system.html">System Description</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="architecture.html">System Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mac.html">Ethernet MAC Component</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ptp.html">Precise Timing Protocol Component</a></li>
+<li class="toctree-l2"><a class="reference internal" href="audio.html">Audio Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="clocking.html">Media Clocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config.html">Configuration and application threads</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">Resource Usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#available-chip-resources">Available Chip Resources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ethernet-component">Ethernet Component</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ptp-component">PTP Component</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#media-clock-server">Media Clock Server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#audio-component-s">Audio Component(s)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tcp-stack">TCP Stack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configuration-control">Configuration/Control</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="chip.html">Choosing the right chip</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="programming.html">Programming Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bandwidth.html">IEEE 1722 Bandwidth Usage</a></li>
+</ul>
+
+<div id="searchbox" style="display: none;margin-bottom: 10px;">
+  <h3>Search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+
+
+    <div class="footer">
+    </div>
+  </body>
+</html>
+
+
+
