@@ -1,7 +1,0 @@
-Appendices
-++++++++++
-
-.. toctree::
-
-   bandwidth
-   references   
