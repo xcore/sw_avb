@@ -1,10 +1,10 @@
 #ifndef __AVB_1722_MAAP_PROTOCOL_H__
 #define __AVB_1722_MAAP_PROTOCOL_H__
 
-#define MAAP_ALLOCATED_ADDRESS_RANGE_LOW  {0x01, 0x50, 0x43, 0xff, 0x00, 0x01}
-#define MAAP_ALLOCATED_ADDRESS_RANGE_HIGH {0x01, 0x50, 0x43, 0xff, 0xff, 0xff}
+#define MAAP_ALLOCATED_ADDRESS_RANGE_LOW  {0x91, 0xE0, 0xF0, 0x00, 0x00, 0x00}
+#define MAAP_ALLOCATED_ADDRESS_RANGE_HIGH {0x91, 0xE0, 0xF0, 0x00, 0xFD, 0xFF}
 
-#define MAAP_PROTOCOL_ADDRESS {0x01, 0x50, 0x43, 0xff, 0x00, 0x00}
+#define MAAP_PROTOCOL_ADDRESS {0x91, 0xE0, 0xF0, 0x00, 0xFF, 0x00}
 
 //#define MAAP_PROTOCOL_ADDRESS {0xff, 0xff, 0xff, 0xff, 0xff, 0xff}
 
@@ -38,7 +38,7 @@ enum maap_message_type_t {
 #define DEFAULT_MAAP_CD_FLAG (1)
 #define DEFAULT_MAAP_SUBTYPE (0x7e)
 #define DEFAULT_MAAP_AVB_VERSION (0x0)
-#define DEFAULT_MAAP_VERSION (0x0)
+#define DEFAULT_MAAP_VERSION (0x1)
 
 #define GET_MAAP_CD_FLAG(pkt) (pkt->cd_subtype >> 7)
 #define GET_MAAP_SUBTYPE(pkt) (pkt->cd_subtype & 0x7f)
@@ -48,7 +48,7 @@ enum maap_message_type_t {
 #define GET_MAAP_VERSION(pkt) (pkt->maap_version_data_length_hi & 0xf8 >> 3)
 #define GET_MAAP_DATALENGTH(pkt) \
    (((pkt->maap_version_data_length_hi & 0x7) << 8) + \
-          ((pkt->data_length_lo) << 8))
+          (pkt->data_length_lo))
 
 #define GET_MAAP_CONFLICT_COUNT(pkt) ((pkt->conflict_count[0] + (pkt->conflict_count[1]<<8)))
 
