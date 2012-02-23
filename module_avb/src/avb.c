@@ -231,14 +231,16 @@ void avb_init(chanend media_ctl[],
   mac_set_custom_filter(c_mac_rx, MAC_FILTER_AVB_CONTROL);
 }
 
-avb_status_t avb_periodic(void) {
-	avb_status_t res = mrp_periodic();
-	if (res != AVB_NO_STATUS) return res;
+void avb_periodic(avb_status_t *status)
+{
+	mrp_periodic(status);
+	if (status->type != AVB_NO_STATUS) return;
 #ifdef AVB_ENABLE_1722_1
-	res = avb_1722_1_periodic(c_mac_tx, c_ptp);
-	if (res != AVB_NO_STATUS) return res;
+	avb_1722_1_periodic(status, c_mac_tx, c_ptp);
+	if (status->type != AVB_NO_STATUS) return;
 #endif
-	return avb_1722_maap_periodic(c_mac_tx);
+  avb_1722_maap_periodic(status, c_mac_tx);
+	return;
 }
 
 void avb_start(void) {
@@ -946,25 +948,23 @@ void avb_set_legacy_mode(int mode)
   avb_mrp_set_legacy_mode(mode);
 }
 
-avb_status_t avb_process_control_packet(unsigned int buf[], 
+void avb_process_control_packet(avb_status_t *status, 
+                                        unsigned int buf[], 
                                         int nbytes,
                                         chanend c_tx)
 {
-  avb_status_t status;
 
-  status = avb_mrp_process_packet(buf, nbytes);
-  if (status != AVB_SRP_OK && status != AVB_NO_STATUS)
-    return status;
+  avb_mrp_process_packet(status, buf, nbytes);
+  if (status->info.srp.msg != AVB_SRP_OK && status->type != AVB_NO_STATUS)
+    return;
 
 #ifdef AVB_ENABLE_1722_1
-  status = avb_1722_1_process_packet(buf, nbytes, c_tx);
-  if (status != AVB_SRP_OK && status != AVB_NO_STATUS)
-    return status;
+  avb_1722_1_process_packet(status, buf, nbytes, c_tx);
+  if (status->info.a1722_1.msg != AVB_1722_1_OK && status->type != AVB_NO_STATUS)
+    return;
 #endif
 
-  status = avb_1722_maap_process_packet_(buf, nbytes, c_tx);
-
-  return status;
+  avb_1722_maap_process_packet(status, buf, nbytes, c_tx);
 }
 
 

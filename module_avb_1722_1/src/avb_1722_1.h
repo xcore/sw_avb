@@ -22,13 +22,13 @@ void avb_1722_1_init(unsigned char macaddr[6], unsigned char serial_number[2]);
  *
  *  This function performs periodic processing. It must be called frequently
  */
-avb_status_t avb_1722_1_periodic(chanend tx, chanend c_ptp);
+void avb_1722_1_periodic(avb_status_t *status, chanend c_tx, chanend c_ptp);
 
 /** \fn avb_1722_1_process_packet
  *
  *  Process a received 1722_1 packet
  */
-avb_status_t avb_1722_1_process_packet(unsigned int buf[], int len, chanend c_tx);
+void avb_1722_1_process_packet(avb_status_t *status, unsigned int buf[], int len, chanend c_tx);
 
 #endif
 

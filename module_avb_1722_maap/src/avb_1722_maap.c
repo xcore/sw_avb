@@ -230,12 +230,11 @@ int current_time_to_milliseconds(int current_time)
   return time_ms;
 }
 
-int avb_1722_maap_periodic(chanend c_tx)
+void avb_1722_maap_periodic(avb_status_t *status, chanend c_tx)
 {
-  int status;
   int nbytes;
   int current_time = current_time_to_milliseconds(get_local_time());
-  status = AVB_NO_STATUS;
+  status->type = AVB_NO_STATUS;
   switch (maap_addr.state) 
     {
     case MAAP_DISABLED:
@@ -254,7 +253,8 @@ int avb_1722_maap_periodic(chanend c_tx)
 
         if (maap_addr.count == 0) {
           maap_addr.state = MAAP_RESERVED;
-          status = AVB_MAAP_ADDRESSES_RESERVED;
+          status->type = AVB_MAAP;
+          status->info.maap.msg = AVB_MAAP_ADDRESSES_RESERVED;
           maap_addr.immediately = 1;
         }
         else {
@@ -283,7 +283,7 @@ int avb_1722_maap_periodic(chanend c_tx)
       }
       break;
     } 
-  return status;
+  return;
 }
 
 static int maap_conflict(maap_address_range* addr,
@@ -327,68 +327,73 @@ static int maap_conflict(maap_address_range* addr,
   return 0;
 }
 
-avb_status_t avb_1722_maap_process_packet_(unsigned int buf0[], 
+void avb_1722_maap_process_packet(avb_status_t *status, unsigned int buf0[], 
                                  int nbytes,
                                  chanend c_tx)
 {
   unsigned char *buf = (unsigned char *) buf0;
   int msg_type;
   struct ethernet_hdr_t *ethernet_hdr = (ethernet_hdr_t *) &buf[0];
-  struct tagged_ethernet_hdr_t *tagged_ethernet_hdr = 
-    (tagged_ethernet_hdr_t *) &buf[0];
+  struct tagged_ethernet_hdr_t *tagged_ethernet_hdr = (tagged_ethernet_hdr_t *) &buf[0];
 
   int has_qtag = ethernet_hdr->ethertype[1]==0x18;
   int ethernet_pkt_size = has_qtag ? 18 : 14;
   unsigned char conflict_addr[6];
   int conflict_count;
-  struct maap_packet_t *maap_pkt = 
-    (struct maap_packet_t *) &buf[ethernet_pkt_size];
+  struct maap_packet_t *maap_pkt = (struct maap_packet_t *) &buf[ethernet_pkt_size];
 
-  if (has_qtag) {
+  status->type = AVB_NO_STATUS;
+
+  if (has_qtag)
+  {
     if (tagged_ethernet_hdr->ethertype[1] != (AVB_ETYPE & 0xff) ||
         tagged_ethernet_hdr->ethertype[0] != (AVB_ETYPE >> 8)) 
       {
         // not a 1722 packet
-        return AVB_NO_STATUS;
+        return; // AVB_NO_STATUS
       }       
   }
-  else {
-    if (ethernet_hdr->ethertype[1] != (AVB_ETYPE & 0xff) ||
+  else if (ethernet_hdr->ethertype[1] != (AVB_ETYPE & 0xff) ||
         ethernet_hdr->ethertype[0] != (AVB_ETYPE >> 8)) 
-      {
-        // not a 1722 packet
-        return AVB_NO_STATUS;
-      }
+  {
+    // not a 1722 packet
+    return; // AVB_NO_STATUS
   }
 
 
   if (GET_MAAP_CD_FLAG(maap_pkt) != 1 ||
       GET_MAAP_SUBTYPE(maap_pkt) != 0x7e)
+  {
     // not a maap packet
-    return AVB_NO_STATUS;
+    return; // AVB_NO_STATUS
+  }
 
   if (maap_addr.state == MAAP_DISABLED)
-    return AVB_NO_STATUS;
+  {
+    return; // AVB_NO_STATUS
+  }
 
   msg_type = GET_MAAP_MSG_TYPE(maap_pkt);
 
   switch (msg_type)
-    {
-    case MAAP_PROBE:
-      if (maap_conflict(&maap_addr, maap_pkt, conflict_addr, &conflict_count)) {
-        int len;
-        len = create_maap_packet(MAAP_DEFEND, &maap_addr, (char*) &maap_buf[0],
-                                 conflict_addr, conflict_count);
-        mac_tx(c_tx, maap_buf, len, ETH_BROADCAST);
-      }
-      break;
-    case MAAP_ANNOUNCE:
-      if (maap_conflict(&maap_addr, maap_pkt, NULL, NULL)) {
-        maap_addr.state = MAAP_DISABLED;
-        return AVB_MAAP_ADDRESSES_LOST;
-      }
-      break;
+  {
+  case MAAP_PROBE:
+    if (maap_conflict(&maap_addr, maap_pkt, conflict_addr, &conflict_count)) {
+      int len;
+      len = create_maap_packet(MAAP_DEFEND, &maap_addr, (char*) &maap_buf[0],
+                               conflict_addr, conflict_count);
+      mac_tx(c_tx, maap_buf, len, ETH_BROADCAST);
     }
-  return AVB_NO_STATUS;
+    break;
+  case MAAP_ANNOUNCE:
+    if (maap_conflict(&maap_addr, maap_pkt, NULL, NULL)) {
+      maap_addr.state = MAAP_DISABLED;
+      status->type = AVB_MAAP;
+      status->info.maap.msg = AVB_MAAP_ADDRESSES_LOST;
+      return;
+    }
+    break;
+  }
+  return; // AVB_NO_STATUS
 }
 

@@ -39,12 +39,12 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
    int num_channels = stream_info->num_channels;
    media_output_fifo_t *map = &stream_info->map[0];
    int stride;   
-#if !AVB_1722_FORMAT_SAF
+#ifndef AVB_1722_FORMAT_SAF
   int dbc_diff;
 #endif
 
    // sanity check on number bytes in payload
-#if AVB_1722_FORMAT_SAF
+#ifdef AVB_1722_FORMAT_SAF
    if (numBytes <= avb_ethernet_hdr_size + AVB_TP_HDR_SIZE)
 #else
    if (numBytes <= avb_ethernet_hdr_size + AVB_TP_HDR_SIZE + AVB_CIP_HDR_SIZE)
@@ -62,7 +62,7 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
    }
 
 
-#if !AVB_1722_FORMAT_SAF
+#ifndef AVB_1722_FORMAT_SAF
    dbc_value = (int) pAVB1722Hdr->DBC;
    dbc_diff = dbc_value - stream_info->dbc;
    stream_info->dbc = dbc_value;
@@ -71,7 +71,7 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
 #endif
 
    pktDataLength = NTOH_U16(pAVBHdr->packet_data_length);
-#if AVB_1722_FORMAT_SAF
+#ifdef AVB_1722_FORMAT_SAF
    num_samples_in_payload = pktDataLength>>2;
 #else
    num_samples_in_payload = (pktDataLength-8)>>2;
@@ -84,12 +84,12 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
    {
      int num_channels;
 
-#if !AVB_1722_FORMAT_SAF
+#ifndef AVB_1722_FORMAT_SAF
    if (!prev_num_samples || dbc_diff == 0)
        return 0;
 #endif
      
-#if AVB_1722_FORMAT_SAF
+#ifdef AVB_1722_FORMAT_SAF
      num_channels = AVBTP_PROTOCOL_SPECIFIC(pAVBHdr);
 #else
      num_channels = prev_num_samples / dbc_diff;
@@ -107,7 +107,7 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
        
      stream_info->chan_lock++;
 
-#if !AVB_1722_FORMAT_SAF
+#ifndef AVB_1722_FORMAT_SAF
      if (stream_info->chan_lock == 16)
      {
     	 stream_info->rate = (stream_info->rate / stream_info->num_channels_in_payload / 16);
@@ -134,7 +134,7 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
    }
 #endif
 
-#if AVB_1722_FORMAT_SAF
+#ifdef AVB_1722_FORMAT_SAF
    if ((AVBTP_TV(pAVBHdr)==1)) {
 	   unsigned sample_num = 0;
 #else
@@ -172,7 +172,7 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
 
 
   // now send the samples
-#if AVB_1722_FORMAT_SAF
+#ifdef AVB_1722_FORMAT_SAF
   sample_ptr = (unsigned char *) &Buf[(avb_ethernet_hdr_size +
                                       AVB_TP_HDR_SIZE)];
 #else

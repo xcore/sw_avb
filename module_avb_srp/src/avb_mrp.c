@@ -951,9 +951,10 @@ static void send_leave_indication(mrp_attribute_state *st, int four_packed_event
   }
 }
 
-avb_status_t mrp_periodic()
+void mrp_periodic(avb_status_t *status)
 {
-	avb_status_t ret = AVB_NO_STATUS;
+  status->type = AVB_NO_STATUS;
+
 	chanend c_tx = avb_control_get_mac_tx();
 	static int leave_all = 0;
 
@@ -1010,7 +1011,9 @@ avb_status_t mrp_periodic()
 
 	for (int j=0;j<MRP_MAX_ATTRS;j++) {
 		if (attrs[j].pending_indications != 0) {
-			ret = AVB_SRP_INDICATION;
+
+      status->type = AVB_SRP;
+			status->info.srp.msg = AVB_SRP_INDICATION;
 			if ((attrs[j].pending_indications & PENDING_JOIN_NEW) != 0) {
 				send_join_indication(&attrs[j], 1, attrs[j].four_vector_parameter);
 			}
@@ -1029,7 +1032,7 @@ avb_status_t mrp_periodic()
 		}
 #endif
 	}
-	return ret;
+	return;
 }
 
 
@@ -1146,25 +1149,28 @@ static int decode_fourpacked(int vector, int i)
 
                     
 
-avb_status_t avb_mrp_process_packet(unsigned int buf[], int len)
+void avb_mrp_process_packet(avb_status_t *status, unsigned int buf[], int len)
 {
   mrp_ethernet_hdr *hdr = (mrp_ethernet_hdr *) &buf[0];
   int etype = (int) (hdr->ethertype[0] << 8) + (int) (hdr->ethertype[1]);
   char *end = (char *) &buf[0] + len;
   char *msg = (char *) &buf[0] + sizeof(mrp_ethernet_hdr) + sizeof(mrp_header);
-  avb_status_t status = AVB_NO_STATUS;
+
+  status->type = AVB_NO_STATUS;
 
   if (etype == AVB_SRP_ETHERTYPE ||
       etype == AVB_MMRP_ETHERTYPE ||
-      etype == AVB_MVRP_ETHERTYPE) {
-	status = AVB_1722_1_OK;
+      etype == AVB_MVRP_ETHERTYPE)
+  {
+    status->type = AVB_SRP;
+    status->info.srp.msg = AVB_SRP_OK;
 
     while (msg < end && (msg[0]!=0 || msg[1]!=0)) {
       mrp_msg_header *hdr = (mrp_msg_header *) &msg[0];     
 
       unsigned first_value_len = hdr->AttributeLength;
       int attr_type = decode_attr_type(etype, hdr->AttributeType);
-      if (attr_type==-1) return status;
+      if (attr_type==-1) return;
 
       msg = msg + sizeof(mrp_msg_header);
 
@@ -1183,7 +1189,7 @@ avb_status_t avb_mrp_process_packet(unsigned int buf[], int len)
         int len = sizeof(mrp_vector_header) + first_value_len + threepacked_len + fourpacked_len;
         
         // Check to see that it isn't asking us to overrun the buffer
-        if (msg + len > end) return status;
+        if (msg + len > end) return;
 
         if (leave_all) {
           attribute_type_event(attr_type, MRP_EVENT_RECEIVE_LEAVE_ALL);
@@ -1214,6 +1220,6 @@ avb_status_t avb_mrp_process_packet(unsigned int buf[], int len)
     }
   }
  
-  return status;
+  return;
 }
 
