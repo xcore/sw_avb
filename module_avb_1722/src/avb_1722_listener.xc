@@ -44,6 +44,7 @@ static void configure_stream(chanend c,
 	c :> media_clock;
 	c :> s.rate;
 	c :> s.num_channels;
+    
 	for(int i=0;i<s.num_channels;i++) {
 		c :> s.map[i];
 		enable_media_output_fifo(s.map[i], media_clock);
