@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "ethernet_server.h"
+#include "ethernet_tx_client.h"
 #include "audio_i2s.h"
 #include "xlog_server.h"
 #include "i2c.h"
@@ -400,7 +401,7 @@ void app_handle_1722_1_indication(avb_status_t &status, chanend c_tx)
 }
 
 /** The main application control thread **/
-void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status)
+void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend c_eth_link_status)
 {
   timer tmr;
   avb_status_t avb_status;
@@ -437,20 +438,22 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
     unsigned int buf[(MAX_AVB_CONTROL_PACKET_SIZE+1)>>2];
     int already_seen;
     unsigned char ifnum;
+    int link_status;
 
     select
     {
       // Check ethernet link status
-      case inuchar_byref(connect_status, ifnum):
+      case mac_check_link_client(c_eth_link_status, ifnum, link_status):
       {
-        int status;
-        status = inuchar(connect_status);
-        (void) inuchar(connect_status);
-        (void) inct(connect_status);
-        if (status != ETHERNET_LINK_IS_DOWN)
+        if (link_status != ETHERNET_LINK_IS_DOWN)
         {
+          printstrln("Up");
           avb_start();
           avb_1722_1_adp_announce();
+        }
+        else
+        {
+          printstrln("Down");
         }
         break;
       }

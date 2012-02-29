@@ -440,10 +440,10 @@ int getset_avb_source_state(int set,
             xc_abi_outuint(c, source->stream.local_id);
             (void) xc_abi_inuint(c); //ACK
 
-            simple_printf("Stream #%d on\n", source_num);
+            simple_printf("Talker stream #%d on\n", source_num);
           }
 #else
-          simple_printf("Stream #%d ready\n", source_num);
+          simple_printf("Talker stream #%d ready\n", source_num);
 #endif
 
         }
@@ -457,13 +457,13 @@ int getset_avb_source_state(int set,
           xc_abi_outuint(c, source->stream.local_id);
           (void) xc_abi_inuint(c); //ACK
 
-          simple_printf("Stream #%d off\n", source_num);
+          simple_printf("Talker stream #%d off\n", source_num);
       }
       else if (source->stream.state == AVB_SOURCE_STATE_POTENTIAL &&
                *state == AVB_SOURCE_STATE_ENABLED) {
         // start transmitting
 
-        simple_printf("Stream #%d on\n", source_num);
+        simple_printf("Talker stream #%d on\n", source_num);
         chanend c = source->talker_ctl;
         xc_abi_outuint(c, AVB1722_TALKER_GO);
         xc_abi_outuint(c, source->stream.local_id);
