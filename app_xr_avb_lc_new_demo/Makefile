@@ -24,7 +24,7 @@ XCC_FLAGS_xr_avb_demo.xc = $(XCC_FLAGS) -fsubword-select
 
 # The USED_MODULES variable lists other module used by the application. 
 
-USED_MODULES = module_avb_1722 module_avb_1722_maap module_avb_srp module_osc module_avb_media_clock  module_avb_audio
+USED_MODULES = module_avb_1722 module_avb_1722_maap module_avb_srp module_avb_media_clock  module_avb_audio
 USED_MODULES += module_avb module_avb_util  module_gptp module_ethernet module_locks module_i2c module_xlog module_avb_1722_1
 
 XCC_FLAGS_xdk_demo_audio_if.xc = $(XCC_FLAGS) -fsubword-select

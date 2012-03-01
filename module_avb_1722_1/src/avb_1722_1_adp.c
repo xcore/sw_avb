@@ -126,7 +126,7 @@ static int avb_1722_1_entity_database_add(avb_1722_1_adp_packet_t* pkt)
 	{
 		entities[found_slot_index].guid.l = guid.l;
 		entities[found_slot_index].vendor_id = NTOH_U32(pkt->vendor_id);
-		entities[found_slot_index].model_id = NTOH_U32(pkt->model_id);
+		entities[found_slot_index].entity_model_id = NTOH_U32(pkt->entity_model_id);
 		entities[found_slot_index].capabilities = NTOH_U32(pkt->entity_capabilities);
 		entities[found_slot_index].talker_stream_sources = NTOH_U16(pkt->talker_stream_sources);
 		entities[found_slot_index].talker_capabilities = NTOH_U16(pkt->talker_capabilities);
@@ -135,10 +135,8 @@ static int avb_1722_1_entity_database_add(avb_1722_1_adp_packet_t* pkt)
 		entities[found_slot_index].controller_capabilities = NTOH_U32(pkt->controller_capabilities);
 		entities[found_slot_index].available_index = NTOH_U32(pkt->available_index);
 		GET_LONG_WORD(entities[found_slot_index].as_grandmaster_id, pkt->as_grandmaster_id)
-		entities[found_slot_index].default_audio_format = NTOH_U32(pkt->default_audio_format);
-		entities[found_slot_index].default_video_format = NTOH_U32(pkt->default_video_format);
 		entities[found_slot_index].association_id = NTOH_U32(pkt->association_id);
-		entities[found_slot_index].type = NTOH_U32(pkt->entity_type);
+		entities[found_slot_index].entity_type = NTOH_U32(pkt->entity_type);
 		entities[found_slot_index].timeout = GET_1722_1_VALID_TIME(&pkt->header) + adp_two_second_counter;
 
 		if (entity_update)
@@ -250,7 +248,7 @@ static void avb_1722_1_create_adp_packet(int message_type, guid_t guid)
 	  if (message_type != ENTITY_DISCOVER)
 	  {
 		  HTON_U32(pkt->vendor_id, AVB_1722_1_ADP_VENDOR_ID);
-		  HTON_U32(pkt->model_id, AVB_1722_1_ADP_MODEL_ID);
+		  HTON_U32(pkt->entity_model_id, AVB_1722_1_ADP_MODEL_ID);
 		  HTON_U32(pkt->entity_capabilities, AVB_1722_1_ADP_ENTITY_CAPABILITIES);
 		  HTON_U16(pkt->talker_stream_sources, AVB_1722_1_ADP_TALKER_STREAM_SOURCES);
 		  HTON_U16(pkt->talker_capabilities, AVB_1722_1_ADP_TALKER_CAPABILITIES);
@@ -259,8 +257,6 @@ static void avb_1722_1_create_adp_packet(int message_type, guid_t guid)
 		  HTON_U32(pkt->controller_capabilities, AVB_1722_1_ADP_CONTROLLER_CAPABILITIES);
 		  HTON_U32(pkt->available_index, avb_1722_1_available_index);
 		  SET_LONG_WORD(pkt->as_grandmaster_id, as_grandmaster_id);
-		  HTON_U32(pkt->default_audio_format, AVB_1722_1_ADP_DEFAULT_AUDIO_FORMAT);
-		  HTON_U32(pkt->default_video_format, AVB_1722_1_ADP_DEFAULT_VIDEO_FORMAT);
 		  HTON_U32(pkt->association_id, AVB_1722_1_ADP_ASSOCIATION_ID);
 		  HTON_U32(pkt->entity_type, AVB_1722_1_ADP_ENTITY_TYPE_OTHER);
 	  }
