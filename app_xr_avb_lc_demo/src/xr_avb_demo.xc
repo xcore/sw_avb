@@ -291,8 +291,10 @@ void ptp_server_and_gpio(chanend c_rx, chanend c_tx, chanend ptp_link[],
 			if ((button_val & 0x4) == 4 &&
 					(new_button_val & 0x4) == 0) {
 				selected_chan++;
-				if (selected_chan > 3)
-				selected_chan = 0;
+				if (selected_chan > ((AVB_NUM_MEDIA_OUTPUTS>>1)-1))
+                {
+                    selected_chan = 0;
+                }
 				p_chan_leds <: ~(1 << selected_chan);
 				c <: CHAN_SEL;
 				c <: selected_chan;
@@ -443,13 +445,22 @@ void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl) {
 					case CHAN_SEL:
 					{
 						enum avb_sink_state_t cur_state;
+						int channel;
 
 						c_gpio_ctl :> selected_chan;
+						channel = selected_chan*2;
 						get_avb_sink_state(0, cur_state);
 						set_avb_sink_state(0, AVB_SINK_STATE_DISABLED);
-						for (int j=0;j<AVB_NUM_MEDIA_INPUTS;j++)
-						map[j] = (j+selected_chan*2) & 0x7;
-						set_avb_sink_map(0, map, AVB_NUM_MEDIA_INPUTS);
+						for (int j=0;j<AVB_NUM_MEDIA_OUTPUTS;j++)
+						{
+							map[j] = channel;
+							channel++;
+							if (channel > AVB_NUM_MEDIA_OUTPUTS-1)
+							{
+								channel = 0;
+							}
+						}
+						set_avb_sink_map(0, map, AVB_NUM_MEDIA_OUTPUTS);
 						if (cur_state != AVB_SINK_STATE_DISABLED)
 						set_avb_sink_state(0, AVB_SINK_STATE_POTENTIAL);
 					}

@@ -1,5 +1,6 @@
 #include <xs1.h>
 #include <platform.h>
+#include <print.h>
 #include "avb.h"
 #include "demo_stream_manager.h"
 #include "simple_printf.h"
@@ -35,6 +36,7 @@ void demo_manage_listener_stream(unsigned int &change_stream,
   unsigned int streamId[2];
   unsigned vlan;
   unsigned char addr[6];
+  int channel = selected_chan;
 
   // check if there is a new stream
   res = avb_check_for_new_stream(streamId, vlan, addr);
@@ -72,7 +74,7 @@ void demo_manage_listener_stream(unsigned int &change_stream,
     }
     
     if (change_stream && new_hi != 0) {
-      int map[8];
+      int map[AVB_NUM_MEDIA_OUTPUTS];
       
       // we want to change the stream we are listening to
       // map the new stream to our single I/O output
@@ -83,12 +85,19 @@ void demo_manage_listener_stream(unsigned int &change_stream,
                     curStreamId[1],
                     0);
 
-      for (int j=0;j<8;j++)
-        map[j] = (j+selected_chan*2) & 0x7;
+      for (int j=0;j<AVB_NUM_MEDIA_OUTPUTS;j++)
+      {
+        map[j] = channel;
+        channel++;
+        if (channel > AVB_NUM_MEDIA_OUTPUTS-1)
+        {
+          channel = 0;
+        }
+      }
 
       set_avb_sink_sync(0, 0);
-      set_avb_sink_channels(0, 8);
-      set_avb_sink_map(0, map, 8);
+      set_avb_sink_channels(0, AVB_NUM_MEDIA_OUTPUTS);
+      set_avb_sink_map(0, map, AVB_NUM_MEDIA_OUTPUTS);
       set_avb_sink_state(0, AVB_SINK_STATE_DISABLED);
       set_avb_sink_id(0, curStreamId);
       set_avb_sink_vlan(0, new_vlan);
