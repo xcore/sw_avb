@@ -52,7 +52,8 @@ void update_stream_derived_clocks(int source_num,
 {
   for (int i=0;i<MAX_NUM_MEDIA_CLOCKS;i++) {
     if (media_clocks[i].active &&
-        media_clocks[i].clock_type == MEDIA_FIFO_DERIVED &&
+        (media_clocks[i].clock_type == MEDIA_FIFO_DERIVED ||
+         media_clocks[i].clock_type == FIFO_LENGTH)&&
         media_clocks[i].source == source_num) 
       {
         update_media_clock_stream_info(i, 
@@ -169,13 +170,27 @@ static void manage_buffer(buf_info_t &b,
                                fill);
  
 
-
   if (wordLength == 0) {
       // clock not locked yet
       buf_ctl <: b.fifo;
       buf_ctl <: BUF_CTL_ACK;
       inct(buf_ctl);  
       return;     
+  }
+
+  if (media_clocks[b.media_clock].clock_type == FIFO_LENGTH) {
+	  if (b.lock_count == 0) {
+	        buf_ctl <: b.fifo;
+	        buf_ctl <: BUF_CTL_ADJUST_FILL;
+	        buf_ctl <: 0;
+	        inct(buf_ctl);
+	        b.lock_count = 1;
+	  } else {
+	      buf_ctl <: b.fifo;
+	      buf_ctl <: BUF_CTL_ACK;
+	      inct(buf_ctl);
+	  }
+	  return;
   }
 
   sample_diff = diff / ((int) ((wordLength*10) >> WC_FRACTIONAL_BITS));

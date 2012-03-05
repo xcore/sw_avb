@@ -18,11 +18,16 @@
 #include <xccompat.h>
 #include "gptp.h"
 #include "avb_1722_def.h"
-#include "print.h"
 #include "media_clock_internal.h"
 #include "media_clock_client.h"
 #include "misc_timer.h"
+
+#include <xscope.h>
 #include <print.h>
+
+#ifndef MEDIA_OUTPUT_FIFO_WORD_SIZE
+#define MEDIA_OUTPUT_FIFO_WORD_SIZE (AVB_MAX_AUDIO_SAMPLE_RATE/450)
+#endif
 
 #define NANO_SECOND 1000000000
 
@@ -50,13 +55,15 @@ typedef struct stream_info_t {
  * \brief Records the state of the clock recovery for one media clock
  */
 typedef struct clock_info_t {
+#ifndef MEDIA_CLOCK_EXCLUDE_PTP_DERIVED
 	unsigned int t1;
 	unsigned int ptp1;
 	unsigned long long wordlen_ptp;
-	unsigned long long wordlen;
-	unsigned int rate;
 	long long err;
+#endif
+	unsigned long long wordlen;
 	long long ierror;
+	unsigned int rate;
 	int first;
 	stream_info_t stream_info1;
 	stream_info_t stream_info2;
@@ -84,18 +91,25 @@ void init_media_clock_recovery(chanend ptp_svr,
 	clock_info->rate = rate;
 	clock_info->err = 0;
 	clock_info->ierror = 0;
+
 	if (rate != 0) {
 		clock_info->wordlen = ((100000000LL << WORDLEN_FRACTIONAL_BITS) / clock_info->rate);
+#ifndef MEDIA_CLOCK_EXCLUDE_PTP_DERIVED
 		clock_info->wordlen_ptp = clock_info->wordlen * 10;
+#endif
 	} else {
 		clock_info->wordlen = 0;
+#ifndef MEDIA_CLOCK_EXCLUDE_PTP_DERIVED
 		clock_info->wordlen_ptp = 0;
+#endif
 	}
 
+#ifndef MEDIA_CLOCK_EXCLUDE_PTP_DERIVED
 	clock_info->t1 = clk_time;
 
 	ptp_get_time_info_mod64(ptp_svr, &timeInfo);
 	clock_info->ptp1 = local_timestamp_to_ptp_mod32(clk_time, &timeInfo);
+#endif
 
 	clock_info->stream_info1.valid = 0;
 	clock_info->stream_info2.valid = 0;
@@ -138,6 +152,8 @@ unsigned int update_media_clock(chanend ptp_svr,
 	case LOCAL_CLOCK:
 		return local_wordlen_to_external_wordlen(clock_info->wordlen);
 		break;
+
+#ifndef MEDIA_CLOCK_EXCLUDE_PTP_DERIVED
 	case PTP_DERIVED: {
 		long long err, diff_ptp;
 		unsigned ptp2;
@@ -181,17 +197,24 @@ unsigned int update_media_clock(chanend ptp_svr,
 		clock_info->ptp1 = ptp2;
 		break;
 	}
+#endif
+
+#ifndef MEDIA_CLOCK_EXCLUDE_FIFO_DERIVED
 	case MEDIA_FIFO_DERIVED: {
 		long long ierror, perror;
+
+		// If the stream info isn't valid at all, then return the default clock rate
 		if (!clock_info->stream_info2.valid)
 			return local_wordlen_to_external_wordlen(clock_info->wordlen);
 
+		// If there are not two stream infos to compare, then return default clock rate
 		if (!clock_info->stream_info1.valid) {
 			clock_info->stream_info1 = clock_info->stream_info2;
 			clock_info->stream_info2.valid = 0;
 			return local_wordlen_to_external_wordlen(clock_info->wordlen);
 		}
 
+		// If the stream is unlocked, return the default clock rate
 		if (!clock_info->stream_info2.locked) {
 			clock_info->wordlen = ((100000000LL << WORDLEN_FRACTIONAL_BITS)
 					/ clock_info->rate);
@@ -199,6 +222,8 @@ unsigned int update_media_clock(chanend ptp_svr,
 			clock_info->stream_info2.valid = 0;
 			clock_info->first = 1;
 			clock_info->ierror = 0;
+
+		// We have all the info we need to perform clock recovery
 		} else {
 			diff_local = clock_info->stream_info2.local_ts
 					- clock_info->stream_info1.local_ts;
@@ -222,9 +247,42 @@ unsigned int update_media_clock(chanend ptp_svr,
 			clock_info->stream_info1 = clock_info->stream_info2;
 			clock_info->stream_info2.valid = 0;
 		}
-	}
-
 		break;
+	}
+#endif
+
+#ifndef MEDIA_CLOCK_EXCLUDE_FIFO_DEPTH
+	case FIFO_LENGTH: {
+		if (!clock_info->stream_info2.valid)
+			return local_wordlen_to_external_wordlen(clock_info->wordlen);
+
+		if (!clock_info->stream_info1.valid) {
+			clock_info->stream_info1 = clock_info->stream_info2;
+			clock_info->stream_info2.valid = 0;
+			return local_wordlen_to_external_wordlen(clock_info->wordlen);
+		}
+
+		{
+
+			long long perror = (signed) clock_info->stream_info2.fill - (MEDIA_OUTPUT_FIFO_WORD_SIZE/2);
+
+			if (clock_info->first) {
+				clock_info->ierror = 0;
+				clock_info->first = 0;
+			} else
+				clock_info->ierror = clock_info->ierror + perror;
+
+			// PID based on this error
+			clock_info->wordlen = clock_info->wordlen - (perror) * 16;// - (clock_info->ierror) / 256;
+
+			xscope_probe_data(0, perror);
+			xscope_probe_data(1, clock_info->ierror);
+			xscope_probe_data(2, local_wordlen_to_external_wordlen(clock_info->wordlen));
+		}
+		break;
+	}
+#endif
+
 	}
 
 	return local_wordlen_to_external_wordlen(clock_info->wordlen);
