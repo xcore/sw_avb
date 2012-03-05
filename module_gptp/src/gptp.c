@@ -695,6 +695,8 @@ static void network_to_ptp_timestamp(ptp_timestamp *ts,
 
   sec1_p[3] = msg->data[0];
   sec1_p[2] = msg->data[1];
+  sec1_p[1] = 0;
+  sec1_p[0] = 0;
                              
   sec0_p[3] = msg->data[2];
   sec0_p[2] = msg->data[3];

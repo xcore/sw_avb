@@ -131,14 +131,6 @@
 						<useDefaultCommand>false</useDefaultCommand>
 						<runAllBuilders>true</runAllBuilders>
 					</target>
-					<target name="app_uart_test.all" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-						<buildCommand>xmake</buildCommand>
-						<buildArguments>-f Makefile</buildArguments>
-						<buildTarget>app_uart_test.all</buildTarget>
-						<stopOnError>true</stopOnError>
-						<useDefaultCommand>true</useDefaultCommand>
-						<runAllBuilders>true</runAllBuilders>
-					</target>
 				</buildTargets>
 			</storageModule>
 		</cconfiguration>
