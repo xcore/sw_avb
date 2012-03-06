@@ -27,7 +27,7 @@
 #define AVB_NUM_TALKER_UNITS 1
 
 /* Media configuration */
-#define AVB_1722_FORMAT_SAF 1
+#define AVB_1722_FORMAT_61883_6
 #define AVB_NUM_MEDIA_OUTPUTS 2
 #define AVB_NUM_MEDIA_INPUTS 2
 #define AVB_NUM_MEDIA_UNITS 2

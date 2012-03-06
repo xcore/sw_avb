@@ -22,8 +22,9 @@
 #include "media_clock_client.h"
 #include "misc_timer.h"
 
-#include <xscope.h>
-#include <print.h>
+#ifndef AVB_MAX_AUDIO_SAMPLE_RATE
+#define AVB_MAX_AUDIO_SAMPLE_RATE 48000
+#endif
 
 #ifndef MEDIA_OUTPUT_FIFO_WORD_SIZE
 #define MEDIA_OUTPUT_FIFO_WORD_SIZE (AVB_MAX_AUDIO_SAMPLE_RATE/450)
@@ -276,10 +277,6 @@ unsigned int update_media_clock(chanend ptp_svr,
 
 			// PID based on this error
 			clock_info->wordlen = clock_info->wordlen - (perror) * 16;// - (clock_info->ierror) / 256;
-
-			xscope_probe_data(0, perror);
-			xscope_probe_data(1, clock_info->ierror);
-			xscope_probe_data(2, local_wordlen_to_external_wordlen(clock_info->wordlen));
 		}
 		break;
 	}
