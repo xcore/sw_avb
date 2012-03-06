@@ -36,7 +36,7 @@ typedef struct {
 	unsigned char connection_count[2];
 	unsigned char sequence_id[2];
 	unsigned char flags[2];
-	unsigned char default_format[4];
+	unsigned char reserved[4];
 } avb_1722_1_acmp_packet_t;
 
 #define AVB_1722_1_ACMP_PACKET_SIZE (sizeof(ethernet_hdr_t)+sizeof(avb_1722_1_acmp_packet_t))
@@ -54,7 +54,7 @@ typedef struct {
 	unsigned short connection_count;
 	unsigned short sequence_id;
 	unsigned short flags;
-	unsigned int default_format;
+	unsigned int reserved;
 } avb_1722_1_acmp_cmd_resp;
 
 typedef struct {
@@ -76,7 +76,6 @@ typedef struct {
 	int connected;
 	stream_t stream_id;
 	unsigned char destination_mac[6];
-	unsigned int default_format;
 } avb_1722_1_acmp_listener_stream_info;
 
 typedef struct {
@@ -121,6 +120,8 @@ typedef enum {
 	ACMP_STATUS_LISTENER_DEFAULT_FORMAT_INVALID = 13,
 	ACMP_STATUS_TALKER_DEFAULT_FORMAT_INVALID = 14,
 	ACMP_STATUS_DEFAULT_SET_DIFFERENT = 15,
+	ACMP_STATUS_CONTROLLER_NOT_AUTHORIZED = 16,
+	ACMP_STATUS_INCOMPATIBLE_REQUEST = 17,
 	ACMP_STATUS_NOT_SUPPORTED = 31
 } avb_1722_1_acmp_status_t;
 
