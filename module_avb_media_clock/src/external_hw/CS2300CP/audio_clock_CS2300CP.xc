@@ -132,45 +132,50 @@ void audio_clock_CS2300CP_init(struct r_i2c &r_i2c, unsigned mclks_per_wordclk)
    mult = mult/2;
    mult = mult << 12;
 
-  // Configure PLL
-  data.data[0] = 0x01;
-  i2c_master_tx(deviceAddr, 0x03, data, r_i2c);
-  data.data[0] = 0x01;
-  i2c_master_tx(deviceAddr, 0x05, data, r_i2c);
-  data.data[0] = 0x10;
-  i2c_master_tx(deviceAddr, 0x16, data, r_i2c);
-  data.data[0] = 0x00;
-  i2c_master_tx(deviceAddr, 0x17, data, r_i2c);
+   // Set loop bandwidth (8.8.1 in CS2300 chip spec)
+   data.data[0] = 0x00; // 1Hz
+   i2c_master_tx(deviceAddr, 0x1E, data, r_i2c);
 
-  data.data[0] = (mult >> 24) & 0xFF;
-  i2c_master_tx(deviceAddr, 0x06, data, r_i2c);
-  data.data[0] = (mult >> 16) & 0xFF;
-  i2c_master_tx(deviceAddr, 0x07, data, r_i2c);
-  data.data[0] = (mult >> 8) & 0xFF;
-  i2c_master_tx(deviceAddr, 0x08, data, r_i2c);
-  data.data[0] = (mult) & 0xFF;
-  i2c_master_tx(deviceAddr, 0x09, data, r_i2c);
+   // Configure PLL
+   data.data[0] = 0x01;
+   i2c_master_tx(deviceAddr, 0x03, data, r_i2c);
+   data.data[0] = 0x01;
+   i2c_master_tx(deviceAddr, 0x05, data, r_i2c);
+   data.data[0] = 0x10;
+   i2c_master_tx(deviceAddr, 0x16, data, r_i2c);
+   data.data[0] = 0x00;
+   i2c_master_tx(deviceAddr, 0x17, data, r_i2c);
 
-  // Check configuration
-  if (!i2c_master_rx(deviceAddr, 0x03, data, r_i2c))
-  {
-	  if (data.data[0] != 0x01)
-	  {
-		  fail = 1;
-	  }
-  }
+   // Set multiplier
+   data.data[0] = (mult >> 24) & 0xFF;
+   i2c_master_tx(deviceAddr, 0x06, data, r_i2c);
+   data.data[0] = (mult >> 16) & 0xFF;
+   i2c_master_tx(deviceAddr, 0x07, data, r_i2c);
+   data.data[0] = (mult >> 8) & 0xFF;
+   i2c_master_tx(deviceAddr, 0x08, data, r_i2c);
+   data.data[0] = (mult) & 0xFF;
+   i2c_master_tx(deviceAddr, 0x09, data, r_i2c);
 
-  if (!i2c_master_rx(deviceAddr, 0x09, data, r_i2c))
-  {
-	  if (data.data[0] != (mult & 0xFF))
-	  {
-		  fail = 1;
-	  }
-  }
+   // Check configuration
+   if (!i2c_master_rx(deviceAddr, 0x03, data, r_i2c))
+   {
+	   if (data.data[0] != 0x01)
+	   {
+		   fail = 1;
+	   }
+   }
 
-  if (fail)
-  {
-	  printstr("PLL chip configuration failed\n");
-  }
+   if (!i2c_master_rx(deviceAddr, 0x09, data, r_i2c))
+   {
+	   if (data.data[0] != (mult & 0xFF))
+	   {
+		   fail = 1;
+	   }
+   }
+
+   if (fail)
+   {
+	   printstr("PLL chip configuration failed\n");
+   }
 }
 

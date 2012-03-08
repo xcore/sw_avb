@@ -245,7 +245,7 @@ unsigned int update_media_clock(chanend ptp_svr,
 			// Kp = 32, Ki = 1 (originally)
 			// Kp = 4, Ki = 64 (modified)
 			// Now Kp = 32, Ki = 4
-			clock_info->wordlen = clock_info->wordlen - (perror / diff_local) * 32 - (ierror / diff_local) / 4;
+			clock_info->wordlen = clock_info->wordlen - (perror / diff_local) * 128 - (ierror / diff_local) * 2;
 
 			clock_info->stream_info1 = clock_info->stream_info2;
 			clock_info->stream_info2.valid = 0;

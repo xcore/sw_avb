@@ -22,7 +22,7 @@ typedef struct media_clock_t {
 
 // The number of ticks between period clock recovery checks
 #define CLOCK_RECOVERY_SLOW_PERIOD  300000000
-#define CLOCK_RECOVERY_PERIOD  (1<<21)
+#define CLOCK_RECOVERY_PERIOD  (1<<23)
 
 // The number of samples the buffer can deviate from the fill point 
 // over the recovery period to allow a lock
