@@ -43,7 +43,6 @@ signed g_inv_ptp_adjust = 0;
 #define PTP_PATH_DELAY_WEIGHT 32
 static int ptp_path_delay_valid = 0;
 static unsigned ptp_path_delay = 0;
-static unsigned prev_ptp_path_delay = 0;
 
 enum ptp_state_t {
   PTP_MASTER,
@@ -452,8 +451,6 @@ static void periodic_update_reference_timestamps(unsigned int local_ts)
 }
 
 
-static int pdelay_history[10];
-
 static void update_path_delay(ptp_timestamp *master_ingress_ts,
                               ptp_timestamp *master_egress_ts,
                               unsigned local_egress_ts,
@@ -463,8 +460,6 @@ static void update_path_delay(ptp_timestamp *master_ingress_ts,
   long long local_diff;
   long long delay;
   long long round_trip;
-  signed diff_with_prev;
-  ptp_timestamp local_egress_ts_ptp, local_ingress_ts_ptp;
 
   /* The sequence of events is:
      
@@ -479,9 +474,6 @@ static void update_path_delay(ptp_timestamp *master_ingress_ts,
 
   */
   
-  local_to_ptp_ts(&local_ingress_ts_ptp, local_ingress_ts);
-  local_to_ptp_ts(&local_egress_ts_ptp, local_egress_ts);
-
   master_diff = ptp_timestamp_diff(master_egress_ts,  master_ingress_ts);
 
   local_diff = (signed) local_ingress_ts - (signed) local_egress_ts;
@@ -491,10 +483,6 @@ static void update_path_delay(ptp_timestamp *master_ingress_ts,
   round_trip = (local_diff - master_diff);
 
   round_trip -= LOCAL_EGRESS_DELAY;
-
-  
-
-  //  round_trip -= 1000;
 
   delay = round_trip / 2;
 
@@ -508,45 +496,12 @@ static void update_path_delay(ptp_timestamp *master_ingress_ts,
     /* Re-average the adjust with a given weighting.
        This method loses a few bits of precision */
     ptp_path_delay = ((ptp_path_delay * (PTP_PATH_DELAY_WEIGHT - 1)) + (int) delay) / PTP_PATH_DELAY_WEIGHT;
-    ptp_path_delay = delay;
+    //ptp_path_delay = delay;
     }
   else {
     ptp_path_delay = delay;
     ptp_path_delay_valid = 1;
   }
-
-  
-  diff_with_prev = ptp_path_delay - prev_ptp_path_delay;
-
-  if (diff_with_prev < 0) diff_with_prev = -diff_with_prev;
-
-#ifdef AVNU_OBSERVABILITY
-  {
-	  static count =0;
-	  count++;
-	  if (count == 10) {
-		char buf[] = "xxxxxxxxxxx   ";
-		int i;
-		int pd=0;
-		for (int j=0;j<10;j++)
-		  pd += pdelay_history[j];
-		
-		pd = pd / 10;
-		
-		count = 0;
-		i = avb_itoa(pd, buf, 10, 0);
-		strcpy(&buf[i]," ns");
-		//avnu_log(AVNU_TESTPOINT_PDELAY, NULL, buf);
-		printstr(buf);
-	  }
-  }
-#endif
-    
-  for (int j=0;j<9;j++)
-    pdelay_history[j+1] = pdelay_history[j];
-  pdelay_history[0] = ptp_path_delay;
-
-  prev_ptp_path_delay = ptp_path_delay;
 
   return;
 }
