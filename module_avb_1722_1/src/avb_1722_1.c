@@ -39,6 +39,10 @@ void avb_1722_1_init(unsigned char macaddr[6], unsigned char serial_number[2])
     my_guid.c[7] = macaddr[0];
 
     avb_1722_1_adp_init();
+#if (AVB_1722_1_AEM_ENABLED)
+    avb_1722_1_aem_descriptors_init();
+#endif
+
 #if (AVB_1722_1_CONTROLLER_ENABLED)
     avb_1722_1_acmp_controller_init();
 #endif

@@ -7,11 +7,10 @@
 #include "ethernet_server.h"
 #include "ethernet_tx_client.h"
 #include "audio_i2s.h"
-#include "xlog_server.h"
+#include <xscope.h>
 #include "i2c.h"
 #include "avb.h"
 #include "audio_clock_CS2300CP.h"
-#include "audio_codec_CS42448.h"
 #include "simple_printf.h"
 #include "media_fifo.h"
 #include "avb_1722_1_adp.h"
@@ -156,6 +155,10 @@ int main(void) {
     
     on stdcore[1]:
     {
+      // Enable XScope printing
+      xscope_register(0, 0, "", 0, "");
+      xscope_config_io(XSCOPE_IO_BASIC);
+
       media_clock_server(media_clock_ctl,
                  ptp_link[1],
                  buf_ctl,
@@ -211,15 +214,13 @@ int main(void) {
                            AVB_NUM_MEDIA_OUTPUTS);
     }
     
-    // Xlog server
-    on stdcore[0]:
-    {
-      xlog_server_uart(p_uart_tx);
-    }
-    
     // Application threads
     on stdcore[0]:
     {
+      // Enable XScope printing
+      xscope_register(0, 0, "", 0, "");
+      xscope_config_io(XSCOPE_IO_BASIC);
+
       // First initialize avb higher level protocols
       avb_init(media_ctl, listener_ctl, talker_ctl, media_clock_ctl, rx_link[2], tx_link[1], ptp_link[0]);
       

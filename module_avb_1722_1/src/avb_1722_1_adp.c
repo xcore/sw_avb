@@ -1,6 +1,7 @@
 #include "avb_1722_common.h"
 #include "avb_1722_1_common.h"
 #include "avb_1722_1_adp.h"
+#include "avb_1722_1_aecp.h"
 #include "misc_timer.h"
 #include "gptp.h"
 #include <string.h>
@@ -94,6 +95,8 @@ void avb_1722_1_adp_change_ptp_grandmaster(unsigned char grandmaster[8])
 	{
 		as_grandmaster_id.c[i] = grandmaster[i];
 	}
+	// Set the gmid in the AEM descriptors at the same time
+	avb_1722_1_aem_set_grandmaster_id(grandmaster);
 }
 
 int avb_1722_1_get_latest_new_entity_idx()

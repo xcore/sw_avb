@@ -18,14 +18,14 @@ APP_NAME =
 # If the variable XCC_MAP_FLAGS is set it overrides the flags passed to 
 # xcc for the final link (mapping) stage.
 
-XCC_FLAGS = -O3 -save-temps -g -report -Xmapper --map -Xmapper MAPFILE
+XCC_FLAGS = -O3 -save-temps -g -report -Xmapper --map -Xmapper MAPFILE -lxscope
 
 XCC_FLAGS_xr_avb_demo.xc = $(XCC_FLAGS) -fsubword-select
 
 # The USED_MODULES variable lists other module used by the application. 
 
 USED_MODULES = module_avb_1722 module_avb_1722_maap module_avb_srp module_avb_media_clock  module_avb_audio
-USED_MODULES += module_avb module_avb_util  module_gptp module_ethernet module_locks module_i2c module_xlog module_avb_1722_1
+USED_MODULES += module_avb module_avb_util module_gptp module_ethernet module_locks module_i2c module_avb_1722_1
 
 XCC_FLAGS_xdk_demo_audio_if.xc = $(XCC_FLAGS) -fsubword-select
 
@@ -33,15 +33,13 @@ XCC_FLAGS_xdk_demo_audio_if.xc = $(XCC_FLAGS) -fsubword-select
 USE_AVB_MAC_CUSTOM_FILTER=1
 
 #Add codecs from module_avb_audio
-USED_CODECS = CS42448
+USED_CODECS =
 
 #Add audio interfaces from module_avb_audio
 USED_AUDIO_INTERFACES = i2s
 
 #Add external clocking chips/plls from module_avb_audio
 USED_EXTERNAL_CLOCK_CHIPS = CS2300CP
-
-USE_LARGE_1722_ROUTER_TABLE = 1
 
 #=============================================================================
 # The following part of the Makefile includes the common build infrastructure
@@ -50,4 +48,6 @@ USE_LARGE_1722_ROUTER_TABLE = 1
 XMOS_MAKE_PATH ?= ../..
 -include $(XMOS_MAKE_PATH)/xcommon/module_xcommon/build/Makefile.common
 
+gen_descriptors:
+	cd ../module_avb_1722_1/src && python generate.py
 
