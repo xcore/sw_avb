@@ -1,3 +1,11 @@
+26th March 2012
+---------------
+  * PTP fix to correct step in g_ptp_adjust (commit #1548fa5ce7)
+  * Software support added for CS2100 PLL.
+  * Media clock recovery PID tuned to decrease settle time and amplitude of oscillations
+  * Fixes to app_xr_avb_lc_demo to work with channel counts < 8
+
+
 23rd November 2011
 ------------------
   * Transport stream interface
