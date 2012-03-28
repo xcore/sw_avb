@@ -4,6 +4,10 @@
    memory usage) and combined the code for the port state machines and the site 
    state machines into one. */
 #include <string.h>
+#include "avb_conf.h"
+#ifdef USE_XSCOPE
+#include <xscope.h>
+#endif
 #include "gptp.h"
 #include "gptp_config.h"
 #include "gptp_pdu.h"
@@ -391,10 +395,17 @@ static void update_adjust(ptp_timestamp *master_ts,
           sync_count = 0;
       }
       
+#ifdef USE_XSCOPE
+      // xscope_probe_data(1, (int)adjust);
+#endif
 
       adjust = (((long long)g_ptp_adjust) * (PTP_ADJUST_WEIGHT - 1) + adjust) / PTP_ADJUST_WEIGHT;
 
       g_ptp_adjust = (int) adjust;
+
+#ifdef USE_XSCOPE
+      // xscope_probe_data(0, g_ptp_adjust);
+#endif
 
       inv_adjust = (((long long)g_inv_ptp_adjust) * (PTP_ADJUST_WEIGHT - 1) + inv_adjust) / PTP_ADJUST_WEIGHT;
 
@@ -695,6 +706,8 @@ static void network_to_ptp_timestamp(ptp_timestamp *ts,
 
   sec1_p[3] = msg->data[0];
   sec1_p[2] = msg->data[1];
+  sec1_p[1] = 0;
+  sec1_p[0] = 0;
                              
   sec0_p[3] = msg->data[2];
   sec0_p[2] = msg->data[3];

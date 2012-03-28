@@ -36,7 +36,7 @@ typedef struct {
 	unsigned char connection_count[2];
 	unsigned char sequence_id[2];
 	unsigned char flags[2];
-	unsigned char reserved[4];
+	unsigned char default_format[4];
 } avb_1722_1_acmp_packet_t;
 
 #define AVB_1722_1_ACMP_PACKET_SIZE (sizeof(ethernet_hdr_t)+sizeof(avb_1722_1_acmp_packet_t))
@@ -54,7 +54,7 @@ typedef struct {
 	unsigned short connection_count;
 	unsigned short sequence_id;
 	unsigned short flags;
-	unsigned int reserved;
+	unsigned int default_format;
 } avb_1722_1_acmp_cmd_resp;
 
 typedef struct {

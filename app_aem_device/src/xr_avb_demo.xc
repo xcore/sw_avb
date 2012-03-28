@@ -98,6 +98,36 @@ media_output_fifo_t ofifos[AVB_NUM_MEDIA_OUTPUTS];
 media_input_fifo_data_t ififo_data[AVB_NUM_MEDIA_INPUTS];
 media_input_fifo_t ififos[AVB_NUM_MEDIA_INPUTS];
 
+
+void xscope_user_init(void)
+{
+	#ifdef USE_XSCOPE
+	/*
+	xscope_register(12,
+	  XSCOPE_CONTINUOUS, "PTP Filtered Adjust", XSCOPE_INT, "PTP",
+	  XSCOPE_CONTINUOUS, "PTP Raw Adjust", XSCOPE_INT, "PTP",
+	  XSCOPE_CONTINUOUS, "ierror", XSCOPE_INT, "WC",
+	  XSCOPE_CONTINUOUS, "perror", XSCOPE_INT, "WC",
+	  XSCOPE_CONTINUOUS, "wordlen", XSCOPE_INT, "WC",
+	  XSCOPE_CONTINUOUS, "mediadiff", XSCOPE_INT, "Buf",
+	  XSCOPE_CONTINUOUS, "lock status", XSCOPE_INT, "Buf",
+	  XSCOPE_CONTINUOUS, "fill", XSCOPE_INT, "Buf",
+	  XSCOPE_CONTINUOUS, "samplediff", XSCOPE_INT, "Buf",
+	  XSCOPE_CONTINUOUS, "stabcount", XSCOPE_INT, "Buf",
+	  XSCOPE_CONTINUOUS, "mcvalid", XSCOPE_INT, "Buf",
+	);
+	*/
+	xscope_register(3,
+	  XSCOPE_CONTINUOUS, "prestime", XSCOPE_INT, "Value",
+	  XSCOPE_CONTINUOUS, "wlen", XSCOPE_INT, "Value",
+	  XSCOPE_CONTINUOUS, "1722time", XSCOPE_INT, "Value"
+	  );
+	#else
+	xscope_register(0, 0, "", 0, "");
+	#endif
+}
+
+
 int main(void) {
   // ethernet tx channels
   chan tx_link[3];
@@ -156,7 +186,6 @@ int main(void) {
     on stdcore[1]:
     {
       // Enable XScope printing
-      xscope_register(0, 0, "", 0, "");
       xscope_config_io(XSCOPE_IO_BASIC);
 
       media_clock_server(media_clock_ctl,
@@ -218,7 +247,7 @@ int main(void) {
     on stdcore[0]:
     {
       // Enable XScope printing
-      xscope_register(0, 0, "", 0, "");
+      // xscope_register(0, 0, "", 0, "");
       xscope_config_io(XSCOPE_IO_BASIC);
 
       // First initialize avb higher level protocols
@@ -351,6 +380,7 @@ void app_handle_1722_1_indication(avb_status_t &status, chanend c_tx)
       get_avb_source_id(0, streamId);
       avb_1722_1_talker_set_stream_id(0, streamId);
       simple_printf("1722.1 request to advertise %x.%x\n", streamId[0], streamId[1]);
+      set_avb_source_state(0, AVB_SOURCE_STATE_DISABLED);
       set_avb_source_state(0, AVB_SOURCE_STATE_POTENTIAL);
       avb_1722_1_acmp_talker_connection_complete(0, c_tx);
       break;
@@ -370,7 +400,9 @@ void app_handle_1722_1_indication(avb_status_t &status, chanend c_tx)
       unsigned int streamId[2];
       unsigned vlan;
       unsigned char addr[6];
-      int map[2] = { 0 ,  1 };
+      int map[AVB_NUM_MEDIA_INPUTS];
+      for (int i = 0; i < AVB_NUM_MEDIA_INPUTS; i++)
+        map[i] = i;
 
       avb_1722_1_acmp_get_listener_connection_info(listener, addr, streamId, vlan);
       simple_printf("1722.1 request to connect to stream %x.%x, address %x:%x:%x:%x:%x:%x, vlan %d\n",
@@ -379,11 +411,12 @@ void app_handle_1722_1_indication(avb_status_t &status, chanend c_tx)
           vlan);
 
       set_avb_sink_sync(0, 0);
-      set_avb_sink_channels(0, 2);
-      set_avb_sink_map(0, map, 2);
+      set_avb_sink_channels(0, AVB_NUM_MEDIA_INPUTS);
+      set_avb_sink_map(0, map, AVB_NUM_MEDIA_INPUTS);
       set_avb_sink_id(0, streamId);
       set_avb_sink_vlan(0, vlan);
       set_avb_sink_addr(0, addr, 6);
+      set_avb_source_state(0, AVB_SOURCE_STATE_DISABLED);
       set_avb_sink_state(0, AVB_SINK_STATE_POTENTIAL);
 
       avb_1722_1_acmp_listener_connection_complete(listener, c_tx);

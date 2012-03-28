@@ -16,6 +16,8 @@ extern unsigned int avb_1722_1_buf[];
 extern guid_t my_guid;
 extern unsigned char my_mac_addr[6];
 
+// static char entity_acquired;
+
 // Called on startup to initialise certain static descriptor fields
 void avb_1722_1_aem_descriptors_init()
 {
@@ -76,13 +78,35 @@ static int create_aem_read_descriptor_response(unsigned short read_type, unsigne
 				desc_size_bytes = aem_descriptor_list[i+k];
 				descriptor = (unsigned char *)aem_descriptor_list[i+k+1];
 				
-				// TODO: Write macros for descriptor fields (or cast to structs??)
-				if (( ((unsigned)descriptor[2] << 8) | ((unsigned)descriptor[3]) ) == read_id)
+				// Generate audio clusters on the fly (to reduce memory)
+				if (read_type == AEM_AUDIO_CLUSTER_TYPE)
 				{
+					char chan_id;
+					// The descriptor id is also the channel number
+					descriptor[3] = (unsigned char)read_id;
+					if (read_id >= AVB_NUM_MEDIA_INPUTS)
+					{
+						// This is nasty for non power of 2 inputs - will do a DIV!
+						chan_id = (char)read_id % AVB_NUM_MEDIA_INPUTS;
+					}
+					else
+					{
+						chan_id = (char)read_id;
+					}
+					descriptor[19] = chan_id + 0x30;
 					found_descriptor = 1;
-					break;
+				}
+				else
+				{
+					// TODO: Write macros for descriptor fields (or cast to structs??)
+					if (( ((unsigned)descriptor[2] << 8) | ((unsigned)descriptor[3]) ) == read_id)
+					{
+						found_descriptor = 1;
+						break;
+					}
 				}
 			}
+
 		}
 
 		i += (num_descriptors*2)+2;
@@ -140,6 +164,20 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
 
 			break;
 		}
+		/*
+		case AECP_AEM_CMD_ACQUIRE_ENTITY:
+		{
+			if (entity_acquired)
+			{
+				
+			}
+			else
+			{
+				// Send CONTROLLER_AVAILABLE command
+			}
+			break;
+		}
+		*/
 		default:
 		{
 			// AECP_AEM_STATUS_NOT_IMPLEMENTED

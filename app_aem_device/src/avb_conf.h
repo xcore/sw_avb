@@ -1,6 +1,12 @@
 #ifndef __avb_conf_h__
 #define __avb_conf_h__
 
+/* XScope */
+#define USE_XSCOPE
+
+// #define AVB_1722_PERIODIC_DEBUG
+// #define AVB_1722_RECORD_ERRORS
+
 /* Configuration parameters for the ethernet code */
 #define PHY_ADDRESS 0x0
 #define MAX_ETHERNET_PACKET_SIZE (1518)
@@ -36,7 +42,7 @@
 #define AVB_NUM_MEDIA_CLOCKS 1
 
 /* Add synths from channels 3/4 upwards in I2S for this demo */
-#define I2S_SYNTH_FROM 1
+// #define I2S_SYNTH_FROM 1
 
 /* 1722.1 */
 #define AVB_ENABLE_1722_1
@@ -55,7 +61,7 @@
 
 /* 1722.1 Debug */
 #define AVB_1722_1_ACMP_DEBUG_INFLIGHT
-#define AVB_1722_1_ENABLE_ASSERTIONS
+// #define AVB_1722_1_ENABLE_ASSERTIONS
 
 // Defining this makes SRP auto-start and auto-stop a stream when listeners come and go
 #define SRP_AUTO_TALKER_STREAM_CONTROL
