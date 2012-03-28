@@ -52,8 +52,7 @@ void update_stream_derived_clocks(int source_num,
 {
   for (int i=0;i<MAX_NUM_MEDIA_CLOCKS;i++) {
     if (media_clocks[i].active &&
-        (media_clocks[i].clock_type == MEDIA_FIFO_DERIVED ||
-         media_clocks[i].clock_type == FIFO_LENGTH)&&
+        media_clocks[i].clock_type == MEDIA_FIFO_DERIVED &&
         media_clocks[i].source == source_num) 
       {
         update_media_clock_stream_info(i, 
@@ -106,7 +105,8 @@ int get_buf_info(int fifo)
 static void manage_buffer(buf_info_t &b,
                           chanend ptp_svr, 
                           chanend buf_ctl,
-                          int index) 
+                          int index,
+                          timer tmr) 
 {
   unsigned outgoing_timestamp_local;
   unsigned presentation_timestamp;
@@ -116,7 +116,6 @@ static void manage_buffer(buf_info_t &b,
   int diff, sample_diff;
   unsigned int wordLength;
   int rdptr,wrptr,fill;
-  timer tmr;
   int thiscore_now,othercore_now;
   unsigned server_core_id;
 
@@ -170,27 +169,13 @@ static void manage_buffer(buf_info_t &b,
                                fill);
  
 
+
   if (wordLength == 0) {
       // clock not locked yet
       buf_ctl <: b.fifo;
       buf_ctl <: BUF_CTL_ACK;
       inct(buf_ctl);  
       return;     
-  }
-
-  if (media_clocks[b.media_clock].clock_type == FIFO_LENGTH) {
-	  if (b.lock_count == 0) {
-	        buf_ctl <: b.fifo;
-	        buf_ctl <: BUF_CTL_ADJUST_FILL;
-	        buf_ctl <: 0;
-	        inct(buf_ctl);
-	        b.lock_count = 1;
-	  } else {
-	      buf_ctl <: b.fifo;
-	      buf_ctl <: BUF_CTL_ACK;
-	      inct(buf_ctl);
-	  }
-	  return;
   }
 
   sample_diff = diff / ((int) ((wordLength*10) >> WC_FRACTIONAL_BITS));
@@ -326,7 +311,7 @@ void media_clock_server(chanend media_clock_ctl,
             {
             case BUF_CTL_GOT_INFO:
               manage_buffer(buf_info[buf_index], ptp_svr, buf_ctl[i],
-                            buf_index);
+                            buf_index, tmr);
               break;
             case BUF_CTL_NEW_STREAM:
               buf_ctl[i] <: buf_info[buf_index].fifo;

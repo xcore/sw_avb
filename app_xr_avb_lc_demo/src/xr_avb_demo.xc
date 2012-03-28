@@ -1,20 +1,19 @@
 #include <platform.h>
 #include <print.h>
+#include "simple_printf.h"
 #include <xccompat.h>
 #include <stdio.h>
 #include <string.h>
+#include <xscope.h>
 #include "xtcp_client.h"
 #include "uip_server.h"
 #include "audio_i2s.h"
-#include "xlog_server.h"
 #include "i2c.h"
 #include "avb.h"
 #include "audio_clock_CS2300CP.h"
-#include "audio_codec_CS42448.h"
 #include "media_fifo.h"
 #include "mdns.h"
 #include "control_api_server.h"
-#include "osc.h"
 #include "demo_stream_manager.h"
 
 // this is the sample rate, the frequency of the word clock
@@ -100,7 +99,10 @@ media_output_fifo_data_t ofifo_data[AVB_NUM_MEDIA_OUTPUTS];
 media_output_fifo_t ofifos[AVB_NUM_MEDIA_OUTPUTS];
 
 
-
+void xscope_user_init(void)
+{
+	xscope_register(0, 0, "", 0, "");
+}
 
 int main(void) {
 	// ethernet tx channels
@@ -122,8 +124,7 @@ int main(void) {
 	chan media_clock_ctl;
 
 	// audio channels
-	streaming
-	chan c_samples_to_codec;
+	streaming chan c_samples_to_codec;
 
 	// tcp/ip channels
 	chan xtcp[1];
@@ -137,13 +138,8 @@ int main(void) {
 		on stdcore[1]:
 		{
 			int mac_address[2];
-			ethernet_getmac_otp(otp_data,
-                                            otp_addr,
-                                            otp_ctrl,
-                                            (mac_address, char[]));
-			phy_init(clk_smi, p_mii_resetn,
-					smi,
-					mii);
+			ethernet_getmac_otp(otp_data, otp_addr,otp_ctrl, (mac_address, char[]));
+			phy_init(clk_smi, p_mii_resetn, smi, mii);
 
 			ethernet_server(mii, mac_address,
 					rx_link, 4,
@@ -155,10 +151,10 @@ int main(void) {
 		on stdcore[1]:
 		{
 			uip_server(rx_link[1],
-                                   tx_link[2],
-                                   xtcp, 1,
-                                   null,
-                                   connect_status);
+                       tx_link[2],
+                       xtcp, 1,
+                       null,
+                       connect_status);
 		}
 
 		// AVB - PTP
@@ -175,6 +171,9 @@ int main(void) {
 
 		on stdcore[1]:
 		{
+			// Enable XScope printing
+			xscope_config_io(XSCOPE_IO_BASIC);
+
 			media_clock_server(media_clock_ctl,
 					ptp_link[1],
 					buf_ctl,
@@ -230,15 +229,12 @@ int main(void) {
 					AVB_NUM_MEDIA_OUTPUTS);
 		}
 
-		// Xlog server
-		on stdcore[0]:
-		{
-			xlog_server_uart(p_uart_tx);
-		}
-
 		// Application threads
 		on stdcore[0]:
 		{
+			// Enable XScope printing
+			xscope_config_io(XSCOPE_IO_BASIC);
+
 			// First initialize avb higher level protocols
 			avb_init(media_ctl, listener_ctl, talker_ctl, media_clock_ctl, rx_link[2], tx_link[3], ptp_link[2]);
 
@@ -315,13 +311,65 @@ void ptp_server_and_gpio(chanend c_rx, chanend c_tx, chanend ptp_link[],
 	}
 }
 
+void app_handle_maap_indication(avb_status_t &status)
+{
+  switch (status.info.maap.msg)
+  {
+    case AVB_MAAP_ADDRESSES_LOST:
+    {
+      // oh dear, someone else is using our multicast address
+      for (int i=0;i<AVB_NUM_SOURCES;i++)
+        set_avb_source_state(i, AVB_SOURCE_STATE_DISABLED);
+      
+      // request a different address
+      avb_1722_maap_request_addresses(AVB_NUM_SOURCES, null);
+      break;
+    }
+    case AVB_MAAP_ADDRESSES_RESERVED:
+    {
+		for(int i=0;i<AVB_NUM_SOURCES;i++)
+		{
+			unsigned char macaddr[6];
+			avb_1722_maap_get_offset_address(macaddr, i);
+			// activate the source
+			set_avb_source_dest(i, macaddr, 6);
+			set_avb_source_state(i, AVB_SOURCE_STATE_POTENTIAL);
+			simple_printf("Stream multicast address acquired (%x:%x:%x:%x:%x:%x)\n", macaddr[0], macaddr[1], macaddr[2], macaddr[3], macaddr[4], macaddr[5]);
+		}
+    }
+  }
+}
+
+void app_handle_srp_indication(avb_status_t &status)
+{
+  switch (status.info.srp.msg)
+  {
+    case AVB_SRP_TALKER_ROUTE_FAILED:
+    {
+      // old: avb_srp_get_failed_stream(streamId);
+      // new: status.info.srp.msg.streamId
+
+      // handle a routing failure here
+      break;
+    }
+    case AVB_SRP_LISTENER_ROUTE_FAILED:
+    {
+      // old: avb_srp_get_failed_stream(streamId);
+      // new: status.info.srp.msg.streamId
+
+      // handle a routing failure here
+      break;
+    }
+  }
+}
+
 /** The main application control thread **/
-void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl) {
+void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl)
+{
 
 	timer tmr;
-	int avb_status = 0;
+	avb_status_t avb_status;
 	int map[AVB_NUM_MEDIA_INPUTS];
-	unsigned char macaddr[6];
 	int selected_chan = 0;
 	unsigned change_stream = 1;
 	unsigned timeout;
@@ -341,7 +389,6 @@ void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl) {
 	c_api_server_init(tcp_svr);
 
 	// Initialize the media clock (a ptp derived clock)
-	//printstr("Media clock: LOCAL\n");
 	//set_device_media_clock_type(0, MEDIA_FIFO_DERIVED);
 	set_device_media_clock_type(0, LOCAL_CLOCK);
 	//set_device_media_clock_type(0, PTP_DERIVED);
@@ -361,7 +408,7 @@ void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl) {
 	// Main loop
 	tmr	:> timeout;
 	while (1) {
-		unsigned char tmp;
+		int ret;
 		xtcp_connection_t conn;
 		unsigned int streamId[2];
 		unsigned int nbytes;
@@ -372,33 +419,22 @@ void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl) {
 		{
 			// Receive any incoming AVB packets (802.1Qat, 1722_MAAP)
 			case avb_get_control_packet(c_rx, buf, nbytes):
-
-			// Process AVB control packet if it is one
-			avb_status = avb_process_control_packet(buf, nbytes, c_tx);
-			switch (avb_status)
 			{
-				case AVB_SRP_TALKER_ROUTE_FAILED:
-				avb_srp_get_failed_stream(streamId);
-				// handle a routing failure here
-				break;
-				case AVB_SRP_LISTENER_ROUTE_FAILED:
-				avb_srp_get_failed_stream(streamId);
-				// handle a routing failure here
-				break;
-				case AVB_MAAP_ADDRESSES_LOST:
-				// oh dear, someone else is using our multicast address
-				for (int i=0;i<AVB_NUM_SOURCES;i++)
-				set_avb_source_state(i, AVB_SOURCE_STATE_DISABLED);
+				// Test for a control packet and process it
+				ret = avb_process_control_packet(avb_status, buf, nbytes, c_tx);
 
-				// request a different address
-				avb_1722_maap_request_addresses(AVB_NUM_SOURCES, null);
-				break;
-				default:
+				if (ret != AVB_NO_STATUS)
+				{
+					switch (avb_status.type)
+					{
+					case AVB_SRP: app_handle_srp_indication(avb_status); break;
+					case AVB_MAAP: app_handle_maap_indication(avb_status); break;
+					}
+				}
+
+				// add any special control packet handling here
 				break;
 			}
-
-			// add any special control packet handling here
-			break;
 
 			// Process TCP/IP events
 			case xtcp_event(tcp_svr, conn):
@@ -428,11 +464,11 @@ void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl) {
 					}
 				}
 
-				c_api_xtcp_handler(tcp_svr, conn);
+				c_api_xtcp_handler(tcp_svr, conn, tmr);
 
 				// add any special tcp/ip packet handling here
+				break;
 			}
-			break;
 
 			// Receive any events from user button presses
 			case c_gpio_ctl :> int cmd:
@@ -466,34 +502,33 @@ void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl) {
 					}
 					break;
 				}
+				break;
 			}
-			break;
 
 			// Periodic processing
 			case tmr when timerafter(timeout) :> void:
-			timeout += PERIODIC_POLL_TIME;
+				timeout += PERIODIC_POLL_TIME;
 
-			do
-			{
-				avb_status = avb_periodic();
-				switch (avb_status)
+				do
 				{
-					case AVB_MAAP_ADDRESSES_RESERVED:
-					for(int i=0;i<AVB_NUM_SOURCES;i++) {
-						avb_1722_maap_get_offset_address(macaddr, i);
-						// activate the source
-						set_avb_source_dest(i, macaddr, 6);
-						set_avb_source_state(i, AVB_SOURCE_STATE_POTENTIAL);
+					ret = avb_periodic(avb_status);
+
+					if (ret != AVB_NO_STATUS)
+					{
+						switch (avb_status.type)
+						{
+						case AVB_SRP: app_handle_srp_indication(avb_status); break;
+						case AVB_MAAP: app_handle_maap_indication(avb_status); break;
+						}
 					}
-					break;
-				}
-			} while (avb_status != AVB_NO_STATUS);
 
-			// Call the stream manager to check for new streams/manage
-			// what is being listened to
-			demo_manage_listener_stream(change_stream, selected_chan);
+				} while (ret != AVB_NO_STATUS);
 
-			break;
+				// Call the stream manager to check for new streams/manage
+				// what is being listened to
+				demo_manage_listener_stream(change_stream, selected_chan);
+
+				break;
 		}
 	}
 }

@@ -230,60 +230,61 @@ int current_time_to_milliseconds(int current_time)
   return time_ms;
 }
 
-int avb_1722_maap_periodic(chanend c_tx)
+int avb_1722_maap_periodic(avb_status_t *status, chanend c_tx)
 {
-  int status;
   int nbytes;
   int current_time = current_time_to_milliseconds(get_local_time());
-  status = AVB_NO_STATUS;
-  switch (maap_addr.state) 
-    {
-    case MAAP_DISABLED:
-      break;
-    case MAAP_PROBING:
-      if (maap_addr.immediately || (current_time - maap_addr.timeout) > 0) {
-        maap_addr.immediately = 0;
-        nbytes = create_maap_packet(MAAP_PROBE, 
-                                    &maap_addr, 
-                                    (char *) &maap_buf[0],
-                                    NULL,
-                                    0);
-        
-        mac_tx(c_tx, maap_buf, nbytes, ETH_BROADCAST);
-        maap_addr.count--;
 
-        if (maap_addr.count == 0) {
-          maap_addr.state = MAAP_RESERVED;
-          status = AVB_MAAP_ADDRESSES_RESERVED;
-          maap_addr.immediately = 1;
-        }
-        else {
-          // reset timeout
-          set_timeout(&maap_addr,
-                      current_time,
-                      MAAP_PROBE_INTERVAL_BASE_MS,
-                      MAAP_PROBE_INTERVAL_VARIATION_MS);
-        }
+  switch (maap_addr.state) 
+  {
+  case MAAP_DISABLED:
+    break;
+  case MAAP_PROBING:
+    if (maap_addr.immediately || (current_time - maap_addr.timeout) > 0) {
+      maap_addr.immediately = 0;
+      nbytes = create_maap_packet(MAAP_PROBE, 
+                                  &maap_addr, 
+                                  (char *) &maap_buf[0],
+                                  NULL,
+                                  0);
+      
+      mac_tx(c_tx, maap_buf, nbytes, ETH_BROADCAST);
+      maap_addr.count--;
+
+      if (maap_addr.count == 0) {
+        maap_addr.state = MAAP_RESERVED;
+        status->type = AVB_MAAP;
+        status->info.maap.msg = AVB_MAAP_ADDRESSES_RESERVED;
+        maap_addr.immediately = 1;
+        return AVB_STATUS_UPDATED;
       }
-      break;
-    case MAAP_RESERVED:
-      if (maap_addr.immediately || (current_time - maap_addr.timeout) > 0) {
-        maap_addr.immediately = 0;
-        nbytes = create_maap_packet(MAAP_ANNOUNCE, 
-                                    &maap_addr, 
-                                    (char *) &maap_buf[0],
-                                    NULL,
-                                    0);
-        mac_tx(c_tx, maap_buf, nbytes, ETH_BROADCAST);
-        // set timeout
-        set_timeout(&maap_addr, 
+      else {
+        // reset timeout
+        set_timeout(&maap_addr,
                     current_time,
-                    MAAP_ANNOUNCE_INTERVAL_BASE_MS,
-                    MAAP_ANNOUNCE_INTERVAL_VARIATION_MS);                     
+                    MAAP_PROBE_INTERVAL_BASE_MS,
+                    MAAP_PROBE_INTERVAL_VARIATION_MS);
       }
-      break;
-    } 
-  return status;
+    }
+    break;
+  case MAAP_RESERVED:
+    if (maap_addr.immediately || (current_time - maap_addr.timeout) > 0) {
+      maap_addr.immediately = 0;
+      nbytes = create_maap_packet(MAAP_ANNOUNCE, 
+                                  &maap_addr, 
+                                  (char *) &maap_buf[0],
+                                  NULL,
+                                  0);
+      mac_tx(c_tx, maap_buf, nbytes, ETH_BROADCAST);
+      // set timeout
+      set_timeout(&maap_addr, 
+                  current_time,
+                  MAAP_ANNOUNCE_INTERVAL_BASE_MS,
+                  MAAP_ANNOUNCE_INTERVAL_VARIATION_MS);                     
+    }
+    break;
+  } 
+  return AVB_NO_STATUS;
 }
 
 static int maap_conflict(maap_address_range* addr,
@@ -327,22 +328,20 @@ static int maap_conflict(maap_address_range* addr,
   return 0;
 }
 
-avb_status_t avb_1722_maap_process_packet_(unsigned int buf0[], 
+int avb_1722_maap_process_packet(avb_status_t *status, unsigned int buf0[], 
                                  int nbytes,
                                  chanend c_tx)
 {
   unsigned char *buf = (unsigned char *) buf0;
   int msg_type;
   struct ethernet_hdr_t *ethernet_hdr = (ethernet_hdr_t *) &buf[0];
-  struct tagged_ethernet_hdr_t *tagged_ethernet_hdr = 
-    (tagged_ethernet_hdr_t *) &buf[0];
+  struct tagged_ethernet_hdr_t *tagged_ethernet_hdr = (tagged_ethernet_hdr_t *) &buf[0];
 
   int has_qtag = ethernet_hdr->ethertype[1]==0x18;
   int ethernet_pkt_size = has_qtag ? 18 : 14;
   unsigned char conflict_addr[6];
   int conflict_count;
-  struct maap_packet_t *maap_pkt = 
-    (struct maap_packet_t *) &buf[ethernet_pkt_size];
+  struct maap_packet_t *maap_pkt = (struct maap_packet_t *) &buf[ethernet_pkt_size];
 
   if (has_qtag) {
     if (tagged_ethernet_hdr->ethertype[1] != (AVB_ETYPE & 0xff) ||
@@ -373,22 +372,24 @@ avb_status_t avb_1722_maap_process_packet_(unsigned int buf0[],
   msg_type = GET_MAAP_MSG_TYPE(maap_pkt);
 
   switch (msg_type)
-    {
-    case MAAP_PROBE:
-      if (maap_conflict(&maap_addr, maap_pkt, conflict_addr, &conflict_count)) {
-        int len;
-        len = create_maap_packet(MAAP_DEFEND, &maap_addr, (char*) &maap_buf[0],
-                                 conflict_addr, conflict_count);
-        mac_tx(c_tx, maap_buf, len, ETH_BROADCAST);
-      }
-      break;
-    case MAAP_ANNOUNCE:
-      if (maap_conflict(&maap_addr, maap_pkt, NULL, NULL)) {
-        maap_addr.state = MAAP_DISABLED;
-        return AVB_MAAP_ADDRESSES_LOST;
-      }
-      break;
+  {
+  case MAAP_PROBE:
+    if (maap_conflict(&maap_addr, maap_pkt, conflict_addr, &conflict_count)) {
+      int len;
+      len = create_maap_packet(MAAP_DEFEND, &maap_addr, (char*) &maap_buf[0],
+                               conflict_addr, conflict_count);
+      mac_tx(c_tx, maap_buf, len, ETH_BROADCAST);
     }
+    break;
+  case MAAP_ANNOUNCE:
+    if (maap_conflict(&maap_addr, maap_pkt, NULL, NULL)) {
+      maap_addr.state = MAAP_DISABLED;
+      status->type = AVB_MAAP;
+      status->info.maap.msg = AVB_MAAP_ADDRESSES_LOST;
+      return AVB_STATUS_UPDATED;
+    }
+    break;
+  }
   return AVB_NO_STATUS;
 }
 

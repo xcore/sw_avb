@@ -231,14 +231,15 @@ void avb_init(chanend media_ctl[],
   mac_set_custom_filter(c_mac_rx, MAC_FILTER_AVB_CONTROL);
 }
 
-avb_status_t avb_periodic(void) {
-	avb_status_t res = mrp_periodic();
-	if (res != AVB_NO_STATUS) return res;
+int avb_periodic(avb_status_t *status)
+{
+	int res = mrp_periodic(status);
+	if (res) return res;
 #ifdef AVB_ENABLE_1722_1
-	res = avb_1722_1_periodic(c_mac_tx, c_ptp);
-	if (res != AVB_NO_STATUS) return res;
+	res = avb_1722_1_periodic(status, c_mac_tx, c_ptp);
+	if (res) return res;
 #endif
-	return avb_1722_maap_periodic(c_mac_tx);
+	return avb_1722_maap_periodic(status, c_mac_tx);
 }
 
 void avb_start(void) {
@@ -368,6 +369,7 @@ int getset_avb_source_state(int set,
                             int source_num, 
                             enum avb_source_state_t *state)
 {
+  char stream_string[] = "Talker stream ";
   if (source_num < AVB_NUM_SOURCES) {
     avb_source_info_t *source = &sources[source_num]; 
     if (set) {      
@@ -438,10 +440,10 @@ int getset_avb_source_state(int set,
             xc_abi_outuint(c, source->stream.local_id);
             (void) xc_abi_inuint(c); //ACK
 
-            simple_printf("Stream #%d on\n", source_num);
+            printstr(stream_string); simple_printf("#%d on\n", source_num);
           }
 #else
-          simple_printf("Stream #%d ready\n", source_num);
+          printstr(stream_string); simple_printf("#%d ready\n", source_num);
 #endif
 
         }
@@ -455,13 +457,13 @@ int getset_avb_source_state(int set,
           xc_abi_outuint(c, source->stream.local_id);
           (void) xc_abi_inuint(c); //ACK
 
-          simple_printf("Stream #%d off\n", source_num);
+          printstr(stream_string); simple_printf("#%d off\n", source_num);
       }
       else if (source->stream.state == AVB_SOURCE_STATE_POTENTIAL &&
                *state == AVB_SOURCE_STATE_ENABLED) {
         // start transmitting
 
-        simple_printf("Stream #%d on\n", source_num);
+        printstr(stream_string); simple_printf("#%d on\n", source_num);
         chanend c = source->talker_ctl;
         xc_abi_outuint(c, AVB1722_TALKER_GO);
         xc_abi_outuint(c, source->stream.local_id);
@@ -946,25 +948,19 @@ void avb_set_legacy_mode(int mode)
   avb_mrp_set_legacy_mode(mode);
 }
 
-avb_status_t avb_process_control_packet(unsigned int buf[], 
-                                        int nbytes,
-                                        chanend c_tx)
+int avb_process_control_packet(avb_status_t *status, unsigned int buf[], int nbytes, chanend c_tx)
 {
-  avb_status_t status;
-
-  status = avb_mrp_process_packet(buf, nbytes);
-  if (status != AVB_SRP_OK && status != AVB_NO_STATUS)
-    return status;
+  int res = avb_mrp_process_packet(status, buf, nbytes);
+  if (res && (status->info.srp.msg != AVB_SRP_OK))
+    return res;
 
 #ifdef AVB_ENABLE_1722_1
-  status = avb_1722_1_process_packet(buf, nbytes, c_tx);
-  if (status != AVB_SRP_OK && status != AVB_NO_STATUS)
-    return status;
+  res = avb_1722_1_process_packet(status, buf, nbytes, c_tx);
+  if (res && (status->info.a1722_1.msg != AVB_1722_1_OK))
+    return res;
 #endif
 
-  status = avb_1722_maap_process_packet_(buf, nbytes, c_tx);
-
-  return status;
+  return avb_1722_maap_process_packet(status, buf, nbytes, c_tx);
 }
 
 

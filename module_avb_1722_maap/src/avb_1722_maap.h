@@ -28,7 +28,7 @@ void avb_1722_maap_request_addresses(int num_addresses, char start_address[]);
 
 void avb_1722_maap_init(unsigned char macaddr[6]);
 
-avb_status_t avb_1722_maap_process_packet_(unsigned int buf[], int nbytes, chanend c_tx);
+int avb_1722_maap_process_packet(REFERENCE_PARAM(avb_status_t, status), unsigned int buf[], int nbytes, chanend c_tx);
 
 /** Get the base address of the reserved range. 
  *
@@ -68,7 +68,7 @@ void avb_1722_maap_relinquish_addresses();
  *
  *  \param c_tx    Channel for ethernet transmission
  */
-int avb_1722_maap_periodic(chanend c_tx);
+int avb_1722_maap_periodic(REFERENCE_PARAM(avb_status_t, status), chanend c_tx);
 
 /** Re-request a claim on the existing address range
  *

@@ -76,7 +76,6 @@ typedef struct {
 	int connected;
 	stream_t stream_id;
 	unsigned char destination_mac[6];
-	unsigned int default_format;
 } avb_1722_1_acmp_listener_stream_info;
 
 typedef struct {
@@ -121,6 +120,8 @@ typedef enum {
 	ACMP_STATUS_LISTENER_DEFAULT_FORMAT_INVALID = 13,
 	ACMP_STATUS_TALKER_DEFAULT_FORMAT_INVALID = 14,
 	ACMP_STATUS_DEFAULT_SET_DIFFERENT = 15,
+	ACMP_STATUS_CONTROLLER_NOT_AUTHORIZED = 16,
+	ACMP_STATUS_INCOMPATIBLE_REQUEST = 17,
 	ACMP_STATUS_NOT_SUPPORTED = 31
 } avb_1722_1_acmp_status_t;
 
