@@ -26,6 +26,12 @@
     <release parenthash = "7f3b9a86d9d8cca5fda18ff5343cd1f55c5ea70a" version = "5.1.1rc0" githash = "dc6f822b16674eafc0e32ed2ba24db5ec96cb397"></release>
     <release parenthash = "7f3b9a86d9d8cca5fda18ff5343cd1f55c5ea70a" version = "5.1.1" githash = "dc6f822b16674eafc0e32ed2ba24db5ec96cb397"></release>
     <scope>reference design</scope>
+    <docdir>doc</docdir>
     <vendor>XMOS</vendor>
     <xpd_version>1.0</xpd_version>
+    <exclude_dir>test_api_listener</exclude_dir>
+    <exclude_dir>test_api_talker</exclude_dir>
+    <exclude_dir>test_api_talker_clock_slew</exclude_dir>
+    <exclude_dir>test_gptp_lc</exclude_dir>
+    <exclude_dir>module_avnu_observability</exclude_dir>
 </xpd>

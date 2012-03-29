@@ -1,22 +1,23 @@
-26th March 2012
----------------
+AVB Changelog
+=============
+
+5.1.2
+-----
   * PTP fix to correct step in g_ptp_adjust (commit #1548fa5ce7)
   * Software support added for CS2100 PLL.
   * Media clock recovery PID tuned to decrease settle time and amplitude of oscillations
   * Fixes to app_xr_avb_lc_demo to work with channel counts < 8
-
-
-23rd November 2011
-------------------
   * Transport stream interface
   * 1722/61883-4 packet encapsulation
+  * Update to ethernet and tcp package dependencies
 
-24th October 2011
------------------
+5.1.1
+-----
   * Field update module added
+  * I2S slave functionality added
 
-13th June 2011 (v5.1.0)
------------------------
+5.1.0
+-----
   * 802.1Qat support
   * Partial (beta) 1722.1 support
   * Clock recovery corrections for 8kHz and >48kHz
@@ -27,27 +28,23 @@
   * SRP state machine corrections
   * SRP state machine drives stream transmission
 
-17th Dec 2010
--------------
-  * 5v0 major release
+5.0.0
+-----
   * New control API
   * 1722 MAAP support
   * Standard updates
   * Optimizations
   * See design guide for new release details
 
-3rd March (4v1alpha) 
---------------------
+4.1.0
+-----
   * Move to new build system
 
-20th January (4v0)
------------------------
+4.0.0
+-----
   * Fixed missing functionality in media clock server
   * Small changes media server API - see demos for examples
   * Optimized audio transport for local listener streams
-
-1st November 2009 (4v0Beta1)
------------------------
   * Major rewrite, many internal APIs changed, overall performance improvements
   * Added gigabit ethernet support
   * Added flexible internal routing (local streams) with simplified
@@ -59,7 +56,7 @@
   * Various bug fixes
 
 31st July 2009
-------------------
+--------------
   * Dropped support for xs1a architecture
   * Major rewrite, many internal APIs changed, overall performance  improvements
   * New mii-ethernet layer (better performance, capable of 2-port switch)
