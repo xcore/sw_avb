@@ -16,9 +16,16 @@
         <githash>784b46781a8f760e73b41daad57bc1b19a593dc7</githash>
     </dependency>
     <description>AVB software stack</description>
+    <docdir>doc</docdir>
+    <exclude_dir>test_api_listener</exclude_dir>
+    <exclude_dir>test_api_talker</exclude_dir>
+    <exclude_dir>test_api_talker_clock_slew</exclude_dir>
+    <exclude_dir>test_gptp_lc</exclude_dir>
+    <exclude_dir>module_avnu_observability</exclude_dir>
     <location>git@github.com:xcore/sw_avb.git</location>
     <name>sw_avb</name>
     <maintainer>DavidNorman</maintainer>
+    <partnumber>XM-001711-DH</partnumber>
     <release parenthash = "c0e2eedbd5609978063be5c43ab2c671bb7d5030" version = "5.1.0beta0" githash = "f41d7b41abbc158ddf61ae895c35475ee4d1f41b"></release>
     <release parenthash = "c5f4fd52b8d824979950bfd4616013ab83649727" version = "5.1.0beta1" githash = "f16649adbf9d90dc003732416b9b430ca6644581"></release>
     <release parenthash = "f16649adbf9d90dc003732416b9b430ca6644581" version = "5.1.0rc0" githash = "c2dcbec12277cad45115212202c5c6be8b850ced"></release>
@@ -26,12 +33,7 @@
     <release parenthash = "7f3b9a86d9d8cca5fda18ff5343cd1f55c5ea70a" version = "5.1.1rc0" githash = "dc6f822b16674eafc0e32ed2ba24db5ec96cb397"></release>
     <release parenthash = "7f3b9a86d9d8cca5fda18ff5343cd1f55c5ea70a" version = "5.1.1" githash = "dc6f822b16674eafc0e32ed2ba24db5ec96cb397"></release>
     <scope>reference design</scope>
-    <docdir>doc</docdir>
+    <subpartnumber>XR-000008-SW</subpartnumber>
     <vendor>XMOS</vendor>
     <xpd_version>1.0</xpd_version>
-    <exclude_dir>test_api_listener</exclude_dir>
-    <exclude_dir>test_api_talker</exclude_dir>
-    <exclude_dir>test_api_talker_clock_slew</exclude_dir>
-    <exclude_dir>test_gptp_lc</exclude_dir>
-    <exclude_dir>module_avnu_observability</exclude_dir>
 </xpd>
