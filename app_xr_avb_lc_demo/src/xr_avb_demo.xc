@@ -336,6 +336,7 @@ void app_handle_maap_indication(avb_status_t &status)
 			set_avb_source_state(i, AVB_SOURCE_STATE_POTENTIAL);
 			simple_printf("Stream multicast address acquired (%x:%x:%x:%x:%x:%x)\n", macaddr[0], macaddr[1], macaddr[2], macaddr[3], macaddr[4], macaddr[5]);
 		}
+		break;
     }
   }
 }

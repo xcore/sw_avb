@@ -15,11 +15,9 @@ INCLUDE_DIRS = src/media_fifos
 
 SOURCE_DIRS += $(foreach x, $(USED_CODECS), src/codecs/$x)
 SOURCE_DIRS += $(foreach x, $(USED_AUDIO_INTERFACES), src/interfaces/$x)
-SOURCE_DIRS += $(foreach x, $(USED_EXTERNAL_CLOCK_CHIPS), src/media_clocks/external/$x)
 
 INCLUDE_DIRS += $(foreach x, $(USED_CODECS), src/codecs/$x)
 INCLUDE_DIRS += $(foreach x, $(USED_AUDIO_INTERFACES), src/interfaces/$x)
-INCLUDE_DIRS += $(foreach x, $(USED_EXTERNAL_CLOCK_CHIPS), src/media_clocks/external/$x)
 
 MODULE_XCC_FLAGS = $(XCC_FLAGS) -g -O3
 

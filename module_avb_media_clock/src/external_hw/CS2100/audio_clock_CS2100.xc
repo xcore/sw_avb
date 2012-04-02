@@ -111,71 +111,24 @@ void audio_gen_CS2100_clock(out port p, chanend clk_ctl)
   }
 }
 
+static unsigned char regaddr[9] = {0x09,0x08,0x07,0x06,0x17,0x16,0x05,0x03,0x1E};
+static unsigned char regdata[9] = {0x00,0x00,0x00,0x00,0x00,0x08,0x01,0x01,0x00};
 
 // Set up the multiplier in the PLL clock generator
-void audio_clock_CS2100_init(struct r_i2c &r_i2c, unsigned mclks_per_wordclk)
+void audio_clock_CS2100CP_init(struct r_i2c &r_i2c, unsigned mclks_per_wordclk)
 {
-   int deviceAddr = 0x9C;
-   struct i2c_data_info data;
-   int fail = 0;
+  int deviceAddr = 0x9C;
+  unsigned char data[1];
 
-   // this is the muiltiplier in the PLL, which takes the PLL reference clock and
-   // multiplies it up to the MCLK frequency.
-   unsigned mult = (PLL_TO_WORD_MULTIPLIER * mclks_per_wordclk);
+  // this is the muiltiplier in the PLL, which takes the PLL reference clock and
+  // multiplies it up to the MCLK frequency.
+  (regdata,unsigned int[])[0] = ((PLL_TO_WORD_MULTIPLIER << 11) * mclks_per_wordclk);
 
-   i2c_master_init(r_i2c);
+  i2c_master_init(r_i2c);
 
-   data.data_len = 1;
-   data.master_num = 0;
-   data.clock_mul = 5;
-
-   mult = mult/2;
-   mult = mult << 12;
-
-   // Set loop bandwidth (8.8.1 in CS2100 chip spec)
-   data.data[0] = 0x00; // 1Hz
-   i2c_master_tx(deviceAddr, 0x1E, data, r_i2c);
-
-   // Configure PLL
-   data.data[0] = 0x01;
-   i2c_master_tx(deviceAddr, 0x03, data, r_i2c);
-   data.data[0] = 0x01;
-   i2c_master_tx(deviceAddr, 0x05, data, r_i2c);
-   data.data[0] = 0x08;
-   i2c_master_tx(deviceAddr, 0x16, data, r_i2c);
-   data.data[0] = 0x00;
-   i2c_master_tx(deviceAddr, 0x17, data, r_i2c);
-
-   // Set multiplier
-   data.data[0] = (mult >> 24) & 0xFF;
-   i2c_master_tx(deviceAddr, 0x06, data, r_i2c);
-   data.data[0] = (mult >> 16) & 0xFF;
-   i2c_master_tx(deviceAddr, 0x07, data, r_i2c);
-   data.data[0] = (mult >> 8) & 0xFF;
-   i2c_master_tx(deviceAddr, 0x08, data, r_i2c);
-   data.data[0] = (mult) & 0xFF;
-   i2c_master_tx(deviceAddr, 0x09, data, r_i2c);
-
-   // Check configuration
-   if (!i2c_master_rx(deviceAddr, 0x03, data, r_i2c))
-   {
-	   if (data.data[0] != 0x01)
-	   {
-		   fail = 1;
-	   }
-   }
-
-   if (!i2c_master_rx(deviceAddr, 0x09, data, r_i2c))
-   {
-	   if (data.data[0] != (mult & 0xFF))
-	   {
-		   fail = 1;
-	   }
-   }
-
-   if (fail)
-   {
-	   printstr("PLL chip configuration failed\n");
-   }
+  #pragma unsafe arrays
+  for(int i = 8; i >= 0; i--) {
+    data[0] = (regdata,unsigned char[])[i];
+    i2c_master_write_reg(deviceAddr, regaddr[i], data, 1, r_i2c);
+  }
 }
-
