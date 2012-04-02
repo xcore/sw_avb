@@ -193,8 +193,8 @@ unsigned int update_media_clock(chanend ptp_svr,
 	}
 #endif
 
-#ifndef MEDIA_CLOCK_EXCLUDE_FIFO_DERIVED
-	case MEDIA_FIFO_DERIVED: {
+#ifndef MEDIA_CLOCK_EXCLUDE_STREAM_DERIVED
+	case INPUT_STREAM_DERIVED: {
 		long long ierror, perror;
 
 		// If the stream info isn't valid at all, then return the default clock rate

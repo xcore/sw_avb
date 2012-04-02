@@ -52,7 +52,7 @@ void update_stream_derived_clocks(int source_num,
 {
   for (int i=0;i<MAX_NUM_MEDIA_CLOCKS;i++) {
     if (media_clocks[i].active &&
-        media_clocks[i].clock_type == MEDIA_FIFO_DERIVED &&
+        media_clocks[i].clock_type == INPUT_STREAM_DERIVED &&
         media_clocks[i].source == source_num) 
       {
         update_media_clock_stream_info(i, 
@@ -71,7 +71,7 @@ void inform_media_clocks_of_lock(int source_num)
 {
  for (int i=0;i<MAX_NUM_MEDIA_CLOCKS;i++) {
     if (media_clocks[i].active &&
-        media_clocks[i].clock_type == MEDIA_FIFO_DERIVED &&
+        media_clocks[i].clock_type == INPUT_STREAM_DERIVED &&
         media_clocks[i].source == source_num) 
       {
         inform_media_clock_of_lock(i);
