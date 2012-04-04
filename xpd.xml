@@ -1,19 +1,23 @@
 <?xml version="1.0" ?>
 <xpd>
     <dependency repo = "sc_xlog">
-        <githash>611bb375ec63ab41e6af5f3f9637bbbb66cd7360</githash>
+        <githash>2b37b398523d7af6fc4dfc94b8c032e3b95bab9a</githash>
     </dependency>
     <dependency repo = "sc_i2c">
-        <githash>6bc49309bfb86c7648c3988d661810f8870350a3</githash>
+        <githash>86cb497a5ee519fbc0c4bb597adeeb135d3e97e1</githash>
+        <version>2.0.0rc3</version>
     </dependency>
     <dependency repo = "sc_xtcp">
-        <githash>64e37067439ef669ea53f2b572f2b6885d01cb24</githash>
+        <githash>65cd05d017456b067f12487dd0ed05aff113a800</githash>
+        <version>3.0.1rc0</version>
     </dependency>
     <dependency repo = "xcommon">
-        <githash>a84cf50fd3719df396345f2f55e1dca20354f3a2</githash>
+        <githash>3416f530590333980bbe152a9123b16becdb441f</githash>
+        <version>1.0.0rc1</version>
     </dependency>
     <dependency repo = "sc_ethernet">
-        <githash>784b46781a8f760e73b41daad57bc1b19a593dc7</githash>
+        <githash>e0d8f57a0f817547484f00be5231b536439397d2</githash>
+        <version>2.1.2rc0</version>
     </dependency>
     <description>AVB software stack</description>
     <docdir>doc</docdir>
@@ -33,7 +37,7 @@
     <release parenthash = "7f3b9a86d9d8cca5fda18ff5343cd1f55c5ea70a" version = "5.1.1rc0" githash = "dc6f822b16674eafc0e32ed2ba24db5ec96cb397"></release>
     <release parenthash = "7f3b9a86d9d8cca5fda18ff5343cd1f55c5ea70a" version = "5.1.1" githash = "dc6f822b16674eafc0e32ed2ba24db5ec96cb397"></release>
     <release parenthash = "e18b48279cf8ffe05720d9288242d09f866b6755" version = "5.1.2rc0" githash = "e1b33c519fc2cec184f3ceb8dd3f3a64d7d129bc"></release>
-    <release parenthash = "a66c8748b642ffe49411169ee4a630f774a4c1d3" githash="6a879e1d1a9c284dd18b513a9787af64444bd551" version = "5.1.2rc1"></release>
+    <release parenthash = "a66c8748b642ffe49411169ee4a630f774a4c1d3" version = "5.1.2rc1" githash = "6a879e1d1a9c284dd18b513a9787af64444bd551"></release>
     <scope>reference design</scope>
     <subpartnumber>XR-000008-SW</subpartnumber>
     <vendor>XMOS</vendor>
