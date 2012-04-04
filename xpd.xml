@@ -32,6 +32,8 @@
     <release parenthash = "4c16b7a4fe7016f6e2f986aa925167293f8cc910" version = "5.1.0rc1" githash = "3efb15eccb013e4dd1058955a9555a240b16e233"></release>
     <release parenthash = "7f3b9a86d9d8cca5fda18ff5343cd1f55c5ea70a" version = "5.1.1rc0" githash = "dc6f822b16674eafc0e32ed2ba24db5ec96cb397"></release>
     <release parenthash = "7f3b9a86d9d8cca5fda18ff5343cd1f55c5ea70a" version = "5.1.1" githash = "dc6f822b16674eafc0e32ed2ba24db5ec96cb397"></release>
+    <release parenthash = "e18b48279cf8ffe05720d9288242d09f866b6755" version = "5.1.2rc0" githash = "e1b33c519fc2cec184f3ceb8dd3f3a64d7d129bc"></release>
+    <release parenthash = "a66c8748b642ffe49411169ee4a630f774a4c1d3" githash="6a879e1d1a9c284dd18b513a9787af64444bd551" version = "5.1.2rc1"></release>
     <scope>reference design</scope>
     <subpartnumber>XR-000008-SW</subpartnumber>
     <vendor>XMOS</vendor>
