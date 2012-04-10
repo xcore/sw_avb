@@ -23,10 +23,21 @@ void avb_add_detected_stream(unsigned streamId[2],
                              int addr_offset)
 {  
   int found = 0;
+  unsigned int my_stream_id[2];
 
   if (AVB_STREAM_DETECT_HISTORY_SIZE == 0)
     return;
 
+  for(int i=0;i<AVB_NUM_SOURCES;i++)
+  {
+    get_avb_source_id(i, my_stream_id);
+
+    // Detect if we are trying to add our own talker stream
+    if (my_stream_id[0] == streamId[0] && my_stream_id[1] == streamId[1])
+    {
+      return;
+    }
+  }
 
   for(int i=0;i<AVB_STREAM_DETECT_HISTORY_SIZE;i++)
     if (streamId[0] == stream_history[i].id[0] &&

@@ -9,7 +9,6 @@
 #define streaming
 #include <xccompat.h>
 #include <string.h>
-#include <print.h>
 
 #include "avb_1722_talker.h"
 #include "gptp.h"
@@ -181,7 +180,6 @@ int avb1722_create_packet(unsigned char Buf0[],
 			return 0;
 
 		stream_info->transmit_ok = 1;
-		printintln(elapsed);
 	}
 
 	// Figure out the number of samples in the 1722 packet

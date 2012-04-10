@@ -5,8 +5,6 @@
 #include <platform.h>
 #include <xs1.h>
 #include <xclib.h>
-#include <xscope.h>
-#include <print.h>
 
 #include "avb_1722_def.h"
 #include "avb_1722.h"
@@ -246,7 +244,7 @@ void avb_1722_talker(chanend ptp_svr, chanend ethernet_tx_svr,
 			if (max_active_avb_stream != -1 &&
 					talker_streams[cur_avb_stream].active==2) {
 				int packet_size;
-				int t, t1;
+				int t;
 				tmr :> t;
 				packet_size =
 				avb1722_create_packet((TxBuf, unsigned char[]),
@@ -259,8 +257,6 @@ void avb_1722_talker(chanend ptp_svr, chanend ethernet_tx_svr,
 							TxBuf,
 							packet_size,
 							ETH_BROADCAST);
-					tmr :> t1;
-					// printintln(t1-t);
 				}
 			}
 			if (max_active_avb_stream != -1) {

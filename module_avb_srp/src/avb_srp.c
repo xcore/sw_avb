@@ -162,25 +162,14 @@ avb_srp_process_talker(int mrp_attribute_type, char *fv, int num)
       
       registered = 1;
     }
-  }
-  
-  // Detect if we are trying to add our own talker stream
-  for(int i=0;i<AVB_NUM_SOURCES;i++)
-  {
-    get_avb_source_id(i, lstreamId);
-
-    if (pdu_streamId[0] == lstreamId[0] && pdu_streamId[1] == lstreamId[1])
-    {
-      registered = 1;
-    }
   }                   
 
   if (!registered)
 #ifndef SRP_VERSION_5
-  {
-    int vlan = ((int) packet->VlanID[0] << 8) | (packet->VlanID[1] & 0xff);
-    avb_add_detected_stream(pdu_streamId, vlan, packet->DestMacAddr, num);
-  }
+    {
+      int vlan = ((int) packet->VlanID[0] << 8) | (packet->VlanID[1] & 0xff);
+      avb_add_detected_stream(pdu_streamId, vlan, packet->DestMacAddr, num);
+    }
 #else
     avb_add_detected_stream(pdu_streamId, 2, packet->DestMacAddr, num);
 #endif
