@@ -153,6 +153,7 @@ typedef struct avb_status_t
   avb_protocol_t type;
   avb_info_t info;
 } avb_status_t;
+#endif
 
 
 #endif

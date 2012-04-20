@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <?fileVersion 4.0.0?>
-
 <cproject>
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
 		<cconfiguration id="com.xmos.cdt.toolchain.30841826">

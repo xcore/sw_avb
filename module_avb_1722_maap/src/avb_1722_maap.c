@@ -351,13 +351,11 @@ int avb_1722_maap_process_packet(avb_status_t *status, unsigned int buf0[],
         return AVB_NO_STATUS;
       }       
   }
-  else {
     if (ethernet_hdr->ethertype[1] != (AVB_ETYPE & 0xff) ||
         ethernet_hdr->ethertype[0] != (AVB_ETYPE >> 8)) 
       {
         // not a 1722 packet
         return AVB_NO_STATUS;
-      }
   }
 
 

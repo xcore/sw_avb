@@ -16,8 +16,6 @@
 #include "ethernet_tx_client.h"
 #include "ethernet_rx_client.h"
 #include "ethernet_server_def.h"
-#include "osc_types.h"
-#include "osc_tree.h"
 #include "mac_custom_filter.h"
 #include "avb_1722_maap.h"
 

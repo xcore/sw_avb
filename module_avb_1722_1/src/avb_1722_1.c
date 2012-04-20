@@ -121,7 +121,7 @@ int avb_1722_1_periodic(avb_status_t *status, chanend c_tx, chanend c_ptp)
 	res = avb_1722_1_acmp_listener_periodic(status, c_tx);
 	if (res) return res;
 #endif
-	return AVB_NO_STATUS;
+    return;
 }
 
 
