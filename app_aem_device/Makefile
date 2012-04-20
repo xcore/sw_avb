@@ -25,11 +25,9 @@ XCC_FLAGS_xr_avb_demo.xc = $(XCC_FLAGS) -fsubword-select
 # The USED_MODULES variable lists other module used by the application. 
 
 USED_MODULES = module_avb_1722 module_avb_1722_maap module_avb_srp module_avb_media_clock  module_avb_audio
-USED_MODULES += module_avb module_avb_util module_gptp module_ethernet module_locks module_i2c module_avb_1722_1
+USED_MODULES += module_avb module_avb_util module_gptp module_ethernet module_locks module_i2c_simple module_avb_1722_1
 
-XCC_FLAGS_xdk_demo_audio_if.xc = $(XCC_FLAGS) -fsubword-select
-
-# This uses the avb mac filtering in module_avb_common
+# This uses the AVB Ethernet filter
 USE_AVB_MAC_CUSTOM_FILTER=1
 
 #Add codecs from module_avb_audio

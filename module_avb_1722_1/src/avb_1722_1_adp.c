@@ -251,7 +251,7 @@ static void avb_1722_1_create_adp_packet(int message_type, guid_t guid)
 	  if (message_type != ENTITY_DISCOVER)
 	  {
 		  HTON_U32(pkt->vendor_id, AVB_1722_1_ADP_VENDOR_ID);
-		  HTON_U32(pkt->model_id, AVB_1722_1_ADP_MODEL_ID);
+		  HTON_U32(pkt->entity_model_id, AVB_1722_1_ADP_MODEL_ID);
 		  HTON_U32(pkt->entity_capabilities, AVB_1722_1_ADP_ENTITY_CAPABILITIES);
 		  HTON_U16(pkt->talker_stream_sources, AVB_1722_1_ADP_TALKER_STREAM_SOURCES);
 		  HTON_U16(pkt->talker_capabilities, AVB_1722_1_ADP_TALKER_CAPABILITIES);

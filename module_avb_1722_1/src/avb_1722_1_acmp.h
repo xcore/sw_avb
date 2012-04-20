@@ -10,10 +10,10 @@ void avb_1722_1_acmp_controller_init();
 void avb_1722_1_acmp_talker_init();
 void avb_1722_1_acmp_listener_init();
 
-int process_avb_1722_1_acmp_packet(EFERENCE_PARAM(avb_status_t, status), REFERENCE_PARAM(avb_1722_1_acmp_packet_t, pkt), chanend c_tx);
-int avb_1722_1_acmp_controller_periodic(EFERENCE_PARAM(avb_status_t, status), chanend c_tx);
-int avb_1722_1_acmp_talker_periodic(EFERENCE_PARAM(avb_status_t, status), chanend c_tx);
-int avb_1722_1_acmp_listener_periodic(EFERENCE_PARAM(avb_status_t, status), chanend c_tx);
+int process_avb_1722_1_acmp_packet(REFERENCE_PARAM(avb_status_t, status), REFERENCE_PARAM(avb_1722_1_acmp_packet_t, pkt), chanend c_tx);
+int avb_1722_1_acmp_controller_periodic(REFERENCE_PARAM(avb_status_t, status), chanend c_tx);
+int avb_1722_1_acmp_talker_periodic(REFERENCE_PARAM(avb_status_t, status), chanend c_tx);
+int avb_1722_1_acmp_listener_periodic(REFERENCE_PARAM(avb_status_t, status), chanend c_tx);
 
 void acmp_controller_connect(REFERENCE_PARAM(guid_t, talker_guid), REFERENCE_PARAM(guid_t, listener_guid), chanend c_tx);
 

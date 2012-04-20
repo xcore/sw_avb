@@ -26,9 +26,7 @@ XCC_FLAGS_xr_avb_demo.xc = $(XCC_FLAGS) -fsubword-select
 
 USED_MODULES = module_avb_attero_cfg module_avb_1722 module_avb_1722_maap module_avb_srp module_avb_media_clock  module_avb_audio  module_avb module_avb_util  module_gptp module_xtcp module_zeroconf module_ethernet module_locks module_i2c_simple
 
-XCC_FLAGS_xdk_demo_audio_if.xc = $(XCC_FLAGS) -fsubword-select
-
-# This uses the avb mac filtering in module_avb_common
+# This uses the AVB Ethernet filter
 USE_AVB_MAC_CUSTOM_FILTER=1
 
 #Add codecs from module_avb_audio
