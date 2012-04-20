@@ -5,11 +5,7 @@
 #include "i2c.h"
 #include <stdlib.h>
 
-/*** Private Definitions ***/
-#define CTL_SCLK_PERIOD_LOW_TICKS      (1000)
-#define CTL_SCLK_PERIOD_HIGH_TICKS     (1000)
-
-#define DEVICE_ADRS                    (0x90)
+#define I2C_BIT_TIME 1100
 
 /*
  *  This module takes the output from the media clock server and transforms it into a
