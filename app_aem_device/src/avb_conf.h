@@ -21,7 +21,7 @@
 #define ETHERNET_MAX_TX_HP_PACKET_SIZE (300)
 
 /* General purpose AVB configuration */
-#define AVB_MAX_NAME_LEN 25
+#define AVB_MAX_NAME_LEN 0
 #define AVB_MAX_CHANNELS_PER_STREAM 8
 
 /* Listener configuration */

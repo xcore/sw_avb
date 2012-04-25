@@ -30,7 +30,8 @@
 #define BUTTON_TIMEOUT_PERIOD (20000000)
 
 // Commands sent from the GPIO to the main demo app
-enum gpio_cmd {
+enum gpio_cmd
+{
     STREAM_SEL, CHAN_SEL, REMOTE_SEL
 };
 
@@ -50,7 +51,8 @@ on stdcore[1]: port otp_data = XS1_PORT_32B; // OTP_DATA_PORT
 on stdcore[1]: out port otp_addr = XS1_PORT_16C; // OTP_ADDR_PORT
 on stdcore[1]: port otp_ctrl = XS1_PORT_16D; // OTP_CTRL_PORT
 
-on stdcore[1]: mii_interface_t mii = {
+on stdcore[1]: mii_interface_t mii =
+{
         XS1_CLKBLK_1,
         XS1_CLKBLK_2,
         PORT_ETH_RXCLK,
@@ -76,14 +78,16 @@ on stdcore[0]: clock b_bclk = XS1_CLKBLK_2;
 on stdcore[0]: in port p_aud_mclk = PORT_MCLK;
 on stdcore[0]: buffered out port:32 p_aud_bclk = PORT_SCLK;
 on stdcore[0]: out buffered port:32 p_aud_lrclk = PORT_LRCLK;
-on stdcore[0]: out buffered port:32 p_aud_dout[4] = {
+on stdcore[0]: out buffered port:32 p_aud_dout[4] =
+{
         PORT_SDATA_OUT0,
         PORT_SDATA_OUT1,
         PORT_SDATA_OUT2,
         PORT_SDATA_OUT3
 };
 
-on stdcore[0]: in buffered port:32 p_aud_din[4] = {
+on stdcore[0]: in buffered port:32 p_aud_din[4] =
+{
         PORT_SDATA_IN0,
         PORT_SDATA_IN1,
         PORT_SDATA_IN2,
@@ -106,7 +110,8 @@ void xscope_user_init(void)
 }
 
 
-int main(void) {
+int main(void)
+{
     // ethernet tx channels
     chan tx_link[4];
     chan rx_link[4];
@@ -263,7 +268,8 @@ void ptp_server_and_gpio(chanend c_rx, chanend c_tx, chanend ptp_link[],
 
     ptp_server_init(c_rx, c_tx, server_type);
 
-    while (1) {
+    while (1)
+    {
         select
         {
             do_ptp_server(c_rx, c_tx, ptp_link, num_ptp);
@@ -421,11 +427,102 @@ void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl)
 
         select
         {
-            // Receive any incoming AVB packets (802.1Qat, 1722_MAAP)
-            case avb_get_control_packet(c_rx, buf, nbytes):
+        // Receive any incoming AVB packets (802.1Qat, 1722_MAAP)
+        case avb_get_control_packet(c_rx, buf, nbytes):
+        {
+            // Test for a control packet and process it
+            ret = avb_process_control_packet(avb_status, buf, nbytes, c_tx);
+
+            if (ret != AVB_NO_STATUS)
             {
-                // Test for a control packet and process it
-                ret = avb_process_control_packet(avb_status, buf, nbytes, c_tx);
+                switch (avb_status.type)
+                {
+                case AVB_SRP: app_handle_srp_indication(avb_status); break;
+                case AVB_MAAP: app_handle_maap_indication(avb_status); break;
+                }
+            }
+
+            // add any special control packet handling here
+            break;
+        }
+
+        // Process TCP/IP events
+        case xtcp_event(tcp_svr, conn):
+        {
+            if (conn.event == XTCP_IFUP)
+            {
+                avb_start();
+
+                // Request a multicast addresses for stream transmission
+                avb_1722_maap_request_addresses(AVB_NUM_SOURCES, null);
+            }
+            else if (conn.event == XTCP_IFDOWN)
+            {
+                for(int i=0; i<AVB_NUM_SOURCES; i++)
+                {
+                    set_avb_source_state(i, AVB_SOURCE_STATE_DISABLED);
+                }
+            }
+
+            {
+                mdns_event res;
+                res = mdns_xtcp_handler(tcp_svr, conn);
+                if (res & mdns_entry_lost)
+                {
+                    printstr("Media clock: Input stream\n");
+                    set_device_media_clock_type(0, INPUT_STREAM_DERIVED);
+                }
+            }
+
+            c_api_xtcp_handler(tcp_svr, conn, tmr);
+
+            // add any special tcp/ip packet handling here
+            break;
+        }
+
+        // Receive any events from user button presses
+        case c_gpio_ctl :> int cmd:
+        {
+            switch (cmd)
+            {
+                case STREAM_SEL:
+                change_stream = 1;
+                break;
+                case CHAN_SEL:
+                {
+                    enum avb_sink_state_t cur_state;
+                    int channel;
+
+                    c_gpio_ctl :> selected_chan;
+                    channel = selected_chan*2;
+                    get_avb_sink_state(0, cur_state);
+                    set_avb_sink_state(0, AVB_SINK_STATE_DISABLED);
+                    for (int j=0;j<AVB_NUM_MEDIA_OUTPUTS;j++)
+                    {
+                        map[j] = channel;
+                        channel++;
+                        if (channel > AVB_NUM_MEDIA_OUTPUTS-1)
+                        {
+                            channel = 0;
+                        }
+                    }
+                    set_avb_sink_map(0, map, AVB_NUM_MEDIA_OUTPUTS);
+                    if (cur_state != AVB_SINK_STATE_DISABLED)
+                    set_avb_sink_state(0, AVB_SINK_STATE_POTENTIAL);
+                }
+                break;
+            }
+            break;
+        }
+
+        // Periodic processing
+        case tmr when timerafter(timeout) :> void:
+        {
+            timeout += PERIODIC_POLL_TIME;
+
+            do
+            {
+                ret = avb_periodic(avb_status);
 
                 if (ret != AVB_NO_STATUS)
                 {
@@ -436,104 +533,16 @@ void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl)
                     }
                 }
 
-                // add any special control packet handling here
-                break;
-            }
+            } while (ret != AVB_NO_STATUS);
 
-            // Process TCP/IP events
-            case xtcp_event(tcp_svr, conn):
-            {
-                if (conn.event == XTCP_IFUP)
-                {
-                    avb_start();
+            // Call the stream manager to check for new streams/manage
+            // what is being listened to
+            demo_manage_listener_stream(change_stream, selected_chan);
 
-                    // Request a multicast addresses for stream transmission
-                    avb_1722_maap_request_addresses(AVB_NUM_SOURCES, null);
-                }
-                else if (conn.event == XTCP_IFDOWN)
-                {
-                    for(int i=0; i<AVB_NUM_SOURCES; i++)
-                    {
-                        set_avb_source_state(i, AVB_SOURCE_STATE_DISABLED);
-                    }
-                }
-
-                {
-                    mdns_event res;
-                    res = mdns_xtcp_handler(tcp_svr, conn);
-                    if (res & mdns_entry_lost)
-                    {
-                        printstr("Media clock: Input stream\n");
-                        set_device_media_clock_type(0, INPUT_STREAM_DERIVED);
-                    }
-                }
-
-                c_api_xtcp_handler(tcp_svr, conn, tmr);
-
-                // add any special tcp/ip packet handling here
-                break;
-            }
-
-            // Receive any events from user button presses
-            case c_gpio_ctl :> int cmd:
-            {
-                switch (cmd)
-                {
-                    case STREAM_SEL:
-                    change_stream = 1;
-                    break;
-                    case CHAN_SEL:
-                    {
-                        enum avb_sink_state_t cur_state;
-                        int channel;
-
-                        c_gpio_ctl :> selected_chan;
-                        channel = selected_chan*2;
-                        get_avb_sink_state(0, cur_state);
-                        set_avb_sink_state(0, AVB_SINK_STATE_DISABLED);
-                        for (int j=0;j<AVB_NUM_MEDIA_OUTPUTS;j++)
-                        {
-                            map[j] = channel;
-                            channel++;
-                            if (channel > AVB_NUM_MEDIA_OUTPUTS-1)
-                            {
-                                channel = 0;
-                            }
-                        }
-                        set_avb_sink_map(0, map, AVB_NUM_MEDIA_OUTPUTS);
-                        if (cur_state != AVB_SINK_STATE_DISABLED)
-                        set_avb_sink_state(0, AVB_SINK_STATE_POTENTIAL);
-                    }
-                    break;
-                }
-                break;
-            }
-
-            // Periodic processing
-            case tmr when timerafter(timeout) :> void:
-                timeout += PERIODIC_POLL_TIME;
-
-                do
-                {
-                    ret = avb_periodic(avb_status);
-
-                    if (ret != AVB_NO_STATUS)
-                    {
-                        switch (avb_status.type)
-                        {
-                        case AVB_SRP: app_handle_srp_indication(avb_status); break;
-                        case AVB_MAAP: app_handle_maap_indication(avb_status); break;
-                        }
-                    }
-
-                } while (ret != AVB_NO_STATUS);
-
-                // Call the stream manager to check for new streams/manage
-                // what is being listened to
-                demo_manage_listener_stream(change_stream, selected_chan);
-
-                break;
+            break;
         }
-    }
+
+        } // end select
+    } // end while
 }
 
