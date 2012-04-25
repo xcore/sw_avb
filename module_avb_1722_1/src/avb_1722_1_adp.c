@@ -285,8 +285,9 @@ int avb_1722_1_adp_discovery_periodic(avb_status_t *status, chanend c_tx)
 			{
 				status->type = AVB_1722_1;
 				status->info.a1722_1.msg = AVB_1722_1_ENTITY_REMOVED;
+				return AVB_STATUS_UPDATED;
 			}
-			return AVB_STATUS_UPDATED;
+			break;
 		}
 		case ADP_DISCOVERY_DISCOVER:
 		{
