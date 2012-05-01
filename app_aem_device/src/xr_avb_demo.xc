@@ -15,6 +15,7 @@
 #include "media_fifo.h"
 #include "avb_1722_1_adp.h"
 #include "avb_1722_1_acmp.h"
+#include "flash.h"
 
 // Ethernet link status
 #define ETHERNET_LINK_IS_DOWN 0
@@ -40,6 +41,17 @@ enum gpio_cmd {
 out port p_mute_led_remote = PORT_SHARED_OUT; // mute, led remote;
 out port p_chan_leds = PORT_LEDS;
 in port p_buttons = PORT_SHARED_IN;
+
+
+fl_SPIPorts fl_ports =
+  {
+    PORT_SPI_MISO,
+    PORT_SPI_SS,
+    PORT_SPI_CLK,
+    PORT_SPI_MOSI,
+    XS1_CLKBLK_4
+  };
+
 
 void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status);
 
@@ -380,7 +392,7 @@ void app_handle_1722_1_indication(avb_status_t &status, chanend c_tx)
       get_avb_source_id(0, streamId);
       avb_1722_1_talker_set_stream_id(0, streamId);
       simple_printf("1722.1 request to advertise %x.%x\n", streamId[0], streamId[1]);
-      set_avb_source_state(0, AVB_SOURCE_STATE_DISABLED);
+      //set_avb_source_state(0, AVB_SOURCE_STATE_DISABLED);
       set_avb_source_state(0, AVB_SOURCE_STATE_POTENTIAL);
       avb_1722_1_acmp_talker_connection_complete(0, c_tx);
       break;
@@ -434,6 +446,27 @@ void app_handle_1722_1_indication(avb_status_t &status, chanend c_tx)
 
 }
 
+void avb_1722_1_store(int offset,
+                      const char x[],
+                      int size)
+{
+  char scratch[4096];
+  printstrln("Storing 1722.1 command to flash");
+  fl_connect(fl_ports);
+  fl_writeData(offset,size,x,scratch);
+  fl_disconnect();
+}
+
+void avb_1722_1_load(int offset,
+                     char x[],
+                     int size)
+{
+  printstrln("Loading 1722.1 command from flash");
+  fl_connect(fl_ports);
+  fl_readData(offset,size,x);
+  fl_disconnect();
+}
+
 /** The main application control thread **/
 void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend c_eth_link_status)
 {
@@ -442,7 +475,9 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend c_eth_link_sta
   int map[AVB_NUM_MEDIA_INPUTS];
   unsigned timeout;
   unsigned sample_rate = 48000;
-  
+
+
+
   // Initialize the media clock (a ptp derived clock)
   set_device_media_clock_type(MEDIA_CLOCK_0, MEDIA_FIFO_DERIVED);
   //set_device_media_clock_type(0, LOCAL_CLOCK);
@@ -452,11 +487,15 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend c_eth_link_sta
   
   // Configure the source stream
   set_avb_source_name(STREAM_SOURCE_0, "2 channel testing stream");
-  
-  set_avb_source_channels(STREAM_SOURCE_0, AVB_NUM_MEDIA_INPUTS);
+
+
+
+  //  set_avb_source_channels(STREAM_SOURCE_0, AVB_NUM_MEDIA_INPUTS);
+  set_avb_source_channels(STREAM_SOURCE_0, 1);
   for (int i = 0; i < AVB_NUM_MEDIA_INPUTS; i++)
     map[i] = i;
-  set_avb_source_map(STREAM_SOURCE_0, map, AVB_NUM_MEDIA_INPUTS);
+  //  set_avb_source_map(STREAM_SOURCE_0, map, AVB_NUM_MEDIA_INPUTS);
+  set_avb_source_map(STREAM_SOURCE_0, map, 1);
   set_avb_source_format(STREAM_SOURCE_0, AVB_SOURCE_FORMAT_MBLA_24BIT, sample_rate);
   set_avb_source_sync(STREAM_SOURCE_0, MEDIA_CLOCK_0); // use the media_clock defined above
   

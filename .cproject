@@ -55,6 +55,8 @@
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_osc/gen}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_osc/src}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_osc}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_1722_1/src}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_1722_1}&quot;' />
                                 </option>
                                 <option id="com.xmos.c.compiler.option.include.paths.11111" valueType="includePath" superClass="com.xmos.c.compiler.option.include.paths">
                                     <listOptionValue builtIn="false" value='&quot;${XMOS_TOOL_PATH}/target/include&quot;' />
@@ -92,6 +94,8 @@
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_osc/gen}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_osc/src}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_osc}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_1722_1/src}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_1722_1}&quot;' />
                                 </option>
                             </tool>
                             <tool id="com.xmos.cdt.xc.compiler.base.11111" name="com.xmos.cdt.xc.compiler.base" superClass="com.xmos.cdt.xc.compiler.base">
@@ -131,6 +135,8 @@
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_osc/gen}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_osc/src}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_osc}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_1722_1/src}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_1722_1}&quot;' />
                                 </option>
                                 <option id="com.xmos.c.compiler.option.include.paths.11111" valueType="includePath" superClass="com.xmos.c.compiler.option.include.paths">
                                     <listOptionValue builtIn="false" value='&quot;${XMOS_DOC_PATH}/../target/include&quot;' />
@@ -168,6 +174,8 @@
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_osc/gen}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_osc/src}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_osc}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_1722_1/src}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_1722_1}&quot;' />
                                 </option>
                             </tool>
                             <tool id="com.xmos.cdt.c.compiler.base.11111" name="com.xmos.cdt.c.compiler.base" superClass="com.xmos.cdt.c.compiler.base">
@@ -207,6 +215,8 @@
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_osc/gen}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_osc/src}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_osc}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_1722_1/src}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_1722_1}&quot;' />
                                 </option>
                                 <option id="com.xmos.c.compiler.option.include.paths.11111" valueType="includePath" superClass="com.xmos.c.compiler.option.include.paths">
                                     <listOptionValue builtIn="false" value='&quot;${XMOS_DOC_PATH}/../target/include&quot;' />
@@ -244,6 +254,8 @@
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_osc/gen}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_osc/src}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_osc}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_1722_1/src}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_1722_1}&quot;' />
                                 </option>
                             </tool>
                             <tool id="com.xmos.cdt.cpp.compiler.base.11111" name="com.xmos.cdt.cpp.compiler.base" superClass="com.xmos.cdt.cpp.compiler.base">
@@ -283,6 +295,8 @@
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_osc/gen}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_osc/src}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_osc}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_1722_1/src}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_1722_1}&quot;' />
                                 </option>
                                 <option id="com.xmos.c.compiler.option.include.paths.11111" valueType="includePath" superClass="com.xmos.c.compiler.option.include.paths">
                                     <listOptionValue builtIn="false" value='&quot;${XMOS_DOC_PATH}/../target/include&quot;' />
@@ -320,6 +334,8 @@
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_osc/gen}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_osc/src}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_osc}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_1722_1/src}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_1722_1}&quot;' />
                                 </option>
                             </tool>
                             <tool id="com.xmos.cdt.core.assembler.base.11111" name="com.xmos.cdt.core.assembler.base" superClass="com.xmos.cdt.core.assembler.base">
@@ -359,6 +375,8 @@
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_osc/gen}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_osc/src}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_osc}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_1722_1/src}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_1722_1}&quot;' />
                                 </option>
                                 <option id="com.xmos.c.compiler.option.include.paths.11111" valueType="includePath" superClass="com.xmos.c.compiler.option.include.paths">
                                     <listOptionValue builtIn="false" value='&quot;${XMOS_DOC_PATH}/../target/include&quot;' />
@@ -396,6 +414,8 @@
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_osc/gen}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_osc/src}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_osc}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_1722_1/src}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_1722_1}&quot;' />
                                 </option>
                             </tool>
                         </toolChain>

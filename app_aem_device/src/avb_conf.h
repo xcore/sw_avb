@@ -2,7 +2,7 @@
 #define __avb_conf_h__
 
 /* XScope */
-#define USE_XSCOPE
+//#define USE_XSCOPE
 
 // #define AVB_1722_PERIODIC_DEBUG
 // #define AVB_1722_RECORD_ERRORS

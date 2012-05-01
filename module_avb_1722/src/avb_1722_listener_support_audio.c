@@ -11,11 +11,18 @@
 #include <string.h>
 #include <xs1.h>
 #include "avb_conf.h"
+#include <print.h>
 
 #if defined(AVB_1722_FORMAT_SAF) || defined(AVB_1722_FORMAT_61883_6)
 
 #ifdef AVB_1722_RECORD_ERRORS
 static unsigned avb_1722_listener_dbc_discontinuity = 0;
+#endif
+
+#define DEBUG_PACKET_FLOW
+
+#ifdef DEBUG_PACKET_FLOW
+static int packet_count = 0;
 #endif
 
 int avb_1722_listener_process_packet(chanend buf_ctl,
@@ -41,6 +48,14 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
    int stride;   
 #ifndef AVB_1722_FORMAT_SAF
   int dbc_diff;
+#endif
+
+#ifdef DEBUG_PACKET_FLOW
+  packet_count++;
+  if (packet_count > 8000*5) {
+    printstr(",");
+    packet_count = 0;
+  }
 #endif
 
    // sanity check on number bytes in payload

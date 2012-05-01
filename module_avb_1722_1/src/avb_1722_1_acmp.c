@@ -13,6 +13,8 @@
 #include <string.h>
 #include <print.h>
 
+#define STORE_RX_COMMAND
+
 /* Inflight command defines */
 #define CONTROLLER	0
 #define LISTENER	1
@@ -121,9 +123,14 @@ void avb_1722_1_acmp_talker_init()
 	for (i = 0; i < AVB_1722_1_MAX_TALKERS; i++) acmp_zero_talker_stream_info(i);
 }
 
+void avb_1722_1_load(int offset,
+                     char x[],
+                     int size);
+
 void avb_1722_1_acmp_listener_init()
 {
-	int i;
+  int i;
+  char cmd;
 	acmp_listener_state = ACMP_LISTENER_WAITING;
 	memset(acmp_listener_inflight_commands, 0, sizeof(avb_1722_1_acmp_inflight_command) * AVB_1722_1_MAX_INFLIGHT_COMMANDS);
 
@@ -131,9 +138,24 @@ void avb_1722_1_acmp_listener_init()
 
 	sequence_id[LISTENER] = 0;
 
-	init_avb_timer(&acmp_inflight_timer[LISTENER], 10);
-	acmp_centisecond_counter[LISTENER] = 0;
-	start_avb_timer(&acmp_inflight_timer[LISTENER], 1);
+        init_avb_timer(&acmp_inflight_timer[LISTENER], 10);
+        acmp_centisecond_counter[LISTENER] = 0;
+        start_avb_timer(&acmp_inflight_timer[LISTENER], 1);
+
+#ifdef STORE_RX_COMMAND
+        avb_1722_1_load(0,
+                        &cmd,
+                        1);
+
+        //simple_printf("cmd:%d,%d",(int) cmd,ACMP_LISTENER_CONNECT_RX_COMMAND);
+        if (cmd == ACMP_LISTENER_CONNECT_RX_COMMAND) {
+          avb_1722_1_load(1,
+                          (char *) &acmp_listener_rcvd_cmd_resp,
+                          sizeof(avb_1722_1_acmp_packet_t));
+          acmp_listener_state = ACMP_LISTENER_CONNECT_RX_COMMAND;
+          //acmp_listener_rcvd_cmd_resp.controller_guid.l = 0;
+        }
+#endif
 }
 
 /**
@@ -622,6 +644,10 @@ static void process_avb_1722_1_acmp_talker_packet(avb_status_t *status, unsigned
 	return;
 }
 
+void avb_1722_1_store(int offset,
+                      const char x[],
+                      int size);
+
 static void process_avb_1722_1_acmp_listener_packet(avb_status_t *status, unsigned char message_type, avb_1722_1_acmp_packet_t* pkt)
 {
 	status->info.a1722_1.msg = AVB_1722_1_OK;
@@ -641,9 +667,29 @@ static void process_avb_1722_1_acmp_listener_packet(avb_status_t *status, unsign
 		break;
 	case ACMP_CMD_CONNECT_RX_COMMAND:
 		acmp_listener_state = ACMP_LISTENER_CONNECT_RX_COMMAND;
+#ifdef STORE_RX_COMMAND
+                {
+                  char x = ACMP_LISTENER_CONNECT_RX_COMMAND;
+                  //simple_printf("cmd:%d,%d",(int) x,ACMP_LISTENER_CONNECT_RX_COMMAND);
+                  avb_1722_1_store(0,
+                                   &x,
+                                   1);
+                  avb_1722_1_store(1,
+                                   (char *) &acmp_listener_rcvd_cmd_resp,
+                                   sizeof(avb_1722_1_acmp_packet_t));
+                }
+#endif
 		break;
 	case ACMP_CMD_DISCONNECT_RX_COMMAND:
 		acmp_listener_state = ACMP_LISTENER_DISCONNECT_RX_COMMAND;
+#ifdef STORE_RX_COMMAND
+                {
+                  char x = 0;
+                  avb_1722_1_store(0,
+                                   &x,
+                                   1);
+                }
+#endif
 		break;
 	case ACMP_CMD_GET_RX_STATE_COMMAND:
 		acmp_listener_state = ACMP_LISTENER_GET_STATE;
@@ -929,7 +975,10 @@ void avb_1722_1_acmp_listener_periodic(avb_status_t *status, chanend c_tx)
 				inflight = acmp_remove_inflight(LISTENER);
 				acmp_listener_rcvd_cmd_resp.sequence_id = inflight->original_sequence_id; // FIXME: This is a bit messy
 
-				acmp_send_response(ACMP_CMD_CONNECT_RX_RESPONSE, &acmp_listener_rcvd_cmd_resp, acmp_listener_rcvd_cmd_resp.status, c_tx);
+                                if (acmp_listener_rcvd_cmd_resp.controller_guid.l != 0) {
+                                    acmp_send_response(ACMP_CMD_CONNECT_RX_RESPONSE, &acmp_listener_rcvd_cmd_resp, acmp_listener_rcvd_cmd_resp.status, c_tx);
+                                }
+
 				acmp_add_listener_stream_info();
 
 				acmp_listener_state = ACMP_LISTENER_WAITING_FOR_CONNECT;
