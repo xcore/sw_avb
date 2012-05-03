@@ -44,6 +44,11 @@
 /* Add synths from channels 3/4 upwards in I2S for this demo */
 // #define I2S_SYNTH_FROM 1
 
+#define AVB_MAX_AUDIO_SAMPLE_RATE 96000
+
+// Fix for Apple
+#define MEDIA_OUTPUT_FIFO_WORD_SIZE (AVB_MAX_AUDIO_SAMPLE_RATE/300)
+
 /* 1722.1 */
 #define AVB_ENABLE_1722_1
 
