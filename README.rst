@@ -2,7 +2,7 @@ AVB Software Stack
 ..................
 
 :Latest release: 5.1.2rc2
-:Maintainer: DavidNorman
+:Maintainer: ajwlucas
 :Description: AVB software stack
 
 
@@ -46,4 +46,15 @@ Required software (dependencies)
   * sc_xtcp
   * xcommon (if using development tools earlier than 11.11.0)
   * sc_ethernet
+
+To clone (read only):
+
+::
+
+  git clone git://github.com/xcore/sw_avb.git
+  git clone git://github.com/xcore/sc_ethernet.git
+  git clone git://github.com/xcore/sc_xtcp.git
+  git clone git://github.com/xcore/sc_xlog.git
+  git clone git://github.com/xcore/sc_i2c.git
+  git clone git://github.com/xcore/xcommon.git
 
