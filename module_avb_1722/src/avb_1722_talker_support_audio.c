@@ -157,6 +157,11 @@ int avb1722_create_packet(unsigned char Buf0[],
 	unsigned ptp_ts = 0;
 	int dbc;
 	int pkt_data_length;
+    
+    AVB_Frame_t *pEtherHdr = (AVB_Frame_t *) &(Buf[0]);
+    for (i = 0; i < MAC_ADRS_BYTE_COUNT; i++) {
+        pEtherHdr->DA[i] = stream_info->destMACAdrs[i];
+    } 
 
 	// Check to see if there is something that can be transmitted.  If there is not, then we give up
 	// transmitting this packet, because there may be other streams serviced by this thread which
