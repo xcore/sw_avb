@@ -19,7 +19,9 @@
 /* General purpose AVB configuration */
 #define AVB_MAX_NAME_LEN 25
 #define AVB_MAX_CHANNELS_PER_STREAM 8
+#ifndef AVB_CHANNELS_PER_STREAM
 #define AVB_CHANNELS_PER_STREAM 1
+#endif
 
 #ifdef LISTENER
 /* Listener configuration */
