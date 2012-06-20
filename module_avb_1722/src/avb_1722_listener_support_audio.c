@@ -11,11 +11,14 @@
 #include <string.h>
 #include <xs1.h>
 #include "avb_conf.h"
+#include "simple_printf.h"
 
 #if defined(AVB_1722_FORMAT_SAF) || defined(AVB_1722_FORMAT_61883_6)
 
 #ifdef AVB_1722_RECORD_ERRORS
 static unsigned avb_1722_listener_dbc_discontinuity = 0;
+unsigned char avb_1722_listener_prev_seq_num[AVB_NUM_SINKS];  // store prev seq_number per stream
+static unsigned avb_1722_listener_seq_num_discountinuity[AVB_NUM_SINKS];
 #endif
 
 int avb_1722_listener_process_packet(chanend buf_ctl,
@@ -61,6 +64,22 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
       return (0);            
    }
 
+#ifdef AVB_1722_RECORD_ERRORS
+   {
+ 	   // log discontinuities in seq_number per stream
+ 	   unsigned stream_idx = AVBTP_STREAM_ID0(pAVBHdr) & 0xf; // support 16 indexes
+ 	   if(stream_idx >= AVB_NUM_SINKS) {
+ 		   simple_printf("stream_idx %x > AVB_NUM_SINKS %x\n", stream_idx, AVB_NUM_SINKS);
+ 	   } else {
+ 	     if((unsigned char) AVBTP_SEQUENCE_NUMBER(pAVBHdr) != (unsigned char) (avb_1722_listener_prev_seq_num[stream_idx]+1)) {
+ 		   avb_1722_listener_seq_num_discountinuity[stream_idx]++;
+ 		   // may break timing:
+ 		   simple_printf("Stream %d: prev_seq_num %d, seq_num %d\n", stream_idx, (unsigned char) avb_1722_listener_prev_seq_num[stream_idx]+1,AVBTP_SEQUENCE_NUMBER(pAVBHdr));
+ 	     }
+ 	     avb_1722_listener_prev_seq_num[stream_idx]++;
+ 	   }
+    }
+#endif
 
 #if !AVB_1722_FORMAT_SAF
    dbc_value = (int) pAVB1722Hdr->DBC;
