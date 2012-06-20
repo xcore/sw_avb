@@ -22,11 +22,13 @@ VERBOSE = 0
 # xcc for the final link (mapping) stage.
 
 XCC_FLAGS = -O3 -save-temps -g -report -Xmapper --map -Xmapper MAPFILE
+XCC_FLAGS += -DAVB_1722_RECORD_ERRORS 
 #XCC_FLAGS += -fllvm
-XCC_FLAGS = -lxscope
+#XCC_FLAGS = -lxscope
 
 # Configs
 XCC_FLAGS_Talker = -DTALKER $(XCC_FLAGS)
+XCC_FLAGS_Talker += -DAVB_NUM_SOURCES=4 -DAVB_CHANNELS_PER_STREAM=1
 #XCC_FLAGS_Talker += -lxscope
 
 XCC_FLAGS_Talker_2x4Chan = -DTALKER $(XCC_FLAGS)
@@ -36,16 +38,17 @@ XCC_FLAGS_Talker_4x2Chan = -DTALKER $(XCC_FLAGS)
 XCC_FLAGS_Talker_4x2Chan += -DAVB_NUM_SOURCES=4 -DAVB_CHANNELS_PER_STREAM=2
 
 XCC_FLAGS_Listener = -DLISTENER $(XCC_FLAGS)
-XCC_FLAGS_Listener += -DAVB_NUM_SINKS=2
+XCC_FLAGS_Listener += -DAVB_NUM_SINKS=4 -DAVB_CHANNELS_PER_STREAM=1
 #debug switches
-XCC_FLAGS_Listener += -DAVB_1722_RECORD_ERRORS 
+#XCC_FLAGS_Listener += -DAVB_1722_RECORD_ERRORS 
 
 XCC_FLAGS_Listener_2x4Chan = -DLISTENER $(XCC_FLAGS)
 XCC_FLAGS_Listener_2x4Chan += -DAVB_NUM_SINKS=4 -DAVB_CHANNELS_PER_STREAM=2
 
 XCC_FLAGS_Listener_4x2Chan = -DLISTENER $(XCC_FLAGS)
 XCC_FLAGS_Listener_4x2Chan += -DAVB_NUM_SINKS=4 -DAVB_CHANNELS_PER_STREAM=2
-
+XCC_FLAGS_Listener_4x2Chan += -DAVB_1722_RECORD_ERRORS 
+					    
 XCC_FLAGS_TalkerListener = -DLISTENER -DLISTENER $(XCC_FLAGS)
 
 XCC_FLAGS_xr_avb_demo.xc = $(XCC_FLAGS) -fsubword-select
