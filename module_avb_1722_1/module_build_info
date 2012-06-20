@@ -10,17 +10,24 @@
 # You can also set MODULE_XCC_C_FLAGS, MODULE_XCC_XC_FLAGS etc..
 #
 
+
+GENERATED_FILES = aem_descriptors.h aem_entity_strings.h
+
+
+# The following include works around a bug in the 11.11.0 toolchain
+# For later versions of the toolchain it should not be needed
+include $(call UNMANGLE,$(CURRENT_MODULE_DIR)/genfix.make)
+
 OPTIONAL_HEADERS += avb_1722_1_protocol
 
 #MODULE_XCC_C_FLAGS = $(XCC_FLAGS) -Os -std=c99
 MODULE_XCC_C_FLAGS = $(XCC_FLAGS) -O0 -g -std=c99
 
-GENERATED_FILES = aem_descriptors.h aem_entity_strings.h
 
-$(GEN_DIR)/aem_descriptors.generated: $(CURRENT_MODULE_DIR)/src/generate.py $(CURRENT_MODULE_DIR)/src/aem_descriptors.h.in $(CURRENT_MODULE_DIR)/src/aem_entity_strings.h.in  | $(GEN_DIR)
+$(GEN_DIR)/aem_descriptors.generated: $(call UNMANGLE,$(CURRENT_MODULE_DIR)/src/generate.py) $(call UNMANGLE, $(CURRENT_MODULE_DIR)/src/aem_descriptors.h.in) $(call UNMANGLE,$(CURRENT_MODULE_DIR)/src/aem_entity_strings.h.in)  | $(GEN_DIR)
 	@echo "Generating aem headers files"
 	@echo "generated" > $(GEN_DIR)/aem_descriptors.generated
-	@$(call JYTHON,$(CURRENT_MODULE_DIR)/src/generate.py $(CURRENT_MODULE_DIR)/src $(GEN_DIR))
+	@$(call JYTHON,$(call UNMANGLE,$(CURRENT_MODULE_DIR)/src/generate.py) "$(call UNMANGLE,$(CURRENT_MODULE_DIR)/src)" $(GEN_DIR))
 
 $(GEN_DIR)/aem_descriptors.h: $(GEN_DIR)/aem_descriptors.generated
 $(GEN_DIR)/aem_entity_strings.h: $(GEN_DIR)/aem_descriptors.generated
