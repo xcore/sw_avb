@@ -16,6 +16,7 @@ extern unsigned int avb_1722_1_buf[];
 extern guid_t my_guid;
 extern unsigned char my_mac_addr[6];
 
+static int global_entity_acquired;
 
 // Called on startup to initialise certain static descriptor fields
 void avb_1722_1_aem_descriptors_init()
@@ -26,10 +27,12 @@ void avb_1722_1_aem_descriptors_init()
 		desc_entity[4+i] = my_guid.c[7-i];
 	}
 
-	// mac_address in AVB Interface Descriptor
 	for (int i=0; i < 6; i++)
 	{
-		desc_avb_interface_0[4+i] = my_mac_addr[i];
+		// mac_address in AVB Interface Descriptor
+		desc_avb_interface_0[70+i] = my_mac_addr[i];
+		// clock_source_identifier in clock source descriptor
+		desc_clock_source_0[74+i] = my_mac_addr[i];
 	}
 }
 
@@ -38,11 +41,8 @@ void avb_1722_1_aem_set_grandmaster_id(unsigned char as_grandmaster_id[])
 #if AVB_1722_1_AEM_ENABLED
 	for (int i=0; i < 8; i++)
 	{
-		// Entity Descriptor
-		desc_entity[40+i] = as_grandmaster_id[7-i];
-
 		// AVB Interface Descriptor
-		desc_avb_interface_0[10+i] = as_grandmaster_id[7-i];
+		desc_avb_interface_0[78+i] = as_grandmaster_id[7-i];
 	}
 #endif
 }
@@ -56,6 +56,7 @@ static unsigned char *avb_1722_1_create_aecp_packet(unsigned char dest_addr[6], 
 
 	avb_1722_1_create_1722_1_header(dest_addr, DEFAULT_1722_1_AECP_SUBTYPE, message_type, status, data_len, hdr);
 
+	// FIXME: This memcpy is terrible. Blindly copying the maximum size payload?
 	memcpy(pkt->target_guid, cmd_pkt->target_guid, (pkt->data.payload - pkt->target_guid));
 
 	return pkt->data.payload;
@@ -79,6 +80,7 @@ static int create_aem_read_descriptor_response(unsigned short read_type, unsigne
 				desc_size_bytes = aem_descriptor_list[i+k];
 				descriptor = (unsigned char *)aem_descriptor_list[i+k+1];
 				
+				#if 0
 				// Generate audio clusters on the fly (to reduce memory)
 				if (read_type == AEM_AUDIO_CLUSTER_TYPE)
 				{
@@ -98,6 +100,7 @@ static int create_aem_read_descriptor_response(unsigned short read_type, unsigne
 					found_descriptor = 1;
 				}
 				else
+				#endif
 				{
 					// TODO: Write macros for descriptor fields (or cast to structs??)
 					if (( ((unsigned)descriptor[2] << 8) | ((unsigned)descriptor[3]) ) == read_id)
@@ -140,7 +143,7 @@ static int create_aem_read_descriptor_response(unsigned short read_type, unsigne
 	}
 }
 
-static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsigned char dest_addr[6], chanend c_tx)
+static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsigned char dest_addr[6], int num_pkt_bytes, chanend c_tx)
 {
 	avb_1722_1_aecp_aem_msg_t *msg = &(pkt->data.avdecc);
 	unsigned char u_flag = AEM_MSG_U_FLAG(msg);
@@ -159,26 +162,64 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
 			desc_read_type = NTOH_U16(cmd->descriptor_type);
 			desc_read_id = NTOH_U16(cmd->descriptor_id);
 
+			printstr("READ_DESCRIPTOR: "); printint(desc_read_type); printchar(','); printintln(desc_read_id);
+
 			num_tx_bytes = create_aem_read_descriptor_response(desc_read_type, desc_read_id, dest_addr, pkt);
 
 			mac_tx(c_tx, avb_1722_1_buf, num_tx_bytes, ETH_BROADCAST);
 
 			break;
 		}
+		
 		/*
-		case AECP_AEM_CMD_ACQUIRE_ENTITY:
+		case AECP_AEM_CMD_LOCK_ENTITY:
 		{
-			if (entity_acquired)
+			avb_1722_1_aem_lock_entity_command_t *cmd = (avb_1722_1_aem_lock_entity_command_t *)msg;
+
+			if (NTOH_U32(cmd->flags) == 1) // Unlock
 			{
-				
+				global_entity_locked = 0;
 			}
-			else
+
+			if (!global_entity_locked)
 			{
-				// Send CONTROLLER_AVAILABLE command
+				for (int i=0; i < 8; i++)
+				{
+					cmd->locked_guid[i] = pkt->controller_guid[i];
+				}
+				avb_1722_1_aecp_aem_msg_t *aem = (avb_1722_1_aecp_aem_msg_t*)avb_1722_1_create_aecp_packet(dest_addr, AECP_CMD_AEM_RESPONSE, AECP_AEM_STATUS_SUCCESS, 20, pkt);
+				global_entity_locked = 1;
+
+				mac_tx(c_tx, avb_1722_1_buf, 68, ETH_BROADCAST);
 			}
+			
 			break;
 		}
 		*/
+		case AECP_AEM_CMD_ACQUIRE_ENTITY:
+		{
+			/*
+			avb_1722_1_aem_acquire_entity_command_t *cmd = (avb_1722_1_aem_acquire_entity_command_t *)msg;
+
+			// if (!global_entity_acquired)
+			{
+				for (int i=0; i < 8; i++)
+				{
+					cmd->owner_guid[i] = pkt->controller_guid[i];
+				}
+
+				avb_1722_1_aecp_aem_msg_t *aem = (avb_1722_1_aecp_aem_msg_t*)avb_1722_1_create_aecp_packet(dest_addr, AECP_CMD_AEM_RESPONSE, AECP_AEM_STATUS_SUCCESS, 38, pkt);
+				memcpy(aem, pkt->data.payload, 18);
+
+				global_entity_acquired = 1;
+
+				mac_tx(c_tx, avb_1722_1_buf, 64, ETH_BROADCAST);
+			}
+			*/
+
+			break;
+		}
+		
 		default:
 		{
 			// AECP_AEM_STATUS_NOT_IMPLEMENTED
@@ -187,7 +228,7 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
 	}
 }
 
-int process_avb_1722_1_aecp_packet(avb_status_t *status, unsigned char dest_addr[6], avb_1722_1_aecp_packet_t *pkt, chanend c_tx)
+int process_avb_1722_1_aecp_packet(avb_status_t *status, unsigned char dest_addr[6], avb_1722_1_aecp_packet_t *pkt, int num_pkt_bytes, chanend c_tx)
 {
 	int message_type = GET_1722_1_MSG_TYPE(((avb_1722_1_packet_header_t*)pkt));
 
@@ -201,7 +242,7 @@ int process_avb_1722_1_aecp_packet(avb_status_t *status, unsigned char dest_addr
 		case AECP_CMD_AEM_COMMAND:
 		{
 #if AVB_1722_1_AEM_ENABLED
-			process_avb_1722_1_aecp_aem_msg(pkt, dest_addr, c_tx);
+			process_avb_1722_1_aecp_aem_msg(pkt, dest_addr, num_pkt_bytes, c_tx);
 #endif
 			break;
 		}

@@ -14,6 +14,9 @@
 #define AVB_1722_1_ADP_ENTITY_CAPIBILITIES_ASSOCIATION_ID_SUPPORTED     (0x00000020)
 #define AVB_1722_1_ADP_ENTITY_CAPIBILITIES_ASSOCIATION_ID_VALID         (0x00000040)
 #define AVB_1722_1_ADP_ENTITY_CAPIBILITIES_VENDOR_UNIQUE_SUPPORTED      (0x00000080)
+#define AVB_1722_1_ADP_ENTITY_CAPABILITIES_CLASS_A_SUPPORTED            (0x00000100)
+#define AVB_1722_1_ADP_ENTITY_CAPABILITIES_CLASS_B_SUPPORTED            (0x00000200)
+#define AVB_1722_1_ADP_ENTITY_CAPABILITIES_AS_SUPPORTED                 (0x00000400)
 
 #define AVB_1722_1_ADP_TALKER_CAPABILITIES_IMPLEMENTED                      (0x0001)
 #define AVB_1722_1_ADP_TALKER_CAPABILITIES_OTHER_SOURCE                     (0x0200)
@@ -109,10 +112,10 @@ typedef struct {
     unsigned char controller_capabilities[4];
     unsigned char available_index[4];
     unsigned char as_grandmaster_id[8];
+    unsigned char reserved0[4];
     unsigned char reserved1[4];
-    unsigned char reserved2[4];
     unsigned char association_id[8];
-    unsigned char entity_type[4];
+    unsigned char reserved2[4];
 } avb_1722_1_adp_packet_t;
 
 #define AVB_1722_1_ADP_PACKET_SIZE (sizeof(ethernet_hdr_t)+sizeof(avb_1722_1_adp_packet_t))
@@ -130,7 +133,6 @@ typedef struct {
     unsigned int available_index;
     gmid_t as_grandmaster_id;
     unsigned int association_id;
-    unsigned int entity_type;
     unsigned timeout;
 } avb_1722_1_entity_record;
 

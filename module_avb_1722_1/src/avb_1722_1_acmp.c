@@ -548,7 +548,7 @@ static void acmp_zero_talker_stream_info(int unique_id)
  */
 static unsigned acmp_talker_valid_talker_unique()
 {
-	return acmp_talker_rcvd_cmd_resp.listener_unique_id < AVB_1722_1_MAX_TALKERS;
+	return acmp_talker_rcvd_cmd_resp.talker_unique_id < AVB_1722_1_MAX_TALKERS;
 }
 
 static int process_avb_1722_1_acmp_controller_packet(avb_status_t *status, unsigned char message_type, avb_1722_1_acmp_packet_t* pkt)

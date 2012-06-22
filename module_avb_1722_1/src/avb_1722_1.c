@@ -92,7 +92,7 @@ int avb_1722_1_process_packet(avb_status_t *status, unsigned int buf0[], int len
         case DEFAULT_1722_1_ADP_SUBTYPE:
             return process_avb_1722_1_adp_packet(status, (avb_1722_1_adp_packet_t*)pkt, c_tx);
         case DEFAULT_1722_1_AECP_SUBTYPE:
-            return process_avb_1722_1_aecp_packet(status, ethernet_hdr->src_addr , (avb_1722_1_aecp_packet_t*)pkt, c_tx);
+            return process_avb_1722_1_aecp_packet(status, ethernet_hdr->src_addr , (avb_1722_1_aecp_packet_t*)pkt, len, c_tx);
         case DEFAULT_1722_1_ACMP_SUBTYPE:
             return process_avb_1722_1_acmp_packet(status, (avb_1722_1_acmp_packet_t*)pkt, c_tx);
         default:

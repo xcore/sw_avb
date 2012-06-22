@@ -139,7 +139,6 @@ static int avb_1722_1_entity_database_add(avb_1722_1_adp_packet_t* pkt)
 		entities[found_slot_index].available_index = NTOH_U32(pkt->available_index);
 		GET_LONG_WORD(entities[found_slot_index].as_grandmaster_id, pkt->as_grandmaster_id)
 		entities[found_slot_index].association_id = NTOH_U32(pkt->association_id);
-		entities[found_slot_index].entity_type = NTOH_U32(pkt->entity_type);
 		entities[found_slot_index].timeout = GET_1722_1_VALID_TIME(&pkt->header) + adp_two_second_counter;
 
 		if (entity_update)
@@ -261,7 +260,6 @@ static void avb_1722_1_create_adp_packet(int message_type, guid_t guid)
 		  HTON_U32(pkt->available_index, avb_1722_1_available_index);
 		  SET_LONG_WORD(pkt->as_grandmaster_id, as_grandmaster_id);
 		  HTON_U32(pkt->association_id, AVB_1722_1_ADP_ASSOCIATION_ID);
-		  HTON_U32(pkt->entity_type, AVB_1722_1_ADP_ENTITY_TYPE_OTHER);
 	  }
 }
 
