@@ -34,18 +34,32 @@ void avb_1722_1_aem_descriptors_init()
 		// clock_source_identifier in clock source descriptor
 		desc_clock_source_0[74+i] = my_mac_addr[i];
 	}
+
+	// TODO: Should be stored centrally, possibly query PTP for ID per interface
+	desc_avb_interface_0[78+0] = my_mac_addr[0];
+	desc_avb_interface_0[78+1] = my_mac_addr[1];
+	desc_avb_interface_0[78+2] = my_mac_addr[2];
+	desc_avb_interface_0[78+3] = 0xff;
+	desc_avb_interface_0[78+4] = 0xfe;
+	desc_avb_interface_0[78+5] = my_mac_addr[3];
+	desc_avb_interface_0[78+6] = my_mac_addr[4];
+	desc_avb_interface_0[78+7] = my_mac_addr[5];
+	desc_avb_interface_0[78+8] = 0;
+	desc_avb_interface_0[78+9] = 1;
 }
 
+#if 0
 void avb_1722_1_aem_set_grandmaster_id(unsigned char as_grandmaster_id[])
 {
 #if AVB_1722_1_AEM_ENABLED
 	for (int i=0; i < 8; i++)
 	{
 		// AVB Interface Descriptor
-		desc_avb_interface_0[78+i] = as_grandmaster_id[7-i];
+		// desc_avb_interface_0[78+i] = as_grandmaster_id[7-i];
 	}
 #endif
 }
+#endif
 
 // TODO: Set available_index on entity descriptor tx
 
