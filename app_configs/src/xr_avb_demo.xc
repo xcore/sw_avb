@@ -13,8 +13,13 @@
 #include "simple_printf.h"
 #include "media_fifo.h"
 #include "avb_conf.h"
+#include "avb_util.h"
+
 #include "xscope.h"
+#ifndef USE_XSCOPE
 #include "xlog_server.h"
+#endif
+
 
 // This is the number of master clocks in a word clock
 #define MASTER_TO_WORDCLOCK_RATIO 512
@@ -41,8 +46,6 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 
 void ptp_server_and_gpio(chanend c_rx, chanend c_tx, chanend ptp_link[],
 		int num_ptp, enum ptp_server_type server_type, chanend c);
-
-void get_stream_name(unsigned idx);
 
 //***** Ethernet Configuration ****
 on stdcore[1]: port otp_data = XS1_PORT_32B; // OTP_DATA_PORT
@@ -107,13 +110,25 @@ media_output_fifo_data_t ofifo_data[AVB_NUM_MEDIA_OUTPUTS];
 media_output_fifo_t ofifos[AVB_NUM_MEDIA_OUTPUTS];
 #endif
 
-#ifdef XSCOPE_1722_TALKER
+#ifdef USE_XSCOPE
 void xscope_user_init() {
     if (get_core_id() == 0) {
-    // Enable XScope printing
+       // Enable XScope printing
        //xscope_register(0, 0, "", 0, "");
-	   xscope_register(0, XSCOPE_DISCRETE, "Talker: Data Block Count", XSCOPE_INT, "Talker DBC");
-	   xscope_register(1, XSCOPE_DISCRETE, "Talker: Stream index", XSCOPE_INT, "Talker Stream");
+       simple_printf("Registering XSCOPE probes for 1722 Listener\n");
+       xscope_register(5,
+    	               XSCOPE_STARTSTOP, "Process 1722 packet startstop", XSCOPE_UINT, "time",
+    	               XSCOPE_STARTSTOP, "manage_buffer duration", XSCOPE_UINT, "time",
+                       XSCOPE_CONTINUOUS, "Clock recovery perror", XSCOPE_INT, "nanoseconds",
+                       XSCOPE_CONTINUOUS, "Clock Recovery ierror", XSCOPE_INT, "nanoseconds",
+                       XSCOPE_CONTINUOUS, "Clock Recovery wordlen", XSCOPE_UINT, "cycles"
+    	               //XSCOPE_DISCRETE, "AVBTP_TIMESTAMP", XSCOPE_UINT, "nanoseconds"
+    	               );
+#if 0 //#ifdef XSCOPE_1722_TALKER
+			           XSCOPE_DISCRETE, "Talker: Data Block Count", XSCOPE_INT, "Talker DBC");
+                       XSCOPE_DISCRETE, "Talker: Stream index", XSCOPE_INT, "Talker Stream");
+#endif
+
     };
     xscope_config_io(XSCOPE_IO_BASIC);
 }
@@ -252,11 +267,13 @@ int main(void) {
 		}
 #endif
 
+#ifndef USE_XSCOPE
 		// Xlog server
 		on stdcore[0]:
 		{
 			xlog_server_uart(p_uart_tx);
 		}
+#endif
 
 		// Application threads
 		on stdcore[0]:
@@ -348,21 +365,21 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 #endif
 
 	// Initialize the media clock (a ptp derived clock)
-	//set_device_media_clock_type(0, MEDIA_FIFO_DERIVED);
 #ifdef TALKER
 	set_device_media_clock_type(0, LOCAL_CLOCK);
 #else
 	set_device_media_clock_type(0, MEDIA_FIFO_DERIVED);
+	set_device_media_clock_source(0, 0); // Set clock recovery to recover clock from channel 0
 #endif
-	//set_device_media_clock_type(0, PTP_DERIVED);
 	set_device_media_clock_rate(0, sample_rate);
 	set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_ENABLED);
 
     // Will only be > 0 for Talkers
 	for (int i=0;i<AVB_NUM_SOURCES;i++) {
 	   // Configure the source stream
-	   //set_avb_source_name(i, get_stream_name(i));
-       set_avb_source_name(i, "Stream");
+	   char stream_name[10] = "Stream ";
+	   string_insert_int(stream_name, i, 7);
+	   set_avb_source_name(i, stream_name);
 	   set_avb_source_channels(i, AVB_CHANNELS_PER_STREAM);
 	   for(int j=0; j<AVB_CHANNELS_PER_STREAM; j++)
          map[j] = i*AVB_CHANNELS_PER_STREAM + j; // generate fifo indices
@@ -370,22 +387,6 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 	   set_avb_source_format(i, AVB_SOURCE_FORMAT_MBLA_24BIT, sample_rate);
 	   set_avb_source_sync(i, 0);
 	}
-
-#if 0
-	set_avb_source_name(1, "Stream 2");
-	set_avb_source_channels(1, 1);
-    map[0] = 1;
-	set_avb_source_map(1, map, 1);
-	set_avb_source_format(1, AVB_SOURCE_FORMAT_MBLA_24BIT, sample_rate);
-	set_avb_source_sync(1, 0);
-
-	set_avb_source_name(2, "Stream 3");
-	set_avb_source_channels(2, 1);
-    map[0] = 2;
-	set_avb_source_map(2, map, 1);
-	set_avb_source_format(2, AVB_SOURCE_FORMAT_MBLA_24BIT, sample_rate);
-	set_avb_source_sync(2, 0);
-#endif
 
 	// Request a multicast addresses for stream transmission
 	avb_1722_maap_request_addresses(AVB_NUM_SOURCES, null);
@@ -564,6 +565,11 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 			    		vlan);
 
 			    stream_index = streamId[1] & 0xf; // up to 15 streams
+			    if(stream_index > AVB_NUM_SINKS) {
+			    	simple_printf("Can't register stream %d. AVB_NUM_SINKS is limited to %d\n",stream_index, AVB_NUM_SINKS);
+			    	break;
+			    }
+
 				for(int j=0; j<AVB_CHANNELS_PER_STREAM; j++)
 			       map[j] = stream_index*AVB_CHANNELS_PER_STREAM + j; // generate fifo indices
 
