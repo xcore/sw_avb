@@ -12,13 +12,15 @@
 #include <xs1.h>
 #include "avb_conf.h"
 #include "simple_printf.h"
+#include "xscope.h"
 
 #if defined(AVB_1722_FORMAT_SAF) || defined(AVB_1722_FORMAT_61883_6)
 
 #ifdef AVB_1722_RECORD_ERRORS
 static unsigned avb_1722_listener_dbc_discontinuity = 0;
-unsigned char avb_1722_listener_prev_seq_num[AVB_NUM_SINKS];  // store prev seq_number per stream
+static unsigned char avb_1722_listener_prev_seq_num[AVB_NUM_SINKS];  // store prev seq_number per stream
 static unsigned avb_1722_listener_seq_num_discountinuity[AVB_NUM_SINKS];
+static unsigned avb_1722_listener_seq_started[AVB_NUM_SINKS];
 #endif
 
 int avb_1722_listener_process_packet(chanend buf_ctl,
@@ -69,14 +71,23 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
  	   // log discontinuities in seq_number per stream
  	   unsigned stream_idx = AVBTP_STREAM_ID0(pAVBHdr) & 0xf; // support 16 indexes
  	   if(stream_idx >= AVB_NUM_SINKS) {
- 		   simple_printf("stream_idx %x > AVB_NUM_SINKS %x\n", stream_idx, AVB_NUM_SINKS);
+ 		   simple_printf("ERROR: stream_idx %x > AVB_NUM_SINKS %x\n", stream_idx, AVB_NUM_SINKS);
  	   } else {
- 	     if((unsigned char) AVBTP_SEQUENCE_NUMBER(pAVBHdr) != (unsigned char) (avb_1722_listener_prev_seq_num[stream_idx]+1)) {
+ 		 if(!avb_1722_listener_seq_started[stream_idx]) {
+ 			avb_1722_listener_seq_started[stream_idx] = 1;
+ 		    avb_1722_listener_prev_seq_num[stream_idx] = (unsigned char) AVBTP_SEQUENCE_NUMBER(pAVBHdr);  // init prev
+ 		 } else if((unsigned char) AVBTP_SEQUENCE_NUMBER(pAVBHdr) != (unsigned char) (avb_1722_listener_prev_seq_num[stream_idx]+1)) {
  		   avb_1722_listener_seq_num_discountinuity[stream_idx]++;
+ 		   unsigned num_disc = avb_1722_listener_seq_num_discountinuity[stream_idx];
+ 		   if((num_disc%0x1000)==0) {
+ 			  simple_printf("ERROR: Stream %d: Detected %d seq_number discontinuities so far\n", stream_idx, num_disc);
+ 		   }
  		   // may break timing:
- 		   simple_printf("Stream %d: prev_seq_num %d, seq_num %d\n", stream_idx, (unsigned char) avb_1722_listener_prev_seq_num[stream_idx]+1,AVBTP_SEQUENCE_NUMBER(pAVBHdr));
- 	     }
- 	     avb_1722_listener_prev_seq_num[stream_idx]++;
+ 		   //simple_printf("ERROR: Stream %d: seq_number discontinuity. prev_seq_num %d, seq_num %d\n", stream_idx, (unsigned char) avb_1722_listener_prev_seq_num[stream_idx],AVBTP_SEQUENCE_NUMBER(pAVBHdr));
+	 	   avb_1722_listener_prev_seq_num[stream_idx] = (unsigned char) AVBTP_SEQUENCE_NUMBER(pAVBHdr); // re-init
+ 		 } else {
+	 	   avb_1722_listener_prev_seq_num[stream_idx]++; // PASS, just increment
+ 		 }
  	   }
     }
 #endif
@@ -183,6 +194,11 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
 	   for (int i=0;i<num_channels;i++)  {
 		   media_output_fifo_set_ptp_timestamp(map[i], AVBTP_TIMESTAMP(pAVBHdr), sample_num);
 	   }
+#if 0 //#ifdef USE_XSCOPE
+	   if((AVBTP_STREAM_ID0(pAVBHdr)&0xF) == 0) { // reduce probing to workaround xscope issue
+	      xscope_probe_data_pred(3, (unsigned) AVBTP_TIMESTAMP(pAVBHdr));
+	   }
+#endif
    }
 
   for (i=0;i<num_channels;i++)  {

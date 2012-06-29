@@ -19,6 +19,7 @@
 #include "avb_unit.h"
 #include "mac_custom_filter.h"
 #include "avb_conf.h"
+#include "xscope.h"
 
 #define TIMEINFO_UPDATE_INTERVAL 50000000
 
@@ -33,10 +34,6 @@
 
 #ifdef AVB_1722_FORMAT_61883_6
 #define MAX_PKT_BUF_SIZE_LISTENER (AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + AVB_CIP_HDR_SIZE + TALKER_NUM_AUDIO_SAMPLES_PER_CHANNEL_PER_AVB1722_PKT * AVB_MAX_CHANNELS_PER_STREAM * 4 + 4)
-#endif
-
-#ifdef AVB_1722_RECORD_ERRORS
-extern unsigned char avb_1722_listener_prev_seq_num[];
 #endif
 
 static void configure_stream(chanend c,
@@ -120,12 +117,6 @@ void avb_1722_listener(chanend ethernet_rx_svr,
 	valid_timeinfo = 0;
 #endif
 
-#ifdef AVB_1722_RECORD_ERRORS
-	for(int i=0; i<AVB_NUM_SINKS; i++) {
-	  avb_1722_listener_prev_seq_num[i] = 0xff; // init with max
-	}
-#endif
-
 	set_thread_fast_mode_on();
 
 	// register how many streams this listener unit has
@@ -157,8 +148,8 @@ void avb_1722_listener(chanend ethernet_rx_svr,
 			pktByteCnt -= 4;
 			avb_hash = RxBuf[1];
 
-#ifdef XSCOPE_1722_LISTENER
-			xscope_probe(1); // start
+#ifdef USE_XSCOPE
+			xscope_probe(0); // start
 #endif
 			// process the audio packet if enabled.
 			if (avb_hash < MAX_AVB_STREAMS_PER_LISTENER && listener_streams[avb_hash].active && valid_timeinfo)
@@ -172,7 +163,7 @@ void avb_1722_listener(chanend ethernet_rx_svr,
 					avb_hash,
 					notified_buf_ctl);
             }
-#ifdef XSCOPE_1722_LISTENER
+#ifdef USE_XSCOPE
 			xscope_probe(0); // stop
 #endif
           break;
