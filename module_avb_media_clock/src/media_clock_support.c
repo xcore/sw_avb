@@ -21,6 +21,7 @@
 #include "media_clock_internal.h"
 #include "media_clock_client.h"
 #include "misc_timer.h"
+#include "xscope.h"
 
 #ifndef AVB_MAX_AUDIO_SAMPLE_RATE
 #define AVB_MAX_AUDIO_SAMPLE_RATE 48000
@@ -252,6 +253,11 @@ unsigned int update_media_clock(chanend ptp_svr,
 
 			clock_info->stream_info1 = clock_info->stream_info2;
 			clock_info->stream_info2.valid = 0;
+
+#ifdef USE_XSCOPE
+			xscope_probe_data_pred(2, (int) (perror >> 32));
+			xscope_probe_data_pred(3, (int) (ierror >> 32));
+#endif
 		}
 		break;
 	}
