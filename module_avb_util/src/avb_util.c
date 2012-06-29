@@ -79,3 +79,8 @@ char *avb_atoi(char *buf, int *x0)
   *x0 = x;
   return p;
 }
+
+void string_insert_int(char buf[], unsigned val, unsigned idx) {
+	char *p_buf = (char *) &(buf[idx]);
+	avb_itoa(val, p_buf, 10, 0);
+}
