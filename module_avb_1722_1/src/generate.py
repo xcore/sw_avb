@@ -1,6 +1,7 @@
 import sys
 import re
 import string
+import os
 
 string_regex = re.compile(r'"[^"]*"')
 		
@@ -23,7 +24,6 @@ def convert_string_to_char_array(str):
 def do_replace(read_file, write_file, replace_defines):
 	write_file.write("/************************************************************************/\n")
 	write_file.write("/* File generated from " + read_file.name + ". DO NOT MODIFY THIS FILE. */ \n")
-	write_file.write("/* Please modify "+ read_file.name +" and run " + __file__ + "*/ \n") 
 	write_file.write("/************************************************************************/\n")
 
 	for line in read_file:
@@ -45,13 +45,15 @@ def do_replace(read_file, write_file, replace_defines):
 
 
 def main():
-	read_file = open('_aem_descriptors_edit.h', 'r')
-	write_file = open('aem_descriptors.h', 'w')
+        srcpath = sys.argv[1]
+        dstpath = sys.argv[2]
+	read_file = open(os.path.join(srcpath,'aem_descriptors.h.in'), 'r')
+	write_file = open(os.path.join(dstpath,'aem_descriptors.h'), 'w')
 	
 	do_replace(read_file, write_file, 0)
 
-	read_file = open('_aem_entity_strings_edit.h', 'r')
-	write_file = open('aem_entity_strings.h', 'w')
+	read_file = open(os.path.join(srcpath,'aem_entity_strings.h.in'), 'r')
+	write_file = open(os.path.join(dstpath,'aem_entity_strings.h'), 'w')
 
 	do_replace(read_file, write_file, 1)
 

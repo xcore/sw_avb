@@ -45,7 +45,3 @@ USED_EXTERNAL_CLOCK_CHIPS = CS2300CP
 
 XMOS_MAKE_PATH ?= ../..
 -include $(XMOS_MAKE_PATH)/xcommon/module_xcommon/build/Makefile.common
-
-gen_descriptors:
-	cd ../module_avb_1722_1/src && python generate.py
-
