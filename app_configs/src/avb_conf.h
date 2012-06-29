@@ -23,23 +23,26 @@
 #define AVB_CHANNELS_PER_STREAM 1
 #endif
 
+#ifdef TALKER
+/* Talker configuration */
+#ifndef AVB_NUM_SOURCES
+  #define AVB_NUM_SOURCES 2
+#endif
+#define AVB_NUM_TALKER_UNITS 1
+#ifndef LISTENER  // avoid redefine warnings
+  #define AVB_NUM_MEDIA_UNITS 1
+#endif
+#endif
+
 #ifdef LISTENER
 /* Listener configuration */
 #ifndef AVB_NUM_SINKS
-  #define AVB_NUM_SINKS 4
+  #define AVB_NUM_SINKS 2
 #endif
 #define AVB_NUM_LISTENER_UNITS 1
 #define AVB_NUM_MEDIA_UNITS 2
 #endif
 
-#ifdef TALKER
-/* Talker configuration */
-#ifndef AVB_NUM_SOURCES
-  #define AVB_NUM_SOURCES 4
-#endif
-#define AVB_NUM_TALKER_UNITS 1
-#define AVB_NUM_MEDIA_UNITS 1
-#endif
 
 /* Media configuration */
 #define AVB_1722_FORMAT_61883_6
