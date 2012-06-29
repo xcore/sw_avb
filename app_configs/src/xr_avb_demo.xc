@@ -78,18 +78,42 @@ on stdcore[0]: clock b_bclk = XS1_CLKBLK_2;
 on stdcore[0]: in port p_aud_mclk = PORT_MCLK;
 on stdcore[0]: buffered out port:32 p_aud_bclk = PORT_SCLK;
 on stdcore[0]: out buffered port:32 p_aud_lrclk = PORT_LRCLK;
-on stdcore[0]: out buffered port:32 p_aud_dout[4] = {
+on stdcore[0]: out buffered port:32 p_aud_dout[AVB_NUM_SDATA_OUT] = {
 		PORT_SDATA_OUT0,
+#if(AVB_NUM_MEDIA_OUTPUTS>2)
 		PORT_SDATA_OUT1,
+#endif
+#if(AVB_NUM_MEDIA_OUTPUTS>4)
 		PORT_SDATA_OUT2,
-		PORT_SDATA_OUT3
+#endif
+#if(AVB_NUM_MEDIA_OUTPUTS>6)
+		PORT_SDATA_OUT3,
+#endif
+#if(AVB_NUM_MEDIA_OUTPUTS>8)
+		XS1_PORT_1P,
+#endif
+#if(AVB_NUM_MEDIA_OUTPUTS>10)
+		XS1_PORT_1O,
+#endif
 };
 
-on stdcore[0]: in buffered port:32 p_aud_din[4] = {
+on stdcore[0]: in buffered port:32 p_aud_din[AVB_NUM_SDATA_IN] = {
 		PORT_SDATA_IN0,
+#if(AVB_NUM_MEDIA_INPUTS>2)
 		PORT_SDATA_IN1,
+#endif
+#if(AVB_NUM_MEDIA_INPUTS>4)
 		PORT_SDATA_IN2,
-		PORT_SDATA_IN3
+#endif
+#if(AVB_NUM_MEDIA_INPUTS>6)
+		PORT_SDATA_IN3,
+#endif
+#if(AVB_NUM_MEDIA_INPUTS>8)
+		XS1_PORT_1J,
+#endif
+#if(AVB_NUM_MEDIA_INPUTS>10)
+		XS1_PORT_1I,
+#endif
 };
 
 on stdcore[0]: port p_uart_tx = PORT_UART_TX;
@@ -354,7 +378,7 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 
 	timer tmr;
 	int avb_status = 0;
-	int map[AVB_CHANNELS_PER_STREAM];
+	int map[AVB_CHANNELS_PER_SOURCE];
 	unsigned char macaddr[6];
 	unsigned timeout;
 	unsigned sample_rate = 48000;
@@ -380,10 +404,10 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 	   char stream_name[10] = "Stream ";
 	   string_insert_int(stream_name, i, 7);
 	   set_avb_source_name(i, stream_name);
-	   set_avb_source_channels(i, AVB_CHANNELS_PER_STREAM);
-	   for(int j=0; j<AVB_CHANNELS_PER_STREAM; j++)
-         map[j] = i*AVB_CHANNELS_PER_STREAM + j; // generate fifo indices
-	   set_avb_source_map(i, map, AVB_CHANNELS_PER_STREAM);
+	   set_avb_source_channels(i, AVB_CHANNELS_PER_SOURCE);
+	   for(int j=0; j<AVB_CHANNELS_PER_SOURCE; j++)
+         map[j] = i*AVB_CHANNELS_PER_SOURCE + j; // generate fifo indices
+	   set_avb_source_map(i, map, AVB_CHANNELS_PER_SOURCE);
 	   set_avb_source_format(i, AVB_SOURCE_FORMAT_MBLA_24BIT, sample_rate);
 	   set_avb_source_sync(i, 0);
 	}
@@ -550,7 +574,7 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 			  unsigned int streamId[2];
 			  unsigned vlan;
 			  unsigned char addr[6];
-			  int map[AVB_CHANNELS_PER_STREAM];
+			  int map[AVB_CHANNELS_PER_SINK];
 			  static unsigned active_streams;
 
 
@@ -570,12 +594,12 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 			    	break;
 			    }
 
-				for(int j=0; j<AVB_CHANNELS_PER_STREAM; j++)
-			       map[j] = stream_index*AVB_CHANNELS_PER_STREAM + j; // generate fifo indices
+				for(int j=0; j<AVB_CHANNELS_PER_SINK; j++)
+			       map[j] = stream_index*AVB_CHANNELS_PER_SINK + j; // generate fifo indices
 
 			    set_avb_sink_sync(stream_index, 0);
-			    set_avb_sink_channels(stream_index, AVB_CHANNELS_PER_STREAM);
-			    set_avb_sink_map(stream_index, map, AVB_CHANNELS_PER_STREAM);
+			    set_avb_sink_channels(stream_index, AVB_CHANNELS_PER_SINK);
+			    set_avb_sink_map(stream_index, map, AVB_CHANNELS_PER_SINK);
 			    set_avb_sink_state(stream_index, AVB_SINK_STATE_DISABLED);
 			    set_avb_sink_id(stream_index, streamId);
 			    set_avb_sink_vlan(stream_index, vlan);
