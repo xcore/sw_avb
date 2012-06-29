@@ -13,6 +13,7 @@ APP_NAME =
 VERBOSE = 0
 
 
+
 # The flags passed to xcc when building the application
 # You can also set the following to override flags for a particular language:
 #
@@ -21,35 +22,56 @@ VERBOSE = 0
 # If the variable XCC_MAP_FLAGS is set it overrides the flags passed to 
 # xcc for the final link (mapping) stage.
 
+#debug switches
+XSCOPE = 1
+
+LISTENER_DEBUG_FLAGS = -DAVB_1722_RECORD_ERRORS 
+
+ifeq ($(XSCOPE),1)
+LISTENER_DEBUG_FLAGS += -lxscope -DUSE_XSCOPE  
+TALKER_DEBUG_FLAGS += -lxscope -DUSE_XSCOPE  
+endif
+
+# common flags
 XCC_FLAGS = -O3 -save-temps -g -report -Xmapper --map -Xmapper MAPFILE
 XCC_FLAGS += -DAVB_1722_RECORD_ERRORS 
 #XCC_FLAGS += -fllvm
 #XCC_FLAGS = -lxscope
 
-# Configs
+# Config specific flags
 XCC_FLAGS_Talker = -DTALKER $(XCC_FLAGS)
 XCC_FLAGS_Talker += -DAVB_NUM_SOURCES=4 -DAVB_CHANNELS_PER_STREAM=1
 #XCC_FLAGS_Talker += -lxscope
 
 XCC_FLAGS_Talker_2x4Chan = -DTALKER $(XCC_FLAGS)
+XCC_FLAGS_Talker_2x4Chan += $(TALKER_DEBUG_FLAGS)
 XCC_FLAGS_Talker_2x4Chan += -DAVB_NUM_SOURCES=2 -DAVB_CHANNELS_PER_STREAM=4
 
 XCC_FLAGS_Talker_4x2Chan = -DTALKER $(XCC_FLAGS)
+XCC_FLAGS_Talker_4x2Chan += $(TALKER_DEBUG_FLAGS)
 XCC_FLAGS_Talker_4x2Chan += -DAVB_NUM_SOURCES=4 -DAVB_CHANNELS_PER_STREAM=2
 
 XCC_FLAGS_Listener = -DLISTENER $(XCC_FLAGS)
+XCC_FLAGS_Listener += $(LISTENER_DEBUG_FLAGS)
 XCC_FLAGS_Listener += -DAVB_NUM_SINKS=4 -DAVB_CHANNELS_PER_STREAM=1
-#debug switches
-#XCC_FLAGS_Listener += -DAVB_1722_RECORD_ERRORS 
 
-XCC_FLAGS_Listener_2x4Chan = -DLISTENER $(XCC_FLAGS)
-XCC_FLAGS_Listener_2x4Chan += -DAVB_NUM_SINKS=4 -DAVB_CHANNELS_PER_STREAM=2
+XCC_FLAGS_Listener_2x4Chan = -DLISTENER $(XCC_FLAGS) 
+XCC_FLAGS_Listener_2x4Chan += $(LISTENER_DEBUG_FLAGS)
+XCC_FLAGS_Listener_2x4Chan += -DAVB_NUM_SINKS=2 -DAVB_CHANNELS_PER_STREAM=4
 
-XCC_FLAGS_Listener_4x2Chan = -DLISTENER $(XCC_FLAGS)
+XCC_FLAGS_Listener_4x2Chan = -DLISTENER $(XCC_FLAGS) 
+XCC_FLAGS_Listener_4x2Chan += $(LISTENER_DEBUG_FLAGS)
 XCC_FLAGS_Listener_4x2Chan += -DAVB_NUM_SINKS=4 -DAVB_CHANNELS_PER_STREAM=2
-XCC_FLAGS_Listener_4x2Chan += -DAVB_1722_RECORD_ERRORS 
+
 					    
-XCC_FLAGS_TalkerListener = -DLISTENER -DLISTENER $(XCC_FLAGS)
+XCC_FLAGS_TalkerListener = -DLISTENER -DTALKER $(XCC_FLAGS)
+XCC_FLAGS_TalkerListener += $(LISTENER_DEBUG_FLAGS) $(TALKER_DEBUG_FLAGS)
+
+
+# Configuration Specific Messages
+ifeq ($(CONFIG),TalkerListener) 
+   $(warning WARNING: TalkerListener configuration currently throws Exception)
+endif
 
 XCC_FLAGS_xr_avb_demo.xc = $(XCC_FLAGS) -fsubword-select
 
@@ -57,7 +79,9 @@ XCC_FLAGS_xr_avb_demo.xc = $(XCC_FLAGS) -fsubword-select
 
 USED_MODULES = module_avb_1722 module_avb_1722_maap module_avb_srp module_osc module_avb_media_clock  module_avb_audio
 USED_MODULES += module_avb module_avb_util  module_gptp module_ethernet module_locks module_i2c 
+ifneq ($(XSCOPE), 1)
 USED_MODULES += module_xlog
+endif
 
 XCC_FLAGS_xdk_demo_audio_if.xc = $(XCC_FLAGS) -fsubword-select
 
