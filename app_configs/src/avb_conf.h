@@ -65,11 +65,11 @@
 ///////////////////////////////////////
 // Derived Defines.
 #ifndef AVB_NUM_MEDIA_INPUTS
-#define AVB_NUM_MEDIA_INPUTS AVB_NUM_SOURCES*AVB_CHANNELS_PER_SOURCE
+#define AVB_NUM_MEDIA_INPUTS (AVB_NUM_SOURCES*AVB_CHANNELS_PER_SOURCE)
 #endif
 
 #ifndef AVB_NUM_MEDIA_OUTPUTS
-#define AVB_NUM_MEDIA_OUTPUTS AVB_NUM_SINKS*AVB_CHANNELS_PER_SINK
+#define AVB_NUM_MEDIA_OUTPUTS (AVB_NUM_SINKS*AVB_CHANNELS_PER_SINK)
 #endif
 
 #if(AVB_NUM_MEDIA_OUTPUTS>0)
@@ -84,13 +84,13 @@
   #define AVB_NUM_SDATA_IN 1  // hardwired to ADC
 #endif
 
-#if(AVB_NUM_MEDIA_INPUTS>12)
-#warning "AVB_NUM_MEDIA_INPUTS exceeds 12, the max channels over 6 i2s lines"
+#if(AVB_NUM_MEDIA_INPUTS>14)
+#warning "AVB_NUM_MEDIA_INPUTS exceeds 14, the max channels over 7 i2s lines"
 #endif
 
 
-#if(AVB_NUM_MEDIA_OUTPUTS>12)
-#warning "AVB_NUM_MEDIA_OUTPUTS exceeds 12, the max channels over 6 i2s lines"
+#if(AVB_NUM_MEDIA_OUTPUTS>14)
+#warning "AVB_NUM_MEDIA_OUTPUTS exceeds 14, the max channels over 7 i2s lines"
 #endif
 
 #if((AVB_NUM_MEDIA_INPUTS+AVB_NUM_MEDIA_OUTPUTS)>16)

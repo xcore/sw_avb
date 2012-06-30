@@ -90,10 +90,13 @@ on stdcore[0]: out buffered port:32 p_aud_dout[AVB_NUM_SDATA_OUT] = {
 		PORT_SDATA_OUT3,
 #endif
 #if(AVB_NUM_MEDIA_OUTPUTS>8)
-		XS1_PORT_1P,
+		PORT_SDATA_IN3,
 #endif
 #if(AVB_NUM_MEDIA_OUTPUTS>10)
-		XS1_PORT_1O,
+		PORT_SDATA_IN2,
+#endif
+#if(AVB_NUM_MEDIA_OUTPUTS>12)
+		PORT_SDATA_IN1,
 #endif
 };
 
@@ -109,10 +112,13 @@ on stdcore[0]: in buffered port:32 p_aud_din[AVB_NUM_SDATA_IN] = {
 		PORT_SDATA_IN3,
 #endif
 #if(AVB_NUM_MEDIA_INPUTS>8)
-		XS1_PORT_1J,
+		PORT_SDATA_OUT3,
 #endif
 #if(AVB_NUM_MEDIA_INPUTS>10)
-		XS1_PORT_1I,
+		PORT_SDATA_OUT2,
+#endif
+#if(AVB_NUM_MEDIA_INPUTS>12)
+		PORT_SDATA_OUT1,
 #endif
 };
 
@@ -140,12 +146,15 @@ void xscope_user_init() {
        // Enable XScope printing
        //xscope_register(0, 0, "", 0, "");
        simple_printf("Registering XSCOPE probes for 1722 Listener\n");
-       xscope_register(5,
+       xscope_register(8,
     	               XSCOPE_STARTSTOP, "Process 1722 packet startstop", XSCOPE_UINT, "time",
     	               XSCOPE_STARTSTOP, "manage_buffer duration", XSCOPE_UINT, "time",
                        XSCOPE_CONTINUOUS, "Clock recovery perror", XSCOPE_INT, "nanoseconds",
                        XSCOPE_CONTINUOUS, "Clock Recovery ierror", XSCOPE_INT, "nanoseconds",
-                       XSCOPE_CONTINUOUS, "Clock Recovery wordlen", XSCOPE_UINT, "cycles"
+                       XSCOPE_CONTINUOUS, "Clock Recovery wordlen", XSCOPE_UINT, "cycles",
+                       XSCOPE_CONTINUOUS, "local_ts", XSCOPE_UINT, "timestamp",
+                       XSCOPE_CONTINUOUS, "outgoing_ptp_ts", XSCOPE_UINT, "timestamp",
+                       XSCOPE_CONTINUOUS, "presentation_ts", XSCOPE_UINT, "timestamp"
     	               //XSCOPE_DISCRETE, "AVBTP_TIMESTAMP", XSCOPE_UINT, "nanoseconds"
     	               );
 #if 0 //#ifdef XSCOPE_1722_TALKER
