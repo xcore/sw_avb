@@ -3,6 +3,20 @@
 	<name>app_configs</name>
 	<comment></comment>
 	<projects>
+		<project>module_avb</project>
+		<project>module_avb_1722</project>
+		<project>module_avb_1722_1</project>
+		<project>module_avb_audio</project>
+		<project>module_avb_media_clock</project>
+		<project>module_avb_srp</project>
+		<project>module_avb_util</project>
+		<project>module_avnu_observability</project>
+		<project>module_ethernet</project>
+		<project>module_ethernet_smi</project>
+		<project>module_gptp</project>
+		<project>module_locks</project>
+		<project>module_mii_singlethread</project>
+		<project>module_xtcp</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
@@ -28,7 +42,7 @@
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildArguments</key>
-					<value>CONFIG=Talker</value>
+					<value>CONFIG=Talker2x6Chan_Listener1x4Chan</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildCommand</key>
