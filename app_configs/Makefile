@@ -83,6 +83,19 @@ XCC_FLAGS_Talker1x4Chan_Listener2x6Chan += -DAVB_NUM_SINKS=2 -DAVB_CHANNELS_PER_
 XCC_FLAGS_Talker1x4Chan_Listener2x6Chan += $(LISTENER_DEBUG_FLAGS) $(TALKER_DEBUG_FLAGS)
 # End: Asymmetric pair of configs
 
+# Pair of Assymetric configs
+XCC_FLAGS_Talker2x7Chan_Listener1x2Chan = -DLISTENER -DTALKER $(XCC_FLAGS)
+XCC_FLAGS_Talker2x7Chan_Listener1x2Chan += -DAVB_NUM_SOURCES=2 -DAVB_CHANNELS_PER_SOURCE=7
+XCC_FLAGS_Talker2x7Chan_Listener1x2Chan += -DAVB_NUM_SINKS=1 -DAVB_CHANNELS_PER_SINK=2 
+XCC_FLAGS_Talker2x7Chan_Listener1x2Chan += $(LISTENER_DEBUG_FLAGS) $(TALKER_DEBUG_FLAGS)
+
+XCC_FLAGS_Talker1x2Chan_Listener2x7Chan = -DLISTENER -DTALKER $(XCC_FLAGS)
+XCC_FLAGS_Talker1x2Chan_Listener2x7Chan += -DAVB_NUM_SOURCES=1 -DAVB_CHANNELS_PER_SOURCE=2 
+XCC_FLAGS_Talker1x2Chan_Listener2x7Chan += -DAVB_NUM_SINKS=2 -DAVB_CHANNELS_PER_SINK=7
+XCC_FLAGS_Talker1x2Chan_Listener2x7Chan += $(LISTENER_DEBUG_FLAGS) $(TALKER_DEBUG_FLAGS)
+# End: Asymmetric pair of configs
+
+
 # Configuration Specific Messages
 ifeq ($(CONFIG),Talker4x2Chan_Listener4x2Chan) 
    $(warning WARNING: Configuration Talker4x2Chan_Listener4x2Chan currently throws Exception)
@@ -94,7 +107,7 @@ XCC_FLAGS_xr_avb_demo.xc = $(XCC_FLAGS) -fsubword-select
 
 USED_MODULES = module_avb_1722 module_avb_1722_maap module_avb_srp module_osc module_avb_media_clock  module_avb_audio
 USED_MODULES += module_avb module_avb_util  module_gptp module_ethernet module_locks module_i2c 
-ifneq ($(XSCOPE), 1)
+ifeq ($(XSCOPE), 0)
 USED_MODULES += module_xlog
 endif
 
