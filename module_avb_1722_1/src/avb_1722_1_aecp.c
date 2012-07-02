@@ -127,8 +127,8 @@ static int create_aem_read_descriptor_response(unsigned short read_type, unsigne
 
 		}
 
-		i += (num_descriptors*2)+2;
-		if (i >= sizeof(aem_descriptor_list)) break;
+		i += ((num_descriptors*2)+2);
+		if (i >= (sizeof(aem_descriptor_list)>>2)) break;
 	}
 
 
