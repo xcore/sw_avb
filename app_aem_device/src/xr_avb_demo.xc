@@ -1,3 +1,4 @@
+#ifndef MAKE_FLASH_DESCRIPTOR_FILE
 #include <platform.h>
 #include <print.h>
 #include <assert.h>
@@ -102,12 +103,10 @@ media_output_fifo_t ofifos[AVB_NUM_MEDIA_OUTPUTS];
 media_input_fifo_data_t ififo_data[AVB_NUM_MEDIA_INPUTS];
 media_input_fifo_t ififos[AVB_NUM_MEDIA_INPUTS];
 
-
 void xscope_user_init(void)
 {
     xscope_register(0, 0, "", 0, "");
 }
-
 
 int main(void)
 {
@@ -514,3 +513,4 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend c_eth_link_sta
     } // end while
 }
 
+#endif

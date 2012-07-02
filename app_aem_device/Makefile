@@ -2,7 +2,13 @@
 # compiled for. It either refers to an XN file in the source directories
 # or a valid argument for the --target option when compiling.
 
+ifeq ($(CONFIG),Release)
 TARGET = XR-AVB-LC-BRD
+endif
+
+ifeq ($(CONFIG),Xsim)
+TARGET = XK-1
+endif
 
 # The APP_NAME variable determines the name of the final .xe file. It should
 # not include the .xe postfix. If left blank the name will default to 
@@ -18,9 +24,14 @@ APP_NAME =
 # If the variable XCC_MAP_FLAGS is set it overrides the flags passed to 
 # xcc for the final link (mapping) stage.
 
-XCC_FLAGS = -O3 -save-temps -g -report -Xmapper --map -Xmapper MAPFILE -lxscope
+XCC_FLAGS = -O3 -save-temps -g -report -Xmapper --map -Xmapper MAPFILE
 
 XCC_FLAGS_xr_avb_demo.xc = $(XCC_FLAGS) -fsubword-select
+
+XCC_FLAGS_Xsim = $(XCC_FLAGS) 
+XCC_FLAGS_Xsim += -DMAKE_FLASH_DESCRIPTOR_FILE -Wno-timing
+
+XCC_FLAGS_Release = $(XCC_FLAGS) -lxscope
 
 # The USED_MODULES variable lists other module used by the application. 
 
