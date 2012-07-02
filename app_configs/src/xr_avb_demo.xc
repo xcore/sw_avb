@@ -401,9 +401,11 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 #endif
 
 	// Initialize the media clock (a ptp derived clock)
-#ifdef TALKER
+#if(TALKER && !LISTENER)
+	simple_printf("Setting Media Clock Type to: LOCAL_CLOCK\n");
 	set_device_media_clock_type(0, LOCAL_CLOCK);
 #else
+	simple_printf("Setting Media Clock Type to: MEDIA_FIFO_DERIVED\n");
 	set_device_media_clock_type(0, MEDIA_FIFO_DERIVED);
 	set_device_media_clock_source(0, 0); // Set clock recovery to recover clock from channel 0
 #endif
