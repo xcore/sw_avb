@@ -146,7 +146,7 @@ void xscope_user_init() {
        // Enable XScope printing
        //xscope_register(0, 0, "", 0, "");
        simple_printf("Registering XSCOPE probes for 1722 Listener\n");
-       xscope_register(8,
+       xscope_register(11,
     	               XSCOPE_STARTSTOP, "Process 1722 packet startstop", XSCOPE_UINT, "time",
     	               XSCOPE_STARTSTOP, "manage_buffer duration", XSCOPE_UINT, "time",
                        XSCOPE_CONTINUOUS, "Clock recovery perror", XSCOPE_INT, "nanoseconds",
@@ -154,7 +154,10 @@ void xscope_user_init() {
                        XSCOPE_CONTINUOUS, "Clock Recovery wordlen", XSCOPE_UINT, "cycles",
                        XSCOPE_CONTINUOUS, "local_ts", XSCOPE_UINT, "timestamp",
                        XSCOPE_CONTINUOUS, "outgoing_ptp_ts", XSCOPE_UINT, "timestamp",
-                       XSCOPE_CONTINUOUS, "presentation_ts", XSCOPE_UINT, "timestamp"
+                       XSCOPE_CONTINUOUS, "presentation_ts", XSCOPE_UINT, "timestamp",
+                       XSCOPE_CONTINUOUS, "diff", XSCOPE_INT, "timestamp",
+                       XSCOPE_CONTINUOUS, "sample_diff", XSCOPE_INT, "timestamp",
+                       XSCOPE_CONTINUOUS, "fill", XSCOPE_INT, "timestamp"
     	               //XSCOPE_DISCRETE, "AVBTP_TIMESTAMP", XSCOPE_UINT, "nanoseconds"
     	               );
 #if 0 //#ifdef XSCOPE_1722_TALKER
@@ -492,7 +495,7 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 					  set_avb_source_state(i, AVB_SOURCE_STATE_DISABLED);
 					}
 					talker_active = 0;
-					simple_printf("Talker disabled\n");
+					simple_printf("T: Talker disabled\n");
 				}
 				else if (talker_ok_to_start)
 				{
@@ -500,7 +503,7 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 					  set_avb_source_state(i, AVB_SOURCE_STATE_POTENTIAL);
 					}
 					talker_active = 1;
-					simple_printf("Talker enabled\n");
+					simple_printf("T: Talker enabled\n");
 				}
 			}
 			break;
@@ -534,7 +537,7 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 					sample_rate = 88200;
 					break;
 				}
-				simple_printf("Frequency set to %d Hz\n", sample_rate);
+				simple_printf("T: Frequency set to %d Hz\n", sample_rate);
 
 				for(int i=0; i<AVB_NUM_SOURCES; i++) {
 				   set_avb_source_format(i, AVB_SOURCE_FORMAT_MBLA_24BIT, sample_rate);
@@ -568,7 +571,7 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 				}
 
 				talker_ok_to_start = 1;
-				simple_printf("Stream multicast address acquired (%x:%x:%x:%x:%x:%x)\nPress Channel Select to advertise streams.\n", macaddr[0], macaddr[1], macaddr[2], macaddr[3], macaddr[4], macaddr[5]);
+				simple_printf("T: Stream multicast address acquired (%x:%x:%x:%x:%x:%x)\n  Press Channel Select to advertise streams.\n", macaddr[0], macaddr[1], macaddr[2], macaddr[3], macaddr[4], macaddr[5]);
 				break;
 #endif
 				default:
@@ -592,14 +595,14 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 
 			  // if so, add it to the stream table
 			  if (res) {
-			    simple_printf("Found stream %x.%x, address %x:%x:%x:%x:%x:%x, vlan %d\n",
+			    simple_printf("L: Found stream %x.%x, address %x:%x:%x:%x:%x:%x, vlan %d\n",
 			    		streamId[0], streamId[1],
 			    		addr[0], addr[1], addr[2], addr[3], addr[4], addr[5],
 			    		vlan);
 
 			    stream_index = streamId[1] & 0xf; // up to 15 streams
 			    if(stream_index > AVB_NUM_SINKS) {
-			    	simple_printf("Can't register stream %d. AVB_NUM_SINKS is limited to %d\n",stream_index, AVB_NUM_SINKS);
+			    	simple_printf("L: WARNING: Can't register stream %d. AVB_NUM_SINKS is limited to %d\n",stream_index, AVB_NUM_SINKS);
 			    	break;
 			    }
 
