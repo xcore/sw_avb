@@ -146,25 +146,27 @@ void xscope_user_init() {
        // Enable XScope printing
        //xscope_register(0, 0, "", 0, "");
        simple_printf("Registering XSCOPE probes for 1722 Listener\n");
-       xscope_register(11,
+       xscope_register(17,
     	               XSCOPE_STARTSTOP, "Process 1722 packet startstop", XSCOPE_UINT, "time",
     	               XSCOPE_STARTSTOP, "manage_buffer duration", XSCOPE_UINT, "time",
-                       XSCOPE_CONTINUOUS, "Clock recovery perror", XSCOPE_INT, "nanoseconds",
-                       XSCOPE_CONTINUOUS, "Clock Recovery ierror", XSCOPE_INT, "nanoseconds",
-                       XSCOPE_CONTINUOUS, "Clock Recovery wordlen", XSCOPE_UINT, "cycles",
-                       XSCOPE_CONTINUOUS, "local_ts", XSCOPE_UINT, "timestamp",
-                       XSCOPE_CONTINUOUS, "outgoing_ptp_ts", XSCOPE_UINT, "timestamp",
-                       XSCOPE_CONTINUOUS, "presentation_ts", XSCOPE_UINT, "timestamp",
-                       XSCOPE_CONTINUOUS, "diff", XSCOPE_INT, "timestamp",
-                       XSCOPE_CONTINUOUS, "sample_diff", XSCOPE_INT, "timestamp",
-                       XSCOPE_CONTINUOUS, "fill", XSCOPE_INT, "timestamp"
+                       XSCOPE_CONTINUOUS, "Clock recovery: perror", XSCOPE_INT, "ns_diff",
+                       XSCOPE_CONTINUOUS, "Clock Recovery: ierror", XSCOPE_INT, "ns_diff",
+                       XSCOPE_CONTINUOUS, "Clock Recovery: wordlen", XSCOPE_UINT, "cycles",
+                       XSCOPE_CONTINUOUS, "Clock recovery: local_ts", XSCOPE_UINT, "ns",
+                       XSCOPE_CONTINUOUS, "Clock recovery: outgoing_ptp_ts", XSCOPE_UINT, "ns",
+                       XSCOPE_CONTINUOUS, "Clock recovery: presentation_ts", XSCOPE_UINT, "ns",
+                       XSCOPE_CONTINUOUS, "Clock recovery: diff", XSCOPE_INT, "ns_diff",
+                       XSCOPE_CONTINUOUS, "Clock recovery: sample_diff", XSCOPE_INT, "count",
+                       XSCOPE_CONTINUOUS, "Clock recovery: fill", XSCOPE_INT, "count",
+                       XSCOPE_CONTINUOUS, "Clock recovery: diff_local", XSCOPE_INT, "ns_diff",
+                       XSCOPE_CONTINUOUS, "Clock Recovery: presentation_ts differential", XSCOPE_INT, "ns_diff",
+                       XSCOPE_CONTINUOUS, "Clock Recovery: outgoing_ptp_ts differential", XSCOPE_INT, "ns_diff",
+                       XSCOPE_CONTINUOUS, "Listener: avbpt_timestamp differential", XSCOPE_INT, "ns_diff",
+                       XSCOPE_CONTINUOUS, "Talker: ptp_ts differential", XSCOPE_INT, "ns_diff",
+                       XSCOPE_CONTINUOUS, "Talker: local presentationTime differential", XSCOPE_INT, "ns_diff"
+                       //XSCOPE_CONTINUOUS, "Clock Recovery stream_info2.presentation_ts", XSCOPE_UINT, "nanoseconds"
     	               //XSCOPE_DISCRETE, "AVBTP_TIMESTAMP", XSCOPE_UINT, "nanoseconds"
     	               );
-#if 0 //#ifdef XSCOPE_1722_TALKER
-			           XSCOPE_DISCRETE, "Talker: Data Block Count", XSCOPE_INT, "Talker DBC");
-                       XSCOPE_DISCRETE, "Talker: Stream index", XSCOPE_INT, "Talker Stream");
-#endif
-
     };
     xscope_config_io(XSCOPE_IO_BASIC);
 }
