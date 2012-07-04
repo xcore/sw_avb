@@ -3,6 +3,7 @@
  * \brief 1722 Talker support C functions
  */
 #include "avb_conf.h"
+#include "xscope.h"
 
 #if defined(AVB_1722_FORMAT_61883_6) || defined(AVB_1722_FORMAT_SAF)
 
@@ -124,6 +125,13 @@ static void sample_copy_strided(int *src, unsigned int *dest, int stride, int n)
 		dest += stride;
 	}
 }
+
+#ifdef USE_XSCOPE
+// globals to store prev values
+unsigned prev_ptp_ts=0;
+unsigned prev_presentationTime=0;
+unsigned prev_valid=0;
+#endif
 
 /** This receives user defined audio samples from local out stream and packetize
  *  them into specified AVB1722 transport packet.
@@ -261,6 +269,18 @@ int avb1722_create_packet(unsigned char Buf0[],
 	if (timerValid) {
 		ptp_ts = local_timestamp_to_ptp_mod32(presentationTime, timeInfo);
 		ptp_ts = ptp_ts + stream_info->presentation_delay;
+		#ifdef USE_XSCOPE
+			if(stream_id0 & 0xF) {
+				if(prev_valid) {
+				    // trace only for stream 0
+					xscope_probe_data_pred(15, (int) (ptp_ts - prev_ptp_ts));
+					xscope_probe_data_pred(16, (int) (presentationTime - prev_presentationTime));
+				};
+			    prev_ptp_ts = ptp_ts;
+			    prev_presentationTime = presentationTime;
+			    prev_valid = 1;
+			}
+		#endif
 	}
 
 	// Update timestamp value and valid flag.
