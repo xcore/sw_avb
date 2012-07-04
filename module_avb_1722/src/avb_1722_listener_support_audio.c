@@ -23,6 +23,11 @@ static unsigned avb_1722_listener_seq_num_discountinuity[AVB_NUM_SINKS];
 static unsigned avb_1722_listener_seq_started[AVB_NUM_SINKS];
 #endif
 
+#ifdef USE_XSCOPE
+char prev_avbtp_ts_valid=0;
+unsigned prev_avbtp_timestamp;
+#endif
+
 int avb_1722_listener_process_packet(chanend buf_ctl,
                                      unsigned char Buf0[], 
                                      int numBytes,
@@ -194,9 +199,13 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
 	   for (int i=0;i<num_channels;i++)  {
 		   media_output_fifo_set_ptp_timestamp(map[i], AVBTP_TIMESTAMP(pAVBHdr), sample_num);
 	   }
-#if 0 //#ifdef USE_XSCOPE
+#ifdef USE_XSCOPE
 	   if((AVBTP_STREAM_ID0(pAVBHdr)&0xF) == 0) { // reduce probing to workaround xscope issue
-	      xscope_probe_data_pred(3, (unsigned) AVBTP_TIMESTAMP(pAVBHdr));
+		  if(prev_avbtp_ts_valid) {
+	         xscope_probe_data_pred(14, (signed) (AVBTP_TIMESTAMP(pAVBHdr) - prev_avbtp_timestamp));
+		  }
+		  prev_avbtp_timestamp = AVBTP_TIMESTAMP(pAVBHdr);
+		  prev_avbtp_ts_valid = 1;
 	   }
 #endif
    }
