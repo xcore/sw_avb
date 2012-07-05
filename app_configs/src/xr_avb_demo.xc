@@ -146,7 +146,7 @@ void xscope_user_init() {
        // Enable XScope printing
        //xscope_register(0, 0, "", 0, "");
        simple_printf("Registering XSCOPE probes for 1722 Listener\n");
-       xscope_register(17,
+       xscope_register(18,
     	               XSCOPE_STARTSTOP, "Process 1722 packet startstop", XSCOPE_UINT, "time",
     	               XSCOPE_STARTSTOP, "manage_buffer duration", XSCOPE_UINT, "time",
                        XSCOPE_CONTINUOUS, "Clock recovery: perror", XSCOPE_INT, "ns_diff",
@@ -163,7 +163,8 @@ void xscope_user_init() {
                        XSCOPE_CONTINUOUS, "Clock Recovery: outgoing_ptp_ts differential", XSCOPE_INT, "ns_diff",
                        XSCOPE_CONTINUOUS, "Listener: avbpt_timestamp differential", XSCOPE_INT, "ns_diff",
                        XSCOPE_CONTINUOUS, "Talker: ptp_ts differential", XSCOPE_INT, "ns_diff",
-                       XSCOPE_CONTINUOUS, "Talker: local presentationTime differential", XSCOPE_INT, "ns_diff"
+                       XSCOPE_CONTINUOUS, "Talker: local presentationTime differential", XSCOPE_INT, "ns_diff",
+                       XSCOPE_CONTINUOUS, "I2S: local timestamp differential", XSCOPE_INT, "ns_diff"
                        //XSCOPE_CONTINUOUS, "Clock Recovery stream_info2.presentation_ts", XSCOPE_UINT, "nanoseconds"
     	               //XSCOPE_DISCRETE, "AVBTP_TIMESTAMP", XSCOPE_UINT, "nanoseconds"
     	               );
