@@ -4,6 +4,12 @@
  */
 #include "avb_conf.h"
 #include "xscope.h"
+#include "simple_printf.h"
+
+#define AVG_PRESENTATION_TIME_DELTA 166667  // 166.667us = 8 samples at 48kHz
+#define MAX_PRESENTATION_TIME_DELTA_DELTA AVG_PRESENTATION_TIME_DELTA / 100 // 1% deviation
+
+#define DEBUG_LOGIC
 
 #if defined(AVB_1722_FORMAT_61883_6) || defined(AVB_1722_FORMAT_SAF)
 
@@ -133,6 +139,10 @@ unsigned prev_presentationTime=0;
 unsigned prev_valid=0;
 #endif
 
+#ifdef DEBUG_LOGIC;
+unsigned prev_chan_presentationTime;
+#endif
+
 /** This receives user defined audio samples from local out stream and packetize
  *  them into specified AVB1722 transport packet.
  */
@@ -243,8 +253,16 @@ int avb1722_create_packet(unsigned char Buf0[],
 				src = (int *) media_input_fifo_get_packet(map[i], &presentationTime, &(stream_info->dbc_at_start_of_last_fifo_packet));
 				media_input_fifo_set_ptr(map[i], src);
 				dest += 1;
-				timerValid = 1;
+#ifdef DEBUG_LOGIC
+			   if(i>0 && presentationTime!=prev_chan_presentationTime) {
+				  simple_printf("ERROR: Presentation time for channel %d : %d \n  differs from previous channel time : %d\n",
+						  i, presentationTime, prev_chan_presentationTime);
+
+			   };
+			   prev_chan_presentationTime=presentationTime;
+#endif
 			}
+			timerValid = 1;
 			dest += (stream_info->samples_left_in_fifo_packet - 1) * num_channels;
 			samples_in_packet -= stream_info->samples_left_in_fifo_packet;
 			stream_info->samples_left_in_fifo_packet = samples_per_fifo_packet;
@@ -269,12 +287,24 @@ int avb1722_create_packet(unsigned char Buf0[],
 	if (timerValid) {
 		ptp_ts = local_timestamp_to_ptp_mod32(presentationTime, timeInfo);
 		ptp_ts = ptp_ts + stream_info->presentation_delay;
+
 		#ifdef USE_XSCOPE
-			if(stream_id0 & 0xF) {
+			if((stream_id0 & 0xF)==0) { // only for stream 0
 				if(prev_valid) {
+					int ptp_ts_delta = ptp_ts - prev_ptp_ts;
+					if(ptp_ts_delta > AVG_PRESENTATION_TIME_DELTA+MAX_PRESENTATION_TIME_DELTA_DELTA ||
+					   ptp_ts_delta < AVG_PRESENTATION_TIME_DELTA-MAX_PRESENTATION_TIME_DELTA_DELTA) {
+#if 1
+						  simple_printf("ERROR: Expecting ptp_ts (Presentation Time) to change between %d and %d. Actual change %d\n",
+								  AVG_PRESENTATION_TIME_DELTA+MAX_PRESENTATION_TIME_DELTA_DELTA,
+								  AVG_PRESENTATION_TIME_DELTA-MAX_PRESENTATION_TIME_DELTA_DELTA,
+								  ptp_ts_delta);
+#endif
+					}
 				    // trace only for stream 0
 					xscope_probe_data(15, (int) (ptp_ts - prev_ptp_ts));
 					xscope_probe_data(16, (int) (presentationTime - prev_presentationTime));
+
 				};
 			    prev_ptp_ts = ptp_ts;
 			    prev_presentationTime = presentationTime;
