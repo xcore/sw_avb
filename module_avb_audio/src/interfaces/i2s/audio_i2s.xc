@@ -12,6 +12,11 @@
 #include "audio_i2s.h"
 #include "media_fifo.h"
 
+#ifdef USE_XSCOPE
+unsigned prev_timestamp_valid=0;
+unsigned int prev_timestamp;
+#endif
+
 #define I2S_SINE_TABLE_SIZE 100
 
 unsigned int i2s_sine[I2S_SINE_TABLE_SIZE] = 

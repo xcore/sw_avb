@@ -273,8 +273,8 @@ int avb1722_create_packet(unsigned char Buf0[],
 			if(stream_id0 & 0xF) {
 				if(prev_valid) {
 				    // trace only for stream 0
-					xscope_probe_data_pred(15, (int) (ptp_ts - prev_ptp_ts));
-					xscope_probe_data_pred(16, (int) (presentationTime - prev_presentationTime));
+					xscope_probe_data(15, (int) (ptp_ts - prev_ptp_ts));
+					xscope_probe_data(16, (int) (presentationTime - prev_presentationTime));
 				};
 			    prev_ptp_ts = ptp_ts;
 			    prev_presentationTime = presentationTime;
