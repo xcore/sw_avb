@@ -177,6 +177,8 @@ media_input_fifo_get_packet(media_input_fifo_t media_input_fifo0,
 
 
   *ts = *rdIndex;
+  // trash the timestamp
+  *rdIndex = 0xdeadbeef;
   *dbc = *(rdIndex+1);
 
   return ((unsigned int *) (rdIndex+2));
