@@ -141,12 +141,13 @@ media_output_fifo_t ofifos[AVB_NUM_MEDIA_OUTPUTS];
 #endif
 
 #ifdef USE_XSCOPE
+#define NUM_XSCOPE_PROBES 18
 void xscope_user_init() {
     if (get_core_id() == 0) {
        // Enable XScope printing
        //xscope_register(0, 0, "", 0, "");
-       simple_printf("Registering XSCOPE probes for 1722 Listener\n");
-       xscope_register(18,
+       simple_printf("Registering %d XSCOPE probes\n", NUM_XSCOPE_PROBES);
+       xscope_register(NUM_XSCOPE_PROBES,
     	               XSCOPE_STARTSTOP, "Process 1722 packet startstop", XSCOPE_UINT, "time",
     	               XSCOPE_STARTSTOP, "manage_buffer duration", XSCOPE_UINT, "time",
                        XSCOPE_CONTINUOUS, "Clock recovery: perror", XSCOPE_INT, "ns_diff",
