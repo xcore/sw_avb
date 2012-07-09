@@ -42,7 +42,7 @@
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildArguments</key>
-					<value>CONFIG=Listener_2x4Chan</value>
+					<value>CONFIG=Talker4x2Chan_SAF</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildCommand</key>
