@@ -6,10 +6,16 @@
 #include "xscope.h"
 #include "simple_printf.h"
 
+#ifdef AVB_1722_FORMAT_SAF
+#define AVG_PRESENTATION_TIME_DELTA 125000  // 125us = 6 samples at 48kHz
+#else
 #define AVG_PRESENTATION_TIME_DELTA 166667  // 166.667us = 8 samples at 48kHz
-#define MAX_PRESENTATION_TIME_DELTA_DELTA AVG_PRESENTATION_TIME_DELTA / 100 // 1% deviation
+#endif
+//#define MAX_PRESENTATION_TIME_DELTA_DELTA AVG_PRESENTATION_TIME_DELTA / 100 // 1% deviation
+#define MAX_PRESENTATION_TIME_DELTA_DELTA AVG_PRESENTATION_TIME_DELTA * 2 // 200% deviation
 
 #define DEBUG_LOGIC
+#define DEBUG_PRINT_ptp_ts_delta_CHECK
 
 #if defined(AVB_1722_FORMAT_61883_6) || defined(AVB_1722_FORMAT_SAF)
 
@@ -137,6 +143,9 @@ static void sample_copy_strided(int *src, unsigned int *dest, int stride, int n)
 unsigned prev_ptp_ts=0;
 unsigned prev_presentationTime=0;
 unsigned prev_valid=0;
+int prev_rdIndex;
+int prev_startIndex;
+
 #endif
 
 #ifdef DEBUG_LOGIC;
@@ -246,6 +255,9 @@ int avb1722_create_packet(unsigned char Buf0[],
 		if (stream_info->samples_left_in_fifo_packet < samples_in_packet) {
 			// Not enough samples left in fifo packet to fill the 1722 packet
 			// therefore pull out remaining samples and get the next packet
+#ifdef USE_XSCOPE
+				xscope_probe(21); // start
+#endif
 			for (i = 0; i < num_channels; i++) {
 				int *src = media_input_fifo_get_ptr(map[i]);
 				sample_copy_strided(src, dest, stride, stream_info->samples_left_in_fifo_packet);
@@ -260,12 +272,19 @@ int avb1722_create_packet(unsigned char Buf0[],
 
 			   };
 			   prev_chan_presentationTime=presentationTime;
+
+			   // store the pointer to current presentationTime
+   		       prev_rdIndex = (unsigned) src - 2; // reverse (rdIndex+2) done by media_input_fifo_get_packet
 #endif
 			}
+
 			timerValid = 1;
 			dest += (stream_info->samples_left_in_fifo_packet - 1) * num_channels;
 			samples_in_packet -= stream_info->samples_left_in_fifo_packet;
 			stream_info->samples_left_in_fifo_packet = samples_per_fifo_packet;
+#ifdef USE_XSCOPE
+				xscope_probe(21);
+#endif
 		}
 	}
 
@@ -288,29 +307,35 @@ int avb1722_create_packet(unsigned char Buf0[],
 		ptp_ts = local_timestamp_to_ptp_mod32(presentationTime, timeInfo);
 		ptp_ts = ptp_ts + stream_info->presentation_delay;
 
-		#ifdef USE_XSCOPE
+#ifdef USE_XSCOPE
 			if((stream_id0 & 0xF)==0) { // only for stream 0
 				if(prev_valid) {
-					int ptp_ts_delta = ptp_ts - prev_ptp_ts;
+#ifdef DEBUG_LOGIC
+					int ptp_ts_delta = (int) (ptp_ts - prev_ptp_ts);
 					if(ptp_ts_delta > AVG_PRESENTATION_TIME_DELTA+MAX_PRESENTATION_TIME_DELTA_DELTA ||
 					   ptp_ts_delta < AVG_PRESENTATION_TIME_DELTA-MAX_PRESENTATION_TIME_DELTA_DELTA) {
-#if 1
+#ifdef DEBUG_PRINT_ptp_ts_delta_CHECK
 						  simple_printf("ERROR: Expecting ptp_ts (Presentation Time) to change between %d and %d. Actual change %d\n",
-								  AVG_PRESENTATION_TIME_DELTA+MAX_PRESENTATION_TIME_DELTA_DELTA,
 								  AVG_PRESENTATION_TIME_DELTA-MAX_PRESENTATION_TIME_DELTA_DELTA,
+								  AVG_PRESENTATION_TIME_DELTA+MAX_PRESENTATION_TIME_DELTA_DELTA,
 								  ptp_ts_delta);
+						  simple_printf("  from fifo values presentationTime %d, prev presentationTime %d\n", presentationTime, prev_presentationTime);
+						  //simple_printf("        hex values presentationTime 0x%x, prev presentationTime 0x%x\n", presentationTime, prev_presentationTime);
 #endif
 					}
+#endif
 				    // trace only for stream 0
 					xscope_probe_data(15, (int) (ptp_ts - prev_ptp_ts));
 					xscope_probe_data(16, (int) (presentationTime - prev_presentationTime));
+					xscope_probe_data(17, (unsigned) (presentationTime));
+
 
 				};
 			    prev_ptp_ts = ptp_ts;
 			    prev_presentationTime = presentationTime;
 			    prev_valid = 1;
 			}
-		#endif
+#endif
 	}
 
 	// Update timestamp value and valid flag.
