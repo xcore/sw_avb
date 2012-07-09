@@ -2,6 +2,7 @@
 #include "media_input_fifo.h"
 #include "hwlock.h"
 #include "avb_1722_def.h"
+#include "xscope.h"
 
 static hwlock_t enable_lock;
 unsigned int enable_request_state = 0;
@@ -114,6 +115,11 @@ void media_input_fifo_push_sample(media_input_fifo_t media_input_fifo0,
     if (spaceLeft && (spaceLeft < packetSize)) return;
 
     wrIndex[0] = ts;
+#ifdef USE_XSCOPE
+	xscope_probe_data(19, (unsigned) (ts));
+	//xscope_probe_data(20, (unsigned) (wrIndex));
+#endif
+
     wrIndex[1] = media_input_fifo->dbc;
     wrIndex[2] = sample;
     wrIndex += 3;
@@ -178,7 +184,7 @@ media_input_fifo_get_packet(media_input_fifo_t media_input_fifo0,
 
   *ts = *rdIndex;
   // trash the timestamp
-  *rdIndex = 0xdeadbeef;
+  //*rdIndex = 0xdeadbeef;
   *dbc = *(rdIndex+1);
 
   return ((unsigned int *) (rdIndex+2));
