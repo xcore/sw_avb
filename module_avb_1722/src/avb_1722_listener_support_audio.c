@@ -163,7 +163,7 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
 
      return 0;
    }
-#ifdef AVB_1722_RECORD_ERRORS
+#if(AVB_1722_RECORD_ERRORS && !AVB_1722_FORMAT_SAF)
    else if (dbc_diff != num_samples_in_payload) {
 	   avb_1722_listener_dbc_discontinuity++;
    }
