@@ -15,7 +15,7 @@
 // By defining this, all channels are filled with an increasing counter
 // value instead of the samples themselves.  Useful to check the channel
 // synchronization using a network monitor
-//#define SAMPLE_COUNTER_TEST
+#define SAMPLE_COUNTER_TEST
 
 #define I2S_SINE_TABLE_SIZE 100
 
@@ -191,7 +191,7 @@ inline void i2s_master(const clock mclk,
 #ifdef USE_XSCOPE
 		if(prev_timestamp_valid) {
 		    // trace only for stream 0
-			xscope_probe_data(17, (int) (timestamp - prev_timestamp));
+			xscope_probe_data(18, (int) (timestamp - prev_timestamp));
 		};
 		prev_timestamp = timestamp;
 	    prev_timestamp_valid = 1;
