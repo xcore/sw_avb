@@ -141,12 +141,11 @@ media_output_fifo_t ofifos[AVB_NUM_MEDIA_OUTPUTS];
 #endif
 
 #ifdef USE_XSCOPE
-#define NUM_XSCOPE_PROBES 18
+#define NUM_XSCOPE_PROBES 22
 void xscope_user_init() {
+#ifdef USE_XSCOPE_PROBES
     if (get_core_id() == 0) {
-       // Enable XScope printing
-       //xscope_register(0, 0, "", 0, "");
-       simple_printf("Registering %d XSCOPE probes\n", NUM_XSCOPE_PROBES);
+       simple_printf("Registering %d XSCOPE probes on core 0\n", NUM_XSCOPE_PROBES);
        xscope_register(NUM_XSCOPE_PROBES,
     	               XSCOPE_STARTSTOP, "Process 1722 packet startstop", XSCOPE_UINT, "time",
     	               XSCOPE_STARTSTOP, "manage_buffer duration", XSCOPE_UINT, "time",
@@ -165,12 +164,19 @@ void xscope_user_init() {
                        XSCOPE_CONTINUOUS, "Listener: avbpt_timestamp differential", XSCOPE_INT, "ns_diff",
                        XSCOPE_CONTINUOUS, "Talker: ptp_ts differential", XSCOPE_INT, "ns_diff",
                        XSCOPE_CONTINUOUS, "Talker: local presentationTime differential", XSCOPE_INT, "ns_diff",
-                       XSCOPE_CONTINUOUS, "I2S: local timestamp differential", XSCOPE_INT, "ns_diff"
+                       XSCOPE_CONTINUOUS, "Talker: local presentationTime", XSCOPE_INT, "cycles",
+                       XSCOPE_CONTINUOUS, "I2S: local timestamp differential", XSCOPE_INT, "ns_diff",
+                       XSCOPE_CONTINUOUS, "ififo timestamp from I2S", XSCOPE_INT, "cycles",
+                       XSCOPE_CONTINUOUS, "ififo startIndex (pointer)", XSCOPE_INT, "cycles",
+    	               XSCOPE_STARTSTOP, " Time to get packets from ififo", XSCOPE_UINT, "time"
                        //XSCOPE_CONTINUOUS, "Clock Recovery stream_info2.presentation_ts", XSCOPE_UINT, "nanoseconds"
     	               //XSCOPE_DISCRETE, "AVBTP_TIMESTAMP", XSCOPE_UINT, "nanoseconds"
     	               );
     };
+#endif
+
     xscope_config_io(XSCOPE_IO_BASIC);
+
 }
 #endif
 
