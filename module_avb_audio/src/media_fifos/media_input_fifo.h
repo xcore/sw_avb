@@ -13,7 +13,7 @@
 #endif
 
 #ifndef MEDIA_INPUT_FIFO_SAMPLE_FIFO_SIZE
-#define GET_SIZE(x) (x == 44100 || x == 48000) ? 64 : 128
+#define GET_SIZE(x) (x == 44100 || x == 48000) ? 64 : 256
 #define MEDIA_INPUT_FIFO_SAMPLE_FIFO_SIZE (GET_SIZE(AVB_MAX_AUDIO_SAMPLE_RATE))
 #endif
 
