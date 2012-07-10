@@ -143,13 +143,15 @@ static void sample_copy_strided(int *src, unsigned int *dest, int stride, int n)
 unsigned prev_ptp_ts=0;
 unsigned prev_presentationTime=0;
 unsigned prev_valid=0;
-int prev_rdIndex;
 int prev_startIndex;
 
 #endif
 
 #ifdef DEBUG_LOGIC;
 unsigned prev_chan_presentationTime;
+int expected_rdIndex;
+unsigned rdIndex_prediction_count=0;
+char rdIndex_prediction_valid=0;
 #endif
 
 /** This receives user defined audio samples from local out stream and packetize
@@ -256,7 +258,7 @@ int avb1722_create_packet(unsigned char Buf0[],
 			// Not enough samples left in fifo packet to fill the 1722 packet
 			// therefore pull out remaining samples and get the next packet
 #ifdef USE_XSCOPE
-				xscope_probe(21); // start
+		    xscope_probe(21); // start
 #endif
 			for (i = 0; i < num_channels; i++) {
 				int *src = media_input_fifo_get_ptr(map[i]);
@@ -273,8 +275,6 @@ int avb1722_create_packet(unsigned char Buf0[],
 			   };
 			   prev_chan_presentationTime=presentationTime;
 
-			   // store the pointer to current presentationTime
-   		       prev_rdIndex = (unsigned) src - 2; // reverse (rdIndex+2) done by media_input_fifo_get_packet
 #endif
 			}
 
@@ -283,7 +283,26 @@ int avb1722_create_packet(unsigned char Buf0[],
 			samples_in_packet -= stream_info->samples_left_in_fifo_packet;
 			stream_info->samples_left_in_fifo_packet = samples_per_fifo_packet;
 #ifdef USE_XSCOPE
-				xscope_probe(21);
+			xscope_probe(21);
+#endif
+#ifdef DEBUG_LOGIC
+			if((stream_id0 & 0xF)==0) { // only for stream 0
+				volatile ififo_t *media_input_fifo =  (ififo_t *) map[num_channels-1];
+                volatile int packetSize;
+                if(rdIndex_prediction_valid) {
+					if(media_input_fifo->rdIndex != expected_rdIndex) {
+						  simple_printf("ERROR: Expected rdIndex ptr 0x%x differs from actual 0x%x\n",expected_rdIndex, media_input_fifo->rdIndex);
+					}
+                }
+                expected_rdIndex = media_input_fifo->rdIndex;
+                packetSize = media_input_fifo->packetSize*4; // byte address increment
+                expected_rdIndex+= packetSize;
+
+			    if (expected_rdIndex + packetSize > media_input_fifo->fifoEnd)
+			    	expected_rdIndex = (int *) &media_input_fifo->buf[0]; // wrap
+			    rdIndex_prediction_count++;
+			    rdIndex_prediction_valid=1;
+			}
 #endif
 		}
 	}
@@ -333,6 +352,7 @@ int avb1722_create_packet(unsigned char Buf0[],
 				};
 			    prev_ptp_ts = ptp_ts;
 			    prev_presentationTime = presentationTime;
+
 			    prev_valid = 1;
 			}
 #endif
