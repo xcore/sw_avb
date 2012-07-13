@@ -859,7 +859,7 @@
 			<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 		</cconfiguration>
 		<cconfiguration id="com.xmos.cdt.toolchain.71094488.368395869.1289298955">
-			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.xmos.cdt.toolchain.71094488.368395869.1289298955" moduleId="org.eclipse.cdt.core.settings" name="Talker_2x4Chan">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.xmos.cdt.toolchain.71094488.368395869.1289298955" moduleId="org.eclipse.cdt.core.settings" name="Talker2x4Chan">
 				<externalSettings/>
 				<extensions>
 					<extension id="com.xmos.cdt.core.XEBinaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
@@ -888,11 +888,11 @@
 				</buildTargets>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration buildProperties="" description="" id="com.xmos.cdt.toolchain.71094488.368395869.1289298955" name="Talker_2x4Chan" parent="org.eclipse.cdt.build.core.emptycfg">
+				<configuration buildProperties="" description="" id="com.xmos.cdt.toolchain.71094488.368395869.1289298955" name="Talker2x4Chan" parent="org.eclipse.cdt.build.core.emptycfg">
 					<folderInfo id="com.xmos.cdt.toolchain.71094488.368395869.1289298955." name="/" resourcePath="">
 						<toolChain id="com.xmos.cdt.toolchain.1059254296" name="com.xmos.cdt.toolchain" superClass="com.xmos.cdt.toolchain">
 							<targetPlatform archList="all" binaryParser="com.xmos.cdt.core.XEBinaryParser" id="com.xmos.cdt.core.platform.411355661" isAbstract="false" osList="linux,win32,macosx" superClass="com.xmos.cdt.core.platform"/>
-							<builder arguments="CONFIG=Talker_2x4Chan" id="com.xmos.cdt.builder.base.789830453" keepEnvironmentInBuildfile="false" managedBuildOn="false" superClass="com.xmos.cdt.builder.base">
+							<builder arguments="CONFIG=Talker2x4Chan" id="com.xmos.cdt.builder.base.789830453" keepEnvironmentInBuildfile="false" managedBuildOn="false" superClass="com.xmos.cdt.builder.base">
 								<outputEntries>
 									<entry flags="VALUE_WORKSPACE_PATH" kind="outputPath" name="bin"/>
 								</outputEntries>
@@ -1144,7 +1144,7 @@
 			<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 		</cconfiguration>
 		<cconfiguration id="com.xmos.cdt.toolchain.71094488.368395869.2104058165">
-			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.xmos.cdt.toolchain.71094488.368395869.2104058165" moduleId="org.eclipse.cdt.core.settings" name="Talker_4x2Chan">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.xmos.cdt.toolchain.71094488.368395869.2104058165" moduleId="org.eclipse.cdt.core.settings" name="Talker4x2Chan">
 				<externalSettings/>
 				<extensions>
 					<extension id="com.xmos.cdt.core.XEBinaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
@@ -1173,11 +1173,11 @@
 				</buildTargets>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration buildProperties="" description="" id="com.xmos.cdt.toolchain.71094488.368395869.2104058165" name="Talker_4x2Chan" parent="org.eclipse.cdt.build.core.emptycfg">
+				<configuration buildProperties="" description="" id="com.xmos.cdt.toolchain.71094488.368395869.2104058165" name="Talker4x2Chan" parent="org.eclipse.cdt.build.core.emptycfg">
 					<folderInfo id="com.xmos.cdt.toolchain.71094488.368395869.2104058165." name="/" resourcePath="">
 						<toolChain id="com.xmos.cdt.toolchain.1486729374" name="com.xmos.cdt.toolchain" superClass="com.xmos.cdt.toolchain">
 							<targetPlatform archList="all" binaryParser="com.xmos.cdt.core.XEBinaryParser" id="com.xmos.cdt.core.platform.423680409" isAbstract="false" osList="linux,win32,macosx" superClass="com.xmos.cdt.core.platform"/>
-							<builder arguments="CONFIG=Talker_4x2Chan" id="com.xmos.cdt.builder.base.977789107" keepEnvironmentInBuildfile="false" managedBuildOn="false" superClass="com.xmos.cdt.builder.base">
+							<builder arguments="CONFIG=Talker4x2Chan" id="com.xmos.cdt.builder.base.977789107" keepEnvironmentInBuildfile="false" managedBuildOn="false" superClass="com.xmos.cdt.builder.base">
 								<outputEntries>
 									<entry flags="VALUE_WORKSPACE_PATH" kind="outputPath" name="bin"/>
 								</outputEntries>
@@ -1429,7 +1429,7 @@
 			<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 		</cconfiguration>
 		<cconfiguration id="com.xmos.cdt.toolchain.71094488.368395869.441255395">
-			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.xmos.cdt.toolchain.71094488.368395869.441255395" moduleId="org.eclipse.cdt.core.settings" name="Listener_2x4Chan">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.xmos.cdt.toolchain.71094488.368395869.441255395" moduleId="org.eclipse.cdt.core.settings" name="Listener2x4Chan">
 				<externalSettings/>
 				<extensions>
 					<extension id="com.xmos.cdt.core.XEBinaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
@@ -1458,11 +1458,11 @@
 				</buildTargets>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration buildProperties="" description="" id="com.xmos.cdt.toolchain.71094488.368395869.441255395" name="Listener_2x4Chan" parent="org.eclipse.cdt.build.core.emptycfg">
+				<configuration buildProperties="" description="" id="com.xmos.cdt.toolchain.71094488.368395869.441255395" name="Listener2x4Chan" parent="org.eclipse.cdt.build.core.emptycfg">
 					<folderInfo id="com.xmos.cdt.toolchain.71094488.368395869.441255395." name="/" resourcePath="">
 						<toolChain id="com.xmos.cdt.toolchain.300899242" name="com.xmos.cdt.toolchain" superClass="com.xmos.cdt.toolchain">
 							<targetPlatform archList="all" binaryParser="com.xmos.cdt.core.XEBinaryParser" id="com.xmos.cdt.core.platform.557537109" isAbstract="false" osList="linux,win32,macosx" superClass="com.xmos.cdt.core.platform"/>
-							<builder arguments="CONFIG=Listener_2x4Chan" id="com.xmos.cdt.builder.base.1974898580" keepEnvironmentInBuildfile="false" managedBuildOn="false" superClass="com.xmos.cdt.builder.base">
+							<builder arguments="CONFIG=Listener2x4Chan" id="com.xmos.cdt.builder.base.1974898580" keepEnvironmentInBuildfile="false" managedBuildOn="false" superClass="com.xmos.cdt.builder.base">
 								<outputEntries>
 									<entry flags="VALUE_WORKSPACE_PATH" kind="outputPath" name="bin"/>
 								</outputEntries>
@@ -1714,7 +1714,7 @@
 			<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 		</cconfiguration>
 		<cconfiguration id="com.xmos.cdt.toolchain.71094488.368395869.1820766216">
-			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.xmos.cdt.toolchain.71094488.368395869.1820766216" moduleId="org.eclipse.cdt.core.settings" name="Listener_4x2Chan">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.xmos.cdt.toolchain.71094488.368395869.1820766216" moduleId="org.eclipse.cdt.core.settings" name="Listener4x2Chan">
 				<externalSettings/>
 				<extensions>
 					<extension id="com.xmos.cdt.core.XEBinaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
@@ -1743,11 +1743,11 @@
 				</buildTargets>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration buildProperties="" description="" id="com.xmos.cdt.toolchain.71094488.368395869.1820766216" name="Listener_4x2Chan" parent="org.eclipse.cdt.build.core.emptycfg">
+				<configuration buildProperties="" description="" id="com.xmos.cdt.toolchain.71094488.368395869.1820766216" name="Listener4x2Chan" parent="org.eclipse.cdt.build.core.emptycfg">
 					<folderInfo id="com.xmos.cdt.toolchain.71094488.368395869.1820766216." name="/" resourcePath="">
 						<toolChain id="com.xmos.cdt.toolchain.671584223" name="com.xmos.cdt.toolchain" superClass="com.xmos.cdt.toolchain">
 							<targetPlatform archList="all" binaryParser="com.xmos.cdt.core.XEBinaryParser" id="com.xmos.cdt.core.platform.2112007242" isAbstract="false" osList="linux,win32,macosx" superClass="com.xmos.cdt.core.platform"/>
-							<builder arguments="CONFIG=Listener_4x2Chan" id="com.xmos.cdt.builder.base.1053286361" keepEnvironmentInBuildfile="false" managedBuildOn="false" superClass="com.xmos.cdt.builder.base">
+							<builder arguments="CONFIG=Listener4x2Chan" id="com.xmos.cdt.builder.base.1053286361" keepEnvironmentInBuildfile="false" managedBuildOn="false" superClass="com.xmos.cdt.builder.base">
 								<outputEntries>
 									<entry flags="VALUE_WORKSPACE_PATH" kind="outputPath" name="bin"/>
 								</outputEntries>
@@ -3139,7 +3139,7 @@
 			<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 		</cconfiguration>
 		<cconfiguration id="com.xmos.cdt.toolchain.71094488.368395869.1721318386">
-			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.xmos.cdt.toolchain.71094488.368395869.1721318386" moduleId="org.eclipse.cdt.core.settings" name="Talker4x2Chan_SAF">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.xmos.cdt.toolchain.71094488.368395869.1721318386" moduleId="org.eclipse.cdt.core.settings" name="Talker4x2ChanSAF">
 				<externalSettings/>
 				<extensions>
 					<extension id="com.xmos.cdt.core.XEBinaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
@@ -3168,11 +3168,11 @@
 				</buildTargets>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration buildProperties="" description="" id="com.xmos.cdt.toolchain.71094488.368395869.1721318386" name="Talker4x2Chan_SAF" parent="org.eclipse.cdt.build.core.emptycfg">
+				<configuration buildProperties="" description="" id="com.xmos.cdt.toolchain.71094488.368395869.1721318386" name="Talker4x2ChanSAF" parent="org.eclipse.cdt.build.core.emptycfg">
 					<folderInfo id="com.xmos.cdt.toolchain.71094488.368395869.1721318386." name="/" resourcePath="">
 						<toolChain id="com.xmos.cdt.toolchain.939696290" name="com.xmos.cdt.toolchain" superClass="com.xmos.cdt.toolchain">
 							<targetPlatform archList="all" binaryParser="com.xmos.cdt.core.XEBinaryParser" id="com.xmos.cdt.core.platform.870743563" isAbstract="false" osList="linux,win32,macosx" superClass="com.xmos.cdt.core.platform"/>
-							<builder arguments="CONFIG=Talker4x2Chan_SAF" id="com.xmos.cdt.builder.base.1541723472" keepEnvironmentInBuildfile="false" managedBuildOn="false" superClass="com.xmos.cdt.builder.base">
+							<builder arguments="CONFIG=Talker4x2ChanSAF" id="com.xmos.cdt.builder.base.1541723472" keepEnvironmentInBuildfile="false" managedBuildOn="false" superClass="com.xmos.cdt.builder.base">
 								<outputEntries>
 									<entry flags="VALUE_WORKSPACE_PATH" kind="outputPath" name="bin"/>
 								</outputEntries>
@@ -3424,7 +3424,7 @@
 			<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 		</cconfiguration>
 		<cconfiguration id="com.xmos.cdt.toolchain.71094488.368395869.342156561">
-			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.xmos.cdt.toolchain.71094488.368395869.342156561" moduleId="org.eclipse.cdt.core.settings" name="Listener4x2Chan_SAF">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.xmos.cdt.toolchain.71094488.368395869.342156561" moduleId="org.eclipse.cdt.core.settings" name="Listener4x2ChanSAF">
 				<externalSettings/>
 				<extensions>
 					<extension id="com.xmos.cdt.core.XEBinaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
@@ -3453,11 +3453,11 @@
 				</buildTargets>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration buildProperties="" description="" id="com.xmos.cdt.toolchain.71094488.368395869.342156561" name="Listener4x2Chan_SAF" parent="org.eclipse.cdt.build.core.emptycfg">
+				<configuration buildProperties="" description="" id="com.xmos.cdt.toolchain.71094488.368395869.342156561" name="Listener4x2ChanSAF" parent="org.eclipse.cdt.build.core.emptycfg">
 					<folderInfo id="com.xmos.cdt.toolchain.71094488.368395869.342156561." name="/" resourcePath="">
 						<toolChain id="com.xmos.cdt.toolchain.1236907384" name="com.xmos.cdt.toolchain" superClass="com.xmos.cdt.toolchain">
 							<targetPlatform archList="all" binaryParser="com.xmos.cdt.core.XEBinaryParser" id="com.xmos.cdt.core.platform.1470595985" isAbstract="false" osList="linux,win32,macosx" superClass="com.xmos.cdt.core.platform"/>
-							<builder arguments="CONFIG=Listener4x2Chan_SAF" id="com.xmos.cdt.builder.base.311136352" keepEnvironmentInBuildfile="false" managedBuildOn="false" superClass="com.xmos.cdt.builder.base">
+							<builder arguments="CONFIG=Listener4x2ChanSAF" id="com.xmos.cdt.builder.base.311136352" keepEnvironmentInBuildfile="false" managedBuildOn="false" superClass="com.xmos.cdt.builder.base">
 								<outputEntries>
 									<entry flags="VALUE_WORKSPACE_PATH" kind="outputPath" name="bin"/>
 								</outputEntries>
@@ -3616,6 +3616,576 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_xlog/module_xlog}&quot;"/>
 								</option>
 								<inputType id="com.xmos.cdt.xc.compiler.input.1864298739" name="XC Sources" superClass="com.xmos.cdt.xc.compiler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="scannerConfiguration">
+				<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+				<profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">
+					<buildOutputProvider>
+						<openAction enabled="true" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="gcc" useDefault="true"/>
+						<parser enabled="true"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="org.eclipse.cdt.make.core.GCCStandardMakePerFileProfile">
+					<buildOutputProvider>
+						<openAction enabled="true" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="makefileGenerator">
+						<runAction arguments="-E -P -v -dD" command="" useDefault="true"/>
+						<parser enabled="true"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfile">
+					<buildOutputProvider>
+						<openAction enabled="true" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="gcc" useDefault="true"/>
+						<parser enabled="true"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP">
+					<buildOutputProvider>
+						<openAction enabled="true" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.cpp" command="g++" useDefault="true"/>
+						<parser enabled="true"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC">
+					<buildOutputProvider>
+						<openAction enabled="true" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.c" command="gcc" useDefault="true"/>
+						<parser enabled="true"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfile">
+					<buildOutputProvider>
+						<openAction enabled="true" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-c 'gcc -E -P -v -dD &quot;${plugin_state_location}/${specs_file}&quot;'" command="sh" useDefault="true"/>
+						<parser enabled="true"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileCPP">
+					<buildOutputProvider>
+						<openAction enabled="true" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-c 'g++ -E -P -v -dD &quot;${plugin_state_location}/specs.cpp&quot;'" command="sh" useDefault="true"/>
+						<parser enabled="true"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileC">
+					<buildOutputProvider>
+						<openAction enabled="true" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-c 'gcc -E -P -v -dD &quot;${plugin_state_location}/specs.c&quot;'" command="sh" useDefault="true"/>
+						<parser enabled="true"/>
+					</scannerInfoProvider>
+				</profile>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+			<storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
+			<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
+		</cconfiguration>
+		<cconfiguration id="com.xmos.cdt.toolchain.71094488.368395869.919769257">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.xmos.cdt.toolchain.71094488.368395869.919769257" moduleId="org.eclipse.cdt.core.settings" name="Talker4x3Chan">
+				<externalSettings/>
+				<extensions>
+					<extension id="com.xmos.cdt.core.XEBinaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="com.xmos.cdt.core.XdeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
+				<buildTargets>
+					<target name="all" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+						<buildCommand>xmake</buildCommand>
+						<buildArguments/>
+						<buildTarget>all</buildTarget>
+						<stopOnError>true</stopOnError>
+						<useDefaultCommand>true</useDefaultCommand>
+						<runAllBuilders>true</runAllBuilders>
+					</target>
+					<target name="clean" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+						<buildCommand>xmake</buildCommand>
+						<buildArguments/>
+						<buildTarget>clean</buildTarget>
+						<stopOnError>true</stopOnError>
+						<useDefaultCommand>true</useDefaultCommand>
+						<runAllBuilders>true</runAllBuilders>
+					</target>
+				</buildTargets>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration buildProperties="" description="" id="com.xmos.cdt.toolchain.71094488.368395869.919769257" name="Talker4x3Chan" parent="org.eclipse.cdt.build.core.emptycfg">
+					<folderInfo id="com.xmos.cdt.toolchain.71094488.368395869.919769257." name="/" resourcePath="">
+						<toolChain id="com.xmos.cdt.toolchain.2061463921" name="com.xmos.cdt.toolchain" superClass="com.xmos.cdt.toolchain">
+							<targetPlatform archList="all" binaryParser="com.xmos.cdt.core.XEBinaryParser" id="com.xmos.cdt.core.platform.1270400065" isAbstract="false" osList="linux,win32,macosx" superClass="com.xmos.cdt.core.platform"/>
+							<builder arguments="CONFIG=Talker4x3Chan" id="com.xmos.cdt.builder.base.1252579792" keepEnvironmentInBuildfile="false" managedBuildOn="false" superClass="com.xmos.cdt.builder.base">
+								<outputEntries>
+									<entry flags="VALUE_WORKSPACE_PATH" kind="outputPath" name="bin"/>
+								</outputEntries>
+							</builder>
+							<tool id="com.xmos.cdt.xc.compiler.564215549" name="com.xmos.cdt.xc.compiler" superClass="com.xmos.cdt.xc.compiler">
+								<option id="com.xmos.c.compiler.option.include.paths.1582136519" name="com.xmos.c.compiler.option.include.paths" superClass="com.xmos.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${XMOS_DOC_PATH}/../target/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${XMOS_DOC_PATH}/../target/include/gcc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${XMOS_DOC_PATH}/../target/include/c++/4.2.1&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${XMOS_DOC_PATH}/../target/include/c++/4.2.1/xcore-xmos-elf&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_1722_maap/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_osc/gen}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_audio/src/interfaces/i2s}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2100}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_osc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb/src/mac_custom_filter}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_srp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_1722_maap}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_media_clock/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_xlog}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_srp/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_locks/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_audio/src/media_fifos}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_media_clock}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_media_clock/src/external_hw}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_audio/src/codecs/CS42448}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_ethernet/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_util}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_xlog/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_gptp/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_locks}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_util/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_1722}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_audio/src/media_clocks/external/CS2300CP}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_osc/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_ethernet/src/client}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_i2c}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_ethernet}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2300CP}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_gptp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_i2c/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_ethernet/src/server}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_1722/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${XMOS_TOOL_PATH}/target/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${XMOS_TOOL_PATH}/target/include/c++/4.2.1&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${XMOS_TOOL_PATH}/target/include/c++/4.2.1/xcore-xmos-elf&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${XMOS_TOOL_PATH}/target/include/gcc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_ethernet/module_ethernet/src/client}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_ethernet/module_ethernet/src/server}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_ethernet/module_ethernet/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_ethernet/module_ethernet}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_ethernet/module_locks/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_ethernet/module_locks}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_i2c/module_i2c/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_i2c/module_i2c}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb/src/mac_custom_filter}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_1722/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_1722_maap/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_1722_maap}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_1722}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_audio/src/codecs/CS42448}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_audio/src/interfaces/i2s}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_audio/src/media_clocks/external/CS2300CP}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_audio/src/media_fifos}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_media_clock/src/external_hw/CS2100}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_media_clock/src/external_hw/CS2300CP}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_media_clock/src/external_hw}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_media_clock/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_media_clock}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_srp/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_srp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_util/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_util}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_gptp/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_gptp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_osc/gen}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_osc/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_osc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_xlog/module_xlog/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_xlog/module_xlog}&quot;"/>
+								</option>
+								<option id="gnu.c.compiler.option.include.paths.1577481446" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_1722_maap/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_osc/gen}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_audio/src/interfaces/i2s}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2100}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_osc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb/src/mac_custom_filter}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_srp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_1722_maap}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_media_clock/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_xlog}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_srp/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_locks/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_audio/src/media_fifos}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_media_clock}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_media_clock/src/external_hw}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_audio/src/codecs/CS42448}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_ethernet/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_util}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_xlog/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_gptp/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_locks}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_util/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_1722}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_audio/src/media_clocks/external/CS2300CP}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_osc/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_ethernet/src/client}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_i2c}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_ethernet}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2300CP}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_gptp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_i2c/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_ethernet/src/server}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_1722/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${XMOS_TOOL_PATH}/target/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${XMOS_TOOL_PATH}/target/include/c++/4.2.1&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${XMOS_TOOL_PATH}/target/include/c++/4.2.1/xcore-xmos-elf&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${XMOS_TOOL_PATH}/target/include/gcc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_ethernet/module_ethernet/src/client}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_ethernet/module_ethernet/src/server}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_ethernet/module_ethernet/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_ethernet/module_ethernet}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_ethernet/module_locks/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_ethernet/module_locks}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_i2c/module_i2c/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_i2c/module_i2c}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb/src/mac_custom_filter}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_1722/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_1722_maap/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_1722_maap}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_1722}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_audio/src/codecs/CS42448}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_audio/src/interfaces/i2s}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_audio/src/media_clocks/external/CS2300CP}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_audio/src/media_fifos}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_media_clock/src/external_hw/CS2100}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_media_clock/src/external_hw/CS2300CP}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_media_clock/src/external_hw}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_media_clock/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_media_clock}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_srp/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_srp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_util/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_util}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_gptp/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_gptp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_osc/gen}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_osc/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_osc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_xlog/module_xlog/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_xlog/module_xlog}&quot;"/>
+								</option>
+								<inputType id="com.xmos.cdt.xc.compiler.input.529781091" name="XC Sources" superClass="com.xmos.cdt.xc.compiler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="scannerConfiguration">
+				<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+				<profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">
+					<buildOutputProvider>
+						<openAction enabled="true" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="gcc" useDefault="true"/>
+						<parser enabled="true"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="org.eclipse.cdt.make.core.GCCStandardMakePerFileProfile">
+					<buildOutputProvider>
+						<openAction enabled="true" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="makefileGenerator">
+						<runAction arguments="-E -P -v -dD" command="" useDefault="true"/>
+						<parser enabled="true"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfile">
+					<buildOutputProvider>
+						<openAction enabled="true" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="gcc" useDefault="true"/>
+						<parser enabled="true"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP">
+					<buildOutputProvider>
+						<openAction enabled="true" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.cpp" command="g++" useDefault="true"/>
+						<parser enabled="true"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC">
+					<buildOutputProvider>
+						<openAction enabled="true" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.c" command="gcc" useDefault="true"/>
+						<parser enabled="true"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfile">
+					<buildOutputProvider>
+						<openAction enabled="true" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-c 'gcc -E -P -v -dD &quot;${plugin_state_location}/${specs_file}&quot;'" command="sh" useDefault="true"/>
+						<parser enabled="true"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileCPP">
+					<buildOutputProvider>
+						<openAction enabled="true" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-c 'g++ -E -P -v -dD &quot;${plugin_state_location}/specs.cpp&quot;'" command="sh" useDefault="true"/>
+						<parser enabled="true"/>
+					</scannerInfoProvider>
+				</profile>
+				<profile id="org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileC">
+					<buildOutputProvider>
+						<openAction enabled="true" filePath=""/>
+						<parser enabled="true"/>
+					</buildOutputProvider>
+					<scannerInfoProvider id="specsFile">
+						<runAction arguments="-c 'gcc -E -P -v -dD &quot;${plugin_state_location}/specs.c&quot;'" command="sh" useDefault="true"/>
+						<parser enabled="true"/>
+					</scannerInfoProvider>
+				</profile>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+			<storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
+			<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
+		</cconfiguration>
+		<cconfiguration id="com.xmos.cdt.toolchain.71094488.368395869.1978417423">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.xmos.cdt.toolchain.71094488.368395869.1978417423" moduleId="org.eclipse.cdt.core.settings" name="Listener4x3Chan">
+				<externalSettings/>
+				<extensions>
+					<extension id="com.xmos.cdt.core.XEBinaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="com.xmos.cdt.core.XdeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
+				<buildTargets>
+					<target name="all" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+						<buildCommand>xmake</buildCommand>
+						<buildArguments/>
+						<buildTarget>all</buildTarget>
+						<stopOnError>true</stopOnError>
+						<useDefaultCommand>true</useDefaultCommand>
+						<runAllBuilders>true</runAllBuilders>
+					</target>
+					<target name="clean" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+						<buildCommand>xmake</buildCommand>
+						<buildArguments/>
+						<buildTarget>clean</buildTarget>
+						<stopOnError>true</stopOnError>
+						<useDefaultCommand>true</useDefaultCommand>
+						<runAllBuilders>true</runAllBuilders>
+					</target>
+				</buildTargets>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration buildProperties="" description="" id="com.xmos.cdt.toolchain.71094488.368395869.1978417423" name="Listener4x3Chan" parent="org.eclipse.cdt.build.core.emptycfg">
+					<folderInfo id="com.xmos.cdt.toolchain.71094488.368395869.1978417423." name="/" resourcePath="">
+						<toolChain id="com.xmos.cdt.toolchain.326059206" name="com.xmos.cdt.toolchain" superClass="com.xmos.cdt.toolchain">
+							<targetPlatform archList="all" binaryParser="com.xmos.cdt.core.XEBinaryParser" id="com.xmos.cdt.core.platform.78370653" isAbstract="false" osList="linux,win32,macosx" superClass="com.xmos.cdt.core.platform"/>
+							<builder arguments="CONFIG=Listener4x3Chan" id="com.xmos.cdt.builder.base.1594521105" keepEnvironmentInBuildfile="false" managedBuildOn="false" superClass="com.xmos.cdt.builder.base">
+								<outputEntries>
+									<entry flags="VALUE_WORKSPACE_PATH" kind="outputPath" name="bin"/>
+								</outputEntries>
+							</builder>
+							<tool id="com.xmos.cdt.xc.compiler.990957028" name="com.xmos.cdt.xc.compiler" superClass="com.xmos.cdt.xc.compiler">
+								<option id="com.xmos.c.compiler.option.include.paths.1087191773" name="com.xmos.c.compiler.option.include.paths" superClass="com.xmos.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${XMOS_DOC_PATH}/../target/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${XMOS_DOC_PATH}/../target/include/gcc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${XMOS_DOC_PATH}/../target/include/c++/4.2.1&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${XMOS_DOC_PATH}/../target/include/c++/4.2.1/xcore-xmos-elf&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_1722_maap/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_osc/gen}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_audio/src/interfaces/i2s}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2100}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_osc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb/src/mac_custom_filter}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_srp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_1722_maap}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_media_clock/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_xlog}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_srp/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_locks/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_audio/src/media_fifos}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_media_clock}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_media_clock/src/external_hw}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_audio/src/codecs/CS42448}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_ethernet/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_util}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_xlog/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_gptp/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_locks}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_util/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_1722}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_audio/src/media_clocks/external/CS2300CP}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_osc/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_ethernet/src/client}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_i2c}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_ethernet}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2300CP}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_gptp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_i2c/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_ethernet/src/server}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_1722/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${XMOS_TOOL_PATH}/target/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${XMOS_TOOL_PATH}/target/include/c++/4.2.1&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${XMOS_TOOL_PATH}/target/include/c++/4.2.1/xcore-xmos-elf&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${XMOS_TOOL_PATH}/target/include/gcc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_ethernet/module_ethernet/src/client}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_ethernet/module_ethernet/src/server}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_ethernet/module_ethernet/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_ethernet/module_ethernet}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_ethernet/module_locks/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_ethernet/module_locks}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_i2c/module_i2c/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_i2c/module_i2c}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb/src/mac_custom_filter}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_1722/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_1722_maap/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_1722_maap}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_1722}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_audio/src/codecs/CS42448}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_audio/src/interfaces/i2s}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_audio/src/media_clocks/external/CS2300CP}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_audio/src/media_fifos}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_media_clock/src/external_hw/CS2100}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_media_clock/src/external_hw/CS2300CP}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_media_clock/src/external_hw}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_media_clock/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_media_clock}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_srp/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_srp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_util/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_util}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_gptp/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_gptp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_osc/gen}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_osc/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_osc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_xlog/module_xlog/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_xlog/module_xlog}&quot;"/>
+								</option>
+								<option id="gnu.c.compiler.option.include.paths.128788076" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_1722_maap/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_osc/gen}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_audio/src/interfaces/i2s}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2100}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_osc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb/src/mac_custom_filter}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_srp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_1722_maap}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_media_clock/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_xlog}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_srp/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_locks/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_audio/src/media_fifos}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_media_clock}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_media_clock/src/external_hw}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_audio/src/codecs/CS42448}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_ethernet/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_util}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_xlog/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_gptp/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_locks}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_util/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_1722}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_audio/src/media_clocks/external/CS2300CP}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_osc/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_ethernet/src/client}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_i2c}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_ethernet}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2300CP}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_gptp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_i2c/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_ethernet/src/server}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/module_avb_1722/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${XMOS_TOOL_PATH}/target/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${XMOS_TOOL_PATH}/target/include/c++/4.2.1&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${XMOS_TOOL_PATH}/target/include/c++/4.2.1/xcore-xmos-elf&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${XMOS_TOOL_PATH}/target/include/gcc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_ethernet/module_ethernet/src/client}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_ethernet/module_ethernet/src/server}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_ethernet/module_ethernet/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_ethernet/module_ethernet}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_ethernet/module_locks/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_ethernet/module_locks}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_i2c/module_i2c/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_i2c/module_i2c}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb/src/mac_custom_filter}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_1722/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_1722_maap/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_1722_maap}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_1722}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_audio/src/codecs/CS42448}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_audio/src/interfaces/i2s}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_audio/src/media_clocks/external/CS2300CP}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_audio/src/media_fifos}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_media_clock/src/external_hw/CS2100}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_media_clock/src/external_hw/CS2300CP}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_media_clock/src/external_hw}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_media_clock/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_media_clock}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_srp/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_srp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_util/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_avb_util}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_gptp/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_gptp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_osc/gen}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_osc/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sw_avb/module_osc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_xlog/module_xlog/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/sc_xlog/module_xlog}&quot;"/>
+								</option>
+								<inputType id="com.xmos.cdt.xc.compiler.input.1358786346" name="XC Sources" superClass="com.xmos.cdt.xc.compiler.input"/>
 							</tool>
 						</toolChain>
 					</folderInfo>
