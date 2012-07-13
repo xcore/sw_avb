@@ -207,6 +207,7 @@ int avb1722_create_packet(unsigned char Buf0[],
 	// If the FIFOs are not being filled then also do not process the packet
 	if ((media_input_fifo_enable_ind_state() & stream_info->fifo_mask) == 0) return 0;
 
+#if 0  // workaround for bug 12860
 	// Figure out if it is time to transmit a packet
 	if (!stream_info->transmit_ok) {
 		int elapsed = time - stream_info->last_transmit_time;
@@ -215,6 +216,7 @@ int avb1722_create_packet(unsigned char Buf0[],
 
 		stream_info->transmit_ok = 1;
 	}
+#endif
 
 	// Figure out the number of samples in the 1722 packet
 	samples_in_packet = stream_info->samples_per_packet_base;
@@ -329,6 +331,11 @@ int avb1722_create_packet(unsigned char Buf0[],
 #ifdef USE_XSCOPE
 			if((stream_id0 & 0xF)==0) { // only for stream 0
 				if(prev_valid) {
+				    // trace only for stream 0
+					xscope_probe_data(15, (int) (ptp_ts - prev_ptp_ts));
+					xscope_probe_data(16, (int) (presentationTime - prev_presentationTime));
+					xscope_probe_data(17, (unsigned) (presentationTime));
+
 #ifdef DEBUG_LOGIC
 					int ptp_ts_delta = (int) (ptp_ts - prev_ptp_ts);
 					if(ptp_ts_delta > AVG_PRESENTATION_TIME_DELTA+MAX_PRESENTATION_TIME_DELTA_DELTA ||
@@ -343,11 +350,6 @@ int avb1722_create_packet(unsigned char Buf0[],
 #endif
 					}
 #endif
-				    // trace only for stream 0
-					xscope_probe_data(15, (int) (ptp_ts - prev_ptp_ts));
-					xscope_probe_data(16, (int) (presentationTime - prev_presentationTime));
-					xscope_probe_data(17, (unsigned) (presentationTime));
-
 
 				};
 			    prev_ptp_ts = ptp_ts;
