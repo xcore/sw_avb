@@ -13,7 +13,6 @@ APP_NAME =
 VERBOSE = 0
 
 
-
 # The flags passed to xcc when building the application
 # You can also set the following to override flags for a particular language:
 #
@@ -23,13 +22,14 @@ VERBOSE = 0
 # xcc for the final link (mapping) stage.
 
 #debug switches
-XSCOPE = 1
+XSCOPE = 0
 
 LISTENER_DEBUG_FLAGS = -DAVB_1722_RECORD_ERRORS 
 
 ifeq ($(XSCOPE),1)
 LISTENER_DEBUG_FLAGS += -lxscope -DUSE_XSCOPE -DUSE_XSCOPE_PROBES
-TALKER_DEBUG_FLAGS += -lxscope -DUSE_XSCOPE -DUSE_XSCOPE_PROBES 
+TALKER_DEBUG_FLAGS += -lxscope -DUSE_XSCOPE #-DUSE_XSCOPE_PROBES 
+XCC_FLAGS += -DUSE_XSCOPE  #to avoid xlog_server.h not found error
 endif
 
 # common flags
@@ -68,6 +68,10 @@ XCC_FLAGS_Talker4x3Chan = -DTALKER $(XCC_FLAGS)
 XCC_FLAGS_Talker4x3Chan += $(TALKER_DEBUG_FLAGS)
 XCC_FLAGS_Talker4x3Chan += -DAVB_NUM_SOURCES=4 -DAVB_CHANNELS_PER_SOURCE=3
 
+XCC_FLAGS_Talker7x2Chan = -DTALKER $(XCC_FLAGS)
+XCC_FLAGS_Talker7x2Chan += $(TALKER_DEBUG_FLAGS)
+XCC_FLAGS_Talker7x2Chan += -DAVB_NUM_SOURCES=7 -DAVB_CHANNELS_PER_SOURCE=2
+
 #----------------------------- Listener Only -------------------------------#
 XCC_FLAGS_Listener = -DLISTENER $(XCC_FLAGS)
 XCC_FLAGS_Listener += $(LISTENER_DEBUG_FLAGS)
@@ -88,6 +92,10 @@ XCC_FLAGS_Listener4x2ChanSAF += -DAVB_NUM_SINKS=4 -DAVB_CHANNELS_PER_SINK=2 -DAV
 XCC_FLAGS_Listener4x3Chan = -DLISTENER $(XCC_FLAGS) 
 XCC_FLAGS_Listener4x3Chan += $(LISTENER_DEBUG_FLAGS)
 XCC_FLAGS_Listener4x3Chan += -DAVB_NUM_SINKS=4 -DAVB_CHANNELS_PER_SINK=3
+
+XCC_FLAGS_Listener7x2Chan = -DLISTENER $(XCC_FLAGS) 
+XCC_FLAGS_Listener7x2Chan += $(LISTENER_DEBUG_FLAGS)
+XCC_FLAGS_Listener7x2Chan += -DAVB_NUM_SINKS=7 -DAVB_CHANNELS_PER_SINK=2
 
 #---------------------------Talker and Listener ----------------------------#
 XCC_FLAGS_TalkerListener = -DLISTENER -DTALKER $(XCC_FLAGS)
