@@ -207,7 +207,6 @@ int avb1722_create_packet(unsigned char Buf0[],
 	// If the FIFOs are not being filled then also do not process the packet
 	if ((media_input_fifo_enable_ind_state() & stream_info->fifo_mask) == 0) return 0;
 
-#if 0  // workaround for bug 12860
 	// Figure out if it is time to transmit a packet
 	if (!stream_info->transmit_ok) {
 		int elapsed = time - stream_info->last_transmit_time;
@@ -216,7 +215,6 @@ int avb1722_create_packet(unsigned char Buf0[],
 
 		stream_info->transmit_ok = 1;
 	}
-#endif
 
 	// Figure out the number of samples in the 1722 packet
 	samples_in_packet = stream_info->samples_per_packet_base;

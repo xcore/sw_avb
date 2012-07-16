@@ -130,6 +130,7 @@ typedef struct
 // The number of samples per channel in each 1722 packet
 #define TALKER_NUM_AUDIO_SAMPLES_PER_CHANNEL_PER_AVB1722_PKT (AVB_MAX_AUDIO_SAMPLE_RATE / AVB1722_PACKET_RATE)
 
-// We add a 2% fudge factor to handle clock difference in the stream transmission shaping
-#define AVB1722_PACKET_PERIOD_TIMER_TICKS (((100000000 / AVB1722_PACKET_RATE)*98)/100)
+// We add a 10% fudge factor to handle clock difference in the stream transmission shaping
+// 10% is workaround for bug 12860
+#define AVB1722_PACKET_PERIOD_TIMER_TICKS (((100000000 / AVB1722_PACKET_RATE)*90)/100)
 #endif
