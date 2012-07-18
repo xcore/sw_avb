@@ -175,6 +175,7 @@ void xscope_user_init() {
     };
 #endif
 
+    simple_printf("Activating print via XScope\n");
     xscope_config_io(XSCOPE_IO_BASIC);
 
 }
@@ -519,13 +520,14 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 				}
 			}
 			break;
+#endif
 			case STREAM_SEL:
 			{
 				// The stream sel button cycles through frequency settings
 				switch (sample_rate)
 				{
 				case 8000:
-					sample_rate = 96000;
+					sample_rate = 192000;
 					break;
 				case 16000:
 					sample_rate = 8000;
@@ -548,6 +550,12 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 				case 96000:
 					sample_rate = 88200;
 					break;
+				case 176000:
+					sample_rate = 96000;
+					break;
+				case 192000:
+					sample_rate = 176000;
+					break;
 				}
 				simple_printf("T: Frequency set to %d Hz\n", sample_rate);
 
@@ -560,7 +568,7 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 				set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_ENABLED);
 			}
 			break;
-#endif
+
 			default:
 			break;
 			}
