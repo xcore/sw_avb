@@ -266,7 +266,7 @@ int avb1722_create_packet(unsigned char Buf0[],
 	// Update timestamp value and valid flag.
 	AVB1722_AVBTP_HeaderGen(Buf, timerValid, ptp_ts, pkt_data_length, stream_info->sequence_number, stream_id0);
 
-	stream_info->last_transmit_time = time;
+	stream_info->last_transmit_time += AVB1722_PACKET_PERIOD_TIMER_TICKS;
 	stream_info->transmit_ok = 0;
 	stream_info->sequence_number++;
 	return (AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + pkt_data_length);
