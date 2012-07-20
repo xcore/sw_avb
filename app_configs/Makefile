@@ -12,7 +12,6 @@ APP_NAME =
 # Verbosity of Build Messages
 VERBOSE = 0
 
-
 # The flags passed to xcc when building the application
 # You can also set the following to override flags for a particular language:
 #
@@ -22,21 +21,22 @@ VERBOSE = 0
 # xcc for the final link (mapping) stage.
 
 #debug switches
-XSCOPE = 0
+XSCOPE = 1
+AUDIO_INTERFACE = tdm_multi  # one of i2s, tdm, tdm_multi
 
 LISTENER_DEBUG_FLAGS = -DAVB_1722_RECORD_ERRORS 
+
+# common flags
+XCC_FLAGS += -O3 -save-temps -g -report -Xmapper --map -Xmapper MAPFILE
+XCC_FLAGS += -DAVB_1722_RECORD_ERRORS -DAVB_AUDIO_IF_$(AUDIO_INTERFACE)
+#XCC_FLAGS += -fllvm
+#XCC_FLAGS = -lxscope
 
 ifeq ($(XSCOPE),1)
 LISTENER_DEBUG_FLAGS += -lxscope -DUSE_XSCOPE -DUSE_XSCOPE_PROBES
 TALKER_DEBUG_FLAGS += -lxscope -DUSE_XSCOPE #-DUSE_XSCOPE_PROBES 
 XCC_FLAGS += -DUSE_XSCOPE  #to avoid xlog_server.h not found error
 endif
-
-# common flags
-XCC_FLAGS = -O3 -save-temps -g -report -Xmapper --map -Xmapper MAPFILE
-XCC_FLAGS += -DAVB_1722_RECORD_ERRORS 
-#XCC_FLAGS += -fllvm
-#XCC_FLAGS = -lxscope
 
 # Config specific flags
 XCC_FLAGS_Talker = -DTALKER $(XCC_FLAGS)
@@ -128,16 +128,32 @@ XCC_FLAGS_Talker1x4Chan_Listener2x6Chan += $(LISTENER_DEBUG_FLAGS) $(TALKER_DEBU
 # End: Asymmetric pair of configs
 
 # Pair of Assymetric configs
-XCC_FLAGS_Talker2x7Chan_Listener1x2Chan = -DLISTENER -DTALKER $(XCC_FLAGS)
+XCC_FLAGS_Talker2x7Chan_Listener1x2Chan = -DLISTENER -DTALKER $(XCC_FLAGS) 
 XCC_FLAGS_Talker2x7Chan_Listener1x2Chan += -DAVB_NUM_SOURCES=2 -DAVB_CHANNELS_PER_SOURCE=7
 XCC_FLAGS_Talker2x7Chan_Listener1x2Chan += -DAVB_NUM_SINKS=1 -DAVB_CHANNELS_PER_SINK=2 
 XCC_FLAGS_Talker2x7Chan_Listener1x2Chan += $(LISTENER_DEBUG_FLAGS) $(TALKER_DEBUG_FLAGS)
 
-XCC_FLAGS_Talker1x2Chan_Listener2x7Chan = -DLISTENER -DTALKER $(XCC_FLAGS)
+XCC_FLAGS_Talker1x2Chan_Listener2x7Chan = -DLISTENER -DTALKER $(XCC_FLAGS) 
 XCC_FLAGS_Talker1x2Chan_Listener2x7Chan += -DAVB_NUM_SOURCES=1 -DAVB_CHANNELS_PER_SOURCE=2 
 XCC_FLAGS_Talker1x2Chan_Listener2x7Chan += -DAVB_NUM_SINKS=2 -DAVB_CHANNELS_PER_SINK=7
 XCC_FLAGS_Talker1x2Chan_Listener2x7Chan += $(LISTENER_DEBUG_FLAGS) $(TALKER_DEBUG_FLAGS)
 # End: Asymmetric pair of configs
+
+XCC_FLAGS_Talker2x8Chan_Listerner2x8Chan_TDM = -DTALKER -DLISTENER $(XCC_FLAGS) -DAVB_MAX_AUDIO_SAMPLE_RATE=48000
+XCC_FLAGS_Talker2x8Chan_Listerner2x8Chan_TDM += $(TALKER_DEBUG_FLAGS) $(LISTENER_DEBUG_FLAGS)
+XCC_FLAGS_Talker2x8Chan_Listerner2x8Chan_TDM += -DAVB_NUM_SOURCES=2 -DAVB_CHANNELS_PER_SOURCE=8 
+XCC_FLAGS_Talker2x8Chan_Listerner2x8Chan_TDM += -DAVB_NUM_SINKS=2 -DAVB_CHANNELS_PER_SINK=8 
+
+XCC_FLAGS_Talker2x8Chan_Listerner2x8Chan_TDM_test = $(XCC_FLAGS_Talker2x8Chan_Listerner2x8Chan_TDM)
+XCC_FLAGS_Talker2x8Chan_Listerner2x8Chan_TDM_test += -DGEN_TEST_SIGNAL #-DCHECK_TEST_SIGNAL
+
+XCC_FLAGS_Talker1x8Chan_Listerner1x8Chan_TDM = -DTALKER -DLISTENER $(XCC_FLAGS) -DAVB_MAX_AUDIO_SAMPLE_RATE=48000
+XCC_FLAGS_Talker1x8Chan_Listerner1x8Chan_TDM += $(TALKER_DEBUG_FLAGS) $(LISTENER_DEBUG_FLAGS)
+XCC_FLAGS_Talker1x8Chan_Listerner1x8Chan_TDM += -DAVB_NUM_SOURCES=1 -DAVB_CHANNELS_PER_SOURCE=8 
+XCC_FLAGS_Talker1x8Chan_Listerner1x8Chan_TDM += -DAVB_NUM_SINKS=1 -DAVB_CHANNELS_PER_SINK=8 
+
+XCC_FLAGS_Talker1x8Chan_Listerner1x8Chan_TDM_test = $(XCC_FLAGS_Talker1x8Chan_Listerner1x8Chan_TDM)
+XCC_FLAGS_Talker1x8Chan_Listerner1x8Chan_TDM_test += -DGEN_TEST_SIGNAL #-DCHECK_TEST_SIGNAL
 
 
 # Configuration Specific Messages
@@ -164,7 +180,8 @@ USE_AVB_MAC_CUSTOM_FILTER=1
 USED_CODECS = CS42448
 
 #Add audio interfaces from module_avb_audio
-USED_AUDIO_INTERFACES = i2s
+USED_AUDIO_INTERFACES = $(AUDIO_INTERFACE)
+
 
 #Add external clocking chips/plls from module_avb_audio
 USED_EXTERNAL_CLOCK_CHIPS = CS2300CP

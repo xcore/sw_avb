@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <string.h>
 #include "ethernet_server.h"
-#include "audio_i2s.h"
 #include "i2c.h"
 #include "avb.h"
 #include "audio_clock_CS2300CP.h"
@@ -14,6 +13,18 @@
 #include "media_fifo.h"
 #include "avb_conf.h"
 #include "avb_util.h"
+
+#if(AVB_AUDIO_IF_i2s)
+#include "audio_i2s.h"
+#define AVB_AUDIO_IF_FUNC i2s_master
+#define MEDIA_OUTPUT_FIFO_FUNC media_output_fifo_to_xc_channel_split_lr
+#endif
+#if(AVB_AUDIO_IF_tdm_multi)
+#include "tdm_multi.h"
+#define AVB_AUDIO_IF_FUNC tdm_master_multi
+#define MEDIA_OUTPUT_FIFO_FUNC media_output_fifo_to_xc_channel
+#endif
+
 
 #include "xscope.h"
 #ifndef USE_XSCOPE
@@ -76,48 +87,60 @@ on stdcore[0]: out port p_fs = PORT_SYNC_OUT;
 on stdcore[0]: clock b_mclk = XS1_CLKBLK_1;
 on stdcore[0]: clock b_bclk = XS1_CLKBLK_2;
 on stdcore[0]: in port p_aud_mclk = PORT_MCLK;
+#if(AVB_AUDIO_IF_i2s)
 on stdcore[0]: buffered out port:32 p_aud_bclk = PORT_SCLK;
 on stdcore[0]: out buffered port:32 p_aud_lrclk = PORT_LRCLK;
+#endif
+#if(AVB_AUDIO_IF_tdm_multi)
+on stdcore[0]: out port p_aud_bclk = PORT_SCLK;
+on stdcore[0]: out buffered port:4 p_aud_lrclk = PORT_LRCLK;
+#endif
+
+#if(AVB_NUM_SDATA_OUT>0)
+#define P_AUD_DOUT p_aud_dout
 on stdcore[0]: out buffered port:32 p_aud_dout[AVB_NUM_SDATA_OUT] = {
 		PORT_SDATA_OUT0,
-#if(AVB_NUM_MEDIA_OUTPUTS>2)
+#if(AVB_NUM_SDATA_OUT>1)
 		PORT_SDATA_OUT1,
 #endif
-#if(AVB_NUM_MEDIA_OUTPUTS>4)
+#if(AVB_NUM_SDATA_OUT>2)
 		PORT_SDATA_OUT2,
 #endif
-#if(AVB_NUM_MEDIA_OUTPUTS>6)
+#if(AVB_NUM_SDATA_OUT>3)
 		PORT_SDATA_OUT3,
 #endif
-#if(AVB_NUM_MEDIA_OUTPUTS>8)
+#if(AVB_NUM_SDATA_OUT>4)
 		PORT_SDATA_IN3,
 #endif
-#if(AVB_NUM_MEDIA_OUTPUTS>10)
+#if(AVB_NUM_SDATA_OUT>5)
 		PORT_SDATA_IN2,
 #endif
-#if(AVB_NUM_MEDIA_OUTPUTS>12)
+#if(AVB_NUM_SDATA_OUT>6)
 		PORT_SDATA_IN1,
 #endif
 };
+#else
+#define P_AUD_DOUT null
+#endif
 
 on stdcore[0]: in buffered port:32 p_aud_din[AVB_NUM_SDATA_IN] = {
 		PORT_SDATA_IN0,
-#if(AVB_NUM_MEDIA_INPUTS>2)
+#if(AVB_NUM_SDATA_IN>1)
 		PORT_SDATA_IN1,
 #endif
-#if(AVB_NUM_MEDIA_INPUTS>4)
+#if(AVB_NUM_SDATA_IN>2)
 		PORT_SDATA_IN2,
 #endif
-#if(AVB_NUM_MEDIA_INPUTS>6)
+#if(AVB_NUM_SDATA_IN>3)
 		PORT_SDATA_IN3,
 #endif
-#if(AVB_NUM_MEDIA_INPUTS>8)
+#if(AVB_NUM_SDATA_IN>4)
 		PORT_SDATA_OUT3,
 #endif
-#if(AVB_NUM_MEDIA_INPUTS>10)
+#if(AVB_NUM_SDATA_IN>5)
 		PORT_SDATA_OUT2,
 #endif
-#if(AVB_NUM_MEDIA_INPUTS>12)
+#if(AVB_NUM_SDATA_IN>6)
 		PORT_SDATA_OUT1,
 #endif
 };
@@ -141,7 +164,7 @@ media_output_fifo_t ofifos[AVB_NUM_MEDIA_OUTPUTS];
 #endif
 
 #ifdef USE_XSCOPE
-#define NUM_XSCOPE_PROBES 22
+#define NUM_XSCOPE_PROBES 23
 void xscope_user_init() {
 #ifdef USE_XSCOPE_PROBES
     if (get_core_id() == 0) {
@@ -168,14 +191,15 @@ void xscope_user_init() {
                        XSCOPE_CONTINUOUS, "I2S: local timestamp differential", XSCOPE_INT, "ns_diff",
                        XSCOPE_CONTINUOUS, "ififo timestamp from I2S", XSCOPE_INT, "cycles",
                        XSCOPE_CONTINUOUS, "ififo startIndex (pointer)", XSCOPE_INT, "cycles",
-    	               XSCOPE_STARTSTOP, " Time to get packets from ififo", XSCOPE_UINT, "time"
+    	               XSCOPE_STARTSTOP, " Time to get packets from ififo", XSCOPE_UINT, "time",
+                       XSCOPE_CONTINUOUS, "Channel 0 samples from Listener", XSCOPE_UINT, "sample"
                        //XSCOPE_CONTINUOUS, "Clock Recovery stream_info2.presentation_ts", XSCOPE_UINT, "nanoseconds"
     	               //XSCOPE_DISCRETE, "AVBTP_TIMESTAMP", XSCOPE_UINT, "nanoseconds"
     	               );
     };
 #endif
 
-    simple_printf("Activating print via XScope\n");
+    //simple_printf("Activating print via XScope\n");
     xscope_config_io(XSCOPE_IO_BASIC);
 
 }
@@ -263,11 +287,11 @@ int main(void) {
 			{
 				audio_gen_CS2300CP_clock(p_fs, clk_ctl[0]);
 
-				i2s_master (b_mclk,
+				AVB_AUDIO_IF_FUNC(b_mclk,
 						b_bclk,
 						p_aud_bclk,
 						p_aud_lrclk,
-						p_aud_dout,
+						P_AUD_DOUT,
 						AVB_NUM_MEDIA_OUTPUTS,
 						p_aud_din,
 						AVB_NUM_MEDIA_INPUTS,
@@ -284,6 +308,34 @@ int main(void) {
 #endif
 						media_ctl[0],
 						0);
+
+#if 0
+                tdm_master_multi(b_mclk,
+                        //b_bclk,
+                        p_aud_mclk,
+                        p_aud_bclk,
+                        p_aud_lrclk,
+                        p_aud_dout,
+                        AVB_NUM_MEDIA_OUTPUTS,
+                        p_aud_din,
+                        AVB_NUM_MEDIA_INPUTS,
+                        MASTER_TO_WORDCLOCK_RATIO,
+#if(AVB_NUM_MEDIA_OUTPUTS>0)
+                        c_samples_to_codec,
+#else
+                        null,
+#endif
+#if(AVB_NUM_MEDIA_INPUTS>0)
+                        ififos,
+#else
+                        null,
+#endif
+                        media_ctl[0],
+                        0);
+
+            }
+
+#endif
 			}
 		}
 
@@ -306,7 +358,7 @@ int main(void) {
 
 		on stdcore[0]:
 		{	init_media_output_fifos(ofifos, ofifo_data, AVB_NUM_MEDIA_OUTPUTS);
-			media_output_fifo_to_xc_channel_split_lr(media_ctl[1],
+			MEDIA_OUTPUT_FIFO_FUNC(media_ctl[1],
 					c_samples_to_codec,
 					0, // clk_ctl index
 					ofifos,
@@ -326,7 +378,7 @@ int main(void) {
 		on stdcore[0]:
 		{
 			// First initialize avb higher level protocols
-			avb_init(media_ctl,
+		    avb_init(media_ctl,
 #ifdef LISTENER
 					listener_ctl,
 #else
@@ -557,7 +609,7 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 					sample_rate = 176000;
 					break;
 				}
-				simple_printf("T: Frequency set to %d Hz\n", sample_rate);
+				simple_printf("Frequency set to %d Hz\n", sample_rate);
 
 				for(int i=0; i<AVB_NUM_SOURCES; i++) {
 				   set_avb_source_format(i, AVB_SOURCE_FORMAT_MBLA_24BIT, sample_rate);

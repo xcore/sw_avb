@@ -59,7 +59,7 @@
 #endif
 
 /* Add synths from channels 3/4 upwards in I2S for this demo */
-#define I2S_SYNTH_FROM 1
+//#define I2S_SYNTH_FROM 1
 
 // Defining this makes SRP auto-start and auto-stop a stream when listeners come and go
 #define SRP_AUTO_TALKER_STREAM_CONTROL
@@ -74,29 +74,31 @@
 #define AVB_NUM_MEDIA_OUTPUTS (AVB_NUM_SINKS*AVB_CHANNELS_PER_SINK)
 #endif
 
-#if(AVB_NUM_MEDIA_OUTPUTS>0)
-  #define AVB_NUM_SDATA_OUT AVB_NUM_MEDIA_OUTPUTS/2
-#else
-  #define AVB_NUM_SDATA_OUT 1  // hardwired to DAC
+// How many channels there are in the TDM window
+#if(AVB_AUDIO_IF_i2s)
+#define AVB_NUM_SDATA_OUT AVB_NUM_MEDIA_OUTPUTS/2
+#define AVB_NUM_SDATA_IN AVB_NUM_MEDIA_INPUTS/2
 #endif
 
-#if(AVB_NUM_MEDIA_INPUTS>0)
-  #define AVB_NUM_SDATA_IN AVB_NUM_MEDIA_INPUTS/2
-#else
-  #define AVB_NUM_SDATA_IN 1  // hardwired to ADC
+#if(AVB_AUDIO_IF_tdm_multi)
+#define TDM_NUM_CHANNELS 8
+#define AVB_NUM_SDATA_OUT AVB_NUM_MEDIA_OUTPUTS/TDM_NUM_CHANNELS
+#define AVB_NUM_SDATA_IN AVB_NUM_MEDIA_INPUTS/TDM_NUM_CHANNELS
 #endif
 
-#if(AVB_NUM_MEDIA_INPUTS>14)
-#warning "AVB_NUM_MEDIA_INPUTS exceeds 14, the max channels over 7 i2s lines"
+//// i2s specific checks
+#if(AVB_AUDIO_IF_i2s)
+#if(AVB_NUM_MEDIA_INPUTS>16)
+#error "AVB_NUM_MEDIA_INPUTS exceeds 16"
 #endif
 
-
-#if(AVB_NUM_MEDIA_OUTPUTS>14)
-#warning "AVB_NUM_MEDIA_OUTPUTS exceeds 14, the max channels over 7 i2s lines"
+#if(AVB_NUM_MEDIA_OUTPUTS>16)
+#error "AVB_NUM_MEDIA_OUTPUTS exceeds 16"
 #endif
 
 #if((AVB_NUM_MEDIA_INPUTS+AVB_NUM_MEDIA_OUTPUTS)>16)
 #error "AVB_NUM_MEDIA_INPUTS+AVB_NUM_MEDIA_OUTPUTS exceeds 16, the max channels over 8 i2s lines"
+#endif
 #endif
 
 ///////////////////////////////////////
@@ -115,6 +117,10 @@
 
 #ifndef AVB_NUM_TALKER_UNITS
 #define AVB_NUM_TALKER_UNITS 0
+#endif
+
+#ifndef AVB_AUDIO_IF
+#define AVB_AUDIO_IF i2s
 #endif
 
 #endif
