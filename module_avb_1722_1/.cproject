@@ -49,33 +49,24 @@
 									<listOptionValue builtIn="false" value="&quot;${XMOS_DOC_PATH}/../target/include/c++/4.2.1&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${XMOS_DOC_PATH}/../target/include/c++/4.2.1/xcore-xmos-elf&quot;"/>
 								</option>
+								<option id="gnu.c.compiler.option.include.paths.78509224" superClass="gnu.c.compiler.option.include.paths"/>
 								<inputType id="com.xmos.cdt.xc.compiler.input.59288645" name="XC Sources" superClass="com.xmos.cdt.xc.compiler.input"/>
-								<option id="gnu.c.compiler.option.include.paths.78509224" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
-								</option>
 							</tool>
-							<tool id="com.xmos.cdt.xc.compiler.base.44789903" name="com.xmos.cdt.xc.compiler.base" superClass="com.xmos.cdt.xc.compiler.base">
-								<option id="gnu.c.compiler.option.include.paths.84094153" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
-								</option>
-								<option id="com.xmos.c.compiler.option.include.paths.48679417" superClass="com.xmos.c.compiler.option.include.paths" valueType="includePath">
-								</option>
+							<tool id="com.xmos.cdt.xc.compiler.base.44789903" name="com.xmos.cdt.xc.compiler.base">
+								<option id="gnu.c.compiler.option.include.paths.84094153" superClass="gnu.c.compiler.option.include.paths"/>
+								<option id="com.xmos.c.compiler.option.include.paths.48679417" superClass="com.xmos.c.compiler.option.include.paths"/>
 							</tool>
-							<tool id="com.xmos.cdt.c.compiler.base.32091926" name="com.xmos.cdt.c.compiler.base" superClass="com.xmos.cdt.c.compiler.base">
-								<option id="gnu.c.compiler.option.include.paths.79026996" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
-								</option>
-								<option id="com.xmos.c.compiler.option.include.paths.60018276" superClass="com.xmos.c.compiler.option.include.paths" valueType="includePath">
-								</option>
+							<tool id="com.xmos.cdt.c.compiler.base.32091926" name="com.xmos.cdt.c.compiler.base">
+								<option id="gnu.c.compiler.option.include.paths.79026996" superClass="gnu.c.compiler.option.include.paths"/>
+								<option id="com.xmos.c.compiler.option.include.paths.60018276" superClass="com.xmos.c.compiler.option.include.paths"/>
 							</tool>
-							<tool id="com.xmos.cdt.cpp.compiler.base.43700511" name="com.xmos.cdt.cpp.compiler.base" superClass="com.xmos.cdt.cpp.compiler.base">
-								<option id="gnu.c.compiler.option.include.paths.34628321" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
-								</option>
-								<option id="com.xmos.c.compiler.option.include.paths.32288749" superClass="com.xmos.c.compiler.option.include.paths" valueType="includePath">
-								</option>
+							<tool id="com.xmos.cdt.cpp.compiler.base.43700511" name="com.xmos.cdt.cpp.compiler.base">
+								<option id="gnu.c.compiler.option.include.paths.34628321" superClass="gnu.c.compiler.option.include.paths"/>
+								<option id="com.xmos.c.compiler.option.include.paths.32288749" superClass="com.xmos.c.compiler.option.include.paths"/>
 							</tool>
-							<tool id="com.xmos.cdt.core.assembler.base.10384962" name="com.xmos.cdt.core.assembler.base" superClass="com.xmos.cdt.core.assembler.base">
-								<option id="gnu.c.compiler.option.include.paths.92925975" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
-								</option>
-								<option id="com.xmos.c.compiler.option.include.paths.51512668" superClass="com.xmos.c.compiler.option.include.paths" valueType="includePath">
-								</option>
+							<tool id="com.xmos.cdt.core.assembler.base.10384962" name="com.xmos.cdt.core.assembler.base">
+								<option id="gnu.c.compiler.option.include.paths.92925975" superClass="gnu.c.compiler.option.include.paths"/>
+								<option id="com.xmos.c.compiler.option.include.paths.51512668" superClass="com.xmos.c.compiler.option.include.paths"/>
 							</tool>
 						</toolChain>
 					</folderInfo>

@@ -15,7 +15,7 @@
 // By defining this, all channels are filled with an increasing counter
 // value instead of the samples themselves.  Useful to check the channel
 // synchronization using a network monitor
-#define SAMPLE_COUNTER_TEST
+//#define SAMPLE_COUNTER_TEST
 
 #define I2S_SINE_TABLE_SIZE 100
 

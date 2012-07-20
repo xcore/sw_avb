@@ -14,7 +14,7 @@
 //#define MAX_PRESENTATION_TIME_DELTA_DELTA AVG_PRESENTATION_TIME_DELTA / 100 // 1% deviation
 #define MAX_PRESENTATION_TIME_DELTA_DELTA AVG_PRESENTATION_TIME_DELTA * 2 // 200% deviation
 
-#define DEBUG_LOGIC
+//#define DEBUG_LOGIC
 #define DEBUG_PRINT_ptp_ts_delta_CHECK
 
 #if defined(AVB_1722_FORMAT_61883_6) || defined(AVB_1722_FORMAT_SAF)
@@ -258,7 +258,7 @@ int avb1722_create_packet(unsigned char Buf0[],
 			// Not enough samples left in fifo packet to fill the 1722 packet
 			// therefore pull out remaining samples and get the next packet
 #ifdef USE_XSCOPE
-		    xscope_probe(21); // start
+		    //xscope_probe(21); // start
 #endif
 			for (i = 0; i < num_channels; i++) {
 				int *src = media_input_fifo_get_ptr(map[i]);
@@ -283,7 +283,7 @@ int avb1722_create_packet(unsigned char Buf0[],
 			samples_in_packet -= stream_info->samples_left_in_fifo_packet;
 			stream_info->samples_left_in_fifo_packet = samples_per_fifo_packet;
 #ifdef USE_XSCOPE
-			xscope_probe(21);
+			//xscope_probe(21);
 #endif
 #ifdef DEBUG_LOGIC
 			if((stream_id0 & 0xF)==0) { // only for stream 0
@@ -330,7 +330,7 @@ int avb1722_create_packet(unsigned char Buf0[],
 			if((stream_id0 & 0xF)==0) { // only for stream 0
 				if(prev_valid) {
 				    // trace only for stream 0
-					xscope_probe_data(15, (int) (ptp_ts - prev_ptp_ts));
+					//xscope_probe_data(15, (int) (ptp_ts - prev_ptp_ts));
 					xscope_probe_data(16, (int) (presentationTime - prev_presentationTime));
 					xscope_probe_data(17, (unsigned) (presentationTime));
 

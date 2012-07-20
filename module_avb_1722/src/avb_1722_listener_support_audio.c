@@ -202,7 +202,7 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
 #ifdef USE_XSCOPE
 	   if((AVBTP_STREAM_ID0(pAVBHdr)&0xF) == 0) { // reduce probing to workaround xscope issue
 		  if(prev_avbtp_ts_valid) {
-	         xscope_probe_data(14, (signed) (AVBTP_TIMESTAMP(pAVBHdr) - prev_avbtp_timestamp));
+	         //xscope_probe_data(14, (signed) (AVBTP_TIMESTAMP(pAVBHdr) - prev_avbtp_timestamp));
 		  }
 		  prev_avbtp_timestamp = AVBTP_TIMESTAMP(pAVBHdr);
 		  prev_avbtp_ts_valid = 1;
