@@ -32,9 +32,6 @@
 #endif
 
 
-// This is the number of master clocks in a word clock
-#define MASTER_TO_WORDCLOCK_RATIO 512
-
 // Set the period inbetween periodic processing to 50us based
 // on the Xcore 100Mhz timer.
 #define PERIODIC_POLL_TIME 5000
@@ -123,6 +120,8 @@ on stdcore[0]: out buffered port:32 p_aud_dout[AVB_NUM_SDATA_OUT] = {
 #define P_AUD_DOUT null
 #endif
 
+#if(AVB_NUM_SDATA_IN>0)
+#define P_AUD_DIN p_aud_din
 on stdcore[0]: in buffered port:32 p_aud_din[AVB_NUM_SDATA_IN] = {
 		PORT_SDATA_IN0,
 #if(AVB_NUM_SDATA_IN>1)
@@ -144,6 +143,9 @@ on stdcore[0]: in buffered port:32 p_aud_din[AVB_NUM_SDATA_IN] = {
 		PORT_SDATA_OUT1,
 #endif
 };
+#else
+#define P_AUD_DIN null
+#endif
 
 on stdcore[0]: port p_uart_tx = PORT_UART_TX;
 
@@ -293,7 +295,7 @@ int main(void) {
 						p_aud_lrclk,
 						P_AUD_DOUT,
 						AVB_NUM_MEDIA_OUTPUTS,
-						p_aud_din,
+						P_AUD_DIN,
 						AVB_NUM_MEDIA_INPUTS,
 						MASTER_TO_WORDCLOCK_RATIO,
 #if(AVB_NUM_MEDIA_OUTPUTS>0)
@@ -453,18 +455,18 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 
 	timer tmr;
 	int avb_status = 0;
-	int map[AVB_CHANNELS_PER_SOURCE];
 	unsigned char macaddr[6];
 	unsigned timeout;
 	unsigned sample_rate = 48000;
 
 #ifdef TALKER
+    int map[AVB_CHANNELS_PER_SOURCE];
 	unsigned talker_active = 0;
 	unsigned talker_ok_to_start = 0;
 #endif
 
 	// Initialize the media clock (a ptp derived clock)
-#if(TALKER && !LISTENER)
+#if((TALKER && !LISTENER) || GEN_TEST_SIGNAL)
 	simple_printf("Setting Media Clock Type to: LOCAL_CLOCK\n");
 	set_device_media_clock_type(0, LOCAL_CLOCK);
 #else
@@ -475,6 +477,7 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 	set_device_media_clock_rate(0, sample_rate);
 	set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_ENABLED);
 
+#ifdef TALKER
     // Will only be > 0 for Talkers
 	for (int i=0;i<AVB_NUM_SOURCES;i++) {
 	   // Configure the source stream
@@ -488,6 +491,7 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 	   set_avb_source_format(i, AVB_SOURCE_FORMAT_MBLA_24BIT, sample_rate);
 	   set_avb_source_sync(i, 0);
 	}
+#endif
 
 	// Request a multicast addresses for stream transmission
 	avb_1722_maap_request_addresses(AVB_NUM_SOURCES, null);

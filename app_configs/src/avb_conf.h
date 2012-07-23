@@ -18,12 +18,11 @@
 
 /* General purpose AVB configuration */
 #define AVB_MAX_NAME_LEN 25
-#define AVB_MAX_CHANNELS_PER_STREAM 8
 #ifndef AVB_CHANNELS_PER_SINK
-  #define AVB_CHANNELS_PER_SINK 1
+  #define AVB_CHANNELS_PER_SINK 0
 #endif
 #ifndef AVB_CHANNELS_PER_SOURCE
-  #define AVB_CHANNELS_PER_SOURCE 1
+  #define AVB_CHANNELS_PER_SOURCE 0
 #endif
 
 #ifdef TALKER
@@ -48,7 +47,7 @@
 
 
 /* Media configuration */
-#define AVB_1722_FORMAT_61883_6
+//#define AVB_1722_FORMAT_61883_6
 
 /* Media clock configuration */
 #define AVB_NUM_MEDIA_CLOCKS 1
@@ -74,14 +73,19 @@
 #define AVB_NUM_MEDIA_OUTPUTS (AVB_NUM_SINKS*AVB_CHANNELS_PER_SINK)
 #endif
 
-// How many channels there are in the TDM window
 #if(AVB_AUDIO_IF_i2s)
 #define AVB_NUM_SDATA_OUT AVB_NUM_MEDIA_OUTPUTS/2
 #define AVB_NUM_SDATA_IN AVB_NUM_MEDIA_INPUTS/2
+// This is the number of master clocks in a word clock
+#define MASTER_TO_WORDCLOCK_RATIO 512
 #endif
 
 #if(AVB_AUDIO_IF_tdm_multi)
+// How many channels there are in the TDM window
 #define TDM_NUM_CHANNELS 8
+// Must be a multiple of 4
+#define CLOCKS_PER_CHANNEL 32
+#define MASTER_TO_WORDCLOCK_RATIO TDM_NUM_CHANNELS*CLOCKS_PER_CHANNEL
 #define AVB_NUM_SDATA_OUT AVB_NUM_MEDIA_OUTPUTS/TDM_NUM_CHANNELS
 #define AVB_NUM_SDATA_IN AVB_NUM_MEDIA_INPUTS/TDM_NUM_CHANNELS
 #endif
@@ -100,6 +104,10 @@
 #error "AVB_NUM_MEDIA_INPUTS+AVB_NUM_MEDIA_OUTPUTS exceeds 16, the max channels over 8 i2s lines"
 #endif
 #endif
+
+// Todo: This should be per Talker/Listener
+//#define AVB_MAX_CHANNELS_PER_STREAM (AVB_CHANNELS_PER_SOURCE >= AVB_CHANNELS_PER_SINK) ? AVB_CHANNELS_PER_SOURCE : AVB_CHANNELS_PER_SINK
+#define AVB_MAX_CHANNELS_PER_STREAM 16
 
 ///////////////////////////////////////
 // Defaults

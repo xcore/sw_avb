@@ -21,14 +21,29 @@ VERBOSE = 0
 # xcc for the final link (mapping) stage.
 
 #debug switches
-XSCOPE = 1
+XSCOPE = 0
+
+# settings derived from configuration names
+ifneq (,$(findstring TDM,$(CONFIG))) 
 AUDIO_INTERFACE = tdm_multi  # one of i2s, tdm, tdm_multi
+else
+AUDIO_INTERFACE = i2s
+endif
+
+ifneq (,$(findstring SAF,$(CONFIG))) 
+AUDIO_FORMAT = SAF
+endif
+
+# defaults
+ifndef AUDIO_FORMAT
+AUDIO_FORMAT = 61883_6
+endif
 
 LISTENER_DEBUG_FLAGS = -DAVB_1722_RECORD_ERRORS 
 
 # common flags
 XCC_FLAGS += -O3 -save-temps -g -report -Xmapper --map -Xmapper MAPFILE
-XCC_FLAGS += -DAVB_1722_RECORD_ERRORS -DAVB_AUDIO_IF_$(AUDIO_INTERFACE)
+XCC_FLAGS += -DAVB_1722_RECORD_ERRORS -DAVB_AUDIO_IF_$(AUDIO_INTERFACE) -DAVB_1722_FORMAT_$(AUDIO_FORMAT)
 #XCC_FLAGS += -fllvm
 #XCC_FLAGS = -lxscope
 
@@ -38,16 +53,16 @@ TALKER_DEBUG_FLAGS += -lxscope -DUSE_XSCOPE #-DUSE_XSCOPE_PROBES
 XCC_FLAGS += -DUSE_XSCOPE  #to avoid xlog_server.h not found error
 endif
 
-# Config specific flags
-XCC_FLAGS_Talker = -DTALKER $(XCC_FLAGS)
-XCC_FLAGS_Talker += -DAVB_NUM_SOURCES=4 -DAVB_CHANNELS_PER_SOURCE=1
-#XCC_FLAGS_Talker += -lxscope
+
 
 ###########################################################################
 #############################  Configurations #############################
 ###########################################################################
 
 #----------------------------- Talker Only -------------------------------#
+# Config specific flags
+XCC_FLAGS_Talker = -DTALKER $(XCC_FLAGS)
+
 XCC_FLAGS_Talker2x4Chan = -DTALKER $(XCC_FLAGS)
 XCC_FLAGS_Talker2x4Chan += $(TALKER_DEBUG_FLAGS)
 XCC_FLAGS_Talker2x4Chan += -DAVB_NUM_SOURCES=2 -DAVB_CHANNELS_PER_SOURCE=4
@@ -62,7 +77,7 @@ XCC_FLAGS_Talker4x2Chan += -DAVB_NUM_SOURCES=4 -DAVB_CHANNELS_PER_SOURCE=2
 
 XCC_FLAGS_Talker4x2ChanSAF = -DTALKER $(XCC_FLAGS)
 XCC_FLAGS_Talker4x2ChanSAF += $(TALKER_DEBUG_FLAGS)
-XCC_FLAGS_Talker4x2ChanSAF += -DAVB_NUM_SOURCES=4 -DAVB_CHANNELS_PER_SOURCE=2 -DAVB_1722_FORMAT_SAF
+XCC_FLAGS_Talker4x2ChanSAF += -DAVB_NUM_SOURCES=4 -DAVB_CHANNELS_PER_SOURCE=2 
 
 XCC_FLAGS_Talker4x3Chan = -DTALKER $(XCC_FLAGS)
 XCC_FLAGS_Talker4x3Chan += $(TALKER_DEBUG_FLAGS)
@@ -78,8 +93,6 @@ XCC_FLAGS_Talker1x8Chan192kHz += -DAVB_NUM_SOURCES=1 -DAVB_CHANNELS_PER_SOURCE=8
 
 #----------------------------- Listener Only -------------------------------#
 XCC_FLAGS_Listener = -DLISTENER $(XCC_FLAGS)
-XCC_FLAGS_Listener += $(LISTENER_DEBUG_FLAGS)
-XCC_FLAGS_Listener += -DAVB_NUM_SINKS=4 -DAVB_CHANNELS_PER_SINK=1
 
 XCC_FLAGS_Listener2x4Chan = -DLISTENER $(XCC_FLAGS) 
 XCC_FLAGS_Listener2x4Chan += $(LISTENER_DEBUG_FLAGS)
@@ -139,21 +152,43 @@ XCC_FLAGS_Talker1x2Chan_Listener2x7Chan += -DAVB_NUM_SINKS=2 -DAVB_CHANNELS_PER_
 XCC_FLAGS_Talker1x2Chan_Listener2x7Chan += $(LISTENER_DEBUG_FLAGS) $(TALKER_DEBUG_FLAGS)
 # End: Asymmetric pair of configs
 
-XCC_FLAGS_Talker2x8Chan_Listerner2x8Chan_TDM = -DTALKER -DLISTENER $(XCC_FLAGS) -DAVB_MAX_AUDIO_SAMPLE_RATE=48000
-XCC_FLAGS_Talker2x8Chan_Listerner2x8Chan_TDM += $(TALKER_DEBUG_FLAGS) $(LISTENER_DEBUG_FLAGS)
-XCC_FLAGS_Talker2x8Chan_Listerner2x8Chan_TDM += -DAVB_NUM_SOURCES=2 -DAVB_CHANNELS_PER_SOURCE=8 
-XCC_FLAGS_Talker2x8Chan_Listerner2x8Chan_TDM += -DAVB_NUM_SINKS=2 -DAVB_CHANNELS_PER_SINK=8 
-
-XCC_FLAGS_Talker2x8Chan_Listerner2x8Chan_TDM_test = $(XCC_FLAGS_Talker2x8Chan_Listerner2x8Chan_TDM)
-XCC_FLAGS_Talker2x8Chan_Listerner2x8Chan_TDM_test += -DGEN_TEST_SIGNAL #-DCHECK_TEST_SIGNAL
 
 XCC_FLAGS_Talker1x8Chan_Listerner1x8Chan_TDM = -DTALKER -DLISTENER $(XCC_FLAGS) -DAVB_MAX_AUDIO_SAMPLE_RATE=48000
 XCC_FLAGS_Talker1x8Chan_Listerner1x8Chan_TDM += $(TALKER_DEBUG_FLAGS) $(LISTENER_DEBUG_FLAGS)
 XCC_FLAGS_Talker1x8Chan_Listerner1x8Chan_TDM += -DAVB_NUM_SOURCES=1 -DAVB_CHANNELS_PER_SOURCE=8 
 XCC_FLAGS_Talker1x8Chan_Listerner1x8Chan_TDM += -DAVB_NUM_SINKS=1 -DAVB_CHANNELS_PER_SINK=8 
+#XCC_FLAGS_Talker1x8Chan_Listerner1x8Chan_TDM += -DCHECK_HW_LOOPBACK
 
-XCC_FLAGS_Talker1x8Chan_Listerner1x8Chan_TDM_test = $(XCC_FLAGS_Talker1x8Chan_Listerner1x8Chan_TDM)
-XCC_FLAGS_Talker1x8Chan_Listerner1x8Chan_TDM_test += -DGEN_TEST_SIGNAL #-DCHECK_TEST_SIGNAL
+#XCC_FLAGS_Talker1x8Chan_Listerner1x8Chan_TDM_test = $(XCC_FLAGS_Talker1x8Chan_Listerner1x8Chan_TDM)
+XCC_FLAGS_Talker1x8Chan_Listerner1x8Chan_TDM_test = -DTALKER -DLISTENER $(XCC_FLAGS) -DAVB_MAX_AUDIO_SAMPLE_RATE=48000
+XCC_FLAGS_Talker1x8Chan_Listerner1x8Chan_TDM_test += $(TALKER_DEBUG_FLAGS) $(LISTENER_DEBUG_FLAGS)
+XCC_FLAGS_Talker1x8Chan_Listerner1x8Chan_TDM_test += -DAVB_NUM_SOURCES=1 -DAVB_CHANNELS_PER_SOURCE=8 
+XCC_FLAGS_Talker1x8Chan_Listerner1x8Chan_TDM_test += -DAVB_NUM_SINKS=1 -DAVB_CHANNELS_PER_SINK=8 
+XCC_FLAGS_Talker1x8Chan_Listerner1x8Chan_TDM_test += -DGEN_TEST_SIGNAL -DCHECK_TEST_SIGNAL
+
+XCC_FLAGS_Talker2x8Chan_Listerner2x8Chan_TDM = -DTALKER -DLISTENER $(XCC_FLAGS) -DAVB_MAX_AUDIO_SAMPLE_RATE=48000
+XCC_FLAGS_Talker2x8Chan_Listerner2x8Chan_TDM += $(TALKER_DEBUG_FLAGS) $(LISTENER_DEBUG_FLAGS)
+XCC_FLAGS_Talker2x8Chan_Listerner2x8Chan_TDM += -DAVB_NUM_SOURCES=2 -DAVB_CHANNELS_PER_SOURCE=8 
+XCC_FLAGS_Talker2x8Chan_Listerner2x8Chan_TDM += -DAVB_NUM_SINKS=2 -DAVB_CHANNELS_PER_SINK=8 
+#XCC_FLAGS_Talker2x8Chan_Listerner2x8Chan_TDM += -DCHECK_HW_LOOPBACK
+
+XCC_FLAGS_Talker2x8Chan_Listerner2x8Chan_TDM_test = -DTALKER -DLISTENER $(XCC_FLAGS) -DAVB_MAX_AUDIO_SAMPLE_RATE=48000
+XCC_FLAGS_Talker2x8Chan_Listerner2x8Chan_TDM_test += $(TALKER_DEBUG_FLAGS) $(LISTENER_DEBUG_FLAGS)
+XCC_FLAGS_Talker2x8Chan_Listerner2x8Chan_TDM_test += -DAVB_NUM_SOURCES=2 -DAVB_CHANNELS_PER_SOURCE=8 
+XCC_FLAGS_Talker2x8Chan_Listerner2x8Chan_TDM_test += -DAVB_NUM_SINKS=2 -DAVB_CHANNELS_PER_SINK=8 
+XCC_FLAGS_Talker2x8Chan_Listerner2x8Chan_TDM_test += -DGEN_TEST_SIGNAL #-DCHECK_TEST_SIGNAL
+
+XCC_FLAGS_Talker2x12Chan_Listerner2x12Chan_TDM = -DTALKER -DLISTENER $(XCC_FLAGS) -DAVB_MAX_AUDIO_SAMPLE_RATE=48000
+XCC_FLAGS_Talker2x12Chan_Listerner2x12Chan_TDM += $(TALKER_DEBUG_FLAGS) $(LISTENER_DEBUG_FLAGS)
+XCC_FLAGS_Talker2x12Chan_Listerner2x12Chan_TDM += -DAVB_NUM_SOURCES=2 -DAVB_CHANNELS_PER_SOURCE=12 
+XCC_FLAGS_Talker2x12Chan_Listerner2x12Chan_TDM += -DAVB_NUM_SINKS=2 -DAVB_CHANNELS_PER_SINK=12 
+#XCC_FLAGS_Talker2x12Chan_Listerner2x12Chan_TDM += -DCHECK_HW_LOOPBACK
+
+XCC_FLAGS_Talker2x12Chan_Listerner2x12Chan_TDM_test = -DTALKER -DLISTENER $(XCC_FLAGS) -DAVB_MAX_AUDIO_SAMPLE_RATE=48000
+XCC_FLAGS_Talker2x12Chan_Listerner2x12Chan_TDM_test += $(TALKER_DEBUG_FLAGS) $(LISTENER_DEBUG_FLAGS)
+XCC_FLAGS_Talker2x12Chan_Listerner2x12Chan_TDM_test += -DAVB_NUM_SOURCES=2 -DAVB_CHANNELS_PER_SOURCE=12 
+XCC_FLAGS_Talker2x12Chan_Listerner2x12Chan_TDM_test += -DAVB_NUM_SINKS=2 -DAVB_CHANNELS_PER_SINK=12 
+XCC_FLAGS_Talker2x12Chan_Listerner2x12Chan_TDM_test += -DGEN_TEST_SIGNAL #-DCHECK_TEST_SIGNAL
 
 
 # Configuration Specific Messages
