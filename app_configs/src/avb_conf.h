@@ -2,6 +2,7 @@
 #define __avb_conf_h__
 
 //#define XSCOPE_1722_TALKER
+#define PRINT
 
 /* Configuration parameters for the ethernet code */
 #define PHY_ADDRESS 0x0
@@ -107,7 +108,8 @@
 
 // Todo: This should be per Talker/Listener
 //#define AVB_MAX_CHANNELS_PER_STREAM (AVB_CHANNELS_PER_SOURCE >= AVB_CHANNELS_PER_SINK) ? AVB_CHANNELS_PER_SOURCE : AVB_CHANNELS_PER_SINK
-#define AVB_MAX_CHANNELS_PER_STREAM 16
+// 8 Fails for some reason
+#define AVB_MAX_CHANNELS_PER_STREAM 24
 
 ///////////////////////////////////////
 // Defaults

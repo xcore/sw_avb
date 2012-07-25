@@ -269,8 +269,10 @@ int avb1722_create_packet(unsigned char Buf0[],
 				dest += 1;
 #ifdef DEBUG_LOGIC
 			   if(i>0 && presentationTime!=prev_chan_presentationTime) {
+#ifdef PRINT
 				  simple_printf("ERROR: Presentation time for channel %d : %d \n  differs from previous channel time : %d\n",
 						  i, presentationTime, prev_chan_presentationTime);
+#endif
 
 			   };
 			   prev_chan_presentationTime=presentationTime;
@@ -291,7 +293,9 @@ int avb1722_create_packet(unsigned char Buf0[],
                 volatile int packetSize;
                 if(rdIndex_prediction_valid) {
 					if(media_input_fifo->rdIndex != expected_rdIndex) {
+#ifdef PRINT
 						  simple_printf("ERROR: Expected rdIndex ptr 0x%x differs from actual 0x%x\n",expected_rdIndex, media_input_fifo->rdIndex);
+#endif
 					}
                 }
                 expected_rdIndex = media_input_fifo->rdIndex;
@@ -338,7 +342,7 @@ int avb1722_create_packet(unsigned char Buf0[],
 					int ptp_ts_delta = (int) (ptp_ts - prev_ptp_ts);
 					if(ptp_ts_delta > AVG_PRESENTATION_TIME_DELTA+MAX_PRESENTATION_TIME_DELTA_DELTA ||
 					   ptp_ts_delta < AVG_PRESENTATION_TIME_DELTA-MAX_PRESENTATION_TIME_DELTA_DELTA) {
-#ifdef DEBUG_PRINT_ptp_ts_delta_CHECK
+#ifdef PRINT
 						  simple_printf("ERROR: Expecting ptp_ts (Presentation Time) to change between %d and %d. Actual change %d\n",
 								  AVG_PRESENTATION_TIME_DELTA-MAX_PRESENTATION_TIME_DELTA_DELTA,
 								  AVG_PRESENTATION_TIME_DELTA+MAX_PRESENTATION_TIME_DELTA_DELTA,
@@ -361,7 +365,7 @@ int avb1722_create_packet(unsigned char Buf0[],
 	// Update timestamp value and valid flag.
 	AVB1722_AVBTP_HeaderGen(Buf, timerValid, ptp_ts, pkt_data_length, stream_info->sequence_number, stream_id0);
 
-	stream_info->last_transmit_time = time;
+    stream_info->last_transmit_time += AVB1722_PACKET_PERIOD_TIMER_TICKS;
 	stream_info->transmit_ok = 0;
 	stream_info->sequence_number++;
 	return (AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + pkt_data_length);

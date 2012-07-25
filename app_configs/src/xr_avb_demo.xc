@@ -168,8 +168,10 @@ media_output_fifo_t ofifos[AVB_NUM_MEDIA_OUTPUTS];
 #ifdef USE_XSCOPE
 #define NUM_XSCOPE_PROBES 23
 void xscope_user_init() {
+
 #ifdef USE_XSCOPE_PROBES
     if (get_core_id() == 0) {
+       xscope_config_uart(p_uart_tx); // only on core 0
        simple_printf("Registering %d XSCOPE probes on core 0\n", NUM_XSCOPE_PROBES);
        xscope_register(NUM_XSCOPE_PROBES,
     	               XSCOPE_STARTSTOP, "Process 1722 packet startstop", XSCOPE_UINT, "time",
@@ -201,8 +203,8 @@ void xscope_user_init() {
     };
 #endif
 
-    //simple_printf("Activating print via XScope\n");
-    xscope_config_io(XSCOPE_IO_BASIC);
+    simple_printf("Activating print via XScope\n");
+    //xscope_config_io(XSCOPE_IO_BASIC);
 
 }
 #endif
@@ -466,7 +468,7 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 #endif
 
 	// Initialize the media clock (a ptp derived clock)
-#if((TALKER && !LISTENER) || GEN_TEST_SIGNAL)
+#ifdef USE_LOCAL_CLOCK
 	simple_printf("Setting Media Clock Type to: LOCAL_CLOCK\n");
 	set_device_media_clock_type(0, LOCAL_CLOCK);
 #else
@@ -667,6 +669,8 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 
 
 			  // check if there is a new stream
+			  // TODO: change funciton to return the index of the stream in stream_history!
+			  // where else is result of avb_check_for_new_stream used?
 			  int res = avb_check_for_new_stream(streamId, vlan, addr);
 
 			  // if so, add it to the stream table
