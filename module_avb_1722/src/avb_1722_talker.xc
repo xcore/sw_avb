@@ -33,6 +33,8 @@
 #define MAX_PKT_BUF_SIZE_TALKER (AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + AVB_CIP_HDR_SIZE + TALKER_NUM_AUDIO_SAMPLES_PER_CHANNEL_PER_AVB1722_PKT * AVB_MAX_CHANNELS_PER_STREAM * 4 + 4)
 #endif
 
+static avb1722_Talker_StreamConfig_t talker_streams[AVB_MAX_STREAMS_PER_TALKER_UNIT];
+
 
 static void configure_stream(chanend avb1722_tx_config,
 							 avb1722_Talker_StreamConfig_t &stream,
@@ -135,8 +137,6 @@ void avb_1722_talker(chanend ptp_svr, chanend ethernet_tx_svr,
 		chanend talker_ctl, int num_streams) {
 	ptp_time_info_mod64 timeInfo;
 	unsigned int TxBuf[(MAX_PKT_BUF_SIZE_TALKER + 3) / 4];
-	avb1722_Talker_StreamConfig_t
-			talker_streams[AVB_MAX_STREAMS_PER_TALKER_UNIT];
 	int max_active_avb_stream = 0;
 	int cur_avb_stream = 0;
 	unsigned char mac_addr[6];

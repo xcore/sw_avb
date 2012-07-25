@@ -112,7 +112,7 @@ void media_input_fifo_push_sample(media_input_fifo_t media_input_fifo0,
 
     spaceLeft &= (MEDIA_INPUT_FIFO_SAMPLE_FIFO_SIZE-1);
     
-    if (spaceLeft && (spaceLeft < packetSize)) return;
+    if ((!spaceLeft && (media_input_fifo->ptr != 0)) && (spaceLeft < packetSize)) return;
 
     wrIndex[0] = ts;
 #ifdef USE_XSCOPE
