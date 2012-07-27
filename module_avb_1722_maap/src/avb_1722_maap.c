@@ -6,19 +6,7 @@
 #include "avb_control_types.h"
 #include "ethernet_tx_client.h"
 #include "misc_timer.h"
-
-typedef struct ethernet_hdr_t {
-  unsigned char dest_addr[6];
-  unsigned char src_addr[6];
-  unsigned char ethertype[2];
-} ethernet_hdr_t;
-
-typedef struct tagged_ethernet_hdr_t {
-  unsigned char dest_addr[6];
-  unsigned char src_addr[6];
-  unsigned char qtag[2];
-  unsigned char ethertype[2];
-} tagged_ethernet_hdr_t;
+#include "nettypes.h"
 
 
 typedef enum {
