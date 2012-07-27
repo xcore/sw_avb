@@ -85,8 +85,8 @@ static int create_maap_packet(int message_type,
     hdr->dest_addr[i] = maap_dest_addr[i];
   }
   
-  hdr->ethertype[0] = AVB_ETYPE >> 8;
-  hdr->ethertype[1] = AVB_ETYPE & 0xff;
+  hdr->ethertype[0] = AVB_1722_ETHERTYPE >> 8;
+  hdr->ethertype[1] = AVB_1722_ETHERTYPE & 0xff;
   
 
   SET_MAAP_CD_FLAG(pkt, DEFAULT_MAAP_CD_FLAG);
@@ -230,7 +230,7 @@ int current_time_to_milliseconds(int current_time)
   return time_ms;
 }
 
-int avb_1722_maap_periodic(avb_status_t *status, chanend c_tx)
+void avb_1722_maap_periodic(avb_status_t *status, chanend c_tx)
 {
   int nbytes;
   int current_time = current_time_to_milliseconds(get_local_time());
@@ -240,7 +240,8 @@ int avb_1722_maap_periodic(avb_status_t *status, chanend c_tx)
   case MAAP_DISABLED:
     break;
   case MAAP_PROBING:
-    if (maap_addr.immediately || (current_time - maap_addr.timeout) > 0) {
+    if (maap_addr.immediately || (current_time - maap_addr.timeout) > 0)
+    {
       maap_addr.immediately = 0;
       nbytes = create_maap_packet(MAAP_PROBE, 
                                   &maap_addr, 
@@ -251,14 +252,14 @@ int avb_1722_maap_periodic(avb_status_t *status, chanend c_tx)
       mac_tx(c_tx, maap_buf, nbytes, ETH_BROADCAST);
       maap_addr.count--;
 
-      if (maap_addr.count == 0) {
+      if (maap_addr.count == 0)
+      {
         maap_addr.state = MAAP_RESERVED;
-        status->type = AVB_MAAP;
-        status->info.maap.msg = AVB_MAAP_ADDRESSES_RESERVED;
         maap_addr.immediately = 1;
-        return AVB_STATUS_UPDATED;
+        // 5.2 TODO: Do event AVB_MAAP_ADDRESSES_RESERVED
       }
-      else {
+      else
+      {
         // reset timeout
         set_timeout(&maap_addr,
                     current_time,
@@ -284,7 +285,7 @@ int avb_1722_maap_periodic(avb_status_t *status, chanend c_tx)
     }
     break;
   } 
-  return AVB_NO_STATUS;
+  return;
 }
 
 static int maap_conflict(maap_address_range* addr,
@@ -328,51 +329,30 @@ static int maap_conflict(maap_address_range* addr,
   return 0;
 }
 
-int avb_1722_maap_process_packet(avb_status_t *status, unsigned int buf0[], 
-                                 int nbytes,
-                                 chanend c_tx)
+void avb_1722_maap_process_packet(avb_status_t *status, unsigned int buf0[], int nbytes, chanend c_tx)
 {
   unsigned char *buf = (unsigned char *) buf0;
+  struct maap_packet_t *maap_pkt = (struct maap_packet_t *) &buf[0];
   int msg_type;
-  struct ethernet_hdr_t *ethernet_hdr = (ethernet_hdr_t *) &buf[0];
-  struct tagged_ethernet_hdr_t *tagged_ethernet_hdr = (tagged_ethernet_hdr_t *) &buf[0];
-
-  int has_qtag = ethernet_hdr->ethertype[1]==0x18;
-  int ethernet_pkt_size = has_qtag ? 18 : 14;
   unsigned char conflict_addr[6];
   int conflict_count;
-  struct maap_packet_t *maap_pkt = (struct maap_packet_t *) &buf[ethernet_pkt_size];
 
-  if (has_qtag) {
-    if (tagged_ethernet_hdr->ethertype[1] != (AVB_ETYPE & 0xff) ||
-        tagged_ethernet_hdr->ethertype[0] != (AVB_ETYPE >> 8)) 
-      {
-        // not a 1722 packet
-        return AVB_NO_STATUS;
-      }       
-  }
-    if (ethernet_hdr->ethertype[1] != (AVB_ETYPE & 0xff) ||
-        ethernet_hdr->ethertype[0] != (AVB_ETYPE >> 8)) 
-      {
-        // not a 1722 packet
-        return AVB_NO_STATUS;
-  }
-
-
-  if (GET_MAAP_CD_FLAG(maap_pkt) != 1 ||
-      GET_MAAP_SUBTYPE(maap_pkt) != 0x7e)
+  if (GET_MAAP_SUBTYPE(maap_pkt) != 0x7e)
+  {
     // not a maap packet
-    return AVB_NO_STATUS;
+    return;
+  }
 
   if (maap_addr.state == MAAP_DISABLED)
-    return AVB_NO_STATUS;
+    return;
 
   msg_type = GET_MAAP_MSG_TYPE(maap_pkt);
 
   switch (msg_type)
   {
   case MAAP_PROBE:
-    if (maap_conflict(&maap_addr, maap_pkt, conflict_addr, &conflict_count)) {
+    if (maap_conflict(&maap_addr, maap_pkt, conflict_addr, &conflict_count))
+    {
       int len;
       len = create_maap_packet(MAAP_DEFEND, &maap_addr, (char*) &maap_buf[0],
                                conflict_addr, conflict_count);
@@ -380,14 +360,14 @@ int avb_1722_maap_process_packet(avb_status_t *status, unsigned int buf0[],
     }
     break;
   case MAAP_ANNOUNCE:
-    if (maap_conflict(&maap_addr, maap_pkt, NULL, NULL)) {
+    if (maap_conflict(&maap_addr, maap_pkt, NULL, NULL))
+    {
       maap_addr.state = MAAP_DISABLED;
-      status->type = AVB_MAAP;
-      status->info.maap.msg = AVB_MAAP_ADDRESSES_LOST;
-      return AVB_STATUS_UPDATED;
+      /* TODO: AVB_MAAP_ADDRESSES_LOST */
+      return;
     }
     break;
   }
-  return AVB_NO_STATUS;
+  return;
 }
 

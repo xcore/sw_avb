@@ -94,7 +94,7 @@ void avb_start(void);
  *  \returns A status update from the periodic processing to indicate
  *           an event due to a timeout etc. (see :c:type:`avb_status_t`)
  **/
-int avb_periodic(REFERENCE_PARAM(avb_status_t, status));
+void avb_periodic(REFERENCE_PARAM(avb_status_t, status));
 
 /** Receives an 802.1Qat SRP packet or an IEEE P1722 MAAP packet.
  *
@@ -138,7 +138,7 @@ void avb_get_control_packet(chanend c_rx,
             reserved, multicast address range to be no longer available,
            then ``AVB_MAAP_ADDRESSES_LOST`` is returned.
  **/
-int avb_process_control_packet(REFERENCE_PARAM(avb_status_t, status),
+void avb_process_control_packet(REFERENCE_PARAM(avb_status_t, status),
                                unsigned int buf[], int len,
                                chanend c_tx);
 

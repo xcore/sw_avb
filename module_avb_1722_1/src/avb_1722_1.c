@@ -55,74 +55,41 @@ void avb_1722_1_init(unsigned char macaddr[6], unsigned char serial_number[2])
 
 }
 
-int avb_1722_1_process_packet(avb_status_t *status, unsigned int buf0[], int len, chanend c_tx)
+void avb_1722_1_process_packet(avb_status_t *status, unsigned int buf0[], int len, chanend c_tx)
 {
     unsigned char *buf = (unsigned char *) buf0;
+    struct avb_1722_1_packet_header_t *pkt = (struct avb_1722_1_packet_header_t *) &buf[0];
+    unsigned subtype = GET_1722_1_SUBTYPE(pkt);
 
-    struct ethernet_hdr_t *ethernet_hdr = (ethernet_hdr_t *) &buf[0];
-    struct tagged_ethernet_hdr_t *tagged_ethernet_hdr = (tagged_ethernet_hdr_t *) &buf[0];
-
-    int has_qtag = ethernet_hdr->ethertype[1]==0x18;
-    int ethernet_pkt_size = has_qtag ? 18 : 14;
-
-    struct avb_1722_1_packet_header_t *pkt = (struct avb_1722_1_packet_header_t *) &buf[ethernet_pkt_size];
-
-    if (has_qtag) {
-      if (tagged_ethernet_hdr->ethertype[1] != (AVB_ETYPE & 0xff) ||
-          tagged_ethernet_hdr->ethertype[0] != (AVB_ETYPE >> 8)) {
-          // not a 1722 packet
-          return AVB_NO_STATUS;
-        }
-    } else {
-      if (ethernet_hdr->ethertype[1] != (AVB_ETYPE & 0xff) ||
-          ethernet_hdr->ethertype[0] != (AVB_ETYPE >> 8)) {
-          // not a 1722 packet
-          return AVB_NO_STATUS;
-        }
-    }
-
-    if (GET_1722_1_CD_FLAG(pkt) != 1)
-          // not a 1722.1 packet
-          return AVB_NO_STATUS;
-
+    switch (subtype)
     {
-        unsigned subtype = GET_1722_1_SUBTYPE(pkt);
-
-        switch (subtype) {
-        case DEFAULT_1722_1_ADP_SUBTYPE:
-            return process_avb_1722_1_adp_packet(status, (avb_1722_1_adp_packet_t*)pkt, c_tx);
-        case DEFAULT_1722_1_AECP_SUBTYPE:
-            return process_avb_1722_1_aecp_packet(status, ethernet_hdr->src_addr , (avb_1722_1_aecp_packet_t*)pkt, len, c_tx);
-        case DEFAULT_1722_1_ACMP_SUBTYPE:
-            return process_avb_1722_1_acmp_packet(status, (avb_1722_1_acmp_packet_t*)pkt, c_tx);
-        default:
-            break;
-        }
+    case DEFAULT_1722_1_ADP_SUBTYPE:
+        process_avb_1722_1_adp_packet(status, (avb_1722_1_adp_packet_t*)pkt, c_tx);
+        return;
+    case DEFAULT_1722_1_AECP_SUBTYPE:
+        process_avb_1722_1_aecp_packet(status, ethernet_hdr->src_addr , (avb_1722_1_aecp_packet_t*)pkt, len, c_tx);
+        return;
+    case DEFAULT_1722_1_ACMP_SUBTYPE:
+        process_avb_1722_1_acmp_packet(status, (avb_1722_1_acmp_packet_t*)pkt, c_tx);
+        return;
+    default:
+        return;
     }
 
-    return AVB_NO_STATUS;
+    return;
 }
 
-int avb_1722_1_periodic(avb_status_t *status, chanend c_tx, chanend c_ptp)
+void avb_1722_1_periodic(avb_status_t *status, chanend c_tx, chanend c_ptp)
 {
-	int res = avb_1722_1_adp_advertising_periodic(status, c_tx, c_ptp);
-	if (res) return res;
-	res = avb_1722_1_adp_discovery_periodic(status, c_tx);
-	if (res) return res;
+	avb_1722_1_adp_advertising_periodic(status, c_tx, c_ptp);
+	avb_1722_1_adp_discovery_periodic(status, c_tx);
 #if (AVB_1722_1_CONTROLLER_ENABLED)
-	res = avb_1722_1_acmp_controller_periodic(status, c_tx);
-	if (res) return res;
+	avb_1722_1_acmp_controller_periodic(status, c_tx);
 #endif
 #if (AVB_1722_1_TALKER_ENABLED)
-	res = avb_1722_1_acmp_talker_periodic(status, c_tx);
-	if (res) return res;
+	avb_1722_1_acmp_talker_periodic(status, c_tx);
 #endif
 #if (AVB_1722_1_LISTENER_ENABLED)
-	res = avb_1722_1_acmp_listener_periodic(status, c_tx);
-	if (res) return res;
+	avb_1722_1_acmp_listener_periodic(status, c_tx);
 #endif
-    return AVB_NO_STATUS;
 }
-
-
-

@@ -431,16 +431,8 @@ void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl)
         case avb_get_control_packet(c_rx, buf, nbytes):
         {
             // Test for a control packet and process it
-            ret = avb_process_control_packet(avb_status, buf, nbytes, c_tx);
-
-            if (ret != AVB_NO_STATUS)
-            {
-                switch (avb_status.type)
-                {
-                case AVB_SRP: app_handle_srp_indication(avb_status); break;
-                case AVB_MAAP: app_handle_maap_indication(avb_status); break;
-                }
-            }
+            avb_process_control_packet(avb_status, buf, nbytes, c_tx);
+            /* Currently generates AVB_MAAP_ADDRESSES_LOST */
 
             // add any special control packet handling here
             break;
@@ -520,20 +512,7 @@ void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl)
         {
             timeout += PERIODIC_POLL_TIME;
 
-            do
-            {
-                ret = avb_periodic(avb_status);
-
-                if (ret != AVB_NO_STATUS)
-                {
-                    switch (avb_status.type)
-                    {
-                    case AVB_SRP: app_handle_srp_indication(avb_status); break;
-                    case AVB_MAAP: app_handle_maap_indication(avb_status); break;
-                    }
-                }
-
-            } while (ret != AVB_NO_STATUS);
+            avb_periodic(avb_status);
 
             // Call the stream manager to check for new streams/manage
             // what is being listened to

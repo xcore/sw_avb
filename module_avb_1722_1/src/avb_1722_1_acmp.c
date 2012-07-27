@@ -551,19 +551,17 @@ static unsigned acmp_talker_valid_talker_unique()
 	return acmp_talker_rcvd_cmd_resp.talker_unique_id < AVB_1722_1_MAX_TALKERS;
 }
 
-static int process_avb_1722_1_acmp_controller_packet(avb_status_t *status, unsigned char message_type, avb_1722_1_acmp_packet_t* pkt)
+static void process_avb_1722_1_acmp_controller_packet(avb_status_t *status, unsigned char message_type, avb_1722_1_acmp_packet_t* pkt)
 {
 	int inflight_index = 0;
 
-	status->info.a1722_1.msg = AVB_1722_1_OK;
-
-	if (acmp_controller_state != ACMP_CONTROLLER_WAITING) return AVB_STATUS_UPDATED;
-	if (compare_guid(pkt->controller_guid, &my_guid) == 0) return AVB_STATUS_UPDATED;
+	if (acmp_controller_state != ACMP_CONTROLLER_WAITING) return;
+	if (compare_guid(pkt->controller_guid, &my_guid) == 0) return;
 
 	inflight_index = acmp_get_inflight_from_sequence_id(CONTROLLER, NTOH_U16(pkt->sequence_id));
-	if (inflight_index < 0) return AVB_STATUS_UPDATED;	// We don't have an inflight entry for this command
+	if (inflight_index < 0) return;	// We don't have an inflight entry for this command
 
-	if (message_type != (acmp_controller_inflight_commands[inflight_index].command.message_type + 1)) return AVB_1722_1_OK;
+	if (message_type != (acmp_controller_inflight_commands[inflight_index].command.message_type + 1)) return;
 
 	store_rcvd_cmd_resp(&acmp_controller_cmd, pkt);
 
@@ -591,18 +589,17 @@ static int process_avb_1722_1_acmp_controller_packet(avb_status_t *status, unsig
 		}
 	}
 
-	return AVB_STATUS_UPDATED;
+	return;
 }
 
-static int process_avb_1722_1_acmp_talker_packet(avb_status_t *status, unsigned char message_type, avb_1722_1_acmp_packet_t* pkt)
+static void process_avb_1722_1_acmp_talker_packet(avb_status_t *status, unsigned char message_type, avb_1722_1_acmp_packet_t* pkt)
 {
-	status->info.a1722_1.msg = AVB_1722_1_OK;
-
-	if (compare_guid(pkt->talker_guid, &my_guid) == 0) return AVB_STATUS_UPDATED;
-	if (acmp_talker_state != ACMP_TALKER_WAITING) return AVB_STATUS_UPDATED;
+	if (compare_guid(pkt->talker_guid, &my_guid) == 0) return;
+	if (acmp_talker_state != ACMP_TALKER_WAITING) return;
 
 	store_rcvd_cmd_resp(&acmp_talker_rcvd_cmd_resp, pkt);
 
+	/* TODO: Can this be memory optimised? */
 	switch (message_type)
 	{
 	case ACMP_CMD_CONNECT_TX_COMMAND:
@@ -619,17 +616,17 @@ static int process_avb_1722_1_acmp_talker_packet(avb_status_t *status, unsigned 
 		break;
 	}
 
-	return AVB_STATUS_UPDATED;
+	return;
 }
 
-static int process_avb_1722_1_acmp_listener_packet(avb_status_t *status, unsigned char message_type, avb_1722_1_acmp_packet_t* pkt)
+static void process_avb_1722_1_acmp_listener_packet(avb_status_t *status, unsigned char message_type, avb_1722_1_acmp_packet_t* pkt)
 {
-	status->info.a1722_1.msg = AVB_1722_1_OK;
-	if (compare_guid(pkt->listener_guid, &my_guid)==0) return AVB_STATUS_UPDATED;
-	if (acmp_listener_state != ACMP_LISTENER_WAITING) return AVB_STATUS_UPDATED;
+	if (compare_guid(pkt->listener_guid, &my_guid)==0) return;
+	if (acmp_listener_state != ACMP_LISTENER_WAITING) return;
 
 	store_rcvd_cmd_resp(&acmp_listener_rcvd_cmd_resp, pkt);
 
+	/* TODO: Can this be memory optimised? */
 	switch (message_type)
 	{
 	case ACMP_CMD_CONNECT_TX_RESPONSE:
@@ -649,14 +646,12 @@ static int process_avb_1722_1_acmp_listener_packet(avb_status_t *status, unsigne
 		break;
 	}
 
-	return AVB_STATUS_UPDATED;
+	return;
 }
 
-int process_avb_1722_1_acmp_packet(avb_status_t *status, avb_1722_1_acmp_packet_t* pkt, chanend c_tx)
+void process_avb_1722_1_acmp_packet(avb_status_t *status, avb_1722_1_acmp_packet_t* pkt, chanend c_tx)
 {
 	unsigned char message_type = GET_1722_1_MSG_TYPE(((avb_1722_1_packet_header_t*)pkt));
-
-	status->info.a1722_1.msg = AVB_1722_1_OK;
 
 	switch (message_type)
 	{
@@ -665,29 +660,36 @@ int process_avb_1722_1_acmp_packet(avb_status_t *status, avb_1722_1_acmp_packet_
 		case ACMP_CMD_DISCONNECT_TX_COMMAND:
 		case ACMP_CMD_GET_TX_STATE_COMMAND:
 		case ACMP_CMD_GET_TX_CONNECTION_COMMAND:
-			return process_avb_1722_1_acmp_talker_packet(status, message_type, pkt);
-
+		{
+			process_avb_1722_1_acmp_talker_packet(status, message_type, pkt);
+			return;
+		}
 		// Listener messages
 		case ACMP_CMD_CONNECT_TX_RESPONSE:
 		case ACMP_CMD_DISCONNECT_TX_RESPONSE:
 		case ACMP_CMD_CONNECT_RX_COMMAND:
 		case ACMP_CMD_DISCONNECT_RX_COMMAND:
 		case ACMP_CMD_GET_RX_STATE_COMMAND:
-			return process_avb_1722_1_acmp_listener_packet(status, message_type, pkt);
-
+		{
+			process_avb_1722_1_acmp_listener_packet(status, message_type, pkt);
+			return;
+		}
 		// Controller messages
 		case ACMP_CMD_CONNECT_RX_RESPONSE:
 		case ACMP_CMD_DISCONNECT_RX_RESPONSE:
 		case ACMP_CMD_GET_RX_STATE_RESPONSE:
 		case ACMP_CMD_GET_TX_STATE_RESPONSE:
 		case ACMP_CMD_GET_TX_CONNECTION_RESPONSE:
-			return process_avb_1722_1_acmp_controller_packet(status, message_type, pkt);
+		{
+			process_avb_1722_1_acmp_controller_packet(status, message_type, pkt);
+			return;
+		}
 	}
 
-	return AVB_STATUS_UPDATED;
+	return;
 }
 
-int avb_1722_1_acmp_controller_periodic(avb_status_t *status, chanend c_tx)
+void avb_1722_1_acmp_controller_periodic(avb_status_t *status, chanend c_tx)
 {
 	switch (acmp_controller_state)
 	{
@@ -759,10 +761,10 @@ int avb_1722_1_acmp_controller_periodic(avb_status_t *status, chanend c_tx)
 		}
 	}
 
-	return AVB_NO_STATUS;
+	return;
 }
 
-int avb_1722_1_acmp_talker_periodic(avb_status_t *status, chanend c_tx)
+void avb_1722_1_acmp_talker_periodic(avb_status_t *status, chanend c_tx)
 {
 	switch (acmp_talker_state)
 	{
@@ -771,7 +773,7 @@ int avb_1722_1_acmp_talker_periodic(avb_status_t *status, chanend c_tx)
 		case ACMP_TALKER_WAITING_FOR_CONNECT:
 		case ACMP_TALKER_WAITING_FOR_DISCONNECT:
 		{
-			return AVB_NO_STATUS;
+			return;
 		}
 		case ACMP_TALKER_CONNECT:
 		{
@@ -779,14 +781,13 @@ int avb_1722_1_acmp_talker_periodic(avb_status_t *status, chanend c_tx)
 			{
 				acmp_send_response(ACMP_CMD_CONNECT_TX_RESPONSE, &acmp_talker_rcvd_cmd_resp, ACMP_STATUS_TALKER_UNKNOWN_ID, c_tx);
 				acmp_talker_state = ACMP_TALKER_WAITING;
-				return AVB_NO_STATUS;
+				return;
 			}
 			else
 			{
 				acmp_talker_state = ACMP_TALKER_WAITING_FOR_CONNECT;
-				status->type = AVB_1722_1;
-				status->info.a1722_1.msg = AVB_1722_1_CONNECT_TALKER;
-				return AVB_STATUS_UPDATED;
+				/* 5.2 TODO: Generate AVB_1722_1_CONNECT_TALKER */
+				return;
 			}
 			break;
 		}
@@ -796,14 +797,13 @@ int avb_1722_1_acmp_talker_periodic(avb_status_t *status, chanend c_tx)
 			{
 				acmp_send_response(ACMP_CMD_DISCONNECT_TX_RESPONSE, &acmp_talker_rcvd_cmd_resp, ACMP_STATUS_TALKER_UNKNOWN_ID, c_tx);
 				acmp_talker_state = ACMP_TALKER_WAITING;
-				return AVB_NO_STATUS;
+				return;
 			}
 			else
 			{
 				acmp_talker_state = ACMP_TALKER_WAITING_FOR_DISCONNECT;
-				status->type = AVB_1722_1;
-				status->info.a1722_1.msg = AVB_1722_1_DISCONNECT_TALKER;
-				return AVB_STATUS_UPDATED;
+				/* 5.2 TODO: Generate AVB_1722_1_DISCONNECT_TALKER */
+				return;
 			}
 			break;
 		}
@@ -821,7 +821,7 @@ int avb_1722_1_acmp_talker_periodic(avb_status_t *status, chanend c_tx)
 			acmp_send_response(ACMP_CMD_GET_TX_STATE_RESPONSE, &acmp_talker_rcvd_cmd_resp, acmp_status, c_tx);
 
 			acmp_talker_state = ACMP_TALKER_WAITING;
-			return AVB_NO_STATUS;
+			return;
 		}
 		case ACMP_TALKER_GET_CONNECTION:
 		{
@@ -837,14 +837,14 @@ int avb_1722_1_acmp_talker_periodic(avb_status_t *status, chanend c_tx)
 			acmp_send_response(ACMP_CMD_GET_TX_CONNECTION_RESPONSE, &acmp_talker_rcvd_cmd_resp, acmp_status, c_tx);
 
 			acmp_talker_state = ACMP_TALKER_WAITING;
-			return AVB_NO_STATUS;
+			return;
 		}
 	}
 
-	return AVB_NO_STATUS;
+	return;
 }
 
-int avb_1722_1_acmp_listener_periodic(avb_status_t *status, chanend c_tx)
+void avb_1722_1_acmp_listener_periodic(avb_status_t *status, chanend c_tx)
 {
 	switch (acmp_listener_state)
 	{
@@ -923,10 +923,10 @@ int avb_1722_1_acmp_listener_periodic(avb_status_t *status, chanend c_tx)
 						debug_acmp_status_s[inflight->command.status],
 						inflight->command.sequence_id);
 #endif
-				status->type = AVB_1722_1;
-				status->info.a1722_1.msg = AVB_1722_1_CONNECT_LISTENER;
+				
+				/* 5.2 TODO: generate AVB_1722_1_CONNECT_LISTENER */
 
-				return AVB_STATUS_UPDATED;
+				return;
 			}
 			break;
 		}
@@ -948,10 +948,9 @@ int avb_1722_1_acmp_listener_periodic(avb_status_t *status, chanend c_tx)
 						debug_acmp_status_s[inflight->command.status],
 						inflight->command.sequence_id);
 #endif
-				status->type = AVB_1722_1;
-				status->info.a1722_1.msg = AVB_1722_1_DISCONNECT_LISTENER;
+				/* 5.2 TODO: generate AVB_1722_1_DISCONNECT_LISTENER */
 
-				return AVB_STATUS_UPDATED;
+				return;
 			}
 			break;
 		}
@@ -1010,7 +1009,7 @@ int avb_1722_1_acmp_listener_periodic(avb_status_t *status, chanend c_tx)
 
 	}
 
-	return AVB_NO_STATUS;
+	return;
 }
 
 unsigned avb_1722_1_acmp_get_talker_connection_info(short *talker)
@@ -1085,7 +1084,7 @@ void avb_1722_1_talker_set_stream_id(unsigned talker_unique_id, unsigned streamI
 	}
 }
 
-// TODO: These functions are not currently invoked
+// TODO: Remove
 avb_1722_1_acmp_status_t avb_1722_1_acmp_configure_source(unsigned talker_unique_id, unsigned int default_format)
 {
 	unsigned number_of_channels;

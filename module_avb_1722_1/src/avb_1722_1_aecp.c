@@ -242,14 +242,11 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
 	}
 }
 
-int process_avb_1722_1_aecp_packet(avb_status_t *status, unsigned char dest_addr[6], avb_1722_1_aecp_packet_t *pkt, int num_pkt_bytes, chanend c_tx)
+void process_avb_1722_1_aecp_packet(avb_status_t *status, unsigned char dest_addr[6], avb_1722_1_aecp_packet_t *pkt, int num_pkt_bytes, chanend c_tx)
 {
 	int message_type = GET_1722_1_MSG_TYPE(((avb_1722_1_packet_header_t*)pkt));
 
-	status->type = AVB_1722_1;
-	status->info.a1722_1.msg = AVB_1722_1_OK;
-
-	if (compare_guid(pkt->target_guid, &my_guid)==0) return AVB_STATUS_UPDATED;
+	if (compare_guid(pkt->target_guid, &my_guid)==0) return;
 
 	switch (message_type)
 	{
@@ -293,5 +290,5 @@ int process_avb_1722_1_aecp_packet(avb_status_t *status, unsigned char dest_addr
 			// This node is not expecting a response
 			break;
 	}
-	return AVB_1722_1_OK;
+	return;
 }

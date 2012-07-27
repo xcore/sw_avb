@@ -18,6 +18,7 @@
 #include "ethernet_server_def.h"
 #include "mac_custom_filter.h"
 #include "avb_1722_maap.h"
+#include "nettypes.h"
 
 #ifdef AVB_ENABLE_1722_1
 #include "avb_1722_1.h"
@@ -229,18 +230,17 @@ void avb_init(chanend media_ctl[],
   mac_set_custom_filter(c_mac_rx, MAC_FILTER_AVB_CONTROL);
 }
 
-int avb_periodic(avb_status_t *status)
+void avb_periodic(avb_status_t *status)
 {
-	int res = mrp_periodic(status);
-	if (res) return res;
+	mrp_periodic(status);
 #ifdef AVB_ENABLE_1722_1
-	res = avb_1722_1_periodic(status, c_mac_tx, c_ptp);
-	if (res) return res;
+	avb_1722_1_periodic(status, c_mac_tx, c_ptp);
 #endif
-	return avb_1722_maap_periodic(status, c_mac_tx);
+	avb_1722_maap_periodic(status, c_mac_tx);
 }
 
-void avb_start(void) {
+void avb_start(void)
+{
   avb_1722_maap_rerequest_addresses();
 
   mrp_mad_begin(domain_attr);
@@ -946,19 +946,44 @@ void avb_set_legacy_mode(int mode)
   avb_mrp_set_legacy_mode(mode);
 }
 
-int avb_process_control_packet(avb_status_t *status, unsigned int buf[], int nbytes, chanend c_tx)
+void avb_process_control_packet(avb_status_t *status, unsigned int buf[], int nbytes, chanend c_tx)
 {
-  int res = avb_mrp_process_packet(status, buf, nbytes);
-  if (res && (status->info.srp.msg != AVB_SRP_OK))
-    return res;
+  struct ethernet_hdr_t *ethernet_hdr = (ethernet_hdr_t *) &buf[0];
+  struct tagged_ethernet_hdr_t *tagged_ethernet_hdr = (tagged_ethernet_hdr_t *) &buf[0];
 
-#ifdef AVB_ENABLE_1722_1
-  res = avb_1722_1_process_packet(status, buf, nbytes, c_tx);
-  if (res && (status->info.a1722_1.msg != AVB_1722_1_OK))
-    return res;
-#endif
+  int has_qtag = ethernet_hdr->ethertype[1]==0x18;
+  int eth_hdr_size = has_qtag ? 18 : 14;
+  int etype;
+  int len = nbytes - eth_hdr_size;
 
-  return avb_1722_maap_process_packet(status, buf, nbytes, c_tx);
+  if (has_qtag)
+  {
+    etype = (int)(tagged_ethernet_hdr->ethertype[0] << 8) + (int)(tagged_ethernet_hdr->ethertype[1]);   
+  }
+  else
+  {
+    etype = (int)(ethernet_hdr->ethertype[0] << 8) + (int)(ethernet_hdr->ethertype[1]); 
+  }
+
+  switch (etype)
+  {
+    /* fallthrough intended */
+    case AVB_SRP_ETHERTYPE:
+    // TODO: #define around MMRP, disabled by default
+    case AVB_MMRP_ETHERTYPE:
+    case AVB_MVRP_ETHERTYPE:
+      avb_mrp_process_packet(status, &buf[eth_hdr_size], etype, len);
+      break;
+    case AVB_1722_ETHERTYPE:
+      // We know that the cd field is true because the MAC filter only forwards
+      // 1722 control to this thread
+    #ifdef AVB_ENABLE_1722_1
+      avb_1722_1_process_packet(status, &buf[eth_hdr_size], len, c_tx);
+    #endif
+      avb_1722_maap_process_packet(status, &buf[eth_hdr_size], len, c_tx);
+      break;
+  }
+
 }
 
 

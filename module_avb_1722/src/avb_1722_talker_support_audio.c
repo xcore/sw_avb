@@ -69,7 +69,7 @@ void AVB1722_Talker_bufInit(unsigned char Buf0[],
 	SET_AVBTP_PCP(pEtherHdr, AVB_DEFAULT_PCP);
 	SET_AVBTP_CFI(pEtherHdr, AVB_DEFAULT_CFI);
 	SET_AVBTP_VID(pEtherHdr, vlanid);
-	SET_AVBTP_ETYPE(pEtherHdr, AVB_ETYPE);
+	SET_AVBTP_ETYPE(pEtherHdr, AVB_1722_ETHERTYPE);
 
 	//--------------------------------------------------------------------------
 	// 2. Initialaise the AVB TP layer.
