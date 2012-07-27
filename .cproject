@@ -50,6 +50,15 @@
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_util}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_gptp/src}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_gptp}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/apps/autoip}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/apps/dhcpc}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/apps/igmp}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/uip}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/xcore}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/xtcp}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_zeroconf/mdns}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_attero_cfg/src}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_attero_cfg}&quot;' />
                                 </option>
                                 <option id="com.xmos.c.compiler.option.include.paths.11111" valueType="includePath" superClass="com.xmos.c.compiler.option.include.paths">
                                     <listOptionValue builtIn="false" value='&quot;${XMOS_TOOL_PATH}/target/include&quot;' />
@@ -82,6 +91,15 @@
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_util}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_gptp/src}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_gptp}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/apps/autoip}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/apps/dhcpc}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/apps/igmp}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/uip}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/xcore}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/xtcp}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_zeroconf/mdns}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_attero_cfg/src}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_attero_cfg}&quot;' />
                                 </option>
                             </tool>
                             <tool id="com.xmos.cdt.xc.compiler.base.11111" name="com.xmos.cdt.xc.compiler.base" superClass="com.xmos.cdt.xc.compiler.base">
@@ -116,6 +134,15 @@
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_util}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_gptp/src}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_gptp}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/apps/autoip}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/apps/dhcpc}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/apps/igmp}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/uip}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/xcore}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/xtcp}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_zeroconf/mdns}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_attero_cfg/src}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_attero_cfg}&quot;' />
                                 </option>
                                 <option id="com.xmos.c.compiler.option.include.paths.11111" valueType="includePath" superClass="com.xmos.c.compiler.option.include.paths">
                                     <listOptionValue builtIn="false" value='&quot;${XMOS_DOC_PATH}/../target/include&quot;' />
@@ -148,6 +175,15 @@
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_util}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_gptp/src}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_gptp}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/apps/autoip}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/apps/dhcpc}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/apps/igmp}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/uip}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/xcore}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/xtcp}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_zeroconf/mdns}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_attero_cfg/src}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_attero_cfg}&quot;' />
                                 </option>
                             </tool>
                             <tool id="com.xmos.cdt.c.compiler.base.11111" name="com.xmos.cdt.c.compiler.base" superClass="com.xmos.cdt.c.compiler.base">
@@ -182,6 +218,15 @@
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_util}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_gptp/src}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_gptp}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/apps/autoip}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/apps/dhcpc}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/apps/igmp}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/uip}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/xcore}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/xtcp}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_zeroconf/mdns}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_attero_cfg/src}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_attero_cfg}&quot;' />
                                 </option>
                                 <option id="com.xmos.c.compiler.option.include.paths.11111" valueType="includePath" superClass="com.xmos.c.compiler.option.include.paths">
                                     <listOptionValue builtIn="false" value='&quot;${XMOS_DOC_PATH}/../target/include&quot;' />
@@ -214,6 +259,15 @@
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_util}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_gptp/src}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_gptp}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/apps/autoip}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/apps/dhcpc}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/apps/igmp}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/uip}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/xcore}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/xtcp}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_zeroconf/mdns}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_attero_cfg/src}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_attero_cfg}&quot;' />
                                 </option>
                             </tool>
                             <tool id="com.xmos.cdt.cpp.compiler.base.11111" name="com.xmos.cdt.cpp.compiler.base" superClass="com.xmos.cdt.cpp.compiler.base">
@@ -248,6 +302,15 @@
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_util}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_gptp/src}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_gptp}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/apps/autoip}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/apps/dhcpc}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/apps/igmp}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/uip}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/xcore}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/xtcp}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_zeroconf/mdns}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_attero_cfg/src}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_attero_cfg}&quot;' />
                                 </option>
                                 <option id="com.xmos.c.compiler.option.include.paths.11111" valueType="includePath" superClass="com.xmos.c.compiler.option.include.paths">
                                     <listOptionValue builtIn="false" value='&quot;${XMOS_DOC_PATH}/../target/include&quot;' />
@@ -280,6 +343,15 @@
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_util}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_gptp/src}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_gptp}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/apps/autoip}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/apps/dhcpc}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/apps/igmp}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/uip}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/xcore}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/xtcp}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_zeroconf/mdns}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_attero_cfg/src}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_attero_cfg}&quot;' />
                                 </option>
                             </tool>
                             <tool id="com.xmos.cdt.core.assembler.base.11111" name="com.xmos.cdt.core.assembler.base" superClass="com.xmos.cdt.core.assembler.base">
@@ -314,6 +386,15 @@
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_util}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_gptp/src}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_gptp}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/apps/autoip}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/apps/dhcpc}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/apps/igmp}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/uip}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/xcore}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/xtcp}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_zeroconf/mdns}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_attero_cfg/src}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_attero_cfg}&quot;' />
                                 </option>
                                 <option id="com.xmos.c.compiler.option.include.paths.11111" valueType="includePath" superClass="com.xmos.c.compiler.option.include.paths">
                                     <listOptionValue builtIn="false" value='&quot;${XMOS_DOC_PATH}/../target/include&quot;' />
@@ -346,6 +427,15 @@
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_util}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_gptp/src}&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_gptp}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/apps/autoip}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/apps/dhcpc}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/apps/igmp}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/uip}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/uip/xcore}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_xtcp/src/xtcp}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sc_xtcp/module_zeroconf/mdns}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_attero_cfg/src}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/sw_avb/module_avb_attero_cfg}&quot;' />
                                 </option>
                             </tool>
                         </toolChain>
