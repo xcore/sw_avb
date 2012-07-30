@@ -291,40 +291,26 @@ static int maap_conflict(maap_address_range* addr,
                          unsigned char conflict_addr[6],
                          int *conflict_count)
 {
-  unsigned long long my_addr_lo;
-  unsigned long long my_addr_hi;
+  unsigned long long my_addr;
   unsigned long long conflict_lo;
   unsigned long long conflict_hi;
-  unsigned int conflict_range;
-  
-  
+  int count = 0;
 
-  my_addr_lo = mac_addr_to_num(addr->base);
-  my_addr_hi = my_addr_lo + addr->range;
-
+  my_addr = mac_addr_to_num(addr->base);
   conflict_lo = mac_addr_to_num(pkt->conflict_start_address);
- 
-  conflict_range = GET_MAAP_CONFLICT_COUNT(pkt);
-  
-  conflict_hi = conflict_lo + conflict_range;
+  conflict_hi = conflict_lo + GET_MAAP_CONFLICT_COUNT(pkt);
 
-  if (my_addr_lo >= conflict_lo && my_addr_lo <= conflict_hi)
-    {
-      // We have a conflict
-      for (int i=0;i<6;i++) {
-        conflict_addr[i] = addr->base[i];        
-      }
-
-      if (my_addr_hi < conflict_hi) 
-        *conflict_count = addr->range;
-      else 
-        *conflict_count = conflict_hi - my_addr_lo;
-      
-      return 1;
+  // iterate over address range to see if any conflict
+  for (int j = 0; j < addr->range; my_addr++, j++) {
+    if (my_addr >= conflict_lo && my_addr <= conflict_hi) {
+        // We have a conflict
+       if (count == 0)
+    	   num_to_mac_addr(conflict_addr, my_addr);
+       count++;
     }
-
-  // TODO - Add defend code
-  return 0;
+  }
+  *conflict_count = count;
+  return (count > 0);
 }
 
 avb_status_t avb_1722_maap_process_packet_(unsigned int buf0[], 
