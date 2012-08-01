@@ -52,8 +52,8 @@ enum maap_message_type_t {
    (((pkt->maap_version_data_length_hi & 0x7) << 8) + \
           (pkt->data_length_lo))
 
-#define GET_MAAP_REQUESTED_COUNT(pkt) ((pkt->requested_count[0] + (pkt->requested_count[1]<<8)))
-#define GET_MAAP_CONFLICT_COUNT(pkt) ((pkt->conflict_count[0] + (pkt->conflict_count[1]<<8)))
+#define GET_MAAP_REQUESTED_COUNT(pkt) ((pkt->requested_count[1] + (pkt->requested_count[0]<<8)))
+#define GET_MAAP_CONFLICT_COUNT(pkt) ((pkt->conflict_count[1] + (pkt->conflict_count[0]<<8)))
 
 #define SET_BITS(p, lo, hi, val) \
   do { \
