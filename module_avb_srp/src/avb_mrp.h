@@ -239,7 +239,7 @@ void mrp_encode_four_packed_event(char *buf,
 mrp_attribute_state *mrp_get_attr(void);
 #endif
 
-void avb_mrp_process_packet(REFERENCE_PARAM(avb_status_t, status), unsigned int buf[], int etype, int len);
+void avb_mrp_process_packet(REFERENCE_PARAM(avb_status_t, status), unsigned char buf[], int etype, int len);
 
 void avb_mrp_set_legacy_mode(int mode);
 

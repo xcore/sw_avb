@@ -1158,7 +1158,7 @@ static int decode_fourpacked(int vector, int i)
 
                     
 
-void avb_mrp_process_packet(avb_status_t *status, unsigned int buf[], int etype, int len)
+void avb_mrp_process_packet(avb_status_t *status, unsigned char buf[], int etype, int len)
 {
   char *end = (char *) &buf[0] + len;
   char *msg = (char *) &buf[0] + sizeof(mrp_header);

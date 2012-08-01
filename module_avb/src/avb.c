@@ -946,9 +946,10 @@ void avb_set_legacy_mode(int mode)
   avb_mrp_set_legacy_mode(mode);
 }
 
-void avb_process_control_packet(avb_status_t *status, unsigned int buf[], int nbytes, chanend c_tx)
+void avb_process_control_packet(avb_status_t *status, unsigned int buf0[], int nbytes, chanend c_tx)
 {
-  struct ethernet_hdr_t *ethernet_hdr = (ethernet_hdr_t *) &buf[0];
+  struct ethernet_hdr_t *ethernet_hdr = (ethernet_hdr_t *) &buf0[0];
+  unsigned char *buf = (unsigned char *) buf0;
 
   int has_qtag = ethernet_hdr->ethertype[1]==0x18;
   int eth_hdr_size = has_qtag ? 18 : 14;
@@ -957,7 +958,7 @@ void avb_process_control_packet(avb_status_t *status, unsigned int buf[], int nb
 
   if (has_qtag)
   {
-    struct tagged_ethernet_hdr_t *tagged_ethernet_hdr = (tagged_ethernet_hdr_t *) &buf[0];
+    struct tagged_ethernet_hdr_t *tagged_ethernet_hdr = (tagged_ethernet_hdr_t *) &buf0[0];
     etype = (int)(tagged_ethernet_hdr->ethertype[0] << 8) + (int)(tagged_ethernet_hdr->ethertype[1]); 
   }
   else
