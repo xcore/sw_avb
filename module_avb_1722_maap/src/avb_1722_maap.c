@@ -1,5 +1,7 @@
 #include <stdlib.h>
-#include "xccompat.h"
+#include <xccompat.h>
+#include <print.h>
+#include "avb_conf.h"
 #include "avb_1722_common.h"
 #include "avb_1722_maap.h"
 #include "avb_1722_maap_protocol.h"
@@ -185,12 +187,13 @@ void avb_1722_maap_periodic(avb_status_t *status, chanend c_tx)
       {
         maap_addr.state = MAAP_RESERVED;
         maap_addr.immediately = 1;
-        timeout_val = MAAP_ANNOUNCE_INTERVAL_BASE_CS + (maap_addr.base[5]);
+        timeout_val = MAAP_ANNOUNCE_INTERVAL_BASE_CS + (maap_addr.base[5]&0x1F);
       #if AVB_DEBUG_MAAP
         printstr("MAAP: Set announce interval ");
         printintln(timeout_val*10);
       #endif
 
+        init_avb_timer(&maap_timer, MAAP_ANNOUNCE_INTERVAL_MULTIPLIER);
         start_avb_timer(&maap_timer, timeout_val);
 
         // 5.2 TODO: Do event AVB_MAAP_ADDRESSES_RESERVED
