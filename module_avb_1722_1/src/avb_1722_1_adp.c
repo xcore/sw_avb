@@ -40,7 +40,7 @@ static guid_t as_grandmaster_id;
 static avb_timer adp_advertise_timer;
 static avb_timer adp_readvertise_timer;
 static avb_timer adp_discovery_timer;
-static avb_timer ptp_monitor_timer;
+static avb_timer ptp_monitor_timer; // TODO: Remove me
 
 // Counts two second intervals
 static unsigned adp_two_second_counter = 0;

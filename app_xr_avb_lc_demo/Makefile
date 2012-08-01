@@ -24,7 +24,7 @@ XCC_FLAGS_xr_avb_demo.xc = $(XCC_FLAGS) -fsubword-select
 
 # The USED_MODULES variable lists other module used by the application. 
 
-USED_MODULES = module_avb_attero_cfg module_avb_1722 module_avb_1722_maap module_avb_srp module_avb_media_clock  module_avb_audio  module_avb module_avb_util  module_gptp module_xtcp module_zeroconf module_ethernet module_locks module_i2c_simple
+USED_MODULES = module_avb_attero_cfg module_avb_1722 module_avb_1722_maap module_avb_srp module_avb_media_clock  module_avb_audio  module_avb module_avb_util  module_gptp module_xtcp module_zeroconf module_ethernet module_locks module_i2c_simple module_random
 
 # This uses the AVB Ethernet filter
 USE_AVB_MAC_CUSTOM_FILTER=1

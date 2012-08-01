@@ -949,7 +949,6 @@ void avb_set_legacy_mode(int mode)
 void avb_process_control_packet(avb_status_t *status, unsigned int buf[], int nbytes, chanend c_tx)
 {
   struct ethernet_hdr_t *ethernet_hdr = (ethernet_hdr_t *) &buf[0];
-  struct tagged_ethernet_hdr_t *tagged_ethernet_hdr = (tagged_ethernet_hdr_t *) &buf[0];
 
   int has_qtag = ethernet_hdr->ethertype[1]==0x18;
   int eth_hdr_size = has_qtag ? 18 : 14;
@@ -958,7 +957,8 @@ void avb_process_control_packet(avb_status_t *status, unsigned int buf[], int nb
 
   if (has_qtag)
   {
-    etype = (int)(tagged_ethernet_hdr->ethertype[0] << 8) + (int)(tagged_ethernet_hdr->ethertype[1]);   
+    struct tagged_ethernet_hdr_t *tagged_ethernet_hdr = (tagged_ethernet_hdr_t *) &buf[0];
+    etype = (int)(tagged_ethernet_hdr->ethertype[0] << 8) + (int)(tagged_ethernet_hdr->ethertype[1]); 
   }
   else
   {
@@ -980,7 +980,7 @@ void avb_process_control_packet(avb_status_t *status, unsigned int buf[], int nb
     #ifdef AVB_ENABLE_1722_1
       avb_1722_1_process_packet(status, &buf[eth_hdr_size], len, c_tx);
     #endif
-      avb_1722_maap_process_packet(status, &buf[eth_hdr_size], len, c_tx);
+      avb_1722_maap_process_packet(status, &buf[eth_hdr_size], &(ethernet_hdr->src_addr[0]), len, c_tx);
       break;
   }
 

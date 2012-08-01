@@ -28,7 +28,7 @@ void avb_1722_maap_request_addresses(int num_addresses, char start_address[]);
 
 void avb_1722_maap_init(unsigned char macaddr[6]);
 
-void avb_1722_maap_process_packet(REFERENCE_PARAM(avb_status_t, status), unsigned int buf[], int nbytes, chanend c_tx);
+void avb_1722_maap_process_packet(REFERENCE_PARAM(avb_status_t, status), unsigned int buf[], unsigned char src_addr[6], int nbytes, chanend c_tx);
 
 /** Get the base address of the reserved range. 
  *
