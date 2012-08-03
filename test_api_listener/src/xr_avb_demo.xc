@@ -71,29 +71,87 @@ on stdcore[0]: clock b_bclk = XS1_CLKBLK_2;
 on stdcore[0]: in port p_aud_mclk = PORT_MCLK;
 on stdcore[0]: buffered out port:32 p_aud_bclk = PORT_SCLK;
 on stdcore[0]: out buffered port:32 p_aud_lrclk = PORT_LRCLK;
-on stdcore[0]: out buffered port:32 p_aud_dout[4] = {
-		PORT_SDATA_OUT0,
-		PORT_SDATA_OUT1,
-		PORT_SDATA_OUT2,
-		PORT_SDATA_OUT3
+#if(AVB_NUM_SDATA_OUT>0)
+#define P_AUD_DOUT p_aud_dout
+on stdcore[0]: out buffered port:32 p_aud_dout[AVB_NUM_SDATA_OUT] = {
+        PORT_SDATA_OUT0,
+#if(AVB_NUM_SDATA_OUT>1)
+        PORT_SDATA_OUT1,
+#endif
+#if(AVB_NUM_SDATA_OUT>2)
+        PORT_SDATA_OUT2,
+#endif
+#if(AVB_NUM_SDATA_OUT>3)
+        PORT_SDATA_OUT3,
+#endif
+#if(AVB_NUM_SDATA_OUT>4)
+        PORT_SDATA_IN3,
+#endif
+#if(AVB_NUM_SDATA_OUT>5)
+        PORT_SDATA_IN2,
+#endif
+#if(AVB_NUM_SDATA_OUT>6)
+        PORT_SDATA_IN1,
+#endif
+#if(AVB_NUM_SDATA_OUT>7)
+        PORT_SDATA_IN0,
+#endif
 };
+#else
+#define P_AUD_DOUT null
+#endif
 
-on stdcore[0]: in buffered port:32 p_aud_din[4] = {
-		PORT_SDATA_IN0,
-		PORT_SDATA_IN1,
-		PORT_SDATA_IN2,
-		PORT_SDATA_IN3
+#if(AVB_NUM_SDATA_IN>0)
+#define P_AUD_DIN p_aud_din
+on stdcore[0]: in buffered port:32 p_aud_din[AVB_NUM_SDATA_IN] = {
+        PORT_SDATA_IN0,
+#if(AVB_NUM_SDATA_IN>1)
+        PORT_SDATA_IN1,
+#endif
+#if(AVB_NUM_SDATA_IN>2)
+        PORT_SDATA_IN2,
+#endif
+#if(AVB_NUM_SDATA_IN>3)
+        PORT_SDATA_IN3,
+#endif
+#if(AVB_NUM_SDATA_IN>4)
+        PORT_SDATA_OUT3,
+#endif
+#if(AVB_NUM_SDATA_IN>5)
+        PORT_SDATA_OUT2,
+#endif
+#if(AVB_NUM_SDATA_IN>6)
+        PORT_SDATA_OUT1,
+#endif
+#if(AVB_NUM_SDATA_IN>7)
+        PORT_SDATA_OUT0,
+#endif
 };
+#else
+#define P_AUD_DIN null
+#endif
+
 
 on stdcore[0]: port p_uart_tx = PORT_UART_TX;
 
 media_output_fifo_data_t ofifo_data[AVB_NUM_MEDIA_OUTPUTS];
 media_output_fifo_t ofifos[AVB_NUM_MEDIA_OUTPUTS];
 
+void xscope_user_init() {
+// Enable XScope printing
+xscope_register(0, XSCOPE_CONTINUOUS, "", XSCOPE_UINT, "");
+xscope_config_io(XSCOPE_IO_BASIC);
+}
+
+
+#if(!(AVB_NUM_SINKS%2 == 0 && AVB_NUM_SINKS>0))
+#error("AVB_NUM_SINKS must be an even number > 0 ")
+#endif
+
 int main(void) {
 	// ethernet tx channels
 	chan tx_link[2];
-	chan rx_link[3];
+	chan rx_link[2+AVB_NUM_LISTENER_UNITS];
 	chan connect_status;
 
 	//ptp channels
@@ -127,7 +185,7 @@ int main(void) {
 					mii);
 
 			ethernet_server(mii, mac_address,
-					rx_link, 3,
+					rx_link, 2+AVB_NUM_LISTENER_UNITS,
 					tx_link, 2,
 					smi, connect_status);
 		}
@@ -146,9 +204,7 @@ int main(void) {
 
 		on stdcore[1]:
 		{
-            // Enable XScope printing
-            xscope_register(0, XSCOPE_CONTINUOUS, "", XSCOPE_UINT, "");
-            xscope_config_io(XSCOPE_IO_BASIC);
+
             
 			media_clock_server(media_clock_ctl,
 					ptp_link[1],
@@ -170,9 +226,9 @@ int main(void) {
 						b_bclk,
 						p_aud_bclk,
 						p_aud_lrclk,
-						p_aud_dout,
+						P_AUD_DOUT,
 						AVB_NUM_MEDIA_OUTPUTS,
-						p_aud_din,
+						P_AUD_DIN,
 						AVB_NUM_MEDIA_INPUTS,
 						MASTER_TO_WORDCLOCK_RATIO,
 						c_samples_to_codec,
@@ -182,12 +238,13 @@ int main(void) {
 			}
 		}
 
-		// AVB Listener
-		on stdcore[0]: avb_1722_listener(rx_link[1],
-				buf_ctl[0],
+		// AVB Listeners
+		par(int i=0; i<AVB_NUM_LISTENER_UNITS; i++)
+		  on stdcore[0]: avb_1722_listener(rx_link[1+i],
+				buf_ctl[i],
 				null,
-				listener_ctl[0],
-				AVB_NUM_SINKS);
+				listener_ctl[i],
+				AVB_NUM_SINKS/AVB_NUM_LISTENER_UNITS);
 
 		on stdcore[0]:
 		{	init_media_output_fifos(ofifos, ofifo_data, AVB_NUM_MEDIA_OUTPUTS);
@@ -201,14 +258,11 @@ int main(void) {
 		// Application threads
 		on stdcore[0]:
 		{
-            // Enable XScope printing
-            xscope_register(0, XSCOPE_CONTINUOUS, "", XSCOPE_UINT, "");
-            xscope_config_io(XSCOPE_IO_BASIC);
             
 			// First initialize avb higher level protocols
-			avb_init(media_ctl, listener_ctl, null, media_clock_ctl, rx_link[2], tx_link[1], ptp_link[0]);
+			avb_init(media_ctl, listener_ctl, null, media_clock_ctl, rx_link[1+AVB_NUM_LISTENER_UNITS], tx_link[1], ptp_link[0]);
 
-			demo(rx_link[2], tx_link[1], c_gpio_ctl, connect_status);
+			demo(rx_link[1+AVB_NUM_LISTENER_UNITS], tx_link[1], c_gpio_ctl, connect_status);
 		}
 	}
 
@@ -282,6 +336,9 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 	set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_ENABLED);
 
 	tmr	:> timeout;
+
+    simple_printf("Starting demo thread\n");
+
 	while (1) {
 		unsigned char tmp;
 		unsigned int streamId[2];
@@ -392,35 +449,51 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 
 			// Look for new streams
 			{
-			  unsigned int streamId[2];
-			  unsigned vlan;
-			  unsigned char addr[6];
-			  int map[2] = { 0 ,  1 };
+	              unsigned stream_index=0;
+	              unsigned int streamId[2];
+	              unsigned vlan;
+	              unsigned char addr[6];
+	              unsigned limited_chans_per_sink;
+	              int map[AVB_SINK_MAP_SIZE];
+	              static unsigned active_streams;
 
-			  // check if there is a new stream
-			  int res = avb_check_for_new_stream(streamId, vlan, addr);
+	              // check if there is a new stream
+	              // TODO: change funciton to return the index of the stream in stream_history!
+	              // where else is result of avb_check_for_new_stream used?
+	              int res = avb_check_for_new_stream(streamId, vlan, addr);
 
-			  if (res) {
-				    simple_printf("Found stream %x.%x, address %x:%x:%x:%x:%x:%x, vlan %d\n",
-				    		streamId[0], streamId[1],
-				    		addr[0], addr[1], addr[2], addr[3], addr[4], addr[5],
-				    		vlan);
-			  }
+	              // if so, add it to the stream table
+	              if (res) {
+	                 stream_index = res-2; // 2 is hack. Won't word when there's no Talker
+	                 simple_printf("L: Found stream number %d. Stream ID %x.%x, address %x:%x:%x:%x:%x:%x, vlan %d\n",
+	                        stream_index+1, streamId[0], streamId[1],
+	                        addr[0], addr[1], addr[2], addr[3], addr[4], addr[5],
+	                        vlan);
 
-			  // if so, add it to the stream table
-			  if (res && listener_ready==0) {
-			    set_avb_sink_sync(0, 0);
-			    set_avb_sink_channels(0, 2);
-			    set_avb_sink_map(0, map, 2);
-			    set_avb_sink_state(0, AVB_SINK_STATE_DISABLED);
-			    set_avb_sink_id(0, streamId);
-			    set_avb_sink_vlan(0, vlan);
-			    set_avb_sink_addr(0, addr, 6);
+	                if(stream_index > AVB_NUM_SINKS) {
+	                    simple_printf("L: WARNING: Can't register stream %d. AVB_NUM_SINKS is limited to %d\n",stream_index, AVB_NUM_SINKS);
+	                    break;
+	                }
 
-			    listener_ready = 1;
-			    c_gpio_ctl <: 1;
-			  }
-			}
+	                for(int j=0; j<AVB_SINK_MAP_SIZE; j++)
+	                   map[j] = stream_index*AVB_SINK_MAP_SIZE + j; // generate fifo indices
+
+	                set_avb_sink_sync(stream_index, 0);
+	                set_avb_sink_channels(stream_index, AVB_SINK_MAP_SIZE);
+	                set_avb_sink_map(stream_index, map, AVB_SINK_MAP_SIZE);
+	                set_avb_sink_state(stream_index, AVB_SINK_STATE_DISABLED);
+	                set_avb_sink_id(stream_index, streamId);
+	                set_avb_sink_vlan(stream_index, vlan);
+	                set_avb_sink_addr(stream_index, addr, 6);
+
+	                set_avb_sink_state(stream_index, AVB_SINK_STATE_POTENTIAL);
+
+	                active_streams++;
+	                c_gpio_ctl <: active_streams;
+	              }
+	          }
+
+
 
 			break;
 		}
