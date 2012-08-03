@@ -132,5 +132,12 @@ typedef struct
 
 // We add a 2% fudge factor to handle clock difference in the stream transmission shaping
 // 10% would be workaround for bug 12860
-#define AVB1722_PACKET_PERIOD_TIMER_TICKS (((100000000 / AVB1722_PACKET_RATE)*98)/100)
+#ifdef BUGFIX_12860
+#define FUDGE_PERCENT 98
+#else
+#define FUDGE_PERCENT 90
+#endif
+
+#define AVB1722_PACKET_PERIOD_TIMER_TICKS (((100000000 / AVB1722_PACKET_RATE)*FUDGE_PERCENT)/100)
+
 #endif

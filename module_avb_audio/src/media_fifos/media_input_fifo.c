@@ -112,10 +112,14 @@ void media_input_fifo_push_sample(media_input_fifo_t media_input_fifo0,
 
     spaceLeft &= (MEDIA_INPUT_FIFO_SAMPLE_FIFO_SIZE-1);
     
+#ifdef BUGFIX_12860
     if ((!spaceLeft && (media_input_fifo->ptr != 0)) && (spaceLeft < packetSize)) return;
+#else
+    if (spaceLeft && (spaceLeft < packetSize)) return;
+#endif
 
     wrIndex[0] = ts;
-#ifdef USE_XSCOPE
+#ifdef USE_XSCOPE_PROBES
 	xscope_probe_data(19, (unsigned) (ts));
 	//xscope_probe_data(20, (unsigned) (wrIndex));
 #endif

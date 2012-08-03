@@ -12,10 +12,10 @@
 #define AVG_PRESENTATION_TIME_DELTA 166667  // 166.667us = 8 samples at 48kHz
 #endif
 //#define MAX_PRESENTATION_TIME_DELTA_DELTA AVG_PRESENTATION_TIME_DELTA / 100 // 1% deviation
-#define MAX_PRESENTATION_TIME_DELTA_DELTA AVG_PRESENTATION_TIME_DELTA * 2 // 200% deviation
+#define MAX_PRESENTATION_TIME_DELTA_DELTA AVG_PRESENTATION_TIME_DELTA/5 // 200% deviation
 
-//#define DEBUG_LOGIC
-#define DEBUG_PRINT_ptp_ts_delta_CHECK
+#define DEBUG_LOGIC
+#define PRINT
 
 #if defined(AVB_1722_FORMAT_61883_6) || defined(AVB_1722_FORMAT_SAF)
 
@@ -257,7 +257,7 @@ int avb1722_create_packet(unsigned char Buf0[],
 		if (stream_info->samples_left_in_fifo_packet < samples_in_packet) {
 			// Not enough samples left in fifo packet to fill the 1722 packet
 			// therefore pull out remaining samples and get the next packet
-#ifdef USE_XSCOPE
+#ifdef USE_XSCOPE_PROBES
 		    //xscope_probe(21); // start
 #endif
 			for (i = 0; i < num_channels; i++) {
@@ -284,7 +284,7 @@ int avb1722_create_packet(unsigned char Buf0[],
 			dest += (stream_info->samples_left_in_fifo_packet - 1) * num_channels;
 			samples_in_packet -= stream_info->samples_left_in_fifo_packet;
 			stream_info->samples_left_in_fifo_packet = samples_per_fifo_packet;
-#ifdef USE_XSCOPE
+#ifdef USE_XSCOPE_PROBES
 			//xscope_probe(21);
 #endif
 #ifdef DEBUG_LOGIC
@@ -335,8 +335,10 @@ int avb1722_create_packet(unsigned char Buf0[],
 				if(prev_valid) {
 				    // trace only for stream 0
 					//xscope_probe_data(15, (int) (ptp_ts - prev_ptp_ts));
+#ifdef USE_XSCOPE_PROBES
 					xscope_probe_data(16, (int) (presentationTime - prev_presentationTime));
 					xscope_probe_data(17, (unsigned) (presentationTime));
+#endif
 
 #ifdef DEBUG_LOGIC
 					int ptp_ts_delta = (int) (ptp_ts - prev_ptp_ts);
@@ -365,7 +367,11 @@ int avb1722_create_packet(unsigned char Buf0[],
 	// Update timestamp value and valid flag.
 	AVB1722_AVBTP_HeaderGen(Buf, timerValid, ptp_ts, pkt_data_length, stream_info->sequence_number, stream_id0);
 
+#ifdef BUGFIX_12860
     stream_info->last_transmit_time += AVB1722_PACKET_PERIOD_TIMER_TICKS;
+#else
+    stream_info->last_transmit_time = time;
+#endif
 	stream_info->transmit_ok = 0;
 	stream_info->sequence_number++;
 	return (AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + pkt_data_length);
