@@ -3,8 +3,12 @@
 
 //#define XSCOPE_1722_TALKER
 #define PRINT
+#define ETHERNET_COUNT_PACKETS  //activate MII error counters
 
-/* Configuration parameters for the ethernet code */
+//==========================================================================================
+// Configuration parameters for the ethernet code
+//==========================================================================================
+
 #define PHY_ADDRESS 0x0
 #define MAX_ETHERNET_PACKET_SIZE (1518)
 #define NUM_MII_RX_BUF 6
@@ -17,7 +21,9 @@
 #define MII_TX_BUFSIZE_LOW_PRIORITY (200)
 #define ETHERNET_MAX_TX_HP_PACKET_SIZE (300)
 
-/* General purpose AVB configuration */
+//==========================================================================================
+// General purpose AVB configuration
+//==========================================================================================
 #define AVB_MAX_NAME_LEN 25
 #ifndef AVB_CHANNELS_PER_SINK
   #define AVB_CHANNELS_PER_SINK 0
@@ -64,8 +70,33 @@
 // Defining this makes SRP auto-start and auto-stop a stream when listeners come and go
 #define SRP_AUTO_TALKER_STREAM_CONTROL
 
-///////////////////////////////////////
+//==========================================================================================
+// Defaults
+//==========================================================================================
+#ifndef AVB_NUM_SINKS
+#define AVB_NUM_SINKS 1
+#endif
+
+#ifndef AVB_NUM_LISTENER_UNITS
+#define AVB_NUM_LISTENER_UNITS 0
+#endif
+
+#ifndef AVB_NUM_SOURCES
+#define AVB_NUM_SOURCES 0
+#endif
+
+#ifndef AVB_NUM_TALKER_UNITS
+#define AVB_NUM_TALKER_UNITS 0
+#endif
+
+#ifndef AVB_AUDIO_IF
+#define AVB_AUDIO_IF i2s
+#endif
+
+
+//==========================================================================================
 // Derived Defines.
+//==========================================================================================
 #ifndef AVB_NUM_MEDIA_INPUTS
 #define AVB_NUM_MEDIA_INPUTS (AVB_NUM_SOURCES*AVB_CHANNELS_PER_SOURCE)
 #endif
@@ -110,27 +141,5 @@
 //#define AVB_MAX_CHANNELS_PER_STREAM (AVB_CHANNELS_PER_SOURCE >= AVB_CHANNELS_PER_SINK) ? AVB_CHANNELS_PER_SOURCE : AVB_CHANNELS_PER_SINK
 // 8 Fails for some reason
 #define AVB_MAX_CHANNELS_PER_STREAM 24
-
-///////////////////////////////////////
-// Defaults
-#ifndef AVB_NUM_SINKS
-#define AVB_NUM_SINKS 0
-#endif
-
-#ifndef AVB_NUM_LISTENER_UNITS
-#define AVB_NUM_LISTENER_UNITS 0
-#endif
-
-#ifndef AVB_NUM_SOURCES
-#define AVB_NUM_SOURCES 0
-#endif
-
-#ifndef AVB_NUM_TALKER_UNITS
-#define AVB_NUM_TALKER_UNITS 0
-#endif
-
-#ifndef AVB_AUDIO_IF
-#define AVB_AUDIO_IF i2s
-#endif
 
 #endif
