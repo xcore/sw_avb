@@ -11,6 +11,7 @@
 #include "avb_media_clock_def.h"
 #include "gptp.h"
 #include "avb_control_types.h"
+#include "get_core_id_from_chanend.h"
 #include "xscope.h"
 
 #define DEBUG_MEDIA_CLOCK
@@ -120,7 +121,7 @@ static void manage_buffer(buf_info_t &b,
   timer tmr;
   int thiscore_now,othercore_now;
   unsigned server_core_id;
-#ifdef USE_XSCOPE
+#ifdef USE_XSCOPE_PROBES
   xscope_probe(1); // start
 #endif
 
@@ -148,7 +149,7 @@ static void manage_buffer(buf_info_t &b,
     buf_ctl :> server_core_id;
   }
 
-  if (server_core_id != get_core_id())
+  if (server_core_id != get_core_id_from_chanend(ptp_svr))
   {
 	  outgoing_timestamp_local = outgoing_timestamp_local - (othercore_now - thiscore_now);
   }
@@ -181,7 +182,7 @@ static void manage_buffer(buf_info_t &b,
       buf_ctl <: b.fifo;
       buf_ctl <: BUF_CTL_ACK;
       inct(buf_ctl);  
-#ifdef USE_XSCOPE
+#ifdef USE_XSCOPE_PROBES
      xscope_probe(1);  // stop 0
 #endif
      return;
@@ -205,7 +206,7 @@ static void manage_buffer(buf_info_t &b,
 
   sample_diff = diff / ((int) ((wordLength*10) >> WC_FRACTIONAL_BITS));
 
-#ifdef USE_XSCOPE
+#ifdef USE_XSCOPE_PROBES
 			xscope_probe_data(8, (unsigned int) diff);
 			xscope_probe_data(9, (unsigned int) sample_diff);
 			xscope_probe_data(10, (unsigned int) fill);
@@ -265,7 +266,7 @@ static void manage_buffer(buf_info_t &b,
 
   b.prev_diff = sample_diff;
 
-#ifdef USE_XSCOPE
+#ifdef USE_XSCOPE_PROBES
   xscope_probe(1);  // stop 1
 #endif
 }
@@ -321,7 +322,7 @@ void media_clock_server(chanend media_clock_ctl,
                                  clk_time,
                                  CLOCK_RECOVERY_PERIOD);
 
-#ifdef USE_XSCOPE
+#ifdef USE_XSCOPE_PROBES
 			xscope_probe_data(4, (unsigned) media_clocks[i].wordLength);
 #endif
             for (int j=0;j<num_clk_ctl;j++) {
