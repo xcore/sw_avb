@@ -56,7 +56,7 @@ LISTENER_DEBUG_FLAGS = -DAVB_1722_RECORD_ERRORS
 ###########################################################################
 # Common Flags
 ###########################################################################
-XCC_FLAGS += -O3 -save-temps -g -report -Xmapper --map -Xmapper MAPFILE
+XCC_FLAGS = -O3 -save-temps -g -report -Xmapper --map -Xmapper MAPFILE
 XCC_FLAGS += -DAVB_1722_RECORD_ERRORS -DAVB_AUDIO_IF_$(AUDIO_INTERFACE) -DAVB_1722_FORMAT_$(AUDIO_FORMAT)
 #XCC_FLAGS += -fllvm
 #XCC_FLAGS = -lxscope
@@ -64,7 +64,7 @@ XCC_FLAGS += -DAVB_1722_RECORD_ERRORS -DAVB_AUDIO_IF_$(AUDIO_INTERFACE) -DAVB_17
 XSCOPE_LIB = xscope
 
 ifeq ($(XSCOPE),1)
-XCC_FLAGS += -l$(XSCOPE_LIB) -DUSE_XSCOPE -DUSE_XSCOPE_PROBES
+XCC_FLAGS += -l$(XSCOPE_LIB) -DUSE_XSCOPE #-DUSE_XSCOPE_PROBES
 endif
 
 
@@ -177,7 +177,7 @@ XCC_FLAGS_Talker1x8Chan_Listener1x8Chan_TDM_test = -DTALKER -DLISTENER $(XCC_FLA
 XCC_FLAGS_Talker1x8Chan_Listener1x8Chan_TDM_test += $(TALKER_DEBUG_FLAGS) $(LISTENER_DEBUG_FLAGS)
 XCC_FLAGS_Talker1x8Chan_Listener1x8Chan_TDM_test += -DAVB_NUM_SOURCES=1 -DAVB_CHANNELS_PER_SOURCE=8 
 XCC_FLAGS_Talker1x8Chan_Listener1x8Chan_TDM_test += -DAVB_NUM_SINKS=1 -DAVB_CHANNELS_PER_SINK=8 
-XCC_FLAGS_Talker1x8Chan_Listener1x8Chan_TDM_test += -DUSE_LOCAL_CLOCK -DGEN_TEST_SIGNAL -DCHECK_TEST_SIGNAL 
+XCC_FLAGS_Talker1x8Chan_Listener1x8Chan_TDM_test += -DGEN_TEST_SIGNAL #-DCHECK_TEST_SIGNAL 
 
 XCC_FLAGS_Talker2x8Chan_Listener2x8Chan_TDM = -DTALKER -DLISTENER $(XCC_FLAGS) -DAVB_MAX_AUDIO_SAMPLE_RATE=48000
 XCC_FLAGS_Talker2x8Chan_Listener2x8Chan_TDM += $(TALKER_DEBUG_FLAGS) $(LISTENER_DEBUG_FLAGS)
@@ -225,13 +225,28 @@ XCC_FLAGS_Talker1x16Chan_Listener1x8Chan_TDM_test = -DTALKER -DLISTENER $(XCC_FL
 XCC_FLAGS_Talker1x16Chan_Listener1x8Chan_TDM_test += $(TALKER_DEBUG_FLAGS) $(LISTENER_DEBUG_FLAGS)
 XCC_FLAGS_Talker1x16Chan_Listener1x8Chan_TDM_test += -DAVB_NUM_SOURCES=1 -DAVB_CHANNELS_PER_SOURCE=16
 XCC_FLAGS_Talker1x16Chan_Listener1x8Chan_TDM_test += -DAVB_NUM_SINKS=1 -DAVB_CHANNELS_PER_SINK=8
-XCC_FLAGS_Talker2x12Chan_Listener2x12Chan_TDM_test += -DUSE_LOCAL_CLOCK -DGEN_TEST_SIGNAL #-DCHECK_TEST_SIGNAL
+XCC_FLAGS_Talker1x16Chan_Listener1x8Chan_TDM_test += -DUSE_LOCAL_CLOCK -DGEN_TEST_SIGNAL #-DCHECK_TEST_SIGNAL
 # End: Asymmetric pair of configs
 
-XCC_FLAGS_Talker1x16Chan_TDM_test = -DTALKER $(XCC_FLAGS) -DAVB_MAX_AUDIO_SAMPLE_RATE=48000
-XCC_FLAGS_Talker1x16Chan_TDM_test += $(TALKER_DEBUG_FLAGS)
+# Start: Asymmetric trio of configs
+# For 3 Endpoints
+XCC_FLAGS_Listener2x16Chan_TDM = -DLISTENER $(XCC_FLAGS) -DAVB_MAX_AUDIO_SAMPLE_RATE=48000
+XCC_FLAGS_Listener2x16Chan_TDM += $(LISTENER_DEBUG_FLAGS)
+XCC_FLAGS_Listener2x16Chan_TDM += -DAVB_NUM_SINKS=2 -DAVB_CHANNELS_PER_SINK=16
+
+XCC_FLAGS_Talker1x16Chan_Listener1x16Chan_TDM_test = -DTALKER -DLISTENER $(XCC_FLAGS) -DAVB_MAX_AUDIO_SAMPLE_RATE=48000
+XCC_FLAGS_Talker1x16Chan_Listener1x16Chan_TDM_test += $(TALKER_DEBUG_FLAGS) $(LISTENER_DEBUG_FLAGS)
+XCC_FLAGS_Talker1x16Chan_Listener1x16Chan_TDM_test += -DAVB_NUM_SOURCES=1 -DAVB_CHANNELS_PER_SOURCE=16
+XCC_FLAGS_Talker1x16Chan_Listener1x16Chan_TDM_test += -DAVB_NUM_SINKS=1 -DAVB_CHANNELS_PER_SINK=16
+XCC_FLAGS_Talker1x16Chan_Listener1x16Chan_TDM_test += -DGEN_TEST_SIGNAL #-DCHECK_TEST_SIGNAL
+
+XCC_FLAGS_Talker1x16Chan_TDM_test = -DTALKER -DLISTENER $(XCC_FLAGS) -DAVB_MAX_AUDIO_SAMPLE_RATE=48000
+XCC_FLAGS_Talker1x16Chan_TDM_test += $(TALKER_DEBUG_FLAGS) $(LISTENER_DEBUG_FLAGS)
 XCC_FLAGS_Talker1x16Chan_TDM_test += -DAVB_NUM_SOURCES=1 -DAVB_CHANNELS_PER_SOURCE=16
+XCC_FLAGS_Talker1x16Chan_TDM_test += -DAVB_NUM_SINKS=1 -DAVB_CHANNELS_PER_SINK=8
 XCC_FLAGS_Talker1x16Chan_TDM_test += -DUSE_LOCAL_CLOCK -DGEN_TEST_SIGNAL #-DCHECK_TEST_SIGNAL
+# End: Asymmetric trio of configs
+
 
 # Configuration Specific Messages
 ifeq ($(CONFIG),Talker4x2Chan_Listener4x2Chan) 
@@ -249,12 +264,13 @@ USED_MODULES += module_xlog
 endif
 
 XCC_FLAGS_xdk_demo_audio_if.xc = $(XCC_FLAGS) -fsubword-select
+XCC_FLAGS_xlog_server_support.c = -O0 -g
 
 # This uses the avb mac filtering in module_avb_common
 USE_AVB_MAC_CUSTOM_FILTER=1
 
 #Add codecs from module_avb_audio
-USED_CODECS = CS42448
+USED_CODECS = 
 
 #Add audio interfaces from module_avb_audio
 USED_AUDIO_INTERFACES = $(AUDIO_INTERFACE)
