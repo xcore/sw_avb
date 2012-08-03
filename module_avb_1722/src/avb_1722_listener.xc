@@ -20,6 +20,7 @@
 #include "mac_custom_filter.h"
 #include "avb_conf.h"
 #include "xscope.h"
+#include "simple_printf.h"
 
 #define TIMEINFO_UPDATE_INTERVAL 50000000
 
@@ -109,6 +110,10 @@ void avb_1722_listener(chanend ethernet_rx_svr,
 	unsigned int src_port;
 	int valid_timeinfo = 1;
 
+#ifdef AVB_1722_DEBUG_SHOW_FIRST_PACKET
+	int seen_router_link = -1;
+#endif
+
 #if defined(AVB_1722_FORMAT_61883_4)
 	// Conditional due to compiler bug 11998.
 	timer tmr;
@@ -148,12 +153,19 @@ void avb_1722_listener(chanend ethernet_rx_svr,
 			pktByteCnt -= 4;
 			avb_hash = RxBuf[1];
 
-#ifdef USE_XSCOPE
+#ifdef USE_XSCOPE_PROBES
 			//xscope_probe(0); // start
 #endif
 			// process the audio packet if enabled.
 			if (avb_hash < MAX_AVB_STREAMS_PER_LISTENER && listener_streams[avb_hash].active && valid_timeinfo)
             {
+#ifdef AVB_1722_DEBUG_SHOW_FIRST_PACKET
+			    //xscope_probe_data(21, router_link);
+			    if(router_link!=seen_router_link) {
+			      simple_printf("Listener with router_link 0x%x Processing first 1722 packet!!!!\n", router_link);
+			      seen_router_link = router_link;
+                }
+#endif
 				// process the current packet
 				avb_1722_listener_process_packet(buf_ctl,
 					(RxBuf, unsigned char[]),
@@ -163,7 +175,7 @@ void avb_1722_listener(chanend ethernet_rx_svr,
 					avb_hash,
 					notified_buf_ctl);
             }
-#ifdef USE_XSCOPE
+#ifdef USE_XSCOPE_PROBES
 			//xscope_probe(0); // stop
 #endif
           break;
@@ -204,8 +216,9 @@ void avb_1722_listener(chanend ethernet_rx_svr,
 				int stream_num;
 				listener_ctl :> stream_num;
 				configure_stream(listener_ctl,
-				listener_streams[stream_num]);
+				  listener_streams[stream_num]);
 				listener_ctl <: AVB1722_ACK;
+                simple_printf("AVB1722_CONFIGURE_LISTENER_STREAM Stream %d for Listener with router_link 0x%x!!!!\n",stream_num,router_link);
 				break;
 				}
 			case AVB1722_ADJUST_LISTENER_STREAM:
@@ -213,7 +226,7 @@ void avb_1722_listener(chanend ethernet_rx_svr,
 				int stream_num;
 				listener_ctl :> stream_num;
 				adjust_stream(listener_ctl,
-				listener_streams[stream_num]);
+				  listener_streams[stream_num]);
 				listener_ctl <: AVB1722_ACK;
 				break;
 				}
