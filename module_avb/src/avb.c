@@ -78,7 +78,7 @@ static void register_talkers(chanend talker_ctl[])
       source->stream.local_id = j;
       source->stream.flags = 0;
       source->stream.streamId[0] = (mac_addr[0] << 24) | (mac_addr[1] << 16) | (mac_addr[2] <<  8) | (mac_addr[3] <<  0);
-      source->stream.streamId[1] = (mac_addr[4] << 24) | (mac_addr[5] << 16) | ((source->stream.local_id & 0xffff)<<0);
+      source->stream.streamId[1] = (mac_addr[4] << 24) | (mac_addr[5] << 16) | ((max_talker_stream_id & 0xffff)<<0);
       source->presentation = AVB_DEFAULT_PRESENTATION_TIME_DELAY_NS;
       source->stream.vlan = AVB_DEFAULT_VLAN;
       source->stream.srp_talker_attr = mrp_get_attr();
@@ -699,6 +699,7 @@ int getset_avb_sink_state(int set,
           avb_1722_add_stream_mapping(c_mac_tx,
                                       sink->stream.streamId,
                                       router_link,
+                                      sink_num,
                                       sink->stream.local_id);
         }
 

@@ -35,7 +35,8 @@ int avb_1722_router_table_lookup_simple(int key0,
 void avb_1722_router_table_add_entry_simple(int key0,
                                             int key1,
                                             int link,
-                                            int avb_hash);
+                                            int avb_hash,
+                                            int sink_local_id);
 
 
 
