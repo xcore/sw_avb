@@ -8,7 +8,6 @@
 #include "i2c.h"
 #include "avb.h"
 #include "audio_clock_CS2300CP.h"
-#include "audio_codec_CS42448.h"
 #include "simple_printf.h"
 #include "media_fifo.h"
 #include "avb_conf.h"
@@ -169,10 +168,11 @@ media_output_fifo_t ofifos[AVB_NUM_MEDIA_OUTPUTS];
 #define NUM_XSCOPE_PROBES 23
 void xscope_user_init() {
 
+    int core_id = get_core_id();
 #ifdef USE_XSCOPE_PROBES
-    if (get_core_id() == 0) {
-       xscope_config_uart(p_uart_tx); // only on core 0
-       simple_printf("Registering %d XSCOPE probes on core 0\n", NUM_XSCOPE_PROBES);
+    if (core_id == 0) {
+       //xscope_config_uart(p_uart_tx); // only on core 0
+       //Used to make it work! simple_printf("Registering %d XSCOPE probes on core %d\n", NUM_XSCOPE_PROBES, core_id);
        xscope_register(NUM_XSCOPE_PROBES,
     	               XSCOPE_STARTSTOP, "Process 1722 packet startstop", XSCOPE_UINT, "time",
     	               XSCOPE_STARTSTOP, "manage_buffer duration", XSCOPE_UINT, "time",
@@ -201,11 +201,16 @@ void xscope_user_init() {
     	               //XSCOPE_DISCRETE, "AVBTP_TIMESTAMP", XSCOPE_UINT, "nanoseconds"
     	               );
     };
+#else
+    xscope_register(0,0,"",0,"");
 #endif
 
-    simple_printf("Activating print via XScope\n");
-    //xscope_config_io(XSCOPE_IO_BASIC);
+    xscope_config_io(XSCOPE_IO_BASIC);
+    simple_printf("Activating print via XScope on core %d\n",core_id);
 
+    if (core_id == 0) {
+      simple_printf("Registering %d XSCOPE probes on core %d\n", NUM_XSCOPE_PROBES, core_id);
+    }
 }
 #endif
 
@@ -381,6 +386,7 @@ int main(void) {
 		// Application threads
 		on stdcore[0]:
 		{
+
 			// First initialize avb higher level protocols
 		    avb_init(media_ctl,
 #ifdef LISTENER
@@ -393,7 +399,7 @@ int main(void) {
 #else
 					null,
 #endif
-					//hack that only works for value 2: AVB_NUM_TALKER_UNITS*2
+					//hack that only works for value AVB_NUM_TALKER_UNITS 0 or 1: AVB_NUM_TALKER_UNITS*2
 					media_clock_ctl, rx_link[1+AVB_NUM_LISTENER_UNITS], tx_link[1+AVB_NUM_TALKER_UNITS], ptp_link[AVB_NUM_TALKER_UNITS*2]);
 
 			demo(rx_link[1+AVB_NUM_LISTENER_UNITS], tx_link[1+AVB_NUM_TALKER_UNITS], c_gpio_ctl, connect_status);
@@ -451,6 +457,11 @@ void ptp_server_and_gpio(chanend c_rx, chanend c_tx, chanend ptp_link[],
 		}
 	}
 }
+
+// Error Counter Values
+#ifdef ETHERNET_COUNT_PACKETS
+unsigned mii_overflow, length, address, filter, crc;
+#endif
 
 /** The main application control thread **/
 void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status) {
@@ -549,7 +560,16 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 				break;
 			}
 
+#ifdef ETHERNET_COUNT_PACKETS
 			// add any special control packet handling here
+	        mac_get_global_counters(c_rx,
+	           mii_overflow,
+	           length,
+	           address,
+	           filter,
+	           crc
+	          );
+#endif
 			break;
 
 			// Receive any events from user button presses
@@ -675,12 +695,12 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 
 			  // if so, add it to the stream table
 			  if (res) {
-			    simple_printf("L: Found stream %x.%x, address %x:%x:%x:%x:%x:%x, vlan %d\n",
-			    		streamId[0], streamId[1],
+			    simple_printf("L: Found stream number %d. Stream ID %x.%x, address %x:%x:%x:%x:%x:%x, vlan %d\n",
+			    		res, streamId[0], streamId[1],
 			    		addr[0], addr[1], addr[2], addr[3], addr[4], addr[5],
 			    		vlan);
 
-			    stream_index = streamId[1] & 0xf; // up to 15 streams
+			    stream_index = res-2; // 2 is hack. Won't word when there's no Talker
 			    if(stream_index > AVB_NUM_SINKS) {
 			    	simple_printf("L: WARNING: Can't register stream %d. AVB_NUM_SINKS is limited to %d\n",stream_index, AVB_NUM_SINKS);
 			    	break;
