@@ -188,7 +188,7 @@ inline void i2s_master(const clock mclk,
 
     tmr :> timestamp;
 
-#ifdef USE_XSCOPE
+#ifdef USE_XSCOPE_PROBES
 		if(prev_timestamp_valid) {
 		    // trace only for stream 0
 			xscope_probe_data(18, (int) (timestamp - prev_timestamp));

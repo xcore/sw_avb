@@ -98,6 +98,9 @@ inline void tdm_master_multi(const clock mclk,
     unsigned check_active=0;
 #endif
 
+    //tmr :> t;
+    // arbitrary delay to avoid ET_ILLEGAL_RESOURCE caused by xlog grabbing all the chanends
+    //tmr when timerafter(t+30000) :> void;
     media_ctl_register(media_ctl, num_chan_in, input_fifos, 0, null, clk_ctl_index);
 
     c_listener <: 0;
@@ -116,7 +119,13 @@ inline void tdm_master_multi(const clock mclk,
             num_din);
 
 
-    p_din[0] :> void @ t;
+    if(num_din>0) {
+        p_din[0] :> void @ t;
+    } else if(num_dout>0) {
+        p_dout[0] <: 0 @ t;
+    } else {
+        assert(0);
+    }
 
     t += 64;
 
@@ -140,7 +149,7 @@ inline void tdm_master_multi(const clock mclk,
             unsigned x;
             for(int i=0; i<num_dout; i++) {
                 c_listener :> x;
-#ifdef USE_XSCOPE
+#ifdef USE_XSCOPE_PROBES
                 xscope_probe_data(22, x);
 #endif
 #ifdef CHECK_TEST_SIGNAL
