@@ -132,7 +132,7 @@ void update_media_clock_stream_info(int clock_index,
 	clock_info->stream_info2.locked = locked;
 	clock_info->stream_info2.fill = fill;
 
-#ifdef USE_XSCOPE
+#ifdef USE_XSCOPE_PROBES
 			xscope_probe_data(5, (unsigned int) local_ts);
 			xscope_probe_data(6, (unsigned int) outgoing_ptp_ts);
 			xscope_probe_data(7, (unsigned int) presentation_ts);
@@ -259,7 +259,7 @@ unsigned int update_media_clock(chanend ptp_svr,
 			// This is the version for CLOCK_RECOVERY_PERIOD = (1<<23)
 			// clock_info->wordlen = clock_info->wordlen - (perror / diff_local) * 128 - (ierror / diff_local) * 2;
 
-#ifdef USE_XSCOPE
+#ifdef USE_XSCOPE_PROBES
 			xscope_probe_data(2, (int) (perror >> 32));
 			xscope_probe_data(3, (int) (ierror >> 32));
 			xscope_probe_data(11, (int) (diff_local >> 32));

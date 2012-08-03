@@ -199,7 +199,7 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
 	   for (int i=0;i<num_channels;i++)  {
 		   media_output_fifo_set_ptp_timestamp(map[i], AVBTP_TIMESTAMP(pAVBHdr), sample_num);
 	   }
-#ifdef USE_XSCOPE
+#ifdef USE_XSCOPE_PROBES
 	   if((AVBTP_STREAM_ID0(pAVBHdr)&0xF) == 0) { // reduce probing to workaround xscope issue
 		  if(prev_avbtp_ts_valid) {
 	         //xscope_probe_data(14, (signed) (AVBTP_TIMESTAMP(pAVBHdr) - prev_avbtp_timestamp));
