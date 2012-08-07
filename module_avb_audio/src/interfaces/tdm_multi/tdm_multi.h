@@ -79,7 +79,7 @@ inline void tdm_master_multi(const clock mclk,
         out port p_bclk,
         out buffered port:4 p_wclk,
         out buffered port:32 ?p_dout[],
-        int  num_chan_out,
+        int num_chan_out,
         in buffered port:32 ?p_din[],
         int num_chan_in,
         int master_to_word_clock_ratio,
@@ -91,8 +91,8 @@ inline void tdm_master_multi(const clock mclk,
     unsigned t;
     unsigned timestamp;
     timer tmr;
-    unsigned num_dout = num_chan_out/TDM_NUM_CHANNELS;
-    unsigned num_din = num_chan_in/TDM_NUM_CHANNELS;
+    unsigned num_dout = (num_chan_out+TDM_NUM_CHANNELS-1)/TDM_NUM_CHANNELS;
+    unsigned num_din = (num_chan_in+TDM_NUM_CHANNELS-1)/TDM_NUM_CHANNELS;
 
 #ifdef CHECK_TEST_SIGNAL
     unsigned check_active=0;
@@ -103,10 +103,12 @@ inline void tdm_master_multi(const clock mclk,
     //tmr when timerafter(t+30000) :> void;
     media_ctl_register(media_ctl, num_chan_in, input_fifos, 0, null, clk_ctl_index);
 
-    c_listener <: 0;
-    for (int n=0;n<num_chan_out;n++) {
-        int x;
-        c_listener :> x;
+    if(num_chan_out>0) {
+        c_listener <: 0;
+        for (int n=0;n<num_chan_out;n++) {
+            int x;
+            c_listener :> x;
+        }
     }
 
     tdm_master_multi_configure_ports(mclk,
@@ -143,12 +145,19 @@ inline void tdm_master_multi(const clock mclk,
     {
         unsigned int active_fifos = media_input_fifo_enable_req_state();
         tmr :> timestamp;
-        c_listener <: timestamp;
+        if(num_chan_out>0) {
+          c_listener <: timestamp;
+        }
         for (int n = 0; n < TDM_NUM_CHANNELS; n++)
         {
             unsigned x;
             for(int i=0; i<num_dout; i++) {
-                c_listener :> x;
+                unsigned chan_idx = i*TDM_NUM_CHANNELS+n;
+                if(chan_idx < num_chan_out) {
+                    c_listener :> x;
+                } else {
+                    x = 0; // silent channel
+                }
 #ifdef USE_XSCOPE_PROBES
                 xscope_probe_data(22, x);
 #endif
@@ -177,6 +186,7 @@ inline void tdm_master_multi(const clock mclk,
 #endif
 
                 p_dout[i] <: bitrev(x << (32 - RESOLUTION)) & 0xffffff;
+
             }
             for(int i=0; i<num_din; i++) {
                 unsigned chan_idx = i*TDM_NUM_CHANNELS+n;
@@ -205,7 +215,9 @@ inline void tdm_master_multi(const clock mclk,
                 }
 
             }
+
         }
+
         t += TDM_NUM_CHANNELS * CLOCKS_PER_CHANNEL;
         p_wclk @ t <: 0b0001;
         media_input_fifo_update_enable_ind_state(active_fifos, 0xFFFFFFFF);
