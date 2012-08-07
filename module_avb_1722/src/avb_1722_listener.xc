@@ -130,6 +130,13 @@ void avb_1722_listener(chanend ethernet_rx_svr,
 	for (int i=0;i<MAX_AVB_STREAMS_PER_LISTENER;i++) {
 		listener_streams[i].active = 0;
 		listener_streams[i].state = 0;
+		// re-use router_link to avoid having to pass listener index and changin all apps
+		// warning! This only works if all listener threads have the same num_streams
+		if(i<num_streams) {
+		   listener_streams[i].unique_idx = (router_link*num_streams)+i;
+		} else {
+		   listener_streams[i].unique_idx = -1; // invalid
+		}
 	}
 
 	// initialisation
@@ -218,8 +225,10 @@ void avb_1722_listener(chanend ethernet_rx_svr,
 				configure_stream(listener_ctl,
 				  listener_streams[stream_num]);
 				listener_ctl <: AVB1722_ACK;
-                simple_printf("AVB1722_CONFIGURE_LISTENER_STREAM Stream %d for Listener with router_link 0x%x!!!!\n",stream_num,router_link);
-				break;
+#ifdef AVB_1722_DEBUG_LISTENER_CONFIG
+                simple_printf("AVB1722_CONFIGURE_LISTENER_STREAM Stream %d for Listener with router_link 0x%x\n",stream_num,router_link);
+#endif
+                break;
 				}
 			case AVB1722_ADJUST_LISTENER_STREAM:
 				{

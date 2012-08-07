@@ -135,7 +135,7 @@ typedef struct
 #ifdef BUGFIX_12860
 #define FUDGE_PERCENT 98
 #else
-#define FUDGE_PERCENT 90
+#define FUDGE_PERCENT 90  // This is a workaround!
 #endif
 
 #define AVB1722_PACKET_PERIOD_TIMER_TICKS (((100000000 / AVB1722_PACKET_RATE)*FUDGE_PERCENT)/100)
