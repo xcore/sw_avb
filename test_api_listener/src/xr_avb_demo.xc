@@ -6,16 +6,23 @@
 #include <string.h>
 #include <xscope.h>
 #include "ethernet_server.h"
-#include "audio_i2s.h"
 #include "i2c.h"
 #include "avb.h"
 #include "audio_clock_CS2300CP.h"
-#include "audio_codec_CS42448.h"
 #include "simple_printf.h"
 #include "media_fifo.h"
 
-// This is the number of master clocks in a word clock
-#define MASTER_TO_WORDCLOCK_RATIO 512
+#if(AVB_AUDIO_IF_i2s)
+#include "audio_i2s.h"
+#define AVB_AUDIO_IF_FUNC i2s_master
+#define MEDIA_OUTPUT_FIFO_FUNC media_output_fifo_to_xc_channel_split_lr
+#endif
+#if(AVB_AUDIO_IF_tdm_multi)
+#include "tdm_multi.h"
+#define AVB_AUDIO_IF_FUNC tdm_master_multi
+// TODO: Implement dedicated function for tdm_master_multi.
+#define MEDIA_OUTPUT_FIFO_FUNC media_output_fifo_to_xc_channel
+#endif
 
 // Set the period inbetween periodic processing to 50us based
 // on the Xcore 100Mhz timer.
@@ -69,8 +76,16 @@ on stdcore[0]: out port p_fs = PORT_SYNC_OUT;
 on stdcore[0]: clock b_mclk = XS1_CLKBLK_1;
 on stdcore[0]: clock b_bclk = XS1_CLKBLK_2;
 on stdcore[0]: in port p_aud_mclk = PORT_MCLK;
+
+#if(AVB_AUDIO_IF_i2s)
 on stdcore[0]: buffered out port:32 p_aud_bclk = PORT_SCLK;
 on stdcore[0]: out buffered port:32 p_aud_lrclk = PORT_LRCLK;
+#endif
+#if(AVB_AUDIO_IF_tdm_multi)
+on stdcore[0]: out port p_aud_bclk = PORT_SCLK;
+on stdcore[0]: out buffered port:4 p_aud_lrclk = PORT_LRCLK;
+#endif
+
 #if(AVB_NUM_SDATA_OUT>0)
 #define P_AUD_DOUT p_aud_dout
 on stdcore[0]: out buffered port:32 p_aud_dout[AVB_NUM_SDATA_OUT] = {
@@ -144,8 +159,15 @@ xscope_config_io(XSCOPE_IO_BASIC);
 }
 
 
-#if(!(AVB_NUM_SINKS%2 == 0 && AVB_NUM_SINKS>0))
-#error("AVB_NUM_SINKS must be an even number > 0 ")
+#if(AVB_NUM_SINKS==0)
+#error("AVB_NUM_SINKS must be > 0")
+#endif
+
+#ifdef AVB_RUN_ALL_THREADS_CORE0
+void dummy() {
+    while(1);
+}
+#define AVB_NUM_DUMMY_THREADS_CORE0 4-AVB_NUM_LISTENER_UNITS
 #endif
 
 int main(void) {
@@ -222,19 +244,19 @@ int main(void) {
 			{
 				audio_gen_CS2300CP_clock(p_fs, clk_ctl[0]);
 
-				i2s_master (b_mclk,
-						b_bclk,
-						p_aud_bclk,
-						p_aud_lrclk,
-						P_AUD_DOUT,
-						AVB_NUM_MEDIA_OUTPUTS,
-						P_AUD_DIN,
-						AVB_NUM_MEDIA_INPUTS,
-						MASTER_TO_WORDCLOCK_RATIO,
-						c_samples_to_codec,
-						null,
-						media_ctl[0],
-						0);
+                AVB_AUDIO_IF_FUNC(b_mclk,
+                        b_bclk,
+                        p_aud_bclk,
+                        p_aud_lrclk,
+                        P_AUD_DOUT,
+                        AVB_NUM_MEDIA_OUTPUTS,
+                        P_AUD_DIN,
+                        AVB_NUM_MEDIA_INPUTS,
+                        MASTER_TO_WORDCLOCK_RATIO,
+                        c_samples_to_codec,
+                        null,
+                        media_ctl[0],
+                        0);
 			}
 		}
 
@@ -248,7 +270,7 @@ int main(void) {
 
 		on stdcore[0]:
 		{	init_media_output_fifos(ofifos, ofifo_data, AVB_NUM_MEDIA_OUTPUTS);
-			media_output_fifo_to_xc_channel_split_lr(media_ctl[1],
+		    MEDIA_OUTPUT_FIFO_FUNC(media_ctl[1],
 					c_samples_to_codec,
 					0, // clk_ctl index
 					ofifos,
@@ -264,6 +286,12 @@ int main(void) {
 
 			demo(rx_link[1+AVB_NUM_LISTENER_UNITS], tx_link[1], c_gpio_ctl, connect_status);
 		}
+
+#ifdef AVB_RUN_ALL_THREADS_CORE0
+        par(int i=0; i<AVB_NUM_DUMMY_THREADS_CORE0; i++)
+		  on stdcore[0]: dummy();
+#endif
+
 	}
 
 	return 0;
@@ -317,6 +345,10 @@ void ptp_server_and_gpio(chanend c_rx, chanend c_tx, chanend ptp_link[],
 		}
 	}
 }
+// Error Counter Values
+#ifdef ETHERNET_COUNT_PACKETS
+unsigned mii_overflow, length, address, filter, crc;
+#endif
 
 /** The main application control thread **/
 void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status) {
@@ -372,6 +404,15 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 			}
 
 			// add any special control packet handling here
+#ifdef ETHERNET_COUNT_PACKETS
+            mac_get_global_counters(c_rx,
+               mii_overflow,
+               length,
+               address,
+               filter,
+               crc
+              );
+#endif
 			break;
 
 			// Receive any events from user button presses
@@ -470,8 +511,8 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 	                        addr[0], addr[1], addr[2], addr[3], addr[4], addr[5],
 	                        vlan);
 
-	                if(stream_index > AVB_NUM_SINKS) {
-	                    simple_printf("L: WARNING: Can't register stream %d. AVB_NUM_SINKS is limited to %d\n",stream_index, AVB_NUM_SINKS);
+	                if(stream_index >= AVB_NUM_SINKS) {
+	                    simple_printf("L: WARNING: Can't register stream number %d. AVB_NUM_SINKS is limited to %d\n",stream_index+1, AVB_NUM_SINKS);
 	                    break;
 	                }
 
