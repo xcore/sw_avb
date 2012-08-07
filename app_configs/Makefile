@@ -71,9 +71,25 @@ endif
 ###########################################################################
 #############################  Configurations #############################
 ###########################################################################
+# Configuration naming convention:
+# example: 1t1s16ch_2l2s32ch_TDM
+# $X[tl]$Ys$Zch[_$if]
+# $Xt: 	number of talkers
+# $Xl: 	number of listeners
+# $Ys: 	number of streams
+# $Zch: number of channels
+# $if:	optional: audio interface other than i2s
+
 
 #----------------------------- Talker Only -------------------------------#
 # Config specific flags
+
+XCC_FLAGS_1t1s16ch = -DTALKER $(XCC_FLAGS) -DUSE_LOCAL_CLOCK -DAVB_MAX_AUDIO_SAMPLE_RATE=48000 
+XCC_FLAGS_1t1s16ch += -DAVB_NUM_SOURCES=1 -DAVB_CHANNELS_PER_SOURCE=16 
+
+XCC_FLAGS_1t1s16ch_TDM = $(XCC_FLAGS_1t1s16ch)
+#same flags as XCC_FLAGS_1t1s16ch. TDM in name will cause AUDIO_INTERFACE to be set to tdm_multi
+
 XCC_FLAGS_Talker = -DTALKER $(XCC_FLAGS)
 
 XCC_FLAGS_Talker2x4Chan = -DTALKER $(XCC_FLAGS)

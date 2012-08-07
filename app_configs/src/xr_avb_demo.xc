@@ -114,6 +114,9 @@ on stdcore[0]: out buffered port:32 p_aud_dout[AVB_NUM_SDATA_OUT] = {
 #if(AVB_NUM_SDATA_OUT>6)
 		PORT_SDATA_IN1,
 #endif
+#if(AVB_NUM_SDATA_OUT>7)
+        PORT_SDATA_IN0,
+#endif
 };
 #else
 #define P_AUD_DOUT null
@@ -140,6 +143,9 @@ on stdcore[0]: in buffered port:32 p_aud_din[AVB_NUM_SDATA_IN] = {
 #endif
 #if(AVB_NUM_SDATA_IN>6)
 		PORT_SDATA_OUT1,
+#endif
+#if(AVB_NUM_SDATA_IN>7)
+        PORT_SDATA_OUT0,
 #endif
 };
 #else

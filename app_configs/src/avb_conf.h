@@ -5,6 +5,8 @@
 #define PRINT
 #define ETHERNET_COUNT_PACKETS  //activate MII error counters
 
+//#define BUGFIX_12860
+
 //==========================================================================================
 // Configuration parameters for the ethernet code
 //==========================================================================================
@@ -15,7 +17,9 @@
 #define NUM_MII_TX_BUF 3
 #define ETHERNET_RX_HP_QUEUE 1
 #define MAX_ETHERNET_CLIENTS   5
-#define MII_RX_BUFSIZE_HIGH_PRIORITY (700)    
+#ifndef MII_RX_BUFSIZE_HIGH_PRIORITY
+#define MII_RX_BUFSIZE_HIGH_PRIORITY (700)
+#endif
 #define MII_RX_BUFSIZE_LOW_PRIORITY (300)
 #define MII_TX_BUFSIZE_HIGH_PRIORITY (300)
 #define MII_TX_BUFSIZE_LOW_PRIORITY (200)
@@ -122,6 +126,9 @@
 #define AVB_NUM_SDATA_IN AVB_NUM_MEDIA_INPUTS/TDM_NUM_CHANNELS
 #endif
 
+//==========================================================================================
+// Checks
+//==========================================================================================
 //// i2s specific checks
 #if(AVB_AUDIO_IF_i2s)
 #if(AVB_NUM_MEDIA_INPUTS>16)
@@ -135,6 +142,10 @@
 #if((AVB_NUM_MEDIA_INPUTS+AVB_NUM_MEDIA_OUTPUTS)>16)
 #error "AVB_NUM_MEDIA_INPUTS+AVB_NUM_MEDIA_OUTPUTS exceeds 16, the max channels over 8 i2s lines"
 #endif
+#endif
+
+#if(AVB_NUM_SDATA_OUT>7)
+#warning "J12 jumper on AVB Board must be removed because SDATA_IN0 is reconfigured as output!!!"
 #endif
 
 // Todo: This should be per Talker/Listener
