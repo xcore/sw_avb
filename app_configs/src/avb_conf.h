@@ -4,7 +4,7 @@
 //#define XSCOPE_1722_TALKER
 #define PRINT
 #define ETHERNET_COUNT_PACKETS  //activate MII error counters
-
+#define AVB_1722_DEBUG_SHOW_FIRST_PACKET
 //#define BUGFIX_12860
 
 //==========================================================================================
@@ -122,8 +122,9 @@
 // Must be a multiple of 4
 #define CLOCKS_PER_CHANNEL 32
 #define MASTER_TO_WORDCLOCK_RATIO TDM_NUM_CHANNELS*CLOCKS_PER_CHANNEL
-#define AVB_NUM_SDATA_OUT AVB_NUM_MEDIA_OUTPUTS/TDM_NUM_CHANNELS
-#define AVB_NUM_SDATA_IN AVB_NUM_MEDIA_INPUTS/TDM_NUM_CHANNELS
+// round-up to support channel counts that are not a multiple of TDM_NUM_CHANNELS
+#define AVB_NUM_SDATA_OUT (AVB_NUM_MEDIA_OUTPUTS+TDM_NUM_CHANNELS-1)/TDM_NUM_CHANNELS
+#define AVB_NUM_SDATA_IN (AVB_NUM_MEDIA_INPUTS+TDM_NUM_CHANNELS-1)/TDM_NUM_CHANNELS
 #endif
 
 //==========================================================================================
