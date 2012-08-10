@@ -2,7 +2,7 @@
 #define __avb_conf_h__
 
 /* Debug Switches */
-//#define AVB_1722_DEBUG_SHOW_FIRST_PACKET
+#define AVB_1722_DEBUG_SHOW_FIRST_PACKET
 #define ETHERNET_COUNT_PACKETS
 
 /* Configuration parameters for the ethernet code */
@@ -72,7 +72,7 @@
 //==========================================================================================
 
 //#define AVB_MAX_CHANNELS_PER_STREAM (AVB_CHANNELS_PER_SOURCE >= AVB_CHANNELS_PER_SINK) ? AVB_CHANNELS_PER_SOURCE : AVB_CHANNELS_PER_SINK
-#define AVB_MAX_CHANNELS_PER_STREAM 16
+#define AVB_MAX_CHANNELS_PER_STREAM 20
 
 #define AVB_SINK_MAP_SIZE (AVB_NUM_MEDIA_OUTPUTS/AVB_NUM_SINKS)
 
