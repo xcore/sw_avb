@@ -208,12 +208,13 @@ inline void tdm_master_multi(const clock mclk,
 
                 x = (bitrev(x) >> (32-RESOLUTION)) & 0xffffff;
 
-                if (active_fifos & (1 << chan_idx)) {
-                    media_input_fifo_push_sample(input_fifos[chan_idx], x, timestamp);
-                } else {
-                    media_input_fifo_flush(input_fifos[chan_idx]);
+                if(chan_idx < num_chan_in) {
+                    if (active_fifos & (1 << chan_idx)) {
+                        media_input_fifo_push_sample(input_fifos[chan_idx], x, timestamp);
+                    } else {
+                        media_input_fifo_flush(input_fifos[chan_idx]);
+                    }
                 }
-
             }
 
         }
