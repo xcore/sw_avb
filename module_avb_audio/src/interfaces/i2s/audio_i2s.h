@@ -6,6 +6,7 @@
   an audio codec using the I2S digital audio interface format.
 */
 
+#include <xscope.h>
 #include "avb_conf.h"
 #include "media_fifo.h"
 #include <xclib.h>
@@ -230,6 +231,7 @@ inline void i2s_master(const clock mclk,
           sample_out = bitrev(sample_out << 8);
 #pragma xta endpoint "i2s_master_sample_output"
           p_dout[k] <: sample_out;
+          // xscope_probe_data(j, sample_out);
         }
         
       }

@@ -90,6 +90,18 @@ on stdcore[0]: port p_uart_tx = PORT_UART_TX;
 media_output_fifo_data_t ofifo_data[AVB_NUM_MEDIA_OUTPUTS];
 media_output_fifo_t ofifos[AVB_NUM_MEDIA_OUTPUTS];
 
+
+void xscope_user_init()
+{
+	xscope_register(2,
+		XSCOPE_CONTINUOUS, "Samples 1", XSCOPE_UINT, "val",
+		XSCOPE_CONTINUOUS, "Samples 2", XSCOPE_UINT, "val"
+		);
+	xscope_config_io(XSCOPE_IO_BASIC);
+	// xscope_register(0, 0, "", 0, "");
+}
+
+
 int main(void) {
 	// ethernet tx channels
 	chan tx_link[2];
@@ -146,10 +158,6 @@ int main(void) {
 
 		on stdcore[1]:
 		{
-            // Enable XScope printing
-            xscope_register(0, XSCOPE_CONTINUOUS, "", XSCOPE_UINT, "");
-            xscope_config_io(XSCOPE_IO_BASIC);
-            
 			media_clock_server(media_clock_ctl,
 					ptp_link[1],
 					buf_ctl,
@@ -201,9 +209,6 @@ int main(void) {
 		// Application threads
 		on stdcore[0]:
 		{
-            // Enable XScope printing
-            xscope_register(0, XSCOPE_CONTINUOUS, "", XSCOPE_UINT, "");
-            xscope_config_io(XSCOPE_IO_BASIC);
             
 			// First initialize avb higher level protocols
 			avb_init(media_ctl, listener_ctl, null, media_clock_ctl, rx_link[2], tx_link[1], ptp_link[0]);
@@ -395,7 +400,8 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 			  unsigned int streamId[2];
 			  unsigned vlan;
 			  unsigned char addr[6];
-			  int map[2] = { 0 ,  1 };
+			  // int map[8] = { -1, -1, -1, -1, -1, -1, 0, 1 };
+			  int map[8] = {0, 1, 2, 3, 4, 5, 6, 7};
 
 			  // check if there is a new stream
 			  int res = avb_check_for_new_stream(streamId, vlan, addr);
@@ -410,8 +416,8 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 			  // if so, add it to the stream table
 			  if (res && listener_ready==0) {
 			    set_avb_sink_sync(0, 0);
-			    set_avb_sink_channels(0, 2);
-			    set_avb_sink_map(0, map, 2);
+			    set_avb_sink_channels(0, 8);
+			    set_avb_sink_map(0, map, 8);
 			    set_avb_sink_state(0, AVB_SINK_STATE_DISABLED);
 			    set_avb_sink_id(0, streamId);
 			    set_avb_sink_vlan(0, vlan);

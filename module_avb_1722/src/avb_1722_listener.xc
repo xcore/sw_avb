@@ -47,7 +47,8 @@ static void configure_stream(chanend c,
     
 	for(int i=0;i<s.num_channels;i++) {
 		c :> s.map[i];
-		enable_media_output_fifo(s.map[i], media_clock);
+		if (s.map[i])
+			enable_media_output_fifo(s.map[i], media_clock);
 	}
 
 	s.active = 1;
@@ -83,7 +84,8 @@ static void adjust_stream(chanend c,
 static void disable_stream(avb_1722_stream_info_t &s)
 {
 	for(int i=0;i<s.num_channels;i++) {
-		disable_media_output_fifo(s.map[i]);
+		if (s.map[i])
+			disable_media_output_fifo(s.map[i]);
 	}
 
 	s.active = 0;
