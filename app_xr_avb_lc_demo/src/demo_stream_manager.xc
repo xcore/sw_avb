@@ -74,7 +74,7 @@ void demo_manage_listener_stream(unsigned int &change_stream,
     }
     
     if (change_stream && new_hi != 0) {
-      int map[AVB_NUM_MEDIA_OUTPUTS] = {0, 1, -1, -1, -1, -1, -1, -1};
+      int map[8] = {-1, -1, -1, 0, 1, -1, -1, -1};
       
       // we want to change the stream we are listening to
       // map the new stream to our single I/O output

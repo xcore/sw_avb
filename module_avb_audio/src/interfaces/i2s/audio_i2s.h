@@ -228,10 +228,11 @@ inline void i2s_master(const clock mclk,
         if (k < num_out>>1) {
           unsigned int sample_out;
           c_listener :> sample_out;
+          if (k == 1) xscope_probe_data(j, sample_out << 8);
           sample_out = bitrev(sample_out << 8);
 #pragma xta endpoint "i2s_master_sample_output"
           p_dout[k] <: sample_out;
-          // xscope_probe_data(j, sample_out);
+          // if (k == 2) xscope_probe_data(j, sample_out);
         }
         
       }

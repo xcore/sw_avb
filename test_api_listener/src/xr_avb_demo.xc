@@ -94,8 +94,8 @@ media_output_fifo_t ofifos[AVB_NUM_MEDIA_OUTPUTS];
 void xscope_user_init()
 {
 	xscope_register(2,
-		XSCOPE_CONTINUOUS, "Samples 1", XSCOPE_UINT, "val",
-		XSCOPE_CONTINUOUS, "Samples 2", XSCOPE_UINT, "val"
+		XSCOPE_CONTINUOUS, "Left", XSCOPE_UINT, "val",
+		XSCOPE_CONTINUOUS, "Right", XSCOPE_UINT, "val"
 		);
 	xscope_config_io(XSCOPE_IO_BASIC);
 	// xscope_register(0, 0, "", 0, "");
@@ -401,7 +401,7 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 			  unsigned vlan;
 			  unsigned char addr[6];
 			  // int map[8] = { -1, -1, -1, -1, -1, -1, 0, 1 };
-			  int map[8] = {0, 1, 2, 3, 4, 5, 6, 7};
+			  int map[8] = {-1, -1, -1, -1, 0, 1, 2, 3};
 
 			  // check if there is a new stream
 			  int res = avb_check_for_new_stream(streamId, vlan, addr);

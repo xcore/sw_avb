@@ -671,6 +671,7 @@ int getset_avb_sink_state(int set,
           *state == AVB_SINK_STATE_POTENTIAL) {
         chanend c = sink->listener_ctl;
         int clk_ctl = -1;
+        simple_printf("Stream %x:\n", sink->stream.streamId[1]);
         xc_abi_outuint(c, AVB1722_CONFIGURE_LISTENER_STREAM);
         xc_abi_outuint(c, sink->stream.local_id);
         xc_abi_outuint(c, sink->stream.sync);
@@ -680,6 +681,7 @@ int getset_avb_sink_state(int set,
           if (sink->stream.map[i] == AVB_CHANNEL_UNMAPPED)
           {
             xc_abi_outuint(c, 0);
+            simple_printf("  %d unmapped\n", i);
           }
           else
           {
@@ -688,6 +690,7 @@ int getset_avb_sink_state(int set,
               clk_ctl = outputs[sink->stream.map[i]].clk_ctl;
             }
             xc_abi_outuint(c, outputs[sink->stream.map[i]].fifo);
+            simple_printf("  %d -> %x\n", i, sink->stream.map[i]);
           }
         }                       
         (void) xc_abi_inuint(c);
