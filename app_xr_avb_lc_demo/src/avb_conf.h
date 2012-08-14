@@ -28,7 +28,7 @@
 
 /* Media configuration */
 #define AVB_1722_FORMAT_61883_6
-#define AVB_NUM_MEDIA_OUTPUTS 8
+#define AVB_NUM_MEDIA_OUTPUTS 2
 #define AVB_NUM_MEDIA_INPUTS 8
 #define AVB_NUM_MEDIA_UNITS 2
 
@@ -36,7 +36,7 @@
 #define AVB_NUM_MEDIA_CLOCKS 1
 
 /* Add synths from channels 3/4 upwards in I2S for this demo */
-#define I2S_SYNTH_FROM 0
+#define I2S_SYNTH_FROM 1
 
 // Defining this makes SRP auto-start and auto-stop a stream when listeners come and go
 #define SRP_AUTO_TALKER_STREAM_CONTROL
