@@ -401,7 +401,7 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status
 			  unsigned vlan;
 			  unsigned char addr[6];
 			  // int map[8] = { -1, -1, -1, -1, -1, -1, 0, 1 };
-			  int map[8] = {-1, -1, -1, -1, 0, 1, 2, 3};
+			  int map[8] = {0, -1, 1, -1, 2, -1, 3, -1};
 
 			  // check if there is a new stream
 			  int res = avb_check_for_new_stream(streamId, vlan, addr);
