@@ -1,1 +1,0 @@
-int make_descriptor_bin_file(void);
