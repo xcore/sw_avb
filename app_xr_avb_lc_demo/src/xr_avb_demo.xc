@@ -319,61 +319,6 @@ void ptp_server_and_gpio(chanend c_rx, chanend c_tx, chanend ptp_link[],
     }
 }
 
-void app_handle_maap_indication(avb_status_t &status)
-{
-    switch (status.info.maap.msg)
-    {
-        case AVB_MAAP_ADDRESSES_LOST:
-        {
-            // oh dear, someone else is using our multicast address
-            for (int i=0;i<AVB_NUM_SOURCES;i++)
-            {
-                set_avb_source_state(i, AVB_SOURCE_STATE_DISABLED);
-            }
-
-            // request a different address
-            avb_1722_maap_request_addresses(AVB_NUM_SOURCES, null);
-            break;
-        }
-        case AVB_MAAP_ADDRESSES_RESERVED:
-        {
-            for(int i=0;i<AVB_NUM_SOURCES;i++)
-            {
-                unsigned char macaddr[6];
-                avb_1722_maap_get_offset_address(macaddr, i);
-                // activate the source
-                set_avb_source_dest(i, macaddr, 6);
-                set_avb_source_state(i, AVB_SOURCE_STATE_POTENTIAL);
-                simple_printf("Stream multicast address acquired (%x:%x:%x:%x:%x:%x)\n", macaddr[0], macaddr[1], macaddr[2], macaddr[3], macaddr[4], macaddr[5]);
-            }
-            break;
-        }
-    }
-}
-
-void app_handle_srp_indication(avb_status_t &status)
-{
-    switch (status.info.srp.msg)
-    {
-        case AVB_SRP_TALKER_ROUTE_FAILED:
-        {
-            // old: avb_srp_get_failed_stream(streamId);
-            // new: status.info.srp.msg.streamId
-
-            // handle a routing failure here
-            break;
-        }
-        case AVB_SRP_LISTENER_ROUTE_FAILED:
-        {
-            // old: avb_srp_get_failed_stream(streamId);
-            // new: status.info.srp.msg.streamId
-
-            // handle a routing failure here
-            break;
-        }
-    }
-}
-
 /** The main application control thread **/
 void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl)
 {
