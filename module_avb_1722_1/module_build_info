@@ -20,8 +20,7 @@ include $(call UNMANGLE,$(CURRENT_MODULE_DIR)/genfix.make)
 
 OPTIONAL_HEADERS += avb_1722_1_protocol
 
-#MODULE_XCC_C_FLAGS = $(XCC_FLAGS) -Os -std=c99
-MODULE_XCC_C_FLAGS = $(XCC_FLAGS) -O0 -g -std=c99
+MODULE_XCC_C_FLAGS = $(XCC_FLAGS) -Os -std=c99
 
 
 $(GEN_DIR)/aem_descriptors.generated: $(call UNMANGLE,$(CURRENT_MODULE_DIR)/src/generate.py) $(call UNMANGLE, $(CURRENT_MODULE_DIR)/src/aem_descriptors.h.in) $(call UNMANGLE,$(CURRENT_MODULE_DIR)/src/aem_entity_strings.h.in)  | $(GEN_DIR)
