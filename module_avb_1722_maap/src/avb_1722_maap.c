@@ -129,12 +129,12 @@ void avb_1722_maap_request_addresses(int num_addr, char start_address[])
   }
   else
   {
-    int offset;
+    int range_offset;
     // Set the base address randomly in the allocated maap address range
-    offset = randomSimple() % (MAAP_ALLOCATION_POOL_SIZE - maap_addr.range);
+    range_offset = randomSimple() % (MAAP_ALLOCATION_POOL_SIZE - maap_addr.range);
     
-    maap_addr.base[4] = (offset >> 8) & 0xFF;
-    maap_addr.base[5] = offset & 0xFF;
+    maap_addr.base[4] = (range_offset >> 8) & 0xFF;
+    maap_addr.base[5] = range_offset & 0xFF;
   }
 
   if (num_addr != -1)
@@ -183,6 +183,7 @@ void avb_1722_maap_periodic(avb_status_t *status, chanend c_tx)
   case MAAP_PROBING:
     if (maap_addr.immediately || avb_timer_expired(&maap_timer))
     {
+      unsigned char mac_addr[6];
       maap_addr.immediately = 0;
 
       nbytes = create_maap_packet(MAAP_PROBE,
@@ -207,7 +208,22 @@ void avb_1722_maap_periodic(avb_status_t *status, chanend c_tx)
         init_avb_timer(&maap_timer, MAAP_ANNOUNCE_INTERVAL_MULTIPLIER);
         start_avb_timer(&maap_timer, timeout_val);
 
-        // 5.2 TODO: Do event AVB_MAAP_ADDRESSES_RESERVED
+        for (int i=0; i < 4; i++)
+        {
+          mac_addr[i] = maap_addr.base[i];
+        }
+
+        for (int i=0; i < maap_addr.range; i++)
+        {
+          int lower_two_bytes;
+          lower_two_bytes = maap_addr.base[4] << 8;
+          lower_two_bytes += maap_addr.base[5];
+          lower_two_bytes += i;
+          mac_addr[4] = (lower_two_bytes >> 8) & 0xFF;
+          mac_addr[5] = lower_two_bytes & 0xFF;
+          /* User app hook */
+          avb_app_on_source_address_reserved(i, mac_addr);
+        }
       }
       else
       {
