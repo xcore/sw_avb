@@ -85,7 +85,7 @@ int avb_check_for_new_stream(unsigned streamId[2], unsigned *vlan,
     rdPtr++;
     if (rdPtr==AVB_STREAM_DETECT_HISTORY_SIZE)
       rdPtr = 0;    
-    return 1;
+    return rdPtr+1; // return stream number
   }
   return 0;
 }

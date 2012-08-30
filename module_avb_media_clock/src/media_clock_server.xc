@@ -11,6 +11,8 @@
 #include "avb_media_clock_def.h"
 #include "gptp.h"
 #include "avb_control_types.h"
+#include "get_core_id_from_chanend.h"
+#include "xscope.h"
 
 #define DEBUG_MEDIA_CLOCK
 
@@ -119,6 +121,9 @@ static void manage_buffer(buf_info_t &b,
   timer tmr;
   int thiscore_now,othercore_now;
   unsigned server_core_id;
+#ifdef USE_XSCOPE_PROBES
+  xscope_probe(1); // start
+#endif
 
   if (b.media_clock == -1) {
       buf_ctl <: b.fifo;
@@ -131,6 +136,7 @@ static void manage_buffer(buf_info_t &b,
 
   buf_ctl <: b.fifo;
   buf_ctl <: BUF_CTL_REQUEST_INFO;
+
   master {
     buf_ctl <: 0;
     buf_ctl :> othercore_now;
@@ -142,7 +148,8 @@ static void manage_buffer(buf_info_t &b,
     buf_ctl :> wrptr;
     buf_ctl :> server_core_id;
   }
-  if (server_core_id != get_core_id())
+
+  if (server_core_id != get_core_id_from_chanend(ptp_svr))
   {
 	  outgoing_timestamp_local = outgoing_timestamp_local - (othercore_now - thiscore_now);
   }
@@ -175,9 +182,13 @@ static void manage_buffer(buf_info_t &b,
       buf_ctl <: b.fifo;
       buf_ctl <: BUF_CTL_ACK;
       inct(buf_ctl);  
-      return;     
+#ifdef USE_XSCOPE_PROBES
+     xscope_probe(1);  // stop 0
+#endif
+     return;
   }
 
+  //TODO: Remove this unreachable code
   if (media_clocks[b.media_clock].clock_type == FIFO_LENGTH) {
 	  if (b.lock_count == 0) {
 	        buf_ctl <: b.fifo;
@@ -194,6 +205,12 @@ static void manage_buffer(buf_info_t &b,
   }
 
   sample_diff = diff / ((int) ((wordLength*10) >> WC_FRACTIONAL_BITS));
+
+#ifdef USE_XSCOPE_PROBES
+			xscope_probe_data(8, (unsigned int) diff);
+			xscope_probe_data(9, (unsigned int) sample_diff);
+			xscope_probe_data(10, (unsigned int) fill);
+#endif
 
   if (locked && b.lock_count < LOCK_COUNT_THRESHOLD) {   
     b.lock_count++;
@@ -235,7 +252,7 @@ static void manage_buffer(buf_info_t &b,
             fill < MIN_FILL_LEVEL))
   {
 #ifdef DEBUG_MEDIA_CLOCK
-      simple_printf("Media output %d lost lock\n", index);
+      simple_printf("Media output %d lost lock. sample_diff : %d, fill : %d\n", index, sample_diff, fill);
 #endif
       b.adjust = 0;
       buf_ctl <: b.fifo;
@@ -248,6 +265,10 @@ static void manage_buffer(buf_info_t &b,
   }
 
   b.prev_diff = sample_diff;
+
+#ifdef USE_XSCOPE_PROBES
+  xscope_probe(1);  // stop 1
+#endif
 }
  
 
@@ -299,7 +320,11 @@ void media_clock_server(chanend media_clock_ctl,
                                  i,
                                  media_clocks[i],
                                  clk_time,
-                                 CLOCK_RECOVERY_PERIOD);            
+                                 CLOCK_RECOVERY_PERIOD);
+
+#ifdef USE_XSCOPE_PROBES
+			xscope_probe_data(4, (unsigned) media_clocks[i].wordLength);
+#endif
             for (int j=0;j<num_clk_ctl;j++) {
               if (registered[j]==i)
                 clk_ctl_set_rate(clk_ctl[j], media_clocks[i].wordLength);   

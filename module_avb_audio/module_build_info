@@ -23,4 +23,3 @@ INCLUDE_DIRS += $(foreach x, $(USED_EXTERNAL_CLOCK_CHIPS), src/media_clocks/exte
 
 MODULE_XCC_FLAGS = $(XCC_FLAGS) -g -O3
 
-XCC_FLAGS_media_output_fifo.c = $(XCC_FLAGS) -g 

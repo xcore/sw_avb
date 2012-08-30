@@ -9,6 +9,7 @@
 #include "avb_conf.h"
 #include "media_fifo.h"
 #include <xclib.h>
+#include <xscope.h>
 #ifdef __XC__
 
 // By defining this, all channels are filled with an increasing counter
@@ -18,15 +19,20 @@
 
 #define I2S_SINE_TABLE_SIZE 100
 
+#ifdef USE_XSCOPE
+extern unsigned prev_timestamp_valid;
+extern unsigned int prev_timestamp;
+#endif
+
 extern unsigned int i2s_sine[I2S_SINE_TABLE_SIZE];
 
 void i2s_master_configure_ports(const clock mclk,
                                 clock bclk,
                                 out buffered port:32 p_bclk,
                                 out buffered port:32 p_lrclk,
-                                out buffered port:32 p_dout[],
+                                out buffered port:32 ?p_dout[],
                                 int num_out,
-                                in buffered port:32 p_din[],             
+                                in buffered port:32 ?p_din[],
                                 int num_in);
 
 /** Input and output audio data using I2S format with the XCore acting 
@@ -78,14 +84,14 @@ inline void i2s_master(const clock mclk,
                        clock bclk,
                        out buffered port:32 p_bclk,
                        out buffered port:32 p_lrclk,
-                       out buffered port:32 p_dout[],
+                       out buffered port:32 ?p_dout[],
                        int num_out,
-                       in buffered port:32 p_din[],
+                       in buffered port:32 ?p_din[],
                        int num_in,
                        int master_to_word_clock_ratio,
                        streaming chanend ?c_listener,
                        media_input_fifo_t ?input_fifos[],
-                       chanend media_ctl,
+                       chanend ?media_ctl,
                        int clk_ctl_index)
 {
   int mclk_to_bclk_ratio = master_to_word_clock_ratio / 64;
@@ -105,7 +111,7 @@ inline void i2s_master(const clock mclk,
   int sine_count[8] = {0};
   int sine_inc[8] = {0x080, 0x100, 0x180, 0x200, 0x100, 0x100, 0x100, 0x100};
 #endif
-  media_ctl_register(media_ctl, num_in, input_fifos, 0, null, clk_ctl_index);
+  if(num_in > 0) media_ctl_register(media_ctl, num_in, input_fifos, 0, null, clk_ctl_index);
 
   // You can output 32 mclk ticks worth of bitclock at a time.
   // So the ratio between the master clock and the word clock will affect 
@@ -181,6 +187,16 @@ inline void i2s_master(const clock mclk,
 #endif
 
     tmr :> timestamp;
+
+#ifdef USE_XSCOPE_PROBES
+		if(prev_timestamp_valid) {
+		    // trace only for stream 0
+			xscope_probe_data(18, (int) (timestamp - prev_timestamp));
+		};
+		prev_timestamp = timestamp;
+	    prev_timestamp_valid = 1;
+#endif
+
     if (num_out > 0)
     {
     	c_listener <: timestamp;
@@ -193,43 +209,46 @@ inline void i2s_master(const clock mclk,
     	lrclk_val = ~lrclk_val;
 
 #pragma loop unroll    
-      for (int k=0;k<mclk_to_bclk_ratio;k++)  {
-
+      for (int k0=0;k0<mclk_to_bclk_ratio;k0++)  {
 #pragma xta endpoint "i2s_master_bclk_output"
         p_bclk <: bclk_val;
 
-        if (k < num_in>>1) {
-#ifdef SAMPLE_COUNTER_TEST
-        	if (active_fifos & (1 << (j+k*2))) {
-			  media_input_fifo_push_sample(input_fifos[j+k*2], sample_counter, timestamp);
-        	} else {
-        	  media_input_fifo_flush(input_fifos[j+k*2]);
-        	}
-#else
-            unsigned int sample_in;
-#pragma xta endpoint "i2s_master_sample_input"
-            asm("in %0, res[%1]":"=r"(sample_in):"r"(p_din[k]));
+        for(int d=0;d<8/mclk_to_bclk_ratio;d++) {
+            int k = k0*(8/mclk_to_bclk_ratio)+d;
 
-            sample_in = (bitrev(sample_in) >> 8);
-#ifdef I2S_SYNTH_FROM
-            if (k >= I2S_SYNTH_FROM) {
-              sample_in = i2s_sine[sine_count[k]>>8];
-            }
-#endif
-            if (active_fifos & (1 << (j+k*2))) {
-			  media_input_fifo_push_sample(input_fifos[j+k*2], sample_in, timestamp);
-            } else {
-              media_input_fifo_flush(input_fifos[j+k*2]);
-            }
-#endif
-        }
-        
-        if (k < num_out>>1) {
-          unsigned int sample_out;
-          c_listener :> sample_out;
-          sample_out = bitrev(sample_out << 8);
-#pragma xta endpoint "i2s_master_sample_output"
-          p_dout[k] <: sample_out;
+			if (k < num_in>>1) {
+	#ifdef SAMPLE_COUNTER_TEST
+				if (active_fifos & (1 << (j+k*2))) {
+				  media_input_fifo_push_sample(input_fifos[j+k*2], sample_counter, timestamp);
+				} else {
+				  media_input_fifo_flush(input_fifos[j+k*2]);
+				}
+	#else
+				unsigned int sample_in;
+	#pragma xta endpoint "i2s_master_sample_input"
+				asm("in %0, res[%1]":"=r"(sample_in):"r"(p_din[k]));
+
+				sample_in = (bitrev(sample_in) >> 8);
+	#ifdef I2S_SYNTH_FROM
+				if (k >= I2S_SYNTH_FROM) {
+				  sample_in = i2s_sine[sine_count[k]>>8];
+				}
+	#endif
+				if (active_fifos & (1 << (j+k*2))) {
+				  media_input_fifo_push_sample(input_fifos[j+k*2], sample_in, timestamp);
+				} else {
+				  media_input_fifo_flush(input_fifos[j+k*2]);
+				}
+	#endif
+			}
+
+			if (k < num_out>>1) {
+			  unsigned int sample_out;
+			  c_listener :> sample_out;
+			  sample_out = bitrev(sample_out << 8);
+	#pragma xta endpoint "i2s_master_sample_output"
+			  p_dout[k] <: sample_out;
+			}
         }
         
       }

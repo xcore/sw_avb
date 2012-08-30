@@ -23,6 +23,8 @@
 #include "mac_custom_filter.h"
 #include "avb_1722_maap.h"
 
+#define PRINT
+
 #ifdef AVB_ENABLE_1722_1
 #include "avb_1722_1.h"
 #endif
@@ -78,7 +80,7 @@ static void register_talkers(chanend talker_ctl[])
       source->stream.local_id = j;
       source->stream.flags = 0;
       source->stream.streamId[0] = (mac_addr[0] << 24) | (mac_addr[1] << 16) | (mac_addr[2] <<  8) | (mac_addr[3] <<  0);
-      source->stream.streamId[1] = (mac_addr[4] << 24) | (mac_addr[5] << 16) | ((source->stream.local_id & 0xffff)<<0);
+      source->stream.streamId[1] = (mac_addr[4] << 24) | (mac_addr[5] << 16) | ((max_talker_stream_id & 0xffff)<<0);
       source->presentation = AVB_DEFAULT_PRESENTATION_TIME_DELAY_NS;
       source->stream.vlan = AVB_DEFAULT_VLAN;
       source->stream.srp_talker_attr = mrp_get_attr();
@@ -439,11 +441,14 @@ int getset_avb_source_state(int set,
             xc_abi_outuint(c, AVB1722_TALKER_GO);
             xc_abi_outuint(c, source->stream.local_id);
             (void) xc_abi_inuint(c); //ACK
-
+#ifdef PRINT
             simple_printf("Stream #%d on\n", source_num);
+#endif
           }
 #else
+#ifdef PRINT
           simple_printf("Stream #%d ready\n", source_num);
+#endif
 #endif
 
         }
@@ -457,13 +462,16 @@ int getset_avb_source_state(int set,
           xc_abi_outuint(c, source->stream.local_id);
           (void) xc_abi_inuint(c); //ACK
 
+#ifdef PRINT
           simple_printf("Stream #%d off\n", source_num);
+#endif
       }
       else if (source->stream.state == AVB_SOURCE_STATE_POTENTIAL &&
                *state == AVB_SOURCE_STATE_ENABLED) {
         // start transmitting
-
+#ifdef PRINT
         simple_printf("Stream #%d on\n", source_num);
+#endif
         chanend c = source->talker_ctl;
         xc_abi_outuint(c, AVB1722_TALKER_GO);
         xc_abi_outuint(c, source->stream.local_id);
@@ -693,6 +701,7 @@ int getset_avb_sink_state(int set,
           avb_1722_add_stream_mapping(c_mac_tx,
                                       sink->stream.streamId,
                                       router_link,
+                                      sink_num,
                                       sink->stream.local_id);
         }
 

@@ -37,6 +37,7 @@ typedef struct avb_1722_stream_info_t {
   int num_channels;
   int dbc;                         //!< The DBC of the last seen packet
   int last_sequence;               //!< The sequence number from the last 1722 packet
+  int unique_idx;                 //!< index unique in the endpoint
   media_output_fifo_t map[AVB_MAX_CHANNELS_PER_STREAM];
 } avb_1722_stream_info_t;
 

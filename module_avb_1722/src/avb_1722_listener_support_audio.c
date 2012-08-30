@@ -11,11 +11,24 @@
 #include <string.h>
 #include <xs1.h>
 #include "avb_conf.h"
+#include "simple_printf.h"
+#include "xscope.h"
 
 #if defined(AVB_1722_FORMAT_SAF) || defined(AVB_1722_FORMAT_61883_6)
 
 #ifdef AVB_1722_RECORD_ERRORS
+#if(AVB_NUM_SINKS>4)
+#error("Listener Debug Logic breaks the timing at > 4 Listener Streams")
+#endif
 static unsigned avb_1722_listener_dbc_discontinuity = 0;
+static unsigned char avb_1722_listener_prev_seq_num[AVB_NUM_SINKS];  // store prev seq_number per stream
+static unsigned avb_1722_listener_seq_num_discountinuity[AVB_NUM_SINKS];
+static unsigned avb_1722_listener_seq_started[AVB_NUM_SINKS];
+#endif
+
+#ifdef USE_XSCOPE
+char prev_avbtp_ts_valid=0;
+unsigned prev_avbtp_timestamp;
 #endif
 
 int avb_1722_listener_process_packet(chanend buf_ctl,
@@ -61,6 +74,31 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
       return (0);            
    }
 
+#ifdef AVB_1722_RECORD_ERRORS
+   {
+ 	   // log discontinuities in seq_number per stream
+       int unique_stream_idx = stream_info->unique_idx;
+ 	   if(unique_stream_idx >= AVB_NUM_SINKS) {
+ 		   simple_printf("ERROR: unique_stream_idx %x > AVB_NUM_SINKS %x\n", unique_stream_idx, AVB_NUM_SINKS);
+ 	   } else {
+ 		 if(!avb_1722_listener_seq_started[unique_stream_idx]) {
+ 			avb_1722_listener_seq_started[unique_stream_idx] = 1;
+ 		    avb_1722_listener_prev_seq_num[unique_stream_idx] = (unsigned char) AVBTP_SEQUENCE_NUMBER(pAVBHdr);  // init prev
+ 		 } else if((unsigned char) AVBTP_SEQUENCE_NUMBER(pAVBHdr) != (unsigned char) (avb_1722_listener_prev_seq_num[unique_stream_idx]+1)) {
+ 		   avb_1722_listener_seq_num_discountinuity[unique_stream_idx]++;
+ 		   unsigned num_disc = avb_1722_listener_seq_num_discountinuity[unique_stream_idx];
+ 		   if((num_disc%0x1000)==0) {
+ 			  simple_printf("ERROR: Stream %d: Detected %d seq_number discontinuities so far\n", unique_stream_idx, num_disc);
+ 		   }
+ 		   // may break timing:
+ 		   //simple_printf("ERROR: Stream %d: seq_number discontinuity. prev_seq_num %d, seq_num %d\n", unique_stream_idx, (unsigned char) avb_1722_listener_prev_seq_num[unique_stream_idx],AVBTP_SEQUENCE_NUMBER(pAVBHdr));
+	 	   avb_1722_listener_prev_seq_num[unique_stream_idx] = (unsigned char) AVBTP_SEQUENCE_NUMBER(pAVBHdr); // re-init
+ 		 } else {
+	 	   avb_1722_listener_prev_seq_num[unique_stream_idx]++; // PASS, just increment
+ 		 }
+ 	   }
+    }
+#endif
 
 #if !AVB_1722_FORMAT_SAF
    dbc_value = (int) pAVB1722Hdr->DBC;
@@ -128,7 +166,7 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
 
      return 0;
    }
-#ifdef AVB_1722_RECORD_ERRORS
+#if(AVB_1722_RECORD_ERRORS && !AVB_1722_FORMAT_SAF)
    else if (dbc_diff != num_samples_in_payload) {
 	   avb_1722_listener_dbc_discontinuity++;
    }
@@ -164,6 +202,15 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
 	   for (int i=0;i<num_channels;i++)  {
 		   media_output_fifo_set_ptp_timestamp(map[i], AVBTP_TIMESTAMP(pAVBHdr), sample_num);
 	   }
+#ifdef USE_XSCOPE_PROBES
+	   if((AVBTP_STREAM_ID0(pAVBHdr)&0xF) == 0) { // reduce probing to workaround xscope issue
+		  if(prev_avbtp_ts_valid) {
+	         //xscope_probe_data(14, (signed) (AVBTP_TIMESTAMP(pAVBHdr) - prev_avbtp_timestamp));
+		  }
+		  prev_avbtp_timestamp = AVBTP_TIMESTAMP(pAVBHdr);
+		  prev_avbtp_ts_valid = 1;
+	   }
+#endif
    }
 
   for (i=0;i<num_channels;i++)  {
