@@ -95,7 +95,7 @@ extern inline void i2s_master(const clock mclk,
                               int master_to_word_clock_ratio,
                               streaming chanend ?c_listener,
                               media_input_fifo_t ?input_fifos[],
-                              chanend media_ctl,
+                              chanend ?media_ctl,
                               int clk_ctl_index);
 
 

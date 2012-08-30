@@ -91,7 +91,7 @@ inline void i2s_master(const clock mclk,
                        int master_to_word_clock_ratio,
                        streaming chanend ?c_listener,
                        media_input_fifo_t ?input_fifos[],
-                       chanend media_ctl,
+                       chanend ?media_ctl,
                        int clk_ctl_index)
 {
   int mclk_to_bclk_ratio = master_to_word_clock_ratio / 64;
@@ -111,7 +111,7 @@ inline void i2s_master(const clock mclk,
   int sine_count[8] = {0};
   int sine_inc[8] = {0x080, 0x100, 0x180, 0x200, 0x100, 0x100, 0x100, 0x100};
 #endif
-  media_ctl_register(media_ctl, num_in, input_fifos, 0, null, clk_ctl_index);
+  if(num_in > 0) media_ctl_register(media_ctl, num_in, input_fifos, 0, null, clk_ctl_index);
 
   // You can output 32 mclk ticks worth of bitclock at a time.
   // So the ratio between the master clock and the word clock will affect 
