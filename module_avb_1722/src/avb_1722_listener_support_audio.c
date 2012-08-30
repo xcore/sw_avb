@@ -17,6 +17,9 @@
 #if defined(AVB_1722_FORMAT_SAF) || defined(AVB_1722_FORMAT_61883_6)
 
 #ifdef AVB_1722_RECORD_ERRORS
+#if(AVB_NUM_SINKS>4)
+#error("Listener Debug Logic breaks the timing at > 4 Listener Streams")
+#endif
 static unsigned avb_1722_listener_dbc_discontinuity = 0;
 static unsigned char avb_1722_listener_prev_seq_num[AVB_NUM_SINKS];  // store prev seq_number per stream
 static unsigned avb_1722_listener_seq_num_discountinuity[AVB_NUM_SINKS];

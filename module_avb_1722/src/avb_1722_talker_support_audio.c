@@ -14,8 +14,8 @@
 //#define MAX_PRESENTATION_TIME_DELTA_DELTA AVG_PRESENTATION_TIME_DELTA / 100 // 1% deviation
 #define MAX_PRESENTATION_TIME_DELTA_DELTA AVG_PRESENTATION_TIME_DELTA/5 // 200% deviation
 
-#define DEBUG_LOGIC
-#define PRINT
+//#define AVB_TALKER_DEBUG_LOGIC
+//#define PRINT
 
 #if defined(AVB_1722_FORMAT_61883_6) || defined(AVB_1722_FORMAT_SAF)
 
@@ -147,7 +147,10 @@ int prev_startIndex;
 
 #endif
 
-#ifdef DEBUG_LOGIC;
+#ifdef AVB_TALKER_DEBUG_LOGIC
+#if(AVB_NUM_SOURCES>4)
+#error("Talker Debug Logic breaks the timing at > 4 Talker Streams");
+#endif
 unsigned prev_chan_presentationTime;
 int expected_rdIndex;
 unsigned rdIndex_prediction_count=0;
@@ -267,7 +270,7 @@ int avb1722_create_packet(unsigned char Buf0[],
 				src = (int *) media_input_fifo_get_packet(map[i], &presentationTime, &(stream_info->dbc_at_start_of_last_fifo_packet));
 				media_input_fifo_set_ptr(map[i], src);
 				dest += 1;
-#ifdef DEBUG_LOGIC
+#ifdef AVB_TALKER_DEBUG_LOGIC
 			   if(i>0 && presentationTime!=prev_chan_presentationTime) {
 #ifdef PRINT
 				  simple_printf("ERROR: Presentation time for channel %d : %d \n  differs from previous channel time : %d\n",
@@ -287,7 +290,7 @@ int avb1722_create_packet(unsigned char Buf0[],
 #ifdef USE_XSCOPE_PROBES
 			//xscope_probe(21);
 #endif
-#ifdef DEBUG_LOGIC
+#ifdef AVB_TALKER_DEBUG_LOGIC
 			if((stream_id0 & 0xF)==0) { // only for stream 0
 				volatile ififo_t *media_input_fifo =  (ififo_t *) map[num_channels-1];
                 volatile int packetSize;
@@ -340,7 +343,7 @@ int avb1722_create_packet(unsigned char Buf0[],
 					xscope_probe_data(17, (unsigned) (presentationTime));
 #endif
 
-#ifdef DEBUG_LOGIC
+#ifdef AVB_TALKER_DEBUG_LOGIC
 					int ptp_ts_delta = (int) (ptp_ts - prev_ptp_ts);
 					if(ptp_ts_delta > AVG_PRESENTATION_TIME_DELTA+MAX_PRESENTATION_TIME_DELTA_DELTA ||
 					   ptp_ts_delta < AVG_PRESENTATION_TIME_DELTA-MAX_PRESENTATION_TIME_DELTA_DELTA) {
