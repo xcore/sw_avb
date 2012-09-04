@@ -4,10 +4,8 @@
    memory usage) and combined the code for the port state machines and the site 
    state machines into one. */
 #include <string.h>
+#include <limits.h>
 #include "avb_conf.h"
-#ifdef USE_XSCOPE
-#include <xscope.h>
-#endif
 #include "gptp.h"
 #include "gptp_config.h"
 #include "gptp_pdu.h"
@@ -35,8 +33,6 @@ static int ptp_legacy_mode = 0;
 static int g_ptp_adjust_valid = 0;
 signed g_ptp_adjust = 0;
 signed g_inv_ptp_adjust = 0;
-
-
 
 /* The average path delay (over the last PDELAY_AVG_WINDOW pdelay_reqs) 
    between the foreign master port and our slave port in nanoseconds (ptp time)
@@ -78,6 +74,9 @@ static int sync_lock = 0;
 static int sync_count = 0;
 
 static AnnounceMessage best_announce_msg;
+
+static unsigned long long pdelay_epoch_timer;
+static unsigned prev_pdelay_local_ts;
 
 
 unsigned local_timestamp_to_ptp_mod32(unsigned local_ts,
@@ -364,18 +363,10 @@ static void update_adjust(ptp_timestamp *master_ts,
         else 
           sync_count = 0;
       }
-      
-#ifdef USE_XSCOPE
-      // xscope_probe_data(1, (int)adjust);
-#endif
 
       adjust = (((long long)g_ptp_adjust) * (PTP_ADJUST_WEIGHT - 1) + adjust) / PTP_ADJUST_WEIGHT;
 
       g_ptp_adjust = (int) adjust;
-
-#ifdef USE_XSCOPE
-      // xscope_probe_data(0, g_ptp_adjust);
-#endif
 
       inv_adjust = (((long long)g_inv_ptp_adjust) * (PTP_ADJUST_WEIGHT - 1) + inv_adjust) / PTP_ADJUST_WEIGHT;
 
@@ -940,6 +931,35 @@ static void send_ptp_pdelay_req_msg(chanend c_tx)
   return;
 }
 
+void local_to_epoch_ts(unsigned local_ts, ptp_timestamp *epoch_ts)
+{
+  unsigned long long sec;
+  unsigned long long nanosec;
+
+  if (local_ts <= prev_pdelay_local_ts) // We overflowed 32 bits
+  {
+    pdelay_epoch_timer += ((UINT_MAX - prev_pdelay_local_ts) + local_ts);
+  }
+  else
+  {
+    pdelay_epoch_timer += (local_ts - prev_pdelay_local_ts);
+  }
+
+  nanosec = pdelay_epoch_timer * 10;
+
+  sec = nanosec / NANOSECONDS_PER_SECOND;
+  nanosec = nanosec % NANOSECONDS_PER_SECOND;
+
+  epoch_ts->seconds[1] = (unsigned) (sec >> 32);
+
+  epoch_ts->seconds[0] = (unsigned) sec;
+  
+  epoch_ts->nanoseconds = nanosec;
+
+  prev_pdelay_local_ts = local_ts;
+
+}
+
 static void send_ptp_pdelay_resp_msg(chanend c_tx, 
                               char *pdelay_req_msg,
                               unsigned req_ingress_ts)
@@ -947,18 +967,19 @@ static void send_ptp_pdelay_resp_msg(chanend c_tx,
 #define PDELAY_RESP_PACKET_SIZE (sizeof(ethernet_hdr_t) + sizeof(ComMessageHdr) + sizeof(PdelayRespMessage))
   unsigned int buf0[(PDELAY_RESP_PACKET_SIZE+3)/4];
   unsigned char *buf = (unsigned char *) &buf0[0];
-   // received packet pointers.
-   ComMessageHdr *pRxMesgHdr = (ComMessageHdr *) pdelay_req_msg;   
-   // transmit packet pointers.
-   ComMessageHdr *pTxMesgHdr = (ComMessageHdr *) &buf[sizeof(ethernet_hdr_t)]; 
-   PdelayRespMessage *pTxRespHdr = 
-     (PdelayRespMessage *) &buf[sizeof(ethernet_hdr_t) + sizeof(ComMessageHdr)];
-   PdelayRespFollowUpMessage *pTxFollowUpHdr = 
-     (PdelayRespFollowUpMessage *) &buf[sizeof(ethernet_hdr_t) + sizeof(ComMessageHdr)];
+  // received packet pointers.
+  ComMessageHdr *pRxMesgHdr = (ComMessageHdr *) pdelay_req_msg;   
+  // transmit packet pointers.
+  ComMessageHdr *pTxMesgHdr = (ComMessageHdr *) &buf[sizeof(ethernet_hdr_t)]; 
+  PdelayRespMessage *pTxRespHdr = 
+   (PdelayRespMessage *) &buf[sizeof(ethernet_hdr_t) + sizeof(ComMessageHdr)];
+  PdelayRespFollowUpMessage *pTxFollowUpHdr = 
+   (PdelayRespFollowUpMessage *) &buf[sizeof(ethernet_hdr_t) + sizeof(ComMessageHdr)];
 
-   ptp_timestamp ptp_req_ingress_ts;
-   ptp_timestamp ptp_resp_ts;
-   unsigned local_resp_ts;
+  ptp_timestamp epoch_req_ingress_ts;
+  ptp_timestamp epoch_resp_ts;
+  unsigned local_resp_ts;
+  unsigned local_diff;
 
   set_ptp_ethernet_hdr(buf);
 
@@ -987,29 +1008,24 @@ static void send_ptp_pdelay_resp_msg(chanend c_tx,
   pTxMesgHdr->transportSpecific_messageType = 
     PTP_TRANSPORT_SPECIFIC_HDR | PTP_PDELAY_RESP_MESG;
 
-  local_to_ptp_ts(&ptp_req_ingress_ts, req_ingress_ts);
+  local_to_epoch_ts(req_ingress_ts, &epoch_req_ingress_ts);
 
   timestamp_to_network(&pTxRespHdr->requestReceiptTimestamp,
-                       &ptp_req_ingress_ts);
+                       &epoch_req_ingress_ts);
                        
-  ptp_tx_timed(c_tx, 
-               buf0, 
-               PDELAY_RESP_PACKET_SIZE,
-               &local_resp_ts);
+  ptp_tx_timed(c_tx,  buf0, PDELAY_RESP_PACKET_SIZE, &local_resp_ts);
 
   /* Now send the follow up */
 
-  local_to_ptp_ts(&ptp_resp_ts, local_resp_ts);
+  local_to_epoch_ts(local_resp_ts, &epoch_resp_ts);
 
   pTxMesgHdr->transportSpecific_messageType = 
     PTP_TRANSPORT_SPECIFIC_HDR | PTP_PDELAY_RESP_FOLLOW_UP_MESG;
 
   timestamp_to_network(&pTxFollowUpHdr->responseOriginTimestamp,
-                       &ptp_resp_ts);
+                       &epoch_resp_ts);
 
-  ptp_tx(c_tx, 
-         buf0, 
-         PDELAY_RESP_PACKET_SIZE);
+  ptp_tx(c_tx, buf0, PDELAY_RESP_PACKET_SIZE);
 
   return;
 }
@@ -1161,6 +1177,8 @@ void ptp_init(chanend c_tx, enum ptp_server_type stype)
   my_port_id.data[9] = 1;
 
   set_new_role(PTP_MASTER, t);
+
+  pdelay_epoch_timer = t;
 }
 
 
