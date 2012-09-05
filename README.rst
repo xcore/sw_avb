@@ -1,11 +1,11 @@
 AVB Software Stack
 ..................
 
-:Stable release:  5.1.1
+:Stable release:  5.2
 
 :Status:  Reference Software
 
-:Maintainer:  davidn@xmos.com
+:Maintainer:  andy@xmos.com
 
 :Description:  Audio Video Bridging Software (AVB)
 
@@ -19,7 +19,7 @@ Key Features
 * PTP server and protocol
 * Audio interface for I2S and TDM
 * Clock recovery and interface to PLL clock source
-* Support for 1722.1 ADP and ACMP draft D15A
+* Support for 1722.1 ADP, AECP (AEM) and ACMP Draft 21
 
 
 Firmware Overview
@@ -40,9 +40,8 @@ Required Repositories
 
 * sc_ethernet git\@github.com:xcore/sc_ethernet.git
 * sc_xtcp git\@github.com:xcore/sc_xtcp.git
-* sc_xlog git\@github.com:xcore/sc_xlog.git
+* sc_util git\@github.com:xcore/sc_util.git
 * sc_i2c git\@github.com:xcore/sc_i2c.git
-* xcommon git\@github.com:xcore/xcommon.git
 
 To clone (read only):
 
@@ -51,9 +50,8 @@ To clone (read only):
   git clone git://github.com/xcore/sw_avb.git
   git clone git://github.com/xcore/sc_ethernet.git
   git clone git://github.com/xcore/sc_xtcp.git
-  git clone git://github.com/xcore/sc_xlog.git
+  git clone git://github.com/xcore/sc_util.git
   git clone git://github.com/xcore/sc_i2c.git
-  git clone git://github.com/xcore/xcommon.git
 
 Support
 =======
