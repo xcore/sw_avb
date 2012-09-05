@@ -1,4 +1,3 @@
-#ifndef MAKE_FLASH_DESCRIPTOR_FILE
 #include <platform.h>
 #include <print.h>
 #include <assert.h>
@@ -289,124 +288,6 @@ void ptp_server_and_gpio(chanend c_rx, chanend c_tx, chanend ptp_link[],
     }
 }
 
-void app_handle_maap_indication(avb_status_t &status)
-{
-    switch (status.info.maap.msg)
-    {
-        case AVB_MAAP_ADDRESSES_LOST:
-        {
-            // oh dear, someone else is using our multicast address
-            for (int i=0;i<AVB_NUM_SOURCES;i++)
-            {
-                set_avb_source_state(i, AVB_SOURCE_STATE_DISABLED);
-            }
-
-            // request a different address
-            avb_1722_maap_request_addresses(AVB_NUM_SOURCES, null);
-            break;
-        }
-        case AVB_MAAP_ADDRESSES_RESERVED:
-        {
-            for(int i=0;i<AVB_NUM_SOURCES;i++)
-            {
-                unsigned char macaddr[6];
-                avb_1722_maap_get_offset_address(macaddr, i);
-                set_avb_source_dest(i, macaddr, 6);
-                avb_1722_1_talker_set_mac_address(i, macaddr);
-                simple_printf("Stream multicast address acquired (%x:%x:%x:%x:%x:%x)\n", macaddr[0], macaddr[1], macaddr[2], macaddr[3], macaddr[4], macaddr[5]);
-            }
-            break;
-        }
-    }
-}
-
-void app_handle_srp_indication(avb_status_t &status)
-{
-    switch (status.info.srp.msg)
-    {
-        case AVB_SRP_TALKER_ROUTE_FAILED:
-        {
-            // old: avb_srp_get_failed_stream(streamId);
-            // new: status.info.srp.msg.streamId
-
-            // handle a routing failure here
-            break;
-        }
-        case AVB_SRP_LISTENER_ROUTE_FAILED:
-        {
-            // old: avb_srp_get_failed_stream(streamId);
-            // new: status.info.srp.msg.streamId
-
-            // handle a routing failure here
-            break;
-        }
-    }
-}
-
-void app_handle_1722_1_indication(avb_status_t &status, chanend c_tx)
-{
-    switch (status.info.a1722_1.msg)
-    {
-        case AVB_1722_1_CONNECT_TALKER:
-        {
-            unsigned streamId[2];
-            get_avb_source_id(0, streamId);
-            avb_1722_1_talker_set_stream_id(0, streamId);
-            simple_printf("1722.1 request to advertise %x.%x\n", streamId[0], streamId[1]);
-            set_avb_source_state(0, AVB_SOURCE_STATE_DISABLED);
-            set_avb_source_state(0, AVB_SOURCE_STATE_POTENTIAL);
-            avb_1722_1_acmp_talker_connection_complete(0, c_tx);
-            break;
-        }
-
-        case AVB_1722_1_DISCONNECT_TALKER:
-        {
-            simple_printf("1722.1 request to disconnect talker\n");
-            set_avb_source_state(0, AVB_SOURCE_STATE_DISABLED);
-            avb_1722_1_acmp_talker_connection_complete(0, c_tx);
-            break;
-        }
-
-        case AVB_1722_1_CONNECT_LISTENER:
-        {
-            short listener;
-            unsigned int streamId[2];
-            unsigned vlan;
-            unsigned char addr[6];
-            int map[AVB_NUM_MEDIA_INPUTS];
-            for (int i = 0; i < AVB_NUM_MEDIA_INPUTS; i++)
-                map[i] = i;
-
-            avb_1722_1_acmp_get_listener_connection_info(listener, addr, streamId, vlan);
-            simple_printf("1722.1 request to connect to stream %x.%x, address %x:%x:%x:%x:%x:%x, vlan %d\n",
-            streamId[0], streamId[1],
-            addr[0], addr[1], addr[2], addr[3], addr[4], addr[5],
-            vlan);
-
-            set_avb_sink_sync(0, 0);
-            set_avb_sink_channels(0, AVB_NUM_MEDIA_INPUTS);
-            set_avb_sink_map(0, map, AVB_NUM_MEDIA_INPUTS);
-            set_avb_sink_id(0, streamId);
-            set_avb_sink_vlan(0, vlan);
-            set_avb_sink_addr(0, addr, 6);
-            set_avb_source_state(0, AVB_SOURCE_STATE_DISABLED);
-            set_avb_sink_state(0, AVB_SINK_STATE_POTENTIAL);
-
-            avb_1722_1_acmp_listener_connection_complete(listener, c_tx);
-            break;
-        }
-
-        case AVB_1722_1_DISCONNECT_LISTENER:
-        {
-            simple_printf("1722.1 request to disconnect listener\n");
-            set_avb_sink_state(0, AVB_SINK_STATE_DISABLED);
-            avb_1722_1_acmp_listener_connection_complete(0, c_tx);
-            break;
-        }
-    }
-
-}
-
 /** The main application control thread **/
 void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend c_eth_link_status)
 {
@@ -463,17 +344,7 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend c_eth_link_sta
         case avb_get_control_packet(c_rx, buf, nbytes):
         {
             // Test for a control packet and process it
-            ret = avb_process_control_packet(avb_status, buf, nbytes, c_tx);
-
-            if (ret != AVB_NO_STATUS)
-            {
-                switch (avb_status.type)
-                {
-                case AVB_SRP: app_handle_srp_indication(avb_status); break;
-                case AVB_MAAP: app_handle_maap_indication(avb_status); break;
-                case AVB_1722_1: app_handle_1722_1_indication(avb_status, c_tx); break;
-                }
-            }
+            avb_process_control_packet(avb_status, buf, nbytes, c_tx);
 
             // add any special control packet handling here
             break;
@@ -490,27 +361,10 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend c_eth_link_sta
         {
             timeout += PERIODIC_POLL_TIME;
 
-            do
-            {
-                ret = avb_periodic(avb_status);
-
-                if (ret != AVB_NO_STATUS)
-                {
-                    switch (avb_status.type)
-                    {
-                    case AVB_SRP: app_handle_srp_indication(avb_status); break;
-                    case AVB_MAAP: app_handle_maap_indication(avb_status); break;
-                    case AVB_1722_1: app_handle_1722_1_indication(avb_status, c_tx); break;
-                    }
-                }
-
-            } while (ret != AVB_NO_STATUS);
-
+            avb_periodic(avb_status);
             break;
         }
 
         } // end select
     } // end while
 }
-
-#endif

@@ -8,9 +8,9 @@
 
 void avb_1722_1_adp_init();
 
-int process_avb_1722_1_adp_packet(REFERENCE_PARAM(avb_status_t, status), REFERENCE_PARAM(avb_1722_1_adp_packet_t, pkt), chanend c_tx);
-int avb_1722_1_adp_advertising_periodic(REFERENCE_PARAM(avb_status_t, status), chanend c_tx, chanend ptp);
-int avb_1722_1_adp_discovery_periodic(REFERENCE_PARAM(avb_status_t, status), chanend c_tx);
+void process_avb_1722_1_adp_packet(REFERENCE_PARAM(avb_1722_1_adp_packet_t, pkt), chanend c_tx);
+void avb_1722_1_adp_advertising_periodic(chanend c_tx, chanend ptp);
+void avb_1722_1_adp_discovery_periodic(chanend c_tx);
 int avb_1722_1_get_latest_new_entity_idx();
 
 /** \fn avb_1722_1_adp_announce

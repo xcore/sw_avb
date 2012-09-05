@@ -979,7 +979,7 @@ void avb_process_control_packet(avb_status_t *status, unsigned int buf0[], int n
       // We know that the cd field is true because the MAC filter only forwards
       // 1722 control to this thread
     #ifdef AVB_ENABLE_1722_1
-      avb_1722_1_process_packet(status, &buf[eth_hdr_size], len, c_tx);
+      avb_1722_1_process_packet(status, &buf[eth_hdr_size], &(ethernet_hdr->src_addr[0]), len, c_tx);
     #endif
       avb_1722_maap_process_packet(status, &buf[eth_hdr_size], &(ethernet_hdr->src_addr[0]), len, c_tx);
       break;

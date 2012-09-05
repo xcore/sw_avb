@@ -242,7 +242,7 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
 	}
 }
 
-void process_avb_1722_1_aecp_packet(avb_status_t *status, unsigned char dest_addr[6], avb_1722_1_aecp_packet_t *pkt, int num_pkt_bytes, chanend c_tx)
+void process_avb_1722_1_aecp_packet(unsigned char dest_addr[6], avb_1722_1_aecp_packet_t *pkt, int num_pkt_bytes, chanend c_tx)
 {
 	int message_type = GET_1722_1_MSG_TYPE(((avb_1722_1_packet_header_t*)pkt));
 

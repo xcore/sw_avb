@@ -55,22 +55,21 @@ void avb_1722_1_init(unsigned char macaddr[6], unsigned char serial_number[2])
 
 }
 
-void avb_1722_1_process_packet(avb_status_t *status, unsigned int buf0[], int len, chanend c_tx)
+void avb_1722_1_process_packet(avb_status_t *status, unsigned char buf[], unsigned char src_addr[6], int len, chanend c_tx)
 {
-    unsigned char *buf = (unsigned char *) buf0;
     struct avb_1722_1_packet_header_t *pkt = (struct avb_1722_1_packet_header_t *) &buf[0];
     unsigned subtype = GET_1722_1_SUBTYPE(pkt);
 
     switch (subtype)
     {
     case DEFAULT_1722_1_ADP_SUBTYPE:
-        process_avb_1722_1_adp_packet(status, (avb_1722_1_adp_packet_t*)pkt, c_tx);
+        process_avb_1722_1_adp_packet((avb_1722_1_adp_packet_t*)pkt, c_tx);
         return;
     case DEFAULT_1722_1_AECP_SUBTYPE:
-        process_avb_1722_1_aecp_packet(status, ethernet_hdr->src_addr , (avb_1722_1_aecp_packet_t*)pkt, len, c_tx);
+        process_avb_1722_1_aecp_packet(src_addr, (avb_1722_1_aecp_packet_t*)pkt, len, c_tx);
         return;
     case DEFAULT_1722_1_ACMP_SUBTYPE:
-        process_avb_1722_1_acmp_packet(status, (avb_1722_1_acmp_packet_t*)pkt, c_tx);
+        process_avb_1722_1_acmp_packet((avb_1722_1_acmp_packet_t*)pkt, c_tx);
         return;
     default:
         return;
@@ -81,15 +80,15 @@ void avb_1722_1_process_packet(avb_status_t *status, unsigned int buf0[], int le
 
 void avb_1722_1_periodic(avb_status_t *status, chanend c_tx, chanend c_ptp)
 {
-	avb_1722_1_adp_advertising_periodic(status, c_tx, c_ptp);
-	avb_1722_1_adp_discovery_periodic(status, c_tx);
+	avb_1722_1_adp_advertising_periodic(c_tx, c_ptp);
+	avb_1722_1_adp_discovery_periodic(c_tx);
 #if (AVB_1722_1_CONTROLLER_ENABLED)
-	avb_1722_1_acmp_controller_periodic(status, c_tx);
+	avb_1722_1_acmp_controller_periodic(c_tx);
 #endif
 #if (AVB_1722_1_TALKER_ENABLED)
-	avb_1722_1_acmp_talker_periodic(status, c_tx);
+	avb_1722_1_acmp_talker_periodic(c_tx);
 #endif
 #if (AVB_1722_1_LISTENER_ENABLED)
-	avb_1722_1_acmp_listener_periodic(status, c_tx);
+	avb_1722_1_acmp_listener_periodic(c_tx);
 #endif
 }

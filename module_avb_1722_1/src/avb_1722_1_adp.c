@@ -193,7 +193,7 @@ static unsigned avb_1722_1_entity_database_check_timeout()
 	return 0;
 }
 
-void process_avb_1722_1_adp_packet(avb_status_t *status, avb_1722_1_adp_packet_t* pkt, chanend c_tx)
+void process_avb_1722_1_adp_packet(avb_1722_1_adp_packet_t* pkt, chanend c_tx)
 {
 	unsigned message_type = GET_1722_1_MSG_TYPE(((avb_1722_1_packet_header_t*)pkt));
 	guid_t zero_guid = { 0 };
@@ -259,7 +259,7 @@ static void avb_1722_1_create_adp_packet(int message_type, guid_t guid)
 	  }
 }
 
-void avb_1722_1_adp_discovery_periodic(avb_status_t *status, chanend c_tx)
+void avb_1722_1_adp_discovery_periodic(chanend c_tx)
 {
 	switch (adp_discovery_state)
 	{
@@ -305,7 +305,7 @@ void avb_1722_1_adp_discovery_periodic(avb_status_t *status, chanend c_tx)
 	return;
 }
 
-void avb_1722_1_adp_advertising_periodic(avb_status_t *status, chanend c_tx, chanend ptp)
+void avb_1722_1_adp_advertising_periodic(chanend c_tx, chanend ptp)
 {
 	guid_t ptp_current;
 
