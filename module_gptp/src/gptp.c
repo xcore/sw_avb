@@ -979,7 +979,6 @@ static void send_ptp_pdelay_resp_msg(chanend c_tx,
   ptp_timestamp epoch_req_ingress_ts;
   ptp_timestamp epoch_resp_ts;
   unsigned local_resp_ts;
-  unsigned local_diff;
 
   set_ptp_ethernet_hdr(buf);
 
