@@ -56,6 +56,6 @@ void avb_1722_maap_periodic(REFERENCE_PARAM(avb_status_t, status), chanend c_tx)
  */
 void avb_1722_maap_rerequest_addresses();
 
-void avb_app_on_source_address_reserved(int offset, unsigned char mac_addr[6]);
+void avb_talker_on_source_address_reserved(int source_num, unsigned char mac_addr[6]);
 
 #endif

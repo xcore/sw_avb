@@ -221,8 +221,8 @@ void avb_1722_maap_periodic(avb_status_t *status, chanend c_tx)
           lower_two_bytes += i;
           mac_addr[4] = (lower_two_bytes >> 8) & 0xFF;
           mac_addr[5] = lower_two_bytes & 0xFF;
-          /* User app hook */
-          avb_app_on_source_address_reserved(i, mac_addr);
+          /* User application hook */
+          avb_talker_on_source_address_reserved(i, mac_addr);
         }
       }
       else

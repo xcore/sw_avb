@@ -11,10 +11,10 @@
 #include "avb_1722_1_acmp.h"
 #endif
 
-void __attribute__((weak)) avb_app_on_source_address_reserved(int offset, unsigned char mac_addr[6])
+void __attribute__((weak)) avb_talker_on_source_address_reserved(int source_num, unsigned char mac_addr[6])
 {
   // Do some debug print
-  simple_printf("MAAP reserved Talker stream #%d address: %x:%x:%x:%x:%x:%x\n", offset,
+  simple_printf("MAAP reserved Talker stream #%d address: %x:%x:%x:%x:%x:%x\n", source_num,
                             mac_addr[0],
                             mac_addr[1],
                             mac_addr[2],
@@ -22,10 +22,10 @@ void __attribute__((weak)) avb_app_on_source_address_reserved(int offset, unsign
                             mac_addr[4],
                             mac_addr[5]);
 
-  set_avb_source_dest(offset, mac_addr, 6);
+  set_avb_source_dest(source_num, mac_addr, 6);
 #if AVB_1722_1_TALKER_ENABLED
-  avb_1722_1_talker_set_mac_address(offset, mac_addr);
+  avb_1722_1_talker_set_mac_address(source_num, mac_addr);
 #else
-  set_avb_source_state(offset, AVB_SOURCE_STATE_POTENTIAL);
+  set_avb_source_state(source_num, AVB_SOURCE_STATE_POTENTIAL);
 #endif
 }
