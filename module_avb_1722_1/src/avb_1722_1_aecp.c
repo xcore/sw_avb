@@ -76,7 +76,7 @@ static unsigned char *avb_1722_1_create_aecp_packet(unsigned char dest_addr[6], 
 	return pkt->data.payload;
 }
 
-static int create_aem_read_descriptor_response(unsigned short read_type, unsigned short read_id, unsigned char dest_addr[6], avb_1722_1_aecp_packet_t *pkt)
+static int create_aem_read_descriptor_response(unsigned short read_type, unsigned short read_id, unsigned char src_addr[6], avb_1722_1_aecp_packet_t *pkt)
 {
 	int desc_size_bytes = 0, i = 0;
 	unsigned char *descriptor;
@@ -138,7 +138,7 @@ static int create_aem_read_descriptor_response(unsigned short read_type, unsigne
 
 		if (packet_size < 64) packet_size = 64;
 
-		avb_1722_1_aecp_aem_msg_t *aem = (avb_1722_1_aecp_aem_msg_t*)avb_1722_1_create_aecp_packet(dest_addr, AECP_CMD_AEM_RESPONSE, AECP_AEM_STATUS_SUCCESS, desc_size_bytes+16, pkt);
+		avb_1722_1_aecp_aem_msg_t *aem = (avb_1722_1_aecp_aem_msg_t*)avb_1722_1_create_aecp_packet(src_addr, AECP_CMD_AEM_RESPONSE, AECP_AEM_STATUS_SUCCESS, desc_size_bytes+16, pkt);
 
 		memcpy(aem, pkt->data.payload, 48);
 		memcpy(&(aem->payload[4]), descriptor, desc_size_bytes+40);
@@ -149,7 +149,7 @@ static int create_aem_read_descriptor_response(unsigned short read_type, unsigne
 	{
 		int packet_size = sizeof(ethernet_hdr_t)+sizeof(avb_1722_1_packet_header_t)+52;
 
-		avb_1722_1_aecp_aem_msg_t *aem = (avb_1722_1_aecp_aem_msg_t*)avb_1722_1_create_aecp_packet(dest_addr, AECP_CMD_AEM_COMMAND, AECP_AEM_STATUS_NO_SUCH_DESCRIPTOR, 40, pkt);
+		avb_1722_1_aecp_aem_msg_t *aem = (avb_1722_1_aecp_aem_msg_t*)avb_1722_1_create_aecp_packet(src_addr, AECP_CMD_AEM_COMMAND, AECP_AEM_STATUS_NO_SUCH_DESCRIPTOR, 40, pkt);
 
 		memcpy(aem, pkt->data.payload, 52);
 
@@ -157,7 +157,7 @@ static int create_aem_read_descriptor_response(unsigned short read_type, unsigne
 	}
 }
 
-static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsigned char dest_addr[6], int num_pkt_bytes, chanend c_tx)
+static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsigned char src_addr[6], int num_pkt_bytes, chanend c_tx)
 {
 	avb_1722_1_aecp_aem_msg_t *msg = &(pkt->data.avdecc);
 	unsigned char u_flag = AEM_MSG_U_FLAG(msg);
@@ -178,7 +178,7 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
 
 			printstr("READ_DESCRIPTOR: "); printint(desc_read_type); printchar(','); printintln(desc_read_id);
 
-			num_tx_bytes = create_aem_read_descriptor_response(desc_read_type, desc_read_id, dest_addr, pkt);
+			num_tx_bytes = create_aem_read_descriptor_response(desc_read_type, desc_read_id, src_addr, pkt);
 
 			mac_tx(c_tx, avb_1722_1_buf, num_tx_bytes, ETH_BROADCAST);
 
@@ -242,7 +242,7 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
 	}
 }
 
-void process_avb_1722_1_aecp_packet(unsigned char dest_addr[6], avb_1722_1_aecp_packet_t *pkt, int num_pkt_bytes, chanend c_tx)
+void process_avb_1722_1_aecp_packet(unsigned char src_addr[6], avb_1722_1_aecp_packet_t *pkt, int num_pkt_bytes, chanend c_tx)
 {
 	int message_type = GET_1722_1_MSG_TYPE(((avb_1722_1_packet_header_t*)pkt));
 
@@ -253,7 +253,7 @@ void process_avb_1722_1_aecp_packet(unsigned char dest_addr[6], avb_1722_1_aecp_
 		case AECP_CMD_AEM_COMMAND:
 		{
 #if AVB_1722_1_AEM_ENABLED
-			process_avb_1722_1_aecp_aem_msg(pkt, dest_addr, num_pkt_bytes, c_tx);
+			process_avb_1722_1_aecp_aem_msg(pkt, src_addr, num_pkt_bytes, c_tx);
 #endif
 			break;
 		}
