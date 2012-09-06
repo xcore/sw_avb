@@ -184,15 +184,6 @@ void avb_init(chanend media_ctl[],
               chanend c_mac_tx0,
               chanend c_ptp0) 
 {
-
-#if AVB_OSC
-  OSC_SET_RANGE(avb_source, 0, AVB_NUM_SOURCES-1);
-  OSC_SET_RANGE(device_media_clock, 0, AVB_NUM_MEDIA_CLOCKS-1);
-  OSC_SET_RANGE(avb_sink, 0, AVB_NUM_SINKS-1);
-  OSC_SET_RANGE(media_in, 0, AVB_NUM_MEDIA_INPUTS-1);
-  OSC_SET_RANGE(media_out, 0, AVB_NUM_MEDIA_OUTPUTS-1);
-#endif
-
   mac_get_macaddr(c_mac_tx0, mac_addr);
 
   mrp_init((char *)mac_addr);

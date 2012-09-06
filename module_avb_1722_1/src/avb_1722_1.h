@@ -1,9 +1,5 @@
 /** \file avb_1722_1.h
  *
- *  1722.1 is a discovery and control protocol for 1722.  It is a layer 2 protocol
- *  similar to Open Sound Control (OSC), and allows for 1722 endpoints to be discovered
- *  by a central controller, and connections between talkers and listeners to be
- *  established
  */
 
 

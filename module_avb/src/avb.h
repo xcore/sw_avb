@@ -17,10 +17,6 @@
 #include "avb_api.h"
 #include "avb_unit.h"
 
-#ifndef AVB_OSC
-#define AVB_OSC 0
-#endif
-
 #ifndef MAX_AVB_CONTROL_PACKET_SIZE
 #define MAX_AVB_CONTROL_PACKET_SIZE (1518)
 #endif

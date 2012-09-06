@@ -20,9 +20,6 @@
 
 #ifndef __OSC_IMPL
 
-int get_osc_version(char a0[]);
-int get_osc_type_reports(char a0[]);
-int get_osc_type_accepts(char a0[]);
 int getset_avb_source_presentation(int set, int h0,REFERENCE_PARAM(int, a0));
 
 inline int set_avb_source_presentation(int h0,int a0)
