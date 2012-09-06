@@ -32,6 +32,7 @@
 #define isnull(A) (A == 0)
 
 #define UNMAPPED (-1)
+#define AVB_CHANNEL_UNMAPPED (-1)
 
 typedef struct media_info_t {
   int core_id;
@@ -156,6 +157,7 @@ static void register_media(chanend media_ctl[])
       strcpy(outputs[output_id].type,"");
 #endif
       outputs[output_id].core_id = core_id;
+      outputs[output_id].clk_ctl = clk_ctl;
       outputs[output_id].local_id = j;
       outputs[output_id].mapped_to = UNMAPPED;
       outputs[output_id].fifo = xc_abi_inuint(media_ctl[i]);
@@ -657,18 +659,31 @@ int getset_avb_sink_state(int set,
       if (sink->stream.state == AVB_SINK_STATE_DISABLED &&
           *state == AVB_SINK_STATE_POTENTIAL) {
         chanend c = sink->listener_ctl;
-        int clk_ctl;
+        int clk_ctl = -1;
+        simple_printf("Listener sink #%d chan map:\n", sink_num);
         xc_abi_outuint(c, AVB1722_CONFIGURE_LISTENER_STREAM);
         xc_abi_outuint(c, sink->stream.local_id);
         xc_abi_outuint(c, sink->stream.sync);
         xc_abi_outuint(c, sink->stream.rate);
         xc_abi_outuint(c, sink->stream.num_channels);
-        for (int i=0;i<sink->stream.num_channels;i++) {
-          xc_abi_outuint(c, outputs[sink->stream.map[i]].fifo);
+        for (int i=0;i<sink->stream.num_channels;i++)
+        {
+          if (sink->stream.map[i] == AVB_CHANNEL_UNMAPPED)
+          {
+            xc_abi_outuint(c, 0);
+            simple_printf("  %d unmapped\n", i);
+          }
+          else
+          {
+            if (clk_ctl == -1)
+            {
+              clk_ctl = outputs[sink->stream.map[i]].clk_ctl;
+            }
+            xc_abi_outuint(c, outputs[sink->stream.map[i]].fifo);
+            simple_printf("  %d -> %x\n", i, sink->stream.map[i]);
+          }
         }                       
         (void) xc_abi_inuint(c);
-
-        clk_ctl = outputs[sink->stream.map[0]].clk_ctl;
 
         if (!isnull(media_clock_svr)) {
         	media_clock_register(media_clock_svr, clk_ctl, sink->stream.sync);
