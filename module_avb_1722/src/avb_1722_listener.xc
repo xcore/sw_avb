@@ -88,7 +88,7 @@ static void disable_stream(avb_1722_stream_info_t &s)
 	for(int i=0;i<s.num_channels;i++) {
 		if (s.map[i])
 		{
-		disable_media_output_fifo(s.map[i]);
+			disable_media_output_fifo(s.map[i]);
 		}
 	}
 
