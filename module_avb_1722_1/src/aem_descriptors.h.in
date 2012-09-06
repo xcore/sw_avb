@@ -477,9 +477,11 @@ unsigned char desc_clock_domain_0[] =
 {
   U16(AEM_CLOCK_DOMAIN_TYPE),                 /* 0-1 descriptor_type */
   U16(0),                                     /* 2-3 descriptor_id */
-  U16(0),                                     /* 4-5 clock_source_index */
-  U16(10),                                    /* 6-7 clock_sources_offset */
-  U16(1),                                     /* 8-9 clock_sources_count */
+  "Clock Domain",                             /* object_name */
+  U16(AEM_NO_STRING),                         /* localized_description */
+  U16(0),                                     /* clock_source_index */
+  U16(10),                                    /* clock_sources_offset */
+  U16(1),                                     /* clock_sources_count */
   U16(0),                                     /* clock_sources */ 
 };
 
