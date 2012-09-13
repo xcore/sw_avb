@@ -40,7 +40,7 @@ void avb_1722_1_init(unsigned char macaddr[6], unsigned char serial_number[2])
 
     avb_1722_1_adp_init();
 #if (AVB_1722_1_AEM_ENABLED)
-    avb_1722_1_aem_descriptors_init();
+    avb_1722_1_aecp_aem_init();
 #endif
 
 #if (AVB_1722_1_CONTROLLER_ENABLED)

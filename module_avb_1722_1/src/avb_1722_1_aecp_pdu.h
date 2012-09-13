@@ -3,6 +3,7 @@
 
 #include "avb_1722_1_protocol.h"
 #include "avb_1722_1_default_conf.h"
+#include "avb_1722_1_aecp_aem.h"
 
 #define AEM_MSG_U_FLAG(pkt)			((pkt)->uflag_command_type >> 7)
 #define AEM_MSG_COMMAND_TYPE(pkt)	((((pkt)->uflag_command_type & 0x7f) << 8)| \
@@ -17,7 +18,13 @@
 typedef struct {
 	unsigned char uflag_command_type;
 	unsigned char command_type;
-	unsigned char payload[512];
+	union {
+		avb_1722_1_aem_read_descriptor_command_t read_descriptor_cmd;
+		avb_1722_1_aem_read_descriptor_response_t read_descriptor_resp;
+		avb_1722_1_aem_acquire_entity_command_t acquire_entity_cmd;
+		avb_1722_1_aem_lock_entity_command_t lock_entity_cmd;
+		unsigned char payload[512];
+	} command;
 } avb_1722_1_aecp_aem_msg_t;
 
 /**
@@ -30,7 +37,7 @@ typedef struct {
 } avb_1722_1_aecp_address_access_t;
 
 /**
- * 1722.1m AECP Legacy AV/C command format
+ * 1722.1 AECP Legacy AV/C command format
  */
 typedef struct {
 	unsigned char avc_length[2];
@@ -56,7 +63,7 @@ typedef struct {
 	unsigned char controller_guid[8];
 	unsigned char sequence_id[2];
 	union {
-		avb_1722_1_aecp_aem_msg_t avdecc;
+		avb_1722_1_aecp_aem_msg_t aem;
 		avb_1722_1_aecp_address_access_t address;
 		avb_1722_1_aecp_avc_t avc;
 		avb_1722_1_aecp_vendor_t vendor;

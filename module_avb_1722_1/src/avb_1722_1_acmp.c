@@ -58,16 +58,6 @@ extern guid_t my_guid;
 
 static const unsigned char avb_1722_1_acmp_dest_addr[6] = AVB_1722_1_ACMP_DEST_MAC;
 
-// The channel counts defined by each bit in the ACMP default audio format word
-static const unsigned char avb_1722_1_acmp_default_format_channel_counts[] = {
-	1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 16, 18, 20, 22, 24
-};
-
-// The sample rates defined by each bit in the ACMP default audio format word
-static const unsigned int avb_1722_1_acmp_default_format_frequency[] = {
-	44100, 48000, 88200, 96000, 176400, 192000
-};
-
 // ACMP command timeouts (in centiseconds) as defined in Table 7.4 of the specification
 static const unsigned int avb_1722_1_acmp_inflight_timeouts[] = {20, 2, 2, 45, 5, 2, 2};
 
@@ -157,12 +147,10 @@ static void avb_1722_1_create_acmp_packet(avb_1722_1_acmp_cmd_resp *cr, int mess
 	HTON_U16(pkt->connection_count, cr->connection_count);
 	HTON_U16(pkt->sequence_id, cr->sequence_id);
 	HTON_U16(pkt->flags, cr->flags);
-	pkt->dest_mac[0] = cr->stream_dest_mac[0];
-	pkt->dest_mac[1] = cr->stream_dest_mac[1];
-	pkt->dest_mac[2] = cr->stream_dest_mac[2];
-	pkt->dest_mac[3] = cr->stream_dest_mac[3];
-	pkt->dest_mac[4] = cr->stream_dest_mac[4];
-	pkt->dest_mac[5] = cr->stream_dest_mac[5];
+	for (int i=0; i < 6; i++)
+	{
+		pkt->dest_mac[i] = cr->stream_dest_mac[i];
+	}
 }
 
 static void acmp_progress_inflight_timer(int entity_type)
@@ -378,12 +366,10 @@ static void store_rcvd_cmd_resp(avb_1722_1_acmp_cmd_resp* store, avb_1722_1_acmp
 	store->connection_count = NTOH_U16(pkt->connection_count);
 	store->sequence_id = NTOH_U16(pkt->sequence_id);
 	store->flags = NTOH_U16(pkt->flags);
-	store->stream_dest_mac[0] = pkt->dest_mac[0];
-	store->stream_dest_mac[1] = pkt->dest_mac[1];
-	store->stream_dest_mac[2] = pkt->dest_mac[2];
-	store->stream_dest_mac[3] = pkt->dest_mac[3];
-	store->stream_dest_mac[4] = pkt->dest_mac[4];
-	store->stream_dest_mac[5] = pkt->dest_mac[5];
+	for (int i=0; i < 6; i++)
+	{
+		store->stream_dest_mac[i] = pkt->dest_mac[i];
+	}
 	store->message_type = GET_1722_1_MSG_TYPE(&(pkt->header));
 	store->status = GET_1722_1_VALID_TIME(&(pkt->header));
 }
