@@ -47,33 +47,14 @@ void ptp_server_and_gpio(chanend c_rx, chanend c_tx, chanend ptp_link[],
 		int num_ptp, enum ptp_server_type server_type, chanend c);
 
 //***** Ethernet Configuration ****
-on stdcore[1]: port otp_data = XS1_PORT_32B; // OTP_DATA_PORT
-on stdcore[1]: out port otp_addr = XS1_PORT_16C; // OTP_ADDR_PORT
-on stdcore[1]: port otp_ctrl = XS1_PORT_16D; // OTP_CTRL_PORT
-
-on stdcore[1]: mii_interface_t mii = {
-		XS1_CLKBLK_1,
-		XS1_CLKBLK_2,
-		PORT_ETH_RXCLK,
-		PORT_ETH_RXER,
-		PORT_ETH_RXD,
-		PORT_ETH_RXDV,
-		PORT_ETH_TXCLK,
-		PORT_ETH_TXEN,
-		PORT_ETH_TXD
-};
-
-on stdcore[1]: out port p_mii_resetn = PORT_ETH_RSTN;
-on stdcore[1]: clock clk_smi = XS1_CLKBLK_5;
-
-on stdcore[1]: smi_interface_t smi = { PORT_ETH_MDIO, PORT_ETH_MDC, 0 };
-
-on stdcore[1]: struct r_i2c r_i2c = { PORT_I2C_SCL, PORT_I2C_SDA };
+avb_ethernet_ports_t avb_ethernet_ports = AVB_ETHERNET_DEFAULT_PORTS_INIT;
 
 //***** AVB audio ports ****
+on stdcore[1]: struct r_i2c r_i2c = { PORT_I2C_SCL, PORT_I2C_SDA };
+
 on stdcore[0]: out port p_fs = PORT_SYNC_OUT;
-on stdcore[0]: clock b_mclk = XS1_CLKBLK_1;
-on stdcore[0]: clock b_bclk = XS1_CLKBLK_2;
+on stdcore[0]: clock b_mclk = XS1_CLKBLK_3;
+on stdcore[0]: clock b_bclk = XS1_CLKBLK_4;
 on stdcore[0]: in port p_aud_mclk = PORT_MCLK;
 on stdcore[0]: buffered out port:32 p_aud_bclk = PORT_SCLK;
 on stdcore[0]: out buffered port:32 p_aud_lrclk = PORT_LRCLK;
@@ -104,9 +85,8 @@ media_output_fifo_t ofifos[AVB_NUM_MEDIA_OUTPUTS];
 
 int main(void) {
 	// ethernet tx channels
-	chan tx_link[4];
-	chan rx_link[4];
-	chan connect_status;
+	chan c_mac_tx[4];
+	chan c_mac_rx[4];
 
 	//ptp channels
 	chan ptp_link[3];
@@ -126,40 +106,24 @@ int main(void) {
 	chan c_samples_to_codec;
 
 	// tcp/ip channels
-	chan xtcp[1];
+	chan c_xtcp[1];
 
 	// control channel from the GPIO buttons
 	chan c_gpio_ctl;
 
 	par
 	{
-		// AVB - Ethernet
-		on stdcore[1]:
-		{
-			int mac_address[2];
-			ethernet_getmac_otp(otp_data,
-                                            otp_addr,
-                                            otp_ctrl,
-                                            (mac_address, char[]));
-			phy_init(clk_smi, p_mii_resetn,
-					smi,
-					mii);
-
-			ethernet_server(mii, mac_address,
-					rx_link, 4,
-					tx_link, 4,
-					smi, connect_status);
-		}
-
-		// TCP/IP stack
-		on stdcore[1]:
-		{
-			uip_server(rx_link[1],
-                                   tx_link[2],
-                                   xtcp, 1,
-                                   null,
-                                   connect_status);
-		}
+          on stdcore[1]:  avb_ethernet_server(avb_ethernet_ports,
+                                              c_mac_rx, 4,
+                                              c_mac_tx, 4);
+          // TCP/IP stack
+          on stdcore[1]:
+          {
+            xtcp_server_uip(c_mac_rx[1],
+                            c_mac_tx[2],
+                            c_xtcp, 1,
+                            null);
+          }
 
 		// AVB - PTP
 		on stdcore[1]:
@@ -168,7 +132,7 @@ int main(void) {
 			// launching  the main function of the thread
 			audio_clock_CS2300CP_init(r_i2c, MASTER_TO_WORDCLOCK_RATIO);
 
-			ptp_server_and_gpio(rx_link[0], tx_link[0], ptp_link, 3,
+			ptp_server_and_gpio(c_mac_rx[0], c_mac_tx[0], ptp_link, 3,
 					PTP_GRANDMASTER_CAPABLE,
 					c_gpio_ctl);
 		}
@@ -210,12 +174,12 @@ int main(void) {
 
 		// AVB Talker - must be on the same core as the audio interface
 		on stdcore[0]: avb_1722_talker(ptp_link[0],
-				tx_link[1],
+				c_mac_tx[1],
 				talker_ctl[0],
 				AVB_NUM_SOURCES);
 
 		// AVB Listener
-		on stdcore[0]: avb_1722_listener(rx_link[3],
+		on stdcore[0]: avb_1722_listener(c_mac_rx[3],
 				buf_ctl[0],
 				null,
 				listener_ctl[0],
@@ -240,9 +204,9 @@ int main(void) {
 		on stdcore[0]:
 		{
 			// First initialize avb higher level protocols
-			avb_init(media_ctl, listener_ctl, talker_ctl, media_clock_ctl, rx_link[2], tx_link[3], ptp_link[2]);
+			avb_init(media_ctl, listener_ctl, talker_ctl, media_clock_ctl, c_mac_rx[2], c_mac_tx[3], ptp_link[2]);
 
-			demo(xtcp[0], rx_link[2], tx_link[3], c_gpio_ctl);
+			demo(c_xtcp[0], c_mac_rx[2], c_mac_tx[3], c_gpio_ctl);
 		}
 	}
 
