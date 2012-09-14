@@ -308,9 +308,6 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend c_eth_link_sta
     set_avb_source_map(0, map, AVB_NUM_MEDIA_INPUTS);
     set_avb_source_format(0, AVB_SOURCE_FORMAT_MBLA_24BIT, sample_rate);
     set_avb_source_sync(0, 0); // use the media_clock defined above
-
-    // Request a multicast addresses for stream transmission
-    avb_1722_maap_request_addresses(AVB_NUM_SOURCES, null);
   
     tmr :> timeout;
     while (1)
@@ -333,6 +330,8 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend c_eth_link_sta
             {
                 avb_start();
                 avb_1722_1_adp_announce();
+                // Request a multicast addresses for stream transmission
+                avb_1722_maap_request_addresses(AVB_NUM_SOURCES, null);
             }
             else
             {
