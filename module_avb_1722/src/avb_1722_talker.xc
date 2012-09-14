@@ -152,7 +152,7 @@ void avb_1722_talker(chanend ptp_svr, chanend ethernet_tx_svr,
 	avb_register_talker_streams(talker_ctl, num_streams);
 
 	// Initialise local data structure.
-	ethernet_get_my_mac_adrs(ethernet_tx_svr, mac_addr);
+	mac_get_macaddr(ethernet_tx_svr, mac_addr);
 
 	for (int i = 0; i < AVB_MAX_STREAMS_PER_TALKER_UNIT; i++)
 		talker_streams[i].active = 0;

@@ -1,3 +1,4 @@
+#define XTCP_SEPARATE_MAC 1
 
 #define XTCP_CLIENT_BUF_SIZE (1472)
 
