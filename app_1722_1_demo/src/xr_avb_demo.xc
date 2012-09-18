@@ -270,14 +270,8 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl)
     tmr :> timeout;
     while (1)
     {
-        int ret;
-        unsigned char tmp;
-        unsigned int streamId[2];
         unsigned int nbytes;
         unsigned int buf[(MAX_AVB_CONTROL_PACKET_SIZE+1)>>2];
-        int already_seen;
-        unsigned char ifnum;
-        int link_status;
 
         select
         {
