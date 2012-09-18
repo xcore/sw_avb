@@ -22,6 +22,7 @@
 
 #ifdef AVB_ENABLE_1722_1
 #include "avb_1722_1.h"
+#include "avb_1722_1_adp.h"
 #endif
 
 //#define AVB_TRANSMIT_BEFORE_RESERVATION 1
@@ -221,6 +222,7 @@ void avb_init(chanend media_ctl[],
   xc_abi_outuint(c_mac_tx, ETHERNET_TX_INIT_AVB_ROUTER);
 
   mac_set_custom_filter(c_mac_rx, MAC_FILTER_AVB_CONTROL);
+  mac_request_status_packets(c_mac_rx);
 }
 
 void avb_periodic(avb_status_t *status)
@@ -234,7 +236,11 @@ void avb_periodic(avb_status_t *status)
 
 void avb_start(void)
 {
-  avb_1722_maap_rerequest_addresses();
+#if AVB_ENABLE_1722_1
+  avb_1722_1_adp_announce();
+#endif
+  // Request a multicast addresses for stream transmission
+  avb_1722_maap_request_addresses(AVB_NUM_SOURCES, NULL);
 
   mrp_mad_begin(domain_attr);
   mrp_mad_join(domain_attr, 1);
@@ -954,41 +960,58 @@ void avb_set_legacy_mode(int mode)
 
 void avb_process_control_packet(avb_status_t *status, unsigned int buf0[], int nbytes, chanend c_tx)
 {
-  struct ethernet_hdr_t *ethernet_hdr = (ethernet_hdr_t *) &buf0[0];
-  unsigned char *buf = (unsigned char *) buf0;
-
-  int has_qtag = ethernet_hdr->ethertype[1]==0x18;
-  int eth_hdr_size = has_qtag ? 18 : 14;
-  int etype;
-  int len = nbytes - eth_hdr_size;
-
-  if (has_qtag)
+  if (nbytes == STATUS_PACKET_LEN)
   {
-    struct tagged_ethernet_hdr_t *tagged_ethernet_hdr = (tagged_ethernet_hdr_t *) &buf0[0];
-    etype = (int)(tagged_ethernet_hdr->ethertype[0] << 8) + (int)(tagged_ethernet_hdr->ethertype[1]); 
+    if (buf0[0]) // Link up
+    {
+      avb_start();
+    }
+    else // Link down
+    {
+      for(int i=0; i < AVB_NUM_SOURCES; i++)
+      {
+        set_avb_source_state(i, AVB_SOURCE_STATE_DISABLED);
+      }
+    }
   }
   else
   {
-    etype = (int)(ethernet_hdr->ethertype[0] << 8) + (int)(ethernet_hdr->ethertype[1]); 
-  }
+    struct ethernet_hdr_t *ethernet_hdr = (ethernet_hdr_t *) &buf0[0];
+    unsigned char *buf = (unsigned char *) buf0;
 
-  switch (etype)
-  {
-    /* fallthrough intended */
-    case AVB_SRP_ETHERTYPE:
-    // TODO: #define around MMRP, disabled by default
-    case AVB_MMRP_ETHERTYPE:
-    case AVB_MVRP_ETHERTYPE:
-      avb_mrp_process_packet(status, &buf[eth_hdr_size], etype, len);
-      break;
-    case AVB_1722_ETHERTYPE:
-      // We know that the cd field is true because the MAC filter only forwards
-      // 1722 control to this thread
-    #ifdef AVB_ENABLE_1722_1
-      avb_1722_1_process_packet(status, &buf[eth_hdr_size], &(ethernet_hdr->src_addr[0]), len, c_tx);
-    #endif
-      avb_1722_maap_process_packet(status, &buf[eth_hdr_size], &(ethernet_hdr->src_addr[0]), len, c_tx);
-      break;
+    int has_qtag = ethernet_hdr->ethertype[1]==0x18;
+    int eth_hdr_size = has_qtag ? 18 : 14;
+    int etype;
+    int len = nbytes - eth_hdr_size;
+
+    if (has_qtag)
+    {
+      struct tagged_ethernet_hdr_t *tagged_ethernet_hdr = (tagged_ethernet_hdr_t *) &buf0[0];
+      etype = (int)(tagged_ethernet_hdr->ethertype[0] << 8) + (int)(tagged_ethernet_hdr->ethertype[1]); 
+    }
+    else
+    {
+      etype = (int)(ethernet_hdr->ethertype[0] << 8) + (int)(ethernet_hdr->ethertype[1]); 
+    }
+
+    switch (etype)
+    {
+      /* fallthrough intended */
+      case AVB_SRP_ETHERTYPE:
+      // TODO: #define around MMRP, disabled by default
+      case AVB_MMRP_ETHERTYPE:
+      case AVB_MVRP_ETHERTYPE:
+        avb_mrp_process_packet(status, &buf[eth_hdr_size], etype, len);
+        break;
+      case AVB_1722_ETHERTYPE:
+        // We know that the cd field is true because the MAC filter only forwards
+        // 1722 control to this thread
+      #ifdef AVB_ENABLE_1722_1
+        avb_1722_1_process_packet(status, &buf[eth_hdr_size], &(ethernet_hdr->src_addr[0]), len, c_tx);
+      #endif
+        avb_1722_maap_process_packet(status, &buf[eth_hdr_size], &(ethernet_hdr->src_addr[0]), len, c_tx);
+        break;
+    }
   }
 
 }

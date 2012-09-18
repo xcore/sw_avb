@@ -4,8 +4,6 @@
 #include <xccompat.h>
 #include <stdio.h>
 #include <string.h>
-#include "ethernet_server.h"
-#include "ethernet_tx_client.h"
 #include "audio_i2s.h"
 #include <xscope.h>
 #include "i2c.h"
@@ -13,12 +11,6 @@
 #include "audio_clock_CS2300CP.h"
 #include "simple_printf.h"
 #include "media_fifo.h"
-#include "avb_1722_1_adp.h"
-#include "avb_1722_1_acmp.h"
-
-// Ethernet link status
-#define ETHERNET_LINK_IS_DOWN 0
-#define ETHERNET_LINK_IS_UP   1
 
 // This is the number of master clocks in a word clock
 #define MASTER_TO_WORDCLOCK_RATIO 512
@@ -42,40 +34,20 @@ out port p_mute_led_remote = PORT_SHARED_OUT; // mute, led remote;
 out port p_chan_leds = PORT_LEDS;
 in port p_buttons = PORT_SHARED_IN;
 
-void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend connect_status);
+void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl);
 
 void ptp_server_and_gpio(chanend c_rx, chanend c_tx, chanend ptp_link[],
         int num_ptp, enum ptp_server_type server_type, chanend c);
 
 //***** Ethernet Configuration ****
-on stdcore[1]: port otp_data = XS1_PORT_32B; // OTP_DATA_PORT
-on stdcore[1]: out port otp_addr = XS1_PORT_16C; // OTP_ADDR_PORT
-on stdcore[1]: port otp_ctrl = XS1_PORT_16D; // OTP_CTRL_PORT
-
-on stdcore[1]: mii_interface_t mii =
-{
-        XS1_CLKBLK_1,
-        XS1_CLKBLK_2,
-        PORT_ETH_RXCLK,
-        PORT_ETH_RXER,
-        PORT_ETH_RXD,
-        PORT_ETH_RXDV,
-        PORT_ETH_TXCLK,
-        PORT_ETH_TXEN,
-        PORT_ETH_TXD
-};
-
-on stdcore[1]: out port p_mii_resetn = PORT_ETH_RSTN;
-on stdcore[1]: clock clk_smi = XS1_CLKBLK_5;
-
-on stdcore[1]: smi_interface_t smi = { PORT_ETH_MDIO, PORT_ETH_MDC, 0 };
-
-on stdcore[1]: struct r_i2c r_i2c = { PORT_I2C_SCL, PORT_I2C_SDA };
+avb_ethernet_ports_t avb_ethernet_ports = AVB_ETHERNET_DEFAULT_PORTS_INIT;
 
 //***** AVB audio ports ****
+on stdcore[1]: struct r_i2c r_i2c = { PORT_I2C_SCL, PORT_I2C_SDA };
+
 on stdcore[0]: out port p_fs = PORT_SYNC_OUT;
-on stdcore[0]: clock b_mclk = XS1_CLKBLK_1;
-on stdcore[0]: clock b_bclk = XS1_CLKBLK_2;
+on stdcore[0]: clock b_mclk = XS1_CLKBLK_3;
+on stdcore[0]: clock b_bclk = XS1_CLKBLK_4;
 on stdcore[0]: in port p_aud_mclk = PORT_MCLK;
 on stdcore[0]: buffered out port:32 p_aud_bclk = PORT_SCLK;
 on stdcore[0]: out buffered port:32 p_aud_lrclk = PORT_LRCLK;
@@ -105,31 +77,31 @@ media_input_fifo_t ififos[AVB_NUM_MEDIA_INPUTS];
 void xscope_user_init(void)
 {
     xscope_register(0, 0, "", 0, "");
+    // Enable XScope printing
+    xscope_config_io(XSCOPE_IO_BASIC);
 }
 
 int main(void)
 {
     // ethernet tx channels
-    chan tx_link[3];
-    chan rx_link[3];
-    chan connect_status;
+    chan c_mac_tx[3];
+    chan c_mac_rx[3];
 
     //ptp channels
-    chan ptp_link[3];
+    chan c_ptp[3];
 
     // avb unit control
-    chan talker_ctl[AVB_NUM_TALKER_UNITS];
-    chan listener_ctl[AVB_NUM_LISTENER_UNITS];
-    chan buf_ctl[AVB_NUM_LISTENER_UNITS];
+    chan c_talker_ctl[AVB_NUM_TALKER_UNITS];
+    chan c_listener_ctl[AVB_NUM_LISTENER_UNITS];
+    chan c_buf_ctl[AVB_NUM_LISTENER_UNITS];
 
     // media control
-    chan media_ctl[AVB_NUM_MEDIA_UNITS];
-    chan clk_ctl[AVB_NUM_MEDIA_CLOCKS];
-    chan media_clock_ctl;
+    chan c_media_ctl[AVB_NUM_MEDIA_UNITS];
+    chan c_clk_ctl[AVB_NUM_MEDIA_CLOCKS];
+    chan c_media_clock_ctl;
 
     // audio channels
-    streaming
-    chan c_samples_to_codec;
+    streaming chan c_samples_to_codec;
 
     // control channel from the GPIO buttons
     chan c_gpio_ctl;
@@ -137,17 +109,9 @@ int main(void)
     par
     {
         // AVB - Ethernet
-        on stdcore[1]:
-        {
-            int mac_address[2];
-            ethernet_getmac_otp(otp_data, otp_addr,otp_ctrl, (mac_address, char[]));
-            phy_init(clk_smi, p_mii_resetn, smi, mii);
-          
-            ethernet_server(mii, mac_address,
-                    rx_link, 3,
-                    tx_link, 3,
-                    smi, connect_status);
-        }
+        on stdcore[1]:  avb_ethernet_server(avb_ethernet_ports,
+                                            c_mac_rx, 3,
+                                            c_mac_tx, 3);
 
         // AVB - PTP
         on stdcore[1]:
@@ -156,21 +120,18 @@ int main(void)
             // launching  the main function of the thread
             audio_clock_CS2300CP_init(r_i2c, MASTER_TO_WORDCLOCK_RATIO);
 
-            ptp_server_and_gpio(rx_link[0], tx_link[0], ptp_link, 3,
+            ptp_server_and_gpio(c_mac_rx[0], c_mac_tx[0], c_ptp, 3,
                     PTP_GRANDMASTER_CAPABLE,
                     c_gpio_ctl);
         }
     
         on stdcore[1]:
         {
-            // Enable XScope printing
-            xscope_config_io(XSCOPE_IO_BASIC);
-
-            media_clock_server(media_clock_ctl,
-                    ptp_link[1],
-                    buf_ctl,
+            media_clock_server(c_media_clock_ctl,
+                    c_ptp[1],
+                    c_buf_ctl,
                     AVB_NUM_LISTENER_UNITS,
-                    clk_ctl,
+                    c_clk_ctl,
                     AVB_NUM_MEDIA_CLOCKS);
         }
     
@@ -181,7 +142,7 @@ int main(void)
             start_clock(b_mclk);
             par
             {
-                audio_gen_CS2300CP_clock(p_fs, clk_ctl[0]);
+                audio_gen_CS2300CP_clock(p_fs, c_clk_ctl[0]);
 
                 i2s_master (b_mclk,
                         b_bclk,
@@ -194,44 +155,41 @@ int main(void)
                         MASTER_TO_WORDCLOCK_RATIO,
                         c_samples_to_codec,
                         ififos,
-                        media_ctl[0],
+                        c_media_ctl[0],
                         0);
             }
         }
 
         // AVB Talker - must be on the same core as the audio interface
-        on stdcore[0]: avb_1722_talker(ptp_link[2],
-                tx_link[2],
-                talker_ctl[0],
+        on stdcore[0]: avb_1722_talker(c_ptp[2],
+                c_mac_tx[2],
+                c_talker_ctl[0],
                 AVB_NUM_SOURCES);
 
         // AVB Listener
-        on stdcore[0]: avb_1722_listener(rx_link[1],
-                buf_ctl[0],
+        on stdcore[0]: avb_1722_listener(c_mac_rx[1],
+                c_buf_ctl[0],
                 null,
-                listener_ctl[0],
+                c_listener_ctl[0],
                 AVB_NUM_SINKS);
     
         on stdcore[0]:
         {   
             init_media_output_fifos(ofifos, ofifo_data, AVB_NUM_MEDIA_OUTPUTS);
-            media_output_fifo_to_xc_channel_split_lr(media_ctl[1],
+            media_output_fifo_to_xc_channel_split_lr(c_media_ctl[1],
                     c_samples_to_codec,
                     0, // clk_ctl index
                     ofifos,
                     AVB_NUM_MEDIA_OUTPUTS);
         }
-    
+
         // Application threads
         on stdcore[0]:
         {
-            // Enable XScope printing
-            xscope_config_io(XSCOPE_IO_BASIC);
-
             // First initialize avb higher level protocols
-            avb_init(media_ctl, listener_ctl, talker_ctl, media_clock_ctl, rx_link[2], tx_link[1], ptp_link[0]);
+            avb_init(c_media_ctl, c_listener_ctl, c_talker_ctl, c_media_clock_ctl, c_mac_rx[2], c_mac_tx[1], c_ptp[0]);
 
-            demo(rx_link[2], tx_link[1], c_gpio_ctl, connect_status);
+            demo(c_mac_rx[2], c_mac_tx[1], c_gpio_ctl);
         }
   }
   
@@ -289,7 +247,7 @@ void ptp_server_and_gpio(chanend c_rx, chanend c_tx, chanend ptp_link[],
 }
 
 /** The main application control thread **/
-void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend c_eth_link_status)
+void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl)
 {
     timer tmr;
     avb_status_t avb_status;
@@ -323,22 +281,6 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl, chanend c_eth_link_sta
 
         select
         {
-        // Check ethernet link status
-        case mac_check_link_client(c_eth_link_status, ifnum, link_status):
-        {
-            if (link_status != ETHERNET_LINK_IS_DOWN)
-            {
-                avb_start();
-                avb_1722_1_adp_announce();
-                // Request a multicast addresses for stream transmission
-                avb_1722_maap_request_addresses(AVB_NUM_SOURCES, null);
-            }
-            else
-            {
-            }
-            break;
-        }
-
         // Receive any incoming AVB packets (802.1Qat, 1722_MAAP)
         case avb_get_control_packet(c_rx, buf, nbytes):
         {
