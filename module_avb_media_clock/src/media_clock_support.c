@@ -134,7 +134,7 @@ void inform_media_clock_of_lock(int clock_index) {
 
 unsigned int update_media_clock(chanend ptp_svr,
 								int clock_index,
-								media_clock_t *mclock,
+								const media_clock_t *mclock,
 								unsigned int t2,
 								int period0) {
 	clock_info_t *clock_info = &clock_states[clock_index];

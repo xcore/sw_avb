@@ -35,7 +35,7 @@ void init_media_clock_recovery(chanend ptp_svr,
 
 unsigned int update_media_clock(chanend ptp_svr, 
                                 int clock_index,
-                                REFERENCE_PARAM(media_clock_t, mclock),
+                                REFERENCE_PARAM(const media_clock_t, mclock),
                                 unsigned int t2,
                                 int period);
 
