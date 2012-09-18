@@ -21,9 +21,8 @@
  */
 typedef enum media_clock_type_t {
   PTP_DERIVED,
-  MEDIA_FIFO_DERIVED,
-  LOCAL_CLOCK,
-  FIFO_LENGTH
+  INPUT_STREAM_DERIVED,
+  LOCAL_CLOCK
 } media_clock_type_t; 
 
 

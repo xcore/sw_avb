@@ -1,3 +1,5 @@
+#include <string.h>
+#include <print.h>
 #include "avb_1722_common.h"
 #include "avb_1722_1_common.h"
 #include "avb_1722_1_acmp.h"
@@ -10,8 +12,7 @@
 #ifdef AVB_1722_1_ENABLE_ASSERTIONS
 #include <assert.h>
 #endif
-#include <string.h>
-#include <print.h>
+#include "avb_1722_1_app_hooks.h"
 
 /* Inflight command defines */
 #define CONTROLLER	0
@@ -56,16 +57,6 @@ extern unsigned int avb_1722_1_buf[];
 extern guid_t my_guid;
 
 static const unsigned char avb_1722_1_acmp_dest_addr[6] = AVB_1722_1_ACMP_DEST_MAC;
-
-// The channel counts defined by each bit in the ACMP default audio format word
-static const unsigned char avb_1722_1_acmp_default_format_channel_counts[] = {
-	1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 16, 18, 20, 22, 24
-};
-
-// The sample rates defined by each bit in the ACMP default audio format word
-static const unsigned int avb_1722_1_acmp_default_format_frequency[] = {
-	44100, 48000, 88200, 96000, 176400, 192000
-};
 
 // ACMP command timeouts (in centiseconds) as defined in Table 7.4 of the specification
 static const unsigned int avb_1722_1_acmp_inflight_timeouts[] = {20, 2, 2, 45, 5, 2, 2};
@@ -156,12 +147,10 @@ static void avb_1722_1_create_acmp_packet(avb_1722_1_acmp_cmd_resp *cr, int mess
 	HTON_U16(pkt->connection_count, cr->connection_count);
 	HTON_U16(pkt->sequence_id, cr->sequence_id);
 	HTON_U16(pkt->flags, cr->flags);
-	pkt->dest_mac[0] = cr->stream_dest_mac[0];
-	pkt->dest_mac[1] = cr->stream_dest_mac[1];
-	pkt->dest_mac[2] = cr->stream_dest_mac[2];
-	pkt->dest_mac[3] = cr->stream_dest_mac[3];
-	pkt->dest_mac[4] = cr->stream_dest_mac[4];
-	pkt->dest_mac[5] = cr->stream_dest_mac[5];
+	for (int i=0; i < 6; i++)
+	{
+		pkt->dest_mac[i] = cr->stream_dest_mac[i];
+	}
 }
 
 static void acmp_progress_inflight_timer(int entity_type)
@@ -377,12 +366,10 @@ static void store_rcvd_cmd_resp(avb_1722_1_acmp_cmd_resp* store, avb_1722_1_acmp
 	store->connection_count = NTOH_U16(pkt->connection_count);
 	store->sequence_id = NTOH_U16(pkt->sequence_id);
 	store->flags = NTOH_U16(pkt->flags);
-	store->stream_dest_mac[0] = pkt->dest_mac[0];
-	store->stream_dest_mac[1] = pkt->dest_mac[1];
-	store->stream_dest_mac[2] = pkt->dest_mac[2];
-	store->stream_dest_mac[3] = pkt->dest_mac[3];
-	store->stream_dest_mac[4] = pkt->dest_mac[4];
-	store->stream_dest_mac[5] = pkt->dest_mac[5];
+	for (int i=0; i < 6; i++)
+	{
+		store->stream_dest_mac[i] = pkt->dest_mac[i];
+	}
 	store->message_type = GET_1722_1_MSG_TYPE(&(pkt->header));
 	store->status = GET_1722_1_VALID_TIME(&(pkt->header));
 }
@@ -482,7 +469,7 @@ static void acmp_add_talker_stream_info()
 	int i;
 	int unique_id = acmp_talker_rcvd_cmd_resp.talker_unique_id;
 
-	// Check listener_guid and listener_unique_id are not in connected_listeners as per 7.2.2.6.2.2. of the spec
+	// Check listener_guid and listener_unique_id are not in connected_listeners as per 8.2.2.6.2.2. of the spec
 	for (i = 0; i < AVB_1722_1_MAX_LISTENERS_PER_TALKER; i++)
 	{
 		if (acmp_talker_streams[unique_id].connected_listeners[i].guid.l == acmp_talker_rcvd_cmd_resp.listener_guid.l &&
@@ -519,12 +506,6 @@ static void acmp_remove_talker_stream_info()
 #ifdef AVB_1722_1_ENABLE_ASSERTIONS
 			assert(acmp_talker_streams[unique_id].connection_count >= 0);
 #endif
-
-			/* TODO: 7.2.2.6.2.4: "If the connection_count is now equal to zero (0) there are no more listeners for
-			 * the stream and the talker may deallocate the stream index and destination multicast MAC and it shall
-			 * initiate an SRP talker de-registration.
-			 */
-
 			return;
 		}
 	}
@@ -548,20 +529,20 @@ static void acmp_zero_talker_stream_info(int unique_id)
  */
 static unsigned acmp_talker_valid_talker_unique()
 {
-	return acmp_talker_rcvd_cmd_resp.listener_unique_id < AVB_1722_1_MAX_TALKERS;
+	return acmp_talker_rcvd_cmd_resp.talker_unique_id < AVB_1722_1_MAX_TALKERS;
 }
 
-static avb_status_t process_avb_1722_1_acmp_controller_packet(unsigned char message_type, avb_1722_1_acmp_packet_t* pkt)
+static void process_avb_1722_1_acmp_controller_packet(unsigned char message_type, avb_1722_1_acmp_packet_t* pkt)
 {
 	int inflight_index = 0;
 
-	if (acmp_controller_state != ACMP_CONTROLLER_WAITING) return AVB_1722_1_OK;
-	if (compare_guid(pkt->controller_guid, &my_guid) == 0) return AVB_1722_1_OK;
+	if (acmp_controller_state != ACMP_CONTROLLER_WAITING) return;
+	if (compare_guid(pkt->controller_guid, &my_guid) == 0) return;
 
 	inflight_index = acmp_get_inflight_from_sequence_id(CONTROLLER, NTOH_U16(pkt->sequence_id));
-	if (inflight_index < 0) return AVB_1722_1_OK;	// We don't have an inflight entry for this command
+	if (inflight_index < 0) return;	// We don't have an inflight entry for this command
 
-	if (message_type != (acmp_controller_inflight_commands[inflight_index].command.message_type + 1)) return AVB_1722_1_OK;
+	if (message_type != (acmp_controller_inflight_commands[inflight_index].command.message_type + 1)) return;
 
 	store_rcvd_cmd_resp(&acmp_controller_cmd, pkt);
 
@@ -589,16 +570,17 @@ static avb_status_t process_avb_1722_1_acmp_controller_packet(unsigned char mess
 		}
 	}
 
-	return AVB_1722_1_OK;
+	return;
 }
 
-static avb_status_t process_avb_1722_1_acmp_talker_packet(unsigned char message_type, avb_1722_1_acmp_packet_t* pkt)
+static void process_avb_1722_1_acmp_talker_packet(unsigned char message_type, avb_1722_1_acmp_packet_t* pkt)
 {
-	if (compare_guid(pkt->talker_guid, &my_guid) == 0) return AVB_1722_1_OK;
-	if (acmp_talker_state != ACMP_TALKER_WAITING) return AVB_1722_1_OK;
+	if (compare_guid(pkt->talker_guid, &my_guid) == 0) return;
+	if (acmp_talker_state != ACMP_TALKER_WAITING) return;
 
 	store_rcvd_cmd_resp(&acmp_talker_rcvd_cmd_resp, pkt);
 
+	/* TODO: Can this be memory optimised? */
 	switch (message_type)
 	{
 	case ACMP_CMD_CONNECT_TX_COMMAND:
@@ -615,16 +597,17 @@ static avb_status_t process_avb_1722_1_acmp_talker_packet(unsigned char message_
 		break;
 	}
 
-	return AVB_1722_1_OK;
+	return;
 }
 
-static avb_status_t process_avb_1722_1_acmp_listener_packet(unsigned char message_type, avb_1722_1_acmp_packet_t* pkt)
+static void process_avb_1722_1_acmp_listener_packet(unsigned char message_type, avb_1722_1_acmp_packet_t* pkt)
 {
-	if (compare_guid(pkt->listener_guid, &my_guid)==0) return AVB_1722_1_OK;
-	if (acmp_listener_state!=ACMP_LISTENER_WAITING) return AVB_1722_1_OK;
+	if (compare_guid(pkt->listener_guid, &my_guid)==0) return;
+	if (acmp_listener_state != ACMP_LISTENER_WAITING) return;
 
 	store_rcvd_cmd_resp(&acmp_listener_rcvd_cmd_resp, pkt);
 
+	/* TODO: Can this be memory optimised? */
 	switch (message_type)
 	{
 	case ACMP_CMD_CONNECT_TX_RESPONSE:
@@ -644,10 +627,10 @@ static avb_status_t process_avb_1722_1_acmp_listener_packet(unsigned char messag
 		break;
 	}
 
-	return AVB_1722_1_OK;
+	return;
 }
 
-avb_status_t process_avb_1722_1_acmp_packet(avb_1722_1_acmp_packet_t* pkt, chanend c_tx)
+void process_avb_1722_1_acmp_packet(avb_1722_1_acmp_packet_t* pkt, chanend c_tx)
 {
 	unsigned char message_type = GET_1722_1_MSG_TYPE(((avb_1722_1_packet_header_t*)pkt));
 
@@ -658,29 +641,36 @@ avb_status_t process_avb_1722_1_acmp_packet(avb_1722_1_acmp_packet_t* pkt, chane
 		case ACMP_CMD_DISCONNECT_TX_COMMAND:
 		case ACMP_CMD_GET_TX_STATE_COMMAND:
 		case ACMP_CMD_GET_TX_CONNECTION_COMMAND:
-			return process_avb_1722_1_acmp_talker_packet(message_type, pkt);
-
+		{
+			process_avb_1722_1_acmp_talker_packet(message_type, pkt);
+			return;
+		}
 		// Listener messages
 		case ACMP_CMD_CONNECT_TX_RESPONSE:
 		case ACMP_CMD_DISCONNECT_TX_RESPONSE:
 		case ACMP_CMD_CONNECT_RX_COMMAND:
 		case ACMP_CMD_DISCONNECT_RX_COMMAND:
 		case ACMP_CMD_GET_RX_STATE_COMMAND:
-			return process_avb_1722_1_acmp_listener_packet(message_type, pkt);
-
+		{
+			process_avb_1722_1_acmp_listener_packet(message_type, pkt);
+			return;
+		}
 		// Controller messages
 		case ACMP_CMD_CONNECT_RX_RESPONSE:
 		case ACMP_CMD_DISCONNECT_RX_RESPONSE:
 		case ACMP_CMD_GET_RX_STATE_RESPONSE:
 		case ACMP_CMD_GET_TX_STATE_RESPONSE:
 		case ACMP_CMD_GET_TX_CONNECTION_RESPONSE:
-			return process_avb_1722_1_acmp_controller_packet(message_type, pkt);
+		{
+			process_avb_1722_1_acmp_controller_packet(message_type, pkt);
+			return;
+		}
 	}
 
-	return AVB_1722_1_OK;
+	return;
 }
 
-avb_status_t avb_1722_1_acmp_controller_periodic(chanend c_tx)
+void avb_1722_1_acmp_controller_periodic(chanend c_tx)
 {
 	switch (acmp_controller_state)
 	{
@@ -752,10 +742,10 @@ avb_status_t avb_1722_1_acmp_controller_periodic(chanend c_tx)
 		}
 	}
 
-	return AVB_NO_STATUS;
+	return;
 }
 
-avb_status_t avb_1722_1_acmp_talker_periodic(chanend c_tx)
+void avb_1722_1_acmp_talker_periodic(chanend c_tx)
 {
 	switch (acmp_talker_state)
 	{
@@ -764,21 +754,25 @@ avb_status_t avb_1722_1_acmp_talker_periodic(chanend c_tx)
 		case ACMP_TALKER_WAITING_FOR_CONNECT:
 		case ACMP_TALKER_WAITING_FOR_DISCONNECT:
 		{
-			return AVB_NO_STATUS;
+			return;
 		}
 		case ACMP_TALKER_CONNECT:
 		{
 			if (!acmp_talker_valid_talker_unique())
 			{
 				acmp_send_response(ACMP_CMD_CONNECT_TX_RESPONSE, &acmp_talker_rcvd_cmd_resp, ACMP_STATUS_TALKER_UNKNOWN_ID, c_tx);
-				acmp_talker_state = ACMP_TALKER_WAITING;
-				return AVB_NO_STATUS;
 			}
 			else
 			{
-				acmp_talker_state = ACMP_TALKER_WAITING_FOR_CONNECT;
-				return AVB_1722_1_CONNECT_TALKER;
+				acmp_add_talker_stream_info();
+				/* Application hook */
+				avb_talker_on_listener_connect(acmp_talker_rcvd_cmd_resp.talker_unique_id, acmp_talker_rcvd_cmd_resp.listener_guid.c);
+
+				acmp_set_talker_response();
+				acmp_send_response(ACMP_CMD_CONNECT_TX_RESPONSE, &acmp_talker_rcvd_cmd_resp, ACMP_STATUS_SUCCESS, c_tx);
+
 			}
+			acmp_talker_state = ACMP_TALKER_WAITING;
 			break;
 		}
 		case ACMP_TALKER_DISCONNECT:
@@ -786,54 +780,58 @@ avb_status_t avb_1722_1_acmp_talker_periodic(chanend c_tx)
 			if (!acmp_talker_valid_talker_unique())
 			{
 				acmp_send_response(ACMP_CMD_DISCONNECT_TX_RESPONSE, &acmp_talker_rcvd_cmd_resp, ACMP_STATUS_TALKER_UNKNOWN_ID, c_tx);
-				acmp_talker_state = ACMP_TALKER_WAITING;
-				return AVB_NO_STATUS;
 			}
 			else
 			{
-				acmp_talker_state = ACMP_TALKER_WAITING_FOR_DISCONNECT;
-				return AVB_1722_1_DISCONNECT_TALKER;
+				unsigned unique_id = acmp_talker_rcvd_cmd_resp.talker_unique_id;
+				acmp_remove_talker_stream_info();
+				/* Application hook */
+				avb_talker_on_listener_disconnect(unique_id, acmp_talker_rcvd_cmd_resp.listener_guid.c, acmp_talker_streams[unique_id].connection_count);
+
+				acmp_set_talker_response();
+				acmp_send_response(ACMP_CMD_DISCONNECT_TX_RESPONSE, &acmp_talker_rcvd_cmd_resp, ACMP_STATUS_SUCCESS, c_tx);
 			}
+			acmp_talker_state = ACMP_TALKER_WAITING;
 			break;
 		}
 		case ACMP_TALKER_GET_STATE:
 		{
-			int status;
+			int acmp_status;
 			if (!acmp_talker_valid_talker_unique())
 			{
-				status = ACMP_STATUS_TALKER_UNKNOWN_ID;
+				acmp_status = ACMP_STATUS_TALKER_UNKNOWN_ID;
 			}
 			else
 			{
-				status = acmp_talker_get_state();
+				acmp_status = acmp_talker_get_state();
 			}
-			acmp_send_response(ACMP_CMD_GET_TX_STATE_RESPONSE, &acmp_talker_rcvd_cmd_resp, status, c_tx);
+			acmp_send_response(ACMP_CMD_GET_TX_STATE_RESPONSE, &acmp_talker_rcvd_cmd_resp, acmp_status, c_tx);
 
 			acmp_talker_state = ACMP_TALKER_WAITING;
-			return AVB_NO_STATUS;
+			return;
 		}
 		case ACMP_TALKER_GET_CONNECTION:
 		{
-			int status;
+			int acmp_status;
 			if (!acmp_talker_valid_talker_unique())
 			{
-				status = ACMP_STATUS_TALKER_UNKNOWN_ID;
+				acmp_status = ACMP_STATUS_TALKER_UNKNOWN_ID;
 			}
 			else
 			{
-				status = acmp_talker_get_connection();
+				acmp_status = acmp_talker_get_connection();
 			}
-			acmp_send_response(ACMP_CMD_GET_TX_CONNECTION_RESPONSE, &acmp_talker_rcvd_cmd_resp, status, c_tx);
+			acmp_send_response(ACMP_CMD_GET_TX_CONNECTION_RESPONSE, &acmp_talker_rcvd_cmd_resp, acmp_status, c_tx);
 
 			acmp_talker_state = ACMP_TALKER_WAITING;
-			return AVB_NO_STATUS;
+			return;
 		}
 	}
 
-	return AVB_NO_STATUS;
+	return;
 }
 
-avb_status_t avb_1722_1_acmp_listener_periodic(chanend c_tx)
+void avb_1722_1_acmp_listener_periodic(chanend c_tx)
 {
 	switch (acmp_listener_state)
 	{
@@ -898,6 +896,7 @@ avb_status_t avb_1722_1_acmp_listener_periodic(chanend c_tx)
 		{
 			if (acmp_listener_valid_listener_unique())
 			{
+				unsigned stream_id[2];
 				avb_1722_1_acmp_inflight_command *inflight;
 				inflight = acmp_remove_inflight(LISTENER);
 				acmp_listener_rcvd_cmd_resp.sequence_id = inflight->original_sequence_id; // FIXME: This is a bit messy
@@ -912,8 +911,20 @@ avb_status_t avb_1722_1_acmp_listener_periodic(chanend c_tx)
 						debug_acmp_status_s[inflight->command.status],
 						inflight->command.sequence_id);
 #endif
+				
+				/* FIXME: Make stream ID representation consistent: we have long long, 2 ints and 6 chars */
 
-				return AVB_1722_1_CONNECT_LISTENER;
+				stream_id[1] = (unsigned)(acmp_listener_rcvd_cmd_resp.stream_id.l >> 0);
+				stream_id[0] = (unsigned)(acmp_listener_rcvd_cmd_resp.stream_id.l >> 32);
+
+				avb_listener_on_talker_connect(acmp_listener_rcvd_cmd_resp.listener_unique_id,
+											acmp_listener_rcvd_cmd_resp.stream_dest_mac,
+											stream_id);
+
+				acmp_listener_rcvd_cmd_resp.status = ACMP_STATUS_SUCCESS;
+				acmp_listener_state = ACMP_LISTENER_WAITING;
+
+				return;
 			}
 			break;
 		}
@@ -921,6 +932,7 @@ avb_status_t avb_1722_1_acmp_listener_periodic(chanend c_tx)
 		{
 			if (acmp_listener_valid_listener_unique())
 			{
+				unsigned stream_id[2];
 				avb_1722_1_acmp_inflight_command *inflight;
 				inflight = acmp_remove_inflight(LISTENER);
 				acmp_listener_rcvd_cmd_resp.sequence_id = inflight->original_sequence_id;
@@ -935,8 +947,17 @@ avb_status_t avb_1722_1_acmp_listener_periodic(chanend c_tx)
 						debug_acmp_status_s[inflight->command.status],
 						inflight->command.sequence_id);
 #endif
+				stream_id[1] = (unsigned)(acmp_listener_rcvd_cmd_resp.stream_id.l >> 0);
+				stream_id[0] = (unsigned)(acmp_listener_rcvd_cmd_resp.stream_id.l >> 32);
 
-				return AVB_1722_1_DISCONNECT_LISTENER;
+				avb_listener_on_talker_disconnect(acmp_listener_rcvd_cmd_resp.listener_unique_id,
+											acmp_listener_rcvd_cmd_resp.stream_dest_mac,
+											stream_id);
+
+				acmp_listener_rcvd_cmd_resp.status = ACMP_STATUS_SUCCESS;
+				acmp_listener_state = ACMP_LISTENER_WAITING;
+
+				return;
 			}
 			break;
 		}
@@ -995,62 +1016,7 @@ avb_status_t avb_1722_1_acmp_listener_periodic(chanend c_tx)
 
 	}
 
-	return AVB_NO_STATUS;
-}
-
-unsigned avb_1722_1_acmp_get_talker_connection_info(short *talker)
-{
-	*talker = acmp_talker_rcvd_cmd_resp.talker_unique_id;
-	return 1;
-}
-
-unsigned avb_1722_1_acmp_get_listener_connection_info(short *listener, unsigned char address[6], unsigned streamId[2], unsigned* vlan)
-{
-	*listener = acmp_listener_rcvd_cmd_resp.listener_unique_id;
-	for (unsigned c=0; c<6; ++c) address[c] = acmp_listener_rcvd_cmd_resp.stream_dest_mac[c];
-	streamId[1] = (unsigned)(acmp_listener_rcvd_cmd_resp.stream_id.l >> 0);
-	streamId[0] = (unsigned)(acmp_listener_rcvd_cmd_resp.stream_id.l >> 32);
-	*vlan = 2;
-	return 1;
-}
-
-void avb_1722_1_acmp_talker_connection_complete(short status, chanend c_tx)
-{
-	switch (acmp_talker_state)
-	{
-		case ACMP_TALKER_WAITING_FOR_CONNECT:
-			acmp_add_talker_stream_info();
-			acmp_set_talker_response();
-			acmp_send_response(ACMP_CMD_CONNECT_TX_RESPONSE, &acmp_talker_rcvd_cmd_resp, status, c_tx);
-			acmp_talker_state = ACMP_TALKER_WAITING;
-			break;
-		case ACMP_TALKER_WAITING_FOR_DISCONNECT:
-			acmp_remove_talker_stream_info();
-			acmp_set_talker_response();
-			acmp_send_response(ACMP_CMD_DISCONNECT_TX_RESPONSE, &acmp_talker_rcvd_cmd_resp, status, c_tx);
-			acmp_talker_state = ACMP_TALKER_WAITING;
-			break;
-		default:
-			break;
-	}
-}
-
-
-void avb_1722_1_acmp_listener_connection_complete(short status, chanend c_tx)
-{
-	switch (acmp_listener_state)
-	{
-		case ACMP_LISTENER_WAITING_FOR_CONNECT:
-			acmp_listener_rcvd_cmd_resp.status = status;
-			acmp_listener_state = ACMP_LISTENER_WAITING;
-			break;
-		case ACMP_LISTENER_WAITING_FOR_DISCONNECT:
-			acmp_listener_rcvd_cmd_resp.status = status;
-			acmp_listener_state = ACMP_LISTENER_WAITING;
-			break;
-		default:
-			break;
-	}
+	return;
 }
 
 void avb_1722_1_talker_set_mac_address(unsigned talker_unique_id, unsigned char macaddr[])
@@ -1068,94 +1034,6 @@ void avb_1722_1_talker_set_stream_id(unsigned talker_unique_id, unsigned streamI
 	{
 		acmp_talker_streams[talker_unique_id].stream_id.l = (unsigned long long)streamId[1] + (((unsigned long long)streamId[0]) << 32);
 	}
-}
-
-// TODO: These functions are not currently invoked
-avb_1722_1_acmp_status_t avb_1722_1_acmp_configure_source(unsigned talker_unique_id, unsigned int default_format)
-{
-	unsigned number_of_channels;
-	unsigned sample_rate;
-	unsigned state=0;
-	int associated_clock=0;
-
-	int channel_index = qlog2(default_format & 0xFFFF);
-	int rate_index = qlog2((default_format&0xFC000000)>>26);
-	if (channel_index==-1 || rate_index==-1) return ACMP_STATUS_TALKER_DEFAULT_FORMAT_INVALID;
-
-	number_of_channels = avb_1722_1_acmp_default_format_channel_counts[channel_index];
-	sample_rate = avb_1722_1_acmp_default_format_frequency[rate_index];
-
-	if (talker_unique_id > AVB_NUM_LISTENER_UNITS) return ACMP_STATUS_TALKER_UNKNOWN_ID;
-
-	if (number_of_channels > AVB_NUM_MEDIA_INPUTS)
-	{
-		return ACMP_STATUS_TALKER_DEFAULT_FORMAT_INVALID;
-	}
-
-	get_avb_source_sync(talker_unique_id, &associated_clock);
-
-	get_avb_source_state(talker_unique_id, &state);
-	if (state != AVB_SOURCE_STATE_DISABLED)
-	{
-		int current_number_of_channels=0;
-		int current_sample_rate=0;
-		get_device_media_clock_rate(associated_clock, &current_sample_rate);
-		get_avb_source_channels(talker_unique_id, &current_number_of_channels);
-		if (sample_rate != current_sample_rate) return ACMP_STATUS_DEFAULT_SET_DIFFERENT;
-		if (number_of_channels != current_number_of_channels) return ACMP_STATUS_DEFAULT_SET_DIFFERENT;
-	}
-	else
-	{
-		int channel_map[16] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
-		set_avb_source_channels(talker_unique_id, number_of_channels);
-		set_avb_source_format(talker_unique_id, AVB_SOURCE_FORMAT_MBLA_24BIT, sample_rate);
-		set_avb_source_map(talker_unique_id, channel_map, number_of_channels);
-		set_device_media_clock_rate(associated_clock, sample_rate);
-	}
-	return ACMP_STATUS_SUCCESS;
-}
-
-avb_1722_1_acmp_status_t avb_1722_1_acmp_configure_sink(unsigned listener_unique_id, unsigned int default_format)
-{
-	unsigned number_of_channels;
-	unsigned sample_rate;
-	unsigned state=0;
-	int associated_clock=0;
-
-	int channel_index = qlog2(default_format & 0xFFFF);
-	int rate_index = qlog2((default_format&0xFC000000)>>26);
-	if (channel_index==-1 || rate_index==-1) return ACMP_STATUS_LISTENER_DEFAULT_FORMAT_INVALID;
-
-	number_of_channels = avb_1722_1_acmp_default_format_channel_counts[channel_index];
-	sample_rate = avb_1722_1_acmp_default_format_frequency[rate_index];
-
-	if (listener_unique_id > AVB_NUM_LISTENER_UNITS) return ACMP_STATUS_LISTENER_UNKNOWN_ID;
-
-	if (number_of_channels > AVB_NUM_MEDIA_OUTPUTS)
-	{
-		return ACMP_STATUS_LISTENER_DEFAULT_FORMAT_INVALID;
-	}
-
-	get_avb_sink_sync(listener_unique_id, &associated_clock);
-
-	get_avb_source_state(listener_unique_id, &state);
-	if (state != AVB_SINK_STATE_DISABLED)
-	{
-		int current_number_of_channels=0;
-		int current_sample_rate=0;
-		get_device_media_clock_rate(associated_clock, &current_sample_rate);
-		get_avb_sink_channels(listener_unique_id, &current_number_of_channels);
-		if (sample_rate != current_sample_rate) return ACMP_STATUS_DEFAULT_SET_DIFFERENT;
-		if (number_of_channels != current_number_of_channels) return ACMP_STATUS_DEFAULT_SET_DIFFERENT;
-	}
-	else
-	{
-		int channel_map[16] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
-		set_avb_sink_channels(listener_unique_id, number_of_channels);
-		set_avb_sink_map(listener_unique_id, channel_map, number_of_channels);
-		set_device_media_clock_rate(associated_clock, sample_rate);
-	}
-	return ACMP_STATUS_SUCCESS;
 }
 
 #undef CONTROLLER

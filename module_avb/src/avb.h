@@ -1,7 +1,7 @@
 #ifndef _avb_h_
 #define _avb_h_
 
-#include "ethernet_server.h"
+#include "avb_ethernet.h"
 #include "ethernet_rx_client.h"
 #include "ethernet_tx_client.h"
 #include "avb_1722.h"
@@ -9,17 +9,12 @@
 #include "avb_1722_maap.h"
 #include "avb_srp.h"
 #include "gptp.h"
-#include "getmac.h"
 #include "media_clock_server.h"
 #include "media_clock_client.h"
 #include "avb_control_types.h"
 #include "avb_stream_detect.h"
 #include "avb_api.h"
 #include "avb_unit.h"
-
-#ifndef AVB_OSC
-#define AVB_OSC 0
-#endif
 
 #ifndef MAX_AVB_CONTROL_PACKET_SIZE
 #define MAX_AVB_CONTROL_PACKET_SIZE (1518)
@@ -94,7 +89,7 @@ void avb_start(void);
  *  \returns A status update from the periodic processing to indicate
  *           an event due to a timeout etc. (see :c:type:`avb_status_t`)
  **/
-avb_status_t avb_periodic(void);
+void avb_periodic(REFERENCE_PARAM(avb_status_t, status));
 
 /** Receives an 802.1Qat SRP packet or an IEEE P1722 MAAP packet.
  *
@@ -138,8 +133,9 @@ void avb_get_control_packet(chanend c_rx,
             reserved, multicast address range to be no longer available,
            then ``AVB_MAAP_ADDRESSES_LOST`` is returned.
  **/
-avb_status_t avb_process_control_packet(unsigned int buf[], int len,
-                                        chanend c_tx);
+void avb_process_control_packet(REFERENCE_PARAM(avb_status_t, status),
+                               unsigned int buf[], int len,
+                               chanend c_tx);
 
 /** Set the endpoint into "legacy mode".
  *

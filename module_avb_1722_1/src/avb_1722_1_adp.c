@@ -1,6 +1,7 @@
 #include "avb_1722_common.h"
 #include "avb_1722_1_common.h"
 #include "avb_1722_1_adp.h"
+#include "avb_1722_1_aecp.h"
 #include "misc_timer.h"
 #include "gptp.h"
 #include <string.h>
@@ -39,7 +40,7 @@ static guid_t as_grandmaster_id;
 static avb_timer adp_advertise_timer;
 static avb_timer adp_readvertise_timer;
 static avb_timer adp_discovery_timer;
-static avb_timer ptp_monitor_timer;
+static avb_timer ptp_monitor_timer; // TODO: Remove me
 
 // Counts two second intervals
 static unsigned adp_two_second_counter = 0;
@@ -126,7 +127,7 @@ static int avb_1722_1_entity_database_add(avb_1722_1_adp_packet_t* pkt)
 	{
 		entities[found_slot_index].guid.l = guid.l;
 		entities[found_slot_index].vendor_id = NTOH_U32(pkt->vendor_id);
-		entities[found_slot_index].model_id = NTOH_U32(pkt->model_id);
+		entities[found_slot_index].entity_model_id = NTOH_U32(pkt->entity_model_id);
 		entities[found_slot_index].capabilities = NTOH_U32(pkt->entity_capabilities);
 		entities[found_slot_index].talker_stream_sources = NTOH_U16(pkt->talker_stream_sources);
 		entities[found_slot_index].talker_capabilities = NTOH_U16(pkt->talker_capabilities);
@@ -135,10 +136,7 @@ static int avb_1722_1_entity_database_add(avb_1722_1_adp_packet_t* pkt)
 		entities[found_slot_index].controller_capabilities = NTOH_U32(pkt->controller_capabilities);
 		entities[found_slot_index].available_index = NTOH_U32(pkt->available_index);
 		GET_LONG_WORD(entities[found_slot_index].as_grandmaster_id, pkt->as_grandmaster_id)
-		entities[found_slot_index].default_audio_format = NTOH_U32(pkt->default_audio_format);
-		entities[found_slot_index].default_video_format = NTOH_U32(pkt->default_video_format);
 		entities[found_slot_index].association_id = NTOH_U32(pkt->association_id);
-		entities[found_slot_index].type = NTOH_U32(pkt->entity_type);
 		entities[found_slot_index].timeout = GET_1722_1_VALID_TIME(&pkt->header) + adp_two_second_counter;
 
 		if (entity_update)
@@ -195,7 +193,7 @@ static unsigned avb_1722_1_entity_database_check_timeout()
 	return 0;
 }
 
-avb_status_t process_avb_1722_1_adp_packet(avb_1722_1_adp_packet_t* pkt, chanend c_tx)
+void process_avb_1722_1_adp_packet(avb_1722_1_adp_packet_t* pkt, chanend c_tx)
 {
 	unsigned message_type = GET_1722_1_MSG_TYPE(((avb_1722_1_packet_header_t*)pkt));
 	guid_t zero_guid = { 0 };
@@ -209,7 +207,7 @@ avb_status_t process_avb_1722_1_adp_packet(avb_1722_1_adp_packet_t* pkt, chanend
 				if (adp_advertise_state == ADP_ADVERTISE_WAITING)
 					adp_advertise_state = ADP_ADVERTISE_ADVERTISE_1;
 			}
-			return AVB_1722_1_OK;
+			return;
 		}
 		case ENTITY_AVAILABLE:
 		{
@@ -220,17 +218,17 @@ avb_status_t process_avb_1722_1_adp_packet(avb_1722_1_adp_packet_t* pkt, chanend
 				 */
 				adp_discovery_state = ADP_DISCOVERY_ADDED;
 			}
-			return AVB_1722_1_OK;
+			return;
 		}
 		case ENTITY_DEPARTING:
 		{
 			avb_1722_1_entity_database_remove(pkt);
 			adp_discovery_state = ADP_DISCOVERY_REMOVED;
-			return AVB_1722_1_OK;
+			return;
 		}
 	}
 
-	return AVB_1722_1_OK;
+	return;
 }
 
 static void avb_1722_1_create_adp_packet(int message_type, guid_t guid)
@@ -248,7 +246,7 @@ static void avb_1722_1_create_adp_packet(int message_type, guid_t guid)
 	  if (message_type != ENTITY_DISCOVER)
 	  {
 		  HTON_U32(pkt->vendor_id, AVB_1722_1_ADP_VENDOR_ID);
-		  HTON_U32(pkt->model_id, AVB_1722_1_ADP_MODEL_ID);
+		  HTON_U32(pkt->entity_model_id, AVB_1722_1_ADP_MODEL_ID);
 		  HTON_U32(pkt->entity_capabilities, AVB_1722_1_ADP_ENTITY_CAPABILITIES);
 		  HTON_U16(pkt->talker_stream_sources, AVB_1722_1_ADP_TALKER_STREAM_SOURCES);
 		  HTON_U16(pkt->talker_capabilities, AVB_1722_1_ADP_TALKER_CAPABILITIES);
@@ -257,14 +255,11 @@ static void avb_1722_1_create_adp_packet(int message_type, guid_t guid)
 		  HTON_U32(pkt->controller_capabilities, AVB_1722_1_ADP_CONTROLLER_CAPABILITIES);
 		  HTON_U32(pkt->available_index, avb_1722_1_available_index);
 		  SET_LONG_WORD(pkt->as_grandmaster_id, as_grandmaster_id);
-		  HTON_U32(pkt->default_audio_format, AVB_1722_1_ADP_DEFAULT_AUDIO_FORMAT);
-		  HTON_U32(pkt->default_video_format, AVB_1722_1_ADP_DEFAULT_VIDEO_FORMAT);
 		  HTON_U32(pkt->association_id, AVB_1722_1_ADP_ASSOCIATION_ID);
-		  HTON_U32(pkt->entity_type, AVB_1722_1_ADP_ENTITY_TYPE_OTHER);
 	  }
 }
 
-avb_status_t avb_1722_1_adp_discovery_periodic(chanend c_tx)
+void avb_1722_1_adp_discovery_periodic(chanend c_tx)
 {
 	switch (adp_discovery_state)
 	{
@@ -280,31 +275,37 @@ avb_status_t avb_1722_1_adp_discovery_periodic(chanend c_tx)
 				lost = avb_1722_1_entity_database_check_timeout();
 				start_avb_timer(&adp_discovery_timer, 1);
 			}
-			return (lost > 0) ? AVB_1722_1_ENTITY_REMOVED : AVB_NO_STATUS;
+			if (lost > 0)
+			{
+				/* 5.2 TODO: Generate AVB_1722_1_ENTITY_REMOVED */
+			}
+			break;
 		}
 		case ADP_DISCOVERY_DISCOVER:
 		{
-				avb_1722_1_create_adp_packet(ENTITY_DISCOVER, discover_guid);
-				mac_tx(c_tx, avb_1722_1_buf, AVB_1722_1_ADP_PACKET_SIZE, ETH_BROADCAST);
-				adp_discovery_state = ADP_DISCOVERY_WAITING;
-				break;
+			avb_1722_1_create_adp_packet(ENTITY_DISCOVER, discover_guid);
+			mac_tx(c_tx, avb_1722_1_buf, AVB_1722_1_ADP_PACKET_SIZE, ETH_BROADCAST);
+			adp_discovery_state = ADP_DISCOVERY_WAITING;
+			break;
 		}
 		case ADP_DISCOVERY_ADDED:
 		{
 			adp_discovery_state = ADP_DISCOVERY_WAITING;
-			return AVB_1722_1_ENTITY_ADDED;
+			/* 5.2 TODO: Generate AVB_1722_1_ENTITY_ADDED */
+			break;
 		}
 		case ADP_DISCOVERY_REMOVED:
 		{
 			adp_discovery_state = ADP_DISCOVERY_WAITING;
-			return AVB_1722_1_ENTITY_REMOVED;
+			/* 5.2 TODO: Generate VB_1722_1_ENTITY_REMOVED */
+			break;
 		}
 	}
 
-	return AVB_NO_STATUS;
+	return;
 }
 
-avb_status_t avb_1722_1_adp_advertising_periodic(chanend c_tx, chanend ptp)
+void avb_1722_1_adp_advertising_periodic(chanend c_tx, chanend ptp)
 {
 	guid_t ptp_current;
 
@@ -362,5 +363,5 @@ avb_status_t avb_1722_1_adp_advertising_periodic(chanend c_tx, chanend ptp)
 		}
 	}
 
-	return AVB_NO_STATUS;
+	return;
 }

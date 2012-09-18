@@ -42,7 +42,7 @@ inline int mac_custom_filter(unsigned int buf[])
     case 0x0008:
       result = MAC_FILTER_ARPIP;
       break;
-    case (((AVB_ETYPE & 0xff) << 8) | (AVB_ETYPE >> 8)):
+    case (((AVB_1722_ETHERTYPE & 0xff) << 8) | (AVB_1722_ETHERTYPE >> 8)):
       {
         int cd_flag;
         if (qhdr) {

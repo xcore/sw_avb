@@ -1,20 +1,22 @@
 #ifndef __AVB_1722_MAAP_PROTOCOL_H__
 #define __AVB_1722_MAAP_PROTOCOL_H__
 
-#define MAAP_ALLOCATED_ADDRESS_RANGE_LOW  {0x91, 0xE0, 0xF0, 0x00, 0x00, 0x00}
-#define MAAP_ALLOCATED_ADDRESS_RANGE_HIGH {0x91, 0xE0, 0xF0, 0x00, 0xFD, 0xFF}
+// Note: Changing these will have unforseen consequences
+// The implementation is now tailored to the size of the official MAAP pool of addresses
+#define MAAP_ALLOCATION_POOL_BASE_ADDR  {0x91, 0xE0, 0xF0, 0x00, 0x00, 0x00}
+#define MAAP_ALLOCATION_POOL_SIZE 0xFE00 // Note to self: upper address is FD:FF
 
-#define MAAP_PROTOCOL_ADDRESS {0x91, 0xE0, 0xF0, 0x00, 0xFF, 0x00}
-
-//#define MAAP_PROTOCOL_ADDRESS {0xff, 0xff, 0xff, 0xff, 0xff, 0xff}
-
+#define MAAP_PROTOCOL_DEST_ADDR {0x91, 0xE0, 0xF0, 0x00, 0xFF, 0x00}
 
 #define MAAP_PROBE_RETRANSMITS 3
 
 #define MAAP_PROBE_INTERVAL_BASE_MS 500
+#define MAAP_PROBE_INTERVAL_BASE_CS MAAP_PROBE_INTERVAL_BASE_MS/10
 #define MAAP_PROBE_INTERVAL_VARIATION_MS 100
 
-#define MAAP_ANNOUNCE_INTERVAL_BASE_MS 30000
+#define MAAP_ANNOUNCE_INTERVAL_BASE_MS 3000
+#define MAAP_ANNOUNCE_INTERVAL_BASE_CS MAAP_ANNOUNCE_INTERVAL_BASE_MS/10
+#define MAAP_ANNOUNCE_INTERVAL_MULTIPLIER 10
 #define MAAP_ANNOUNCE_INTERVAL_VARIATION_MS 2000
 
 typedef struct maap_packet_t {
@@ -50,7 +52,8 @@ enum maap_message_type_t {
    (((pkt->maap_version_data_length_hi & 0x7) << 8) + \
           (pkt->data_length_lo))
 
-#define GET_MAAP_CONFLICT_COUNT(pkt) ((pkt->conflict_count[0] + (pkt->conflict_count[1]<<8)))
+#define GET_MAAP_REQUESTED_COUNT(pkt) ((pkt->requested_count[1] + (pkt->requested_count[0]<<8)))
+#define GET_MAAP_CONFLICT_COUNT(pkt) ((pkt->conflict_count[1] + (pkt->conflict_count[0]<<8)))
 
 #define SET_BITS(p, lo, hi, val) \
   do { \

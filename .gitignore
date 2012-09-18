@@ -16,8 +16,10 @@ doc/*/.doxygen/*
 doc/*/.linked_dirs/*
 doc/*/.sources/*
 doc/*/.support/*
+.settings/*
 Doxyfile-e
 .DS_Store
 *.pyc
 *.pdf
 *.xmt
+*.txt

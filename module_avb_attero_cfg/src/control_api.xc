@@ -64,10 +64,10 @@ void c_api_handle_udp_event(
 //-----------------------------------------------------------------------------
 void c_api_xtcp_handler(
     chanend tcp_svr,
-    xtcp_connection_t &conn
+    xtcp_connection_t &conn,
+    timer tmr
 )
 {
-  timer tmr;
   unsigned t;
   tmr :> t;
   c_api_handle_udp_event(tcp_svr, conn, t);

@@ -18,17 +18,10 @@
 #include <xccompat.h>
 #include "gptp.h"
 #include "avb_1722_def.h"
+#include "print.h"
 #include "media_clock_internal.h"
 #include "media_clock_client.h"
 #include "misc_timer.h"
-
-#ifndef AVB_MAX_AUDIO_SAMPLE_RATE
-#define AVB_MAX_AUDIO_SAMPLE_RATE 48000
-#endif
-
-#ifndef MEDIA_OUTPUT_FIFO_WORD_SIZE
-#define MEDIA_OUTPUT_FIFO_WORD_SIZE (AVB_MAX_AUDIO_SAMPLE_RATE/450)
-#endif
 
 #define NANO_SECOND 1000000000
 
@@ -200,8 +193,8 @@ unsigned int update_media_clock(chanend ptp_svr,
 	}
 #endif
 
-#ifndef MEDIA_CLOCK_EXCLUDE_FIFO_DERIVED
-	case MEDIA_FIFO_DERIVED: {
+#ifndef MEDIA_CLOCK_EXCLUDE_STREAM_DERIVED
+	case INPUT_STREAM_DERIVED: {
 		long long ierror, perror;
 
 		// If the stream info isn't valid at all, then return the default clock rate
@@ -257,34 +250,7 @@ unsigned int update_media_clock(chanend ptp_svr,
 	}
 #endif
 
-#ifndef MEDIA_CLOCK_EXCLUDE_FIFO_DEPTH
-	case FIFO_LENGTH: {
-		if (!clock_info->stream_info2.valid)
-			return local_wordlen_to_external_wordlen(clock_info->wordlen);
-
-		if (!clock_info->stream_info1.valid) {
-			clock_info->stream_info1 = clock_info->stream_info2;
-			clock_info->stream_info2.valid = 0;
-			return local_wordlen_to_external_wordlen(clock_info->wordlen);
-		}
-
-		{
-
-			long long perror = (signed) clock_info->stream_info2.fill - (MEDIA_OUTPUT_FIFO_WORD_SIZE/2);
-
-			if (clock_info->first) {
-				clock_info->ierror = 0;
-				clock_info->first = 0;
-			} else
-				clock_info->ierror = clock_info->ierror + perror;
-
-			// PID based on this error
-			clock_info->wordlen = clock_info->wordlen - (perror) * 16;// - (clock_info->ierror) / 256;
-		}
 		break;
-	}
-#endif
-
 	}
 
 	return local_wordlen_to_external_wordlen(clock_info->wordlen);

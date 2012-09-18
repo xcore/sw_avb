@@ -24,7 +24,8 @@
 #define ATTERO_CFG_PORT (40404)
 
 void c_api_xtcp_handler(chanend tcp_svr,
-                       REFERENCE_PARAM(xtcp_connection_t, conn));
+                       REFERENCE_PARAM(xtcp_connection_t, conn),
+                       timer t);
 
 void c_api_server_init(
      chanend tcp_svr // chan for the xtcp server

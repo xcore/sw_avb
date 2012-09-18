@@ -26,7 +26,7 @@
 #endif
 
 #ifndef AVB_1722_1_ADP_MODEL_ID
-#define AVB_1722_1_ADP_MODEL_ID 0
+#define AVB_1722_1_ADP_MODEL_ID 0x1234
 #endif
 
 #ifndef AVB_1722_1_ADP_ENTITY_CAPABILITIES

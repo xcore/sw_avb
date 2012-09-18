@@ -4,6 +4,8 @@
    memory usage) and combined the code for the port state machines and the site 
    state machines into one. */
 #include <string.h>
+#include <limits.h>
+#include "avb_conf.h"
 #include "gptp.h"
 #include "gptp_config.h"
 #include "gptp_pdu.h"
@@ -11,9 +13,6 @@
 #include "misc_timer.h"
 #include "print.h"
 #include "simple_printf.h"
-#ifdef AVNU_OBSERVABILITY
-#include "avnu_observability.h"
-#endif
 #include "avb_util.h"
 
 //#define GPTP_DEBUG 1
@@ -34,8 +33,6 @@ static int ptp_legacy_mode = 0;
 static int g_ptp_adjust_valid = 0;
 signed g_ptp_adjust = 0;
 signed g_inv_ptp_adjust = 0;
-
-
 
 /* The average path delay (over the last PDELAY_AVG_WINDOW pdelay_reqs) 
    between the foreign master port and our slave port in nanoseconds (ptp time)
@@ -68,8 +65,6 @@ static unsigned last_received_announce_time;
 static unsigned last_announce_time;
 static unsigned last_sync_time;
 static unsigned last_pdelay_req_time;
-static unsigned last_avnu_update_time;
-
 
 static ptp_timestamp prev_adjust_master_ts;
 static unsigned prev_adjust_local_ts;
@@ -80,16 +75,8 @@ static int sync_count = 0;
 
 static AnnounceMessage best_announce_msg;
 
-#ifdef AVNU_OBSERVABILITY
-static char * sprint_clock_id(char *s, n64_t *id)
-{
-  for (int i=0;i<8;i++) {
-    avb_itoa(id->data[i],s,16,2);
-    s+=2;
-  }
-  return s;
-}
-#endif
+static unsigned long long pdelay_epoch_timer;
+static unsigned prev_pdelay_local_ts;
 
 
 unsigned local_timestamp_to_ptp_mod32(unsigned local_ts,
@@ -290,19 +277,6 @@ static void set_new_role(enum ptp_state_t new_role,
   if (ptp_state == PTP_MASTER || ptp_state == PTP_UNCERTAIN)
     create_my_announce_msg(&best_announce_msg);
 
-
-#ifdef AVNU_OBSERVABILITY
-  if (ptp_state == PTP_MASTER || ptp_state == PTP_SLAVE)
-    { 
-      char id_str[] = "xxxxxxxxxxxxxxxx";
-      sprint_clock_id(id_str, &(best_announce_msg.grandmasterIdentity));
-      avnu_log(AVNU_TESTPOINT_GM, NULL, id_str);
-    }
-
-  if (ptp_state == PTP_UNCERTAIN)
-    avnu_log(AVNU_TESTPOINT_LM, NULL, "");
-#endif
-
   return;
 }
 
@@ -389,7 +363,6 @@ static void update_adjust(ptp_timestamp *master_ts,
         else 
           sync_count = 0;
       }
-      
 
       adjust = (((long long)g_ptp_adjust) * (PTP_ADJUST_WEIGHT - 1) + adjust) / PTP_ADJUST_WEIGHT;
 
@@ -542,14 +515,6 @@ static void bcma_update_roles(char *msg, unsigned t)
   AnnounceMessage *pAnnounceMesg = (AnnounceMessage *) ((char *) pComMesgHdr+sizeof(ComMessageHdr));
   int clock_identity_comp;
   int new_best = 0;
- 
-#ifdef AVNU_OBSERVABILITY
-      { 
-        char id_str[] = "xxxxxxxxxxxxxxxx";
-        sprint_clock_id(id_str, &pAnnounceMesg->grandmasterIdentity);
-        avnu_log(AVNU_TESTPOINT_ANRX, NULL, id_str);
-      }
-#endif
 
   clock_identity_comp =
     compare_clock_identity_to_me(&pAnnounceMesg->grandmasterIdentity);
@@ -812,11 +777,7 @@ static void send_ptp_announce_msg(chanend c_tx)
 
    // send the message.
    ptp_tx(c_tx, buf0, ANNOUNCE_PACKET_SIZE);
-#ifdef AVNU_OBSERVABILITY
-   avnu_log(AVNU_TESTPOINT_ANTX,
-            NULL,
-            "");
-#endif
+
    return;
 }
 
@@ -970,6 +931,35 @@ static void send_ptp_pdelay_req_msg(chanend c_tx)
   return;
 }
 
+void local_to_epoch_ts(unsigned local_ts, ptp_timestamp *epoch_ts)
+{
+  unsigned long long sec;
+  unsigned long long nanosec;
+
+  if (local_ts <= prev_pdelay_local_ts) // We overflowed 32 bits
+  {
+    pdelay_epoch_timer += ((UINT_MAX - prev_pdelay_local_ts) + local_ts);
+  }
+  else
+  {
+    pdelay_epoch_timer += (local_ts - prev_pdelay_local_ts);
+  }
+
+  nanosec = pdelay_epoch_timer * 10;
+
+  sec = nanosec / NANOSECONDS_PER_SECOND;
+  nanosec = nanosec % NANOSECONDS_PER_SECOND;
+
+  epoch_ts->seconds[1] = (unsigned) (sec >> 32);
+
+  epoch_ts->seconds[0] = (unsigned) sec;
+  
+  epoch_ts->nanoseconds = nanosec;
+
+  prev_pdelay_local_ts = local_ts;
+
+}
+
 static void send_ptp_pdelay_resp_msg(chanend c_tx, 
                               char *pdelay_req_msg,
                               unsigned req_ingress_ts)
@@ -977,18 +967,18 @@ static void send_ptp_pdelay_resp_msg(chanend c_tx,
 #define PDELAY_RESP_PACKET_SIZE (sizeof(ethernet_hdr_t) + sizeof(ComMessageHdr) + sizeof(PdelayRespMessage))
   unsigned int buf0[(PDELAY_RESP_PACKET_SIZE+3)/4];
   unsigned char *buf = (unsigned char *) &buf0[0];
-   // received packet pointers.
-   ComMessageHdr *pRxMesgHdr = (ComMessageHdr *) pdelay_req_msg;   
-   // transmit packet pointers.
-   ComMessageHdr *pTxMesgHdr = (ComMessageHdr *) &buf[sizeof(ethernet_hdr_t)]; 
-   PdelayRespMessage *pTxRespHdr = 
-     (PdelayRespMessage *) &buf[sizeof(ethernet_hdr_t) + sizeof(ComMessageHdr)];
-   PdelayRespFollowUpMessage *pTxFollowUpHdr = 
-     (PdelayRespFollowUpMessage *) &buf[sizeof(ethernet_hdr_t) + sizeof(ComMessageHdr)];
+  // received packet pointers.
+  ComMessageHdr *pRxMesgHdr = (ComMessageHdr *) pdelay_req_msg;   
+  // transmit packet pointers.
+  ComMessageHdr *pTxMesgHdr = (ComMessageHdr *) &buf[sizeof(ethernet_hdr_t)]; 
+  PdelayRespMessage *pTxRespHdr = 
+   (PdelayRespMessage *) &buf[sizeof(ethernet_hdr_t) + sizeof(ComMessageHdr)];
+  PdelayRespFollowUpMessage *pTxFollowUpHdr = 
+   (PdelayRespFollowUpMessage *) &buf[sizeof(ethernet_hdr_t) + sizeof(ComMessageHdr)];
 
-   ptp_timestamp ptp_req_ingress_ts;
-   ptp_timestamp ptp_resp_ts;
-   unsigned local_resp_ts;
+  ptp_timestamp epoch_req_ingress_ts;
+  ptp_timestamp epoch_resp_ts;
+  unsigned local_resp_ts;
 
   set_ptp_ethernet_hdr(buf);
 
@@ -1017,29 +1007,24 @@ static void send_ptp_pdelay_resp_msg(chanend c_tx,
   pTxMesgHdr->transportSpecific_messageType = 
     PTP_TRANSPORT_SPECIFIC_HDR | PTP_PDELAY_RESP_MESG;
 
-  local_to_ptp_ts(&ptp_req_ingress_ts, req_ingress_ts);
+  local_to_epoch_ts(req_ingress_ts, &epoch_req_ingress_ts);
 
   timestamp_to_network(&pTxRespHdr->requestReceiptTimestamp,
-                       &ptp_req_ingress_ts);
+                       &epoch_req_ingress_ts);
                        
-  ptp_tx_timed(c_tx, 
-               buf0, 
-               PDELAY_RESP_PACKET_SIZE,
-               &local_resp_ts);
+  ptp_tx_timed(c_tx,  buf0, PDELAY_RESP_PACKET_SIZE, &local_resp_ts);
 
   /* Now send the follow up */
 
-  local_to_ptp_ts(&ptp_resp_ts, local_resp_ts);
+  local_to_epoch_ts(local_resp_ts, &epoch_resp_ts);
 
   pTxMesgHdr->transportSpecific_messageType = 
     PTP_TRANSPORT_SPECIFIC_HDR | PTP_PDELAY_RESP_FOLLOW_UP_MESG;
 
   timestamp_to_network(&pTxFollowUpHdr->responseOriginTimestamp,
-                       &ptp_resp_ts);
+                       &epoch_resp_ts);
 
-  ptp_tx(c_tx, 
-         buf0, 
-         PDELAY_RESP_PACKET_SIZE);
+  ptp_tx(c_tx, buf0, PDELAY_RESP_PACKET_SIZE);
 
   return;
 }
@@ -1169,8 +1154,6 @@ void ptp_init(chanend c_tx, enum ptp_server_type stype)
   last_debug_time = t;
 #endif
 
-  last_avnu_update_time = t;
-
 
   if (stype == PTP_GRANDMASTER_CAPABLE) {
     ptp_priority1 = PTP_DEFAULT_GM_CAPABLE_PRIORITY1;
@@ -1193,6 +1176,8 @@ void ptp_init(chanend c_tx, enum ptp_server_type stype)
   my_port_id.data[9] = 1;
 
   set_new_role(PTP_MASTER, t);
+
+  pdelay_epoch_timer = t;
 }
 
 
@@ -1209,17 +1194,7 @@ void ptp_server_set_legacy_mode(int legacy_mode)
   ptp_legacy_mode = legacy_mode;
 }
 
-void avnu_update_ptp_timeinfo();
-
-#define AVNU_UPDATE_PERIOD 200000000
 void ptp_periodic(chanend c_tx, unsigned t) {
-
-#ifdef AVNU_OBSERVABILITY
-  if (timeafter(t, last_avnu_update_time + AVNU_UPDATE_PERIOD)) {
-    avnu_update_ptp_timeinfo();
-    last_avnu_update_time = t;
-  }
-#endif
 
   if (last_received_announce_time_valid && 
       timeafter(t, last_received_announce_time + RECV_ANNOUNCE_TIMEOUT)) {

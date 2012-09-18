@@ -16,15 +16,13 @@
 #include "ethernet_tx_client.h"
 #include "ethernet_rx_client.h"
 #include "ethernet_server_def.h"
-#ifdef __OSC_IMPL
-#include "osc_types.h"
-#include "osc_tree.h"
-#endif
 #include "mac_custom_filter.h"
 #include "avb_1722_maap.h"
+#include "nettypes.h"
 
 #ifdef AVB_ENABLE_1722_1
 #include "avb_1722_1.h"
+#include "avb_1722_1_adp.h"
 #endif
 
 //#define AVB_TRANSMIT_BEFORE_RESERVATION 1
@@ -35,6 +33,7 @@
 #define isnull(A) (A == 0)
 
 #define UNMAPPED (-1)
+#define AVB_CHANNEL_UNMAPPED (-1)
 
 typedef struct media_info_t {
   int core_id;
@@ -159,6 +158,7 @@ static void register_media(chanend media_ctl[])
       strcpy(outputs[output_id].type,"");
 #endif
       outputs[output_id].core_id = core_id;
+      outputs[output_id].clk_ctl = clk_ctl;
       outputs[output_id].local_id = j;
       outputs[output_id].mapped_to = UNMAPPED;
       outputs[output_id].fifo = xc_abi_inuint(media_ctl[i]);
@@ -187,15 +187,6 @@ void avb_init(chanend media_ctl[],
               chanend c_mac_tx0,
               chanend c_ptp0) 
 {
-
-#if AVB_OSC
-  OSC_SET_RANGE(avb_source, 0, AVB_NUM_SOURCES-1);
-  OSC_SET_RANGE(device_media_clock, 0, AVB_NUM_MEDIA_CLOCKS-1);
-  OSC_SET_RANGE(avb_sink, 0, AVB_NUM_SINKS-1);
-  OSC_SET_RANGE(media_in, 0, AVB_NUM_MEDIA_INPUTS-1);
-  OSC_SET_RANGE(media_out, 0, AVB_NUM_MEDIA_OUTPUTS-1);
-#endif
-
   mac_get_macaddr(c_mac_tx0, mac_addr);
 
   mrp_init((char *)mac_addr);
@@ -231,20 +222,25 @@ void avb_init(chanend media_ctl[],
   xc_abi_outuint(c_mac_tx, ETHERNET_TX_INIT_AVB_ROUTER);
 
   mac_set_custom_filter(c_mac_rx, MAC_FILTER_AVB_CONTROL);
+  mac_request_status_packets(c_mac_rx);
 }
 
-avb_status_t avb_periodic(void) {
-	avb_status_t res = mrp_periodic();
-	if (res != AVB_NO_STATUS) return res;
+void avb_periodic(avb_status_t *status)
+{
+	mrp_periodic(status);
 #ifdef AVB_ENABLE_1722_1
-	res = avb_1722_1_periodic(c_mac_tx, c_ptp);
-	if (res != AVB_NO_STATUS) return res;
+	avb_1722_1_periodic(status, c_mac_tx, c_ptp);
 #endif
-	return avb_1722_maap_periodic(c_mac_tx);
+	avb_1722_maap_periodic(status, c_mac_tx);
 }
 
-void avb_start(void) {
-  avb_1722_maap_rerequest_addresses();
+void avb_start(void)
+{
+#if AVB_ENABLE_1722_1
+  avb_1722_1_adp_announce();
+#endif
+  // Request a multicast addresses for stream transmission
+  avb_1722_maap_request_addresses(AVB_NUM_SOURCES, NULL);
 
   mrp_mad_begin(domain_attr);
   mrp_mad_join(domain_attr, 1);
@@ -370,6 +366,7 @@ int getset_avb_source_state(int set,
                             int source_num, 
                             enum avb_source_state_t *state)
 {
+  char stream_string[] = "Talker stream ";
   if (source_num < AVB_NUM_SOURCES) {
     avb_source_info_t *source = &sources[source_num]; 
     if (set) {      
@@ -440,10 +437,10 @@ int getset_avb_source_state(int set,
             xc_abi_outuint(c, source->stream.local_id);
             (void) xc_abi_inuint(c); //ACK
 
-            simple_printf("Stream #%d on\n", source_num);
+            printstr(stream_string); simple_printf("#%d on\n", source_num);
           }
 #else
-          simple_printf("Stream #%d ready\n", source_num);
+          printstr(stream_string); simple_printf("#%d ready\n", source_num);
 #endif
 
         }
@@ -457,13 +454,13 @@ int getset_avb_source_state(int set,
           xc_abi_outuint(c, source->stream.local_id);
           (void) xc_abi_inuint(c); //ACK
 
-          simple_printf("Stream #%d off\n", source_num);
+          printstr(stream_string); simple_printf("#%d off\n", source_num);
       }
       else if (source->stream.state == AVB_SOURCE_STATE_POTENTIAL &&
                *state == AVB_SOURCE_STATE_ENABLED) {
         // start transmitting
 
-        simple_printf("Stream #%d on\n", source_num);
+        printstr(stream_string); simple_printf("#%d on\n", source_num);
         chanend c = source->talker_ctl;
         xc_abi_outuint(c, AVB1722_TALKER_GO);
         xc_abi_outuint(c, source->stream.local_id);
@@ -668,18 +665,31 @@ int getset_avb_sink_state(int set,
       if (sink->stream.state == AVB_SINK_STATE_DISABLED &&
           *state == AVB_SINK_STATE_POTENTIAL) {
         chanend c = sink->listener_ctl;
-        int clk_ctl;
+        int clk_ctl = -1;
+        simple_printf("Listener sink #%d chan map:\n", sink_num);
         xc_abi_outuint(c, AVB1722_CONFIGURE_LISTENER_STREAM);
         xc_abi_outuint(c, sink->stream.local_id);
         xc_abi_outuint(c, sink->stream.sync);
         xc_abi_outuint(c, sink->stream.rate);
         xc_abi_outuint(c, sink->stream.num_channels);
-        for (int i=0;i<sink->stream.num_channels;i++) {
-          xc_abi_outuint(c, outputs[sink->stream.map[i]].fifo);
+        for (int i=0;i<sink->stream.num_channels;i++)
+        {
+          if (sink->stream.map[i] == AVB_CHANNEL_UNMAPPED)
+          {
+            xc_abi_outuint(c, 0);
+            simple_printf("  %d unmapped\n", i);
+          }
+          else
+          {
+            if (clk_ctl == -1)
+            {
+              clk_ctl = outputs[sink->stream.map[i]].clk_ctl;
+            }
+            xc_abi_outuint(c, outputs[sink->stream.map[i]].fifo);
+            simple_printf("  %d -> %x\n", i, sink->stream.map[i]);
+          }
         }                       
         (void) xc_abi_inuint(c);
-
-        clk_ctl = outputs[sink->stream.map[0]].clk_ctl;
 
         if (!isnull(media_clock_svr)) {
         	media_clock_register(media_clock_svr, clk_ctl, sink->stream.sync);
@@ -948,25 +958,62 @@ void avb_set_legacy_mode(int mode)
   avb_mrp_set_legacy_mode(mode);
 }
 
-avb_status_t avb_process_control_packet(unsigned int buf[], 
-                                        int nbytes,
-                                        chanend c_tx)
+void avb_process_control_packet(avb_status_t *status, unsigned int buf0[], int nbytes, chanend c_tx)
 {
-  avb_status_t status;
+  if (nbytes == STATUS_PACKET_LEN)
+  {
+    if (buf0[0]) // Link up
+    {
+      avb_start();
+    }
+    else // Link down
+    {
+      for(int i=0; i < AVB_NUM_SOURCES; i++)
+      {
+        set_avb_source_state(i, AVB_SOURCE_STATE_DISABLED);
+      }
+    }
+  }
+  else
+  {
+    struct ethernet_hdr_t *ethernet_hdr = (ethernet_hdr_t *) &buf0[0];
+    unsigned char *buf = (unsigned char *) buf0;
 
-  status = avb_mrp_process_packet(buf, nbytes);
-  if (status != AVB_SRP_OK && status != AVB_NO_STATUS)
-    return status;
+    int has_qtag = ethernet_hdr->ethertype[1]==0x18;
+    int eth_hdr_size = has_qtag ? 18 : 14;
+    int etype;
+    int len = nbytes - eth_hdr_size;
 
-#ifdef AVB_ENABLE_1722_1
-  status = avb_1722_1_process_packet(buf, nbytes, c_tx);
-  if (status != AVB_SRP_OK && status != AVB_NO_STATUS)
-    return status;
-#endif
+    if (has_qtag)
+    {
+      struct tagged_ethernet_hdr_t *tagged_ethernet_hdr = (tagged_ethernet_hdr_t *) &buf0[0];
+      etype = (int)(tagged_ethernet_hdr->ethertype[0] << 8) + (int)(tagged_ethernet_hdr->ethertype[1]); 
+    }
+    else
+    {
+      etype = (int)(ethernet_hdr->ethertype[0] << 8) + (int)(ethernet_hdr->ethertype[1]); 
+    }
 
-  status = avb_1722_maap_process_packet_(buf, nbytes, c_tx);
+    switch (etype)
+    {
+      /* fallthrough intended */
+      case AVB_SRP_ETHERTYPE:
+      // TODO: #define around MMRP, disabled by default
+      case AVB_MMRP_ETHERTYPE:
+      case AVB_MVRP_ETHERTYPE:
+        avb_mrp_process_packet(status, &buf[eth_hdr_size], etype, len);
+        break;
+      case AVB_1722_ETHERTYPE:
+        // We know that the cd field is true because the MAC filter only forwards
+        // 1722 control to this thread
+      #ifdef AVB_ENABLE_1722_1
+        avb_1722_1_process_packet(status, &buf[eth_hdr_size], &(ethernet_hdr->src_addr[0]), len, c_tx);
+      #endif
+        avb_1722_maap_process_packet(status, &buf[eth_hdr_size], &(ethernet_hdr->src_addr[0]), len, c_tx);
+        break;
+    }
+  }
 
-  return status;
 }
 
 

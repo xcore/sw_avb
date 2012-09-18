@@ -1,2 +1,0 @@
-
-#define XTCP_CLIENT_BUF_SIZE (800)

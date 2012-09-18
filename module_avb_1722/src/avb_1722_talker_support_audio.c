@@ -69,7 +69,7 @@ void AVB1722_Talker_bufInit(unsigned char Buf0[],
 	SET_AVBTP_PCP(pEtherHdr, AVB_DEFAULT_PCP);
 	SET_AVBTP_CFI(pEtherHdr, AVB_DEFAULT_CFI);
 	SET_AVBTP_VID(pEtherHdr, vlanid);
-	SET_AVBTP_ETYPE(pEtherHdr, AVB_ETYPE);
+	SET_AVBTP_ETYPE(pEtherHdr, AVB_1722_ETHERTYPE);
 
 	//--------------------------------------------------------------------------
 	// 2. Initialaise the AVB TP layer.
@@ -80,7 +80,7 @@ void AVB1722_Talker_bufInit(unsigned char Buf0[],
 
 	//--------------------------------------------------------------------------
 	// 3. Initialise the Simple Audio Format protocol specific part
-#if AVB_1722_FORMAT_SAF
+#ifdef AVB_1722_FORMAT_SAF
 	//TODO://This is hardcoded for 48k 32 bit 32 bit samples 2 channels
 	SET_AVBTP_PROTOCOL_SPECIFIC(p1722Hdr, 2);
 	SET_AVBTP_GATEWAY_INFO(p1722Hdr, 0x02000920);
@@ -113,7 +113,7 @@ void AVB1722_Talker_bufInit(unsigned char Buf0[],
 static void sample_copy_strided(int *src, unsigned int *dest, int stride, int n) {
 	int i;
 	for (i = 0; i < n; i++) {
-#if AVB_1722_FORMAT_SAF
+#ifdef AVB_1722_FORMAT_SAF
 		unsigned sample = *src << 8;
 #else
 		unsigned sample = (*src & 0xffffff) | AVB1722_audioSampleType;
@@ -147,7 +147,7 @@ int avb1722_create_packet(unsigned char Buf0[],
 	// word align for fast copying.
 	unsigned char *Buf = &Buf0[2];
 
-#if AVB_1722_FORMAT_SAF
+#ifdef AVB_1722_FORMAT_SAF
 	unsigned int *dest = (unsigned int *) &Buf[(AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE)];
 #else
 	unsigned int *dest = (unsigned int *) &Buf[(AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + AVB_CIP_HDR_SIZE)];
@@ -254,7 +254,7 @@ int avb1722_create_packet(unsigned char Buf0[],
 
 	dbc &= 0xff;
 
-#if !AVB_1722_FORMAT_SAF
+#ifndef AVB_1722_FORMAT_SAF
 	AVB1722_CIP_HeaderGen(Buf, dbc);
 #endif
 	// perform required updates to header
@@ -266,7 +266,7 @@ int avb1722_create_packet(unsigned char Buf0[],
 	// Update timestamp value and valid flag.
 	AVB1722_AVBTP_HeaderGen(Buf, timerValid, ptp_ts, pkt_data_length, stream_info->sequence_number, stream_id0);
 
-	stream_info->last_transmit_time = time;
+	stream_info->last_transmit_time += AVB1722_PACKET_PERIOD_TIMER_TICKS;
 	stream_info->transmit_ok = 0;
 	stream_info->sequence_number++;
 	return (AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + pkt_data_length);
