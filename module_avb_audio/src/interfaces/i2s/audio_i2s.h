@@ -33,7 +33,8 @@ void i2s_master_configure_ports(const clock mclk,
                                 out buffered port:32 ?p_dout[],
                                 int num_out,
                                 in buffered port:32 ?p_din[],
-                                int num_in);
+                                int num_in,
+                                int mclk_to_bclk_ratio);
 
 /** Input and output audio data using I2S format with the XCore acting 
  as master.
@@ -120,6 +121,9 @@ inline void i2s_master(const clock mclk,
   // In every case you will end up with 32 bit clocks per word.
   switch (mclk_to_bclk_ratio)
     {
+    case 1:
+        // no bclk_val
+        break;
     case 2:
       bclk_val = 0xaaaaaaaa; // 10
       break;
@@ -129,6 +133,7 @@ inline void i2s_master(const clock mclk,
     case 8:
       bclk_val = 0xf0f0f0f0; // 11110000
       break;
+
     default:
       // error - unknown master clock/word clock ratio
       return;
@@ -141,7 +146,8 @@ inline void i2s_master(const clock mclk,
                              p_dout,
                              num_out>>1,
                              p_din,
-                             num_in>>1);
+                             num_in>>1,
+                             mclk_to_bclk_ratio);
 
   
 
@@ -188,15 +194,6 @@ inline void i2s_master(const clock mclk,
 
     tmr :> timestamp;
 
-#ifdef USE_XSCOPE_PROBES
-		if(prev_timestamp_valid) {
-		    // trace only for stream 0
-			xscope_probe_data(18, (int) (timestamp - prev_timestamp));
-		};
-		prev_timestamp = timestamp;
-	    prev_timestamp_valid = 1;
-#endif
-
     if (num_out > 0)
     {
     	c_listener <: timestamp;
@@ -211,7 +208,7 @@ inline void i2s_master(const clock mclk,
 #pragma loop unroll    
       for (int k0=0;k0<mclk_to_bclk_ratio;k0++)  {
 #pragma xta endpoint "i2s_master_bclk_output"
-        p_bclk <: bclk_val;
+        if(mclk_to_bclk_ratio!=1) p_bclk <: bclk_val;
 
         for(int d=0;d<8/mclk_to_bclk_ratio;d++) {
             int k = k0*(8/mclk_to_bclk_ratio)+d;
