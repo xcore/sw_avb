@@ -25,7 +25,7 @@
 #include "avb_1722_1_adp.h"
 #endif
 
-//#define AVB_TRANSMIT_BEFORE_RESERVATION 1
+#define AVB_TRANSMIT_BEFORE_RESERVATION 1
 
 // Warning: The XC spec makes no assertions that a null chanend is numerically zero. There is
 //          no isnull function in C, so this makes up that deficiency, but it may need modifying
@@ -480,8 +480,8 @@ int getset_avb_source_state(int set,
           // And remove the group
           mrp_mad_leave(source->stream.srp_talker_attr);
       }
-      avb_set_talker_bandwidth();
       source->stream.state = *state;
+      avb_set_talker_bandwidth();
     }
     *state = source->stream.state;
     return 1;

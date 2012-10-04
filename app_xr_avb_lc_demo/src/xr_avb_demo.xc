@@ -86,7 +86,10 @@ media_output_fifo_t ofifos[AVB_NUM_MEDIA_OUTPUTS];
 
 void xscope_user_init(void)
 {
-    xscope_register(0, 0, "", 0, "");
+    xscope_register(4, XSCOPE_CONTINUOUS, "rx interval", XSCOPE_UINT, "time",
+        XSCOPE_CONTINUOUS, "spaceleft", XSCOPE_UINT, "n",
+        XSCOPE_STATEMACHINE, "buf", XSCOPE_UINT, "n",
+        XSCOPE_CONTINUOUS, "tx", XSCOPE_UINT, "n");
     // Enable XScope printing
     xscope_config_io(XSCOPE_IO_BASIC);
 }
@@ -341,6 +344,8 @@ void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl)
         {
             // Test for a control packet and process it
             avb_process_control_packet(avb_status, buf, nbytes, c_tx);
+
+            printchar('.');
 
             // add any special control packet handling here
             break;

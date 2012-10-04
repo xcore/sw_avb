@@ -76,7 +76,11 @@ media_input_fifo_t ififos[AVB_NUM_MEDIA_INPUTS];
 
 void xscope_user_init(void)
 {
-    xscope_register(0, 0, "", 0, "");
+    // xscope_register(0, 0, "", 0, "");
+    xscope_register(4, XSCOPE_CONTINUOUS, "rx interval", XSCOPE_UINT, "time",
+    XSCOPE_CONTINUOUS, "spaceleft", XSCOPE_UINT, "n",
+    XSCOPE_STATEMACHINE, "buf", XSCOPE_UINT, "n",
+    XSCOPE_CONTINUOUS, "tx", XSCOPE_UINT, "n");
     // Enable XScope printing
     xscope_config_io(XSCOPE_IO_BASIC);
 }

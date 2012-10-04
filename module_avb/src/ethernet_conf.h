@@ -8,7 +8,9 @@
 #define ETHERNET_TX_HP_QUEUE 1
 #endif
 
-//#define ETHERNET_TRAFFIC_SHAPER 1
+#ifndef ETHERNET_TX_HP_QUEUE 
+#define ETHERNET_TRAFFIC_SHAPER 1
+#endif
 
 #define MAC_CUSTOM_FILTER 1
 #define AVB_MAC

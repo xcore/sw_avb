@@ -5,6 +5,8 @@
 #include <platform.h>
 #include <xs1.h>
 #include <xclib.h>
+#include <print.h>
+ #include <xscope.h>
 
 #include "avb_1722_def.h"
 #include "avb_1722.h"
@@ -32,8 +34,6 @@
 #ifdef AVB_1722_FORMAT_61883_6
 #define MAX_PKT_BUF_SIZE_TALKER (AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + AVB_CIP_HDR_SIZE + TALKER_NUM_AUDIO_SAMPLES_PER_CHANNEL_PER_AVB1722_PKT * AVB_MAX_CHANNELS_PER_STREAM * 4 + 4)
 #endif
-
-static avb1722_Talker_StreamConfig_t talker_streams[AVB_MAX_STREAMS_PER_TALKER_UNIT];
 
 static void configure_stream(chanend avb1722_tx_config,
 							 avb1722_Talker_StreamConfig_t &stream,
@@ -94,6 +94,8 @@ static void configure_stream(chanend avb1722_tx_config,
 	stream.active = 1;
 	stream.transmit_ok = 1;
 	stream.sequence_number = 0;
+
+	stream.last_transmit_time = 0;
 }
 
 static void disable_stream(avb1722_Talker_StreamConfig_t &stream) {
@@ -136,6 +138,7 @@ void avb_1722_talker(chanend ptp_svr, chanend ethernet_tx_svr,
 		chanend talker_ctl, int num_streams) {
 	ptp_time_info_mod64 timeInfo;
 	unsigned int TxBuf[(MAX_PKT_BUF_SIZE_TALKER + 3) / 4];
+	avb1722_Talker_StreamConfig_t talker_streams[AVB_MAX_STREAMS_PER_TALKER_UNIT];
 	int max_active_avb_stream = 0;
 	int cur_avb_stream = 0;
 	unsigned char mac_addr[6];
@@ -245,17 +248,24 @@ void avb_1722_talker(chanend ptp_svr, chanend ethernet_tx_svr,
 				int packet_size;
 				int t;
 				tmr :> t;
+
 				packet_size =
 				avb1722_create_packet((TxBuf, unsigned char[]),
 						talker_streams[cur_avb_stream],
 						timeInfo,
 						t);
-				if (packet_size) {
+				if (packet_size)
+				{
+					tmr :> t;
 					if (packet_size < 60) packet_size = 60;
-					ethernet_send_frame_offset2(ethernet_tx_svr,
+					/*
+					ethernet_send_avb_class_a_frame(ethernet_tx_svr,
 							TxBuf,
 							packet_size,
 							ETH_BROADCAST);
+					*/
+					talker_streams[cur_avb_stream].last_transmit_time = t;
+					// printstr("."); printintln(t);
 				}
 			}
 			if (max_active_avb_stream != -1) {

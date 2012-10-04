@@ -9,6 +9,7 @@
 #define streaming
 #include <xccompat.h>
 #include <string.h>
+ #include <print.h>
 
 #include "avb_1722_talker.h"
 #include "gptp.h"
@@ -131,7 +132,7 @@ static void sample_copy_strided(int *src, unsigned int *dest, int stride, int n)
 int avb1722_create_packet(unsigned char Buf0[],
 		avb1722_Talker_StreamConfig_t *stream_info,
 		ptp_time_info_mod64 *timeInfo,
-		int time)
+		int current_time)
 {
 	unsigned int presentationTime = 0;
 	int timerValid = 0;
@@ -157,6 +158,16 @@ int avb1722_create_packet(unsigned char Buf0[],
 	unsigned ptp_ts = 0;
 	int dbc;
 	int pkt_data_length;
+
+	// Figure out if it is time to transmit a packet
+	if (!stream_info->transmit_ok) {
+		int elapsed = current_time - stream_info->last_transmit_time;
+		// printintln(elapsed);
+		if (elapsed < AVB1722_PACKET_PERIOD_TIMER_TICKS)
+			return 0;
+
+		stream_info->transmit_ok = 1;
+	}
     
     AVB_Frame_t *pEtherHdr = (AVB_Frame_t *) &(Buf[0]);
     for (i = 0; i < MAC_ADRS_BYTE_COUNT; i++) {
@@ -177,15 +188,6 @@ int avb1722_create_packet(unsigned char Buf0[],
 
 	// If the FIFOs are not being filled then also do not process the packet
 	if ((media_input_fifo_enable_ind_state() & stream_info->fifo_mask) == 0) return 0;
-
-	// Figure out if it is time to transmit a packet
-	if (!stream_info->transmit_ok) {
-		int elapsed = time - stream_info->last_transmit_time;
-		if (elapsed < AVB1722_PACKET_PERIOD_TIMER_TICKS)
-			return 0;
-
-		stream_info->transmit_ok = 1;
-	}
 
 	// Figure out the number of samples in the 1722 packet
 	samples_in_packet = stream_info->samples_per_packet_base;
@@ -266,7 +268,6 @@ int avb1722_create_packet(unsigned char Buf0[],
 	// Update timestamp value and valid flag.
 	AVB1722_AVBTP_HeaderGen(Buf, timerValid, ptp_ts, pkt_data_length, stream_info->sequence_number, stream_id0);
 
-	stream_info->last_transmit_time += AVB1722_PACKET_PERIOD_TIMER_TICKS;
 	stream_info->transmit_ok = 0;
 	stream_info->sequence_number++;
 	return (AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + pkt_data_length);

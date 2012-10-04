@@ -119,12 +119,10 @@ media_output_fifo_pull_sample(media_output_fifo_t s0,
   if (s->wrptr - dptr >= 0)
   {
     unsigned int size = s->wrptr - dptr;
-    xscope_probe_data(0, size);
   }
   else
   {
     unsigned int size = (END_OF_FIFO(s) - START_OF_FIFO(s)) + (s->wrptr - dptr);
-    xscope_probe_data(0, size);
   }
 #endif
   
