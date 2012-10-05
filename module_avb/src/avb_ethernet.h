@@ -13,10 +13,6 @@ typedef struct avb_ethernet_ports_s {
 } avb_ethernet_ports_t;
 #endif
 
-#define AVB_ETHERNET_DEFAULT_PORTS_INIT {OTP_PORTS_INITIALIZER, \
-      ETHERNET_DEFAULT_SMI_INIT,                                 \
-      ETHERNET_DEFAULT_MII_INIT_full,                            \
-      ETHERNET_DEFAULT_RESET_INTERFACE_INIT}
 
 #ifdef __XC__
 void avb_ethernet_server(avb_ethernet_ports_t &ports,
