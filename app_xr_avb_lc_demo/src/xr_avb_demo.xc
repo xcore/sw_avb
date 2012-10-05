@@ -5,8 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <xscope.h>
-#include "xtcp_client.h"
-#include "uip_server.h"
+#include "xtcp.h"
 #include "audio_i2s.h"
 #include "i2c.h"
 #include "avb.h"
@@ -15,6 +14,7 @@
 #include "mdns.h"
 #include "control_api_server.h"
 #include "demo_stream_manager.h"
+#include "ethernet_board_support.h"
 
 // this is the sample rate, the frequency of the word clock
 #define SAMPLE_RATE 48000
@@ -47,7 +47,16 @@ void ptp_server_and_gpio(chanend c_rx, chanend c_tx, chanend ptp_link[],
         int num_ptp, enum ptp_server_type server_type, chanend c);
 
 //***** Ethernet Configuration ****
-avb_ethernet_ports_t avb_ethernet_ports = AVB_ETHERNET_DEFAULT_PORTS_INIT;
+
+// Here are the port definitions required by ethernet
+// The intializers are taken from the ethernet_board_support.h header for
+// XMOS dev boards. If you are using a different board you will need to
+// supply explicit port structure intializers for these values
+avb_ethernet_ports_t avb_ethernet_ports =
+  {OTP_PORTS_INITIALIZER,
+   ETHERNET_DEFAULT_SMI_INIT,
+   ETHERNET_DEFAULT_MII_INIT_full,
+   ETHERNET_DEFAULT_RESET_INTERFACE_INIT};
 
 //***** AVB audio ports ****
 on stdcore[1]: struct r_i2c r_i2c = { PORT_I2C_SCL, PORT_I2C_SDA };
