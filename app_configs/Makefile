@@ -21,7 +21,8 @@ VERBOSE = 0
 # xcc for the final link (mapping) stage.
 
 #debug switches
-XSCOPE = 0
+# currently XSCOPE doesn't work for this app!
+XSCOPE = 0  
 
 ###########################################################################
 # Settings derived from configuration names
@@ -59,7 +60,7 @@ LISTENER_DEBUG_FLAGS = -DAVB_1722_RECORD_ERRORS
 XCC_FLAGS = -O3 -save-temps -g -report -Xmapper --map -Xmapper MAPFILE
 XCC_FLAGS += -DAVB_1722_RECORD_ERRORS -DAVB_AUDIO_IF_$(AUDIO_INTERFACE) -DAVB_1722_FORMAT_$(AUDIO_FORMAT)
 #XCC_FLAGS += -fllvm
-#XCC_FLAGS = -lxscope
+#XCC_FLAGS += -DDEBUG_AVB_TALKER_SENT_FRAMES  #!!! Causes Media output lock lost on Listener side
 
 XSCOPE_LIB = xscope
 
@@ -87,8 +88,16 @@ endif
 XCC_FLAGS_1t1s16ch = -DTALKER $(XCC_FLAGS) -DUSE_LOCAL_CLOCK -DAVB_MAX_AUDIO_SAMPLE_RATE=48000 
 XCC_FLAGS_1t1s16ch += -DAVB_NUM_SOURCES=1 -DAVB_CHANNELS_PER_SOURCE=16 
 
+XCC_FLAGS_1t1s16ch_SAF = $(XCC_FLAGS_1t1s16ch)
+#same flags as 1t1s16ch. SAF in name will cause AUDIO_FORMAT to be set to SAF
+
+XCC_FLAGS_1t1s16ch_SAF16 = $(XCC_FLAGS_1t1s16ch) -DAVB_1722_FORMAT_SAF16
+
 XCC_FLAGS_1t1s16ch_TDM = $(XCC_FLAGS_1t1s16ch)
-#same flags as XCC_FLAGS_1t1s16ch. TDM in name will cause AUDIO_INTERFACE to be set to tdm_multi
+#same flags as 1t1s16ch. TDM in name will cause AUDIO_INTERFACE to be set to tdm_multi
+
+XCC_FLAGS_1t2s16ch_SAF = -DTALKER $(XCC_FLAGS) -DUSE_LOCAL_CLOCK -DAVB_MAX_AUDIO_SAMPLE_RATE=48000 
+XCC_FLAGS_1t2s16ch_SAF += -DAVB_NUM_SOURCES=2 -DAVB_CHANNELS_PER_SOURCE=8 
 
 XCC_FLAGS_1t2s16ch_TDM = -DTALKER $(XCC_FLAGS) -DUSE_LOCAL_CLOCK -DAVB_MAX_AUDIO_SAMPLE_RATE=48000 
 XCC_FLAGS_1t2s16ch_TDM += -DAVB_NUM_SOURCES=2 -DAVB_CHANNELS_PER_SOURCE=8 
@@ -291,7 +300,7 @@ XCC_FLAGS_xr_avb_demo.xc = $(XCC_FLAGS) -fsubword-select
 
 USED_MODULES = module_avb_1722 module_avb_1722_maap module_avb_srp module_osc module_avb_media_clock  module_avb_audio
 USED_MODULES += module_avb module_avb_util  module_gptp module_ethernet module_locks module_i2c 
-ifeq ($(XSCOPE), 0)
+ifneq ($(XSCOPE), 1)
 USED_MODULES += module_xlog
 endif
 

@@ -42,7 +42,7 @@
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildArguments</key>
-					<value>CONFIG=1t2s16ch_TDM</value>
+					<value>CONFIG=1t2s16ch_SAF</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildCommand</key>

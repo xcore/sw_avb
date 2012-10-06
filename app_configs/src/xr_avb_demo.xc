@@ -206,7 +206,9 @@ void xscope_user_init() {
                        //XSCOPE_CONTINUOUS, "Clock Recovery stream_info2.presentation_ts", XSCOPE_UINT, "nanoseconds"
     	               //XSCOPE_DISCRETE, "AVBTP_TIMESTAMP", XSCOPE_UINT, "nanoseconds"
     	               );
-    };
+    } else {
+        xscope_register(0,0,"",0,"");
+    }
 #else
     xscope_register(0,0,"",0,"");
 #endif
