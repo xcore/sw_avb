@@ -4,6 +4,7 @@
 #include "media_output_fifo.h"
 #include "avb_1722_def.h"
 #include "media_clock_client.h"
+#include "simple_printf.h"
 
 #define OUTPUT_DURING_LOCK 1
 #define NOTIFICATION_PERIOD 250
@@ -179,6 +180,7 @@ media_output_fifo_maintain(media_output_fifo_t s0,
         int buf_len = (END_OF_FIFO(s) - START_OF_FIFO(s));
         unsigned int *new_wrptr;
         
+        //TODO: TG why the while?
         new_wrptr = s->dptr + ((buf_len>>1));
         while (new_wrptr >= END_OF_FIFO(s))
           new_wrptr -= buf_len;
@@ -214,7 +216,7 @@ media_output_fifo_maintain(media_output_fifo_t s0,
 }
 
 // 1722 thread
-void 
+void
 media_output_fifo_strided_push(media_output_fifo_t s0,
                                    unsigned int *sample_ptr,
                                    int stride,
@@ -232,11 +234,12 @@ media_output_fifo_strided_push(media_output_fifo_t s0,
   int volume = (s->state == ZEROING) ? 0 : 1;
 #endif
   int count=0;
-  
+
   for(i=0;i<n;i+=stride) {
     count++;
     sample = *sample_ptr;
     sample = __builtin_bswap32(sample);
+
     sample_ptr += stride;
 
 #ifdef MEDIA_OUTPUT_FIFO_VOLUME_CONTROL
@@ -245,11 +248,11 @@ media_output_fifo_strided_push(media_output_fifo_t s0,
 #endif
     {
         // Multiply volume into upper word of 64 bit result
-    	int h=0, l=0;
-		asm ("maccs %0,%1,%2,%3":"+r"(h),"+r"(l):"r"(sample),"r"(volume));
-		sample = h >> 6;
-	    sample &= 0xffffff;
-	}
+        int h=0, l=0;
+        asm ("maccs %0,%1,%2,%3":"+r"(h),"+r"(l):"r"(sample),"r"(volume));
+        sample = h >> 6;
+        sample &= 0xffffff;
+    }
 #else
 #ifdef AVB_1722_FORMAT_SAF
     sample = sample >> 8;
@@ -259,12 +262,72 @@ media_output_fifo_strided_push(media_output_fifo_t s0,
 #endif
 
     new_wrptr = wrptr+1;
-    
+
     if (new_wrptr == END_OF_FIFO(s)) new_wrptr = START_OF_FIFO(s);
-        
+
     if (new_wrptr != s->dptr) {
       *wrptr = sample;
-      wrptr = new_wrptr;         
+      wrptr = new_wrptr;
+    }
+    else {
+        // Overflow
+    }
+  }
+
+  s->wrptr = wrptr;
+  s->sample_count+=count;
+  return;
+}
+
+void
+media_output_fifo_strided_push_saf16(media_output_fifo_t s0,
+                                   unsigned short *sample_ptr,
+                                   int stride,
+                                   int n)
+
+{
+  struct ofifo_t *s = (struct ofifo_t *) s0;
+  unsigned int *wrptr = s->wrptr;
+  unsigned int *new_wrptr;
+  int i;
+  int sample;
+#ifdef MEDIA_OUTPUT_FIFO_VOLUME_CONTROL
+  int volume = (s->state == ZEROING) ? 0 : s->volume;
+#else
+  int volume = (s->state == ZEROING) ? 0 : 1;
+#endif
+  int count=0;
+
+  for(i=0;i<n;i+=stride) {
+    count++;
+    sample = *sample_ptr;
+    // Todo: Change this for AVB_1722_FORMAT_SAF16
+
+    //simple_printf("0x%x\n",sample_ptr);
+    sample_ptr += stride;
+
+#ifdef MEDIA_OUTPUT_FIFO_VOLUME_CONTROL
+    {
+        // Multiply volume into upper word of 64 bit result
+        int h=0, l=0;
+        asm ("maccs %0,%1,%2,%3":"+r"(h),"+r"(l):"r"(sample),"r"(volume));
+        sample = h >> 6;
+        sample &= 0xffffff;
+    }
+#else
+    sample = (sample * volume);
+    sample &= 0xffff;  // 16 bit valid
+#endif
+
+    sample = sample << 8; // convert 16-bit to 24-bit sample
+
+    new_wrptr = wrptr+1;
+
+    if (new_wrptr == END_OF_FIFO(s)) new_wrptr = START_OF_FIFO(s);
+
+    if (new_wrptr != s->dptr) {
+      *wrptr = sample;
+      wrptr = new_wrptr;
     }
     else {
         // Overflow

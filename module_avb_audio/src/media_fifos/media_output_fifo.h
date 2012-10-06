@@ -179,6 +179,20 @@ media_output_fifo_strided_push(media_output_fifo_t s0,
                                unsigned int *sample_ptr,
                                int stride,
                                int n);
+
+/**
+ *  \brief Push a set of 16-bit samples into the FIFO
+ *
+ *  See media_output_fifo_strided_push
+ */
+void
+media_output_fifo_strided_push_saf16(media_output_fifo_t s0,
+                               unsigned short *sample_ptr,
+                               int stride,
+                               int n);
+
+
+
 #endif
 
 

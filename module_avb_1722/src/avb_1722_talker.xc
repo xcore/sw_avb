@@ -17,6 +17,10 @@
 #include "avb_srp.h"
 #include "avb_unit.h"
 #include "avb_conf.h"
+#include "xscope.h"
+#include "simple_printf.h"
+
+#define AVB_TALKER_SENT_FRAME_THRESHOLD 10000
 
 #if AVB_NUM_SOURCES != 0
 
@@ -144,6 +148,12 @@ void avb_1722_talker(chanend ptp_svr, chanend ethernet_tx_svr,
 	unsigned t;
 	int pending_timeinfo = 0;
 	int vlan = 2;
+
+#ifdef DEBUG_AVB_TALKER_SENT_FRAMES
+	int packets_sent[AVB_MAX_STREAMS_PER_TALKER_UNIT];
+	for(unsigned i=0; i<AVB_MAX_STREAMS_PER_TALKER_UNIT; i++) packets_sent[i]=0;
+#endif
+
 	set_thread_fast_mode_on();
 
 	for (unsigned n=0; n<(MAX_PKT_BUF_SIZE_TALKER + 3) / 4; ++n) TxBuf[n] = 0;
@@ -259,6 +269,15 @@ void avb_1722_talker(chanend ptp_svr, chanend ethernet_tx_svr,
 							TxBuf,
 							packet_size,
 							ETH_BROADCAST);
+
+#ifdef DEBUG_AVB_TALKER_SENT_FRAMES
+					if(packets_sent[cur_avb_stream] == AVB_TALKER_SENT_FRAME_THRESHOLD) {
+					    simple_printf("Stream %d : another %d packets sent\n", cur_avb_stream, AVB_TALKER_SENT_FRAME_THRESHOLD);
+					    packets_sent[cur_avb_stream] = 0;
+					} else {
+					    packets_sent[cur_avb_stream]++;
+					}
+#endif
 				}
 			}
 			if (max_active_avb_stream != -1) {

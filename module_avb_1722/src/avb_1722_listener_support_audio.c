@@ -110,7 +110,11 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
 
    pktDataLength = NTOH_U16(pAVBHdr->packet_data_length);
 #if AVB_1722_FORMAT_SAF
+ #if AVB_1722_FORMAT_SAF16
+   num_samples_in_payload = pktDataLength>>1; // two octets hold one 16-bit sample
+ #else
    num_samples_in_payload = pktDataLength>>2;
+ #endif
 #else
    num_samples_in_payload = (pktDataLength-8)>>2;
 #endif
@@ -205,7 +209,7 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
 #ifdef USE_XSCOPE_PROBES
 	   if((AVBTP_STREAM_ID0(pAVBHdr)&0xF) == 0) { // reduce probing to workaround xscope issue
 		  if(prev_avbtp_ts_valid) {
-	         //xscope_probe_data(14, (signed) (AVBTP_TIMESTAMP(pAVBHdr) - prev_avbtp_timestamp));
+	         xscope_probe_data(8, (signed) (AVBTP_TIMESTAMP(pAVBHdr) - prev_avbtp_timestamp));
 		  }
 		  prev_avbtp_timestamp = AVBTP_TIMESTAMP(pAVBHdr);
 		  prev_avbtp_ts_valid = 1;
@@ -237,10 +241,17 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
      num_channels :
      num_channels_in_payload;
 
+   //simple_printf("stride %d, num_samples_in_payload %d\n", stride, num_samples_in_payload);
   for(i=0;i<num_channels;i++) {
-    media_output_fifo_strided_push(map[i], (unsigned int *) sample_ptr, 
+#if AVB_1722_FORMAT_SAF16
+    media_output_fifo_strided_push_saf16(map[i], (unsigned short *) sample_ptr,
+                                   stride, num_samples_in_payload);
+    sample_ptr += 2; // packed 16-bit samples in audio_data_payload
+#else
+    media_output_fifo_strided_push(map[i], (unsigned int *) sample_ptr,
                                    stride, num_samples_in_payload);
     sample_ptr += 4;
+#endif
   }
 
    return(1);

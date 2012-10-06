@@ -1,4 +1,5 @@
 #include <print.h>
+#include <simple_printf.h>
 #include "media_input_fifo.h"
 #include "hwlock.h"
 #include "avb_1722_def.h"
@@ -7,6 +8,8 @@
 static hwlock_t enable_lock;
 unsigned int enable_request_state = 0;
 unsigned int enable_indication_state = 0;
+
+#define AVB_MAX_SPINLOCK_ITERATIONS 100000
 
 void media_input_fifo_enable_fifos(unsigned int enable)
 {
@@ -120,8 +123,8 @@ void media_input_fifo_push_sample(media_input_fifo_t media_input_fifo0,
 
     wrIndex[0] = ts;
 #ifdef USE_XSCOPE_PROBES
-	xscope_probe_data(19, (unsigned) (ts));
-	//xscope_probe_data(20, (unsigned) (wrIndex));
+	//xscope_probe_data(11, (unsigned) (ts));
+	//xscope_probe_data(12, (unsigned) (wrIndex));
 #endif
 
     wrIndex[1] = media_input_fifo->dbc;
@@ -179,11 +182,24 @@ media_input_fifo_get_packet(media_input_fifo_t media_input_fifo0,
   volatile ififo_t *media_input_fifo =  (ififo_t *) media_input_fifo0;
   int *rdIndex = (int *) media_input_fifo->rdIndex;
 
-  while (media_input_fifo->rdIndex==0);
+  int count=0;
+  while (media_input_fifo->rdIndex==0) {
+      count++;
+      if(count==AVB_MAX_SPINLOCK_ITERATIONS) {
+          simple_printf("Error: rdIndex==0 spinlock max iterations (%d) reached\n", count);
+      }
+  }
 
   rdIndex = (int *) media_input_fifo->rdIndex;
 
-  while (rdIndex == (int *) media_input_fifo->startIndex);
+  count=0;
+  // waits until new packet is available. I.e. until startIndex was moved on by I2S side
+  while (rdIndex == (int *) media_input_fifo->startIndex) {
+      count++;
+      if(count==AVB_MAX_SPINLOCK_ITERATIONS) {
+          simple_printf("Error: rdINdex==startIndex spinlock max iterations (%d) reached\n", count);
+      }
+  }
 
 
   *ts = *rdIndex;

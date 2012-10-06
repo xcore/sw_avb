@@ -161,7 +161,7 @@ void avb_1722_listener(chanend ethernet_rx_svr,
 			avb_hash = RxBuf[1];
 
 #ifdef USE_XSCOPE_PROBES
-			//xscope_probe(0); // start
+			xscope_probe(0); // start
 #endif
 			// process the audio packet if enabled.
 			if (avb_hash < MAX_AVB_STREAMS_PER_LISTENER && listener_streams[avb_hash].active && valid_timeinfo)
@@ -183,7 +183,7 @@ void avb_1722_listener(chanend ethernet_rx_svr,
 					notified_buf_ctl);
             }
 #ifdef USE_XSCOPE_PROBES
-			//xscope_probe(0); // stop
+			xscope_probe(0); // stop
 #endif
           break;
         }

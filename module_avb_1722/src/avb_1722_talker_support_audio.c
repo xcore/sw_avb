@@ -3,8 +3,8 @@
  * \brief 1722 Talker support C functions
  */
 #include "avb_conf.h"
-#include "xscope.h"
 #include "simple_printf.h"
+#include "xscope.h"
 
 #ifdef AVB_1722_FORMAT_SAF
 #define AVG_PRESENTATION_TIME_DELTA 125000  // 125us = 6 samples at 48kHz
@@ -94,8 +94,8 @@ void AVB1722_Talker_bufInit(unsigned char Buf0[],
 	//--------------------------------------------------------------------------
 	// 3. Initialise the Simple Audio Format protocol specific part
 #if AVB_1722_FORMAT_SAF
-	//TODO://This is hardcoded for 48k 32 bit 32 bit samples 2 channels
-	SET_AVBTP_PROTOCOL_SPECIFIC(p1722Hdr, 2);
+	//TODO://This is hardcoded for 48k 32 bit 32 bit samples
+	SET_AVBTP_PROTOCOL_SPECIFIC(p1722Hdr, pStreamConfig->num_channels);
 	SET_AVBTP_GATEWAY_INFO(p1722Hdr, 0x02000920);
 	SET_AVBTP_SUBTYPE(p1722Hdr, 2);
 #else
@@ -136,6 +136,18 @@ static void sample_copy_strided(int *src, unsigned int *dest, int stride, int n)
 		src += 1;
 		dest += stride;
 	}
+}
+static void sample_copy_strided_saf16(int *src, unsigned short *dest, int stride, int n) {
+    int i;
+    for (i = 0; i < n; i++) {
+        // 16 bit sample
+        unsigned short sample = (unsigned short ) (*src >> 8);  // reduce 24-bit to 16-bit sample
+
+        *dest = sample;
+        src += 1;
+        //simple_printf("0x%x\n",dest);
+        dest += stride;
+    }
 }
 
 #ifdef USE_XSCOPE
@@ -179,13 +191,13 @@ int avb1722_create_packet(unsigned char Buf0[],
 	// word align for fast copying.
 	unsigned char *Buf = &Buf0[2];
 
-#if AVB_1722_FORMAT_SAF
-	unsigned int *dest = (unsigned int *) &Buf[(AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE)];
+#if AVB_1722_FORMAT_SAF16
+	unsigned short *dest = (unsigned short *) &Buf[(AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE)];
 #else
 	unsigned int *dest = (unsigned int *) &Buf[(AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + AVB_CIP_HDR_SIZE)];
 #endif
+    int stride = num_channels;
 
-	int stride = num_channels;
 	unsigned ptp_ts = 0;
 	int dbc;
 	int pkt_data_length;
@@ -232,7 +244,11 @@ int avb1722_create_packet(unsigned char Buf0[],
 	num_audio_samples = samples_in_packet * num_channels;
 
 #ifdef AVB_1722_FORMAT_SAF
-	pkt_data_length = (num_audio_samples << 2);
+#ifdef AVB_1722_FORMAT_SAF16
+    pkt_data_length = (num_audio_samples << 1); // 16-bit samples
+#else
+    pkt_data_length = (num_audio_samples << 2);
+#endif
 #else
 	pkt_data_length = AVB_CIP_HDR_SIZE + (num_audio_samples << 2);
 #endif
@@ -260,16 +276,23 @@ int avb1722_create_packet(unsigned char Buf0[],
 		if (stream_info->samples_left_in_fifo_packet < samples_in_packet) {
 			// Not enough samples left in fifo packet to fill the 1722 packet
 			// therefore pull out remaining samples and get the next packet
-#ifdef USE_XSCOPE_PROBES
-		    //xscope_probe(21); // start
+#ifdef XSCOPE_AVB_TALKER_PULL_FROM_FIFO_DURATION
+		    xscope_probe(14); // start
 #endif
 			for (i = 0; i < num_channels; i++) {
 				int *src = media_input_fifo_get_ptr(map[i]);
-				sample_copy_strided(src, dest, stride, stream_info->samples_left_in_fifo_packet);
+
+#ifdef AVB_1722_FORMAT_SAF16
+				sample_copy_strided_saf16(src, dest, stride, stream_info->samples_left_in_fifo_packet);
+#else
+                sample_copy_strided(src, dest, stride, stream_info->samples_left_in_fifo_packet);
+#endif
 				media_input_fifo_release_packet(map[i]);
 				src = (int *) media_input_fifo_get_packet(map[i], &presentationTime, &(stream_info->dbc_at_start_of_last_fifo_packet));
 				media_input_fifo_set_ptr(map[i], src);
+
 				dest += 1;
+
 #ifdef AVB_TALKER_DEBUG_LOGIC
 			   if(i>0 && presentationTime!=prev_chan_presentationTime) {
 #ifdef PRINT
@@ -287,8 +310,8 @@ int avb1722_create_packet(unsigned char Buf0[],
 			dest += (stream_info->samples_left_in_fifo_packet - 1) * num_channels;
 			samples_in_packet -= stream_info->samples_left_in_fifo_packet;
 			stream_info->samples_left_in_fifo_packet = samples_per_fifo_packet;
-#ifdef USE_XSCOPE_PROBES
-			//xscope_probe(21);
+#ifdef XSCOPE_AVB_TALKER_PULL_FROM_FIFO_DURATION
+			xscope_probe(14);
 #endif
 #ifdef AVB_TALKER_DEBUG_LOGIC
 			if((stream_id0 & 0xF)==0) { // only for stream 0
@@ -316,8 +339,13 @@ int avb1722_create_packet(unsigned char Buf0[],
 
 	for (i = 0; i < num_channels; i++) {
 		int *src = media_input_fifo_get_ptr(map[i]);
+#ifdef AVB_1722_FORMAT_SAF16
+        sample_copy_strided_saf16(src, dest, stride, samples_in_packet);
+#else
 		sample_copy_strided(src, dest, stride, samples_in_packet);
-		dest += 1;
+#endif
+		dest += 1; // interleave samples from different channels.
+		// E.g. first 8 samples in 1722 buffer are first samples of all 8 channels.
 		media_input_fifo_set_ptr(map[i], src + samples_in_packet);
 	}
 
@@ -336,11 +364,11 @@ int avb1722_create_packet(unsigned char Buf0[],
 #ifdef USE_XSCOPE
 			if((stream_id0 & 0xF)==0) { // only for stream 0
 				if(prev_valid) {
-				    // trace only for stream 0
-					//xscope_probe_data(15, (int) (ptp_ts - prev_ptp_ts));
-#ifdef USE_XSCOPE_PROBES
-					xscope_probe_data(16, (int) (presentationTime - prev_presentationTime));
-					xscope_probe_data(17, (unsigned) (presentationTime));
+#ifdef XSCOPE_AVB_TALKER_CREATE_PACKET
+                    // trace only for stream 0
+                    xscope_probe_data(9, (int) (ptp_ts - prev_ptp_ts));
+					xscope_probe_data(10, (int) (presentationTime - prev_presentationTime));
+					xscope_probe_data(11, (unsigned) (presentationTime));
 #endif
 
 #ifdef AVB_TALKER_DEBUG_LOGIC
@@ -376,7 +404,9 @@ int avb1722_create_packet(unsigned char Buf0[],
     stream_info->last_transmit_time = time;
 #endif
 	stream_info->transmit_ok = 0;
+
 	stream_info->sequence_number++;
+
 	return (AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + pkt_data_length);
 }
 
