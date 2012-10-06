@@ -31,7 +31,6 @@
 #define AVB_NUM_SDATA_IN 0
 
 /* Media configuration */
-#define AVB_1722_FORMAT_61883_6
 #define AVB_NUM_MEDIA_INPUTS 0
 #define AVB_NUM_MEDIA_UNITS 2
 
@@ -90,6 +89,10 @@
 #define MASTER_TO_WORDCLOCK_RATIO TDM_NUM_CHANNELS*CLOCKS_PER_CHANNEL
 #define AVB_NUM_SDATA_OUT (AVB_NUM_MEDIA_OUTPUTS+(TDM_NUM_CHANNELS-1))/TDM_NUM_CHANNELS
 #endif
+
+//#ifdef AVB_1722_FORMAT_SAF16
+//#define AVB_1722_FORMAT_SAF  // SAF16 intersects wtih SAF
+//#endif
 
 //==========================================================================================
 // Checks

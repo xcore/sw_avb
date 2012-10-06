@@ -13,7 +13,7 @@ APP_NAME =
 # global debug switches
 #
 XSCOPE = 1
-
+VERBOSE= 1
 
 # Settings derived from configuration names
 #
@@ -41,12 +41,25 @@ ifneq (,$(findstring TDM,$(CONFIG)))
 AUDIO_INTERFACE = tdm_multi  # one of i2s, tdm, tdm_multi
 endif
 
+# if config name contains SAF, use  the Simple Audio Format
+ifneq (,$(findstring SAF16,$(CONFIG))) 
+AUDIO_FORMAT = SAF 
+#else ifneq (,$(findstring SAF,$(CONFIG))) 
+#AUDIO_FORMAT = SAF
+endif
+
+
+
 ###########################################################################
 # Default settings
 ###########################################################################
 
 ifndef AUDIO_INTERFACE
 AUDIO_INTERFACE = i2s
+endif
+
+ifndef AUDIO_FORMAT
+AUDIO_FORMAT = 61883_6
 endif
 
 
@@ -56,6 +69,7 @@ endif
 
 XCC_FLAGS = -O3 -save-temps -g -report -Xmapper --map -Xmapper MAPFILE -lxscope
 XCC_FLAGS += -DAVB_AUDIO_IF_$(AUDIO_INTERFACE)
+XCC_FLAGS += -DAVB_1722_FORMAT_$(AUDIO_FORMAT)
 #debug
 XCC_FLAGS += -DAVB_1722_RECORD_ERRORS
 #XCC_FLAGS += -fllvm
@@ -78,8 +92,15 @@ XCC_FLAGS_1l2s16ch += -DAVB_NUM_LISTENER_UNITS=1 -DAVB_NUM_SINKS=2 -DAVB_NUM_MED
 XCC_FLAGS_1l1s16ch = $(XCC_FLAGS) -DAVB_MAX_AUDIO_SAMPLE_RATE=48000
 XCC_FLAGS_1l1s16ch += -DAVB_NUM_LISTENER_UNITS=1 -DAVB_NUM_SINKS=1 -DAVB_NUM_MEDIA_OUTPUTS=16
 
+XCC_FLAGS_1l1s16ch_SAF16 = $(XCC_FLAGS) -DAVB_MAX_AUDIO_SAMPLE_RATE=48000 -DAVB_1722_FORMAT_SAF16
+XCC_FLAGS_1l1s16ch_SAF16 += -DAVB_NUM_LISTENER_UNITS=1 -DAVB_NUM_SINKS=1 -DAVB_NUM_MEDIA_OUTPUTS=16
+
 XCC_FLAGS_2l2s16ch = $(XCC_FLAGS) -DAVB_MAX_AUDIO_SAMPLE_RATE=48000
 XCC_FLAGS_2l2s16ch += -DAVB_NUM_LISTENER_UNITS=2 -DAVB_NUM_SINKS=2 -DAVB_NUM_MEDIA_OUTPUTS=16
+
+#TODO: Debug why streams are not found
+XCC_FLAGS_2l2s16ch_SAF = $(XCC_FLAGS) -DAVB_MAX_AUDIO_SAMPLE_RATE=48000
+XCC_FLAGS_2l2s16ch_SAF += -DAVB_NUM_LISTENER_UNITS=2 -DAVB_NUM_SINKS=2 -DAVB_NUM_MEDIA_OUTPUTS=16
 
 XCC_FLAGS_2l2s16ch_TDM = $(XCC_FLAGS) -DAVB_MAX_AUDIO_SAMPLE_RATE=48000
 XCC_FLAGS_2l2s16ch_TDM += -DAVB_NUM_LISTENER_UNITS=2 -DAVB_NUM_SINKS=2 -DAVB_NUM_MEDIA_OUTPUTS=16
