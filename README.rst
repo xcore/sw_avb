@@ -13,7 +13,7 @@ Key Features
 
 * 1722 Packet listener and talker
 * 1722 MAAP multicast reservation protocol
-* MRP,MMRP,MVRP,SRP 802.1 protocols
+* MRP, MMRP, MVRP, SRP 802.1 protocols
 * PTP server and protocol
 * Audio interface for I2S and TDM
 * Clock recovery and interface to PLL clock source
