@@ -23,7 +23,7 @@ XCC_FLAGS = -O3 -save-temps -g -report -Xmapper --map -Xmapper MAPFILE -lxscope
 # The USED_MODULES variable lists other module used by the application. 
 
 USED_MODULES = module_avb_1722 module_avb_1722_maap module_avb_srp module_avb_media_clock module_avb_audio module_random
-USED_MODULES += module_avb module_avb_util module_gptp module_ethernet module_locks module_i2c_simple module_avb_1722_1
+USED_MODULES += module_avb module_avb_util module_gptp module_ethernet module_ethernet_board_support module_i2c_simple module_avb_1722_1
 
 # This uses the AVB Ethernet filter
 USE_AVB_MAC_CUSTOM_FILTER=1

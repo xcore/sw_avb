@@ -11,6 +11,7 @@
 #include "audio_clock_CS2300CP.h"
 #include "simple_printf.h"
 #include "media_fifo.h"
+#include "ethernet_board_support.h"
 
 // This is the number of master clocks in a word clock
 #define MASTER_TO_WORDCLOCK_RATIO 512
@@ -40,7 +41,15 @@ void ptp_server_and_gpio(chanend c_rx, chanend c_tx, chanend ptp_link[],
         int num_ptp, enum ptp_server_type server_type, chanend c);
 
 //***** Ethernet Configuration ****
-avb_ethernet_ports_t avb_ethernet_ports = AVB_ETHERNET_DEFAULT_PORTS_INIT;
+// Here are the port definitions required by ethernet
+// The intializers are taken from the ethernet_board_support.h header for
+// XMOS dev boards. If you are using a different board you will need to
+// supply explicit port structure intializers for these values
+avb_ethernet_ports_t avb_ethernet_ports =
+  {OTP_PORTS_INITIALIZER,
+   ETHERNET_DEFAULT_SMI_INIT,
+   ETHERNET_DEFAULT_MII_INIT_full,
+   ETHERNET_DEFAULT_RESET_INTERFACE_INIT};
 
 //***** AVB audio ports ****
 on stdcore[1]: struct r_i2c r_i2c = { PORT_I2C_SCL, PORT_I2C_SDA };
