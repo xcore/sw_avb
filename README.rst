@@ -22,15 +22,12 @@ Key Features
 Firmware Overview
 =================
 
-This is an implementation of the AVB transport stream protocol carrying audio data. It includes a PTP time
-server to provide a stable wallclock reference and clock recovery to synchronize listener audio to talker audio
-codecs.  It also includes implementations of the Stream Reservation Protocol for conveying AVB stream reservation
-information through 802.1 network infrastructure.
+This firmware is a reference endpoint implementation of Audio Video Bridging protocols for XMOS silicon. It includes a PTP time
+server to provide a stable wallclock reference and clock recovery to synchronise listener audio to talker audio
+codecs. The Stream Reservation Protocol is used to reserve bandwidth through 802.1 network infrastructure.
 
 Known Issues
 ============
-
-* The listener does not respond to the withdrawal of a talker advertise message
 
 Support
 =======
