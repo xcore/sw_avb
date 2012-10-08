@@ -44,6 +44,7 @@ Required software (dependencies)
 * sc_xtcp git\@github.com:xcore/sc_xtcp.git
 * sc_util git\@github.com:xcore/sc_util.git
 * sc_i2c git\@github.com:xcore/sc_i2c.git
+* sc_otp git\@github.com:xcore/sc_otp.git
 
 To clone (read only):
 
@@ -54,4 +55,4 @@ To clone (read only):
   git clone git://github.com/xcore/sc_xtcp.git
   git clone git://github.com/xcore/sc_util.git
   git clone git://github.com/xcore/sc_i2c.git
-
+  git clone git://github.com/xcore/sc_otp.git
