@@ -11,13 +11,13 @@ AVB Software Stack
 Key Features
 ============
 
-* 1722 Packet listener and talker
-* 1722 MAAP multicast reservation protocol
-* MRP, MMRP, MVRP, SRP 802.1 protocols
-* PTP server and protocol
+* 1722 Talker and Listener (simultaneous) support
+* 1722 MAAP support for Talkers
+* 802.1Q MRP, MMRP, MVRP, SRP protocols
+* gPTP server and protocol
 * Audio interface for I2S and TDM
-* Clock recovery and interface to PLL clock source
-* Support for 1722.1 ADP, AECP (AEM) and ACMP Draft 21
+* Media clock recovery and interface to PLL clock source
+* Support for 1722.1 AVDECC: ADP, AECP (AEM) and ACMP Draft 21
 
 Firmware Overview
 =================
