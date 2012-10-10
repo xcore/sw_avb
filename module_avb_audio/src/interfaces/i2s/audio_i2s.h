@@ -11,10 +11,11 @@
 #include <xclib.h>
 #ifdef __XC__
 
-// By defining this, all channels are filled with an increasing counter
+// By enabling this, all channels are filled with an increasing counter
 // value instead of the samples themselves.  Useful to check the channel
 // synchronization using a network monitor
-//#define SAMPLE_COUNTER_TEST
+
+#define SAMPLE_COUNTER_TEST 0
 
 #define I2S_SINE_TABLE_SIZE 100
 
@@ -90,9 +91,9 @@ inline void i2s_master(const clock mclk,
 {
   int mclk_to_bclk_ratio = master_to_word_clock_ratio / 64;
   unsigned int bclk_val;
-  unsigned int lrclk_val = 0;
+  unsigned int lrclk_val = 0xFFFFFFFF;
 
-#ifdef SAMPLE_COUNTER_TEST
+#if SAMPLE_COUNTER_TEST
   unsigned int sample_counter=0;
 #endif
 
@@ -113,20 +114,20 @@ inline void i2s_master(const clock mclk,
   // length of the bitclock w.r.t the master clock.
   // In every case you will end up with 32 bit clocks per word.
   switch (mclk_to_bclk_ratio)
-    {
-    case 2:
-      bclk_val = 0xaaaaaaaa; // 10
-      break;
-    case 4: 
-      bclk_val = 0xcccccccc; // 1100
-      break;
-    case 8:
-      bclk_val = 0xf0f0f0f0; // 11110000
-      break;
-    default:
-      // error - unknown master clock/word clock ratio
-      return;
-    }
+  {
+  case 2:
+    bclk_val = 0xaaaaaaaa; // 10
+    break;
+  case 4: 
+    bclk_val = 0xcccccccc; // 1100
+    break;
+  case 8:
+    bclk_val = 0xf0f0f0f0; // 11110000
+    break;
+  default:
+    // error - unknown master clock/word clock ratio
+    return;
+  }
 
   i2s_master_configure_ports(mclk,
                              bclk,
@@ -150,7 +151,7 @@ inline void i2s_master(const clock mclk,
   for (int i=0;i<num_in>>1;i++) 
     asm ("setpt res[%0], %1" : : "r"(p_din[i]), "r"(63));
 
-  p_lrclk @ 31 <: 0;
+  p_lrclk @ 31 <: 0xFFFFFFFF;
 
   for (int j=0;j<2;j++) {
     for (int i=0;i<mclk_to_bclk_ratio;i++)  {
@@ -193,34 +194,34 @@ inline void i2s_master(const clock mclk,
     	lrclk_val = ~lrclk_val;
 
 #pragma loop unroll    
-      for (int k=0;k<mclk_to_bclk_ratio;k++)  {
+      for (int k=0;k<mclk_to_bclk_ratio;k++) {
 
 #pragma xta endpoint "i2s_master_bclk_output"
         p_bclk <: bclk_val;
 
         if (k < num_in>>1) {
-#ifdef SAMPLE_COUNTER_TEST
+#if SAMPLE_COUNTER_TEST
         	if (active_fifos & (1 << (j+k*2))) {
-			  media_input_fifo_push_sample(input_fifos[j+k*2], sample_counter, timestamp);
+            media_input_fifo_push_sample(input_fifos[j+k*2], sample_counter, timestamp);
         	} else {
         	  media_input_fifo_flush(input_fifos[j+k*2]);
         	}
 #else
-            unsigned int sample_in;
+          unsigned int sample_in;
 #pragma xta endpoint "i2s_master_sample_input"
-            asm("in %0, res[%1]":"=r"(sample_in):"r"(p_din[k]));
+          asm volatile("in %0, res[%1]":"=r"(sample_in):"r"(p_din[k]));
 
-            sample_in = (bitrev(sample_in) >> 8);
+          sample_in = (bitrev(sample_in) >> 8);
 #ifdef I2S_SYNTH_FROM
-            if (k >= I2S_SYNTH_FROM) {
-              sample_in = i2s_sine[sine_count[k]>>8];
-            }
+          if (k >= I2S_SYNTH_FROM) {
+            sample_in = i2s_sine[sine_count[k]>>8];
+          }
 #endif
-            if (active_fifos & (1 << (j+k*2))) {
-			  media_input_fifo_push_sample(input_fifos[j+k*2], sample_in, timestamp);
-            } else {
-              media_input_fifo_flush(input_fifos[j+k*2]);
-            }
+          if (active_fifos & (1 << (j+k*2))) {
+            media_input_fifo_push_sample(input_fifos[j+k*2], sample_in, timestamp);
+          } else {
+            media_input_fifo_flush(input_fifos[j+k*2]);
+          }
 #endif
         }
         
@@ -231,20 +232,16 @@ inline void i2s_master(const clock mclk,
 #pragma xta endpoint "i2s_master_sample_output"
           p_dout[k] <: sample_out;
         }
-        
-      }
-    }
+      } // end: for (int k=0;k<mclk_to_bclk_ratio;k++)
+    } // end: for (int j=0;j<2;j++)
 
-#ifdef SAMPLE_COUNTER_TEST
+#if SAMPLE_COUNTER_TEST
     sample_counter++;
 #endif
 
     media_input_fifo_update_enable_ind_state(active_fifos, 0xFFFFFFFF);
   }
 }
-
-
-
 
 #endif
 
