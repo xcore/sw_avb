@@ -119,16 +119,12 @@ void media_input_fifo_push_sample(media_input_fifo_t media_input_fifo0,
     wrIndex += 3;
     media_input_fifo->wrIndex = (int) wrIndex;
 
-    // xscope_probe_data(0, ts);
-
     sampleCountInPacket = 3;
   }
   else {
     wrIndex = (int *) media_input_fifo->wrIndex;
     *wrIndex = sample;
     wrIndex++;
-
-    // if (sample != 0) xscope_probe_data(0, sample);
 
     sampleCountInPacket++;
   }
