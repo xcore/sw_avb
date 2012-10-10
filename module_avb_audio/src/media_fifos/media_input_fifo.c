@@ -111,7 +111,7 @@ void media_input_fifo_push_sample(media_input_fifo_t media_input_fifo0,
 
     spaceLeft &= (MEDIA_INPUT_FIFO_SAMPLE_FIFO_SIZE-1);
     
-    if ((!spaceLeft && (media_input_fifo->ptr != 0)) && (spaceLeft < packetSize)) return;
+    if (spaceLeft && (spaceLeft < packetSize)) return;
 
     wrIndex[0] = ts;
     wrIndex[1] = media_input_fifo->dbc;
@@ -119,12 +119,16 @@ void media_input_fifo_push_sample(media_input_fifo_t media_input_fifo0,
     wrIndex += 3;
     media_input_fifo->wrIndex = (int) wrIndex;
 
+    // xscope_probe_data(0, ts);
+
     sampleCountInPacket = 3;
   }
   else {
     wrIndex = (int *) media_input_fifo->wrIndex;
     *wrIndex = sample;
     wrIndex++;
+
+    // if (sample != 0) xscope_probe_data(0, sample);
 
     sampleCountInPacket++;
   }
