@@ -18,7 +18,7 @@ APP_NAME =
 # If the variable XCC_MAP_FLAGS is set it overrides the flags passed to 
 # xcc for the final link (mapping) stage.
 
-XCC_FLAGS = -O3 -save-temps -g -report -Xmapper --map -Xmapper MAPFILE -fxscope -falways-inline
+XCC_FLAGS = -O2 -save-temps -g -report -Xmapper --map -Xmapper MAPFILE -fxscope -falways-inline
 
 # The USED_MODULES variable lists other module used by the application. 
 

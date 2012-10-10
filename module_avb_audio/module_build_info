@@ -19,6 +19,6 @@ SOURCE_DIRS += $(foreach x, $(USED_AUDIO_INTERFACES), src/interfaces/$x)
 INCLUDE_DIRS += $(foreach x, $(USED_CODECS), src/codecs/$x)
 INCLUDE_DIRS += $(foreach x, $(USED_AUDIO_INTERFACES), src/interfaces/$x)
 
-MODULE_XCC_FLAGS = $(XCC_FLAGS) -g -O3
+MODULE_XCC_FLAGS = $(XCC_FLAGS) -g -O2
 
 XCC_FLAGS_media_output_fifo.c = $(XCC_FLAGS) -g 
