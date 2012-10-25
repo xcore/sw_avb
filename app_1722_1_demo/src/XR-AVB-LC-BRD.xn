@@ -8,14 +8,14 @@ xsi:schemaLocation="http://www.xmos.com http://www.xmos.com">
   <!-- File Version 1V1 -->
 
   <Declarations>
-    <Declaration>core stdcore[2]</Declaration>
+    <Declaration>core tile[2]</Declaration>
   </Declarations>
 
   <Packages>
     <Package ID="0" Type="XS1-L2A-QF124">
       <Nodes>
         <Node Id="0" InPackageId="0" Type="XS1-L1A" Oscillator="25Mhz" SystemFrequency="500MHz">
-          <Core Number="0" Reference="stdcore[0]">
+          <Core Number="0" Reference="tile[0]">
             <!-- SPI FLASH -->
             <Port Location="XS1_PORT_1A" Name="PORT_SPI_MISO"/>
             <Port Location="XS1_PORT_1B" Name="PORT_SPI_SS"/>
@@ -50,7 +50,7 @@ xsi:schemaLocation="http://www.xmos.com http://www.xmos.com">
           </Boot>
         </Node>
         <Node Id="1" InPackageId="1" Type="XS1-L1A" Oscillator="25Mhz" SystemFrequency="500MHz">
-          <Core Number="0" Reference="stdcore[1]">
+          <Core Number="0" Reference="tile[1]">
             <!-- ETHERNET -->
             <Port Location="XS1_PORT_1A" Name="PORT_ETH_RXCLK"/>
             <Port Location="XS1_PORT_1B" Name="PORT_ETH_RXER"/>

@@ -10,7 +10,7 @@
 #define MAX_ETHERNET_CLIENTS   5
 #define MII_RX_BUFSIZE_HIGH_PRIORITY (700)    
 #define MII_RX_BUFSIZE_LOW_PRIORITY (300)
-#define MII_TX_BUFSIZE_HIGH_PRIORITY (300)    
+#define MII_TX_BUFSIZE_HIGH_PRIORITY (300)
 #define MII_TX_BUFSIZE_LOW_PRIORITY (200)
 #define ETHERNET_MAX_TX_HP_PACKET_SIZE (300)
 
@@ -24,16 +24,17 @@
 
 /* Talker configuration */
 #define AVB_NUM_SOURCES 1
-#define AVB_NUM_TALKER_UNITS 1 
+#define AVB_NUM_TALKER_UNITS 1
 
 /* Media configuration */
-#define AVB_1722_FORMAT_61883_6
+#define AVB_1722_FORMAT_61883_6 1
 #define AVB_NUM_MEDIA_OUTPUTS 8
 #define AVB_NUM_MEDIA_INPUTS 8
 #define AVB_NUM_MEDIA_UNITS 2
 
 /* Media clock configuration */
 #define AVB_NUM_MEDIA_CLOCKS 1
+#define I2C_BIT_TIME 1100
 
 /* Add synths from channels 3/4 upwards in I2S for this demo */
 #define I2S_SYNTH_FROM 1

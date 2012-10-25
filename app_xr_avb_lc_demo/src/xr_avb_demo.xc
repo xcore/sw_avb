@@ -53,21 +53,21 @@ void ptp_server_and_gpio(chanend c_rx, chanend c_tx, chanend ptp_link[],
 // XMOS dev boards. If you are using a different board you will need to
 // supply explicit port structure intializers for these values
 avb_ethernet_ports_t avb_ethernet_ports =
-  {OTP_PORTS_INITIALIZER,
+  {on ETHERNET_DEFAULT_TILE: OTP_PORTS_INITIALIZER,
    ETHERNET_DEFAULT_SMI_INIT,
    ETHERNET_DEFAULT_MII_INIT_full,
    ETHERNET_DEFAULT_RESET_INTERFACE_INIT};
 
 //***** AVB audio ports ****
-on stdcore[1]: struct r_i2c r_i2c = { PORT_I2C_SCL, PORT_I2C_SDA };
+on tile[1]: struct r_i2c r_i2c = { PORT_I2C_SCL, PORT_I2C_SDA };
 
-on stdcore[0]: out port p_fs = PORT_SYNC_OUT;
-on stdcore[0]: clock b_mclk = XS1_CLKBLK_3;
-on stdcore[0]: clock b_bclk = XS1_CLKBLK_4;
-on stdcore[0]: in port p_aud_mclk = PORT_MCLK;
-on stdcore[0]: buffered out port:32 p_aud_bclk = PORT_SCLK;
-on stdcore[0]: out buffered port:32 p_aud_lrclk = PORT_LRCLK;
-on stdcore[0]: out buffered port:32 p_aud_dout[4] =
+on tile[0]: out port p_fs = PORT_SYNC_OUT;
+on tile[0]: clock b_mclk = XS1_CLKBLK_3;
+on tile[0]: clock b_bclk = XS1_CLKBLK_4;
+on tile[0]: in port p_aud_mclk = PORT_MCLK;
+on tile[0]: buffered out port:32 p_aud_bclk = PORT_SCLK;
+on tile[0]: out buffered port:32 p_aud_lrclk = PORT_LRCLK;
+on tile[0]: out buffered port:32 p_aud_dout[4] =
 {
         PORT_SDATA_OUT0,
         PORT_SDATA_OUT1,
@@ -75,7 +75,7 @@ on stdcore[0]: out buffered port:32 p_aud_dout[4] =
         PORT_SDATA_OUT3
 };
 
-on stdcore[0]: in buffered port:32 p_aud_din[4] =
+on tile[0]: in buffered port:32 p_aud_din[4] =
 {
         PORT_SDATA_IN0,
         PORT_SDATA_IN1,
@@ -83,7 +83,7 @@ on stdcore[0]: in buffered port:32 p_aud_din[4] =
         PORT_SDATA_IN3
 };
 
-on stdcore[0]: port p_uart_tx = PORT_UART_TX;
+on tile[0]: port p_uart_tx = PORT_UART_TX;
 
 media_input_fifo_data_t ififo_data[AVB_NUM_MEDIA_INPUTS];
 media_input_fifo_t ififos[AVB_NUM_MEDIA_INPUTS];
@@ -132,18 +132,18 @@ int main(void)
     par
     {
         // AVB - Ethernet
-        on stdcore[1]:  avb_ethernet_server(avb_ethernet_ports,
+        on tile[1]:  avb_ethernet_server(avb_ethernet_ports,
                                             c_mac_rx, 4,
                                             c_mac_tx, 4);
 
         // TCP/IP stack
-        on stdcore[1]:  xtcp_server_uip(c_mac_rx[1],
+        on tile[1]:  xtcp_server_uip(c_mac_rx[1],
                                         c_mac_tx[2],
                                         c_xtcp, 1,
                                         null);
 
         // AVB - PTP
-        on stdcore[1]:
+        on tile[1]:
         {
             // We need to initiate the PLL from core 1, so do it here before
             // launching  the main function of the thread
@@ -154,7 +154,7 @@ int main(void)
                     c_gpio_ctl);
         }
 
-        on stdcore[1]:
+        on tile[1]:
         {
             media_clock_server(c_media_clock_ctl,
                     c_ptp[1],
@@ -165,7 +165,7 @@ int main(void)
         }
 
         // AVB - Audio
-        on stdcore[0]: {
+        on tile[0]: {
             init_media_input_fifos(ififos, ififo_data, AVB_NUM_MEDIA_INPUTS);
             configure_clock_src(b_mclk, p_aud_mclk);
             start_clock(b_mclk);
@@ -190,19 +190,19 @@ int main(void)
         }
 
         // AVB Talker - must be on the same core as the audio interface
-        on stdcore[0]: avb_1722_talker(c_ptp[0],
+        on tile[0]: avb_1722_talker(c_ptp[0],
                 c_mac_tx[1],
                 c_talker_ctl[0],
                 AVB_NUM_SOURCES);
 
         // AVB Listener
-        on stdcore[0]: avb_1722_listener(c_mac_rx[3],
+        on tile[0]: avb_1722_listener(c_mac_rx[3],
                 c_buf_ctl[0],
                 null,
                 c_listener_ctl[0],
                 AVB_NUM_SINKS);
 
-        on stdcore[0]:
+        on tile[0]:
         {   
             init_media_output_fifos(ofifos, ofifo_data, AVB_NUM_MEDIA_OUTPUTS);
             media_output_fifo_to_xc_channel_split_lr(c_media_ctl[1],
@@ -213,7 +213,7 @@ int main(void)
         }
 
         // Application threads
-        on stdcore[0]:
+        on tile[0]:
         {
             // First initialize avb higher level protocols
             avb_init(c_media_ctl, c_listener_ctl, c_talker_ctl, c_media_clock_ctl, c_mac_rx[2], c_mac_tx[3], c_ptp[2]);
