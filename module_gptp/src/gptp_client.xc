@@ -54,10 +54,10 @@ void ptp_request_time_info_mod64(chanend c)
 }
 
 
-void ptp_get_requested_time_info_mod64(chanend c, 
-                                       ptp_time_info_mod64 &info)
+void ptp_get_requested_time_info_mod64_use_timer(chanend c,
+                                                 ptp_time_info_mod64 &info,
+                                                 timer tmr)
 {
-  timer tmr;
   signed thiscore_now,othercore_now;
   unsigned server_core_id;
   slave {
@@ -78,6 +78,13 @@ void ptp_get_requested_time_info_mod64(chanend c,
   }
 }
 
+
+void ptp_get_requested_time_info_mod64(chanend c,
+                                       ptp_time_info_mod64 &info)
+{
+  timer tmr;
+  ptp_get_requested_time_info_mod64_use_timer(c, info, tmr);
+}
 
 void ptp_get_time_info_mod64(chanend c, 
                              ptp_time_info_mod64  &info)

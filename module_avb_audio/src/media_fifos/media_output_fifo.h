@@ -234,7 +234,8 @@ void media_output_fifo_set_ptp_timestamp(media_output_fifo_t s0,
 void
 media_output_fifo_handle_buf_ctl(chanend buf_ctl, 
                                  int stream_num,
-                                 REFERENCE_PARAM(int, buf_ctl_notified));
+                                 REFERENCE_PARAM(int, buf_ctl_notified),
+                                 timer tmr);
 
 /**
  *  \brief Set the volume control multiplier for the media FIFO

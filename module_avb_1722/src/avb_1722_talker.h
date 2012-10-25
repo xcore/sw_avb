@@ -116,5 +116,28 @@ void AVB1722_AVBTP_HeaderGen(unsigned char Buf[],
 		int sequence_number,
 		const unsigned stream_id0);
 
+// Max. packet size for AVB 1722 talker
+#ifdef AVB_1722_FORMAT_SAF
+#define MAX_PKT_BUF_SIZE_TALKER (AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + TALKER_NUM_AUDIO_SAMPLES_PER_CHANNEL_PER_AVB1722_PKT * AVB_MAX_CHANNELS_PER_STREAM * 4 + 4)
+#endif
+
+#ifdef AVB_1722_FORMAT_61883_4
+#define MAX_PKT_BUF_SIZE_TALKER (AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + AVB_CIP_HDR_SIZE + 192*MAX_TS_PACKETS_PER_1722 + 4)
+#endif
+
+#ifdef AVB_1722_FORMAT_61883_6
+#define MAX_PKT_BUF_SIZE_TALKER (AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + AVB_CIP_HDR_SIZE + TALKER_NUM_AUDIO_SAMPLES_PER_CHANNEL_PER_AVB1722_PKT * AVB_MAX_CHANNELS_PER_STREAM * 4 + 4)
+#endif
+
+typedef struct avb_1722_talker_state_s {
+  unsigned int TxBuf[(MAX_PKT_BUF_SIZE_TALKER + 3) / 4];
+  avb1722_Talker_StreamConfig_t
+    talker_streams[AVB_MAX_STREAMS_PER_TALKER_UNIT];
+  int max_active_avb_stream ;
+  int cur_avb_stream;
+  unsigned char mac_addr[6];
+  int vlan;
+} avb_1722_talker_state_t;
+
 
 #endif

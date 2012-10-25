@@ -160,6 +160,13 @@ void ptp_request_time_info_mod64(chanend ptp_server);
 void ptp_get_requested_time_info_mod64(chanend ptp_server, 
                                         REFERENCE_PARAM(ptp_time_info_mod64, info));
 
+#ifdef __XC__
+#pragma select handler
+#endif
+void ptp_get_requested_time_info_mod64_use_timer(chanend c,
+                                                 REFERENCE_PARAM(ptp_time_info_mod64, info),
+                                                 timer tmr);
+
 
 /** Convert a timestamp from the local XCore timer to PTP time.
  *

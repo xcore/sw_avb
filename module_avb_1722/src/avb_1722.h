@@ -48,6 +48,17 @@ void avb_1722_listener(chanend ethernet_rx_svr,
                        int num_streams);
 
 
+
+void avb_1722_talkerlistener(chanend c_ptp,
+                             chanend c_mac_rx,
+                             chanend c_mac_tx,
+                             chanend c_listener_ctl,
+                             chanend c_talker_ctl,
+                             chanend c_buf_ctl,
+                             int num_listener_streams,
+                             int num_talker_streams);
+
+
 #endif
 
 #endif
