@@ -30,7 +30,7 @@
 #define AVB_1722_FORMAT_61883_6 1
 #define AVB_NUM_MEDIA_OUTPUTS 8
 #define AVB_NUM_MEDIA_INPUTS 8
-#define AVB_NUM_MEDIA_UNITS 2
+#define AVB_NUM_MEDIA_UNITS 1
 
 /* Media clock configuration */
 #define AVB_NUM_MEDIA_CLOCKS 1

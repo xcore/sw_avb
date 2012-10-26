@@ -39,35 +39,35 @@ unsigned int i2s_sine[I2S_SINE_TABLE_SIZE] =
 };
 
 
-void i2s_master_configure_ports(const clock mclk,
-                                clock bclk,
-                                out buffered port:32 p_bclk,
-                                out buffered port:32 p_lrclk,
+void i2s_master_configure_ports(i2s_ports_t &i2s,
                                 out buffered port:32 p_dout[],
                                 int num_out,
                                 in buffered port:32 p_din[],             
                                 int num_in)
 {
-  configure_clock_src(bclk, p_bclk);
+  configure_clock_src(i2s.mclk, i2s.p_mclk);
+  start_clock(i2s.mclk);
 
-  configure_out_port_no_ready(p_bclk, mclk, 0);
-  start_port(p_bclk);
+  configure_clock_src(i2s.bclk, i2s.p_bclk);
+
+  configure_out_port_no_ready(i2s.p_bclk, i2s.mclk, 0);
+  start_port(i2s.p_bclk);
   
-  configure_out_port_no_ready(p_lrclk, bclk, 0);
-  start_port(p_lrclk);
+  configure_out_port_no_ready(i2s.p_lrclk, i2s.bclk, 0);
+  start_port(i2s.p_lrclk);
   
   for (int i=0;i<num_out;i++) {
-    configure_out_port_no_ready(p_dout[i], bclk, 0);
+    configure_out_port_no_ready(p_dout[i], i2s.bclk, 0);
     start_port(p_dout[i]);
   }
   
   for (int i=0;i<num_in;i++) {
-    configure_in_port_no_ready(p_din[i], bclk);
-    start_port(p_din[i]); 
+    configure_in_port_no_ready(p_din[i], i2s.bclk);
+    start_port(p_din[i]);
   }
   
-  clearbuf(p_lrclk);
-  clearbuf(p_bclk);
+  clearbuf(i2s.p_lrclk);
+  clearbuf(i2s.p_bclk);
 
   for (int i = 0; i < num_in; i++) {
     clearbuf(p_din[i]);
@@ -75,23 +75,33 @@ void i2s_master_configure_ports(const clock mclk,
   for (int i = 0; i < num_out; i++) {
     clearbuf(p_dout[i]);
   }  
-  start_clock(bclk);
+  start_clock(i2s.bclk);
   return;
 }
 
-extern inline void i2s_master(const clock mclk,
-                              clock bclk,
-                              out buffered port:32 p_bclk,
-                              out buffered port:32 p_lrclk,
-                              out buffered port:32 p_dout[],
-                              int num_out,
-                              in buffered port:32 p_din[],
-                              int num_in,
-                              int master_to_word_clock_ratio,
-                              streaming chanend ?c_listener,
-                              media_input_fifo_t ?input_fifos[],
-                              chanend media_ctl,
-                              int clk_ctl_index);
+extern inline void i2s_master_upto_8(const clock mclk,
+                                     clock bclk,
+                                     out buffered port:32 p_bclk,
+                                     out buffered port:32 p_lrclk,
+                                     out buffered port:32 p_dout[],
+                                     int num_out,
+                                     in buffered port:32 p_din[],
+                                     int num_in,
+                                     int master_to_word_clock_ratio,
+                                     streaming chanend ?c_listener,
+                                     media_input_fifo_t ?input_fifos[]);
+
+extern inline void i2s_master_upto_4(const clock mclk,
+                                     clock bclk,
+                                     out buffered port:32 p_bclk,
+                                     out buffered port:32 p_lrclk,
+                                     out buffered port:32 p_dout[],
+                                     int num_out,
+                                     in buffered port:32 p_din[],
+                                     int num_in,
+                                     int master_to_word_clock_ratio,
+                                     media_input_fifo_t ?input_fifos[],
+                                     media_output_fifo_t ?output_fifos[]);
 
 
 
