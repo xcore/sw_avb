@@ -61,7 +61,7 @@ avb_ethernet_ports_t avb_ethernet_ports =
 //***** AVB audio ports ****
 on tile[1]: struct r_i2c r_i2c = { PORT_I2C_SCL, PORT_I2C_SDA };
 
-on tile[0]: out port p_fs = PORT_SYNC_OUT;
+on tile[0]: out port p_fs[1] = { PORT_SYNC_OUT };
 
 on tile[0]: i2s_ports_t i2s_ports = {
   XS1_CLKBLK_3,
@@ -115,7 +115,6 @@ int main(void)
 
     // Media control
     chan c_media_ctl[AVB_NUM_MEDIA_UNITS];
-    chan c_clk_ctl[AVB_NUM_MEDIA_CLOCKS];
     chan c_media_clock_ctl;
 
 
@@ -151,22 +150,18 @@ int main(void)
                     c_gpio_ctl);
         }
 
-        on tile[1]:
+        on tile[0]:
         {
-            media_clock_server(c_media_clock_ctl,
-                    c_ptp[1],
-                    c_buf_ctl,
-                    AVB_NUM_LISTENER_UNITS,
-                    c_clk_ctl,
-                    AVB_NUM_MEDIA_CLOCKS);
+          media_clock_server(c_media_clock_ctl,
+                             c_ptp[1],
+                             c_buf_ctl,
+                             AVB_NUM_LISTENER_UNITS,
+                             p_fs);
         }
 
 
 
         // AVB - Audio
-
-        on tile[0] : audio_gen_CS2300CP_clock(p_fs, c_clk_ctl[0]);
-
         on tile[0]: {
           media_input_fifo_data_t ififo_data[AVB_NUM_MEDIA_INPUTS];
           media_input_fifo_t ififos[AVB_NUM_MEDIA_INPUTS];

@@ -12,6 +12,14 @@ typedef struct media_clock_t {
                             ///  fifo it should be derived from.
   int rate;                 ///<  The rate of the media clock in Hz
   unsigned int wordLength;
+  unsigned int divWordLength;
+  unsigned int wordTime;
+  unsigned int baseLength;
+  unsigned int lowBits;
+  unsigned int prevLowBits;
+  int count;
+  unsigned int next_event;
+  unsigned int bit;
 } media_clock_t;
 
 
@@ -28,12 +36,12 @@ typedef struct media_clock_t {
 // over the recovery period to allow a lock
 #define ACCEPTABLE_LOCKED_FILL_DEVIATION 20
 
-void init_media_clock_recovery(chanend ptp_svr,
+void init_media_clock_recovery(NULLABLE_RESOURCE(chanend,ptp_svr),
                                        int clock_info,
                                        unsigned int clk_time,
                                        unsigned int rate);
 
-unsigned int update_media_clock(chanend ptp_svr, 
+unsigned int update_media_clock(NULLABLE_RESOURCE(chanend,ptp_svr),
                                 int clock_index,
                                 REFERENCE_PARAM(const media_clock_t, mclock),
                                 unsigned int t2,
@@ -64,6 +72,7 @@ void clock_recovery_maintain_buffer(chanend buf_info,
 			         unsigned int *t);
 #endif
 
+void ptp_get_local_time_info_mod64(REFERENCE_PARAM(ptp_time_info_mod64,info));
 
 
 #endif
