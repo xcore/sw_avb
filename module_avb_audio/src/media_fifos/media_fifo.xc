@@ -9,7 +9,7 @@ void media_ctl_register(chanend media_ctl,
                         int clk_ctl_index)
 {
   unsigned core_id;
-  core_id = get_core_id();
+  core_id = get_local_tile_id();
   media_ctl <: core_id;
   media_ctl <: clk_ctl_index;
   media_ctl <: num_in;

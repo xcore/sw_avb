@@ -142,7 +142,7 @@ static void manage_buffer(buf_info_t &b,
     buf_ctl :> wrptr;
     buf_ctl :> server_core_id;
   }
-  if (server_core_id != get_core_id())
+  if (server_core_id != get_local_tile_id())
   {
 	  outgoing_timestamp_local = outgoing_timestamp_local - (othercore_now - thiscore_now);
   }
