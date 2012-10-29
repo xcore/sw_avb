@@ -13,6 +13,7 @@
 #include "avb_control_types.h"
 
 #define DEBUG_MEDIA_CLOCK
+#define PLL_OUTPUT_TIMING_CHECK 0
 
 #define STABLE_THRESHOLD 32
 #define LOCK_COUNT_THRESHOLD 400
@@ -301,7 +302,7 @@ static void do_media_clock_output(media_clock_t &clk,
 
 }
 
-static void update_media_clocks(chanend ptp_svr, int clk_time)
+static void update_media_clocks(chanend ?ptp_svr, int clk_time)
 {
   for (int i=0;i<AVB_NUM_MEDIA_CLOCKS;i++) {
     if (media_clocks[i].active) {
@@ -373,8 +374,14 @@ void media_clock_server(chanend media_clock_ctl,
       {
       case (int i=0;i<num_clks;i++)
         clk_timers[i] when timerafter(media_clocks[i].next_event) :> int now:
+#if PLL_OUTPUT_TIMING_CHECK
         if ((now - media_clocks[i].next_event) > media_clocks[i].baseLength) {
+          static int count = 0;
+          count++;
+          if (x==3)
+            printstrln("ERROR: failed to drive PLL freq signal in time");
         }
+#endif
         do_media_clock_output(media_clocks[i], p_fs[i]);
         break;
 

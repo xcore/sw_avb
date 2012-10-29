@@ -276,6 +276,7 @@ void avb_1722_talker(chanend c_ptp, chanend c_mac_tx,
           pending_timeinfo = 0;
           break;
 
+
           // Call the 1722 packet construction
         default:
           avb_1722_talker_send_packets(c_mac_tx, st, timeInfo, tmr);

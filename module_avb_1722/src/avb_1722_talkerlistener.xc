@@ -81,17 +81,23 @@ void avb_1722_talkerlistener(chanend c_ptp,
       #pragma ordered
       select
         {
+        case c_buf_ctl :> int stream_num:
+          media_output_fifo_handle_buf_ctl(c_buf_ctl,  stream_num,
+                                           listener_state.notified_buf_ctl,
+                                           tmr);
+          break;
+
+          // The PTP server has sent new time information
+        case ptp_get_requested_time_info_mod64_use_timer(                                                   c_ptp, timeInfo, tmr):
+          pending_timeinfo = 0;
+          break;
+
         case avb_1722_listener_handle_packet(c_mac_rx,
                                              c_buf_ctl,
                                              listener_state,
                                              timeInfo):
           break;
 
-        case c_buf_ctl :> int stream_num:
-          media_output_fifo_handle_buf_ctl(c_buf_ctl,  stream_num,
-                                           listener_state.notified_buf_ctl,
-                                           tmr);
-          break;
 
           // Periodically ask the PTP server for new time information
         case tmr when timerafter(t) :> t:
@@ -102,10 +108,6 @@ void avb_1722_talkerlistener(chanend c_ptp,
           t+=TIMEINFO_UPDATE_INTERVAL;
           break;
 
-          // The PTP server has sent new time information
-        case ptp_get_requested_time_info_mod64_use_timer(                                                   c_ptp, timeInfo, tmr):
-          pending_timeinfo = 0;
-          break;
 
           // Process commands from the AVB control/application thread
         case avb_1722_talker_handle_cmd(c_talker_ctl, talker_state): break;

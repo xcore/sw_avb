@@ -86,11 +86,14 @@ void ptp_get_requested_time_info_mod64(chanend c,
   ptp_get_requested_time_info_mod64_use_timer(c, info, tmr);
 }
 
-void ptp_get_time_info_mod64(chanend c, 
+
+void ptp_get_local_time_info_mod64(ptp_time_info_mod64 &info);
+
+void ptp_get_time_info_mod64(chanend ?c,
                              ptp_time_info_mod64  &info)
 {
   ptp_request_time_info_mod64(c);
-  ptp_get_requested_time_info_mod64(c, info);   
+  ptp_get_requested_time_info_mod64(c, info);
 }
 
 

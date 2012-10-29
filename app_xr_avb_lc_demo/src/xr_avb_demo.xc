@@ -41,10 +41,7 @@ out port p_mute_led_remote = PORT_SHARED_OUT; // mute, led remote;
 out port p_chan_leds = PORT_LEDS;
 in port p_buttons = PORT_SHARED_IN;
 
-void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl);
-
-void ptp_server_and_gpio(chanend c_rx, chanend c_tx, chanend ptp_link[],
-        int num_ptp, enum ptp_server_type server_type, chanend c);
+void demo(chanend tcp_svr, chanend c_rx, chanend c_tx);
 
 //***** Ethernet Configuration ****
 
@@ -70,7 +67,6 @@ on tile[0]: i2s_ports_t i2s_ports = {
   PORT_SCLK,
   PORT_LRCLK
 };
-
 
 on tile[0]: out buffered port:32 p_aud_dout[4] =
 {
@@ -106,7 +102,7 @@ int main(void)
     chan c_mac_rx[4];
 
     // PTP channels
-    chan c_ptp[3];
+    chan c_ptp[2];
 
     // AVB unit control
     chan c_listener_ctl[AVB_NUM_LISTENER_UNITS];
@@ -122,9 +118,6 @@ int main(void)
     // TCP/IP channels
     chan c_xtcp[1];
 
-    // control channel from the GPIO buttons
-    chan c_gpio_ctl;
-
     par
     {
         // AVB - Ethernet
@@ -132,34 +125,19 @@ int main(void)
                                             c_mac_rx, 4,
                                             c_mac_tx, 4);
 
-        // TCP/IP stack
-        on tile[1]:  xtcp_server_uip(c_mac_rx[1],
-                                        c_mac_tx[2],
-                                        c_xtcp, 1,
-                                        null);
-
-        // AVB - PTP
-        on tile[1]:
-        {
-            // We need to initiate the PLL from core 1, so do it here before
-            // launching  the main function of the thread
-            audio_clock_CS2300CP_init(r_i2c, MASTER_TO_WORDCLOCK_RATIO);
-
-            ptp_server_and_gpio(c_mac_rx[0], c_mac_tx[0], c_ptp, 3,
-                    PTP_GRANDMASTER_CAPABLE,
-                    c_gpio_ctl);
-        }
-
         on tile[0]:
         {
           media_clock_server(c_media_clock_ctl,
-                             c_ptp[1],
+                             null,
                              c_buf_ctl,
                              AVB_NUM_LISTENER_UNITS,
-                             p_fs);
+                             p_fs,
+                             c_mac_rx[0],
+                             c_mac_tx[0],
+                             c_ptp,
+                             2,
+                             PTP_GRANDMASTER_CAPABLE);
         }
-
-
 
         // AVB - Audio
         on tile[0]: {
@@ -183,103 +161,46 @@ int main(void)
                      0);
         }
 
-        // AVB Talker - must be on the same core as the audio interface
-        on tile[0]: avb_1722_talker(c_ptp[0],
-                c_mac_tx[1],
-                c_talker_ctl[0],
-                AVB_NUM_SOURCES);
-
-        // AVB Listener
-        on tile[0]: avb_1722_listener(c_mac_rx[3],
-                c_buf_ctl[0],
-                null,
-                c_listener_ctl[0],
-                AVB_NUM_SINKS);
+        // AVB 1722 packet processing
+        // Must be on the same tile as the audio interface
+        on tile[0]: avb_1722_talkerlistener(c_ptp[0],
+                                            c_mac_rx[3],
+                                            c_mac_tx[1],
+                                            c_listener_ctl[0],
+                                            c_talker_ctl[0],
+                                            c_buf_ctl[0],
+                                            AVB_NUM_SINKS,
+                                            AVB_NUM_SOURCES);
 
 
+        // TCP/IP stack
+        on tile[0]:  xtcp_server_uip(c_mac_rx[1],
+                                     c_mac_tx[2],
+                                     c_xtcp, 1,
+                                     null);
 
         // Application threads
-        on tile[0]:
+        on tile[1]:
         {
             // First initialize avb higher level protocols
-            avb_init(c_media_ctl, c_listener_ctl, c_talker_ctl, c_media_clock_ctl, c_mac_rx[2], c_mac_tx[3], c_ptp[2]);
+            audio_clock_CS2300CP_init(r_i2c, MASTER_TO_WORDCLOCK_RATIO);
 
-            demo(c_xtcp[0], c_mac_rx[2], c_mac_tx[3], c_gpio_ctl);
+            avb_init(c_media_ctl, c_listener_ctl, c_talker_ctl,
+                     c_media_clock_ctl, c_mac_rx[2], c_mac_tx[3], c_ptp[1]);
+
+            demo(c_xtcp[0], c_mac_rx[2], c_mac_tx[3]);
         }
+
+        on tile[0]: par(int i=0;i<3;i++) while(1);
+        on tile[1]: par(int i=0;i<2;i++) while(1);
     }
 
     return 0;
 }
 
-void ptp_server_and_gpio(chanend c_rx, chanend c_tx, chanend ptp_link[],
-        int num_ptp, enum ptp_server_type server_type, chanend c) {
-
-    static unsigned buttons_active = 1;
-    static unsigned buttons_timeout;
-    static unsigned remote = 0;
-    static unsigned selected_chan = 0;
-
-    unsigned button_val;
-    timer tmr;
-    p_mute_led_remote <: ~(remote << 1) | 1;
-    p_chan_leds <: ~(1 << selected_chan);
-    p_buttons :> button_val;
-
-    ptp_server_init(c_rx, c_tx, server_type);
-
-    while (1)
-    {
-        select
-        {
-            do_ptp_server(c_rx, c_tx, ptp_link, num_ptp);
-
-            case buttons_active =>
-            p_buttons when pinsneq(button_val) :> unsigned new_button_val:
-            if ((button_val & 0x1) == 1 && (new_button_val & 0x1) == 0)
-            {
-                c <: STREAM_SEL;
-                buttons_active = 0;
-            }
-            if ((button_val & 0x2) == 2 && (new_button_val & 0x2) == 0)
-            {
-                remote = 1-remote;
-                p_mute_led_remote <: ~(remote << 1) | 1;
-
-                /* Currently we do not do anything with the remote select
-                 mode. So there is no need to signal the demo thread. */
-                //c <: REMOTE_SEL;
-                //c <: remote;
-                buttons_active = 0;
-            }
-            if ((button_val & 0x4) == 4 && (new_button_val & 0x4) == 0)
-            {
-                selected_chan++;
-                if (selected_chan > ((AVB_NUM_MEDIA_OUTPUTS>>1)-1))
-                {
-                    selected_chan = 0;
-                }
-                p_chan_leds <: ~(1 << selected_chan);
-                c <: CHAN_SEL;
-                c <: selected_chan;
-                buttons_active = 0;
-            }
-            if (!buttons_active) {
-                tmr :> buttons_timeout;
-                buttons_timeout += BUTTON_TIMEOUT_PERIOD;
-            }
-            button_val = new_button_val;
-            break;
-            case !buttons_active => tmr when timerafter(buttons_timeout) :> void:
-            buttons_active = 1;
-            p_buttons :> button_val;
-            break;
-
-        }
-    }
-}
 
 /** The main application control thread **/
-void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl)
+void demo(chanend tcp_svr, chanend c_rx, chanend c_tx)
 {
 
     timer tmr;
@@ -288,6 +209,10 @@ void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl)
     int selected_chan = 0;
     unsigned change_stream = 1;
     unsigned timeout;
+    unsigned buttons_active = 1;
+    unsigned buttons_timeout;
+    unsigned button_val;
+    timer button_tmr;
 
     // Set AVB to be in "legacy" mode
     //  avb_set_legacy_mode(1);
@@ -318,6 +243,10 @@ void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl)
     set_avb_source_map(0, map, AVB_NUM_MEDIA_INPUTS);
     set_avb_source_format(0, AVB_SOURCE_FORMAT_MBLA_24BIT, SAMPLE_RATE);
     set_avb_source_sync(0, 0); // use the media_clock defined above
+
+    p_mute_led_remote <: ~0;
+    p_chan_leds <: ~(1 << selected_chan);
+    p_buttons :> button_val;
 
     // Main loop
     tmr :> timeout;
@@ -359,40 +288,51 @@ void demo(chanend tcp_svr, chanend c_rx, chanend c_tx, chanend c_gpio_ctl)
         }
 
         // Receive any events from user button presses
-        case c_gpio_ctl :> int cmd:
-        {
-            switch (cmd)
-            {
-                case STREAM_SEL:
+        case buttons_active => p_buttons when pinsneq(button_val) :>
+                   unsigned new_button_val:
+
+            if ((button_val & 0x1) == 1 && (new_button_val & 0x1) == 0)
+              {
                 change_stream = 1;
-                break;
-                case CHAN_SEL:
+                buttons_active = 0;
+              }
+            if ((button_val & 0x4) == 4 && (new_button_val & 0x4) == 0)
+            {
+              enum avb_sink_state_t cur_state;
+              int channel;
+              selected_chan++;
+              if (selected_chan > ((AVB_NUM_MEDIA_OUTPUTS>>1)-1))
                 {
-                    enum avb_sink_state_t cur_state;
-                    int channel;
-
-                    c_gpio_ctl :> selected_chan;
-                    channel = selected_chan*2;
-                    get_avb_sink_state(0, cur_state);
-                    set_avb_sink_state(0, AVB_SINK_STATE_DISABLED);
-                    for (int j=0;j<AVB_NUM_MEDIA_OUTPUTS;j++)
-                    {
-                        map[j] = channel;
-                        channel++;
-                        if (channel > AVB_NUM_MEDIA_OUTPUTS-1)
-                        {
-                            channel = 0;
-                        }
-                    }
-                    set_avb_sink_map(0, map, AVB_NUM_MEDIA_OUTPUTS);
-                    if (cur_state != AVB_SINK_STATE_DISABLED)
-                    set_avb_sink_state(0, AVB_SINK_STATE_POTENTIAL);
+                  selected_chan = 0;
                 }
-                break;
+              p_chan_leds <: ~(1 << selected_chan);
+              buttons_active = 0;
+              channel = selected_chan*2;
+              get_avb_sink_state(0, cur_state);
+              set_avb_sink_state(0, AVB_SINK_STATE_DISABLED);
+              for (int j=0;j<AVB_NUM_MEDIA_OUTPUTS;j++)
+                {
+                  map[j] = channel;
+                  channel++;
+                  if (channel > AVB_NUM_MEDIA_OUTPUTS-1)
+                    {
+                      channel = 0;
+                    }
+                }
+              set_avb_sink_map(0, map, AVB_NUM_MEDIA_OUTPUTS);
+              if (cur_state != AVB_SINK_STATE_DISABLED)
+                set_avb_sink_state(0, AVB_SINK_STATE_POTENTIAL);
             }
+            if (!buttons_active) {
+                tmr :> buttons_timeout;
+                buttons_timeout += BUTTON_TIMEOUT_PERIOD;
+            }
+            button_val = new_button_val;
             break;
-        }
-
+        case !buttons_active => button_tmr when timerafter(buttons_timeout) :> void:
+          buttons_active = 1;
+          p_buttons :> button_val;
+          break;
         // Periodic processing
         case tmr when timerafter(timeout) :> void:
         {

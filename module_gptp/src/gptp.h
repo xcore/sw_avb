@@ -103,7 +103,7 @@ void ptp_get_time_info(chanend ptp_server,
  *  \param info       structure to be filled with time information
  *
  **/
-void ptp_get_time_info_mod64(chanend ptp_server, 
+void ptp_get_time_info_mod64(NULLABLE_RESOURCE(chanend,ptp_server),
                               REFERENCE_PARAM(ptp_time_info_mod64, info));
 
 // Asynchronous PTP client functions
@@ -239,9 +239,6 @@ void ptp_set_legacy_mode(chanend c, int mode);
 void ptp_get_current_grandmaster(chanend ptp_server, unsigned char grandmaster[8]);
 
 
-extern timer ptp_timer;   
-extern unsigned ptp_timeout;
-
 /** Initialize the inline ptp server.
  *
  *  \param mac_rx       chanend connected to the ethernet server (receive)
@@ -267,7 +264,9 @@ extern unsigned ptp_timeout;
  *  \sa do_ptp_server
  **/
 void ptp_server_init(chanend mac_rx, chanend mac_tx, 
-                     enum ptp_server_type server_type);
+                     enum ptp_server_type server_type,
+                     timer ptp_timer,
+                     REFERENCE_PARAM(int, ptp_timeout));
 
 
 #ifdef __XC__
@@ -277,17 +276,18 @@ void ptp_recv_and_process_packet(chanend c_rx, chanend c_tx);
 #ifdef __XC__
 #pragma select handler
 #endif
-void ptp_process_client_request(chanend c);
+void ptp_process_client_request(chanend c, timer ptp_timer);
 void ptp_periodic(chanend, unsigned);
 #define PTP_PERIODIC_TIME (10000)  // 0.tfp1 milliseconds
 
 
 
 
-#define do_ptp_server(c_rx, c_tx, client, num_clients) \
+
+#define do_ptp_server(c_rx, c_tx, client, num_clients, ptp_timer, ptp_timeout)      \
   case ptp_recv_and_process_packet(c_rx, c_tx): \
        break;                     \
-  case (int i=0;i<num_clients;i++) ptp_process_client_request(client[i]): \
+ case (int i=0;i<num_clients;i++) ptp_process_client_request(client[i], ptp_timer): \
        break; \
   case ptp_timer when timerafter(ptp_timeout) :> void: \
        ptp_periodic(c_tx, ptp_timeout); \

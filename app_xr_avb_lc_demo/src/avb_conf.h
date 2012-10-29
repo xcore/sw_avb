@@ -18,6 +18,8 @@
 #define AVB_MAX_NAME_LEN 25
 #define AVB_MAX_CHANNELS_PER_STREAM 8
 
+#define COMBINE_MEDIA_CLOCK_AND_PTP 1
+
 /* Listener configuration */
 #define AVB_NUM_SINKS 1
 #define AVB_NUM_LISTENER_UNITS 1
@@ -41,5 +43,7 @@
 
 // Defining this makes SRP auto-start and auto-stop a stream when listeners come and go
 #define SRP_AUTO_TALKER_STREAM_CONTROL
+
+
 
 #endif
