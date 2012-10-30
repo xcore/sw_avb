@@ -17,7 +17,7 @@
 
 #include "avb_srp.h"
 #include "avb_unit.h"
-#include "mac_custom_filter.h"
+#include "mac_filter.h"
 #include "avb_conf.h"
 
 #define TIMEINFO_UPDATE_INTERVAL 50000000

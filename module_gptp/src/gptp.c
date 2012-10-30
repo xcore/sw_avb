@@ -1202,8 +1202,7 @@ void ptp_periodic(chanend c_tx, unsigned t) {
     if (ptp_state == PTP_SLAVE ) {
       set_new_role(PTP_UNCERTAIN, t);
       last_received_announce_time = t;
-      send_ptp_announce_msg(c_tx);
-      last_announce_time = t;
+      last_announce_time = t - ANNOUNCE_PERIOD - 1;
     }
     else
       if (ptp_state == PTP_UNCERTAIN) {

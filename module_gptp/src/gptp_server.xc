@@ -2,7 +2,7 @@
 #include "gptp.h"
 #include "gptp_cmd.h"
 #include "ethernet_rx_client.h"
-#include "mac_custom_filter.h"
+#include "mac_filter.h"
 #include "print.h"
 
 /* These functions are the workhorse functions for the actual protocol.

@@ -16,6 +16,9 @@
 #include "demo_stream_manager.h"
 #include "ethernet_board_support.h"
 
+#define AVB_DEMO_USE_TCP 1
+#define USE_DEMO_AUTO_STREAM_MANAGER 1
+
 // this is the sample rate, the frequency of the word clock
 #define SAMPLE_RATE 48000
 
@@ -29,19 +32,17 @@
 // Timeout for debouncing buttons
 #define BUTTON_TIMEOUT_PERIOD (20000000)
 
-// Commands sent from the GPIO to the main demo app
-enum gpio_cmd
-{
-    STREAM_SEL, CHAN_SEL, REMOTE_SEL
-};
-
 // Note that this port must be at least declared to ensure it
 // drives the mute low
 out port p_mute_led_remote = PORT_SHARED_OUT; // mute, led remote;
 out port p_chan_leds = PORT_LEDS;
 in port p_buttons = PORT_SHARED_IN;
 
-void demo(chanend tcp_svr, chanend c_rx, chanend c_tx);
+void demo(
+          #if AVB_DEMO_USE_TCP
+          chanend tcp_svr,
+          #endif
+          chanend c_rx, chanend c_tx);
 
 //***** Ethernet Configuration ****
 
@@ -84,9 +85,6 @@ on tile[0]: in buffered port:32 p_aud_din[4] =
         PORT_SDATA_IN3
 };
 
-on tile[0]: port p_uart_tx = PORT_UART_TX;
-
-
 void xscope_user_init(void)
 {
     xscope_register(0, 0, "", 0, "");
@@ -98,8 +96,13 @@ void xscope_user_init(void)
 int main(void)
 {
     // Ethernet channels
+    #if AVB_DEMO_USE_TCP
     chan c_mac_tx[4];
     chan c_mac_rx[4];
+    #else
+    chan c_mac_tx[3];
+    chan c_mac_rx[3];
+    #endif
 
     // PTP channels
     chan c_ptp[2];
@@ -113,10 +116,10 @@ int main(void)
     chan c_media_ctl[AVB_NUM_MEDIA_UNITS];
     chan c_media_clock_ctl;
 
-
-
+#if AVB_DEMO_USE_TCP
     // TCP/IP channels
     chan c_xtcp[1];
+#endif
 
     par
     {
@@ -164,7 +167,7 @@ int main(void)
         // AVB 1722 packet processing
         // Must be on the same tile as the audio interface
         on tile[0]: avb_1722_talkerlistener(c_ptp[0],
-                                            c_mac_rx[3],
+                                            c_mac_rx[1],
                                             c_mac_tx[1],
                                             c_listener_ctl[0],
                                             c_talker_ctl[0],
@@ -173,11 +176,13 @@ int main(void)
                                             AVB_NUM_SOURCES);
 
 
+#if AVB_DEMO_USE_TCP
         // TCP/IP stack
-        on tile[0]:  xtcp_server_uip(c_mac_rx[1],
-                                     c_mac_tx[2],
+        on tile[0]:  xtcp_server_uip(c_mac_rx[3],
+                                     c_mac_tx[3],
                                      c_xtcp, 1,
                                      null);
+#endif
 
         // Application threads
         on tile[1]:
@@ -186,13 +191,17 @@ int main(void)
             audio_clock_CS2300CP_init(r_i2c, MASTER_TO_WORDCLOCK_RATIO);
 
             avb_init(c_media_ctl, c_listener_ctl, c_talker_ctl,
-                     c_media_clock_ctl, c_mac_rx[2], c_mac_tx[3], c_ptp[1]);
+                     c_media_clock_ctl, c_mac_rx[2], c_mac_tx[2], c_ptp[1]);
 
-            demo(c_xtcp[0], c_mac_rx[2], c_mac_tx[3]);
+            demo(
+                 #if AVB_DEMO_USE_TCP
+                 c_xtcp[0],
+                 #endif
+                 c_mac_rx[2], c_mac_tx[2]);
         }
 
-        on tile[0]: par(int i=0;i<3;i++) while(1);
-        on tile[1]: par(int i=0;i<2;i++) while(1);
+        //        on tile[0]: par(int i=0;i<3;i++) while(1);
+        //        on tile[1]: par(int i=0;i<2;i++) while(1);
     }
 
     return 0;
@@ -200,7 +209,11 @@ int main(void)
 
 
 /** The main application control thread **/
-void demo(chanend tcp_svr, chanend c_rx, chanend c_tx)
+void demo(
+#if AVB_DEMO_USE_TCP
+          chanend tcp_svr,
+#endif
+          chanend c_rx, chanend c_tx)
 {
 
     timer tmr;
@@ -217,6 +230,7 @@ void demo(chanend tcp_svr, chanend c_rx, chanend c_tx)
     // Set AVB to be in "legacy" mode
     //  avb_set_legacy_mode(1);
 
+#if AVB_DEMO_USE_TCP
     // Initialize Zeroconf
     mdns_init(tcp_svr);
 
@@ -226,11 +240,11 @@ void demo(chanend tcp_svr, chanend c_rx, chanend c_tx)
 
     // Initialize the control api server
     c_api_server_init(tcp_svr);
+#endif
 
     // Initialize the media clock (a ptp derived clock)
-    //set_device_media_clock_type(0, INPUT_STREAM_DERIVED);
+    set_device_media_clock_type(0, INPUT_STREAM_DERIVED);
     set_device_media_clock_type(0, LOCAL_CLOCK);
-    //set_device_media_clock_type(0, PTP_DERIVED);
     set_device_media_clock_rate(0, SAMPLE_RATE);
     set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_ENABLED);
 
@@ -270,23 +284,21 @@ void demo(chanend tcp_svr, chanend c_rx, chanend c_tx)
             break;
         }
 
+
+#if AVB_DEMO_USE_TCP
         // Process TCP/IP events
         case xtcp_event(tcp_svr, conn):
         {
             mdns_event res;
             res = mdns_xtcp_handler(tcp_svr, conn);
-            if (res & mdns_entry_lost)
-            {
-                printstr("Media clock: Input stream\n");
-                set_device_media_clock_type(0, INPUT_STREAM_DERIVED);
-            }
-
             c_api_xtcp_handler(tcp_svr, conn, tmr);
 
             // add any special tcp/ip packet handling here
             break;
         }
+#endif
 
+#if USE_DEMO_AUTO_STREAM_MANAGER
         // Receive any events from user button presses
         case buttons_active => p_buttons when pinsneq(button_val) :>
                    unsigned new_button_val:
@@ -333,6 +345,8 @@ void demo(chanend tcp_svr, chanend c_rx, chanend c_tx)
           buttons_active = 1;
           p_buttons :> button_val;
           break;
+#endif
+
         // Periodic processing
         case tmr when timerafter(timeout) :> void:
         {
@@ -340,9 +354,11 @@ void demo(chanend tcp_svr, chanend c_rx, chanend c_tx)
 
             avb_periodic(avb_status);
 
+#if USE_DEMO_AUTO_STREAM_MANAGER
             // Call the stream manager to check for new streams/manage
             // what is being listened to
             demo_manage_listener_stream(change_stream, selected_chan);
+#endif
 
             break;
         }

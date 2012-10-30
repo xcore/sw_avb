@@ -1,5 +1,5 @@
-#ifndef __avb_conf_h__
-#define __avb_conf_h__
+#ifndef __avb_conf_8_h__
+#define __avb_conf_8_h__
 
 /* Configuration parameters for the ethernet code */
 #define PHY_ADDRESS 0x0

@@ -1,5 +1,6 @@
 #ifndef _mac_custom_filter_h_
 #define _mac_custom_filter_h_
+#include "avb_conf.h"
 #include "avb_srp.h"
 #include "avb_mmrp.h"
 #include "avb_mvrp.h"
@@ -16,7 +17,7 @@
 
 #define HTONS(x) ((x>>8)|(((x&0xff)<<8)))
 
-#ifdef __XC__
+#if defined(__XC__) && (!defined(ETHERNET_USE_AVB_FILTER) || ETHERNET_USE_AVB_FILTER)
 #pragma unsafe arrays
 inline int mac_custom_filter(unsigned int buf[])
 {

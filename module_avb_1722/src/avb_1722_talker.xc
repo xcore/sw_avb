@@ -20,6 +20,7 @@
 
 #if AVB_NUM_SOURCES != 0
 
+#pragma unsafe arrays
 static void configure_stream(chanend avb1722_tx_config,
 							 avb1722_Talker_StreamConfig_t &stream,
 							 unsigned char mac_addr[]) {
@@ -81,6 +82,7 @@ static void configure_stream(chanend avb1722_tx_config,
 	stream.sequence_number = 0;
 }
 
+#pragma unsafe arrays
 static void disable_stream(avb1722_Talker_StreamConfig_t &stream) {
 
 	stream.streamId[1] = 0;
@@ -95,6 +97,7 @@ static void disable_stream(avb1722_Talker_StreamConfig_t &stream) {
 	stream.active = 0;
 }
 
+
 static void start_stream(avb1722_Talker_StreamConfig_t &stream) {
 	media_input_fifo_enable_fifos(stream.fifo_mask);
 	stream.samples_left_in_fifo_packet = 0;
@@ -107,6 +110,7 @@ static void stop_stream(avb1722_Talker_StreamConfig_t &stream) {
 	media_input_fifo_disable_fifos(stream.fifo_mask);
 	stream.active = 1;
 }
+
 
 void avb_1722_talker_init(chanend c_talker_ctl,
                           chanend c_mac_tx,
@@ -131,6 +135,7 @@ void avb_1722_talker_init(chanend c_talker_ctl,
 }
 
 
+#pragma unsafe arrays
 #pragma select handler
 void avb_1722_talker_handle_cmd(chanend c_talker_ctl,
                                 avb_1722_talker_state_t &st)
