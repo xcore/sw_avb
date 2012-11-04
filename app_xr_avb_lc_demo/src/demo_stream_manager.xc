@@ -7,7 +7,7 @@
 
 #define STREAM_TIMEOUT 100000
 
-#define MAX_STREAMS 20
+#define MAX_STREAMS 10
 
 typedef struct stream_table_entry {
   unsigned int hi;

@@ -9,12 +9,7 @@
 #
 # You can also set MODULE_XCC_C_FLAGS, MODULE_XCC_XC_FLAGS etc..
 
-SOURCE_DIRS += src
-INCLUDE_DIRS += src
-
-SOURCE_DIRS += $(foreach x, $(USED_EXTERNAL_CLOCK_CHIPS), src/external_hw/$x)
-INCLUDE_DIRS += $(foreach x, $(USED_EXTERNAL_CLOCK_CHIPS), src/external_hw/$x)
-
 MODULE_XCC_FLAGS = $(XCC_FLAGS) -O3
 
 XCC_FLAGS_media_clock_server.xc = $(XCC_FLAGS) -O3 -fsubword-select
+XCC_FLAGS_media_clock_support.c = -Os

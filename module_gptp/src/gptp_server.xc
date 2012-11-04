@@ -2,7 +2,7 @@
 #include "gptp.h"
 #include "gptp_cmd.h"
 #include "ethernet_rx_client.h"
-#include "mac_custom_filter.h"
+#include "mac_filter.h"
 #include "print.h"
 
 /* These functions are the workhorse functions for the actual protocol.
@@ -30,10 +30,10 @@ extern ptp_timestamp ptp_reference_ptp_ts;
 extern signed int g_ptp_adjust;
 extern signed int g_inv_ptp_adjust;
 
-#define do_ptp_server(c_rx, c_tx, client, num_clients) \
+#define do_ptp_server(c_rx, c_tx, client, num_clients, ptp_timer, ptp_timeout)      \
   case ptp_recv_and_process_packet(c_rx, c_tx): \
        break;                     \
-  case (int i=0;i<num_clients;i++) ptp_process_client_request(client[i]): \
+ case (int i=0;i<num_clients;i++) ptp_process_client_request(client[i], ptp_timer): \
        break; \
   case ptp_timer when timerafter(ptp_timeout) :> void: \
        ptp_periodic(c_tx, ptp_timeout); \
@@ -44,7 +44,9 @@ timer ptp_timer;
 unsigned ptp_timeout;
 
 void ptp_server_init(chanend c_rx, chanend c_tx, 
-                     enum ptp_server_type server_type)
+                     enum ptp_server_type server_type,
+                     timer ptp_timer,
+                     int &ptp_timeout)
 {                                             
 
   mac_set_custom_filter(c_rx, MAC_FILTER_PTP);
@@ -71,10 +73,10 @@ void ptp_recv_and_process_packet(chanend c_rx, chanend c_tx)
   ptp_recv(c_tx, (buf, unsigned char[]), ts);
 }
 
-static void ptp_give_requested_time_info(chanend c)
+static void ptp_give_requested_time_info(chanend c, timer ptp_timer)
 {
   int thiscore_now;
-  unsigned core_id = get_core_id();
+  unsigned core_id = get_local_tile_id();
   master {
     ptp_timer :> thiscore_now;
     c <: thiscore_now;
@@ -85,13 +87,23 @@ static void ptp_give_requested_time_info(chanend c)
     c <: core_id;
   }
 }
+void ptp_get_local_time_info_mod64(ptp_time_info_mod64 &info)
+{
+  unsigned int hi, lo;
+  ptp_get_reference_ptp_ts_mod_64(hi,lo);
+  info.local_ts = ptp_reference_local_ts;
+  info.ptp_ts_hi = hi;
+  info.ptp_ts_lo = lo;
+  info.ptp_adjust = g_ptp_adjust;
+  info.inv_ptp_adjust = g_inv_ptp_adjust;
+}
 
 #pragma select handler
-void ptp_process_client_request(chanend c)
+void ptp_process_client_request(chanend c, timer ptp_timer)
 {
   unsigned char cmd;
   unsigned thiscore_now;
-  unsigned core_id = get_core_id();
+  unsigned core_id = get_local_tile_id();
 
   cmd = inuchar(c);
   (void) inuchar(c);
@@ -100,7 +112,7 @@ void ptp_process_client_request(chanend c)
   switch (cmd) 
     {
     case PTP_GET_TIME_INFO:
-      ptp_give_requested_time_info(c);
+      ptp_give_requested_time_info(c, ptp_timer);
       break;
     case PTP_GET_TIME_INFO_MOD64: {
       unsigned int hi, lo;
@@ -121,7 +133,7 @@ void ptp_process_client_request(chanend c)
     case PTP_SET_LEGACY_MODE: {
       int mode;
       c :> mode;
-      ptp_server_set_legacy_mode(mode);                          
+      ptp_server_set_legacy_mode(mode);
       break;            
     }
     case PTP_GET_GRANDMASTER: {
@@ -144,13 +156,14 @@ void ptp_server(chanend c_rx, chanend c_tx,
                 chanend client[], int num_clients,
                 enum ptp_server_type server_type)
 {
-
-  ptp_server_init(c_rx, c_tx, server_type);
+  timer ptp_timer;
+  int ptp_timeout;
+  ptp_server_init(c_rx, c_tx, server_type, ptp_timer, ptp_timeout);
 
   while (1) {
     select 
       {
-        do_ptp_server(c_rx, c_tx, client, num_clients);
+        do_ptp_server(c_rx, c_tx, client, num_clients, ptp_timer, ptp_timeout);
       }
   }
 }

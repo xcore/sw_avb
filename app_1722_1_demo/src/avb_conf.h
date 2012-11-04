@@ -19,6 +19,7 @@
 #define MII_TX_BUFSIZE_HIGH_PRIORITY (2000)
 #define MII_TX_BUFSIZE_LOW_PRIORITY (2000)
 #define ETHERNET_MAX_TX_HP_PACKET_SIZE (300)
+#define ETHERNET_MAX_TX_LP_PACKET_SIZE (500)
 
 /* General purpose AVB configuration */
 #define AVB_MAX_NAME_LEN 0

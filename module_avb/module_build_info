@@ -1,12 +1,3 @@
 DEPENDENT_MODULES = module_ethernet module_otp_board_info
 
-AVB_COMMON_SOURCE_DIRS = src
-
-SOURCE_DIRS += $(AVB_COMMON_SOURCE_DIRS) 
-INCLUDE_DIRS += $(AVB_COMMON_SOURCE_DIRS)
-
-ifeq ($(USE_AVB_MAC_CUSTOM_FILTER),1)
-INCLUDE_DIRS += src/mac_custom_filter
-SOURCE_DIRS += src/mac_custom_filter
-endif
 

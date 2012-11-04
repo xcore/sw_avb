@@ -64,7 +64,7 @@ typedef struct clock_info_t {
 } clock_info_t;
 
 /// The array of media clock state structures
-static clock_info_t clock_states[MAX_NUM_MEDIA_CLOCKS];
+static clock_info_t clock_states[AVB_NUM_MEDIA_CLOCKS];
 
 /**
  * \brief Converts the internal 64 bit wordlen into an external 32 bit wordlen
@@ -79,13 +79,16 @@ void init_media_clock_recovery(chanend ptp_svr,
 							   unsigned int rate) {
 	clock_info_t *clock_info = &clock_states[clock_num];
 
+#ifndef MEDIA_CLOCK_EXCLUDE_PTP_DERIVED
 	ptp_time_info_mod64 timeInfo;
+#endif
 
 	clock_info->first = 1;
 	clock_info->rate = rate;
-	clock_info->err = 0;
 	clock_info->ierror = 0;
-
+#ifndef MEDIA_CLOCK_EXCLUDE_PTP_DERIVED
+	clock_info->err = 0;
+#endif
 	if (rate != 0) {
 		clock_info->wordlen = ((100000000LL << WORDLEN_FRACTIONAL_BITS) / clock_info->rate);
 #ifndef MEDIA_CLOCK_EXCLUDE_PTP_DERIVED
@@ -101,7 +104,12 @@ void init_media_clock_recovery(chanend ptp_svr,
 #ifndef MEDIA_CLOCK_EXCLUDE_PTP_DERIVED
 	clock_info->t1 = clk_time;
 
-	ptp_get_time_info_mod64(ptp_svr, &timeInfo);
+#if COMBINE_MEDIA_CLOCK_AND_PTP
+        ptp_get_local_time_info_mod64(&timeInfo);
+#else
+        ptp_get_time_info_mod64(ptp_svr, &timeInfo);
+#endif
+
 	clock_info->ptp1 = local_timestamp_to_ptp_mod32(clk_time, &timeInfo);
 #endif
 
@@ -110,11 +118,11 @@ void init_media_clock_recovery(chanend ptp_svr,
 }
 
 void update_media_clock_stream_info(int clock_index,
-									unsigned int local_ts,
-									unsigned int outgoing_ptp_ts,
-									unsigned int presentation_ts,
-									int locked,
-									int fill) {
+                                    unsigned int local_ts,
+                                    unsigned int outgoing_ptp_ts,
+                                    unsigned int presentation_ts,
+                                    int locked,
+                                    int fill) {
 	clock_info_t *clock_info = &clock_states[clock_index];
 
 	clock_info->stream_info2.local_ts = local_ts;
@@ -138,7 +146,9 @@ unsigned int update_media_clock(chanend ptp_svr,
 								unsigned int t2,
 								int period0) {
 	clock_info_t *clock_info = &clock_states[clock_index];
+#ifndef MEDIA_CLOCK_EXCLUDE_PTP_DERIVED
 	ptp_time_info_mod64 timeInfo;
+#endif
 	long long diff_local;
 	int clock_type = mclock->clock_type;
 
@@ -152,7 +162,12 @@ unsigned int update_media_clock(chanend ptp_svr,
 		long long err, diff_ptp;
 		unsigned ptp2;
 
-		ptp_get_time_info_mod64(ptp_svr, &timeInfo);
+#if COMBINE_MEDIA_CLOCK_AND_PTP
+                ptp_get_local_time_info_mod64(&timeInfo);
+#else
+                ptp_get_time_info_mod64(ptp_svr, &timeInfo);
+#endif
+
 
 		ptp2 = local_timestamp_to_ptp_mod32(t2, &timeInfo);
 

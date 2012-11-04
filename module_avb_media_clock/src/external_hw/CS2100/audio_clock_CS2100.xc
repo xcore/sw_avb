@@ -5,8 +5,6 @@
 #include "i2c.h"
 #include <stdlib.h>
 
-#define I2C_BIT_TIME 1100
-
 /*
  *  This module takes the output from the media clock server and transforms it into a
  *  reference clock to be sent to a PLL multiplier device - the CS2100
@@ -115,10 +113,15 @@ void audio_clock_CS2100CP_init(struct r_i2c &r_i2c, unsigned mclks_per_wordclk)
 {
   int deviceAddr = 0x9C;
   unsigned char data[1];
+  unsigned int mult[1];
 
   // this is the muiltiplier in the PLL, which takes the PLL reference clock and
   // multiplies it up to the MCLK frequency.
-  (regdata,unsigned int[])[0] = ((PLL_TO_WORD_MULTIPLIER << 11) * mclks_per_wordclk);
+  mult[0] = ((PLL_TO_WORD_MULTIPLIER << 11) * mclks_per_wordclk);
+  regdata[0] = (mult,char[])[0];
+  regdata[1] = (mult,char[])[1];
+  regdata[2] = (mult,char[])[2];
+  regdata[3] = (mult,char[])[3];
 
   i2c_master_init(r_i2c);
 

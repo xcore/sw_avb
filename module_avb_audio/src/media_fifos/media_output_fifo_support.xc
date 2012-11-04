@@ -13,15 +13,10 @@
 #include <xscope.h>
 #include "media_fifo.h"
 
-void media_output_fifo_to_xc_channel(chanend media_ctl,
-                                     streaming chanend samples_out,    
-                                     int clk_ctl_index,
+void media_output_fifo_to_xc_channel(streaming chanend samples_out,
                                      media_output_fifo_t output_fifos[],
                                      int num_channels)
 {
-  media_ctl_register(media_ctl, 0, null, num_channels, output_fifos,
-                     clk_ctl_index);  
-
   while (1) {
     unsigned int size;
     unsigned timestamp;
@@ -40,9 +35,7 @@ void media_output_fifo_to_xc_channel(chanend media_ctl,
 int mo_ts;
 #pragma unsafe arrays
 void 
-media_output_fifo_to_xc_channel_split_lr(chanend media_ctl,
-                                         streaming chanend samples_out,    
-                                         int clk_ctl_index,
+media_output_fifo_to_xc_channel_split_lr(streaming chanend samples_out,
                                          media_output_fifo_t output_fifos[],
                                          int num_channels)
 {
@@ -51,9 +44,6 @@ media_output_fifo_to_xc_channel_split_lr(chanend media_ctl,
 #ifdef XSCOPE_OUTPUT_FIFO_PULL
   xscope_register(1, XSCOPE_DISCRETE, "Media Output FIFO", XSCOPE_UINT, "Samples");
 #endif
-  
-  media_ctl_register(media_ctl, 0, null, num_channels, output_fifos,
-                     clk_ctl_index);  
 
   while (1) {
     unsigned timestamp;

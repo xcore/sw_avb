@@ -19,7 +19,7 @@ int avb_register_listener_streams(chanend listener_ctl,
 {
   int core_id;
   int link_id;
-  core_id = get_core_id();
+  core_id = get_local_tile_id();
   listener_ctl <: core_id;
   listener_ctl <: num_streams;
   listener_ctl :> link_id;
@@ -30,7 +30,7 @@ void avb_register_talker_streams(chanend talker_ctl,
                                  int num_streams)
 {
   int core_id;
-  core_id = get_core_id();
+  core_id = get_local_tile_id();
   talker_ctl <: core_id;
   talker_ctl <: num_streams;
 }
