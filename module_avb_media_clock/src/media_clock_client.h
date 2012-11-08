@@ -39,7 +39,8 @@ void send_buf_ctl_info(chanend buf_ctl,
                        unsigned int ptp_ts, 
                        unsigned int local_ts,
                        unsigned int rdptr,
-                       unsigned int wrptr);
+                       unsigned int wrptr,
+                       timer tmr);
 
 void send_buf_ctl_new_stream_info(chanend buf_ctl,
                                   int media_clock);

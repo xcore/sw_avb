@@ -2,9 +2,10 @@
 #define __media_clock_server_h__
 
 #include "avb_conf.h"
+#include "gptp.h"
 
-#ifndef MAX_NUM_MEDIA_CLOCKS
-#define MAX_NUM_MEDIA_CLOCKS 2
+#ifndef AVB_NUM_MEDIA_CLOCKS
+#define AVB_NUM_MEDIA_CLOCKS 1
 #endif
 
 #ifndef MAX_CLK_CTL_CLIENTS
@@ -40,14 +41,30 @@ typedef enum media_clock_type_t {
  */
 #ifdef __XC__
 void media_clock_server(chanend media_clock_ctl,
-                        chanend ptp_svr,
+                        chanend ?ptp_svr,
                         chanend ?buf_ctl[], int buf_ctl_size,
-                        chanend ?clk_ctl[], int clk_ctl_size);
+                        out port p_fs[]
+#if COMBINE_MEDIA_CLOCK_AND_PTP
+                        ,chanend c_rx,
+                        chanend c_tx,
+                        chanend c_ptp[],
+                        int num_ptp,
+                        enum ptp_server_type server_type
+#endif
+                        );
 #else
 void media_clock_server(chanend media_clock_ctl,
                         chanend ptp_svr,
                         chanend buf_ctl[], int buf_ctl_size,
-                        chanend clk_ctl[], int clk_ctl_size);
+                        port p_fs[]
+#if COMBINE_MEDIA_CLOCK_AND_PTP
+                        ,chanend c_rx,
+                        chanend c_tx,
+                        chanend c_ptp[],
+                        int num_ptp,
+                        enum ptp_server_type server_type
+#endif
+);
 #endif
 
 #endif

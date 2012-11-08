@@ -19,7 +19,9 @@
 #define MAX_MRP_MSG_SIZE (sizeof(mrp_msg_header) + sizeof(srp_talker_first_value) + 1 /* for event vector */ + sizeof(mrp_msg_footer))
 
 // The size of the send buffer - currently a full ethernet frame
-#define MRP_SEND_BUFFER_SIZE (1518)
+#ifndef MRP_SEND_BUFFER_SIZE
+#define MRP_SEND_BUFFER_SIZE (500)
+#endif
 
 //! Lengths of the first values for each attribute type
 static int first_value_lengths[MRP_NUM_ATTRIBUTE_TYPES] = FIRST_VALUE_LENGTHS;

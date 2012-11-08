@@ -9,15 +9,6 @@
 #
 # You can also set MODULE_XCC_C_FLAGS, MODULE_XCC_XC_FLAGS etc..
 
-SOURCE_DIRS = src/media_fifos
-
-INCLUDE_DIRS = src/media_fifos
-
-SOURCE_DIRS += $(foreach x, $(USED_CODECS), src/codecs/$x)
-SOURCE_DIRS += $(foreach x, $(USED_AUDIO_INTERFACES), src/interfaces/$x)
-
-INCLUDE_DIRS += $(foreach x, $(USED_CODECS), src/codecs/$x)
-INCLUDE_DIRS += $(foreach x, $(USED_AUDIO_INTERFACES), src/interfaces/$x)
 
 MODULE_XCC_FLAGS = $(XCC_FLAGS) -g -O2
 

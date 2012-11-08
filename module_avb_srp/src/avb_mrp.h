@@ -2,6 +2,10 @@
 #ifndef _avb_mrp_h_
 #define _avb_mrp_h_
 #include "avb_control_types.h"
+#ifdef __avb_conf_h_exist__
+#include "avb_conf.h"
+#endif
+
 #ifdef __mrp_conf_h_exist__
 #include "mrp_conf.h"
 #endif

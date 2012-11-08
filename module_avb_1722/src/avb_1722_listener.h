@@ -46,7 +46,7 @@ int avb_1722_listener_process_packet(chanend? buf_ctl,
                                      unsigned char Buf[],
                                      int numBytes,
                                      REFERENCE_PARAM(avb_1722_stream_info_t, stream_info),
-				                     REFERENCE_PARAM(ptp_time_info_mod64, timeInfo),
+                                     NULLABLE_REFERENCE_PARAM(ptp_time_info_mod64, timeInfo),
                                      int index,
                                      REFERENCE_PARAM(int, notified_buf_ctl));
 #else
@@ -58,5 +58,12 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
                                      int index,
                                      REFERENCE_PARAM(int, notified_buf_ctl));
 #endif
+
+typedef struct avb_1722_listener_state_s {
+  avb_1722_stream_info_t listener_streams[MAX_AVB_STREAMS_PER_LISTENER];
+  int notified_buf_ctl;
+  int router_link;
+} avb_1722_listener_state_t;
+
 
 #endif

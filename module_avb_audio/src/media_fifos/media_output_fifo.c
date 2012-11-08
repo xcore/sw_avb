@@ -281,7 +281,8 @@ media_output_fifo_strided_push(media_output_fifo_t s0,
 void
 media_output_fifo_handle_buf_ctl(chanend buf_ctl, 
                                  int s0,
-                                 int *buf_ctl_notified)
+                                 int *buf_ctl_notified,
+                                 timer tmr)
 {
   int cmd;              
   struct ofifo_t *s = (struct ofifo_t *) s0;
@@ -294,7 +295,8 @@ media_output_fifo_handle_buf_ctl(chanend buf_ctl,
                         s->ptp_ts,
                         s->local_ts,
                         s->dptr - START_OF_FIFO(s),
-                        s->wrptr - START_OF_FIFO(s));
+                        s->wrptr - START_OF_FIFO(s),
+                        tmr);
       s->ptp_ts = 0;
       s->local_ts = 0;
       s->marker = (unsigned int *) 0;

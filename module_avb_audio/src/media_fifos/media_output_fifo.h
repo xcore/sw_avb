@@ -67,20 +67,11 @@ typedef int media_output_fifo_t;
  * from the ``ofifos`` array. It will then expect another timestamp before
  * the next set of samples. 
  *
- *  \param media_ctl            chanend connected to the main control thread
  *  \param samples_out          the chanend on which samples are output
- *  \param clk_ctl_index        the index in the clk_ctl array passed to 
- *                              media_clock_server() that controls the rate
- *                              of the FIFOs (i.e. the rate at which samples 
- *                              are pulled from the other end of the channel).
- *                              This should be -1 if the pull rate is not
- *                              controlled by the media clock server.
  *  \param ofifos               array of media output FIFOs to pull from
  *  \param num_channels         the number of channels (or FIFOs)
  **/
-void media_output_fifo_to_xc_channel(chanend media_ctl,
-                                     streaming chanend samples_out,
-                                     int clk_ctl_index,
+void media_output_fifo_to_xc_channel(streaming chanend samples_out,
                                      media_output_fifo_t ofifos[],
                                      int num_channels);
 
@@ -102,21 +93,12 @@ void media_output_fifo_to_xc_channel(chanend media_ctl,
  * It will then expect another timestamp before
  * the next set of samples.
  *
- *  \param media_ctl            chanend connected to the main control thread
  *  \param samples_out          the chanend on which samples are output
- *  \param clk_ctl_index        the index in the clk_ctl array passed to 
- *                              media_clock_server() that controls the rate
- *                              of the FIFOs (i.e. the rate at which samples 
- *                              are pulled from the other end of the channel).
- *                              This should be -1 if the pull rate is not
- *                              controlled by the media clock server.
  *  \param output_fifos         array of media output fifos to pull from
  *  \param num_channels         the number of channels (or FIFOs)
  **/
 void 
-media_output_fifo_to_xc_channel_split_lr(chanend media_ctl,
-                                         streaming chanend samples_out,    
-                                         int clk_ctl_index,
+media_output_fifo_to_xc_channel_split_lr(streaming chanend samples_out,
                                          media_output_fifo_t output_fifos[],
                                          int num_channels);
 
@@ -234,7 +216,8 @@ void media_output_fifo_set_ptp_timestamp(media_output_fifo_t s0,
 void
 media_output_fifo_handle_buf_ctl(chanend buf_ctl, 
                                  int stream_num,
-                                 REFERENCE_PARAM(int, buf_ctl_notified));
+                                 REFERENCE_PARAM(int, buf_ctl_notified),
+                                 timer tmr);
 
 /**
  *  \brief Set the volume control multiplier for the media FIFO

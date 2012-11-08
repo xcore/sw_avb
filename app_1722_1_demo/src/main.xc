@@ -54,12 +54,15 @@ avb_ethernet_ports_t avb_ethernet_ports =
 //***** AVB audio ports ****
 on tile[1]: struct r_i2c r_i2c = { PORT_I2C_SCL, PORT_I2C_SDA };
 
-on tile[0]: out port p_fs = PORT_SYNC_OUT;
-on tile[0]: clock b_mclk = XS1_CLKBLK_3;
-on tile[0]: clock b_bclk = XS1_CLKBLK_4;
-on tile[0]: in port p_aud_mclk = PORT_MCLK;
-on tile[0]: buffered out port:32 p_aud_bclk = PORT_SCLK;
-on tile[0]: out buffered port:32 p_aud_lrclk = PORT_LRCLK;
+on tile[0]: out port p_fs[1] = { PORT_SYNC_OUT };
+on tile[0]: i2s_ports_t i2s_ports = {
+  XS1_CLKBLK_3,
+  XS1_CLKBLK_4,
+  PORT_MCLK,
+  PORT_SCLK,
+  PORT_LRCLK
+};
+
 on tile[0]: out buffered port:32 p_aud_dout[4] =
 {
         PORT_SDATA_OUT0,
@@ -106,11 +109,8 @@ int main(void)
 
     // media control
     chan c_media_ctl[AVB_NUM_MEDIA_UNITS];
-    chan c_clk_ctl[AVB_NUM_MEDIA_CLOCKS];
     chan c_media_clock_ctl;
 
-    // audio channels
-    streaming chan c_samples_to_codec;
 
     // control channel from the GPIO buttons
     chan c_gpio_ctl;
@@ -134,39 +134,35 @@ int main(void)
                     c_gpio_ctl);
         }
     
-        on tile[1]:
+        on tile[0]:
         {
             media_clock_server(c_media_clock_ctl,
                     c_ptp[1],
                     c_buf_ctl,
                     AVB_NUM_LISTENER_UNITS,
-                    c_clk_ctl,
-                    AVB_NUM_MEDIA_CLOCKS);
+                    p_fs);
         }
     
         // AVB - Audio
         on tile[0]: {
-            init_media_input_fifos(ififos, ififo_data, AVB_NUM_MEDIA_INPUTS);
-            configure_clock_src(b_mclk, p_aud_mclk);
-            start_clock(b_mclk);
-            par
-            {
-                audio_gen_CS2300CP_clock(p_fs, c_clk_ctl[0]);
+          media_input_fifo_data_t ififo_data[AVB_NUM_MEDIA_INPUTS];
+          media_input_fifo_t ififos[AVB_NUM_MEDIA_INPUTS];
 
-                i2s_master (b_mclk,
-                        b_bclk,
-                        p_aud_bclk,
-                        p_aud_lrclk,
-                        p_aud_dout,
-                        AVB_NUM_MEDIA_OUTPUTS,
-                        p_aud_din,
-                        AVB_NUM_MEDIA_INPUTS,
-                        MASTER_TO_WORDCLOCK_RATIO,
-                        c_samples_to_codec,
-                        ififos,
-                        c_media_ctl[0],
-                        0);
-            }
+          media_output_fifo_data_t ofifo_data[AVB_NUM_MEDIA_OUTPUTS];
+          media_output_fifo_t ofifos[AVB_NUM_MEDIA_OUTPUTS];
+
+          init_media_input_fifos(ififos, ififo_data, AVB_NUM_MEDIA_INPUTS);
+          init_media_output_fifos(ofifos, ofifo_data, AVB_NUM_MEDIA_OUTPUTS);
+          i2s_master(i2s_ports,
+                     p_aud_din,
+                     AVB_NUM_MEDIA_INPUTS,
+                     p_aud_dout,
+                     AVB_NUM_MEDIA_OUTPUTS,
+                     MASTER_TO_WORDCLOCK_RATIO,
+                     ififos,
+                     ofifos,
+                     c_media_ctl[0],
+                     0);
         }
 
         // AVB Talker - must be on the same core as the audio interface
@@ -182,15 +178,6 @@ int main(void)
                 c_listener_ctl[0],
                 AVB_NUM_SINKS);
     
-        on tile[0]:
-        {   
-            init_media_output_fifos(ofifos, ofifo_data, AVB_NUM_MEDIA_OUTPUTS);
-            media_output_fifo_to_xc_channel_split_lr(c_media_ctl[1],
-                    c_samples_to_codec,
-                    0, // clk_ctl index
-                    ofifos,
-                    AVB_NUM_MEDIA_OUTPUTS);
-        }
 
         // Application threads
         on tile[0]:
@@ -213,15 +200,17 @@ void ptp_server_and_gpio(chanend c_rx, chanend c_tx, chanend ptp_link[],
 
     unsigned button_val;
     timer tmr;
+    timer ptp_timer;
+    int ptp_timeout;
     p_buttons :> button_val;
 
-    ptp_server_init(c_rx, c_tx, server_type);
+    ptp_server_init(c_rx, c_tx, server_type,ptp_timer, ptp_timeout);
 
     while (1)
     {
         select
         {
-            do_ptp_server(c_rx, c_tx, ptp_link, num_ptp);
+          do_ptp_server(c_rx, c_tx, ptp_link, num_ptp,ptp_timer,ptp_timeout);
 
             case buttons_active =>
                 p_buttons when pinsneq(button_val) :> unsigned new_button_val:
