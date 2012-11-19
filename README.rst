@@ -32,10 +32,12 @@ Known Issues
 Support
 =======
 
-Supported by XMOS Ltd.
+The HEAD of this repository is a work in progress. It may or may not compile from time to time, and modules, code and features may be incomplete. For a stable, supported release please see the reference designs section at www.xmos.com.
 
 Required software (dependencies)
 ================================
+
+NOTE: The HEAD of sw_avb requires the latest xTIMEcomposer v12 development tools.
 
 * sc_ethernet git\@github.com:xcore/sc_ethernet.git
 * sc_xtcp git\@github.com:xcore/sc_xtcp.git
