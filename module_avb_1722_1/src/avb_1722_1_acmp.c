@@ -392,8 +392,23 @@ static unsigned acmp_listener_valid_listener_unique()
 static unsigned acmp_listener_is_connected()
 {
 	enum avb_sink_state_t state;
-	get_avb_sink_state(acmp_listener_rcvd_cmd_resp.listener_unique_id, &state);
-	return state != AVB_SINK_STATE_DISABLED;
+	
+	int unique_id = acmp_listener_rcvd_cmd_resp.listener_unique_id;
+	
+	get_avb_sink_state(unique_id, &state);
+	
+	unsigned listenerIsConnected = (state != AVB_SINK_STATE_DISABLED);
+	
+	if(listenerIsConnected)
+	{
+		if(	acmp_listener_streams[unique_id].talker_guid.l == acmp_listener_rcvd_cmd_resp.talker_guid.l &&
+			acmp_listener_streams[unique_id].talker_unique_id == acmp_listener_rcvd_cmd_resp.talker_unique_id)
+		{
+			listenerIsConnected = 0;
+		}
+	}
+	
+	return listenerIsConnected;
 }
 
 /**
@@ -917,6 +932,10 @@ void avb_1722_1_acmp_listener_periodic(chanend c_tx)
 				stream_id[1] = (unsigned)(acmp_listener_rcvd_cmd_resp.stream_id.l >> 0);
 				stream_id[0] = (unsigned)(acmp_listener_rcvd_cmd_resp.stream_id.l >> 32);
 
+				avb_listener_on_talker_disconnect(acmp_listener_rcvd_cmd_resp.listener_unique_id,
+											acmp_listener_rcvd_cmd_resp.stream_dest_mac,
+											stream_id);
+											
 				avb_listener_on_talker_connect(acmp_listener_rcvd_cmd_resp.listener_unique_id,
 											acmp_listener_rcvd_cmd_resp.stream_dest_mac,
 											stream_id);
