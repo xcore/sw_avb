@@ -299,7 +299,6 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
               acquired_controller_guid.c[i] = pkt->controller_guid[i];
               acquired_controller_mac[i] = src_addr[i];
             }
-            // set_guid(&global_controller_guid, pkt->controller_guid);
             status = AECP_AEM_STATUS_SUCCESS;
           }
         }
