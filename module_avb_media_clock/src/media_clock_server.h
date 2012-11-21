@@ -12,7 +12,9 @@
 #define MAX_CLK_CTL_CLIENTS 8
 #endif
 
-
+#ifndef PLL_TO_WORD_MULTIPLIER
+#define PLL_TO_WORD_MULTIPLIER 100
+#endif
 
 /** The type of a media clock.
  *  A media clock can be either derived from the PTP clock or recovered 

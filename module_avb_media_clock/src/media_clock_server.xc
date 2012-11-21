@@ -241,7 +241,6 @@ static void manage_buffer(buf_info_t &b,
 
 #endif // (AVB_NUM_MEDIA_OUTPUTS != 0)
 
-#define PLL_TO_WORD_MULTIPLIER 100
 #define INITIAL_MEDIA_CLOCK_OUTPUT_DELAY 100000
 #define EVENT_AFTER_PORT_OUTPUT_DELAY 100
 
