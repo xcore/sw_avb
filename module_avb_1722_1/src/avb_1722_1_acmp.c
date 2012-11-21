@@ -231,7 +231,7 @@ static void acmp_set_inflight_retry(int entity_type, unsigned int message_type, 
 	inflight[inflight_idx].retried = 1;
 }
 
-static void acmp_add_inflight(int entity_type, unsigned int message_type)
+static void acmp_add_inflight(int entity_type, unsigned int message_type, unsigned short original_sequence_id)
 {
 	int i;
 	avb_1722_1_acmp_inflight_command *inflight = acmp_get_inflight_list(entity_type);
@@ -250,7 +250,7 @@ static void acmp_add_inflight(int entity_type, unsigned int message_type)
 		}
 
 		inflight[i].command.message_type = message_type;
-		inflight[i].original_sequence_id = inflight[i].command.sequence_id;
+		inflight[i].original_sequence_id = original_sequence_id;
 
 		acmp_update_inflight_timeout(entity_type, &inflight[i], message_type);
 
@@ -298,6 +298,8 @@ static int acmp_check_inflight_command_timeouts(int entity_type)
 
 static void acmp_send_command(int entity_type, int message_type, avb_1722_1_acmp_cmd_resp *command, int retry, int inflight_idx, chanend c_tx)
 {
+	/* We need to save the sequence_id of the Listener command that generated this Talker command for the response */
+	unsigned short original_sequence_id = command->sequence_id;
 	command->sequence_id = sequence_id[entity_type];
 	sequence_id[entity_type]++;
 
@@ -306,7 +308,7 @@ static void acmp_send_command(int entity_type, int message_type, avb_1722_1_acmp
 
 	if (!retry)
 	{
-		acmp_add_inflight(entity_type, message_type);
+		acmp_add_inflight(entity_type, message_type, original_sequence_id);
 	}
 	else
 	{
@@ -595,7 +597,6 @@ static void process_avb_1722_1_acmp_talker_packet(unsigned char message_type, av
 
 	store_rcvd_cmd_resp(&acmp_talker_rcvd_cmd_resp, pkt);
 
-	/* TODO: Can this be memory optimised? */
 	switch (message_type)
 	{
 	case ACMP_CMD_CONNECT_TX_COMMAND:
@@ -622,7 +623,6 @@ static void process_avb_1722_1_acmp_listener_packet(unsigned char message_type, 
 
 	store_rcvd_cmd_resp(&acmp_listener_rcvd_cmd_resp, pkt);
 
-	/* TODO: Can this be memory optimised? */
 	switch (message_type)
 	{
 	case ACMP_CMD_CONNECT_TX_RESPONSE:
