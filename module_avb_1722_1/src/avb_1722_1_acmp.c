@@ -387,11 +387,11 @@ static unsigned acmp_listener_valid_listener_unique()
 }
 
 /**
- * Returns 1 if the listener with unique id in a received command is currently connected.
+ * See 8.2.2.5.2.2 and 8.2.2.5.2.3 for explanation. 
  *
- * Else returns 0.
+ * The connected_to param equal to 1 is equivalent to listenerIsConnectedTo(command) in spec
  */
-static unsigned acmp_listener_is_connected()
+static unsigned acmp_listener_is_connected(int connected_to)
 {
 	enum avb_sink_state_t state;
 	unsigned stream_is_reserved;
@@ -405,7 +405,12 @@ static unsigned acmp_listener_is_connected()
 		if(	acmp_listener_streams[unique_id].talker_guid.l == acmp_listener_rcvd_cmd_resp.talker_guid.l &&
 			acmp_listener_streams[unique_id].talker_unique_id == acmp_listener_rcvd_cmd_resp.talker_unique_id)
 		{
-			return 1;
+			if (connected_to) return 1;
+			else return 0;
+		}
+		else
+		{
+			if(!connected_to) return 1;
 		}
 	}
 	
@@ -874,7 +879,7 @@ void avb_1722_1_acmp_listener_periodic(chanend c_tx)
 			}
 			else
 			{
-				if (acmp_listener_is_connected())
+				if (acmp_listener_is_connected(0))
 				{
 					acmp_send_response(ACMP_CMD_CONNECT_RX_RESPONSE, &acmp_listener_rcvd_cmd_resp, ACMP_STATUS_LISTENER_EXCLUSIVE, c_tx);
 				}
@@ -894,7 +899,7 @@ void avb_1722_1_acmp_listener_periodic(chanend c_tx)
 			}
 			else
 			{
-				if (acmp_listener_is_connected())
+				if (acmp_listener_is_connected(1))
 				{
 					acmp_send_command(LISTENER, ACMP_CMD_DISCONNECT_TX_COMMAND, &acmp_listener_rcvd_cmd_resp, FALSE, -1, c_tx);;
 				}
