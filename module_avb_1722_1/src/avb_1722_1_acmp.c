@@ -295,7 +295,6 @@ static int acmp_check_inflight_command_timeouts(int entity_type)
 	return -1;
 }
 
-
 static void acmp_send_command(int entity_type, int message_type, avb_1722_1_acmp_cmd_resp *command, int retry, int inflight_idx, chanend c_tx)
 {
 	/* We need to save the sequence_id of the Listener command that generated this Talker command for the response */
@@ -305,6 +304,7 @@ static void acmp_send_command(int entity_type, int message_type, avb_1722_1_acmp
 
 	avb_1722_1_create_acmp_packet(command, message_type, ACMP_STATUS_SUCCESS);
 	mac_tx(c_tx, avb_1722_1_buf, AVB_1722_1_ACMP_PACKET_SIZE, ETH_BROADCAST);
+	process_avb_1722_1_acmp_packet((avb_1722_1_acmp_packet_t*)avb_1722_1_buf, c_tx);
 
 	if (!retry)
 	{
@@ -341,8 +341,6 @@ void acmp_controller_connect(guid_t *talker_guid, guid_t *listener_guid, chanend
 	acmp_controller_cmd.controller_guid = my_guid;
 	acmp_controller_cmd.talker_guid.l = talker_guid->l;
 	acmp_controller_cmd.listener_guid.l = listener_guid->l;
-
-	// TODO: Default audio format
 
 	acmp_send_command(CONTROLLER, ACMP_CMD_CONNECT_RX_COMMAND, &acmp_controller_cmd, FALSE, -1, c_tx);
 }
