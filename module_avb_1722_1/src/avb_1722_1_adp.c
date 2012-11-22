@@ -7,6 +7,8 @@
 #include <string.h>
 #include "xccompat.h"
 #include <print.h>
+#include "simple_printf.h"
+#include "avb_1722_1_app_hooks.h"
 
 /* Enumerations for state variables */
 static enum { ADP_ADVERTISE_IDLE,
@@ -290,8 +292,8 @@ void avb_1722_1_adp_discovery_periodic(chanend c_tx)
 		}
 		case ADP_DISCOVERY_ADDED:
 		{
+			avb_controller_on_new_entity_available(&my_guid, &entities[adp_latest_entity_added_index], c_tx);
 			adp_discovery_state = ADP_DISCOVERY_WAITING;
-			/* 5.2 TODO: Generate AVB_1722_1_ENTITY_ADDED */
 			break;
 		}
 		case ADP_DISCOVERY_REMOVED:
