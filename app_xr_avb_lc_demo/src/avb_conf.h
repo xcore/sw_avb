@@ -37,7 +37,6 @@
 
 /* Media clock configuration */
 #define AVB_NUM_MEDIA_CLOCKS 1
-#define I2C_BIT_TIME 1100
 
 /* Add synths from channels 3/4 upwards in I2S for this demo */
 #define I2S_SYNTH_FROM 1
