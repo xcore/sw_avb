@@ -16,7 +16,7 @@ doc/*/.doxygen/*
 doc/*/.linked_dirs/*
 doc/*/.sources/*
 doc/*/.support/*
-.settings/*
+*/.settings/*
 Doxyfile-e
 .DS_Store
 *.pyc
