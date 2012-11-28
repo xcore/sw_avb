@@ -13,31 +13,17 @@
 #endif
 #include "avb_1722_1_app_hooks.h"
 
-void print_guid_ln(unsigned char *g)
-{
-  for (int i=0; i<8; i++)
-  {
-    printhex(g[i]);
-    if (i == 7)
-      printchar('\n');
-    else
-      printchar(':'); 
-  }
-}
-
 /*** ADP ***/
 void __attribute__((weak)) avb_controller_on_new_entity_available(guid_t *my_guid, avb_1722_1_entity_record *entity, chanend c_tx)
 {
-  // printstr("Controller discovered entity "); print_guid_ln(entity->guid.c);
-
-  acmp_controller_connect(my_guid, &entity->guid, c_tx);
+  // Do nothing in the core stack 
 }
 
 
 /*** ACMP ***/
 
 /* The controller has indicated that a listener is connecting to this talker stream */
-void __attribute__((weak)) avb_talker_on_listener_connect(int source_num, unsigned char listener_guid[8])
+void __attribute__((weak)) avb_talker_on_listener_connect(int source_num, guid_t *listener_guid)
 {
   unsigned stream_id[2];
   enum avb_source_state_t state;
@@ -61,7 +47,7 @@ void __attribute__((weak)) avb_talker_on_listener_connect(int source_num, unsign
 }
 
 /* The controller has indicated that a listener is disconnecting from this talker stream */
-void __attribute__((weak)) avb_talker_on_listener_disconnect(int source_num, unsigned char listener_guid[8], int connection_count)
+void __attribute__((weak)) avb_talker_on_listener_disconnect(int source_num, guid_t *listener_guid, int connection_count)
 {
   unsigned stream_id[2];
   enum avb_source_state_t state;
@@ -77,12 +63,12 @@ void __attribute__((weak)) avb_talker_on_listener_disconnect(int source_num, uns
 }
 
 /* The controller has indicated to connect this listener sink to a talker stream */
-void __attribute__((weak)) avb_listener_on_talker_connect(int sink_num, unsigned char dest_addr[6], unsigned int stream_id[2])
+void __attribute__((weak)) avb_listener_on_talker_connect(int sink_num, guid_t *talker_guid, unsigned char dest_addr[6], unsigned int stream_id[2])
 {
   int map[AVB_NUM_MEDIA_INPUTS];
   for (int i = 0; i < AVB_NUM_MEDIA_INPUTS; i++) map[i] = i;
 
-  simple_printf("CONNECTING Listener sink #%d -> Talker stream %x%x, DA: ", sink_num, stream_id[0], stream_id[1]); print_guid_ln(dest_addr);
+  simple_printf("CONNECTING Listener sink #%d -> Talker stream %x%x, DA: ", sink_num, stream_id[0], stream_id[1]); print_mac_ln(dest_addr);
 
   set_avb_sink_sync(sink_num, 0);
   set_avb_sink_channels(sink_num, AVB_NUM_MEDIA_INPUTS);
@@ -95,9 +81,9 @@ void __attribute__((weak)) avb_listener_on_talker_connect(int sink_num, unsigned
 }
 
 /* The controller has indiscated to disconnect this listener sink from a talker stream */
-void __attribute__((weak)) avb_listener_on_talker_disconnect(int sink_num, unsigned char dest_addr[6], unsigned int stream_id[2])
+void __attribute__((weak)) avb_listener_on_talker_disconnect(int sink_num, guid_t *talker_guid, unsigned char dest_addr[6], unsigned int stream_id[2])
 {
-  simple_printf("DISCONNECTING Listener sink #%d -> Talker stream %x%x, DA: ", sink_num, stream_id[0], stream_id[1]); print_guid_ln(dest_addr);
+  simple_printf("DISCONNECTING Listener sink #%d -> Talker stream %x%x, DA: ", sink_num, stream_id[0], stream_id[1]); print_mac_ln(dest_addr);
 
   set_avb_sink_state(sink_num, AVB_SINK_STATE_DISABLED);
 }

@@ -16,7 +16,7 @@ void avb_1722_1_acmp_talker_periodic(chanend c_tx);
 void avb_1722_1_acmp_listener_periodic(chanend c_tx);
 
 void acmp_controller_connect(REFERENCE_PARAM(guid_t, talker_guid), REFERENCE_PARAM(guid_t, listener_guid), chanend c_tx);
-
+void acmp_controller_disconnect_all(chanend c_tx);
 
 unsigned avb_1722_1_acmp_get_talker_connection_info(REFERENCE_PARAM(short,talker));
 

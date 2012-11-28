@@ -238,6 +238,7 @@ void avb_start(void)
 {
 #if AVB_ENABLE_1722_1
   avb_1722_1_adp_announce();
+  avb_1722_1_adp_discover_all();
 #endif
   // Request a multicast addresses for stream transmission
   avb_1722_maap_request_addresses(AVB_NUM_SOURCES, NULL);

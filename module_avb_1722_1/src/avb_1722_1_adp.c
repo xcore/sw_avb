@@ -49,7 +49,7 @@ static unsigned adp_two_second_counter = 0;
 
 // Entity database
 avb_1722_1_entity_record entities[AVB_1722_1_MAX_ENTITIES];
-static int adp_latest_entity_added_index = 0;
+static int adp_latest_entity_added_index = -1;
 
 
 void avb_1722_1_adp_init()
@@ -107,7 +107,7 @@ int avb_1722_1_get_latest_new_entity_idx()
 static int avb_1722_1_entity_database_add(avb_1722_1_adp_packet_t* pkt)
 {
 	guid_t guid;
-	int found_slot_index = AVB_1722_1_MAX_ENTITIES;
+	int found_slot_index = -1;
 	int i;
 	int entity_update = 0;
 
@@ -125,7 +125,7 @@ static int avb_1722_1_entity_database_add(avb_1722_1_adp_packet_t* pkt)
 		}
 	}
 
-	if (found_slot_index != AVB_1722_1_MAX_ENTITIES)
+	if (found_slot_index != -1)
 	{
 		entities[found_slot_index].guid.l = guid.l;
 		entities[found_slot_index].vendor_id = NTOH_U32(pkt->vendor_id);
@@ -151,6 +151,10 @@ static int avb_1722_1_entity_database_add(avb_1722_1_adp_packet_t* pkt)
 			return 1;
 		}
 	}
+	else
+	{
+		// TODO: Database full - we should have a scheme for dealing with this
+	}
 
 	return 0;
 }
@@ -167,8 +171,7 @@ static void avb_1722_1_entity_database_remove(avb_1722_1_adp_packet_t* pkt)
 		{
 			entities[i].guid.l = 0;
 #ifdef AVB_1722_1_ADP_DEBUG_ENTITY_REMOVAL
-			printstr("ADP: Removing entity who advertised departing -> GUID ");
-			printhexln(guid.l);
+			printstr("ADP: Removing entity who advertised departing -> GUID "); print_guid_ln(&entities[i].guid);
 #endif
 		}
 	}
@@ -185,8 +188,7 @@ static unsigned avb_1722_1_entity_database_check_timeout()
 		if (entities[i].timeout < adp_two_second_counter)
 		{
 #ifdef AVB_1722_1_ADP_DEBUG_ENTITY_REMOVAL
-			printstr("ADP: Removing entity who timed out -> GUID ");
-			printhexln(entities[i].guid.l);
+			printstr("ADP: Removing entity who timed out -> GUID "); print_guid_ln(&entities[i].guid);
 #endif
 			entities[i].guid.l=0;
 			return 1;

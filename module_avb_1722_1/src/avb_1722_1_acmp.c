@@ -331,7 +331,10 @@ static void acmp_set_talker_response()
 	int talker = acmp_talker_rcvd_cmd_resp.talker_unique_id;
 
 	acmp_talker_rcvd_cmd_resp.stream_id = acmp_talker_streams[talker].stream_id;
-	for (i=0; i < 6; i++) acmp_talker_rcvd_cmd_resp.stream_dest_mac[i] = acmp_talker_streams[talker].destination_mac[i];
+	for (i=0; i < 6; i++)
+	{
+		acmp_talker_rcvd_cmd_resp.stream_dest_mac[i] = acmp_talker_streams[talker].destination_mac[i];
+	}
 
 	acmp_talker_rcvd_cmd_resp.connection_count = acmp_talker_streams[talker].connection_count;
 }
@@ -352,6 +355,36 @@ void acmp_controller_disconnect(guid_t *talker_guid, guid_t *listener_guid, chan
 	acmp_controller_cmd.listener_guid.l = listener_guid->l;
 
 	acmp_send_command(CONTROLLER, ACMP_CMD_DISCONNECT_RX_COMMAND, &acmp_controller_cmd, FALSE, -1, c_tx);
+}
+
+void acmp_controller_disconnect_all(chanend c_tx)
+{
+	for (int j=0; j < AVB_1722_1_MAX_TALKERS; j++)
+	{
+		if (acmp_talker_streams[j].stream_id.l != 0)
+		{
+			if (acmp_talker_streams[j].connection_count > 0)
+			{
+				for (int i = 0; i < AVB_1722_1_MAX_LISTENERS_PER_TALKER; i++)
+				{
+					if (acmp_talker_streams[j].connected_listeners[i].guid.l != 0)
+					{
+						acmp_controller_disconnect(&my_guid, &acmp_talker_streams[j].connected_listeners[i].guid, c_tx);
+					}
+				}
+			}
+		}
+	}
+	for (int j=0; j < AVB_1722_1_MAX_LISTENERS; j++)
+	{
+		if (acmp_listener_streams[j].stream_id.l != 0)
+		{
+			if (acmp_listener_streams[j].connected)
+			{
+				acmp_controller_disconnect(&acmp_listener_streams[j].talker_guid, &my_guid, c_tx);
+			}
+		}
+	}
 }
 
 static void store_rcvd_cmd_resp(avb_1722_1_acmp_cmd_resp* store, avb_1722_1_acmp_packet_t* pkt)
@@ -385,7 +418,7 @@ static unsigned acmp_listener_valid_listener_unique()
 }
 
 /**
- * See 8.2.2.5.2.2 and 8.2.2.5.2.3 for explanation. 
+ * See 8.2.2.5.2.2 and 8.2.2.5.2.3 for explanation.
  *
  * The connected_to param equal to 1 is equivalent to listenerIsConnectedTo(command) in spec
  */
@@ -397,7 +430,7 @@ static unsigned acmp_listener_is_connected(int connected_to)
 
 	get_avb_sink_state(unique_id, &state);
 	stream_is_reserved = (state != AVB_SINK_STATE_DISABLED);
-	
+
 	if (stream_is_reserved)
 	{
 		if(	acmp_listener_streams[unique_id].talker_guid.l == acmp_listener_rcvd_cmd_resp.talker_guid.l &&
@@ -411,7 +444,7 @@ static unsigned acmp_listener_is_connected(int connected_to)
 			if(!connected_to) return 1;
 		}
 	}
-	
+
 	return 0;
 }
 
@@ -783,7 +816,7 @@ void avb_1722_1_acmp_talker_periodic(chanend c_tx)
 			{
 				acmp_add_talker_stream_info();
 				/* Application hook */
-				avb_talker_on_listener_connect(acmp_talker_rcvd_cmd_resp.talker_unique_id, acmp_talker_rcvd_cmd_resp.listener_guid.c);
+				avb_talker_on_listener_connect(acmp_talker_rcvd_cmd_resp.talker_unique_id, &acmp_talker_rcvd_cmd_resp.listener_guid);
 
 				acmp_set_talker_response();
 				acmp_send_response(ACMP_CMD_CONNECT_TX_RESPONSE, &acmp_talker_rcvd_cmd_resp, ACMP_STATUS_SUCCESS, c_tx);
@@ -803,7 +836,7 @@ void avb_1722_1_acmp_talker_periodic(chanend c_tx)
 				unsigned unique_id = acmp_talker_rcvd_cmd_resp.talker_unique_id;
 				acmp_remove_talker_stream_info();
 				/* Application hook */
-				avb_talker_on_listener_disconnect(unique_id, acmp_talker_rcvd_cmd_resp.listener_guid.c, acmp_talker_streams[unique_id].connection_count);
+				avb_talker_on_listener_disconnect(unique_id, &acmp_talker_rcvd_cmd_resp.listener_guid, acmp_talker_streams[unique_id].connection_count);
 
 				acmp_set_talker_response();
 				acmp_send_response(ACMP_CMD_DISCONNECT_TX_RESPONSE, &acmp_talker_rcvd_cmd_resp, ACMP_STATUS_SUCCESS, c_tx);
@@ -928,17 +961,19 @@ void avb_1722_1_acmp_listener_periodic(chanend c_tx)
 						debug_acmp_status_s[inflight->command.status],
 						inflight->command.sequence_id);
 #endif
-				
+
 				/* FIXME: Make stream ID representation consistent: we have long long, 2 ints and 6 chars */
 
 				stream_id[1] = (unsigned)(acmp_listener_rcvd_cmd_resp.stream_id.l >> 0);
 				stream_id[0] = (unsigned)(acmp_listener_rcvd_cmd_resp.stream_id.l >> 32);
 
 				avb_listener_on_talker_disconnect(acmp_listener_rcvd_cmd_resp.listener_unique_id,
+											&acmp_listener_rcvd_cmd_resp.talker_guid,
 											acmp_listener_rcvd_cmd_resp.stream_dest_mac,
 											stream_id);
-											
+
 				avb_listener_on_talker_connect(acmp_listener_rcvd_cmd_resp.listener_unique_id,
+											&acmp_listener_rcvd_cmd_resp.talker_guid,
 											acmp_listener_rcvd_cmd_resp.stream_dest_mac,
 											stream_id);
 
@@ -972,6 +1007,7 @@ void avb_1722_1_acmp_listener_periodic(chanend c_tx)
 				stream_id[0] = (unsigned)(acmp_listener_rcvd_cmd_resp.stream_id.l >> 32);
 
 				avb_listener_on_talker_disconnect(acmp_listener_rcvd_cmd_resp.listener_unique_id,
+											&acmp_listener_rcvd_cmd_resp.talker_guid,
 											acmp_listener_rcvd_cmd_resp.stream_dest_mac,
 											stream_id);
 
@@ -1044,8 +1080,10 @@ void avb_1722_1_talker_set_mac_address(unsigned talker_unique_id, unsigned char 
 {
 	if (talker_unique_id < AVB_1722_1_MAX_TALKERS)
 	{
-		for (unsigned i=0; i<6; ++i)
+		for (unsigned i=0; i<6; i++)
+		{
 			acmp_talker_streams[talker_unique_id].destination_mac[i] = macaddr[i];
+		}
 	}
 }
 

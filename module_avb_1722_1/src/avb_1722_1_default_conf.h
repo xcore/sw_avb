@@ -12,7 +12,7 @@
 #if AVB_NUM_SOURCES > 0
 #define AVB_1722_1_TALKER_ENABLED 1
 #else
-#define AVB_1722_1_TALKER_ENABLED 1
+#define AVB_1722_1_TALKER_ENABLED 0
 #endif
 #endif
 
