@@ -299,12 +299,13 @@ static void acmp_send_command(int entity_type, int message_type, avb_1722_1_acmp
 {
 	/* We need to save the sequence_id of the Listener command that generated this Talker command for the response */
 	unsigned short original_sequence_id = command->sequence_id;
+	char *pkt_without_eth_header = ((char *)avb_1722_1_buf)+14;
 	command->sequence_id = sequence_id[entity_type];
 	sequence_id[entity_type]++;
 
 	avb_1722_1_create_acmp_packet(command, message_type, ACMP_STATUS_SUCCESS);
 	mac_tx(c_tx, avb_1722_1_buf, AVB_1722_1_ACMP_PACKET_SIZE, ETH_BROADCAST);
-	process_avb_1722_1_acmp_packet((avb_1722_1_acmp_packet_t*)avb_1722_1_buf, c_tx);
+	process_avb_1722_1_acmp_packet((avb_1722_1_acmp_packet_t*)pkt_without_eth_header, c_tx);
 
 	if (!retry)
 	{
