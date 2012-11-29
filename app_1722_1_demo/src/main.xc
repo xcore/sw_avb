@@ -244,8 +244,9 @@ void demo(chanend c_rx, chanend c_tx)
         if ((button_val & REMOTE_SEL) == REMOTE_SEL &&
             (new_val & REMOTE_SEL) == 0)
         {
-          toggle_remote = 1;
+          toggle_remote = !toggle_remote;
           buttons_active = 0;
+          p_mute_led_remote <: (~0) & ~(toggle_remote<<1);
 
         }
         if ((button_val & CHAN_SEL) == CHAN_SEL &&

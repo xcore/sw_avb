@@ -14,23 +14,34 @@
 #endif
 
 extern avb_1722_1_entity_record entities[AVB_1722_1_MAX_ENTITIES];
-int entity_elected_master_clock;
+static int entity_elected_master_clock = 0;
+static int controller_state = 0;
 
 #define XMOS_VENDOR_ID 0x00229700
 
 void simple_demo_controller(int *change_stream, int *toggle_remote, chanend c_tx)
 {
-  if (*toggle_remote)
+  if (*toggle_remote != controller_state)
   {
-    acmp_controller_disconnect_all(c_tx);
-    *toggle_remote = 0;
+    acmp_controller_disconnect_all_listeners(c_tx);
+
+    if (*toggle_remote)
+    {
+      avb_1722_1_acmp_controller_deinit();
+    }
+    else
+    {
+      avb_1722_1_acmp_controller_init();
+      avb_1722_1_entity_database_flush();
+      avb_1722_1_adp_discover_all();
+    }
   }
+  controller_state = *toggle_remote;
 }
 
 void avb_controller_on_new_entity_available(guid_t *my_guid, avb_1722_1_entity_record *entity, chanend c_tx)
 {
-  if (// (!external_controller_on_network) &&
-     (entity->vendor_id == XMOS_VENDOR_ID) &&
+  if ((entity->vendor_id == XMOS_VENDOR_ID) &&
      ((entity->listener_capabilites & AVB_1722_1_ADP_LISTENER_CAPABILITIES_AUDIO_SINK) == AVB_1722_1_ADP_LISTENER_CAPABILITIES_AUDIO_SINK) &&
      (entity->listener_stream_sinks >= 1))
   {
@@ -90,20 +101,13 @@ void avb_talker_on_source_address_reserved(int source_num, unsigned char mac_add
    * what was just set */
   avb_1722_1_acmp_talker_init();
   avb_1722_1_talker_set_mac_address(source_num, mac_addr);
+  avb_1722_1_adp_announce();
 
 #if AVB_1722_1_CONTROLLER_ENABLED
   for (int i=0; i < AVB_1722_1_MAX_ENTITIES; i++)
   {
     if (entities[i].guid.l != 0)
     {
-      // Is there a non-XMOS controller on the network?
-      /*
-      if ((entities[i].vendor_id != XMOS_VENDOR_ID) &&
-         ((entities[i].controller_capabilities & AVB_1722_1_ADP_CONTROLLER_CAPABILITIES_IMPLEMENTED) == AVB_1722_1_ADP_CONTROLLER_CAPABILITIES_IMPLEMENTED))
-      {
-        external_controller_on_network = 1;
-      }
-      */
       // Check to see if we are the only XMOS talker on the network
       if (((entities[i].talker_capabilities & AVB_1722_1_ADP_TALKER_CAPABILITIES_AUDIO_SOURCE)
            == AVB_1722_1_ADP_TALKER_CAPABILITIES_AUDIO_SOURCE))

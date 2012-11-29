@@ -36,9 +36,7 @@ enum {	ACMP_TALKER_IDLE,
 		ACMP_TALKER_CONNECT,
 		ACMP_TALKER_DISCONNECT,
 		ACMP_TALKER_GET_STATE,
-		ACMP_TALKER_GET_CONNECTION,
-		ACMP_TALKER_WAITING_FOR_CONNECT,
-		ACMP_TALKER_WAITING_FOR_DISCONNECT
+		ACMP_TALKER_GET_CONNECTION
 } acmp_talker_state = ACMP_TALKER_IDLE;
 
 enum {	ACMP_LISTENER_IDLE,
@@ -48,8 +46,6 @@ enum {	ACMP_LISTENER_IDLE,
 		ACMP_LISTENER_CONNECT_TX_RESPONSE,
 		ACMP_LISTENER_DISCONNECT_TX_RESPONSE,
 		ACMP_LISTENER_GET_STATE,
-		ACMP_LISTENER_WAITING_FOR_CONNECT,
-		ACMP_LISTENER_WAITING_FOR_DISCONNECT,
 		ACMP_LISTENER_RX_TIMEOUT
 } acmp_listener_state = ACMP_LISTENER_IDLE;
 
@@ -102,6 +98,11 @@ void avb_1722_1_acmp_controller_init()
 	init_avb_timer(&acmp_inflight_timer[CONTROLLER], 10);
 	acmp_centisecond_counter[CONTROLLER] = 0;
 	start_avb_timer(&acmp_inflight_timer[CONTROLLER], 1);
+}
+
+void avb_1722_1_acmp_controller_deinit()
+{
+	acmp_controller_state = ACMP_CONTROLLER_IDLE;
 }
 
 void avb_1722_1_acmp_talker_init()
@@ -358,7 +359,7 @@ void acmp_controller_disconnect(guid_t *talker_guid, guid_t *listener_guid, chan
 	acmp_send_command(CONTROLLER, ACMP_CMD_DISCONNECT_RX_COMMAND, &acmp_controller_cmd, FALSE, -1, c_tx);
 }
 
-void acmp_controller_disconnect_all(chanend c_tx)
+void acmp_controller_disconnect_all_listeners(chanend c_tx)
 {
 	for (int j=0; j < AVB_1722_1_MAX_TALKERS; j++)
 	{
@@ -376,6 +377,10 @@ void acmp_controller_disconnect_all(chanend c_tx)
 			}
 		}
 	}
+}
+
+void acmp_controller_disconnect_all_talkers(chanend c_tx)
+{
 	for (int j=0; j < AVB_1722_1_MAX_LISTENERS; j++)
 	{
 		if (acmp_listener_streams[j].stream_id.l != 0)
@@ -726,6 +731,9 @@ void avb_1722_1_acmp_controller_periodic(chanend c_tx)
 	switch (acmp_controller_state)
 	{
 		case ACMP_CONTROLLER_IDLE:
+		{
+			break;
+		}
 		case ACMP_CONTROLLER_WAITING:
 		{
 			acmp_progress_inflight_timer(CONTROLLER);
@@ -801,9 +809,10 @@ void avb_1722_1_acmp_talker_periodic(chanend c_tx)
 	switch (acmp_talker_state)
 	{
 		case ACMP_TALKER_IDLE:
+		{
+			break;
+		}
 		case ACMP_TALKER_WAITING:
-		case ACMP_TALKER_WAITING_FOR_CONNECT:
-		case ACMP_TALKER_WAITING_FOR_DISCONNECT:
 		{
 			return;
 		}
@@ -887,9 +896,9 @@ void avb_1722_1_acmp_listener_periodic(chanend c_tx)
 	switch (acmp_listener_state)
 	{
 		case ACMP_LISTENER_IDLE:
-		case ACMP_LISTENER_WAITING_FOR_CONNECT:
-		case ACMP_LISTENER_WAITING_FOR_DISCONNECT:
+		{
 			break;
+		}
 		case ACMP_LISTENER_WAITING:
 		{
 			acmp_progress_inflight_timer(LISTENER);
@@ -955,8 +964,6 @@ void avb_1722_1_acmp_listener_periodic(chanend c_tx)
 				acmp_send_response(ACMP_CMD_CONNECT_RX_RESPONSE, &acmp_listener_rcvd_cmd_resp, acmp_listener_rcvd_cmd_resp.status, c_tx);
 				acmp_add_listener_stream_info();
 
-				acmp_listener_state = ACMP_LISTENER_WAITING_FOR_CONNECT;
-
 #ifdef AVB_1722_1_ACMP_DEBUG_INFLIGHT
 				simple_printf("ACMP Listener: Removed inflight CONNECT_TX_COMMAND with response %s - seq id: %d\n",
 						debug_acmp_status_s[inflight->command.status],
@@ -996,8 +1003,6 @@ void avb_1722_1_acmp_listener_periodic(chanend c_tx)
 
 				acmp_send_response(ACMP_CMD_DISCONNECT_RX_RESPONSE, &acmp_listener_rcvd_cmd_resp, acmp_listener_rcvd_cmd_resp.status, c_tx);
 				acmp_zero_listener_stream_info(acmp_listener_rcvd_cmd_resp.listener_unique_id);
-
-				acmp_listener_state = ACMP_LISTENER_WAITING_FOR_DISCONNECT;
 
 #ifdef AVB_1722_1_ACMP_DEBUG_INFLIGHT
 				simple_printf("ACMP Listener: Removed inflight DISCONNECT_TX_COMMAND with response %s - seq id: %d\n",

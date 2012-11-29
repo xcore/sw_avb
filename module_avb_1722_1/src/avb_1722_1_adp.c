@@ -54,6 +54,7 @@ static int adp_latest_entity_added_index = -1;
 
 void avb_1722_1_adp_init()
 {
+	avb_1722_1_entity_database_flush();
 	init_avb_timer(&adp_advertise_timer, 1);
 	init_avb_timer(&adp_readvertise_timer, 100);
 	init_avb_timer(&adp_discovery_timer, 200);
@@ -157,6 +158,14 @@ static int avb_1722_1_entity_database_add(avb_1722_1_adp_packet_t* pkt)
 	}
 
 	return 0;
+}
+
+void avb_1722_1_entity_database_flush(void)
+{
+	for (int i=0; i < AVB_1722_1_MAX_ENTITIES; ++i)
+	{
+		entities[i].guid.l = 0;
+	}
 }
 
 static void avb_1722_1_entity_database_remove(avb_1722_1_adp_packet_t* pkt)
