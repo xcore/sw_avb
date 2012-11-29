@@ -65,14 +65,14 @@ void __attribute__((weak)) avb_talker_on_listener_disconnect(int source_num, gui
 /* The controller has indicated to connect this listener sink to a talker stream */
 void __attribute__((weak)) avb_listener_on_talker_connect(int sink_num, guid_t *talker_guid, unsigned char dest_addr[6], unsigned int stream_id[2])
 {
-  int map[AVB_NUM_MEDIA_INPUTS];
-  for (int i = 0; i < AVB_NUM_MEDIA_INPUTS; i++) map[i] = i;
+  int map[AVB_NUM_MEDIA_OUTPUTS];
+  for (int i = 0; i < AVB_NUM_MEDIA_OUTPUTS; i++) map[i] = i;
 
   simple_printf("CONNECTING Listener sink #%d -> Talker stream %x%x, DA: ", sink_num, stream_id[0], stream_id[1]); print_mac_ln(dest_addr);
 
   set_avb_sink_sync(sink_num, 0);
-  set_avb_sink_channels(sink_num, AVB_NUM_MEDIA_INPUTS);
-  set_avb_sink_map(sink_num, map, AVB_NUM_MEDIA_INPUTS);
+  set_avb_sink_channels(sink_num, AVB_NUM_MEDIA_OUTPUTS);
+  set_avb_sink_map(sink_num, map, AVB_NUM_MEDIA_OUTPUTS);
   set_avb_sink_id(sink_num, stream_id);
   set_avb_sink_addr(sink_num, dest_addr, 6);
 

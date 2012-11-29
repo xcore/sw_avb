@@ -41,19 +41,26 @@ void simple_demo_controller(int *change_stream, int *toggle_remote, chanend c_tx
 
 void avb_controller_on_new_entity_available(guid_t *my_guid, avb_1722_1_entity_record *entity, chanend c_tx)
 {
-  if ((entity->vendor_id == XMOS_VENDOR_ID) &&
-     ((entity->listener_capabilites & AVB_1722_1_ADP_LISTENER_CAPABILITIES_AUDIO_SINK) == AVB_1722_1_ADP_LISTENER_CAPABILITIES_AUDIO_SINK) &&
-     (entity->listener_stream_sinks >= 1))
+  enum avb_source_state_t state;
+  get_avb_source_state(0, &state);
+
+  // If our first Talker stream isn't connected already, connect to the first XMOS listener we see
+  if (state == AVB_SOURCE_STATE_DISABLED)
   {
-    acmp_controller_connect(my_guid, &entity->guid, c_tx);
+    if ((entity->vendor_id == XMOS_VENDOR_ID) &&
+       ((entity->listener_capabilites & AVB_1722_1_ADP_LISTENER_CAPABILITIES_AUDIO_SINK) == AVB_1722_1_ADP_LISTENER_CAPABILITIES_AUDIO_SINK) &&
+       (entity->listener_stream_sinks >= 1))
+    {
+      acmp_controller_connect(my_guid, &entity->guid, c_tx);
+    }
   }
 }
 
 /* The controller has indicated to connect this listener sink to a talker stream */
 void avb_listener_on_talker_connect(int sink_num, REFERENCE_PARAM(guid_t, talker_guid), unsigned char dest_addr[6], unsigned int stream_id[2])
 {
-  int map[AVB_NUM_MEDIA_INPUTS];
-  for (int i = 0; i < AVB_NUM_MEDIA_INPUTS; i++) map[i] = i;
+  int map[AVB_NUM_MEDIA_OUTPUTS];
+  for (int i = 0; i < AVB_NUM_MEDIA_OUTPUTS; i++) map[i] = i;
 
   simple_printf("CONNECTING Listener sink #%d -> Talker stream %x%x, DA: ", sink_num, stream_id[0], stream_id[1]); print_mac_ln(dest_addr);
 
@@ -73,8 +80,8 @@ void avb_listener_on_talker_connect(int sink_num, REFERENCE_PARAM(guid_t, talker
   }
 
   set_avb_sink_sync(sink_num, 0);
-  set_avb_sink_channels(sink_num, AVB_NUM_MEDIA_INPUTS);
-  set_avb_sink_map(sink_num, map, AVB_NUM_MEDIA_INPUTS);
+  set_avb_sink_channels(sink_num, AVB_NUM_MEDIA_OUTPUTS);
+  set_avb_sink_map(sink_num, map, AVB_NUM_MEDIA_OUTPUTS);
   set_avb_sink_id(sink_num, stream_id);
   set_avb_sink_addr(sink_num, dest_addr, 6);
 
@@ -84,8 +91,6 @@ void avb_listener_on_talker_connect(int sink_num, REFERENCE_PARAM(guid_t, talker
 
 void avb_talker_on_source_address_reserved(int source_num, unsigned char mac_addr[6])
 {
-  enum avb_source_state_t state;
-  get_avb_source_state(source_num, &state);
   // Do some debug print
   simple_printf("MAAP reserved Talker stream #%d address: %x:%x:%x:%x:%x:%x\n", source_num,
                             mac_addr[0],
