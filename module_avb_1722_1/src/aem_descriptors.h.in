@@ -110,11 +110,9 @@ unsigned char desc_audio_unit_0[] =
   U16(0),                                     /* base_control_block */
   U32(48000),                                 /* current_sample_rate */
   U16(144),                                   /* sample_rates_offset */
-  U16(3),                                     /* sample_rates_count */
+  U16(1),                                     /* sample_rates_count */
   /* sample_rates */
-  U32(48000),
-  U32(96000),
-  U32(192000)
+  U32(48000)
 };
 
 /*******************************/
@@ -366,7 +364,7 @@ unsigned char desc_stream_input_0[] =
   U16(AEM_STREAM_FLAGS_CLASS_A),              /* stream_flags */
   U64(0x00a0020240000200),                    /* current_format */
   U16(132),                                   /* formats_offset */
-  U16(3),                                     /* number_of_formats */
+  U16(1),                                     /* number_of_formats */
   0, 0, 0, 0, 0, 0, 0, 0,                     /* backup_talker_guid[0] */
   U16(0),                                     /* backup_talker_unique[0] */
   0, 0, 0, 0, 0, 0, 0, 0,                     /* backup_talker_guid[1] */
@@ -378,9 +376,9 @@ unsigned char desc_stream_input_0[] =
   U16(0),                                     /* avb_interface_id */
   U32(0),                                     /* buffer_length */
   /* 130-> formats */
-  U64(0x00a0020240000200),
-  U64(0x00a0040240000200),
-  U64(0x00a0060240000200)
+  U64(0x00a0020240000200)
+  // U64(0x00a0040240000200),
+  // U64(0x00a0060240000200)
 };
 
 /* Output */
@@ -394,7 +392,7 @@ unsigned char desc_stream_output_0[] =
   U16(AEM_STREAM_FLAGS_CLASS_A),              /* stream_flags */
   U64(0x00a0020240000200),                    /* current_format */
   U16(132),                                   /* formats_offset */
-  U16(3),                                     /* number_of_formats */
+  U16(1),                                     /* number_of_formats */
   0, 0, 0, 0, 0, 0, 0, 0,                     /* backup_talker_guid[0] */
   U16(0),                                     /* backup_talker_unique[0] */
   0, 0, 0, 0, 0, 0, 0, 0,                     /* backup_talker_guid[1] */
@@ -406,9 +404,9 @@ unsigned char desc_stream_output_0[] =
   U16(0),                                     /* avb_interface_id */
   U32(0),                                     /* buffer_length */
   /* 130-> formats */
-  U64(0x00a0020240000200),
-  U64(0x00a0040240000200),
-  U64(0x00a0060240000200)
+  U64(0x00a0020240000200)
+  // U64(0x00a0040240000200),
+  // U64(0x00a0060240000200)
 };
 
 /* Jack Descriptors */
