@@ -466,7 +466,7 @@ unsigned char desc_clock_source_0[] =
   U16(AEM_CLOCK_SOURCE_FLAGS_STREAM_ID),      /* 70-71 clock_source_flags */
   U16(AEM_CLOCK_SOURCE_INPUT_STREAM),         /* 72-73 clock_source_type */
   0, 0, 0, 0, 0, 0, 0, 0,                     /* 74-81 clock_source_identifier */
-  U16(AEM_AUDIO_UNIT_TYPE),                   /* 82-83 clock_source_location_type */
+  U16(AEM_STREAM_INPUT_TYPE),                 /* 82-83 clock_source_location_type */
   U16(0)                                      /* 84-85 clock_source_location_id */
 };
 
@@ -478,7 +478,7 @@ unsigned char desc_clock_domain_0[] =
   "Clock Domain",                             /* object_name */
   U16(AEM_NO_STRING),                         /* localized_description */
   U16(0),                                     /* clock_source_index */
-  U16(10),                                    /* clock_sources_offset */
+  U16(76),                                    /* clock_sources_offset */
   U16(1),                                     /* clock_sources_count */
   U16(0),                                     /* clock_sources */ 
 };
