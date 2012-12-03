@@ -942,7 +942,16 @@ void avb_1722_1_acmp_listener_periodic(chanend c_tx)
 			{
 				if (acmp_listener_is_connected(1))
 				{
-					acmp_send_command(LISTENER, ACMP_CMD_DISCONNECT_TX_COMMAND, &acmp_listener_rcvd_cmd_resp, FALSE, -1, c_tx);;
+					unsigned stream_id[2];
+					acmp_send_command(LISTENER, ACMP_CMD_DISCONNECT_TX_COMMAND, &acmp_listener_rcvd_cmd_resp, FALSE, -1, c_tx);
+
+					stream_id[1] = (unsigned)(acmp_listener_rcvd_cmd_resp.stream_id.l >> 0);
+					stream_id[0] = (unsigned)(acmp_listener_rcvd_cmd_resp.stream_id.l >> 32);
+
+					avb_listener_on_talker_disconnect(acmp_listener_rcvd_cmd_resp.listener_unique_id,
+											&acmp_listener_rcvd_cmd_resp.talker_guid,
+											acmp_listener_rcvd_cmd_resp.stream_dest_mac,
+											stream_id);
 				}
 				else
 				{
@@ -996,7 +1005,6 @@ void avb_1722_1_acmp_listener_periodic(chanend c_tx)
 		{
 			if (acmp_listener_valid_listener_unique())
 			{
-				unsigned stream_id[2];
 				avb_1722_1_acmp_inflight_command *inflight;
 				inflight = acmp_remove_inflight(LISTENER);
 				acmp_listener_rcvd_cmd_resp.sequence_id = inflight->original_sequence_id;
@@ -1009,13 +1017,6 @@ void avb_1722_1_acmp_listener_periodic(chanend c_tx)
 						debug_acmp_status_s[inflight->command.status],
 						inflight->command.sequence_id);
 #endif
-				stream_id[1] = (unsigned)(acmp_listener_rcvd_cmd_resp.stream_id.l >> 0);
-				stream_id[0] = (unsigned)(acmp_listener_rcvd_cmd_resp.stream_id.l >> 32);
-
-				avb_listener_on_talker_disconnect(acmp_listener_rcvd_cmd_resp.listener_unique_id,
-											&acmp_listener_rcvd_cmd_resp.talker_guid,
-											acmp_listener_rcvd_cmd_resp.stream_dest_mac,
-											stream_id);
 
 				acmp_listener_rcvd_cmd_resp.status = ACMP_STATUS_SUCCESS;
 				acmp_listener_state = ACMP_LISTENER_WAITING;
