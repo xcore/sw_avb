@@ -214,7 +214,7 @@ unsigned char desc_stream_port_output_0[] =
   U16(0),                                     /* number_of_controls */
   U16(0),                                     /* base_control */
   U16(AVB_NUM_MEDIA_INPUTS),                  /* number_of_clusters */
-  U16(AVB_NUM_MEDIA_INPUTS),                  /* base_cluster */
+  U16(AVB_NUM_MEDIA_OUTPUTS),                 /* base_cluster */
   U16(1),                                     /* number_of_maps */
   U16(1)                                      /* base_map */
 };

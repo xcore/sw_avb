@@ -138,15 +138,15 @@ static int create_aem_read_descriptor_response(unsigned short read_type, unsigne
       descriptor = &desc_audio_cluster_template[0];
       // The descriptor id is also the channel number
       descriptor[3] = (unsigned char)read_id;
-      if (read_id >= AVB_NUM_MEDIA_INPUTS)
+      if (read_id < AVB_NUM_MEDIA_OUTPUTS)
       {
-        chan_id = (char)read_id - AVB_NUM_MEDIA_INPUTS;
+        chan_id = (char)read_id;
         strcpy((char*)&descriptor[4], "Output ");
         descriptor[11] = chan_id + 0x30;
       }
       else
       {
-        chan_id = (char)read_id;
+        chan_id = (char)read_id - AVB_NUM_MEDIA_OUTPUTS;
         strcpy((char*)&descriptor[4], "Input ");
         descriptor[10] = chan_id + 0x30;
         descriptor[11] = '\0'; // NUL
