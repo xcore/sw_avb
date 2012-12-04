@@ -188,8 +188,8 @@ media_output_fifo_maintain(media_output_fifo_t s0,
         s->local_ts = 0;
         s->ptp_ts = 0;
         s->marker = 0;
-#ifdef OUTPUT_DURING_LOCK
-        s->zero_flag = 0;
+#if (OUTPUT_DURING_LOCK == 0)
+        s->zero_flag = 1;
 #endif
       }
       break;
