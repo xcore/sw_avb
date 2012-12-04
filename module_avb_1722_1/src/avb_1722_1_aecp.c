@@ -128,40 +128,80 @@ static int create_aem_read_descriptor_response(unsigned short read_type, unsigne
   unsigned char *descriptor;
   int found_descriptor = 0;
 
-  /* Search for the descriptor */
-  while (aem_descriptor_list[i] <= read_type)
+#if AEM_GENERATE_CLUSTERS_MAP_ON_FLY
+  // Generate audio clusters on the fly (to reduce memory)
+  if (read_type == AEM_AUDIO_CLUSTER_TYPE)
   {
-    int num_descriptors = aem_descriptor_list[i+1];
-
-    if (aem_descriptor_list[i] == read_type)
+    if (read_id < (AVB_NUM_MEDIA_OUTPUTS+AVB_NUM_MEDIA_INPUTS))
     {
-      for (int j=0, k=2; j < num_descriptors; j++, k += 2)
+      char chan_id;
+      descriptor = &desc_audio_cluster_template[0];
+      // The descriptor id is also the channel number
+      descriptor[3] = (unsigned char)read_id;
+      if (read_id >= AVB_NUM_MEDIA_INPUTS)
       {
-        desc_size_bytes = aem_descriptor_list[i+k];
-        descriptor = (unsigned char *)aem_descriptor_list[i+k+1];
-        
-        #if 0
-        // Generate audio clusters on the fly (to reduce memory)
-        if (read_type == AEM_AUDIO_CLUSTER_TYPE)
+        chan_id = (char)read_id - AVB_NUM_MEDIA_INPUTS;
+        strcpy((char*)&descriptor[4], "Output ");
+        descriptor[11] = chan_id + 0x30;
+      }
+      else
+      {
+        chan_id = (char)read_id;
+        strcpy((char*)&descriptor[4], "Input ");
+        descriptor[10] = chan_id + 0x30;
+        descriptor[11] = '\0'; // NUL
+      }
+      desc_size_bytes = sizeof(desc_audio_cluster_template);
+      found_descriptor = 1;
+    }
+  }
+  else if (read_type == AEM_AUDIO_MAP_TYPE)
+  {
+    if (read_id < (AVB_NUM_SINKS+AVB_NUM_SOURCES))
+    {
+      int num_mappings = (read_id == 0) ? AVB_NUM_MEDIA_OUTPUTS : AVB_NUM_MEDIA_INPUTS;
+
+      /* Since the map descriptors aren't constant size, unlike the clusters, and 
+       * dependent on the number of channels, we don't use a template */
+      
+      struct ethernet_hdr_t *hdr = (ethernet_hdr_t*) &avb_1722_1_buf[0];
+      avb_1722_1_aecp_packet_t *pkt = (avb_1722_1_aecp_packet_t*) (hdr + AVB_1722_1_PACKET_BODY_POINTER_OFFSET);
+      avb_1722_1_aecp_aem_msg_t *aem = (avb_1722_1_aecp_aem_msg_t*)(pkt->data.payload);
+      unsigned char *pktptr = (unsigned char *)&(aem->command.read_descriptor_resp.descriptor);
+
+      desc_size_bytes = 8+(num_mappings*8);
+
+      memset(pktptr, 0, desc_size_bytes);
+ 
+      pktptr[0*2+1] = AEM_AUDIO_MAP_TYPE;
+      pktptr[1*2+1] = read_id;
+      pktptr[2*2+1] = 8;
+      pktptr[3*2+1] = num_mappings;
+
+      for (int i=0; i < num_mappings; i++)
+      {
+        pktptr[11+(8*i)] = i;
+        pktptr[13+(8*i)] = i;
+      }
+
+      found_descriptor = 2; // 2 signifies do not copy descriptor below
+    }
+  }
+  else
+#endif
+  {
+    /* Search for the descriptor */
+    while (aem_descriptor_list[i] <= read_type)
+    {
+      int num_descriptors = aem_descriptor_list[i+1];
+
+      if (aem_descriptor_list[i] == read_type)
+      {
+        for (int j=0, k=2; j < num_descriptors; j++, k += 2)
         {
-          char chan_id;
-          // The descriptor id is also the channel number
-          descriptor[3] = (unsigned char)read_id;
-          if (read_id >= AVB_NUM_MEDIA_INPUTS)
-          {
-            // This is nasty for non power of 2 inputs - will do a DIV!
-            chan_id = (char)read_id % AVB_NUM_MEDIA_INPUTS;
-          }
-          else
-          {
-            chan_id = (char)read_id;
-          }
-          descriptor[19] = chan_id + 0x30;
-          found_descriptor = 1;
-        }
-        else
-        #endif
-        {
+          desc_size_bytes = aem_descriptor_list[i+k];
+          descriptor = (unsigned char *)aem_descriptor_list[i+k+1];
+          
           // TODO: Write macros for descriptor fields (or cast to structs??)
           if (( ((unsigned)descriptor[2] << 8) | ((unsigned)descriptor[3]) ) == read_id)
           {
@@ -169,12 +209,12 @@ static int create_aem_read_descriptor_response(unsigned short read_type, unsigne
             break;
           }
         }
+
       }
 
+      i += ((num_descriptors*2)+2);
+      if (i >= (sizeof(aem_descriptor_list)>>2)) break;
     }
-
-    i += ((num_descriptors*2)+2);
-    if (i >= (sizeof(aem_descriptor_list)>>2)) break;
   }
 
 
@@ -186,8 +226,8 @@ static int create_aem_read_descriptor_response(unsigned short read_type, unsigne
 
     avb_1722_1_aecp_aem_msg_t *aem = (avb_1722_1_aecp_aem_msg_t*)avb_1722_1_create_aecp_response_header(src_addr, AECP_AEM_STATUS_SUCCESS, desc_size_bytes+16, pkt);
 
-    memcpy(aem, pkt->data.payload, 48);
-    memcpy(&(aem->command.read_descriptor_resp.descriptor), descriptor, desc_size_bytes+40);
+    memcpy(aem, pkt->data.payload, 6);
+    if (found_descriptor < 2) memcpy(&(aem->command.read_descriptor_resp.descriptor), descriptor, desc_size_bytes+40);
 
     return packet_size;
   }

@@ -31,15 +31,15 @@
 
 /* Media configuration */
 #define AVB_1722_FORMAT_61883_6 1
-#define AVB_NUM_MEDIA_OUTPUTS 2
-#define AVB_NUM_MEDIA_INPUTS 2
+#define AVB_NUM_MEDIA_OUTPUTS 8
+#define AVB_NUM_MEDIA_INPUTS 8
 #define AVB_NUM_MEDIA_UNITS 1
 
 /* Media clock configuration */
 #define AVB_NUM_MEDIA_CLOCKS 1
 
 /* Add synths from channels 3/4 upwards in I2S for this demo */
-// #define I2S_SYNTH_FROM 1
+#define I2S_SYNTH_FROM 1
 
 #define AVB_MAX_AUDIO_SAMPLE_RATE 96000
 
@@ -54,6 +54,8 @@
 #define AVB_1722_1_LISTENER_ENABLED 1
 
 #define AVB_1722_1_AEM_ENABLED 1
+
+#define AEM_GENERATE_CLUSTERS_MAP_ON_FLY 1
 
 /* 1722.1 Debug */
 // #define AVB_1722_1_ACMP_DEBUG_INFLIGHT

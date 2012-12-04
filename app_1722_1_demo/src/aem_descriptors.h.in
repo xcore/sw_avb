@@ -127,7 +127,7 @@ unsigned char desc_stream_port_input_0[] =
   U16(0),                                     /* port_flags */
   U16(0),                                     /* number_of_controls */
   U16(0),                                     /* base_control */
-  U16(2),                                     /* number_of_clusters */
+  U16(AVB_NUM_MEDIA_OUTPUTS),                 /* number_of_clusters */
   U16(0),                                     /* base_cluster */
   U16(1),                                     /* number_of_maps */
   U16(0)                                      /* base_map */
@@ -135,6 +135,22 @@ unsigned char desc_stream_port_input_0[] =
 
 /* Audio Input Clusters */
 
+#if AEM_GENERATE_CLUSTERS_MAP_ON_FLY
+unsigned char desc_audio_cluster_template[] =
+{
+  U16(AEM_AUDIO_CLUSTER_TYPE),                /* 0-1 descriptor_type */
+  U16(0),                                     /* 2-3 descriptor_id */ 
+  "Input 0",                                  /* object_name */
+  U16(AEM_NO_STRING),                         /* localized_description */
+  U16(AEM_INVALID_TYPE),                      /* signal_type */
+  U16(0),                                     /* signal_id */
+  U16(0),                                     /* signal_output */
+  U32(0),                                     /* path_latency */
+  U32(0),                                     /* block_latency */
+  U16(1),                                     /* channel_count */
+  AEM_AUDIO_CLUSTER_FORMAT_MBLA               /* format */
+};
+#else
 unsigned char desc_audio_cluster_0[] =
 {
   U16(AEM_AUDIO_CLUSTER_TYPE),                /* 0-1 descriptor_type */
@@ -165,7 +181,6 @@ unsigned char desc_audio_cluster_1[] =
   AEM_AUDIO_CLUSTER_FORMAT_MBLA               /* format */
 };
 
-
 /* Audio Input Map */
 
 unsigned char desc_audio_map_0[] =
@@ -184,6 +199,7 @@ unsigned char desc_audio_map_0[] =
   U16(1),                                     /* mapping_cluster_offset[0] */
   U16(0),                                     /* mapping_cluster_channel[0] */
 };
+#endif
 
 /*****************************/
 
@@ -197,14 +213,15 @@ unsigned char desc_stream_port_output_0[] =
   U16(0),                                     /* port_flags */
   U16(0),                                     /* number_of_controls */
   U16(0),                                     /* base_control */
-  U16(2),                                     /* number_of_clusters */
-  U16(2),                                     /* base_cluster */
+  U16(AVB_NUM_MEDIA_INPUTS),                  /* number_of_clusters */
+  U16(AVB_NUM_MEDIA_INPUTS),                  /* base_cluster */
   U16(1),                                     /* number_of_maps */
   U16(1)                                      /* base_map */
 };
 
 /* Audio Output Clusters */
 
+#if (AEM_GENERATE_CLUSTERS_MAP_ON_FLY == 0)
 unsigned char desc_audio_cluster_2[] =
 {
   U16(AEM_AUDIO_CLUSTER_TYPE),                /* 0-1 descriptor_type */
@@ -253,6 +270,7 @@ unsigned char desc_audio_map_1[] =
   U16(1),                                     /* mapping_cluster_offset[0] */
   U16(0),                                     /* mapping_cluster_channel[0] */
 };
+#endif
 
 /*******************************/
 
@@ -362,7 +380,11 @@ unsigned char desc_stream_input_0[] =
   U16(AEM_NO_STRING),                         /* 68-69 localized_description */
   U16(0),                                     /* 70-71 clock_domain_index */
   U16(AEM_STREAM_FLAGS_CLASS_A),              /* stream_flags */
-  U64(0x00a0020240000200),                    /* current_format */
+  0x00, 0xa0, 0x02, AVB_NUM_MEDIA_OUTPUTS,    /* current_format */
+  0x40, // b[0], nb[1], reserved[2:]
+  0, // label_iec_60958_cnt
+  AVB_NUM_MEDIA_OUTPUTS, // label_mbla_cnt
+  0, // label_midi_cnt[0:3], label_smptecnt[4:]
   U16(132),                                   /* formats_offset */
   U16(1),                                     /* number_of_formats */
   0, 0, 0, 0, 0, 0, 0, 0,                     /* backup_talker_guid[0] */
@@ -376,9 +398,14 @@ unsigned char desc_stream_input_0[] =
   U16(0),                                     /* avb_interface_id */
   U32(0),                                     /* buffer_length */
   /* 130-> formats */
-  U64(0x00a0020240000200)
-  // U64(0x00a0040240000200),
-  // U64(0x00a0060240000200)
+  0x00, 0xa0, 0x02, AVB_NUM_MEDIA_OUTPUTS,
+  0x40, // b[0], nb[1], reserved[2:]
+  0, // label_iec_60958_cnt
+  AVB_NUM_MEDIA_OUTPUTS, // label_mbla_cnt
+  0 // label_midi_cnt[0:3], label_smptecnt[4:]
+  // U64(0x00a0020240000200) // 48K, 2 chan
+  // U64(0x00a0040240000200), // 96K, 2 chan
+  // U64(0x00a0060240000200) // 192K, 2 chan
 };
 
 /* Output */
@@ -390,7 +417,11 @@ unsigned char desc_stream_output_0[] =
   U16(AEM_NO_STRING),                         /* 68-69 localized_description */
   U16(0),                                     /* 70-71 clock_domain_index */
   U16(AEM_STREAM_FLAGS_CLASS_A),              /* stream_flags */
-  U64(0x00a0020240000200),                    /* current_format */
+  0x00, 0xa0, 0x02, AVB_NUM_MEDIA_INPUTS,     /* current_format */                           /* current_format */
+  0x40, // b[0], nb[1], reserved[2:]
+  0, // label_iec_60958_cnt
+  AVB_NUM_MEDIA_INPUTS, // label_mbla_cnt
+  0, // label_midi_cnt[0:3], label_smptecnt[4:]
   U16(132),                                   /* formats_offset */
   U16(1),                                     /* number_of_formats */
   0, 0, 0, 0, 0, 0, 0, 0,                     /* backup_talker_guid[0] */
@@ -404,9 +435,14 @@ unsigned char desc_stream_output_0[] =
   U16(0),                                     /* avb_interface_id */
   U32(0),                                     /* buffer_length */
   /* 130-> formats */
-  U64(0x00a0020240000200)
-  // U64(0x00a0040240000200),
-  // U64(0x00a0060240000200)
+  0x00, 0xa0, 0x02, AVB_NUM_MEDIA_INPUTS,
+  0x40, // b[0], nb[1], reserved[2:]
+  0, // label_iec_60958_cnt
+  AVB_NUM_MEDIA_INPUTS, // label_mbla_cnt
+  0 // label_midi_cnt[0:3], label_smptecnt[4:]
+  // U64(0x00a0020240000200) // 48K, 2 chan
+  // U64(0x00a0040240000200), // 96K, 2 chan
+  // U64(0x00a0060240000200) // 192K, 2 chan
 };
 
 /* Jack Descriptors */
@@ -527,8 +563,10 @@ unsigned int aem_descriptor_list[] =
   AEM_STREAM_PORT_OUTPUT_TYPE, 1, sizeof(desc_stream_port_output_0), (unsigned)desc_stream_port_output_0,
   AEM_EXTERNAL_PORT_INPUT_TYPE, 1, sizeof(desc_external_input_port_0), (unsigned)desc_external_input_port_0,
   AEM_EXTERNAL_PORT_OUTPUT_TYPE, 1, sizeof(desc_external_output_port_0), (unsigned)desc_external_output_port_0,
+#if (AEM_GENERATE_CLUSTERS_MAP_ON_FLY == 0)
   AEM_AUDIO_CLUSTER_TYPE, 4, sizeof(desc_audio_cluster_0), (unsigned)desc_audio_cluster_0, sizeof(desc_audio_cluster_1), (unsigned)desc_audio_cluster_1, sizeof(desc_audio_cluster_2), (unsigned)desc_audio_cluster_2, sizeof(desc_audio_cluster_3), (unsigned)desc_audio_cluster_3,
   AEM_AUDIO_MAP_TYPE, 2, sizeof(desc_audio_map_0), (unsigned)desc_audio_map_0, sizeof(desc_audio_map_1), (unsigned)desc_audio_map_1,
+#endif
   /* AEM_CONTROL_TYPE, 1, sizeof(desc_control_mute), (unsigned)desc_control_mute, */
   AEM_CLOCK_DOMAIN_TYPE, 1, sizeof(desc_clock_domain_0), (unsigned)desc_clock_domain_0
 };

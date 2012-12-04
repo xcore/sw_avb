@@ -205,7 +205,7 @@ void demo(chanend c_rx, chanend c_tx)
 
   set_avb_source_channels(0, AVB_NUM_MEDIA_INPUTS);
   for (int i = 0; i < AVB_NUM_MEDIA_INPUTS; i++)
-      map[i] = i;
+    map[i] = i;
   set_avb_source_map(0, map, AVB_NUM_MEDIA_INPUTS);
   set_avb_source_format(0, AVB_SOURCE_FORMAT_MBLA_24BIT, sample_rate);
   set_avb_source_sync(0, 0); // use the media_clock defined above
@@ -252,8 +252,33 @@ void demo(chanend c_rx, chanend c_tx)
         if ((button_val & CHAN_SEL) == CHAN_SEL &&
             (new_val & CHAN_SEL) == 0)
         {
-          // enable_remote = 1;
-          buttons_active = 0;
+          if (AVB_NUM_MEDIA_OUTPUTS > 2)
+          {
+            enum avb_sink_state_t cur_state;
+            int channel;
+            selected_chan++;
+            if (selected_chan > ((AVB_NUM_MEDIA_OUTPUTS>>1)-1))
+            {
+              selected_chan = 0;
+            }
+            p_chan_leds <: ~(1 << selected_chan);
+            buttons_active = 0;
+            channel = selected_chan*2;
+            get_avb_sink_state(0, cur_state);
+            set_avb_sink_state(0, AVB_SINK_STATE_DISABLED);
+            for (int j=0;j<AVB_NUM_MEDIA_OUTPUTS;j++)
+            {
+              map[j] = channel;
+              channel++;
+              if (channel > AVB_NUM_MEDIA_OUTPUTS-1)
+              {
+                channel = 0;
+              }
+            }
+            set_avb_sink_map(0, map, AVB_NUM_MEDIA_OUTPUTS);
+            if (cur_state != AVB_SINK_STATE_DISABLED)
+              set_avb_sink_state(0, AVB_SINK_STATE_POTENTIAL);
+          }
         }
         if (!buttons_active)
         {
