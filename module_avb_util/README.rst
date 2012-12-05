@@ -1,9 +1,8 @@
-<Add title here>
-================
+module_avb_util
+===============
 
-:scope: <Put one of Roadmap, Example, Early Development or General Use>
-:description: <Add one line here>
-:keywords: <Add comma separated list of keywords>
-:boards: <Add comma separated list of supported boards>
+:scope: General Use
+:description: Misc useful functions for timers, I/O, printing
+:keywords: avb, util, misc, simple_printf
 
-<Add description of software block>
+Misc useful functions for timers, I/O, printing

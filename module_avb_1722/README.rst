@@ -1,9 +1,8 @@
-<Add title here>
-================
+module_avb_1722
+===============
 
-:scope: <Put one of Roadmap, Example, Early Development or General Use>
-:description: <Add one line here>
-:keywords: <Add comma separated list of keywords>
-:boards: <Add comma separated list of supported boards>
+:scope: General Use
+:description: IEEE 1722 implement for talkers and listeners
+:keywords: avb, 1722, talker, listener
 
-<Add description of software block>
+IEEE 1722 implement for talkers and listeners

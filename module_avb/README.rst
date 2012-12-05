@@ -1,9 +1,8 @@
-<Add title here>
-================
+module_avb
+==========
 
-:scope: <Put one of Roadmap, Example, Early Development or General Use>
-:description: <Add one line here>
-:keywords: <Add comma separated list of keywords>
-:boards: <Add comma separated list of supported boards>
+:scope: General Use
+:description: AVB stack control API
+:keywords: avb, api, control
 
-<Add description of software block>
+AVB stack control API

@@ -1,9 +1,9 @@
-<Add title here>
-================
+app_simple_avb_demo
+===================
 
-:scope: <Put one of Roadmap, Example, Early Development or General Use>
-:description: <Add one line here>
-:keywords: <Add comma separated list of keywords>
-:boards: <Add comma separated list of supported boards>
+:scope: Example
+:description: A simple 1722.1 example endpoint application
+:keywords: avb, simple, 1722.1, example
+:boards: XR-AVB-LC-BRD
 
-<Add description of software block>
+A simple 1722.1 example endpoint application

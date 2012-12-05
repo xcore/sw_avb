@@ -1,9 +1,8 @@
-<Add title here>
-================
+module_avb_1722_1
+=================
 
-:scope: <Put one of Roadmap, Example, Early Development or General Use>
-:description: <Add one line here>
-:keywords: <Add comma separated list of keywords>
-:boards: <Add comma separated list of supported boards>
+:scope: General Use
+:description: Implementation of IEEE 1722.1 Draft 21 for use with the AVB reference design
+:keywords: avb, 1722.1, discovery, enumeration, command, control
 
-<Add description of software block>
+Implementation of IEEE 1722.1 Draft 21 for use with the AVB reference design

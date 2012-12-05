@@ -1,9 +1,8 @@
-<Add title here>
-================
+sc_gptp
+=======
 
-:scope: <Put one of Roadmap, Example, Early Development or General Use>
-:description: <Add one line here>
-:keywords: <Add comma separated list of keywords>
-:boards: <Add comma separated list of supported boards>
+:scope: General Use
+:description: Implementation of IEEE 802.1AS gPTP clock synchronisation 
+:keywords: avb, ptp, gptp, 802.1as
 
-<Add description of software block>
+Implementation of IEEE 802.1AS gPTP clock synchronisation 

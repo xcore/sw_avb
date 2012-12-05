@@ -24,7 +24,7 @@ XCC_FLAGS_xr_avb_demo.xc = $(XCC_FLAGS) -fsubword-select
 
 # The USED_MODULES variable lists other module used by the application. 
 
-USED_MODULES = module_avb_util  module_gptp module_xtcp module_ethernet module_locks module_xlog
+USED_MODULES = module_avb_util module_gptp module_ethernet module_locks
 
 # This uses the avb mac filtering in module_avb_common
 USE_AVB_MAC_CUSTOM_FILTER=1

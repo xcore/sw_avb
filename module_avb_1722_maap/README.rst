@@ -1,9 +1,8 @@
-<Add title here>
-================
+module_avb_1722_maap
+====================
 
-:scope: <Put one of Roadmap, Example, Early Development or General Use>
-:description: <Add one line here>
-:keywords: <Add comma separated list of keywords>
-:boards: <Add comma separated list of supported boards>
+:scope: General Use
+:description: Implementation of 1722 MAAP for assignment of multicast MAC addresses
+:keywords: avb, 1722, maap
 
-<Add description of software block>
+Implementation of 1722 MAAP for assignment of multicast MAC addresses
