@@ -1,6 +1,75 @@
 <?xml version="1.0" ?>
 <xpd>
-    <components></components>
+    <components>
+        <component description = "A simple 1722.1 example endpoint application" type = "demoCode" scope = "Example" path = "app_simple_avb_demo" local = "false" id = "app_simple_avb_demo" name = "app_simple_avb_demo">
+            <board>XR-AVB-LC-BRD</board>
+            <componentDependency>module_avb_1722</componentDependency>
+            <componentDependency>module_random</componentDependency>
+            <componentDependency>module_avb_srp</componentDependency>
+            <componentDependency>module_avb_media_clock</componentDependency>
+            <componentDependency>module_avb_audio</componentDependency>
+            <componentDependency>module_avb_1722_maap</componentDependency>
+            <keyword>avb</keyword>
+            <keyword>simple</keyword>
+            <keyword>1722.1</keyword>
+            <keyword>example</keyword>
+        </component>
+        <component description = "AVB stack control API" type = "demoCode" scope = "Example" path = "module_avb" local = "false" id = "module_avb" name = "module_avb">
+            <componentDependency>module_locks</componentDependency>
+            <componentDependency>module_ethernet_smi</componentDependency>
+            <componentDependency>module_ethernet</componentDependency>
+            <componentDependency>module_otp_board_info</componentDependency>
+            <keyword>avb</keyword>
+            <keyword>api</keyword>
+            <keyword>control</keyword>
+        </component>
+        <component description = "IEEE 1722 implement for talkers and listeners" type = "demoCode" scope = "Example" path = "module_avb_1722" local = "false" id = "module_avb_1722" name = "module_avb_1722">
+            <keyword>avb</keyword>
+            <keyword>1722</keyword>
+            <keyword>talker</keyword>
+            <keyword>listener</keyword>
+        </component>
+        <component description = "Implementation of IEEE 1722.1 Draft 21 for use with the AVB reference design" type = "demoCode" scope = "Example" path = "module_avb_1722_1" local = "false" id = "module_avb_1722_1" name = "module_avb_1722_1">
+            <keyword>avb</keyword>
+            <keyword>1722.1</keyword>
+            <keyword>discovery</keyword>
+            <keyword>enumeration</keyword>
+            <keyword>command</keyword>
+            <keyword>control</keyword>
+        </component>
+        <component description = "Implementation of 1722 MAAP for assignment of multicast MAC addresses" type = "demoCode" scope = "Example" path = "module_avb_1722_maap" local = "false" id = "module_avb_1722_maap" name = "module_avb_1722_maap">
+            <keyword>avb</keyword>
+            <keyword>1722</keyword>
+            <keyword>maap</keyword>
+        </component>
+        <component description = "AVB functions for audio interfaces and sample FIFOs" type = "demoCode" scope = "Example" path = "module_avb_audio" local = "false" id = "module_avb_audio" name = "module_avb_audio">
+            <keyword>avb</keyword>
+            <keyword>audio</keyword>
+            <keyword>i2s</keyword>
+            <keyword>fifo</keyword>
+        </component>
+        <component description = "This module handles the media clock recovery of the incoming and outgoing AVB streams." type = "demoCode" scope = "Example" path = "module_avb_media_clock" local = "false" id = "module_avb_media_clock" name = "module_avb_media_clock">
+            <keyword>media</keyword>
+            <keyword>clock</keyword>
+            <keyword>audio</keyword>
+        </component>
+        <component description = "Implementation of 802.1Qat stream reservation protocol. It needs to be used within the context of other XMOS AVB modules." type = "demoCode" scope = "Example" path = "module_avb_srp" local = "false" id = "module_avb_srp" name = "module_avb_srp">
+            <keyword>srp</keyword>
+            <keyword>avb</keyword>
+        </component>
+        <component description = "Misc useful functions for timers, I/O, printing" type = "demoCode" scope = "Example" path = "module_avb_util" local = "false" id = "module_avb_util" name = "module_avb_util">
+            <keyword>avb</keyword>
+            <keyword>util</keyword>
+            <keyword>misc</keyword>
+            <keyword>simple_printf</keyword>
+        </component>
+        <component description = "Implementation of IEEE 802.1AS gPTP clock synchronisation" type = "demoCode" scope = "Example" path = "module_gptp" local = "false" id = "module_gptp" name = "sc_gptp">
+            <keyword>avb</keyword>
+            <keyword>ptp</keyword>
+            <keyword>gptp</keyword>
+            <keyword>802.1as</keyword>
+        </component>
+    </components>
     <dependency repo = "sc_i2c">
         <githash>576de5f72f10954ce0eed83acb418890ed636bb8</githash>
         <version>2.1.0rc0</version>
@@ -33,6 +102,7 @@
     <release parenthash = "e18b48279cf8ffe05720d9288242d09f866b6755" version = "5.1.2rc0" githash = "e1b33c519fc2cec184f3ceb8dd3f3a64d7d129bc"></release>
     <release parenthash = "a66c8748b642ffe49411169ee4a630f774a4c1d3" version = "5.1.2rc1" githash = "6a879e1d1a9c284dd18b513a9787af64444bd551"></release>
     <release parenthash = "f90a0b678afe99ba45972884676c48da87eff96d" version = "5.1.2rc2" githash = "5d8c49b4cea8be4dac7750b5d78c07be6e77ba68"></release>
+    <release parenthash = "9291a860cf1c0a6c0e4ceb83a7c8787f3b164322" version = "5.2.0alpha0"></release>
     <subpartnumber>XR-000008-SW</subpartnumber>
     <vendor>XMOS</vendor>
     <xcore_repo>sw_avb.git</xcore_repo>
