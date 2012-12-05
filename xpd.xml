@@ -1,34 +1,28 @@
 <?xml version="1.0" ?>
 <xpd>
-    <dependency repo = "sc_xlog">
-        <githash>2b37b398523d7af6fc4dfc94b8c032e3b95bab9a</githash>
-    </dependency>
+    <components></components>
     <dependency repo = "sc_i2c">
-        <githash>86cb497a5ee519fbc0c4bb597adeeb135d3e97e1</githash>
-        <version>2.0.0rc3</version>
-    </dependency>
-    <dependency repo = "sc_xtcp">
-        <githash>65cd05d017456b067f12487dd0ed05aff113a800</githash>
-        <version>3.0.1rc0</version>
-    </dependency>
-    <dependency repo = "xcommon">
-        <githash>3416f530590333980bbe152a9123b16becdb441f</githash>
-        <version>1.0.0rc1</version>
+        <githash>576de5f72f10954ce0eed83acb418890ed636bb8</githash>
+        <version>2.1.0rc0</version>
     </dependency>
     <dependency repo = "sc_ethernet">
-        <githash>e0d8f57a0f817547484f00be5231b536439397d2</githash>
-        <version>2.1.2rc0</version>
+        <githash>f01fa2f8121e8d69d71185a04a05fddf9373c523</githash>
+    </dependency>
+    <dependency repo = "sc_otp">
+        <githash>c58cd84295fdbdd72a970417bb4cc54342a9d71c</githash>
+        <uri>https://github.com/xcore/sc_otp.git</uri>
+        <version>1.0.0alpha0</version>
+    </dependency>
+    <dependency repo = "sc_util">
+        <githash>3f82b846395c07e8dd32ad9951afc209b6ed7efc</githash>
+        <uri>https://github.com/xcore/sc_util.git</uri>
     </dependency>
     <description>AVB software stack</description>
     <docdir>doc</docdir>
-    <exclude_dir>test_api_listener</exclude_dir>
-    <exclude_dir>test_api_talker</exclude_dir>
-    <exclude_dir>test_api_talker_clock_slew</exclude_dir>
-    <exclude_dir>test_gptp_lc</exclude_dir>
-    <exclude_dir>module_avnu_observability</exclude_dir>
+    <exclude_dir>tests</exclude_dir>
     <location>git@github.com:xcore/sw_avb.git</location>
     <name>sw_avb</name>
-    <maintainer>DavidNorman</maintainer>
+    <maintainer>ajwlucas</maintainer>
     <partnumber>XM-001711-DH</partnumber>
     <release parenthash = "c0e2eedbd5609978063be5c43ab2c671bb7d5030" version = "5.1.0beta0" githash = "f41d7b41abbc158ddf61ae895c35475ee4d1f41b"></release>
     <release parenthash = "c5f4fd52b8d824979950bfd4616013ab83649727" version = "5.1.0beta1" githash = "f16649adbf9d90dc003732416b9b430ca6644581"></release>
@@ -38,9 +32,10 @@
     <release parenthash = "7f3b9a86d9d8cca5fda18ff5343cd1f55c5ea70a" version = "5.1.1" githash = "dc6f822b16674eafc0e32ed2ba24db5ec96cb397"></release>
     <release parenthash = "e18b48279cf8ffe05720d9288242d09f866b6755" version = "5.1.2rc0" githash = "e1b33c519fc2cec184f3ceb8dd3f3a64d7d129bc"></release>
     <release parenthash = "a66c8748b642ffe49411169ee4a630f774a4c1d3" version = "5.1.2rc1" githash = "6a879e1d1a9c284dd18b513a9787af64444bd551"></release>
-    <release parenthash = "f90a0b678afe99ba45972884676c48da87eff96d" version = "5.1.2rc2"></release>
-    <scope>reference design</scope>
+    <release parenthash = "f90a0b678afe99ba45972884676c48da87eff96d" version = "5.1.2rc2" githash = "5d8c49b4cea8be4dac7750b5d78c07be6e77ba68"></release>
     <subpartnumber>XR-000008-SW</subpartnumber>
     <vendor>XMOS</vendor>
+    <xcore_repo>sw_avb.git</xcore_repo>
     <xpd_version>1.0</xpd_version>
+    <scope>reference design</scope>
 </xpd>

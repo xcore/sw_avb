@@ -1,10 +1,9 @@
 AVB Software Stack
 ..................
 
-:Stable release:  5.2
-
-
-:Maintainer:  andy@xmos.com
+:Latest release: 5.1.2rc2
+:Maintainer: ajwlucas
+:Description: AVB software stack
 
 
 
@@ -37,21 +36,8 @@ The HEAD of this repository is a work in progress. It may or may not compile fro
 Required software (dependencies)
 ================================
 
-NOTE: The HEAD of sw_avb requires the latest xTIMEcomposer v12 development tools.
+  * sc_i2c
+  * sc_ethernet
+  * sc_otp (https://github.com/xcore/sc_otp.git)
+  * sc_util (https://github.com/xcore/sc_util.git)
 
-* sc_ethernet git\@github.com:xcore/sc_ethernet.git
-* sc_xtcp git\@github.com:xcore/sc_xtcp.git
-* sc_util git\@github.com:xcore/sc_util.git
-* sc_i2c git\@github.com:xcore/sc_i2c.git
-* sc_otp git\@github.com:xcore/sc_otp.git
-
-To clone (read only):
-
-::
-
-  git clone git://github.com/xcore/sw_avb.git
-  git clone git://github.com/xcore/sc_ethernet.git
-  git clone git://github.com/xcore/sc_xtcp.git
-  git clone git://github.com/xcore/sc_util.git
-  git clone git://github.com/xcore/sc_i2c.git
-  git clone git://github.com/xcore/sc_otp.git
