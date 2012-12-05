@@ -1,6 +1,19 @@
 AVB Changelog
 =============
 
+5.2.0
+-----
+  * Numerous updates to support xTIMEcomposer v12 tools, including updated sc_ethernet
+  * 1722.1 Draft 21 support for ADP, ACMP and a subset of AECP including an AEM descriptor set
+  * Old TCP/IP based Attero Tech application replaced with a 1722.1 demo
+  * Added ability to arbitrarily map between channels in sinked streams and audio outputs
+  * 1722 MAAP rewritten to optimise memory and improve compliance to standard
+  * AVB status API replaced with new weak attribute hooks
+  * Support added for CS2100 variant of PLL
+  * sc_xlog printing removed, replaced with XScope
+  * Support removed for XDK/XAI, XC-2 and XC-3 dev kits
+  * Application support removed for Open Sound Control
+
 5.1.2
 -----
   * PTP fix to correct step in g_ptp_adjust (commit #1548fa5ce7)
