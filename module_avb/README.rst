@@ -1,7 +1,7 @@
 module_avb
 ==========
 
-:scope: General Use
+:scope: Example
 :description: AVB stack control API
 :keywords: avb, api, control
 

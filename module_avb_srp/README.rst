@@ -1,7 +1,7 @@
 module_avb_srp
 ==============
 
-:scope: General Use
+:scope: Example
 :description: Implementation of 802.1Qat stream reservation protocol. It needs to be used within the context of other XMOS AVB modules.
 :keywords: srp, avb
 

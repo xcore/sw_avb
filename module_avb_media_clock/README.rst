@@ -1,7 +1,7 @@
 module_avb_media_clock
 ======================
 
-:scope: General Use
+:scope: Example
 :description: This module handles the media clock recovery of the incoming and outgoing AVB streams.
 :keywords: media, clock, audio
 
