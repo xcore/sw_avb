@@ -39,7 +39,9 @@ void simple_demo_controller(int *change_stream, int *toggle_remote, chanend c_tx
   controller_state = *toggle_remote;
 }
 
-void avb_controller_on_new_entity_available(guid_t *my_guid, avb_1722_1_entity_record *entity, chanend c_tx)
+
+#if AVB_1722_1_CONTROLLER_ENABLED
+void avb_entity_on_new_entity_available(guid_t *my_guid, avb_1722_1_entity_record *entity, chanend c_tx)
 {
   enum avb_source_state_t state;
   get_avb_source_state(0, &state);
@@ -55,6 +57,7 @@ void avb_controller_on_new_entity_available(guid_t *my_guid, avb_1722_1_entity_r
     }
   }
 }
+#endif
 
 /* The controller has indicated to connect this listener sink to a talker stream */
 void avb_listener_on_talker_connect(int sink_num, REFERENCE_PARAM(guid_t, talker_guid), unsigned char dest_addr[6], unsigned int stream_id[2])
@@ -108,7 +111,6 @@ void avb_talker_on_source_address_reserved(int source_num, unsigned char mac_add
   avb_1722_1_talker_set_mac_address(source_num, mac_addr);
   avb_1722_1_adp_announce();
 
-#if AVB_1722_1_CONTROLLER_ENABLED
   for (int i=0; i < AVB_1722_1_MAX_ENTITIES; i++)
   {
     if (entities[i].guid.l != 0)
@@ -130,5 +132,4 @@ void avb_talker_on_source_address_reserved(int source_num, unsigned char mac_add
     }
   }
 
-#endif
 }

@@ -81,9 +81,9 @@ void avb_1722_1_process_packet(avb_status_t *status, unsigned char buf[], unsign
 void avb_1722_1_periodic(avb_status_t *status, chanend c_tx, chanend c_ptp)
 {
 	avb_1722_1_adp_advertising_periodic(c_tx, c_ptp);
+    avb_1722_1_adp_discovery_periodic(c_tx);
 #if (AVB_1722_1_CONTROLLER_ENABLED)
 	avb_1722_1_acmp_controller_periodic(c_tx);
-    avb_1722_1_adp_discovery_periodic(c_tx);
 #endif
 #if (AVB_1722_1_TALKER_ENABLED)
 	avb_1722_1_acmp_talker_periodic(c_tx);

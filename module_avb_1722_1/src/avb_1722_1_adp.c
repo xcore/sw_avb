@@ -303,7 +303,7 @@ void avb_1722_1_adp_discovery_periodic(chanend c_tx)
 		}
 		case ADP_DISCOVERY_ADDED:
 		{
-			avb_controller_on_new_entity_available(&my_guid, &entities[adp_latest_entity_added_index], c_tx);
+			avb_entity_on_new_entity_available(&my_guid, &entities[adp_latest_entity_added_index], c_tx);
 			adp_discovery_state = ADP_DISCOVERY_WAITING;
 			break;
 		}
