@@ -20,7 +20,6 @@ MODULE_XCC_C_FLAGS = $(XCC_FLAGS) -Os -std=c99
 $(GEN_DIR)/aem_descriptors.generated: $(call UNMANGLE,$(CURRENT_MODULE_DIR)/src/generate.py) $(call UNMANGLE, src/aem_descriptors.h.in) $(call UNMANGLE,src/aem_entity_strings.h.in)  | $(GEN_DIR)
 	@echo "Generating AEM header files"
 	@echo "generated" > $(GEN_DIR)/aem_descriptors.generated
-	@$(call JYTHON,$(call UNMANGLE,$(CURRENT_MODULE_DIR)/src/generate.py) "$(call UNMANGLE,src/)" $(GEN_DIR))
-
+	@xta --console-basic source "$(call UNMANGLE_NO_ESCAPE,$(CURRENT_MODULE_DIR)/src/generate.py)" "$(call UNMANGLE_NO_ESCAPE, src/)" $(GEN_DIR) -exit
 $(GEN_DIR)/aem_descriptors.h: $(GEN_DIR)/aem_descriptors.generated
 $(GEN_DIR)/aem_entity_strings.h: $(GEN_DIR)/aem_descriptors.generated
