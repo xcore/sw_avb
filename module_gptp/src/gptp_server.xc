@@ -13,6 +13,7 @@ void ptp_periodic(chanend, unsigned);
 void ptp_server_set_legacy_mode(int legacy_mode);
 void ptp_get_reference_ptp_ts_mod_64(unsigned &hi, unsigned &lo);
 void ptp_current_grandmaster(char grandmaster[8]);
+ptp_state_t ptp_current_state(void);
 
 #define MAX_PTP_MESG_LENGTH 100
 
@@ -110,7 +111,7 @@ void ptp_process_client_request(chanend c, timer ptp_timer)
   (void) inuchar(c); 
   (void) inct(c);
   switch (cmd) 
-    {
+  {
     case PTP_GET_TIME_INFO:
       ptp_give_requested_time_info(c, ptp_timer);
       break;
@@ -137,18 +138,26 @@ void ptp_process_client_request(chanend c, timer ptp_timer)
       break;            
     }
     case PTP_GET_GRANDMASTER: {
-    	char grandmaster[8];
-    	ptp_current_grandmaster(grandmaster);
-    	master
-    	{
-    		for(int i = 0; i < 8; i++)
-			{
-				c <: grandmaster[i];
-			}
-    	}
-    	break;
+      char grandmaster[8];
+      ptp_current_grandmaster(grandmaster);
+      master
+      {
+        for(int i = 0; i < 8; i++)
+        {
+          c <: grandmaster[i];
+        }
+      }
+      break;
     }
+    case PTP_GET_STATE: {
+      ptp_state_t ptp_state = ptp_current_state();
+      master
+      {
+        c <: ptp_state;
+      }
+      break;
     }
+  }
 }
 
 

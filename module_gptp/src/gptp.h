@@ -64,6 +64,12 @@ enum ptp_server_type {
   PTP_SLAVE_ONLY
 };
 
+typedef enum ptp_state_t {
+  PTP_MASTER,
+  PTP_UNCERTAIN,
+  PTP_SLAVE
+} ptp_state_t;
+
 /** This function runs the PTP server. It takes one thread and runs 
     indefinitely
 
@@ -82,6 +88,8 @@ void ptp_server(chanend mac_rx, chanend mac_tx,
 
 // Synchronous PTP client functions
 // --------------------------------
+
+ptp_state_t ptp_get_state(chanend ptp_server);
 
 /** Retrieve time information from the ptp server 
  *

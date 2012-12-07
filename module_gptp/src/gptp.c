@@ -41,19 +41,13 @@ signed g_inv_ptp_adjust = 0;
 static int ptp_path_delay_valid = 0;
 static unsigned ptp_path_delay = 0;
 
-enum ptp_state_t {
-  PTP_MASTER,
-  PTP_UNCERTAIN,
-  PTP_SLAVE
-};
-
 /* These variables make up the state of the local clock/port */
 unsigned ptp_reference_local_ts;
 ptp_timestamp ptp_reference_ptp_ts;
 static long long ptp_gmoffset = 0;
 static int expect_gm_discontinuity = 1;
 static int ptp_candidate_gmoffset_valid = 0;
-static enum ptp_state_t ptp_state = PTP_MASTER;
+static ptp_state_t ptp_state = PTP_MASTER;
 static n80_t my_port_id;
 static n80_t master_port_id;
 static u8_t ptp_priority1;
@@ -78,6 +72,11 @@ static AnnounceMessage best_announce_msg;
 static unsigned long long pdelay_epoch_timer;
 static unsigned prev_pdelay_local_ts;
 
+
+ptp_state_t ptp_current_state()
+{
+  return ptp_state;
+}
 
 unsigned local_timestamp_to_ptp_mod32(unsigned local_ts,
                                       ptp_time_info_mod64 *info)

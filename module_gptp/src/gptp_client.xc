@@ -115,3 +115,15 @@ void ptp_get_current_grandmaster(chanend ptp_server, unsigned char grandmaster[8
 		}
 	}
 }
+
+ptp_state_t ptp_get_state(chanend ptp_server)
+{
+  ptp_state_t state;
+  send_cmd(ptp_server, PTP_GET_STATE);
+  slave
+  {
+      ptp_server :> state;
+  }
+
+  return state;
+}
