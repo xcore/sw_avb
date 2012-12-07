@@ -508,7 +508,7 @@ static int compare_clock_identity(n64_t *c1,
   return 0;
 }
 
-static void bcma_update_roles(char *msg, unsigned t)
+static void bmca_update_roles(char *msg, unsigned t)
 {
   ComMessageHdr *pComMesgHdr = (ComMessageHdr *) msg;
   AnnounceMessage *pAnnounceMesg = (AnnounceMessage *) ((char *) pComMesgHdr+sizeof(ComMessageHdr));
@@ -1056,7 +1056,7 @@ void ptp_recv(chanend c_tx,
     case PTP_ANNOUNCE_MESG: {
         AnnounceMessage *announce_msg = (AnnounceMessage *) (msg + 1);
 
-      bcma_update_roles((char *) msg, local_ingress_ts);
+      bmca_update_roles((char *) msg, local_ingress_ts);
       
       if (ptp_state == PTP_SLAVE && 
           port_id_equal(&master_port_id, &msg->sourcePortIdentity) &&
