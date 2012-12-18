@@ -10,6 +10,7 @@
 #include "gptp_config.h"
 #include "gptp_pdu.h"
 #include "ethernet_tx_client.h"
+#include "ethernet_rx_client.h"
 #include "misc_timer.h"
 #include "print.h"
 #include "simple_printf.h"
@@ -71,6 +72,8 @@ static AnnounceMessage best_announce_msg;
 
 static unsigned long long pdelay_epoch_timer;
 static unsigned prev_pdelay_local_ts;
+
+static int tile_timer_offset;
 
 
 ptp_state_t ptp_current_state()
@@ -390,10 +393,6 @@ static void update_reference_timestamps(ptp_timestamp *master_egress_ts,
   ptp_timestamp master_ingress_ts;
 
   ptp_timestamp_offset64(&master_ingress_ts, master_egress_ts, ptp_path_delay);
-  
-  /* Do some sanity checks */
-
-  // TODO - also need to handle gm disconiuty
 
   /* Update the reference timestamps */
   ptp_reference_local_ts = local_ingress_ts;
@@ -663,6 +662,7 @@ static void ptp_tx_timed(chanend c_tx,
 {
   len = len < 64 ? 64 : len;
   mac_tx_timed(c_tx, buf, len, ts, 0);
+  *ts = *ts - tile_timer_offset;
   return;
 }
 
@@ -1051,6 +1051,8 @@ void ptp_recv(chanend c_tx,
   int ethernet_pkt_size = has_qtag ? 18 : 14;
   ComMessageHdr *msg =  (ComMessageHdr *) &buf[ethernet_pkt_size];
 
+  local_ingress_ts = local_ingress_ts - tile_timer_offset;
+
   switch ((msg->transportSpecific_messageType & 0xf)) 
     {
     case PTP_ANNOUNCE_MESG: {
@@ -1145,9 +1147,12 @@ void ptp_recv(chanend c_tx,
 static unsigned last_debug_time;
 #endif
 
-void ptp_init(chanend c_tx, enum ptp_server_type stype)
+void ptp_init(chanend c_tx, chanend c_rx, enum ptp_server_type stype)
 {
-  unsigned t = get_local_time();
+  unsigned t;
+  mac_get_tile_timer_offset(c_rx, &tile_timer_offset);
+  t = get_local_time();
+
 
 #ifdef GPTP_DEBUG  
   last_debug_time = t;

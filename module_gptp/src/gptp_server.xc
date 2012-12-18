@@ -7,7 +7,7 @@
 
 /* These functions are the workhorse functions for the actual protocol.
    They are implemented in gptp.c  */
-void ptp_init(chanend, enum ptp_server_type stype);
+void ptp_init(chanend, chanend, enum ptp_server_type stype);
 void ptp_recv(chanend, unsigned char buf[], unsigned ts);
 void ptp_periodic(chanend, unsigned);
 void ptp_server_set_legacy_mode(int legacy_mode);
@@ -41,9 +41,6 @@ extern signed int g_inv_ptp_adjust;
        ptp_timeout += PTP_PERIODIC_TIME; \
        break
 
-timer ptp_timer;   
-unsigned ptp_timeout;
-
 void ptp_server_init(chanend c_rx, chanend c_tx, 
                      enum ptp_server_type server_type,
                      timer ptp_timer,
@@ -54,7 +51,7 @@ void ptp_server_init(chanend c_rx, chanend c_tx,
 
   ptp_timer :> ptp_timeout;
  
-  ptp_init(c_tx, server_type);
+  ptp_init(c_tx, c_rx, server_type);
 
 }
 
