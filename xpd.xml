@@ -75,7 +75,7 @@
         <version>2.1.0rc0</version>
     </dependency>
     <dependency repo = "sc_ethernet">
-        <githash>f01fa2f8121e8d69d71185a04a05fddf9373c523</githash>
+        <githash>67295ffd06b3e19f8e7f733f0c542e4fe6139509</githash>
     </dependency>
     <dependency repo = "sc_otp">
         <githash>c58cd84295fdbdd72a970417bb4cc54342a9d71c</githash>
@@ -102,7 +102,8 @@
     <release parenthash = "e18b48279cf8ffe05720d9288242d09f866b6755" version = "5.1.2rc0" githash = "e1b33c519fc2cec184f3ceb8dd3f3a64d7d129bc"></release>
     <release parenthash = "a66c8748b642ffe49411169ee4a630f774a4c1d3" version = "5.1.2rc1" githash = "6a879e1d1a9c284dd18b513a9787af64444bd551"></release>
     <release parenthash = "f90a0b678afe99ba45972884676c48da87eff96d" version = "5.1.2rc2" githash = "5d8c49b4cea8be4dac7750b5d78c07be6e77ba68"></release>
-    <release parenthash = "9291a860cf1c0a6c0e4ceb83a7c8787f3b164322" version = "5.2.0alpha0"></release>
+    <release parenthash = "9291a860cf1c0a6c0e4ceb83a7c8787f3b164322" version = "5.2.0alpha0" githash = "d99f8390accf098ccecfe30ccc560e1187fa1b5e"></release>
+    <release parenthash = "a7a4e68a44e613e919ef156df8a357590a959955" version = "5.2.0alpha1"></release>
     <subpartnumber>XR-000008-SW</subpartnumber>
     <vendor>XMOS</vendor>
     <xcore_repo>sw_avb.git</xcore_repo>
