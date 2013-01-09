@@ -294,7 +294,7 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
                 command to the currently acquired Controller to verify that the Controller is still present. */
 
                 avb_1722_1_create_controller_available_packet(acquired_controller_mac, acquired_controller_guid);
-                mac_tx(c_tx, avb_1722_1_buf, 64, ETH_BROADCAST);
+                mac_tx(c_tx, avb_1722_1_buf, 64, 0);
 
                 // Set a flag to indicate that the current acquisition is pending
                 entity_acquired_status = AEM_ENTITY_ACQUIRED_BUT_PENDING;
@@ -355,7 +355,7 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
 
         avb_1722_1_create_aecp_aem_response(src_addr, status, sizeof(avb_1722_1_aem_acquire_entity_command_t), pkt);
 
-        mac_tx(c_tx, avb_1722_1_buf, 64, ETH_BROADCAST);
+        mac_tx(c_tx, avb_1722_1_buf, 64, 0);
 
         break;
       }
@@ -391,7 +391,7 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
           avb_1722_1_aecp_aem_msg_t *aem =(avb_1722_1_aecp_aem_msg_t*)avb_1722_1_create_aecp_packet(src_addr, AECP_CMD_AEM_RESPONSE, AECP_AEM_STATUS_SUCCESS, 20, pkt);
           global_entity_locked = 1;
 
-          mac_tx(c_tx, avb_1722_1_buf, 68, ETH_BROADCAST);
+          mac_tx(c_tx, avb_1722_1_buf, 68, 0);
         }
         */
         
@@ -409,7 +409,7 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
 
         num_tx_bytes = create_aem_read_descriptor_response(desc_read_type, desc_read_id, src_addr, pkt);
 
-        mac_tx(c_tx, avb_1722_1_buf, num_tx_bytes, ETH_BROADCAST);
+        mac_tx(c_tx, avb_1722_1_buf, num_tx_bytes, 0);
 
         break;
       }

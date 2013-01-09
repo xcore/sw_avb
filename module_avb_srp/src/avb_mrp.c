@@ -133,7 +133,7 @@ static void force_send(chanend c_tx)
     for (char *p = ptr;p<end;p++) *p = 0;
 
     // Transmit
-    mac_tx(c_tx, (unsigned int *) buf, end - buf, ETH_BROADCAST);
+    mac_tx(c_tx, (unsigned int *) buf, end - buf, 0);
   }
   send_ptr = buf+sizeof(mrp_ethernet_hdr)+sizeof(mrp_header);
   return;

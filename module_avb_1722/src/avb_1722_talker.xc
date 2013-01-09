@@ -221,7 +221,7 @@ void avb_1722_talker_send_packets(chanend c_mac_tx,
       ethernet_send_frame_offset2(c_mac_tx,
                                   st.TxBuf,
                                   packet_size,
-                                  ETH_BROADCAST);
+                                  0);
     }
   }
   if (st.max_active_avb_stream != -1) {
