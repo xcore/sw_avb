@@ -91,6 +91,7 @@ void ptp_server(chanend mac_rx, chanend mac_tx,
 
 ptp_state_t ptp_get_state(chanend ptp_server);
 
+
 /** Retrieve time information from the ptp server 
  *
  *  This function gets an up-to-date structure of type `ptp_time_info` to use
@@ -98,6 +99,15 @@ ptp_state_t ptp_get_state(chanend ptp_server);
  *
  *  \param ptp_server chanend connected to the ptp_server
  *  \param info       structure to be filled with time information
+ *
+ **/
+void ptp_get_propagation_delay(chanend ptp_server, REFERENCE_PARAM(unsigned, pdelay));
+
+/** Retrieve port progatation delay from the ptp server 
+ *
+ *
+ *  \param ptp_server chanend connected to the ptp_server
+ *  \param pdelay     unsigned int with delay in ns
  *
  **/
 void ptp_get_time_info(chanend ptp_server, 

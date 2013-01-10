@@ -6,7 +6,8 @@ enum ptp_cmd_t {
   PTP_GET_TIME_INFO_MOD64,
   PTP_SET_LEGACY_MODE,
   PTP_GET_GRANDMASTER,
-  PTP_GET_STATE
+  PTP_GET_STATE,
+  PTP_GET_PDELAY
 };
 
 #endif // __ptp_cmd_h__

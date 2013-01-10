@@ -267,7 +267,7 @@ static void avb_1722_1_create_adp_packet(int message_type, guid_t guid)
 		  HTON_U16(pkt->listener_capabilites, AVB_1722_1_ADP_LISTENER_CAPABILITIES);
 		  HTON_U32(pkt->controller_capabilities, AVB_1722_1_ADP_CONTROLLER_CAPABILITIES);
 		  HTON_U32(pkt->available_index, avb_1722_1_available_index);
-		  SET_LONG_WORD(pkt->as_grandmaster_id, as_grandmaster_id);
+		  memcpy(pkt->as_grandmaster_id, as_grandmaster_id.c, 8);
 		  HTON_U32(pkt->association_id, AVB_1722_1_ADP_ASSOCIATION_ID);
 	  }
 }

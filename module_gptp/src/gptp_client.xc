@@ -35,7 +35,7 @@ void ptp_get_requested_time_info(chanend c,
   }
   if (server_core_id != get_local_tile_id())
   {
-	  info.local_ts = info.local_ts - (othercore_now-thiscore_now);
+    info.local_ts = info.local_ts - (othercore_now-thiscore_now);
   }
 }
 
@@ -73,8 +73,8 @@ void ptp_get_requested_time_info_mod64_use_timer(chanend c,
   }
   if (server_core_id != get_local_tile_id())
   {
-	  // 3 = protocol instruction cycle difference
-	  info.local_ts = info.local_ts - (othercore_now-thiscore_now-3);
+    // 3 = protocol instruction cycle difference
+    info.local_ts = info.local_ts - (othercore_now-thiscore_now-3);
   }
 }
 
@@ -106,14 +106,14 @@ void ptp_set_legacy_mode(chanend c, int mode)
 
 void ptp_get_current_grandmaster(chanend ptp_server, unsigned char grandmaster[8])
 {
-	send_cmd(ptp_server, PTP_GET_GRANDMASTER);
-	slave
-	{
-		for(int i = 0; i < 8; i++)
-		{
-			ptp_server :> grandmaster[i];
-		}
-	}
+  send_cmd(ptp_server, PTP_GET_GRANDMASTER);
+  slave
+  {
+    for(int i = 0; i < 8; i++)
+    {
+      ptp_server :> grandmaster[i];
+    }
+  }
 }
 
 ptp_state_t ptp_get_state(chanend ptp_server)
@@ -122,8 +122,18 @@ ptp_state_t ptp_get_state(chanend ptp_server)
   send_cmd(ptp_server, PTP_GET_STATE);
   slave
   {
-      ptp_server :> state;
+    ptp_server :> state;
   }
 
   return state;
+}
+
+
+void ptp_get_propagation_delay(chanend ptp_server, unsigned &pdelay)
+{
+  send_cmd(ptp_server, PTP_GET_PDELAY);
+  slave
+  {
+    ptp_server :> pdelay;
+  }
 }

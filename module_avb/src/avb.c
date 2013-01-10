@@ -1036,9 +1036,10 @@ char *avb_control_get_my_mac_addr(void)
 }
 
 
-int get_avb_ptp_gm(unsigned char a0[], int *a0_len)
+int get_avb_ptp_gm(unsigned char a0[])
 {
-  return 0;
+  ptp_get_current_grandmaster(c_ptp, a0);
+  return 1;
 }
 
 int get_avb_ptp_ports(int *a0)
@@ -1051,9 +1052,17 @@ int get_avb_ptp_rateratio(int *a0)
   return 0;
 }
 
-int get_avb_ptp_port_pdelay(int h0,int *a0)
+int get_avb_ptp_port_pdelay(int port, unsigned *pdelay)
 {
-  return 0;
+  if (port == 0)
+  {
+    ptp_get_propagation_delay(c_ptp, pdelay);
+    return 1;
+  }
+  else
+  {
+    return 0;
+  }
 }
 
 unsigned avb_get_source_stream_index_from_pointer(void* ptr)

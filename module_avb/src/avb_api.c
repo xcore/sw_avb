@@ -86,10 +86,10 @@ int get_avb_source_state(int h0,REFERENCE_PARAM(enum avb_source_state_t, a0))
 
 int get_avb_sources(REFERENCE_PARAM(int, a0));
 int get_avb_sinks(REFERENCE_PARAM(int, a0));
-int get_avb_ptp_gm(unsigned char a0[], REFERENCE_PARAM(int, a0_len));
+int get_avb_ptp_gm(unsigned char a0[]);
 int get_avb_ptp_ports(REFERENCE_PARAM(int, a0));
 int get_avb_ptp_rateratio(REFERENCE_PARAM(int, a0));
-int get_avb_ptp_port_pdelay(int h0,REFERENCE_PARAM(int, a0));
+int get_avb_ptp_port_pdelay(int h0,REFERENCE_PARAM(unsigned, a0));
 int getset_avb_sink_channels(int set, int h0,REFERENCE_PARAM(int, a0));
 
 

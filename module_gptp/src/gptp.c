@@ -40,7 +40,7 @@ signed g_inv_ptp_adjust = 0;
 */
 #define PTP_PATH_DELAY_WEIGHT 32
 static int ptp_path_delay_valid = 0;
-static unsigned ptp_path_delay = 0;
+unsigned ptp_path_delay = 0;
 
 /* These variables make up the state of the local clock/port */
 unsigned ptp_reference_local_ts;
@@ -1240,8 +1240,8 @@ void ptp_periodic(chanend c_tx, unsigned t) {
 void ptp_current_grandmaster(char grandmaster[8])
 {
 	int i;
-	for (i = 7; i >= 0; i--)
+	for (i = 0; i < 8; i++)
 	{
-		grandmaster[i] = best_announce_msg.grandmasterIdentity.data[7-i];
+		grandmaster[i] = best_announce_msg.grandmasterIdentity.data[i];
 	}
 }

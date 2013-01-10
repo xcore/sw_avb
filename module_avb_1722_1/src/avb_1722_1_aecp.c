@@ -1,6 +1,8 @@
+#include "avb.h"
 #include "avb_1722_1_common.h"
 #include "avb_1722_1_aecp.h"
 #include "misc_timer.h"
+#include "avb_srp_pdu.h"
 #include <string.h>
 #include <print.h>
 #include "xccompat.h"
@@ -246,8 +248,8 @@ static int create_aem_read_descriptor_response(unsigned short read_type, unsigne
 static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsigned char src_addr[6], int message_type, int num_pkt_bytes, chanend c_tx)
 {
   avb_1722_1_aecp_aem_msg_t *aem_msg = &(pkt->data.aem);
-  unsigned char u_flag = AEM_MSG_U_FLAG(aem_msg);
-  unsigned short command_type = AEM_MSG_COMMAND_TYPE(aem_msg);
+  unsigned char u_flag = AEM_MSG_GET_U_FLAG(aem_msg);
+  unsigned short command_type = AEM_MSG_GET_COMMAND_TYPE(aem_msg);
 
   // Check/do something with the u_flag?
 
@@ -413,6 +415,31 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
 
         break;
       }
+      case AECP_AEM_CMD_GET_AVB_INFO:
+      {
+        // Command and response share descriptor_type and descriptor_index
+        avb_1722_1_aem_get_avb_info_response_t *cmd = (avb_1722_1_aem_get_avb_info_response_t *)(pkt->data.aem.command.payload);
+        unsigned short desc_id = NTOH_U16(cmd->descriptor_id);
+
+        if (desc_id == 0)
+        {
+          unsigned int pdelay;
+          get_avb_ptp_gm(&cmd->as_grandmaster_id[0]);
+          get_avb_ptp_port_pdelay(0, &pdelay);
+          HTON_U32(cmd->propagation_delay, pdelay);
+          HTON_U16(cmd->msrp_mappings_count, 1);
+          cmd->msrp_mappings[0] = AVB_SRP_SRCLASS_DEFAULT;
+          cmd->msrp_mappings[1] = AVB_SRP_TSPEC_PRIORITY_DEFAULT;
+          cmd->msrp_mappings[2] = (AVB_DEFAULT_VLAN>>8)&0xff;
+          cmd->msrp_mappings[3] = (AVB_DEFAULT_VLAN&0xff);
+
+          avb_1722_1_create_aecp_aem_response(src_addr, AECP_AEM_STATUS_SUCCESS, sizeof(avb_1722_1_aem_get_avb_info_response_t), pkt);
+
+          mac_tx(c_tx, avb_1722_1_buf, 64, 0);
+        }
+
+        break;
+      }
       // TODO: ENTITY_AVAILABLE
       default:
       {
@@ -423,25 +450,25 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
   }
   else // AECP_CMD_AEM_RESPONSE
   {
-      switch (command_type)
+    switch (command_type)
+    {
+      case AECP_AEM_CMD_CONTROLLER_AVAILABLE:
       {
-        case AECP_AEM_CMD_CONTROLLER_AVAILABLE:
+        if ((entity_acquired_status != AEM_ENTITY_ACQUIRED_BUT_PENDING) ||
+            (!compare_guid(pkt->controller_guid, &pending_controller_guid)))
         {
-          if ((entity_acquired_status != AEM_ENTITY_ACQUIRED_BUT_PENDING) ||
-              (!compare_guid(pkt->controller_guid, &pending_controller_guid)))
-          {
-            // Not interested... ignore
-            break;
-          }
-          /* The acquired controller is still available.
-           * We mark the entity status as acquired so that the ACQUIRE_ENTITY retry is responded to with 
-           * the correct ENTITY_ACQUIRED status code */
-          entity_acquired_status = AEM_ENTITY_ACQUIRED;
+          // Not interested... ignore
           break;
         }
-        default:
-          break;
+        /* The acquired controller is still available.
+         * We mark the entity status as acquired so that the ACQUIRE_ENTITY retry is responded to with 
+         * the correct ENTITY_ACQUIRED status code */
+        entity_acquired_status = AEM_ENTITY_ACQUIRED;
+        break;
       }
+      default:
+        break;
+    }
   }
 }
 
