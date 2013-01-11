@@ -251,7 +251,7 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
   unsigned char u_flag = AEM_MSG_GET_U_FLAG(aem_msg);
   unsigned short command_type = AEM_MSG_GET_COMMAND_TYPE(aem_msg);
 
-  // Check/do something with the u_flag?
+  // TODO: Check if the entity is locked/acquired and reply with appropriate status if it is
 
   if (message_type == AECP_CMD_AEM_COMMAND)
   {
@@ -437,6 +437,36 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
 
           mac_tx(c_tx, avb_1722_1_buf, 64, 0);
         }
+        break;
+      }
+      case AECP_AEM_CMD_GET_STREAM_FORMAT:
+      case AECP_AEM_CMD_SET_STREAM_FORMAT: // Fallthrough intentional
+      {
+        avb_1722_1_aem_getset_stream_format_t *cmd = (avb_1722_1_aem_getset_stream_format_t *)(pkt->data.aem.command.payload);
+        unsigned short stream_index = NTOH_U16(cmd->descriptor_id);
+        unsigned short desc_type = NTOH_U16(cmd->descriptor_type);
+
+        if (desc_type == AEM_STREAM_INPUT_TYPE)
+        {
+          if (command_type == AECP_AEM_CMD_GET_STREAM_FORMAT)
+          {
+            enum avb_stream_format_t format;
+            int rate;
+            if (get_avb_sink_format(stream_index, &format, &rate))
+            {
+
+            }
+            else
+            {
+              // invalid
+            }
+          }
+          else
+          {
+
+          }
+        }
+
 
         break;
       }

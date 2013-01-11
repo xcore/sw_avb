@@ -82,14 +82,10 @@ void avb_start(void);
 /** Perform AVB periodic processing.
  *
  *  This function performs AVB periodic processing. It should be called 
- *  from the main control thread at least once each ms. If it returns
- *  a state other than AVB_NO_STATUS then it should be called again
- *  immediately.
+ *  from the main control thread at least once each ms.
  * 
- *  \returns A status update from the periodic processing to indicate
- *           an event due to a timeout etc. (see :c:type:`avb_status_t`)
  **/
-void avb_periodic(REFERENCE_PARAM(avb_status_t, status));
+void avb_periodic(void);
 
 /** Receives an 802.1Qat SRP packet or an IEEE P1722 MAAP packet.
  *
@@ -124,17 +120,8 @@ void avb_get_control_packet(chanend c_rx,
    \param len the length (in bytes) of the incoming buffer
    \param c_tx           chanend connected to the ethernet mac (TX)
           
-   \returns ``AVB_SRP_TALKER_ROUTE_FAILED`` if the incoming packet reports a 
-            talker routing failure (i.e. a failure in getting an outgoing stream
-            to its intended listener). ``AVB_SRP_LISTENER_ROUTE_FAILED``
-            if the incoming packet reports a
-            listener routing failure (i.e. a failure in listening to a stream).
-            If the packet causes a previously asked for, or 
-            reserved, multicast address range to be no longer available,
-           then ``AVB_MAAP_ADDRESSES_LOST`` is returned.
  **/
-void avb_process_control_packet(REFERENCE_PARAM(avb_status_t, status),
-                               unsigned int buf[], int len,
+void avb_process_control_packet(unsigned int buf[], int len,
                                chanend c_tx);
 
 /** Set the endpoint into "legacy mode".

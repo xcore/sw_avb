@@ -186,7 +186,6 @@ int main(void)
 void demo(chanend c_rx, chanend c_tx)
 {
   timer tmr;
-  avb_status_t avb_status;
   int map[AVB_NUM_MEDIA_INPUTS];
   unsigned periodic_timeout;
   unsigned sample_rate = 48000;
@@ -226,7 +225,7 @@ void demo(chanend c_rx, chanend c_tx)
       case avb_get_control_packet(c_rx, buf, nbytes):
       {
         // Test for a control packet and process it
-        avb_process_control_packet(avb_status, buf, nbytes, c_tx);
+        avb_process_control_packet(buf, nbytes, c_tx);
 
         // add any special control packet handling here
         break;
@@ -299,7 +298,7 @@ void demo(chanend c_rx, chanend c_tx)
       // Periodic processing
       case tmr when timerafter(periodic_timeout) :> void:
       {
-        avb_periodic(avb_status);
+        avb_periodic();
 
         simple_demo_controller(change_stream, toggle_remote, c_tx);
 

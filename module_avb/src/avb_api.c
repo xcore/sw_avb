@@ -35,12 +35,12 @@ int set_avb_source_dest(int h0,unsigned char a0[], int a0_len)
 int get_avb_source_dest(int h0,unsigned char a0[], REFERENCE_PARAM(int, a0_len))
  {return getset_avb_source_dest(0, h0,a0, a0_len);}
 
-int getset_avb_source_format(int set, int h0,REFERENCE_PARAM(enum avb_source_format_t, a0),REFERENCE_PARAM(int, a1));
+int getset_avb_source_format(int set, int h0,REFERENCE_PARAM(enum avb_stream_format_t, a0),REFERENCE_PARAM(int, a1));
 
-int set_avb_source_format(int h0,enum avb_source_format_t a0,int a1)
+int set_avb_source_format(int h0,enum avb_stream_format_t a0,int a1)
 {return getset_avb_source_format(1, h0,REFERENCE_TO a0,REFERENCE_TO a1);}
 
-int get_avb_source_format(int h0,REFERENCE_PARAM(enum avb_source_format_t, a0),REFERENCE_PARAM(int, a1))
+int get_avb_source_format(int h0,REFERENCE_PARAM(enum avb_stream_format_t, a0),REFERENCE_PARAM(int, a1))
  {return getset_avb_source_format(0, h0,a0,a1);}
 
 int getset_avb_source_channels(int set, int h0,REFERENCE_PARAM(int, a0));
@@ -91,6 +91,14 @@ int get_avb_ptp_ports(REFERENCE_PARAM(int, a0));
 int get_avb_ptp_rateratio(REFERENCE_PARAM(int, a0));
 int get_avb_ptp_port_pdelay(int h0,REFERENCE_PARAM(unsigned, a0));
 int getset_avb_sink_channels(int set, int h0,REFERENCE_PARAM(int, a0));
+
+int getset_avb_sink_format(int set, int h0,REFERENCE_PARAM(enum avb_stream_format_t, a0),REFERENCE_PARAM(int, a1));
+
+int set_avb_sink_format(int h0,enum avb_stream_format_t a0,int a1)
+{return getset_avb_sink_format(1, h0,REFERENCE_TO a0,REFERENCE_TO a1);}
+
+int get_avb_sink_format(int h0,REFERENCE_PARAM(enum avb_stream_format_t, a0),REFERENCE_PARAM(int, a1))
+ {return getset_avb_sink_format(0, h0,a0,a1);}
 
 
 int set_avb_sink_channels(int h0,int a0)

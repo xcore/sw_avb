@@ -227,7 +227,7 @@ void mrp_mad_leave(mrp_attribute_state *st);
    
        mrp_init
  */
-void mrp_periodic(avb_status_t *status);
+void mrp_periodic(void);
 
 int mrp_is_observer(mrp_attribute_state *st);
 
@@ -243,7 +243,7 @@ void mrp_encode_four_packed_event(char *buf,
 mrp_attribute_state *mrp_get_attr(void);
 #endif
 
-void avb_mrp_process_packet(REFERENCE_PARAM(avb_status_t, status), unsigned char buf[], int etype, int len);
+void avb_mrp_process_packet(unsigned char buf[], int etype, int len);
 
 void avb_mrp_set_legacy_mode(int mode);
 

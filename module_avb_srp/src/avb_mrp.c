@@ -953,7 +953,7 @@ static void send_leave_indication(mrp_attribute_state *st, int four_packed_event
   }
 }
 
-void mrp_periodic(avb_status_t *status)
+void mrp_periodic(void)
 {
 	chanend c_tx = avb_control_get_mac_tx();
 	static int leave_all = 0;
@@ -1160,7 +1160,7 @@ static int decode_fourpacked(int vector, int i)
 
                     
 
-void avb_mrp_process_packet(avb_status_t *status, unsigned char buf[], int etype, int len)
+void avb_mrp_process_packet(unsigned char buf[], int etype, int len)
 {
   char *end = (char *) &buf[0] + len;
   char *msg = (char *) &buf[0] + sizeof(mrp_header);

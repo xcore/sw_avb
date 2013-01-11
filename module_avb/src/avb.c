@@ -225,13 +225,13 @@ void avb_init(chanend media_ctl[],
   mac_request_status_packets(c_mac_rx);
 }
 
-void avb_periodic(avb_status_t *status)
+void avb_periodic(void)
 {
-	mrp_periodic(status);
+	mrp_periodic();
 #ifdef AVB_ENABLE_1722_1
-	avb_1722_1_periodic(status, c_mac_tx, c_ptp);
+	avb_1722_1_periodic(c_mac_tx, c_ptp);
 #endif
-	avb_1722_maap_periodic(status, c_mac_tx);
+	avb_1722_maap_periodic(c_mac_tx);
 }
 
 void avb_start(void)
@@ -278,7 +278,7 @@ int get_avb_sources(int *a0)
 
 int getset_avb_source_format(int set,
                              int source_num,
-                             enum avb_source_format_t *format,
+                             enum avb_stream_format_t *format,
                              int *rate)
 {
   if (source_num < AVB_NUM_SOURCES &&
@@ -578,6 +578,26 @@ int getset_avb_sink_id(int set, int sink_num, unsigned int a1[2])
       memcpy(sink->stream.streamId, a1, 8);
     }
     memcpy(a1, sink->stream.streamId, 8);
+    return 1;
+  }
+  else
+    return 0;
+}
+
+int getset_avb_sink_format(int set,
+                           int sink_num,
+                           enum avb_stream_format_t *format,
+                           int *rate)
+{
+  if (sink_num < AVB_NUM_SOURCES &&
+      (!set || sinks[sink_num].stream.state == AVB_SOURCE_STATE_DISABLED)) {
+    avb_sink_info_t *sink = &sinks[sink_num];
+    if (set) {
+      sink->stream.format = *format;
+      sink->stream.rate = *rate;
+    }
+    *format = sink->stream.format;
+    sink->stream.rate = *rate;
     return 1;
   }
   else
@@ -961,7 +981,7 @@ void avb_set_legacy_mode(int mode)
   avb_mrp_set_legacy_mode(mode);
 }
 
-void avb_process_control_packet(avb_status_t *status, unsigned int buf0[], int nbytes, chanend c_tx)
+void avb_process_control_packet(unsigned int buf0[], int nbytes, chanend c_tx)
 {
   if (nbytes == STATUS_PACKET_LEN)
   {
@@ -1004,15 +1024,15 @@ void avb_process_control_packet(avb_status_t *status, unsigned int buf0[], int n
       // TODO: #define around MMRP, disabled by default
       case AVB_MMRP_ETHERTYPE:
       case AVB_MVRP_ETHERTYPE:
-        avb_mrp_process_packet(status, &buf[eth_hdr_size], etype, len);
+        avb_mrp_process_packet(&buf[eth_hdr_size], etype, len);
         break;
       case AVB_1722_ETHERTYPE:
         // We know that the cd field is true because the MAC filter only forwards
         // 1722 control to this thread
       #ifdef AVB_ENABLE_1722_1
-        avb_1722_1_process_packet(status, &buf[eth_hdr_size], &(ethernet_hdr->src_addr[0]), len, c_tx);
+        avb_1722_1_process_packet(&buf[eth_hdr_size], &(ethernet_hdr->src_addr[0]), len, c_tx);
       #endif
-        avb_1722_maap_process_packet(status, &buf[eth_hdr_size], &(ethernet_hdr->src_addr[0]), len, c_tx);
+        avb_1722_maap_process_packet(&buf[eth_hdr_size], &(ethernet_hdr->src_addr[0]), len, c_tx);
         break;
     }
   }

@@ -172,7 +172,7 @@ void avb_1722_maap_get_base_address(unsigned char addr[6])
   // TODO
 }
 
-void avb_1722_maap_periodic(avb_status_t *status, chanend c_tx)
+void avb_1722_maap_periodic(chanend c_tx)
 {
   int nbytes;
 
@@ -351,7 +351,7 @@ static int maap_conflict(unsigned char remote_addr[6], int remote_count, unsigne
   return 1;
 }
 
-void avb_1722_maap_process_packet(avb_status_t *status, unsigned char buf[], unsigned char src_addr[6], int nbytes, chanend c_tx)
+void avb_1722_maap_process_packet(unsigned char buf[], unsigned char src_addr[6], int nbytes, chanend c_tx)
 {
   struct maap_packet_t *maap_pkt = (struct maap_packet_t *) &buf[0];
   int msg_type;

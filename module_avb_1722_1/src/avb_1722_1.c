@@ -55,7 +55,7 @@ void avb_1722_1_init(unsigned char macaddr[6], unsigned char serial_number[2])
 
 }
 
-void avb_1722_1_process_packet(avb_status_t *status, unsigned char buf[], unsigned char src_addr[6], int len, chanend c_tx)
+void avb_1722_1_process_packet(unsigned char buf[], unsigned char src_addr[6], int len, chanend c_tx)
 {
     struct avb_1722_1_packet_header_t *pkt = (struct avb_1722_1_packet_header_t *) &buf[0];
     unsigned subtype = GET_1722_1_SUBTYPE(pkt);
@@ -78,7 +78,7 @@ void avb_1722_1_process_packet(avb_status_t *status, unsigned char buf[], unsign
     return;
 }
 
-void avb_1722_1_periodic(avb_status_t *status, chanend c_tx, chanend c_ptp)
+void avb_1722_1_periodic(chanend c_tx, chanend c_ptp)
 {
 	avb_1722_1_adp_advertising_periodic(c_tx, c_ptp);
     avb_1722_1_adp_discovery_periodic(c_tx);

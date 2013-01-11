@@ -53,5 +53,12 @@ typedef struct {
     unsigned char msrp_mappings[4];
 } avb_1722_1_aem_get_avb_info_response_t;
 
+/* 7.4.9.1 SET_STREAM_FORMAT Command/response */
+typedef struct {
+    unsigned char descriptor_type[2];
+    unsigned char descriptor_id[2];
+    unsigned char stream_format[8];
+} avb_1722_1_aem_getset_stream_format_t;
+
 
 #endif /* AVB_1722_1_AECP_AEM_H_ */
