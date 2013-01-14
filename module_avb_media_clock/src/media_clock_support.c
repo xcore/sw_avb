@@ -49,12 +49,6 @@ typedef struct stream_info_t {
  * \brief Records the state of the clock recovery for one media clock
  */
 typedef struct clock_info_t {
-#ifndef MEDIA_CLOCK_EXCLUDE_PTP_DERIVED
-	unsigned int t1;
-	unsigned int ptp1;
-	unsigned long long wordlen_ptp;
-	long long err;
-#endif
 	unsigned long long wordlen;
 	long long ierror;
 	unsigned int rate;
@@ -79,39 +73,14 @@ void init_media_clock_recovery(chanend ptp_svr,
 							   unsigned int rate) {
 	clock_info_t *clock_info = &clock_states[clock_num];
 
-#ifndef MEDIA_CLOCK_EXCLUDE_PTP_DERIVED
-	ptp_time_info_mod64 timeInfo;
-#endif
-
 	clock_info->first = 1;
 	clock_info->rate = rate;
 	clock_info->ierror = 0;
-#ifndef MEDIA_CLOCK_EXCLUDE_PTP_DERIVED
-	clock_info->err = 0;
-#endif
 	if (rate != 0) {
 		clock_info->wordlen = ((100000000LL << WORDLEN_FRACTIONAL_BITS) / clock_info->rate);
-#ifndef MEDIA_CLOCK_EXCLUDE_PTP_DERIVED
-		clock_info->wordlen_ptp = clock_info->wordlen * 10;
-#endif
 	} else {
 		clock_info->wordlen = 0;
-#ifndef MEDIA_CLOCK_EXCLUDE_PTP_DERIVED
-		clock_info->wordlen_ptp = 0;
-#endif
 	}
-
-#ifndef MEDIA_CLOCK_EXCLUDE_PTP_DERIVED
-	clock_info->t1 = clk_time;
-
-#if COMBINE_MEDIA_CLOCK_AND_PTP
-        ptp_get_local_time_info_mod64(&timeInfo);
-#else
-        ptp_get_time_info_mod64(ptp_svr, &timeInfo);
-#endif
-
-	clock_info->ptp1 = local_timestamp_to_ptp_mod32(clk_time, &timeInfo);
-#endif
 
 	clock_info->stream_info1.valid = 0;
 	clock_info->stream_info2.valid = 0;
@@ -146,9 +115,6 @@ unsigned int update_media_clock(chanend ptp_svr,
 								unsigned int t2,
 								int period0) {
 	clock_info_t *clock_info = &clock_states[clock_index];
-#ifndef MEDIA_CLOCK_EXCLUDE_PTP_DERIVED
-	ptp_time_info_mod64 timeInfo;
-#endif
 	long long diff_local;
 	int clock_type = mclock->clock_type;
 
@@ -156,57 +122,6 @@ unsigned int update_media_clock(chanend ptp_svr,
 	case LOCAL_CLOCK:
 		return local_wordlen_to_external_wordlen(clock_info->wordlen);
 		break;
-
-#ifndef MEDIA_CLOCK_EXCLUDE_PTP_DERIVED
-	case PTP_DERIVED: {
-		long long err, diff_ptp;
-		unsigned ptp2;
-
-#if COMBINE_MEDIA_CLOCK_AND_PTP
-                ptp_get_local_time_info_mod64(&timeInfo);
-#else
-                ptp_get_time_info_mod64(ptp_svr, &timeInfo);
-#endif
-
-
-		ptp2 = local_timestamp_to_ptp_mod32(t2, &timeInfo);
-
-		diff_local = (signed) t2 - (signed) clock_info->t1;
-		diff_ptp = (signed) ptp2 - (signed) clock_info->ptp1;
-
-		//      error in ns = diff_ptp - diff_local * wlptp / wl
-		//      error in ns * wl = dptp * wl - dlocal * wlptp
-		//      err = actual - expected
-
-		err = (diff_ptp * clock_info->wordlen) - (diff_local
-				* clock_info->wordlen_ptp);
-		err = ((err << WORDLEN_FRACTIONAL_BITS)
-				/ (long long) clock_info->wordlen);
-
-		// Chop off bottom bits - thread scheduling causes noise here
-		err = err & (~255);
-
-		if ((err >> WORDLEN_FRACTIONAL_BITS) > MAX_ERROR_TOLERANCE ||
-			(err >> WORDLEN_FRACTIONAL_BITS) < -MAX_ERROR_TOLERANCE) {
-			clock_info->wordlen = ((100000000LL << WORDLEN_FRACTIONAL_BITS)
-					/ clock_info->rate);
-			clock_info->wordlen_ptp = clock_info->wordlen * 10;
-			clock_info->err = 0;
-		} else {
-			clock_info->err += err;
-
-			// original *8, /4
-			long long diff = (((err) / diff_local) * 512) + (((clock_info->err) / diff_local) * 16);
-
-			// adjust for error
-			clock_info->wordlen = clock_info->wordlen - diff;
-		}
-
-		clock_info->t1 = t2;
-		clock_info->ptp1 = ptp2;
-		break;
-	}
-#endif
 
 #ifndef MEDIA_CLOCK_EXCLUDE_STREAM_DERIVED
 	case INPUT_STREAM_DERIVED: {

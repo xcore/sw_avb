@@ -17,13 +17,13 @@
 #endif
 
 /** The type of a media clock.
- *  A media clock can be either derived from the PTP clock or recovered 
+ *  A media clock can be either be recovered 
  *  from an 
  *  incoming media FIFO (which in turn will derive its timing
- *  from the IEEE 1722 audio stream it came from)
+ *  from the IEEE 1722 audio stream it came from) or use the
+ *  local oscillator
  */
 typedef enum media_clock_type_t {
-  PTP_DERIVED,
   INPUT_STREAM_DERIVED,
   LOCAL_CLOCK
 } media_clock_type_t; 
