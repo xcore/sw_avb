@@ -209,6 +209,8 @@ void demo(chanend c_rx, chanend c_tx)
   set_avb_source_format(0, AVB_SOURCE_FORMAT_MBLA_24BIT, sample_rate);
   set_avb_source_sync(0, 0); // use the media_clock defined above
 
+  set_avb_sink_format(0, AVB_SOURCE_FORMAT_MBLA_24BIT, sample_rate);
+
   p_mute_led_remote <: ~0;
   p_chan_leds <: ~(1 << selected_chan);
   p_buttons :> button_val;
