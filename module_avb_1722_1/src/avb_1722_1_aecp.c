@@ -389,7 +389,7 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
   unsigned short command_type = AEM_MSG_GET_COMMAND_TYPE(aem_msg);
   unsigned char status = AECP_AEM_STATUS_SUCCESS;
 
-  // TODO: Check if the entity is locked/acquired and reply with appropriate status if it is
+  // TODO: Check if the entity is locked/acquired and reply with appropriate status if it is (only on relevant commands)
 
   if (message_type == AECP_CMD_AEM_COMMAND)
   {
@@ -579,13 +579,8 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
       case AECP_AEM_CMD_GET_STREAM_FORMAT:
       case AECP_AEM_CMD_SET_STREAM_FORMAT: // Fallthrough intentional
       {
-        int cd_len = sizeof(avb_1722_1_aem_getset_stream_format_t);
         process_aem_cmd_getset_stream_format(pkt, &status, command_type);
-        if ((command_type == AECP_AEM_CMD_GET_STREAM_FORMAT) && (status != AECP_AEM_STATUS_SUCCESS))
-        {
-          cd_len =- 8;
-        }
-        avb_1722_1_create_aecp_aem_response(src_addr, status, cd_len, pkt);
+        avb_1722_1_create_aecp_aem_response(src_addr, status, sizeof(avb_1722_1_aem_getset_stream_format_t), pkt);
         mac_tx(c_tx, avb_1722_1_buf, 64, 0);
 
         break;
@@ -593,14 +588,14 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
       case AECP_AEM_CMD_GET_SAMPLING_RATE:
       case AECP_AEM_CMD_SET_SAMPLING_RATE:
       {
-        int cd_len = sizeof(avb_1722_1_aem_getset_sampling_rate_t);
         process_aem_cmd_getset_sampling_rate(pkt, &status, command_type);
-        if ((command_type == AECP_AEM_CMD_GET_SAMPLING_RATE) && (status != AECP_AEM_STATUS_SUCCESS))
-        {
-          cd_len =- 4;
-        }
-        avb_1722_1_create_aecp_aem_response(src_addr, status, cd_len, pkt);
+        avb_1722_1_create_aecp_aem_response(src_addr, status, sizeof(avb_1722_1_aem_getset_sampling_rate_t), pkt);
         mac_tx(c_tx, avb_1722_1_buf, 64, 0);
+        break;
+      }
+      case AECP_AEM_CMD_GET_CLOCK_SOURCE:
+      case AECP_AEM_CMD_SET_CLOCK_SOURCE:
+      {
         break;
       }
       // TODO: ENTITY_AVAILABLE
