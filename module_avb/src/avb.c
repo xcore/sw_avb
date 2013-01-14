@@ -289,7 +289,7 @@ int getset_avb_source_format(int set,
       source->stream.rate = *rate;
     }
     *format = source->stream.format;
-    source->stream.rate = *rate;
+    *rate = source->stream.rate;
     return 1;
   }
   else
@@ -590,14 +590,14 @@ int getset_avb_sink_format(int set,
                            int *rate)
 {
   if (sink_num < AVB_NUM_SOURCES &&
-      (!set || sinks[sink_num].stream.state == AVB_SOURCE_STATE_DISABLED)) {
+      (!set || sinks[sink_num].stream.state == AVB_SINK_STATE_DISABLED)) {
     avb_sink_info_t *sink = &sinks[sink_num];
     if (set) {
       sink->stream.format = *format;
       sink->stream.rate = *rate;
     }
     *format = sink->stream.format;
-    sink->stream.rate = *rate;
+    *rate = sink->stream.rate;
     return 1;
   }
   else
