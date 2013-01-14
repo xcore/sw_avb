@@ -275,7 +275,7 @@ static int sfc_from_sampling_rate(int rate)
   }
 }
 
-static void process_aem_getset_stream_format_cmd(avb_1722_1_aecp_packet_t *pkt, unsigned char *status, unsigned short command_type)
+static void process_aem_cmd_getset_stream_format(avb_1722_1_aecp_packet_t *pkt, unsigned char *status, unsigned short command_type)
 {
   avb_1722_1_aem_getset_stream_format_t *cmd = (avb_1722_1_aem_getset_stream_format_t *)(pkt->data.aem.command.payload);
   unsigned short stream_index = NTOH_U16(cmd->descriptor_id);
@@ -351,6 +351,35 @@ static void process_aem_getset_stream_format_cmd(avb_1722_1_aecp_packet_t *pkt, 
 
   }
 
+}
+
+static void process_aem_cmd_getset_sampling_rate(avb_1722_1_aecp_packet_t *pkt, unsigned char *status, unsigned short command_type)
+{
+  avb_1722_1_aem_getset_sampling_rate_t *cmd = (avb_1722_1_aem_getset_sampling_rate_t *)(pkt->data.aem.command.payload);
+  unsigned short stream_index = NTOH_U16(cmd->descriptor_id);
+  unsigned short desc_type = NTOH_U16(cmd->descriptor_type);
+  int rate;
+
+  if (command_type == AECP_AEM_CMD_GET_SAMPLING_RATE)
+  {
+    if (get_device_media_clock_rate(stream_index, &rate))
+    {
+      HTON_U32(cmd->sampling_rate, rate);
+      return;
+    }
+  }
+  else // AECP_AEM_CMD_SET_SAMPLING_RATE
+  {
+    rate = NTOH_U32(cmd->sampling_rate);
+
+    if (set_device_media_clock_rate(stream_index, rate))
+    {
+      // Success
+      return;
+    }
+  }
+
+  *status = AECP_AEM_STATUS_NO_SUCH_DESCRIPTOR;
 }
 
 static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsigned char src_addr[6], int message_type, int num_pkt_bytes, chanend c_tx)
@@ -550,12 +579,28 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
       case AECP_AEM_CMD_GET_STREAM_FORMAT:
       case AECP_AEM_CMD_SET_STREAM_FORMAT: // Fallthrough intentional
       {
-
-        process_aem_getset_stream_format_cmd(pkt, &status, command_type);
-        // TODO: sizeof needs to check if GET status is not SUCCESS
-        avb_1722_1_create_aecp_aem_response(src_addr, status, sizeof(avb_1722_1_aem_getset_stream_format_t), pkt);
+        int cd_len = sizeof(avb_1722_1_aem_getset_stream_format_t);
+        process_aem_cmd_getset_stream_format(pkt, &status, command_type);
+        if ((command_type == AECP_AEM_CMD_GET_STREAM_FORMAT) && (status != AECP_AEM_STATUS_SUCCESS))
+        {
+          cd_len =- 8;
+        }
+        avb_1722_1_create_aecp_aem_response(src_addr, status, cd_len, pkt);
         mac_tx(c_tx, avb_1722_1_buf, 64, 0);
 
+        break;
+      }
+      case AECP_AEM_CMD_GET_SAMPLING_RATE:
+      case AECP_AEM_CMD_SET_SAMPLING_RATE:
+      {
+        int cd_len = sizeof(avb_1722_1_aem_getset_sampling_rate_t);
+        process_aem_cmd_getset_sampling_rate(pkt, &status, command_type);
+        if ((command_type == AECP_AEM_CMD_GET_SAMPLING_RATE) && (status != AECP_AEM_STATUS_SUCCESS))
+        {
+          cd_len =- 4;
+        }
+        avb_1722_1_create_aecp_aem_response(src_addr, status, cd_len, pkt);
+        mac_tx(c_tx, avb_1722_1_buf, 64, 0);
         break;
       }
       // TODO: ENTITY_AVAILABLE

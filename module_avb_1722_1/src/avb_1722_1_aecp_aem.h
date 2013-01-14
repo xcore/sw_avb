@@ -60,5 +60,12 @@ typedef struct {
     unsigned char stream_format[8];
 } avb_1722_1_aem_getset_stream_format_t;
 
+/* 7.4.22. SET_SAMPLING_RATE Command/Response */
+typedef struct {
+    unsigned char descriptor_type[2];
+    unsigned char descriptor_id[2];
+    unsigned char sampling_rate[4];
+} avb_1722_1_aem_getset_sampling_rate_t;
+
 
 #endif /* AVB_1722_1_AECP_AEM_H_ */
