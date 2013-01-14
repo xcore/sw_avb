@@ -168,6 +168,7 @@ typedef enum {
     AECP_AEM_STATUS_IN_PROGRESS = 9,
     AECP_AEM_STATUS_ENTITY_MISBEHAVING = 10,
     AECP_AEM_STATUS_NOT_SUPPORTED = 11,
+    AECP_AEM_STATUS_STREAM_IS_RUNNING = 12,
 } avb_1722_1_aecp_aem_status_code;
 
 typedef enum {
