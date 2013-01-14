@@ -69,7 +69,7 @@ void avb_listener_on_talker_connect(int sink_num, REFERENCE_PARAM(guid_t, talker
 
   if ((talker_guid->l >> 40) != (XMOS_VENDOR_ID>>8))
   {
-    set_device_media_clock_type(0, INPUT_STREAM_DERIVED);
+    set_device_media_clock_type(0, DEVICE_MEDIA_CLOCK_INPUT_STREAM_DERIVED);
     printstrln("Non XMOS talker: setting input stream derived clock");
   }
   else
@@ -77,7 +77,7 @@ void avb_listener_on_talker_connect(int sink_num, REFERENCE_PARAM(guid_t, talker
     // If we were previously master clock, restore this on connection to an XMOS talker
     if (entity_elected_master_clock)
     {
-      set_device_media_clock_type(0, LOCAL_CLOCK);
+      set_device_media_clock_type(0, DEVICE_MEDIA_CLOCK_LOCAL_CLOCK);
       printstrln("Entity is Master audio clock");
     }
   }

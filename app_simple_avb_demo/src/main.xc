@@ -198,7 +198,7 @@ void demo(chanend c_rx, chanend c_tx)
   timer button_tmr;
 
   // Initialize the media clock
-  set_device_media_clock_type(0, INPUT_STREAM_DERIVED);
+  set_device_media_clock_type(0, DEVICE_MEDIA_CLOCK_INPUT_STREAM_DERIVED);
   set_device_media_clock_rate(0, sample_rate);
   set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_ENABLED);
 

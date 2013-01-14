@@ -37,8 +37,8 @@ enum device_media_clock_state_t
 #define __DEVICE_MEDIA_CLOCK_TYPE_T__
 enum device_media_clock_type_t 
 {
-  DEVICE_MEDIA_CLOCK_TYPE_PTP,
-  DEVICE_MEDIA_CLOCK_TYPE_STREAM,
+  DEVICE_MEDIA_CLOCK_INPUT_STREAM_DERIVED,
+  DEVICE_MEDIA_CLOCK_LOCAL_CLOCK
 };
 
 #endif
