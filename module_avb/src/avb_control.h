@@ -130,22 +130,6 @@ void set_avb_source_sync(unsigned source_num, unsigned mclock);
  */
 void get_avb_source_sync(unsigned source_num, unsigned& mclock);
 
-/** Set the name of an AVB source.
- *
- *  Sets a human readable name for the stream. This name
- *  must be fewer than ``AVB_MAX_NAME_LEN`` which can be set in ``avb_conf.h``.
- *  
- *  \param source_num the local source number
- *  \param name       the string containing the name
- */
-void set_avb_source_name(unsigned source_num, char name[]);
-
-/** Get the name of an AVB source.
- *  \param source_num the local source number
- *  \param name       the string containing the name
- */
-void get_avb_source_name(unsigned source_num, char name[]);
-
 /** Set the destination vlan of an AVB source.
  *
  *  Sets the vlan that the source will transmit on. This defaults
@@ -287,24 +271,6 @@ void set_avb_sink_addr(unsigned sink_num, char addr[], unsigned len);
  */
 void get_avb_sink_addr(unsigned sink_num, char addr[], unsigned& len);
 
-/** Set the name of an AVB sink.
- *
- *  Sets the name of the sink (to be reported by higher level
- *  protocols).
- *
- *  \param sink_num the number of the sink
- *  \param name     the name string 
- *
- */
-void set_avb_sink_name(unsigned sink_num, char name[]);
-
-/** Get the name of an AVB sink.
- *
- *  \param sink_num the number of the sink
- *  \param name     the name string
- */
-void get_avb_sink_name(unsigned sink_num, char name[]);
-
 /** Set the stream id that an AVB sink listens to.
  *
  *  Sets the stream id that an AVB sink listens to.
@@ -342,48 +308,6 @@ void set_avb_sink_state(unsigned sink_num, avb_sink_state_t state);
  * \param state the state of the sink
  */
 void get_avb_sink_state(unsigned sink_num, avb_sink_state_t state);
-
-/** Get the name of the device.
- * 
- *  \param device_name_string array to be filled with the device name
- **/
-int get_device_name(char device_name_string[]);
-
-/** Get the name of the system the device is part of.
- * 
- *  \param device_name_string array to be filled with the system name
- **/
-int get_device_system(char device_name_string[]);
-
-/** Get the name of the device vendor.
- * 
- *  \param vendor_name_string array to be filled with the vendor name
- **/
-int get_device_identity_vendor(char vendor_name_string[]);
-
-/** Get the id of the vendor
- * 
- *  \param vendor_id_string array to be filled with the vendor id
- **/
-int get_device_identity_vendor_id(char vendor_id_string[]);
-
-/** Get the name of the product.
- * 
- *  \param product_string array to be filled with the product name
- **/
-int get_device_identity_product(char product_string[]);
-
-/** Get the version of the product
- * 
- *  \param version_string array to be filled with the version
- **/
-int get_device_identity_version(char version_string);
-
-/** Get the serial number of the device.
- * 
- *  \param serial_no_string array to be filled with the serial number
- **/
-int get_device_identity_serial(char serial_no_string[]);
 
 /** Set the source of a media clock.
  *

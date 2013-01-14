@@ -41,10 +41,6 @@ typedef struct media_info_t {
   unsigned fifo;
   int local_id;
   int mapped_to;
-  char name[AVB_MAX_NAME_LEN];
-#ifdef AVB_STORE_IO_TYPE_NAMES
-  char type[AVB_MAX_NAME_LEN];
-#endif
 } media_info_t;
 
 static int max_talker_stream_id = 0;
@@ -138,10 +134,6 @@ static void register_media(chanend media_ctl[])
     num_in = xc_abi_inuint(media_ctl[i]);
     for (int j=0;j<num_in;j++) {
       xc_abi_outuint(media_ctl[i], input_id);
-      strcpy(inputs[input_id].name,"");
-#ifdef AVB_STORE_IO_TYPE_NAMES
-      strcpy(inputs[input_id].type,"");
-#endif
       inputs[input_id].core_id = core_id;
       inputs[input_id].clk_ctl = clk_ctl;
       inputs[input_id].local_id = j;
@@ -153,10 +145,6 @@ static void register_media(chanend media_ctl[])
     num_out = xc_abi_inuint(media_ctl[i]);
     for (int j=0;j<num_out;j++) {
       xc_abi_outuint(media_ctl[i], output_id);
-      strcpy(outputs[output_id].name,"");
-#ifdef AVB_STORE_IO_TYPE_NAMES
-      strcpy(outputs[output_id].type,"");
-#endif
       outputs[output_id].core_id = core_id;
       outputs[output_id].clk_ctl = clk_ctl;
       outputs[output_id].local_id = j;
@@ -493,20 +481,6 @@ int getset_avb_source_state(int set,
     return 0;
 }
 
-int getset_avb_source_name(int set, int source_num, char a2[])
-{
-  if (source_num < AVB_NUM_SOURCES) {
-    avb_source_info_t *source = &sources[source_num];
-    if (set) {
-      strncpy(source->name, a2, AVB_MAX_NAME_LEN);
-    }
-    strncpy(a2, source->name, AVB_MAX_NAME_LEN);
-    return 1;
-  }
-  else
-    return 0;
-}
-
 int getset_avb_source_map(int set, int source_num, int map[], int *map_len)
 {
   if (source_num < AVB_NUM_SOURCES &&
@@ -773,20 +747,6 @@ int getset_avb_sink_state(int set,
     return 0;
 }
 
-int getset_avb_sink_name(int set, int sink_num, char a2[])
-{
-  if (sink_num < AVB_NUM_SINKS) {
-    avb_sink_info_t *sink = &sinks[sink_num];
-    if (set) {
-      strncpy(sink->name, a2, AVB_MAX_NAME_LEN);
-    }
-    strncpy(a2, sink->name,  AVB_MAX_NAME_LEN);
-    return 1;
-  }
-  else
-    return 0;
-}
-
 int getset_avb_sink_map(int set, int sink_num, int map[], int *map_len)
 {
   if (sink_num < AVB_NUM_SINKS &&
@@ -884,94 +844,16 @@ int getset_device_media_clock_type(int set, int media_clock_num, enum device_med
 }
 
 
-
-
 int get_media_ins(int *a0)
 {
   *a0 = AVB_NUM_MEDIA_INPUTS;
   return 1;
 }
 
-int getset_media_in_name(int set, int input_num, char a2[])
-{
-  if (input_num < AVB_NUM_MEDIA_INPUTS) {
-    media_info_t *media = &inputs[input_num];
-    if (set) {
-      strncpy(media->name, a2, AVB_MAX_NAME_LEN);
-    }
-    strncpy(a2, media->name, AVB_MAX_NAME_LEN);
-    return 1;
-  }
-  else
-    return 0;
-}
-
-int getset_media_in_type(int set, int input_num, char a2[])
-{
-#ifndef AVB_STORE_IO_TYPE_NAMES
-  return 0;
-#else
-  if (input_num < AVB_NUM_MEDIA_INPUTS) {
-    media_info_t *media = &inputs[input_num];
-    if (set) {
-      strncpy(media->type, a2, AVB_MAX_NAME_LEN);
-      return 0;
-    }
-    strncpy(a2, media->type,AVB_MAX_NAME_LEN);
-    return 1;
-  }
-  else
-    return 0;
-
-#endif
-}
-
-int get_media_in_type(int h, char a2[]) {
-  return getset_media_in_type(0, h, a2);
-}
-
-
 int get_media_outs(int *a0)
 {
   *a0 = AVB_NUM_MEDIA_OUTPUTS;
   return 1;
-}
-
-int getset_media_out_name(int set, int output_num, char a2[])
-{
-  if (output_num < AVB_NUM_MEDIA_OUTPUTS) {
-    media_info_t *media = &outputs[output_num];
-    if (set) {
-      strncpy(media->name, a2, AVB_MAX_NAME_LEN);
-    }
-    strncpy(a2, media->name, AVB_MAX_NAME_LEN);
-    return 1;
-  }
-  else
-    return 0;
-}
-
-int getset_media_out_type(int set, int output_num, char a2[])
-{
-#ifndef AVB_STORE_IO_TYPE_NAMES
-  return 0;
-#else
-  if (output_num < AVB_NUM_MEDIA_OUTPUTS) {
-    media_info_t *media = &outputs[output_num];
-    if (set) {
-      strncpy(media->type, a2, AVB_MAX_NAME_LEN);
-    }
-    strncpy(a2, media->type, AVB_MAX_NAME_LEN);
-
-    return 1;
-  }
-  else
-    return 0;
-#endif
-}
-
-int get_media_out_type(int h, char a2[]) {
-  return getset_media_out_type(0, h, a2);
 }
 
 

@@ -18,8 +18,6 @@
 #define REFERENCE_TO &
 #endif
 
-#ifndef __OSC_IMPL
-
 int getset_avb_source_presentation(int set, int h0,REFERENCE_PARAM(int, a0));
 
 inline int set_avb_source_presentation(int h0,int a0)
@@ -68,14 +66,6 @@ inline int set_avb_source_sync(int h0,int a0)
 inline int get_avb_source_sync(int h0,REFERENCE_PARAM(int, a0))
  {return getset_avb_source_sync(0, h0,a0);}
 
-int getset_avb_source_name(int set, int h0,char a0[]);
-
-inline int set_avb_source_name(int h0,char a0[])
-{return getset_avb_source_name(1, h0,a0);}
-
-inline int get_avb_source_name(int h0,char a0[])
- {return getset_avb_source_name(0, h0,a0);}
-
 int get_avb_source_id(int h0,unsigned int a0[2]);
 int getset_avb_source_vlan(int set, int h0,REFERENCE_PARAM(int, a0));
 
@@ -123,14 +113,6 @@ inline int set_avb_sink_sync(int h0,int a0)
 inline int get_avb_sink_sync(int h0,REFERENCE_PARAM(int, a0))
  {return getset_avb_sink_sync(0, h0,a0);}
 
-int getset_avb_sink_name(int set, int h0,char a0[]);
-
-inline int set_avb_sink_name(int h0,char a0[])
-{return getset_avb_sink_name(1, h0,a0);}
-
-inline int get_avb_sink_name(int h0,char a0[])
- {return getset_avb_sink_name(0, h0,a0);}
-
 int getset_avb_sink_vlan(int set, int h0,REFERENCE_PARAM(int, a0));
 
 inline int set_avb_sink_vlan(int h0,int a0)
@@ -171,26 +153,9 @@ inline int set_avb_sink_addr(int h0,unsigned char a0[], int a0_len)
 inline int get_avb_sink_addr(int h0,unsigned char a0[], REFERENCE_PARAM(int, a0_len))
  {return getset_avb_sink_addr(0, h0,a0, a0_len);}
 
-int getset_media_out_name(int set, int h0,char a0[]);
-
-inline int set_media_out_name(int h0,char a0[])
-{return getset_media_out_name(1, h0,a0);}
-
-inline int get_media_out_name(int h0,char a0[])
- {return getset_media_out_name(0, h0,a0);}
-
-int get_media_out_type(int h0,char a0[]);
 int get_media_outs(REFERENCE_PARAM(int, a0));
 int get_media_ins(REFERENCE_PARAM(int, a0));
-int getset_media_in_name(int set, int h0,char a0[]);
 
-inline int set_media_in_name(int h0,char a0[])
-{return getset_media_in_name(1, h0,a0);}
-
-inline int get_media_in_name(int h0,char a0[])
- {return getset_media_in_name(0, h0,a0);}
-
-int get_media_in_type(int h0,char a0[]);
 int getset_device_media_clock_source(int set, int h0,REFERENCE_PARAM(int, a0));
 
 inline int set_device_media_clock_source(int h0,int a0)
@@ -222,17 +187,6 @@ inline int set_device_media_clock_state(int h0,enum device_media_clock_state_t a
 
 inline int get_device_media_clock_state(int h0,REFERENCE_PARAM(enum device_media_clock_state_t, a0))
  {return getset_device_media_clock_state(0, h0,a0);}
-
-int get_device_system(char a0[]);
-int get_device_identity_serial(char a0[]);
-int get_device_identity_version(char a0[]);
-int get_device_identity_vendor_id(char a0[]);
-int get_device_identity_product(char a0[]);
-int get_device_identity_vendor(char a0[]);
-int get_device_name(char a0[]);
-int get_device_media_clocks(REFERENCE_PARAM(int, a0));
-
-#endif // __OSC_IMPL
 
 
 #endif // _avb_api_h_

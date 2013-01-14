@@ -16,7 +16,6 @@
 #define ETHERNET_MAX_TX_LP_PACKET_SIZE (500)
 
 /* General purpose AVB configuration */
-#define AVB_MAX_NAME_LEN 0
 #define AVB_MAX_CHANNELS_PER_STREAM 8
 
 #define COMBINE_MEDIA_CLOCK_AND_PTP 1

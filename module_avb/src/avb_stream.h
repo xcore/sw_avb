@@ -27,7 +27,6 @@ typedef struct avb_source_info_t
 	int talker_ctl;
 	unsigned char dest[6];
 	int presentation;
-	char name[AVB_MAX_NAME_LEN];
 } avb_source_info_t;
 
 
@@ -36,7 +35,6 @@ typedef struct avb_sink_info_t
 	avb_stream_info_t stream;
 	int listener_ctl;
 	unsigned char addr[6];
-	char name[AVB_MAX_NAME_LEN];
 } avb_sink_info_t;
 
 
