@@ -67,5 +67,14 @@ typedef struct {
     unsigned char sampling_rate[4];
 } avb_1722_1_aem_getset_sampling_rate_t;
 
+/* 7.4.23. SET_CLOCK_SOURCE Command/Response */
+typedef struct {
+    unsigned char descriptor_type[2];
+    unsigned char descriptor_id[2];
+    unsigned char clock_source_index[2];
+    unsigned char reserved[2];
+} avb_1722_1_aem_getset_clock_source_t;
+
+
 
 #endif /* AVB_1722_1_AECP_AEM_H_ */

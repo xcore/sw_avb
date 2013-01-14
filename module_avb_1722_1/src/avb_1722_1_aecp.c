@@ -356,13 +356,12 @@ static void process_aem_cmd_getset_stream_format(avb_1722_1_aecp_packet_t *pkt, 
 static void process_aem_cmd_getset_sampling_rate(avb_1722_1_aecp_packet_t *pkt, unsigned char *status, unsigned short command_type)
 {
   avb_1722_1_aem_getset_sampling_rate_t *cmd = (avb_1722_1_aem_getset_sampling_rate_t *)(pkt->data.aem.command.payload);
-  unsigned short stream_index = NTOH_U16(cmd->descriptor_id);
-  unsigned short desc_type = NTOH_U16(cmd->descriptor_type);
+  unsigned short media_clock_id = NTOH_U16(cmd->descriptor_id);
   int rate;
 
   if (command_type == AECP_AEM_CMD_GET_SAMPLING_RATE)
   {
-    if (get_device_media_clock_rate(stream_index, &rate))
+    if (get_device_media_clock_rate(media_clock_id, &rate))
     {
       HTON_U32(cmd->sampling_rate, rate);
       return;
@@ -372,7 +371,36 @@ static void process_aem_cmd_getset_sampling_rate(avb_1722_1_aecp_packet_t *pkt, 
   {
     rate = NTOH_U32(cmd->sampling_rate);
 
-    if (set_device_media_clock_rate(stream_index, rate))
+    if (set_device_media_clock_rate(media_clock_id, rate))
+    {
+      // Success
+      return;
+    }
+  }
+
+  *status = AECP_AEM_STATUS_NO_SUCH_DESCRIPTOR;
+}
+
+static void process_aem_cmd_getset_clock_source(avb_1722_1_aecp_packet_t *pkt, unsigned char *status, unsigned short command_type)
+{
+  avb_1722_1_aem_getset_clock_source_t *cmd = (avb_1722_1_aem_getset_clock_source_t *)(pkt->data.aem.command.payload);
+  unsigned short media_clock_id = NTOH_U16(cmd->descriptor_id);
+  // The clock source descriptor's index corresponds to the clock type in our implementation
+  enum device_media_clock_type_t source_index;
+
+  if (command_type == AECP_AEM_CMD_GET_CLOCK_SOURCE)
+  {
+    if (get_device_media_clock_type(media_clock_id, &source_index))
+    {
+      HTON_U16(cmd->clock_source_index, source_index);
+      return;
+    }
+  }
+  else // AECP_AEM_CMD_SET_CLOCK_SOURCE
+  {
+    source_index = NTOH_U16(cmd->clock_source_index);
+
+    if (set_device_media_clock_type(media_clock_id, source_index))
     {
       // Success
       return;
@@ -596,6 +624,9 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
       case AECP_AEM_CMD_GET_CLOCK_SOURCE:
       case AECP_AEM_CMD_SET_CLOCK_SOURCE:
       {
+        process_aem_cmd_getset_clock_source(pkt, &status, command_type);
+        avb_1722_1_create_aecp_aem_response(src_addr, status, sizeof(avb_1722_1_aem_getset_clock_source_t), pkt);
+        mac_tx(c_tx, avb_1722_1_buf, 64, 0);
         break;
       }
       // TODO: ENTITY_AVAILABLE
