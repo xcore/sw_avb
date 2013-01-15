@@ -5,6 +5,7 @@
 #include "avb_srp_pdu.h"
 #include <string.h>
 #include <print.h>
+#include "simple_printf.h"
 #include "xccompat.h"
 
 #if AVB_1722_1_USE_AVC
@@ -410,6 +411,47 @@ static void process_aem_cmd_getset_clock_source(avb_1722_1_aecp_packet_t *pkt, u
   *status = AECP_AEM_STATUS_NO_SUCH_DESCRIPTOR;
 }
 
+static void process_aem_cmd_startstop_streaming(avb_1722_1_aecp_packet_t *pkt, unsigned char *status, unsigned short command_type)
+{
+  avb_1722_1_aem_startstop_streaming_t *cmd = (avb_1722_1_aem_startstop_streaming_t *)(pkt->data.aem.command.payload);
+  unsigned short stream_index = NTOH_U16(cmd->descriptor_id);
+  unsigned short desc_type = NTOH_U16(cmd->descriptor_type);
+
+  if (desc_type == AEM_STREAM_INPUT_TYPE)
+  {
+    enum avb_sink_state_t state;
+    if (get_avb_sink_state(stream_index, &state))
+    {
+      if (command_type == AECP_AEM_CMD_START_STREAMING)
+      {
+        set_avb_sink_state(stream_index, AVB_SINK_STATE_ENABLED);
+      }
+      else
+      {
+        set_avb_sink_state(stream_index, AVB_SINK_STATE_POTENTIAL);
+      }
+    }
+    else *status = AECP_AEM_STATUS_NO_SUCH_DESCRIPTOR;
+
+  }
+  else if ((desc_type == AEM_STREAM_OUTPUT_TYPE))
+  {
+    enum avb_source_state_t state;
+    if (get_avb_source_state(stream_index, &state))
+    {
+      if (command_type == AECP_AEM_CMD_START_STREAMING)
+      {
+        set_avb_source_state(stream_index, AVB_SOURCE_STATE_ENABLED);
+      }
+      else
+      {
+        set_avb_source_state(stream_index, AVB_SINK_STATE_POTENTIAL);
+      }
+    }
+    else *status = AECP_AEM_STATUS_NO_SUCH_DESCRIPTOR;
+  }
+}
+
 static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsigned char src_addr[6], int message_type, int num_pkt_bytes, chanend c_tx)
 {
   avb_1722_1_aecp_aem_msg_t *aem_msg = &(pkt->data.aem);
@@ -421,6 +463,8 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
 
   if (message_type == AECP_CMD_AEM_COMMAND)
   {
+    int cd_len = 0;
+
     switch (command_type)
     {
       case AECP_AEM_CMD_ACQUIRE_ENTITY: // Long term exclusive control of the entity
@@ -520,9 +564,7 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
         }
         printstrln(" acquired entity");
 
-        avb_1722_1_create_aecp_aem_response(src_addr, status, sizeof(avb_1722_1_aem_acquire_entity_command_t), pkt);
-
-        mac_tx(c_tx, avb_1722_1_buf, 64, 0);
+        cd_len = sizeof(avb_1722_1_aem_acquire_entity_command_t);
 
         break;
       }
@@ -572,7 +614,7 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
         desc_read_type = NTOH_U16(aem_msg->command.read_descriptor_cmd.descriptor_type);
         desc_read_id = NTOH_U16(aem_msg->command.read_descriptor_cmd.descriptor_id);
 
-        printstr("READ_DESCRIPTOR: "); printint(desc_read_type); printchar(','); printintln(desc_read_id);
+        simple_printf("READ_DESCRIPTOR - type: %d, id: %d\n", desc_read_type, desc_read_id);
 
         num_tx_bytes = create_aem_read_descriptor_response(desc_read_type, desc_read_id, src_addr, pkt);
 
@@ -598,9 +640,7 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
           cmd->msrp_mappings[2] = (AVB_DEFAULT_VLAN>>8)&0xff;
           cmd->msrp_mappings[3] = (AVB_DEFAULT_VLAN&0xff);
 
-          avb_1722_1_create_aecp_aem_response(src_addr, AECP_AEM_STATUS_SUCCESS, sizeof(avb_1722_1_aem_get_avb_info_response_t), pkt);
-
-          mac_tx(c_tx, avb_1722_1_buf, 64, 0);
+          cd_len = sizeof(avb_1722_1_aem_get_avb_info_response_t);
         }
         break;
       }
@@ -608,25 +648,28 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
       case AECP_AEM_CMD_SET_STREAM_FORMAT: // Fallthrough intentional
       {
         process_aem_cmd_getset_stream_format(pkt, &status, command_type);
-        avb_1722_1_create_aecp_aem_response(src_addr, status, sizeof(avb_1722_1_aem_getset_stream_format_t), pkt);
-        mac_tx(c_tx, avb_1722_1_buf, 64, 0);
-
+        cd_len = sizeof(avb_1722_1_aem_getset_stream_format_t);
         break;
       }
       case AECP_AEM_CMD_GET_SAMPLING_RATE:
       case AECP_AEM_CMD_SET_SAMPLING_RATE:
       {
         process_aem_cmd_getset_sampling_rate(pkt, &status, command_type);
-        avb_1722_1_create_aecp_aem_response(src_addr, status, sizeof(avb_1722_1_aem_getset_sampling_rate_t), pkt);
-        mac_tx(c_tx, avb_1722_1_buf, 64, 0);
+        cd_len = sizeof(avb_1722_1_aem_getset_sampling_rate_t);
         break;
       }
       case AECP_AEM_CMD_GET_CLOCK_SOURCE:
       case AECP_AEM_CMD_SET_CLOCK_SOURCE:
       {
         process_aem_cmd_getset_clock_source(pkt, &status, command_type);
-        avb_1722_1_create_aecp_aem_response(src_addr, status, sizeof(avb_1722_1_aem_getset_clock_source_t), pkt);
-        mac_tx(c_tx, avb_1722_1_buf, 64, 0);
+        cd_len = sizeof(avb_1722_1_aem_getset_clock_source_t);
+        break;
+      }
+      case AECP_AEM_CMD_START_STREAMING:
+      case AECP_AEM_CMD_STOP_STREAMING:
+      {
+        process_aem_cmd_startstop_streaming(pkt, &status, command_type);
+        cd_len = sizeof(avb_1722_1_aem_startstop_streaming_t);
         break;
       }
       // TODO: ENTITY_AVAILABLE
@@ -635,6 +678,13 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
         // AECP_AEM_STATUS_NOT_IMPLEMENTED
         return;
       }
+    }
+
+    // Send a response if required
+    if (cd_len > 0)
+    {
+      avb_1722_1_create_aecp_aem_response(src_addr, status, cd_len, pkt);
+      mac_tx(c_tx, avb_1722_1_buf, 64, 0);
     }
   }
   else // AECP_CMD_AEM_RESPONSE
