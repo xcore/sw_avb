@@ -7,75 +7,73 @@ Available Chip Resources
 ++++++++++++++++++++++++
 
 Each XMOS device has a set of resources detailed in the following
-table. The resources are split amongst different cores on the device
+table. The resources are split amongst different tiles on the device
 which may affect how resources can be used:
 
 .. list-table::
  :header-rows: 1
- :widths: 14 10 10 10 10
+ :widths: 22 7 7 7 10
 
  * - Device
-   - Threads
-   - MIPS
+   - Logical Cores
+   - MIPS/Core
    - Memory (KB)
    - Ports
- * - XS1-G4-512BGA
-   - 32
-   - 1600
-   - 256
-   - | 64 x 1bit
-     | 16 x 4bit
-     | 8 x 16bit 
-     | 4 x 32bit  
- * - XS1-L2-124QFN-C5
+ * - XS1-L16A-128-QF124-C10
    - 16
-   - 500
+   - 1000
    - 128
-   - | 16 x 1bit
-     | 6 x 4bit
-     | 4 x 8bit
-     | 2 x 16bit
- * - XS1-L2-124QFN-C4
-   - 16
-   - 400
+   - | 32 x 1bit
+     | 12 x 4bit
+     | 7 x 8bit
+     | 3 x 16bit
+ * - XS1-L12A-128-QF124-C10
+   - 12
+   - 1000
    - 128
-   - | 16 x 1bit
-     | 6 x 4bit
-     | 4 x 8bit
-     | 2 x 16bit
+   - | 32 x 1bit
+     | 12 x 4bit
+     | 7 x 8bit
+     | 3 x 16bit
+ * - XS1-L10A-128-QF124-C10
+   - 10
+   - 1000
+   - 128
+   - | 32 x 1bit
+     | 12 x 4bit
+     | 7 x 8bit
+     | 3 x 16bit
 
 .. note::
  
    Note that some ports overlap on the device so, for example,
-   using a 32 bit port makes some 1 bit ports unavailable. See
+   using a 16 bit port may make some 1 bit ports unavailable. See
    the device datasheets for details.
 
 The following sections detail the resource required for each
 component. Please note that the memory requirements for code size
 should be taken as a rough guide since exact memory usage depends
 on the integration of components (which components are on which
-core etc.) in the final build of the application.
+tile etc.) in the final build of the application.
 
 Ethernet Component
 ++++++++++++++++++
 
-Each endpoint requires a driver for the ethernet PHY.
+Each endpoint requires an Ethernet MAC layer.
 
 .. list-table::
   :header-rows: 1
 
   * - Component 
-    - Threads 
-    - MIPS/Thread       
+    - Logical Cores 
+    - MIPS/Core       
     - Memory (KB)           
     - Ports
   * - Ethernet 
     - 5
     - 50 
-    - | 15 code
-      | 1.5 per buffer
-    - | 6 x 1bit 
-      | 2 x 4bit
+    - 15 code, 1.5 per buffer
+    - 6 x 1bit, 2 x 4bit
 
 PTP Component
 +++++++++++++
@@ -86,8 +84,8 @@ Every AVB endpoint must include a PTP component.
   :header-rows: 1
 
   * - Component 
-    - Threads 
-    - MIPS/Thread       
+    - Logical Cores 
+    - MIPS/Core       
     - Memory (KB)           
     - Ports
   * - PTP
@@ -106,8 +104,8 @@ Every AVB endpoint must include a media clock server.
   :header-rows: 1
 
   * - Component 
-    - Threads 
-    - MIPS/Thread       
+    - Logical Cores 
+    - MIPS/Core       
     - Memory (KB)
     - Ports
   * - Media Clock Server
@@ -123,32 +121,36 @@ is required.
   :header-rows: 1
 
   * - Component 
-    - Threads 
-    - MIPS/Thread       
+    - Logical Cores 
+    - MIPS/Core       
     - Memory (KB)           
     - Ports
   * - PLL driver
-    - 1
+    - 0 - 1
     - 50
     - 0.5
-    - | 1 x 1bit 
-      | + ports to configure PLL
+    - 1 x 1bit + ports to configure PLL
+
+.. note::
+ 
+   PTP, Media Clock Server and PLL driver components may be combined into a single logical core running at 100 MIPS if
+   the number of channels is constrained.
 
 
 Audio Component(s)
 ++++++++++++++++++
 
 Each endpoint may have several listener and talker components. Each
-listener/talker component is capable of handling eight IEEE P1722
-streams and up to 24 channels of audio.
+listener/talker component is capable of handling four IEEE P1722
+streams and up to 12 channels of audio.
 
 .. list-table::
   :header-rows: 1
   :widths: 14 8 12 12 10
 
   * - Component 
-    - Threads 
-    - MIPS/Thread       
+    - Logical Cores 
+    - MIPS/Core       
     - Memory (KB)           
     - Ports
   * - 1722 listener unit
@@ -162,6 +164,11 @@ streams and up to 24 channels of audio.
     - 5
     - None
 
+.. note::
+ 
+   The Talker and Listener components may be combined into a single logical core running at 100 MIPS if
+   the number of streams is 1 and the number of channels is <= 4 per stream.
+
 The amount of resource required for audio processing depends on the
 interface and the number of audio channels required. The overheads
 for the interface are:
@@ -169,11 +176,11 @@ for the interface are:
 
 .. list-table::
   :header-rows: 1
-  :widths: 11 8 12 11 18
+  :widths: 11 8 10 11 20
 
   * - Component 
-    - Threads 
-    - MIPS/Thread       
+    - Logical Cores 
+    - MIPS/Core       
     - Memory(KB)            
     - Ports
   * - I2S
@@ -190,7 +197,7 @@ for the interface are:
       | 1 x 1bit per 8 channels
 
 The following table shows that number of channels an interface can
-handle per thread:
+handle per logical core:
 
 .. list-table::
   :header-rows: 1
@@ -210,7 +217,7 @@ handle per thread:
 
 
 Note that several instances of the audio interface component
-can be made *e.g.* you could use 2 threads to handle 16 channels 
+can be made *e.g.* you could use 2 logical cores to handle 16 channels 
 of I2S. The following table shows how much buffering
 memory is required depending on the number of audio channels.
 
@@ -233,32 +240,12 @@ memory is required depending on the number of audio channels.
    - n in/m out
    - 1 x (n+m)
 
-TCP Stack
-+++++++++
-
-The uIP IP/UDP/TCP stack requires the following resource.
-
-
-.. list-table::
-  :header-rows: 1
-
-  * - Component 
-    - Threads 
-    - MIPS/Thread       
-    - Memory (KB)           
-    - Ports
-  * - uIP server
-    - 1
-    - 50
-    - 30
-    - None
-
 Configuration/Control
 +++++++++++++++++++++
 
 In addition to the other components 
-there are application dependant threads that control
+there are application dependant tasks that control
 other I/O. For general configuration and slow I/O a minimum of
-1 thread (50 MIPS) should be reserved.
+1 logical core (50 MIPS) should be reserved.
 
 

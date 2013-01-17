@@ -1,6 +1,6 @@
 AVB Source Control
 ------------------
-.. doxygenenum:: avb_source_format_t
+.. doxygenenum:: avb_stream_format_t
 
 .. doxygenfunction::  get_avb_source_format
 .. doxygenfunction::  set_avb_source_format
@@ -16,9 +16,6 @@ AVB Source Control
 
 .. doxygenfunction::  get_avb_source_presentation
 .. doxygenfunction::  set_avb_source_presentation
-
-.. doxygenfunction::  get_avb_source_name
-.. doxygenfunction::  set_avb_source_name
 
 .. doxygenfunction::  get_avb_source_dest
 .. doxygenfunction::  set_avb_source_dest

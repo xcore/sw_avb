@@ -9,9 +9,6 @@ AVB Sink Control
 .. doxygenfunction::  get_avb_sink_sync
 .. doxygenfunction::  set_avb_sink_sync
 
-.. doxygenfunction::  get_avb_sink_name
-.. doxygenfunction::  set_avb_sink_name
-
 .. doxygenfunction::  get_avb_sink_id
 .. doxygenfunction::  set_avb_sink_id
 

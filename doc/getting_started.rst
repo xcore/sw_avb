@@ -1,65 +1,45 @@
 Getting Started 
 ================
 
-The following instructions show how to build the demo for the
-XR-AVB-LC-BRD endpoint. The same method holds for the other
-applications.
+The following instructions explain how to build the demo for the
+XR-AVB-LC-BRD endpoint.
 
-.. only:: xdehtml
+To install the software, open the xTIMEcomposer Studio and
+follow these steps:
 
-   .. raw:: html
+#. Choose `File` |submenu| `Import`.
+
+#. Choose `General` |submenu| `Existing Projects into Workspace` and
+   click **Next**.
+
+#. Click **Browse** next to `Select archive file` and select
+   the file firmware ZIP file.
+
+#. Make sure that all projects are ticked in the
+   `Projects` list.
  
-     <div class="xde-inside">
-     <ul class="iconmenu">
-       <li class="xde"><a href="http://www.xmos.com/automate?automate=ImportComponent&partnum=XR-000008-SW">Import AVB Reference Design</a></li>
-     </ul>
-     </div>
+#. Click **Finish**.
 
-  To build, select the ``app_usb_aud_l1`` or ``app_usb_aud_l2`` project in the
-  Project Explorer and click the **Build** icon.
-
-.. cssclass:: xde-outside
-
-  To install the software, open the XDE (XMOS Development Tools) and
-  follow these steps:
-
-  #. Choose `File` |submenu| `Import`.
-
-  #. Choose `General` |submenu| `Existing Projects into Workspace` and
-     click **Next**.
-
-  #. Click **Browse** next to `Select archive file` and select
-     the file firmware ZIP file.
-
-  #. Make sure the projects you want to import are ticked in the
-     `Projects` list. Import all the components and whichever
-     applications you are interested in.
-   
-  #. Click **Finish**.
-
-  To build, select the ``app_xr_avb_lc_demo`` project in the
-  Project Explorer and click the **Build** icon.
+To build, select the ``app_simple_avb_demo`` project in the
+Project Explorer and click the **Build** icon.
 
 .. cssclass:: cmd-only
 
-  From the command line, you can follow these steps:
+From the command line, you can follow these steps:
 
-  #. To install, unzip the pacakge zipfile
+#. To install, unzip the pacakge zipfile
 
-  #. To build, change into the ``app_xr_avb_lc_demo`` directory and
-     execute the command::
+#. To build, change into the ``app_simple_avb_demo`` directory and
+   execute the command::
 
-          xmake all
+        xmake all
 
 Makefiles
 ~~~~~~~~~
 
 The main Makefile for the project is in the
-``app_xr_avb_lc_demo`` directory. This file specifies build
-options and used modules. The Makefile uses the common build
-infrastructure in ``module_xmos_common``. This system includes
-the source files from the relevant modules and is documented within
-``module_xmos_common``.
+``app_simple_avb_demo`` directory. This file specifies build
+options and used modules.
 
 Running the application
 -----------------------
@@ -67,77 +47,86 @@ Running the application
 To upgrade the firmware you must, firstly connect the XTAG-2 to the 
 relevant development board and plug the XTAG-2 into your PC or Mac.
 
-Using the XMOS Development Environment
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Using the XMOS xTIMEcomposer Studio
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Using the 11.2.0 development tools or later and AVB version 5v0.1 or
-later, from within the XDE:
+Using the 12.0.0 tools or later and AVB version 5.2.0 or
+later, from within the xTIMEcomposer Studio:
 
- #. Right click on the binary within the project.
+ #. Right click on the binary within the bin folder of the project.
  #. Choose `Run As` |submenu| `Run Configurations`
- #. Choose `hardware` and select the relevant XTAG-2 adapter
- #. Select the `Run UART server` check box.
+ #. Double click `xCORE Application` in the left panel
+ #. Choose `hardware` in `Device options` and select the relevant XTAG-2 adapter
+ #. Select the `Run XScope output server` check box.
  #. Click on **Apply** if configuration has changed
  #. Click on **Run**
 
 Using the Command Line Tools
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#. Open the XMOS command line tools (Desktop Tools Prompt) and
+#. Open the XMOS command line tools (Command Prompt) and
    execute the following command:
 
 
    ::
 
-       xrun --uart <binary>.xe
+       xrun --xscope <binary>.xe
+
+#. If multiple XTAG2s are connected, obtain the adapter ID integer by executing:
+
+   :: 
+
+      xrun -l
+
+#. Execute the `xrun` command with the adapter ID flag
+
+   :: 
+
+      xrun --id <id> --xscope <binary>.xe
+
 
 
 Installing the application onto flash
 -------------------------------------
 
-#. Connect the XTAG-2 debug adapter to the  relevant development
+#. Connect the XTAG-2 debug adapter to the relevant development
    board, then plug the XTAG-2 into your PC or Mac.
 
 
-Using the XMOS Development Environment
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Using the XMOS xTIMEcomposer Studio
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To upgrade the flash from the XDE, follow these steps:
+To upgrade the flash from the xTIMEcomposer Studio, follow these steps:
 
 
-#. Start the XMOS Development Environment and open a workspace.
-
-#. Choose *File* |submenu| *Import* |submenu| *C/XC* |submenu| *C/XC Executable*
-
-#. Click **Browse** and select the new firmware (XE) file.
-
-#. Click **Next** and **Finish**.
-
-#. A Debug Configurations window is displayed. Click **Close**.
-
-#. Choose *Run* |submenu| *Run Configurations*.
-
-#. Double-click *Flash Programmer* to create a new
-   configuration.
-
-#. Browse for the XE file in the *Project* and
-   *C/XC Application* boxes.
-
-#. Ensure the *XTAG-2* device appears in the adapter
-   list.
-
-#. Click **Run**.
-
+#. Start the xTIMEcomposer Studio and open the workspace created in **Running the application**.
+#. Right click on the binary within the bin folder of the project.
+#. Choose `Flash As` |submenu| `Flash Configurations`
+#. Double click `xCORE Application` in the left panel
+#. Choose `hardware` in `Device options` and select the relevant XTAG-2 adapter
+#. Click on **Apply** if configuration has changed
+#. Click on **Flash**
 
 Using Command Line Tools
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-#. Open the XMOS command line tools (Desktop Tools Prompt) and
+#. Open the XMOS command line tools (Command Prompt) and
    execute the following command:
 
    ::
 
        xflash <binary>.xe
 
+#. If multiple XTAG2s are connected, obtain the adapter ID integer by executing:
+
+   :: 
+
+      xrun -l
+
+#. Execute the `xflash` command with the adapter ID flag
+
+   :: 
+
+      xflash --id <id> <binary>.xe
 

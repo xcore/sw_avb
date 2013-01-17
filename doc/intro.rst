@@ -2,45 +2,44 @@ XMOS AVB Specification
 ======================
 
  +-------------------------------------------------------------------+
- |                        **Functionality**                          |
- +-------------------------------------------------------------------+
- |  Provides hardware interfaces, audio transport,                   |
- |  precise timing protocol clock synchronization and media clock    |
- |  recovery to streamed audio over ethernet.                        |
- +-------------------------------------------------------------------+
  |                       **Supported Standards**                     |
+ +=================================+=================================+
+ | Ethernet                        | IEEE 802.3 (via MII)            |
  +---------------------------------+---------------------------------+
- | | Ethernet                      | | IEEE 802.3 (via MII)          |
- | | AVB QoS                       | | IEEE 802.1Qav, 802.1Qat       |
- | | Precise Timing Protocol       | | IEEE 802.1as                  |
- | | AVB Audio Over Ethernet       | | IEEE P1722                    |
- | | Audio Streaming               | | IEC 61883-6                   |
- | | Control Protocol              | | IEEE P1722.1                  |
+ | AVB QoS                         | IEEE 802.1Qav, 802.1Qat         |
+ +---------------------------------+---------------------------------+
+ | Precision Timing Protocol       | IEEE 802.1AS                    |
+ +---------------------------------+---------------------------------+
+ | Audio Stream Encapsulation      | IEEE P1722                      |
+ +---------------------------------+---------------------------------+
+ | Audio Format                    | IEC 61883-6 AM824               |
+ +---------------------------------+---------------------------------+
+ | Enumeration and control         | IEEE P1722.1 (Draft 21)         |
  +---------------------------------+---------------------------------+
  |                       **Supported Devices**                       |
  +---------------------------------+---------------------------------+
- | XMOS Devices                    | | XS1-G4                        |
- |                                 | | XS1-L2                        |
+ | XMOS Devices                    | | L16-128                       |
+ |                                 | | L12-128                       |
+ |                                 | | L10-128                       |
+ |                                 | | *L8-128* (Contact XMOS)       |
  +---------------------------------+---------------------------------+
  |                       **Requirements**                            |
  +---------------------------------+---------------------------------+
- | Development Tools               | XMOS Desktop Tools v11.2 or     |
+ | Development Tools               | xTIMEComposer suite v12.0 or    |
  |                                 | later                           |
  +---------------------------------+---------------------------------+
  | Ethernet                        | | 1 x MII compatible 100Mbit PHY|  
  +---------------------------------+---------------------------------+ 
  | Audio                           | | Audio input/output device     |
- |                                 |   (e.g. ADC/DAC audio CODEC)    |
+ |                                 |   (e.g. Audio CODEC)            |
  |                                 | | PLL/Frequency synthesizer     |
- |                                 |   chip to generate CODEC system |
- |                                 |   clock                         |
+ |                                 |   to generate CODEC master clock|
  +---------------------------------+---------------------------------+ 
  | Boot/Storage                    | Compatible SPI Flash Device     |
  +---------------------------------+---------------------------------+
  |                       **Licensing and Support**                   |
  +-------------------------------------------------------------------+
- | | Reference code provided without charge under license from XMOS. |
- | | Support via http://www.xmos.com/secure/tickets.                 |
- | | Reference code is maintained by XMOS Limited.                   |
+ | Reference code provided without charge under license from XMOS.   |
+ | Support via http://www.xmos.com/secure/tickets.                   |
+ | Reference code is maintained by XMOS Limited.                     |
  +-------------------------------------------------------------------+
-

@@ -5,5 +5,5 @@ Programming Guide
 
    getting_started
    structure
-   app_tutorial
-   modification
+..   app_tutorial
+..   modification

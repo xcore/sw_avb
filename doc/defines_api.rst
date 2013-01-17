@@ -16,15 +16,15 @@ Configuration Defines
  * - Define
    - Description
  * - ``MAX_ETHERNET_PACKET_SIZE``
-   - The maximum ethernet packet size that can be received by the
+   - The maximum Ethernet packet size that can be received by the
      endpoint. Packets larger than this are truncated (default 1518).
  * - ``NUM_MII_RX_BUF``
    - Number of packet buffers for incoming packets.
  * - ``NUM_MII_TX_BUF``
    - Number of packet buffers for outgoing packets.
  * - ``MAX_ETHERNET_CLIENTS``
-   - Maximum number of ethernet clients (i.e. threads connected to the
-     ethernet server).
+   - Maximum number of Ethernet clients (i.e. threads connected to the
+     Ethernet server).
 
 .. list-table::
  :header-rows: 1
@@ -32,12 +32,11 @@ Configuration Defines
  
  * - Define
    - Description
- * - ``AVB_MAX_NAME_LEN``
-   - The maximum length in characters of any text name used in the
-     endpoint (e.g. the name of a source).
  * - ``AVB_MAX_CHANNELS_PER_STREAM``
    - The maximum allowed number of channels per AVB stream (incoming
      or outgoing).
+ * - ``AVB_MAX_AUDIO_SAMPLE_RATE``
+   - The maximum sample rate in Hz of audio that is to be input or output
 
 .. list-table::
  :header-rows: 1
@@ -75,3 +74,19 @@ Configuration Defines
  * - ``AVB_NUM_MEDIA_CLOCKS`` 
    - The number of media clocks in the endpoint.
 
+.. list-table::
+ :header-rows: 1
+ :widths: 11 15
+
+ * - Define
+   - Description
+ * - ``AVB_ENABLE_1722_1``
+   - Enable 1722.1 capability on the endpoint
+ * - ``AVB_1722_1_CONTROLLER_ENABLED``
+   - Enable 1722.1 Controller capability on the endpoint
+ * - ``AVB_1722_1_TALKER_ENABLED``
+   - Enable 1722.1 Talker capability on the endpoint
+ * - ``AVB_1722_1_LISTENER_ENABLED``
+   - Enable 1722.1 Listener capability on the endpoint
+
+Defaults for these #defines are assigned in their absence, but may cause compilation failure or unpredictable/erroneous behaviour.

@@ -8,10 +8,8 @@ AVB API
    avb_general_api
    avb_maap_api
    avb_srp_api
-   avb_device_api
    avb_media_clock_api
    avb_source_api
    avb_sink_api
-   avb_audio_api
 
 

@@ -1,90 +1,50 @@
 .. _sec_config:
 
-Configuration and application threads
--------------------------------------
+Device Discovery, Connection Management and Control
+---------------------------------------------------
 
-The Control Thread
-++++++++++++++++++
+The Control Task
+++++++++++++++++
 
-As well as the components described in previous sections, an AVB
-endpoint application needs a thread to control and configure the
-system. This control thread varies across application and must
-be implemented by the application designer. To assist in this task a
-unified control API is presented in Section :ref:`sec_avb_api`. The
-control thread can pass XC channels connected to other components into
-the :c:func:`avb_init` function and subsequently use the control API calls to
-configure the other components.
+In addition to components described in previous sections, an AVB
+endpoint application requires a task to control and configure the
+system. This control task varies across applications but the protocol to provide device discovery, connection management and control services has been standardised by the IEEE in 1722.1.
+
+1722.1
+++++++
+
+The 1722.1 standard defines four independent steps that can be used to connect end stations that use 1722 streams to transport media across a LAN. The steps are:
+
+a) Discovery
+b) Enumeration
+c) Connection Management
+d) Control
+
+These steps can be used together to form a system of end stations that interoperate with each other in a standards compliant way. The application that will use these individual steps is called a Controller and is the third member in the Talker, Listener and Controller device relationship.
+
+A Controller may exist within a Talker, a Listener, or exist remotely within the network in a separate endpoint or general purpose computer.
+
+The Controller can use the individual steps to find, connect and control entities on the network but it may choose to not use all of the steps if the Controller already knows some of the information (e.g. hard coded values assigned by user/hardware switch or values from previous session establishment) that can be gained in using the steps. The only required step is connection management because this is the step that establishes the bandwidth usage and reservations across the AVB cloud.
+
+The four steps are broken down as follows:
+
+ * Discovery is the process of finding AVB endpoints on the LAN that have services that are useful to the other
+   AVB endpoints on the network. The discovery process also covers the termination of the publication of those
+   services on the network.
+ * Enumeration is the process of the collection of information from the AVB endpoint that could help an
+   1722.1 Controller to use the capabilities of the AVB endpoint. This information can be used for connection
+   management.
+ * Connection management is the process of connecting or disconnecting one or more streams between two or more
+   AVB endpoint.
+ * Control is the process of adjusting a parameter on the endpoint from another Entity. There are a number of standard
+   types of controls used in media devices like volume control, mute control and so on. A framework of basic
+   commands allows the control process to be extended by the endpoint.
+
+.. note:: 
+   The XMOS endpoint provides full support for Talker and Listener 1722.1 services. Basic 1722.1 Controller functionality is available to allow 'plug and play' connection between two XMOS endpoints, however, it is expected that GUI Controller software will be available on the network for setting up larger topologies.
+
+FIXME: To assist in this task a
+unified control API is presented in Section :ref:`sec_avb_api`.
 
 For an example of how an application can use this API, see the example
 code walkthrough presented in Section :ref:`sec_app_tutorial`.
-
-Legacy Mode
-~~~~~~~~~~~
-
-AVB protocols require an AVB compatible switch to function correctly. 
-For testing/demonstration purposes the software platform provides 
-a "legacy" mode
-which alters the protocols to be non standard but function through
-non-AVB switches. In this mode the destination addresses of the
-protocols change to become legacy traffic and some of the PTP protocol
-behavior changes. In this case:
-
-  * The protocols are non-longer AVB standard so do not work with
-    any other AVB hardware. They will work with other endpoints 
-    set to this mode.
-  * There is no longer any quality of service guarantee so audio        
-    may be disrupted. Furthermore the traffic from the endpoint may
-    disrupt other non-AVB ethernet devices on the network.
-
-Remote Configuration
-++++++++++++++++++++
-
-The AVB standard protocols control the time synchronization, streaming
-and routing of audio data. However, it is likely that a higher level
-configuration protocol will be required to configure an AVB endpoint.
-
-Such a protocol needs two parts: discovery and control. The
-discovery part must determine higher level information about other
-endpoints on the network. For example:
-
- * Discover which other Talkers/Listeners are on the network.
- * Discover which streams are available and meta-information about
-   them (sample rate, description, global clock synchronization
-   participation *etc.*).
-
-The XMOS TCP/IP implementation canbe used with the AVB solution to
-provide services such as MDNS.
-
-The control part controls the device. For example it controls:
-
- * The streams the Talker outputs/Listener inputs.
- * Audio input/output (including sample rate, gain, dsp).
- * Other non-audio aspects.
-
-A control stack will link into the control thread to provide a bridge
-to the local control API. To aid implementation of this, a the XMOS TCP/IP
-stack can be used. A demonstration control API is provided for
-the XR-AVB-LC-BRD, for more details see the `AtteroTech/XMOS XR-AVB-LC-BRD Quickstart Guide <http://www.atterotech.com/cobranet-oem-products/xmos-avb-module/>`_.
-
-TCP/IP Stack
-++++++++++++
-
-The AVB software solution includes a port of the uIP protocol stack
-which is a small memory footprint stack that can be used for UDP/TCP
-communication to aid implementation of an upper layer configuration
-protocol. For details on this stack see the `XTCP Component Guide <http://github.xcore.com/sc_xtcp/index.html>`_.
-
-Zeroconf
-++++++++
-
-The Zeroconf stack (sometimes known as "Bonjour") provides:
-
-    * **Multicast DNS** - Allows endpoints to have a local name
-      related to their IP address.
-    * **DNS Service Discovery** - Allows endpoints to advertize a 
-      particular service (such as a configuration/control service over
-      TCP/IP) for other entities on the network to discover.
-
-The stack is configured via the API described in Section :ref:`sec_mdns_api`.
-      
-
