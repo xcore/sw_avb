@@ -17,10 +17,6 @@ void avb_ethernet_server(avb_ethernet_ports_t &ports,
                          chanend c_mac_rx[], int num_rx,
                          chanend c_mac_tx[], int num_tx);
 
-void avb_ethernet_server_with_phy_mode_port(avb_ethernet_ports_t &avb_port,
-                                            mii_slave_interface_full_t &phy_mode_port, 
-                                            chanend c_mac_rx[], int num_rx,
-                                            chanend c_mac_tx[], int num_tx);
 #endif
 
 

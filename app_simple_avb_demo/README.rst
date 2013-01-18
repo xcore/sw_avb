@@ -1,5 +1,5 @@
-app_simple_avb_demo
-===================
+Simple AVB Endpoint Demo
+========================
 
 :scope: Example
 :description: A simple 1722.1 example endpoint application
