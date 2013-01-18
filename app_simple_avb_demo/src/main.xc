@@ -14,6 +14,7 @@
 #include "ethernet_board_support.h"
 #include "simple_demo_controller.h"
 #include "avb_1722_1_adp.h"
+#include "app_config.h"
 
 // This is the number of master clocks in a word clock
 #define MASTER_TO_WORDCLOCK_RATIO 512
@@ -33,9 +34,9 @@ enum gpio_cmd
 
 // Note that this port must be at least declared to ensure it
 // drives the mute low
-out port p_mute_led_remote = PORT_SHARED_OUT; // mute, led remote;
+out port p_mute_led_remote = PORT_MUTE_LED_REMOTE; // mute, led remote;
 out port p_chan_leds = PORT_LEDS;
-in port p_buttons = PORT_SHARED_IN;
+in port p_buttons = PORT_BUTTONS;
 
 void demo(chanend c_rx, chanend c_tx);
 
@@ -47,8 +48,8 @@ void demo(chanend c_rx, chanend c_tx);
 avb_ethernet_ports_t avb_ethernet_ports =
 {
   on ETHERNET_DEFAULT_TILE: OTP_PORTS_INITIALIZER,
-    ETHERNET_DEFAULT_SMI_INIT,
-    ETHERNET_DEFAULT_MII_INIT_full,
+    ETHERNET_SMI_INIT,
+    ETHERNET_MII_INIT_full,
     ETHERNET_DEFAULT_RESET_INTERFACE_INIT
 };
 
@@ -65,28 +66,18 @@ on tile[0]: i2s_ports_t i2s_ports =
   PORT_LRCLK
 };
 
-on tile[0]: out buffered port:32 p_aud_dout[4] =
-{
-  PORT_SDATA_OUT0,
-  PORT_SDATA_OUT1,
-  PORT_SDATA_OUT2,
-  PORT_SDATA_OUT3
-};
+on tile[0]: out buffered port:32 p_aud_dout[AVB_DEMO_NUM_CHANNELS/2] = PORT_SDATA_OUT;
 
-on tile[0]: in buffered port:32 p_aud_din[4] =
-{
-  PORT_SDATA_IN0,
-  PORT_SDATA_IN1,
-  PORT_SDATA_IN2,
-  PORT_SDATA_IN3
-};
+on tile[0]: in buffered port:32 p_aud_din[AVB_DEMO_NUM_CHANNELS/2] = PORT_SDATA_IN;
 
-on tile[0]: port p_uart_tx = PORT_UART_TX;
-
+#if AVB_DEMO_ENABLE_LISTENER
 media_output_fifo_data_t ofifo_data[AVB_NUM_MEDIA_OUTPUTS];
 media_output_fifo_t ofifos[AVB_NUM_MEDIA_OUTPUTS];
+#endif
+#if AVB_DEMO_ENABLE_TALKER
 media_input_fifo_data_t ififo_data[AVB_NUM_MEDIA_INPUTS];
 media_input_fifo_t ififos[AVB_NUM_MEDIA_INPUTS];
+#endif
 
 void xscope_user_init(void)
 {
@@ -98,16 +89,21 @@ void xscope_user_init(void)
 int main(void)
 {
   // Ethernet channels
-  chan c_mac_tx[3];
-  chan c_mac_rx[3];
+  chan c_mac_tx[2 + AVB_DEMO_ENABLE_TALKER];
+  chan c_mac_rx[2 + AVB_DEMO_ENABLE_LISTENER];
 
   // PTP channels
-  chan c_ptp[2];
+  chan c_ptp[1 + AVB_DEMO_ENABLE_TALKER];
 
   // AVB unit control
+#if AVB_DEMO_ENABLE_TALKER
   chan c_talker_ctl[AVB_NUM_TALKER_UNITS];
+#endif
+
+#if AVB_DEMO_ENABLE_LISTENER
   chan c_listener_ctl[AVB_NUM_LISTENER_UNITS];
   chan c_buf_ctl[AVB_NUM_LISTENER_UNITS];
+#endif
 
   // Media control
   chan c_media_ctl[AVB_NUM_MEDIA_UNITS];
@@ -122,7 +118,11 @@ int main(void)
 
     on tile[0]: media_clock_server(c_media_clock_ctl,
                                    null,
+                                   #if AVB_DEMO_ENABLE_LISTENER
                                    c_buf_ctl,
+                                   #else
+                                   null,
+                                   #endif
                                    AVB_NUM_LISTENER_UNITS,
                                    p_fs,
                                    c_mac_rx[0],
@@ -131,41 +131,74 @@ int main(void)
                                    2,
                                    PTP_GRANDMASTER_CAPABLE);
 
+
     // AVB - Audio
     on tile[0]:
     {
+#if AVB_DEMO_ENABLE_TALKER
       media_input_fifo_data_t ififo_data[AVB_NUM_MEDIA_INPUTS];
       media_input_fifo_t ififos[AVB_NUM_MEDIA_INPUTS];
+#endif
 
+#if AVB_DEMO_ENABLE_LISTENER
       media_output_fifo_data_t ofifo_data[AVB_NUM_MEDIA_OUTPUTS];
       media_output_fifo_t ofifos[AVB_NUM_MEDIA_OUTPUTS];
+#endif
 
+#if AVB_DEMO_ENABLE_TALKER
       init_media_input_fifos(ififos, ififo_data, AVB_NUM_MEDIA_INPUTS);
+#endif
+#if AVB_DEMO_ENABLE_LISTENER
       init_media_output_fifos(ofifos, ofifo_data, AVB_NUM_MEDIA_OUTPUTS);
+#endif
       i2s_master(i2s_ports,
-                 p_aud_din,
-                 AVB_NUM_MEDIA_INPUTS,
-                 p_aud_dout,
-                 AVB_NUM_MEDIA_OUTPUTS,
+
+                 #if AVB_DEMO_ENABLE_TALKER
+                 p_aud_din, AVB_NUM_MEDIA_INPUTS,
+                 #else
+                 null, 0,
+                 #endif
+
+                 #if AVB_DEMO_ENABLE_LISTENER
+                 p_aud_dout, AVB_NUM_MEDIA_OUTPUTS,
+                 #else
+                 null, 0,
+                 #endif
+
                  MASTER_TO_WORDCLOCK_RATIO,
+
+                 #if AVB_DEMO_ENABLE_TALKER
                  ififos,
+                 #else
+                 null,
+                 #endif
+
+                 #if AVB_DEMO_ENABLE_LISTENER
                  ofifos,
+                 #else
+                 null,
+                 #endif
                  c_media_ctl[0],
                  0);
     }
 
+#if AVB_DEMO_ENABLE_TALKER
     // AVB Talker - must be on the same tile as the audio interface
     on tile[0]: avb_1722_talker(c_ptp[1],
                                 c_mac_tx[2],
                                 c_talker_ctl[0],
                                 AVB_NUM_SOURCES);
+#endif
 
+#if AVB_DEMO_ENABLE_LISTENER
     // AVB Listener
-    on tile[0]: avb_1722_listener(c_mac_rx[1],
+    on tile[0]: avb_1722_listener(c_mac_rx[2],
                                   c_buf_ctl[0],
                                   null,
                                   c_listener_ctl[0],
                                   AVB_NUM_SINKS);
+#endif
+
 
 
     // Application
@@ -173,9 +206,21 @@ int main(void)
     {
       audio_clock_CS2300CP_init(r_i2c, MASTER_TO_WORDCLOCK_RATIO);
       // First initialize avb higher level protocols
-      avb_init(c_media_ctl, c_listener_ctl, c_talker_ctl, c_media_clock_ctl, c_mac_rx[2], c_mac_tx[1], c_ptp[0]);
+      avb_init(c_media_ctl,
+               #if AVB_DEMO_ENABLE_LISTENER
+               c_listener_ctl,
+               #else
+               null,
+               #endif
+               #if AVB_DEMO_ENABLE_TALKER
+               c_talker_ctl,
+               #else
+               null,
+               #endif
+               c_media_clock_ctl,
+               c_mac_rx[1], c_mac_tx[1], c_ptp[0]);
 
-      demo(c_mac_rx[2], c_mac_tx[1]);
+      demo(c_mac_rx[1], c_mac_tx[1]);
     }
   }
 
@@ -186,7 +231,9 @@ int main(void)
 void demo(chanend c_rx, chanend c_tx)
 {
   timer tmr;
+#if AVB_DEMO_ENABLE_TALKER
   int map[AVB_NUM_MEDIA_INPUTS];
+#endif
   unsigned periodic_timeout;
   unsigned sample_rate = 48000;
   int selected_chan = 0;
@@ -202,12 +249,14 @@ void demo(chanend c_rx, chanend c_tx)
   set_device_media_clock_rate(0, sample_rate);
   set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_ENABLED);
 
+#if AVB_DEMO_ENABLE_TALKER
   set_avb_source_channels(0, AVB_NUM_MEDIA_INPUTS);
   for (int i = 0; i < AVB_NUM_MEDIA_INPUTS; i++)
     map[i] = i;
   set_avb_source_map(0, map, AVB_NUM_MEDIA_INPUTS);
   set_avb_source_format(0, AVB_SOURCE_FORMAT_MBLA_24BIT, sample_rate);
   set_avb_source_sync(0, 0); // use the media_clock defined above
+#endif
 
   set_avb_sink_format(0, AVB_SOURCE_FORMAT_MBLA_24BIT, sample_rate);
 
@@ -250,6 +299,8 @@ void demo(chanend c_rx, chanend c_tx)
           p_mute_led_remote <: (~0) & ~(toggle_remote<<1);
 
         }
+
+#if AVB_DEMO_ENABLE_LISTENER
         if ((button_val & CHAN_SEL) == CHAN_SEL &&
             (new_val & CHAN_SEL) == 0)
         {
@@ -257,6 +308,7 @@ void demo(chanend c_rx, chanend c_tx)
           {
             enum avb_sink_state_t cur_state;
             int channel;
+            int map[AVB_NUM_MEDIA_OUTPUTS];
             selected_chan++;
             if (selected_chan > ((AVB_NUM_MEDIA_OUTPUTS>>1)-1))
             {
@@ -281,6 +333,8 @@ void demo(chanend c_rx, chanend c_tx)
               set_avb_sink_state(0, AVB_SINK_STATE_POTENTIAL);
           }
         }
+#endif
+
         if (!buttons_active)
         {
           tmr :> buttons_timeout;
