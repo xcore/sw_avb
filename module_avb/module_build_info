@@ -1,3 +1,8 @@
 DEPENDENT_MODULES = module_ethernet module_otp_board_info
 
+# This setting is in this module due to a bug in the 12.0
+# xTIMEcomposer tools that means optional headers cannot be set in the
+# application Makefile
+OPTIONAL_HEADERS = avb_app_board_config.h
+
 

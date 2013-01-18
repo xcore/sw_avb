@@ -4,7 +4,7 @@
  */
 #include "avb_conf.h"
 
-#if defined(AVB_1722_FORMAT_61883_6) || defined(AVB_1722_FORMAT_SAF)
+#if AVB_NUM_SOURCES > 0 && (defined(AVB_1722_FORMAT_61883_6) || defined(AVB_1722_FORMAT_SAF))
 
 #define streaming
 #include <xccompat.h>
