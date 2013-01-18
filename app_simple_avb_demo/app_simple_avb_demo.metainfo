@@ -1,0 +1,219 @@
+-- -*- mode: lua -*-
+
+configPoints = {
+   enable_talker = {
+      short = "Enable Talker Unit",
+      long = "Enable Talker Unit",
+      help =
+[[
+  Enable the AVB talker unit, allowing the endpoint to transmit AVB audio over
+  the network.
+]],
+      type = "bool",
+      default = true,
+      define = "AVB_DEMO_ENABLE_TALKER"
+  },
+   enable_listener = {
+      short = "Enable Listener Unit",
+      long = "Enable Listener Unit",
+      help =
+[[
+  Enable the AVB listener unit, allowing the endpoint to transmit AVB audio over
+  the network.
+]],
+      type = "bool",
+      default = true,
+      define = "AVB_DEMO_ENABLE_LISTENER"
+  },
+   num_channels = {
+      short = "Number of channels",
+      long = "Number of channels",
+      help =
+[[
+  How many audio channels the enpoint supports. This config point will set up
+  the demo to have this number of channels in and out. The default
+  configuration for the endpoint demo is for a single AVB stream in/out but
+  the software stack can be configured for multiple streams.
+]],
+      type = "int",
+      default = 8,
+      options = {2,4,6,8},
+      define = "AVB_DEMO_NUM_CHANNELS"
+  },
+}
+
+derivedValues = {}
+
+ports = {
+  p_sdata_out = {
+    short   = "",
+    long    = "",
+    help    = "",
+    width   = 1,
+    define  = "USER_PORT_SDATA_OUT",
+    arraySize = swblock.params.num_channels/2,
+    tile = "tile[0]",
+  },
+  p_mclk = {
+    short   = "",
+    long    = "",
+    help    = "",
+    width   = 1,
+    define  = "PORT_MCLK",
+    tile = "tile[0]",
+  },
+  p_sync_out = {
+    short   = "",
+    long    = "",
+    help    = "",
+    width   = 1,
+    define  = "PORT_SYNC_OUT",
+    tile = "tile[0]",
+  },
+  p_sclk = {
+    short   = "",
+    long    = "",
+    help    = "",
+    width   = 1,
+    define  = "PORT_SCLK",
+    tile = "tile[0]",
+  },
+  p_sdata_in = {
+    short   = "",
+    long    = "",
+    help    = "",
+    width   = 1,
+    define  = "USER_PORT_SDATA_IN",
+    arraySize = swblock.params.num_channels/2,
+    tile = "tile[0]",
+  },
+  p_lrclk = {
+    short   = "",
+    long    = "",
+    help    = "",
+    width   = 1,
+    define  = "PORT_LRCLK",
+    tile = "tile[0]",
+  },
+  p_eth_rxclk = {
+    short   = "",
+    long    = "",
+    help    = "",
+    width   = 1,
+    define  = "PORT_ETH_RXCLK",
+    tile = "tile[1]",
+  },
+  p_mute_led = {
+    short   = "",
+    long    = "",
+    help    = "",
+    width   = 4,
+    define  = "USER_PORT_MUTE_LED_REMOTE",
+    tile = "tile[1]",
+  },
+  p_eth_txclk = {
+    short   = "",
+    long    = "",
+    help    = "",
+    width   = 1,
+    define  = "PORT_ETH_TXCLK",
+    tile = "tile[1]",
+  },
+  p_eth_rxer = {
+    short   = "",
+    long    = "",
+    help    = "",
+    width   = 1,
+    define  = "PORT_ETH_ERR",
+    tile = "tile[1]",
+  },
+  p_leds = {
+    short   = "",
+    long    = "",
+    help    = "",
+    width   = 4,
+    define  = "USER_PORT_LEDS",
+    tile = "tile[1]",
+  },
+  p_buttons = {
+    short   = "",
+    long    = "",
+    help    = "",
+    width   = 4,
+    define  = "USER_PORT_BUTTONS",
+    tile = "tile[1]",
+  },
+  p_eth_txd = {
+    short   = "",
+    long    = "",
+    help    = "",
+    width   = 4,
+    define  = "PORT_ETH_TXD",
+    tile = "tile[1]",
+  },
+  p_eth_rxd = {
+    short   = "",
+    long    = "",
+    help    = "",
+    width   = 4,
+    define  = "PORT_ETH_RXD",
+    tile = "tile[1]",
+  },
+  p_eth_mdc = {
+    short   = "",
+    long    = "",
+    help    = "",
+    width   = 1,
+    define  = "PORT_ETH_MDC",
+    tile = "tile[1]",
+  },
+  p_i2c_sda = {
+    short   = "",
+    long    = "",
+    help    = "",
+    width   = 1,
+    define  = "PORT_I2C_SDA",
+    tile = "tile[1]",
+  },
+  p_eth_txen = {
+    short   = "",
+    long    = "",
+    help    = "",
+    width   = 1,
+    define  = "PORT_ETH_TXEN",
+    tile = "tile[1]",
+  },
+  p_eth_rxdv = {
+    short   = "",
+    long    = "",
+    help    = "",
+    width   = 1,
+    define  = "PORT_ETH_RXDV",
+    tile = "tile[1]",
+  },
+  p_eth_mdio = {
+    short   = "",
+    long    = "",
+    help    = "",
+    width   = 1,
+    define  = "PORT_ETH_MDIO",
+    tile = "tile[1]",
+  },
+  p_i2c_scl = {
+    short   = "",
+    long    = "",
+    help    = "",
+    width   = 1,
+    define  = "PORT_I2C_SCL",
+    tile = "tile[1]",
+  },
+}
+
+channels = {}
+
+function getConfigStatus()
+         return "Trusted", {};
+end
+
+files = {["app_simple_avb_demo"] = ""}
+

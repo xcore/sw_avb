@@ -13,6 +13,7 @@
 #include "gptp.h"
 #include "media_input_fifo.h"
 
+#if AVB_NUM_SOURCES > 0
 
 #ifndef AVB_MAX_CHANNELS_PER_STREAM 
 #define AVB_MAX_CHANNELS_PER_STREAM 16
@@ -139,5 +140,6 @@ typedef struct avb_1722_talker_state_s {
   int vlan;
 } avb_1722_talker_state_t;
 
+#endif // AVB_NUM_SOURCES > 0
 
 #endif

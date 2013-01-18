@@ -394,9 +394,9 @@ inline void i2s_master_upto_4(const clock mclk,
 
 #pragma unsafe arrays
 static inline void i2s_master(i2s_ports_t &ports,
-                              in buffered port:32 p_din[],
+                              in buffered port:32 ?p_din[],
                               int num_in,
-                              out buffered port:32 p_dout[],
+                              out buffered port:32 ?p_dout[],
                               int num_out,
                               int master_to_word_clock_ratio,
                               media_input_fifo_t ?input_fifos[],
