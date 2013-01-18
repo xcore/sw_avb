@@ -185,11 +185,8 @@ void avb_init(chanend media_ctl[],
 
   avb_1722_maap_init(mac_addr);
 
-#ifdef AVB_ENABLE_1722_1
-  {
-	  unsigned char serial_number[2] = { 0,1 };
-	  avb_1722_1_init(mac_addr, serial_number);
-  }
+#if AVB_ENABLE_1722_1
+  avb_1722_1_init(mac_addr);
 #endif
 
   c_mac_rx = c_mac_rx0;

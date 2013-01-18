@@ -23,7 +23,7 @@ void simple_demo_controller(int *change_stream, int *toggle_remote, chanend c_tx
 {
   if (*toggle_remote != controller_state)
   {
-    acmp_controller_disconnect_all_listeners(c_tx);
+    avb_1722_1_controller_disconnect_all_listeners(c_tx, 0);
 
     if (*toggle_remote)
     {
@@ -53,7 +53,7 @@ void avb_entity_on_new_entity_available(guid_t *my_guid, avb_1722_1_entity_recor
        ((entity->listener_capabilites & AVB_1722_1_ADP_LISTENER_CAPABILITIES_AUDIO_SINK) == AVB_1722_1_ADP_LISTENER_CAPABILITIES_AUDIO_SINK) &&
        (entity->listener_stream_sinks >= 1))
     {
-      acmp_controller_connect(my_guid, &entity->guid, c_tx);
+      avb_1722_1_controller_connect(my_guid, &entity->guid, 0, 0, c_tx);
     }
   }
 }

@@ -22,7 +22,7 @@ unsigned int avb_1722_1_buf[(sizeof(avb_1722_1_packet_t)+sizeof(ethernet_hdr_t)+
 // The GUID of this device
 guid_t my_guid;
 
-void avb_1722_1_init(unsigned char macaddr[6], unsigned char serial_number[2])
+void avb_1722_1_init(unsigned char macaddr[6])
 {
     for (int i=0;i<6;i++)
     {

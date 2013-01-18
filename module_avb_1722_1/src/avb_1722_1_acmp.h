@@ -16,76 +16,69 @@ void avb_1722_1_acmp_controller_periodic(chanend c_tx);
 void avb_1722_1_acmp_talker_periodic(chanend c_tx);
 void avb_1722_1_acmp_listener_periodic(chanend c_tx);
 
-void acmp_controller_connect(REFERENCE_PARAM(guid_t, talker_guid), REFERENCE_PARAM(guid_t, listener_guid), chanend c_tx);
-void acmp_controller_disconnect_all_listeners(chanend c_tx);
-void acmp_controller_disconnect_all_talkers(chanend c_tx);
+/** Setup a new stream connection between a Talker and Listener entity.
+ *
+ *  The Controller shall send a CONNECT_RX_COMMAND to the Listener Entity. The Listener Entity shall then send a
+ *  CONNECT_TX_COMMAND to the Talker Entity.
+ *
+ *  \param talker_guid      the GUID of the Talker being targeted by the command
+ *  \param listener_guid    the GUID of the Listener being targeted by the command
+ *  \param talker_id        the unique id of the Talker stream source to connect.
+                            For entities using AEM, this corresponds to the id of the STREAM_OUTPUT descriptor
+ *  \param listener_id      the unique id of the Listener stream source to connect.
+                            For entities using AEM, this corresponds to the id of the STREAM_INPUT descriptor
+ *  
+ **/
+void avb_1722_1_controller_connect(REFERENCE_PARAM(guid_t, talker_guid), 
+                                   REFERENCE_PARAM(guid_t, listener_guid),
+                                   int talker_id,
+                                   int listener_id,
+                                   chanend c_tx);
+
+/** Disconnect an existing stream connection between a Talker and Listener entity.
+ *
+ *  The Controller shall send a DISCONNECT_RX_COMMAND to the Listener Entity. The Listener Entity shall then send a
+ *  DISCONNECT_TX_COMMAND to the Talker Entity.
+ *
+ *  \param talker_guid      the GUID of the Talker being targeted by the command
+ *  \param listener_guid    the GUID of the Listener being targeted by the command
+ *  \param talker_id        the unique id of the Talker stream source to disconnect.
+                            For entities using AEM, this corresponds to the id of the STREAM_OUTPUT descriptor
+ *  \param listener_id      the unique id of the Listener stream source to disconnect.
+                            For entities using AEM, this corresponds to the id of the STREAM_INPUT descriptor
+ *  
+ **/
+void avb_1722_1_controller_disconnect(REFERENCE_PARAM(guid_t, talker_guid), 
+                                      REFERENCE_PARAM(guid_t, listener_guid),
+                                      int talker_id,
+                                      int listener_id,
+                                      chanend c_tx);
+
+void avb_1722_1_controller_disconnect_all_listeners(chanend c_tx, int talker_id);
+void avb_1722_1_controller_disconnect_talker(chanend c_tx, int listener_id);
 
 unsigned avb_1722_1_acmp_get_talker_connection_info(REFERENCE_PARAM(short,talker));
 
-/** \fn avb_1722_1_acmp_get_listener_connection_info
+/**
  *
  * Return information that is required for processing the AVB_1722_1_CONNECT_LISTENER and
  * AVB_1722_1_DISCONNECT_LISTENER notifications.
  */
 unsigned avb_1722_1_acmp_get_listener_connection_info(REFERENCE_PARAM(short,listener), unsigned char address[6], unsigned streamId[2], REFERENCE_PARAM(unsigned,vlan));
 
-/** \fn avb_1722_1_acmp_talker_connection_complete
- *
- * Inform the 1722.1 state machine that the AVB_1722_1_CONNECT_TALKER or
- * AVB_1722_1_DISCONNECT_TALKER has completed, and passing in an error
- * code.
- *
- * \param code the 1722.1 status field code
- */
-void avb_1722_1_acmp_talker_connection_complete(short code, chanend c_tx);
-
-/** \fn avb_1722_1_acmp_listener_connection_complete
- *
- * Inform the 1722.1 state machine that the AVB_1722_1_CONNECT_LISTENER or
- * AVB_1722_1_DISCONNECT_LISTENER has completed, and passing in an error
- * code.
- *
- * \param code the 1722.1 status field code
- */
-void avb_1722_1_acmp_listener_connection_complete(short code, chanend c_tx);
-
-/** \fn avb_1722_1_talker_set_mac_address
+/**
  *
  *  Called by the application to inform 1722.1 of the source MAC
  *  address for the particular talker.
  */
 void avb_1722_1_talker_set_mac_address(unsigned talker_unique_id, unsigned char macaddr[]);
 
-/** \fn avb_1722_1_talker_set_stream_id
+/** 
  *
  * Called by the application to inform 1722.1 of the source stream identifier
  * for a particular stream.
  */
 void avb_1722_1_talker_set_stream_id(unsigned talker_unique_id, unsigned streamId[2]);
 
-
-/** \fn avb_1722_1_acmp_configure_source
- *
- *  Utility function to configure a source according to the value of the ACMP
- *  default format parameter.  Returns a status which can be passed back into
- *  the code parameter of the avb_1722_1_acmp_talker_connection_complete function
- *
- *  \param talker_unique_id the index of the talker source
- *  \param default_format the default format from the 1722.1 ACMP message
- *  \returns a 1722.1 ACMP status code
- */
-avb_1722_1_acmp_status_t avb_1722_1_acmp_configure_source(unsigned talker_unique_id, unsigned int default_format);
-
-/** \fn avb_1722_1_acmp_configure_sink
- *
- *  Utility function to configure a sink according to the value of the ACMP
- *  default format parameter.  Returns a status which can be passed back into
- *  the code parameter of the avb_1722_1_acmp_listener_connection_complete function
- *
- *  \param listener_unique_id the index of the listener sink
- *  \param default_format the default format from the 1722.1 ACMP message
- *  \returns a 1722.1 ACMP status code
- */
-avb_1722_1_acmp_status_t avb_1722_1_acmp_configure_sink(unsigned listener_unique_id, unsigned int default_format);
 
 #endif /* AVB_17221_ACMP_H_ */
