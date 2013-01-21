@@ -23,7 +23,7 @@ void simple_demo_controller(int *change_stream, int *toggle_remote, chanend c_tx
 {
   if (*toggle_remote != controller_state)
   {
-    avb_1722_1_controller_disconnect_all_listeners(c_tx, 0);
+    avb_1722_1_controller_disconnect_all_listeners(0, c_tx);
 
     if (*toggle_remote)
     {

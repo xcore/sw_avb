@@ -24,9 +24,10 @@ void avb_1722_1_acmp_listener_periodic(chanend c_tx);
  *  \param talker_guid      the GUID of the Talker being targeted by the command
  *  \param listener_guid    the GUID of the Listener being targeted by the command
  *  \param talker_id        the unique id of the Talker stream source to connect.
-                            For entities using AEM, this corresponds to the id of the STREAM_OUTPUT descriptor
+ *                          For entities using AEM, this corresponds to the id of the STREAM_OUTPUT descriptor
  *  \param listener_id      the unique id of the Listener stream source to connect.
-                            For entities using AEM, this corresponds to the id of the STREAM_INPUT descriptor
+ *                          For entities using AEM, this corresponds to the id of the STREAM_INPUT descriptor
+ *  \param c_tx             a transmit chanend to the Ethernet server
  *  
  **/
 void avb_1722_1_controller_connect(REFERENCE_PARAM(guid_t, talker_guid), 
@@ -43,9 +44,10 @@ void avb_1722_1_controller_connect(REFERENCE_PARAM(guid_t, talker_guid),
  *  \param talker_guid      the GUID of the Talker being targeted by the command
  *  \param listener_guid    the GUID of the Listener being targeted by the command
  *  \param talker_id        the unique id of the Talker stream source to disconnect.
-                            For entities using AEM, this corresponds to the id of the STREAM_OUTPUT descriptor
+ *                          For entities using AEM, this corresponds to the id of the STREAM_OUTPUT descriptor
  *  \param listener_id      the unique id of the Listener stream source to disconnect.
-                            For entities using AEM, this corresponds to the id of the STREAM_INPUT descriptor
+ *                          For entities using AEM, this corresponds to the id of the STREAM_INPUT descriptor
+ *  \param c_tx             a transmit chanend to the Ethernet server
  *  
  **/
 void avb_1722_1_controller_disconnect(REFERENCE_PARAM(guid_t, talker_guid), 
@@ -54,9 +56,32 @@ void avb_1722_1_controller_disconnect(REFERENCE_PARAM(guid_t, talker_guid),
                                       int listener_id,
                                       chanend c_tx);
 
-void avb_1722_1_controller_disconnect_all_listeners(chanend c_tx, int talker_id);
-void avb_1722_1_controller_disconnect_talker(chanend c_tx, int listener_id);
+/** Disconnect all Listener sinks currently connected to the Talker stream source with ``talker_id``
+ *
+ *
+ *  \param talker_id        the unique id of the Talker stream source to disconnect its listeners.
+ *                          For entities using AEM, this corresponds to the id of the STREAM_OUTPUT descriptor
+ *  \param c_tx             a transmit chanend to the Ethernet server
+ *  
+ **/
+void avb_1722_1_controller_disconnect_all_listeners(int talker_id, chanend c_tx);
 
+
+/** Disconnect the Talker source currently connected to the Listener stream sink with ``listener_id``
+ *
+ *
+ *  \param listener_id      the unique id of the Listener stream source to disconnect its Talker.
+ *                          For entities using AEM, this corresponds to the id of the STREAM_INPUT descriptor
+ *  \param c_tx             a transmit chanend to the Ethernet server
+ *  
+ **/
+void avb_1722_1_controller_disconnect_talker(int listener_id, chanend c_tx);
+
+/**
+ *
+ * Return information that is required for processing the AVB_1722_1_CONNECT_TALKER and
+ * AVB_1722_1_DISCONNECT_TALKER notifications.
+ */
 unsigned avb_1722_1_acmp_get_talker_connection_info(REFERENCE_PARAM(short,talker));
 
 /**

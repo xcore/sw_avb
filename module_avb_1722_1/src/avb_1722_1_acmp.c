@@ -363,7 +363,7 @@ void avb_1722_1_controller_disconnect(guid_t *talker_guid, guid_t *listener_guid
     acmp_controller_connect_disconnect(ACMP_CMD_DISCONNECT_RX_COMMAND, talker_guid, listener_guid, talker_id, listener_id, c_tx);
 }
 
-void avb_1722_1_controller_disconnect_all_listeners(chanend c_tx, int talker_id)
+void avb_1722_1_controller_disconnect_all_listeners(int talker_id, chanend c_tx)
 {
     if (acmp_talker_streams[talker_id].stream_id.l != 0)
     {
@@ -380,7 +380,7 @@ void avb_1722_1_controller_disconnect_all_listeners(chanend c_tx, int talker_id)
     }
 }
 
-void avb_1722_1_controller_disconnect_talker(chanend c_tx, int listener_id)
+void avb_1722_1_controller_disconnect_talker(int listener_id, chanend c_tx)
 {
     if (acmp_listener_streams[listener_id].stream_id.l != 0)
     {
