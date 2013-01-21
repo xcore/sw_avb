@@ -11,7 +11,7 @@
 *.vcd
 *.log
 *.xe
-doc/*/_build/*
+doc/_build/*
 doc/*/.doxygen/*
 doc/*/.linked_dirs/*
 doc/*/.sources/*
