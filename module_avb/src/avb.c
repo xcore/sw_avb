@@ -367,13 +367,13 @@ int getset_avb_source_state(int set,
         if (source->stream.num_channels <= 0)
           valid = 0;
 
-        clk_ctl = inputs[source->stream.map[0]].clk_ctl;
+        clk_ctl = inputs[source->map[0]].clk_ctl;
 
         // check that the map is ok
         for (int i=0;i<source->stream.num_channels;i++) {
-          if (inputs[source->stream.map[i]].mapped_to != UNMAPPED)
+          if (inputs[source->map[i]].mapped_to != UNMAPPED)
             valid = 0;
-          if (inputs[source->stream.map[i]].clk_ctl != clk_ctl)
+          if (inputs[source->map[i]].clk_ctl != clk_ctl)
             valid = 0;
         }
 
@@ -383,8 +383,8 @@ int getset_avb_source_state(int set,
           unsigned fifo_mask = 0;
 
           for (int i=0;i<source->stream.num_channels;i++) {
-            inputs[source->stream.map[i]].mapped_to = source_num;
-            fifo_mask |= (1 << source->stream.map[i]);
+            inputs[source->map[i]].mapped_to = source_num;
+            fifo_mask |= (1 << source->map[i]);
           }
 
           xc_abi_outuint(c, AVB1722_CONFIGURE_TALKER_STREAM);
@@ -397,7 +397,7 @@ int getset_avb_source_state(int set,
           xc_abi_outuint(c, source->stream.num_channels);
           xc_abi_outuint(c, fifo_mask);
           for (int i=0;i<source->stream.num_channels;i++) {
-            xc_abi_outuint(c, inputs[source->stream.map[i]].fifo);
+            xc_abi_outuint(c, inputs[source->map[i]].fifo);
           }
           xc_abi_outuint(c, source->stream.rate);
           if (source->presentation)
@@ -458,7 +458,7 @@ int getset_avb_source_state(int set,
                *state == AVB_SOURCE_STATE_DISABLED) {
         // disabled the source
           for (int i=0;i<source->stream.num_channels;i++) {
-            inputs[source->stream.map[i]].mapped_to = UNMAPPED;
+            inputs[source->map[i]].mapped_to = UNMAPPED;
           }
           chanend c = source->talker_ctl;
           xc_abi_outuint(c, AVB1722_TALKER_STOP);
@@ -483,15 +483,15 @@ int getset_avb_source_map(int set, int source_num, int map[], int *map_len)
   if (source_num < AVB_NUM_SOURCES &&
       (!set ||
        (sources[source_num].stream.state == AVB_SOURCE_STATE_DISABLED &&
-        *map_len <= AVB_MAX_CHANNELS_PER_STREAM))) {
+        *map_len <= AVB_MAX_CHANNELS_PER_TALKER_STREAM))) {
     avb_source_info_t *source = &sources[source_num];
     if (set) {
-      memcpy(source->stream.map, map, *map_len<<2);
+      memcpy(source->map, map, *map_len<<2);
     }
     else {
       *map_len = source[source_num].stream.num_channels;
     }
-    memcpy(map, source->stream.map, *map_len<<2);
+    memcpy(map, source->map, *map_len<<2);
     return 1;
   }
   else
@@ -668,7 +668,7 @@ int getset_avb_sink_state(int set,
         xc_abi_outuint(c, sink->stream.num_channels);
         for (int i=0;i<sink->stream.num_channels;i++)
         {
-          if (sink->stream.map[i] == AVB_CHANNEL_UNMAPPED)
+          if (sink->map[i] == AVB_CHANNEL_UNMAPPED)
           {
             xc_abi_outuint(c, 0);
             simple_printf("  %d unmapped\n", i);
@@ -677,10 +677,10 @@ int getset_avb_sink_state(int set,
           {
             if (clk_ctl == -1)
             {
-              clk_ctl = outputs[sink->stream.map[i]].clk_ctl;
+              clk_ctl = outputs[sink->map[i]].clk_ctl;
             }
-            xc_abi_outuint(c, outputs[sink->stream.map[i]].fifo);
-            simple_printf("  %d -> %x\n", i, sink->stream.map[i]);
+            xc_abi_outuint(c, outputs[sink->map[i]].fifo);
+            simple_printf("  %d -> %x\n", i, sink->map[i]);
           }
         }
         (void) xc_abi_inuint(c);
@@ -748,14 +748,14 @@ int getset_avb_sink_map(int set, int sink_num, int map[], int *map_len)
 {
   if (sink_num < AVB_NUM_SINKS &&
       (!set || (sinks[sink_num].stream.state == AVB_SINK_STATE_DISABLED
-                && *map_len <= AVB_MAX_CHANNELS_PER_STREAM))) {
+                && *map_len <= AVB_MAX_CHANNELS_PER_LISTENER_STREAM))) {
     avb_sink_info_t *sink = &sinks[sink_num];
     if (set) {
-      memcpy(sink->stream.map, map, *map_len<<2);
+      memcpy(sink->map, map, *map_len<<2);
     }
     else
       *map_len = sinks->stream.num_channels;
-    memcpy(map, sink->stream.map, *map_len<<2);
+    memcpy(map, sink->map, *map_len<<2);
     return 1;
   }
   else

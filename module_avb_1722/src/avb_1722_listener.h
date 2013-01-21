@@ -18,12 +18,12 @@
 #define MAX_INCOMING_AVB_STREAMS (AVB_NUM_SINKS)
 #endif
 
-#ifndef AVB_MAX_CHANNELS_PER_STREAM 
-#define AVB_MAX_CHANNELS_PER_STREAM 16
+#ifndef AVB_MAX_CHANNELS_PER_LISTENER_STREAM 
+#define AVB_MAX_CHANNELS_PER_LISTENER_STREAM 8
 #endif
 
 #ifndef MAX_AVB_STREAMS_PER_LISTENER
-#define MAX_AVB_STREAMS_PER_LISTENER 12
+#define MAX_AVB_STREAMS_PER_LISTENER 4
 #endif
 
 
@@ -37,7 +37,7 @@ typedef struct avb_1722_stream_info_t {
   int num_channels;
   int dbc;                         //!< The DBC of the last seen packet
   int last_sequence;               //!< The sequence number from the last 1722 packet
-  media_output_fifo_t map[AVB_MAX_CHANNELS_PER_STREAM];
+  media_output_fifo_t map[AVB_MAX_CHANNELS_PER_LISTENER_STREAM];
 } avb_1722_stream_info_t;
 
 

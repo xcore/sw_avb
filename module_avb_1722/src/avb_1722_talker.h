@@ -15,8 +15,8 @@
 
 #if AVB_NUM_SOURCES > 0
 
-#ifndef AVB_MAX_CHANNELS_PER_STREAM 
-#define AVB_MAX_CHANNELS_PER_STREAM 16
+#ifndef AVB_MAX_CHANNELS_PER_TALKER_STREAM 
+#define AVB_MAX_CHANNELS_PER_TALKER_STREAM 8
 #endif
 
 #ifndef AVB_MAX_STREAMS_PER_TALKER_UNIT
@@ -37,7 +37,7 @@ typedef struct avb1722_Talker_StreamConfig_t
   //! number of channels in the stream
   unsigned int  num_channels;
   //! map from media fifos to channels in the stream
-  media_input_fifo_t map[AVB_MAX_CHANNELS_PER_STREAM];
+  media_input_fifo_t map[AVB_MAX_CHANNELS_PER_TALKER_STREAM];
   //! word containing the bit flags for the fifo map above
   unsigned int fifo_mask;
   //! the type of samples in the stream
@@ -119,7 +119,7 @@ void AVB1722_AVBTP_HeaderGen(unsigned char Buf[],
 
 // Max. packet size for AVB 1722 talker
 #ifdef AVB_1722_FORMAT_SAF
-#define MAX_PKT_BUF_SIZE_TALKER (AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + TALKER_NUM_AUDIO_SAMPLES_PER_CHANNEL_PER_AVB1722_PKT * AVB_MAX_CHANNELS_PER_STREAM * 4 + 4)
+#define MAX_PKT_BUF_SIZE_TALKER (AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + TALKER_NUM_AUDIO_SAMPLES_PER_CHANNEL_PER_AVB1722_PKT * AVB_MAX_CHANNELS_PER_TALKER_STREAM * 4 + 4)
 #endif
 
 #ifdef AVB_1722_FORMAT_61883_4
@@ -127,7 +127,7 @@ void AVB1722_AVBTP_HeaderGen(unsigned char Buf[],
 #endif
 
 #ifdef AVB_1722_FORMAT_61883_6
-#define MAX_PKT_BUF_SIZE_TALKER (AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + AVB_CIP_HDR_SIZE + TALKER_NUM_AUDIO_SAMPLES_PER_CHANNEL_PER_AVB1722_PKT * AVB_MAX_CHANNELS_PER_STREAM * 4 + 4)
+#define MAX_PKT_BUF_SIZE_TALKER (AVB_ETHERNET_HDR_SIZE + AVB_TP_HDR_SIZE + AVB_CIP_HDR_SIZE + TALKER_NUM_AUDIO_SAMPLES_PER_CHANNEL_PER_AVB1722_PKT * AVB_MAX_CHANNELS_PER_TALKER_STREAM * 4 + 4)
 #endif
 
 typedef struct avb_1722_talker_state_s {
