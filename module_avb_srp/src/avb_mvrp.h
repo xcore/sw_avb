@@ -8,7 +8,7 @@
  */
 
 #ifndef AVB_MAX_NUM_VLAN
-#define AVB_MAX_NUM_VLAN 4
+#define AVB_MAX_NUM_VLAN 2
 #endif
 
 //! The MVRP Ethertype
