@@ -407,7 +407,10 @@ int getset_avb_source_state(int set,
 
           (void) xc_abi_inuint(c);
 
-
+#ifndef AVB_EXCLUDE_MVRP
+          if (source->stream.vlan)
+            avb_join_vlan(source->stream.vlan);
+#endif
 
           mrp_mad_begin(source->stream.srp_talker_attr);
           mrp_mad_begin(source->stream.srp_talker_failed_attr);
@@ -464,6 +467,11 @@ int getset_avb_source_state(int set,
           xc_abi_outuint(c, AVB1722_TALKER_STOP);
           xc_abi_outuint(c, source->stream.local_id);
           (void) xc_abi_inuint(c); //ACK
+
+#ifndef AVB_EXCLUDE_MVRP
+        if (source->stream.vlan)
+          avb_leave_vlan(source->stream.vlan);
+#endif
 
           // And remove the group
           mrp_mad_leave(source->stream.srp_talker_attr);
