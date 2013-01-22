@@ -31,8 +31,8 @@ how these figures were determined.
    multiplexed protocol such as TDM is used to reduce the
    required pin count.
 
-XS1-L16 Device - 100Mbit/s
-~~~~~~~~~~~~~~~~~~~~~~~~~
+XS1-L16 Device
+~~~~~~~~~~~~~~
 
 .. list-table::
   :header-rows: 1
@@ -50,8 +50,8 @@ XS1-L16 Device - 100Mbit/s
     - 2 in/2 out
     - 4 in/4 out
 
-XS1-L10 Device - 100Mbit/s
-~~~~~~~~~~~~~~~~~~~~~~~~~
+XS1-L10 Device
+~~~~~~~~~~~~~~
 
 .. list-table::
   :header-rows: 1

@@ -8,7 +8,7 @@ development platforms are recommended:
 
 In addition the following kit can be used for development:
 
-  * `SliceKIT Core Board <http://www.xmos.com/discover/products/xkits/slicekit#tabs>`_ with an Ethernet and Audio slice. 
+  * `SliceKIT Core Board <http://www.xmos.com/discover/products/xkits/slicekit#tabs>`_ with 1 x Ethernet slice and 1 x Audio slice. 
 
 
 It is recommended to have at least two boards for developing streaming audio applications. It is also recommended that an AVB compatible network switch be obtained and used while developing the system.

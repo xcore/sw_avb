@@ -14,15 +14,15 @@
  *  sent to the ethernet component. It is dynamically configured 
  *  using the AVB control API.
  * 
- *  \param ptp_svr          link to the PTP timing server
- *  \param ethernet_tx_svr  transmit link to the ethernet MAC
- *  \param talker_ctl       channel to configure the talker (given 
+ *  \param c_ptp            link to the PTP timing server
+ *  \param c_mac_tx         transmit link to the ethernet MAC
+ *  \param c_talker_ctl     channel to configure the talker (given 
  *                          to avb_init())
  *  \param num_streams      the number of streams the unit controls
  **/
-void avb_1722_talker(chanend ptp_svr,
-                     chanend ethernet_tx_svr,
-                     chanend talker_ctl,
+void avb_1722_talker(chanend c_ptp,
+                     chanend c_mac_tx,
+                     chanend c_talker_ctl,
                      int num_streams);
 
 /** An AVB IEEE 1722 audio listener thread.
@@ -33,18 +33,17 @@ void avb_1722_talker(chanend ptp_svr,
  *  to the media clock server. This thread is dynamically configured
  *  using the AVB control API.
  *
- *  \param ethernet_rx_svr  receive link to the ethernet MAC
- *  \param ethernet_tx_svr  transmit link to the ethernet MAC
- *  \param buf_ctl          buffer control link to the media clock server
- *  \param ptp_ctl          PTP server link for retreiving PTP time info
- *  \param listener_ctl     channel to configure the listener (given
+ *  \param c_mac_rx         receive link to the ethernet MAC
+ *  \param c_buf_ctl        buffer control link to the media clock server
+ *  \param c_ptp_ctl        PTP server link for retreiving PTP time info
+ *  \param c_listener_ctl   channel to configure the listener (given
  *                          to avb_init())
  *  \param num_streams      the number of streams the unit will handle
  */
-void avb_1722_listener(chanend ethernet_rx_svr,
-                       chanend? buf_ctl,
-                       chanend? ptp_ctl,
-                       chanend listener_ctl,
+void avb_1722_listener(chanend c_mac_rx,
+                       chanend? c_buf_ctl,
+                       chanend? c_ptp_ctl,
+                       chanend c_listener_ctl,
                        int num_streams);
 
 

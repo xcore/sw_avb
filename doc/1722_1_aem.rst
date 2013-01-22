@@ -1,0 +1,113 @@
+.. _sec_1722_1_aem:
+
+1722.1 Descriptors
+==================
+
+The XMOS AVB reference design provides an AVDECC Entity Model (AEM) consisting of descriptors to describe the internal components 
+of the Entity. For a complete overview of AEM, see section 7 of the 1722.1 specification.
+
+An AEM descriptor is a fixed field structure followed by variable length data which describes an object in the AEM
+Entity model. The maximum length of a descriptor is 508 octets.
+
+All descriptors share two common fields which are used to uniquely identify a descriptor by a type and an index.
+AEM defines a number of descriptors for specific parts of the Entity model. The descriptor types that XMOS currently provide in the 
+reference design are listed in the table below. 
+
+Editing descriptors
+-------------------
+
+The descriptors are declared in the a header configuration file named
+``aem_descriptors.h.in`` within the ``src/`` directory of the application.
+The XMOS Reference column in the table refers to the array names of the descriptors in this file. 
+
+This file is post-processed by a script in the build stage to expand strings to 64 octet padded with zeros.
+
+.. list-table::
+ :header-rows: 1
+ :widths: 11 20 15
+
+ * - Name
+   - Description
+   - XMOS Reference
+ * - ENTITY
+   - This is the top level descriptor defining the Entity.
+   - ``desc_entity``
+ * - CONFIGURATION
+   - This is the descriptor defining a configuration of the Entity.
+   - ``desc_configuration_0``
+ * - AUDIO_UNIT
+   - This is the descriptor defining an audio unit.
+   - ``desc_audio_unit_0``
+ * - STREAM_INPUT
+   - This is the descriptor defining an input stream to the Entity.
+   - ``desc_stream_input_0``
+ * - STREAM_OUTPUT
+   - This is the descriptor defining an output stream from the Entity.
+   - ``desc_stream_output_0``
+ * - JACK_INPUT
+   - This is the descriptor defining an input jack on the Entity.
+   - ``desc_jack_input_0``
+ * - JACK_OUTPUT
+   - This is the descriptor defining an output jack on the Entity.
+   - ``desc_jack_output_0``
+ * - AVB_INTERFACE
+   - This is the descriptor defining an AVB interface.
+   - ``desc_avb_interface_0``
+ * - CLOCK_SOURCE
+   - This is the descriptor describing a clock source.
+   - ``desc_clock_source_0..1``
+ * - LOCALE
+   - This is the descriptor defining a locale.
+   - ``desc_locale_0``
+ * - STRINGS
+   - This is the descriptor defining localized strings.
+   - ``desc_strings_0``
+ * - STREAM_PORT_INPUT
+   - This is the descriptor defining an input stream port on a unit.
+   - ``desc_stream_port_input_0``
+ * - STREAM_PORT_OUTPUT
+   - This is the descriptor defining an output stream port on a unit.
+   - ``desc_stream_port_output_0``
+ * - EXTERNAL_PORT_INPUT
+   - This is the descriptor defining an input external port on a unit.
+   - ``desc_external_input_port_0``
+ * - EXTERNAL_PORT_OUTPUT
+   - This is the descriptor defining an output external port on a unit.
+   - ``desc_external_output_port_0``
+ * - AUDIO_CLUSTER
+   - This is the descriptor defining a cluster of channels within an audio stream.
+   - ``desc_audio_cluster_0..N``
+ * - AUDIO_MAP
+   - This is the descriptor defining the mapping between the channels of an audio stream and the channels of the audio port.
+   - ``desc_audio_map_0..N``
+ * - CLOCK_DOMAIN
+   - This is the descriptor describing a clock domain.
+   - ``desc_clock_domain_0``
+
+
+Adding and removing descriptors
+-------------------------------
+
+Descriptors are indexed by a descriptor list named ``aem_descriptor_list`` in the ``aem_descriptors.h.in`` file. 
+
+The format for this list is as follows:
+
++---------------------------------+
+| Descriptor type                 |
++---------------------------------+
+|Number of descriptors of type (N)|
++---------------------------------+
+| Size of descriptor 0 (bytes)    |
++---------------------------------+
+| Address of descriptor 0         |
++---------------------------------+
+|``...``                          |
++---------------------------------+
+| Size of descriptor N (bytes)    |
++---------------------------------+
+| Address of descriptor N         |
++---------------------------------+
+
+For example:
+
+``AEM_ENTITY_TYPE``, ``1``, ``sizeof(desc_entity)``, ``(unsigned)desc_entity``

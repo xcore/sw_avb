@@ -73,9 +73,10 @@ Key Files
 
  * - File
    - Description
- * - ``avb.h``
-   - Header file containing declarations for all AVB component
-     functions and the AVB control API.      
+ * - ``avb_api.h``
+   - Header file containing declarations for the core AVB control API.
+ * - ``avb_1722_1_app_hooks.h``
+   - Header file containing declarations for hooks into 1722.1  
  * - ``ethernet_rx_client.h`` 
    - Header file for clients that require direct access to the ethernet MAC
      (RX). 
@@ -86,5 +87,3 @@ Key Files
    - Header file for access to the PTP server.
  * - ``audio_i2s.h``
    - Header file containing the I2S audio component.
- * - ``audio_tdm.h``
-   - Header file containing the TDM audio component.

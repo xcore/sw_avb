@@ -97,7 +97,7 @@ void avb_srp_listener_join_ind(mrp_attribute_state *attr, int new, int four_pack
 	if (state == AVB_SOURCE_STATE_POTENTIAL) {
 		if (four_packed_event == AVB_SRP_FOUR_PACKED_EVENT_READY ||
 			four_packed_event == AVB_SRP_FOUR_PACKED_EVENT_READY_FAILED) {
-#ifdef SRP_AUTO_TALKER_STREAM_CONTROL
+#if SRP_AUTO_TALKER_STREAM_CONTROL
 			set_avb_source_state(stream, AVB_SOURCE_STATE_ENABLED);
 #else
 #endif
@@ -113,7 +113,7 @@ void avb_srp_listener_leave_ind(mrp_attribute_state *attr, int four_packed_event
 
 	get_avb_source_state(stream, &state);
 	if (state == AVB_SOURCE_STATE_ENABLED) {
-#ifdef SRP_AUTO_TALKER_STREAM_CONTROL
+#if SRP_AUTO_TALKER_STREAM_CONTROL
 		set_avb_source_state(stream, AVB_SOURCE_STATE_POTENTIAL);
 #else
 #endif

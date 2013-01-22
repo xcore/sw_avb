@@ -193,7 +193,7 @@ media_output_fifo_pull_sample(media_output_fifo_t s,
  *
  *  \param s0 the media fifo which is being updated
  *  \param timestamp the 32 bit PTP timestamp
- *  \param the sample, counted from the end of the FIFO, which the timestamp applies to
+ *  \param sample_number the sample, counted from the end of the FIFO, which the timestamp applies to
  *
  */
 void media_output_fifo_set_ptp_timestamp(media_output_fifo_t s0,

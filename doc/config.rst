@@ -43,8 +43,4 @@ The four steps are broken down as follows:
 .. note:: 
    The XMOS endpoint provides full support for Talker and Listener 1722.1 services. Basic 1722.1 Controller functionality is available to allow 'plug and play' connection between two XMOS endpoints, however, it is expected that GUI Controller software will be available on the network for setting up larger topologies.
 
-FIXME: To assist in this task a
-unified control API is presented in Section :ref:`sec_avb_api`.
-
-For an example of how an application can use this API, see the example
-code walkthrough presented in Section :ref:`sec_app_tutorial`.
+To assist in this task a unified control API is presented in Section :ref:`sec_avb_api`.

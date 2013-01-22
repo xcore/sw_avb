@@ -124,26 +124,6 @@ void avb_get_control_packet(chanend c_rx,
 void avb_process_control_packet(unsigned int buf[], int len,
                                chanend c_tx);
 
-/** Set the endpoint into "legacy mode".
- *
- *  This function sets the endpoint into "legacy mode" to work with 
- *  non-AVB switches for testing or demonstration purposes. In this
- *  mode the destination address of certain protocols change to become 
- *  legacy (non-AVB) traffic  and the PTP 802.1as protocol behaves in a
- *  slightly different manner. In this case:
- * 
- *    * The protocols are non-longer AVB standard so will not work with
- *      any other AVB hardware. They will only work with other endpoints 
- *      set to this mode.
- *
- *    * There is no longer any quality of service guarantee so audio        
- *      may be disrupted. Furthermore the traffic from the endpoint may
- *      disrupt other non-AVB ethernet devices on the network.
- *
- *  \param mode    non-zero to set legacy mode, zero to unset it
- *
- **/
-void avb_set_legacy_mode(int mode);
 
 /**
  *   \brief Set the volume multipliers for the audio channels

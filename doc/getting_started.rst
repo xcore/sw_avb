@@ -42,13 +42,13 @@ The main Makefile for the project is in the
 options and used modules.
 
 Running the application
------------------------
+~~~~~~~~~~~~~~~~~~~~~~~
 
 To upgrade the firmware you must, firstly connect the XTAG-2 to the 
 relevant development board and plug the XTAG-2 into your PC or Mac.
 
 Using the XMOS xTIMEcomposer Studio
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------------
 
 Using the 12.0.0 tools or later and AVB version 5.2.0 or
 later, from within the xTIMEcomposer Studio:
@@ -62,7 +62,7 @@ later, from within the xTIMEcomposer Studio:
  #. Click on **Run**
 
 Using the Command Line Tools
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 #. Open the XMOS command line tools (Command Prompt) and
    execute the following command:
@@ -87,14 +87,14 @@ Using the Command Line Tools
 
 
 Installing the application onto flash
--------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #. Connect the XTAG-2 debug adapter to the relevant development
    board, then plug the XTAG-2 into your PC or Mac.
 
 
 Using the XMOS xTIMEcomposer Studio
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------------
 
 To upgrade the flash from the xTIMEcomposer Studio, follow these steps:
 
@@ -108,7 +108,7 @@ To upgrade the flash from the xTIMEcomposer Studio, follow these steps:
 #. Click on **Flash**
 
 Using Command Line Tools
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 
 
 #. Open the XMOS command line tools (Command Prompt) and

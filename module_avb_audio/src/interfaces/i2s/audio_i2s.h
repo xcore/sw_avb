@@ -76,7 +76,6 @@ void i2s_master_configure_ports(REFERENCE_PARAM(i2s_ports_t, p),
 							   for example, if you have two input ports, the map
                                {0,1,0,1} would map to the two stereo local
                                talker streams 0 and 1.
-  \param media_ctl the media fifo control channel
  */
 #pragma unsafe arrays
 inline void i2s_master_upto_8(const clock mclk,

@@ -3,9 +3,14 @@
 
 /***** APPLICATION CONFIGURATION ******/
 
+/** Global switch to enable or disable AVB Talker functionality in the demo */
 #define AVB_DEMO_ENABLE_TALKER 1
+/** Global switch to enable or disable AVB Listener functionality in the demo */
 #define AVB_DEMO_ENABLE_LISTENER 1
 
+/** Number of input/output audio channels in the demo application 
+  * For simplicity, input and output is identical in size but can be configured
+  * differently in ``avb_conf.h``. */
 #define AVB_DEMO_NUM_CHANNELS 8
 
 /***** PORTS *********/
