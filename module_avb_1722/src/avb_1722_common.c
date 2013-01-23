@@ -7,7 +7,7 @@ short ntoh_16(unsigned char x[2]) {
 }
 
 int ntoh_32(unsigned char x[4]) {
-  return ((x[0] << 24) | x[1] << 16 | x[2] << 8 | x[1]);
+  return ((x[0] << 24) | x[1] << 16 | x[2] << 8 | x[3]);
 }
 
 void get_64(unsigned char g[8], unsigned char c[8]) {
@@ -29,7 +29,7 @@ void hton_16(unsigned char x[2], unsigned short v) {
     x[1] = (v & 0xFF);
 }
 
-void hton_32(unsigned char x[4], unsigned short v) {
+void hton_32(unsigned char x[4], unsigned int v) {
     x[0] = (unsigned char) (v >> 24);
     x[1] = (unsigned char) (v >> 16);
     x[2] = (unsigned char) (v >> 8);

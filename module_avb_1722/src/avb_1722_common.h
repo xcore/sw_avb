@@ -188,4 +188,4 @@ void set_64(unsigned char g[8], unsigned char c[8]);
 
 void hton_16(unsigned char x[2], unsigned short v);
 
-void hton_32(unsigned char x[4], unsigned short v);
+void hton_32(unsigned char x[4], unsigned int v);
