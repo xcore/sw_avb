@@ -17,6 +17,10 @@ OPTIONAL_HEADERS += avb_1722_1_protocol
 
 MODULE_XCC_C_FLAGS = $(XCC_FLAGS) -Os -std=c99
 
+XCC_FLAGS_avb_1722_1_aecp.c = $(XCC_FLAGS)
+
+# -fno-inline-functions -fno-unroll-loops
+
 $(GEN_DIR)/aem_descriptors.generated: $(call UNMANGLE,$(CURRENT_MODULE_DIR)/src/generate.py) $(call UNMANGLE, src/aem_descriptors.h.in) $(call UNMANGLE,src/aem_entity_strings.h.in)  | $(GEN_DIR)
 	@echo "Generating AEM header files"
 	@echo "generated" > $(GEN_DIR)/aem_descriptors.generated

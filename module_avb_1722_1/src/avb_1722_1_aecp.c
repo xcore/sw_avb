@@ -89,9 +89,9 @@ static void avb_1722_1_create_controller_available_packet(unsigned char dest_add
 
   avb_1722_1_create_1722_1_header(dest_addr, DEFAULT_1722_1_AECP_SUBTYPE, AECP_CMD_AEM_COMMAND, AECP_AEM_STATUS_SUCCESS, 10, hdr);
 
-  SET_LONG_WORD(pkt->target_guid, target_guid);
+  set_64(pkt->target_guid, target_guid.c);
   for (int i=0; i < 6; i++) pkt->controller_guid[i] = 0;
-  HTON_U16(pkt->sequence_id, 0);
+  hton_16(pkt->sequence_id, 0);
 }
 
 static unsigned char *avb_1722_1_create_aecp_response_header(unsigned char dest_addr[6], char status, unsigned int data_len, avb_1722_1_aecp_packet_t* cmd_pkt)
@@ -279,8 +279,8 @@ static int sfc_from_sampling_rate(int rate)
 static void process_aem_cmd_getset_stream_format(avb_1722_1_aecp_packet_t *pkt, unsigned char *status, unsigned short command_type)
 {
   avb_1722_1_aem_getset_stream_format_t *cmd = (avb_1722_1_aem_getset_stream_format_t *)(pkt->data.aem.command.payload);
-  unsigned short stream_index = NTOH_U16(cmd->descriptor_id);
-  unsigned short desc_type = NTOH_U16(cmd->descriptor_type);
+  unsigned short stream_index = ntoh_16(cmd->descriptor_id);
+  unsigned short desc_type = ntoh_16(cmd->descriptor_type);
   enum avb_stream_format_t format;
   int rate;
   int channels;
@@ -357,20 +357,20 @@ static void process_aem_cmd_getset_stream_format(avb_1722_1_aecp_packet_t *pkt, 
 static void process_aem_cmd_getset_sampling_rate(avb_1722_1_aecp_packet_t *pkt, unsigned char *status, unsigned short command_type)
 {
   avb_1722_1_aem_getset_sampling_rate_t *cmd = (avb_1722_1_aem_getset_sampling_rate_t *)(pkt->data.aem.command.payload);
-  unsigned short media_clock_id = NTOH_U16(cmd->descriptor_id);
+  unsigned short media_clock_id = ntoh_16(cmd->descriptor_id);
   int rate;
 
   if (command_type == AECP_AEM_CMD_GET_SAMPLING_RATE)
   {
     if (get_device_media_clock_rate(media_clock_id, &rate))
     {
-      HTON_U32(cmd->sampling_rate, rate);
+      hton_32(cmd->sampling_rate, rate);
       return;
     }
   }
   else // AECP_AEM_CMD_SET_SAMPLING_RATE
   {
-    rate = NTOH_U32(cmd->sampling_rate);
+    rate = ntoh_32(cmd->sampling_rate);
 
     if (set_device_media_clock_rate(media_clock_id, rate))
     {
@@ -385,7 +385,7 @@ static void process_aem_cmd_getset_sampling_rate(avb_1722_1_aecp_packet_t *pkt, 
 static void process_aem_cmd_getset_clock_source(avb_1722_1_aecp_packet_t *pkt, unsigned char *status, unsigned short command_type)
 {
   avb_1722_1_aem_getset_clock_source_t *cmd = (avb_1722_1_aem_getset_clock_source_t *)(pkt->data.aem.command.payload);
-  unsigned short media_clock_id = NTOH_U16(cmd->descriptor_id);
+  unsigned short media_clock_id = ntoh_16(cmd->descriptor_id);
   // The clock source descriptor's index corresponds to the clock type in our implementation
   enum device_media_clock_type_t source_index;
 
@@ -393,13 +393,13 @@ static void process_aem_cmd_getset_clock_source(avb_1722_1_aecp_packet_t *pkt, u
   {
     if (get_device_media_clock_type(media_clock_id, &source_index))
     {
-      HTON_U16(cmd->clock_source_index, source_index);
+      hton_16(cmd->clock_source_index, source_index);
       return;
     }
   }
   else // AECP_AEM_CMD_SET_CLOCK_SOURCE
   {
-    source_index = NTOH_U16(cmd->clock_source_index);
+    source_index = ntoh_16(cmd->clock_source_index);
 
     if (set_device_media_clock_type(media_clock_id, source_index))
     {
@@ -414,8 +414,8 @@ static void process_aem_cmd_getset_clock_source(avb_1722_1_aecp_packet_t *pkt, u
 static void process_aem_cmd_startstop_streaming(avb_1722_1_aecp_packet_t *pkt, unsigned char *status, unsigned short command_type)
 {
   avb_1722_1_aem_startstop_streaming_t *cmd = (avb_1722_1_aem_startstop_streaming_t *)(pkt->data.aem.command.payload);
-  unsigned short stream_index = NTOH_U16(cmd->descriptor_id);
-  unsigned short desc_type = NTOH_U16(cmd->descriptor_type);
+  unsigned short stream_index = ntoh_16(cmd->descriptor_id);
+  unsigned short desc_type = ntoh_16(cmd->descriptor_type);
 
   if (desc_type == AEM_STREAM_INPUT_TYPE)
   {
@@ -472,8 +472,8 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
         unsigned short desc_type, desc_id;
         avb_1722_1_aem_acquire_entity_command_t *cmd = (avb_1722_1_aem_acquire_entity_command_t *)(pkt->data.aem.command.payload);
 
-        desc_type = NTOH_U16(cmd->descriptor_type);
-        desc_id = NTOH_U16(cmd->descriptor_id);
+        desc_type = ntoh_16(cmd->descriptor_type);
+        desc_id = ntoh_16(cmd->descriptor_id);
 
         if (desc_type != AEM_ENTITY_TYPE || desc_id != 0)
         {
@@ -510,7 +510,7 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
                 // Set a flag to indicate that the current acquisition is pending
                 entity_acquired_status = AEM_ENTITY_ACQUIRED_BUT_PENDING;
 
-                for(int i=0; i < 8; i++) pending_controller_guid.c[i] = pkt->controller_guid[i];
+                memcpy(pending_controller_guid.c, pkt->controller_guid, 8);
 
                 break;
               }
@@ -586,7 +586,7 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
         */
 
         /*
-        if (NTOH_U32(cmd->flags) == 1) // Unlock
+        if (ntoh_32(cmd->flags) == 1) // Unlock
         {
           global_entity_locked = 0;
         }
@@ -611,8 +611,8 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
         unsigned short desc_read_type, desc_read_id;
         int num_tx_bytes;
 
-        desc_read_type = NTOH_U16(aem_msg->command.read_descriptor_cmd.descriptor_type);
-        desc_read_id = NTOH_U16(aem_msg->command.read_descriptor_cmd.descriptor_id);
+        desc_read_type = ntoh_16(aem_msg->command.read_descriptor_cmd.descriptor_type);
+        desc_read_id = ntoh_16(aem_msg->command.read_descriptor_cmd.descriptor_id);
 
         simple_printf("READ_DESCRIPTOR - type: %d, id: %d\n", desc_read_type, desc_read_id);
 
@@ -626,15 +626,15 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
       {
         // Command and response share descriptor_type and descriptor_index
         avb_1722_1_aem_get_avb_info_response_t *cmd = (avb_1722_1_aem_get_avb_info_response_t *)(pkt->data.aem.command.payload);
-        unsigned short desc_id = NTOH_U16(cmd->descriptor_id);
+        unsigned short desc_id = ntoh_16(cmd->descriptor_id);
 
         if (desc_id == 0)
         {
           unsigned int pdelay;
           get_avb_ptp_gm(&cmd->as_grandmaster_id[0]);
           get_avb_ptp_port_pdelay(0, &pdelay);
-          HTON_U32(cmd->propagation_delay, pdelay);
-          HTON_U16(cmd->msrp_mappings_count, 1);
+          hton_32(cmd->propagation_delay, pdelay);
+          hton_16(cmd->msrp_mappings_count, 1);
           cmd->msrp_mappings[0] = AVB_SRP_SRCLASS_DEFAULT;
           cmd->msrp_mappings[1] = AVB_SRP_TSPEC_PRIORITY_DEFAULT;
           cmd->msrp_mappings[2] = (AVB_DEFAULT_VLAN>>8)&0xff;

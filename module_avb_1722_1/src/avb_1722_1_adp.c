@@ -81,7 +81,7 @@ void avb_1722_1_adp_discover(guid_t *guid)
 	{
 		adp_discovery_state = ADP_DISCOVERY_DISCOVER;
 		discover_guid.l = guid->l;
-	}
+	} 
 }
 
 void avb_1722_1_adp_discover_all()
@@ -94,10 +94,7 @@ void avb_1722_1_adp_discover_all()
 void avb_1722_1_adp_change_ptp_grandmaster(unsigned char grandmaster[8])
 {
 	int i;
-	for(i=0; i < 8; i++)
-	{
-		as_grandmaster_id.c[i] = grandmaster[i];
-	}
+	memcpy(as_grandmaster_id.c, grandmaster, 8);
 }
 
 int avb_1722_1_get_latest_new_entity_idx()
@@ -112,7 +109,7 @@ static int avb_1722_1_entity_database_add(avb_1722_1_adp_packet_t* pkt)
 	int i;
 	int entity_update = 0;
 
-	GET_LONG_WORD(guid, pkt->entity_guid);
+	get_64(guid.c, pkt->entity_guid);
 
 	for (i=0; i < AVB_1722_1_MAX_ENTITIES; ++i)
 	{
@@ -129,17 +126,17 @@ static int avb_1722_1_entity_database_add(avb_1722_1_adp_packet_t* pkt)
 	if (found_slot_index != -1)
 	{
 		entities[found_slot_index].guid.l = guid.l;
-		entities[found_slot_index].vendor_id = NTOH_U32(pkt->vendor_id);
-		entities[found_slot_index].entity_model_id = NTOH_U32(pkt->entity_model_id);
-		entities[found_slot_index].capabilities = NTOH_U32(pkt->entity_capabilities);
-		entities[found_slot_index].talker_stream_sources = NTOH_U16(pkt->talker_stream_sources);
-		entities[found_slot_index].talker_capabilities = NTOH_U16(pkt->talker_capabilities);
-		entities[found_slot_index].listener_stream_sinks = NTOH_U16(pkt->listener_stream_sinks);
-		entities[found_slot_index].listener_capabilites = NTOH_U16(pkt->listener_capabilites);
-		entities[found_slot_index].controller_capabilities = NTOH_U32(pkt->controller_capabilities);
-		entities[found_slot_index].available_index = NTOH_U32(pkt->available_index);
-		GET_LONG_WORD(entities[found_slot_index].as_grandmaster_id, pkt->as_grandmaster_id)
-		entities[found_slot_index].association_id = NTOH_U32(pkt->association_id);
+		entities[found_slot_index].vendor_id = ntoh_32(pkt->vendor_id);
+		entities[found_slot_index].entity_model_id = ntoh_32(pkt->entity_model_id);
+		entities[found_slot_index].capabilities = ntoh_32(pkt->entity_capabilities);
+		entities[found_slot_index].talker_stream_sources = ntoh_16(pkt->talker_stream_sources);
+		entities[found_slot_index].talker_capabilities = ntoh_16(pkt->talker_capabilities);
+		entities[found_slot_index].listener_stream_sinks = ntoh_16(pkt->listener_stream_sinks);
+		entities[found_slot_index].listener_capabilites = ntoh_16(pkt->listener_capabilites);
+		entities[found_slot_index].controller_capabilities = ntoh_32(pkt->controller_capabilities);
+		entities[found_slot_index].available_index = ntoh_32(pkt->available_index);
+		get_64(entities[found_slot_index].as_grandmaster_id.c, pkt->as_grandmaster_id);
+		entities[found_slot_index].association_id = ntoh_32(pkt->association_id);
 		entities[found_slot_index].timeout = GET_1722_1_VALID_TIME(&pkt->header) + adp_two_second_counter;
 
 		if (entity_update)
@@ -172,7 +169,7 @@ static void avb_1722_1_entity_database_remove(avb_1722_1_adp_packet_t* pkt)
 {
 	guid_t guid;
 	int i;
-	GET_LONG_WORD(guid, pkt->entity_guid);
+	get_64(guid.c, pkt->entity_guid);
 
 	for (i=0; i < AVB_1722_1_MAX_ENTITIES; ++i)
 	{
@@ -254,21 +251,21 @@ static void avb_1722_1_create_adp_packet(int message_type, guid_t guid)
 	  avb_1722_1_create_1722_1_header(avb_1722_1_adp_dest_addr, DEFAULT_1722_1_ADP_SUBTYPE, message_type,
 			  (message_type==ENTITY_AVAILABLE)?AVB_1722_1_ADP_VALID_TIME:0, AVB_1722_1_ADP_CD_LENGTH, hdr);
 
-	  SET_LONG_WORD(pkt->entity_guid, guid);
+	  set_64(pkt->entity_guid, guid.c);
 
 	  if (message_type != ENTITY_DISCOVER)
 	  {
-		  HTON_U32(pkt->vendor_id, AVB_1722_1_ADP_VENDOR_ID);
-		  HTON_U32(pkt->entity_model_id, AVB_1722_1_ADP_MODEL_ID);
-		  HTON_U32(pkt->entity_capabilities, AVB_1722_1_ADP_ENTITY_CAPABILITIES);
-		  HTON_U16(pkt->talker_stream_sources, AVB_1722_1_ADP_TALKER_STREAM_SOURCES);
-		  HTON_U16(pkt->talker_capabilities, AVB_1722_1_ADP_TALKER_CAPABILITIES);
-		  HTON_U16(pkt->listener_stream_sinks, AVB_1722_1_ADP_LISTENER_STREAM_SINKS);
-		  HTON_U16(pkt->listener_capabilites, AVB_1722_1_ADP_LISTENER_CAPABILITIES);
-		  HTON_U32(pkt->controller_capabilities, AVB_1722_1_ADP_CONTROLLER_CAPABILITIES);
-		  HTON_U32(pkt->available_index, avb_1722_1_available_index);
+		  hton_32(pkt->vendor_id, AVB_1722_1_ADP_VENDOR_ID);
+		  hton_32(pkt->entity_model_id, AVB_1722_1_ADP_MODEL_ID);
+		  hton_32(pkt->entity_capabilities, AVB_1722_1_ADP_ENTITY_CAPABILITIES);
+		  hton_16(pkt->talker_stream_sources, AVB_1722_1_ADP_TALKER_STREAM_SOURCES);
+		  hton_16(pkt->talker_capabilities, AVB_1722_1_ADP_TALKER_CAPABILITIES);
+		  hton_16(pkt->listener_stream_sinks, AVB_1722_1_ADP_LISTENER_STREAM_SINKS);
+		  hton_16(pkt->listener_capabilites, AVB_1722_1_ADP_LISTENER_CAPABILITIES);
+		  hton_32(pkt->controller_capabilities, AVB_1722_1_ADP_CONTROLLER_CAPABILITIES);
+		  hton_32(pkt->available_index, avb_1722_1_available_index);
 		  memcpy(pkt->as_grandmaster_id, as_grandmaster_id.c, 8);
-		  HTON_U32(pkt->association_id, AVB_1722_1_ADP_ASSOCIATION_ID);
+		  hton_32(pkt->association_id, AVB_1722_1_ADP_ASSOCIATION_ID);
 	  }
 }
 

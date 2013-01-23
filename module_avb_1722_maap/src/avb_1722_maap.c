@@ -106,10 +106,7 @@ void avb_1722_maap_init(unsigned char macaddr[6])
 {
   maap_addr.state = MAAP_DISABLED;
 
-  for (int i=0;i<6;i++)
-  {
-    my_mac_addr[i] = macaddr[i];
-  }
+  memcpy(my_mac_addr, macaddr, 6);
 
   randomSimpleSeed((macaddr[3]<<24)+(macaddr[4]<<8)+(macaddr[5]));
   randomSimpleRandomiseSeed();

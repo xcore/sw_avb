@@ -1,4 +1,5 @@
 #include <print.h>
+#include <xclib.h>
 #include "avb_1722_common.h"
 #include "avb_1722_1_common.h"
 
@@ -30,14 +31,11 @@ void print_mac_ln(unsigned char *c)
 
 unsigned compare_guid(unsigned char *a, guid_t *b)
 {
-    return (a[0]==b->c[7] &&
-            a[1]==b->c[6] &&
-            a[2]==b->c[5] &&
-            a[3]==b->c[4] &&
-            a[4]==b->c[3] &&
-            a[5]==b->c[2] &&
-            a[6]==b->c[1] &&
-            a[7]==b->c[0]);
+    for (int i=0; i < 8; i++)
+    {
+        if (a[i] != b->c[7-i]) return 0;
+    }
+    return 1;
 }
 
 int qlog2(unsigned n)

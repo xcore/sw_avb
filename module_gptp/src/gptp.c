@@ -1240,8 +1240,5 @@ void ptp_periodic(chanend c_tx, unsigned t) {
 void ptp_current_grandmaster(char grandmaster[8])
 {
 	int i;
-	for (i = 0; i < 8; i++)
-	{
-		grandmaster[i] = best_announce_msg.grandmasterIdentity.data[i];
-	}
+	memcpy(grandmaster, best_announce_msg.grandmasterIdentity.data, 8);
 }

@@ -138,20 +138,17 @@ static void avb_1722_1_create_acmp_packet(avb_1722_1_acmp_cmd_resp *cr, int mess
 
     avb_1722_1_create_1722_1_header(avb_1722_1_acmp_dest_addr, DEFAULT_1722_1_ACMP_SUBTYPE, message_type, status, AVB_1722_1_ACMP_CD_LENGTH, hdr);
 
-    SET_LONG_WORD(pkt->stream_id, cr->stream_id);
-    SET_LONG_WORD(pkt->controller_guid, cr->controller_guid);
-    SET_LONG_WORD(pkt->listener_guid, cr->listener_guid);
-    SET_LONG_WORD(pkt->talker_guid, cr->talker_guid);
-    HTON_U32(pkt->default_format, cr->default_format);
-    HTON_U16(pkt->talker_unique_id, cr->talker_unique_id);
-    HTON_U16(pkt->listener_unique_id, cr->listener_unique_id);
-    HTON_U16(pkt->connection_count, cr->connection_count);
-    HTON_U16(pkt->sequence_id, cr->sequence_id);
-    HTON_U16(pkt->flags, cr->flags);
-    for (int i=0; i < 6; i++)
-    {
-        pkt->dest_mac[i] = cr->stream_dest_mac[i];
-    }
+    set_64(pkt->stream_id, cr->stream_id.c);
+    set_64(pkt->controller_guid, cr->controller_guid.c);
+    set_64(pkt->listener_guid, cr->listener_guid.c);
+    set_64(pkt->talker_guid, cr->talker_guid.c);
+    hton_32(pkt->default_format, cr->default_format);
+    hton_16(pkt->talker_unique_id, cr->talker_unique_id);
+    hton_16(pkt->listener_unique_id, cr->listener_unique_id);
+    hton_16(pkt->connection_count, cr->connection_count);
+    hton_16(pkt->sequence_id, cr->sequence_id);
+    hton_16(pkt->flags, cr->flags);
+    memcpy(pkt->dest_mac, cr->stream_dest_mac, 6);
 }
 
 static void acmp_progress_inflight_timer(int entity_type)
@@ -333,10 +330,7 @@ static void acmp_set_talker_response()
     int talker = acmp_talker_rcvd_cmd_resp.talker_unique_id;
 
     acmp_talker_rcvd_cmd_resp.stream_id = acmp_talker_streams[talker].stream_id;
-    for (i=0; i < 6; i++)
-    {
-        acmp_talker_rcvd_cmd_resp.stream_dest_mac[i] = acmp_talker_streams[talker].destination_mac[i];
-    }
+    memcpy(acmp_talker_rcvd_cmd_resp.stream_dest_mac, acmp_talker_streams[talker].destination_mac, 6);
 
     acmp_talker_rcvd_cmd_resp.connection_count = acmp_talker_streams[talker].connection_count;
 }
@@ -397,20 +391,17 @@ void avb_1722_1_controller_disconnect_talker(int listener_id, chanend c_tx)
 
 static void store_rcvd_cmd_resp(avb_1722_1_acmp_cmd_resp* store, avb_1722_1_acmp_packet_t* pkt)
 {
-    GET_LONG_WORD(store->stream_id, pkt->stream_id);
-    GET_LONG_WORD(store->controller_guid, pkt->controller_guid);
-    GET_LONG_WORD(store->listener_guid, pkt->listener_guid);
-    GET_LONG_WORD(store->talker_guid, pkt->talker_guid);
-    GET_WORD(store->default_format, pkt->default_format);
-    store->talker_unique_id = NTOH_U16(pkt->talker_unique_id);
-    store->listener_unique_id = NTOH_U16(pkt->listener_unique_id);
-    store->connection_count = NTOH_U16(pkt->connection_count);
-    store->sequence_id = NTOH_U16(pkt->sequence_id);
-    store->flags = NTOH_U16(pkt->flags);
-    for (int i=0; i < 6; i++)
-    {
-        store->stream_dest_mac[i] = pkt->dest_mac[i];
-    }
+    get_64(store->stream_id.c, pkt->stream_id);
+    get_64(store->controller_guid.c, pkt->controller_guid);
+    get_64(store->listener_guid.c, pkt->listener_guid);
+    get_64(store->talker_guid.c, pkt->talker_guid);
+    store->default_format = ntoh_32(pkt->default_format);
+    store->talker_unique_id = ntoh_16(pkt->talker_unique_id);
+    store->listener_unique_id = ntoh_16(pkt->listener_unique_id);
+    store->connection_count = ntoh_16(pkt->connection_count);
+    store->sequence_id = ntoh_16(pkt->sequence_id);
+    store->flags = ntoh_16(pkt->flags);
+    memcpy(store->stream_dest_mac, pkt->dest_mac, 6);
     store->message_type = GET_1722_1_MSG_TYPE(&(pkt->header));
     store->status = GET_1722_1_VALID_TIME(&(pkt->header));
 }
@@ -482,7 +473,7 @@ static avb_1722_1_acmp_status_t acmp_listener_get_state()
     int unique_id = acmp_listener_rcvd_cmd_resp.listener_unique_id;
 
     acmp_listener_rcvd_cmd_resp.stream_id = acmp_listener_streams[unique_id].stream_id;
-    for (i = 0; i < 6; i++) acmp_listener_rcvd_cmd_resp.stream_dest_mac[i] = acmp_listener_streams[unique_id].destination_mac[i];
+    memcpy(acmp_listener_rcvd_cmd_resp.stream_dest_mac, acmp_listener_streams[unique_id].destination_mac, 6);
     acmp_listener_rcvd_cmd_resp.talker_guid = acmp_listener_streams[unique_id].talker_guid;
     acmp_listener_rcvd_cmd_resp.talker_unique_id = acmp_listener_streams[unique_id].talker_unique_id;
 
@@ -497,7 +488,7 @@ static avb_1722_1_acmp_status_t acmp_talker_get_state()
     int unique_id = acmp_talker_rcvd_cmd_resp.talker_unique_id;
 
     acmp_talker_rcvd_cmd_resp.stream_id = acmp_talker_streams[unique_id].stream_id;
-    for (i = 0; i < 6; i++) acmp_talker_rcvd_cmd_resp.stream_dest_mac[i] = acmp_talker_streams[unique_id].destination_mac[i];
+    memcpy(acmp_talker_rcvd_cmd_resp.stream_dest_mac, acmp_talker_streams[unique_id].destination_mac, 6);
     acmp_talker_rcvd_cmd_resp.connection_count = acmp_talker_streams[unique_id].connection_count;
 
     return ACMP_STATUS_SUCCESS;
@@ -516,7 +507,7 @@ static avb_1722_1_acmp_status_t acmp_talker_get_connection()
     }
 
     acmp_talker_rcvd_cmd_resp.stream_id = acmp_talker_streams[unique_id].stream_id;
-    for (i = 0; i < 6; i++) acmp_talker_rcvd_cmd_resp.stream_dest_mac[i] = acmp_talker_streams[unique_id].destination_mac[i];
+    memcpy(acmp_talker_rcvd_cmd_resp.stream_dest_mac, acmp_talker_streams[unique_id].destination_mac, 6);
 
     acmp_talker_rcvd_cmd_resp.listener_guid.l = acmp_talker_streams[unique_id].connected_listeners[connection].guid.l;
     acmp_talker_rcvd_cmd_resp.listener_unique_id = acmp_talker_streams[unique_id].connected_listeners[connection].unique_id;
@@ -599,7 +590,7 @@ static void process_avb_1722_1_acmp_controller_packet(unsigned char message_type
     if (acmp_controller_state != ACMP_CONTROLLER_WAITING) return;
     if (compare_guid(pkt->controller_guid, &my_guid) == 0) return;
 
-    inflight_index = acmp_get_inflight_from_sequence_id(CONTROLLER, NTOH_U16(pkt->sequence_id));
+    inflight_index = acmp_get_inflight_from_sequence_id(CONTROLLER, ntoh_16(pkt->sequence_id));
     if (inflight_index < 0) return; // We don't have an inflight entry for this command
 
     if (message_type != (acmp_controller_inflight_commands[inflight_index].command.message_type + 1)) return;
@@ -1089,10 +1080,7 @@ void avb_1722_1_talker_set_mac_address(unsigned talker_unique_id, unsigned char 
 {
     if (talker_unique_id < AVB_1722_1_MAX_TALKERS)
     {
-        for (unsigned i=0; i<6; i++)
-        {
-            acmp_talker_streams[talker_unique_id].destination_mac[i] = macaddr[i];
-        }
+        memcpy(acmp_talker_streams[talker_unique_id].destination_mac, macaddr, 6);
     }
 }
 

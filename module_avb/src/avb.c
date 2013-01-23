@@ -515,12 +515,10 @@ int getset_avb_source_dest(int set, int source_num, unsigned char dest[], int *d
         *dest_len == 6))) {
     avb_source_info_t *source = &sources[source_num];
     if (set) {
-      for(int i=0;i<6;i++)
-        source->dest[i]=dest[i];
+      memcpy(source->dest, dest, 6);
     }
     *dest_len = 6;
-    for(int i=0;i<6;i++)
-      dest[i]=source->dest[i];
+    memcpy(dest, source->dest, 6);
     return 1;
   }
   else
@@ -644,12 +642,10 @@ int getset_avb_sink_addr(int set, int sink_num, unsigned char addr[], int *addr_
         *addr_len == 6))) {
     avb_sink_info_t *sink = &sinks[sink_num];
     if (set) {
-      for(int i=0;i<6;i++)
-        sink->addr[i]=addr[i];
+      memcpy(sink->addr, addr, 6);
     }
     *addr_len = 6;
-    for(int i=0;i<6;i++)
-      addr[i]=sink->addr[i];
+    memcpy(addr, sink->addr, 6);
     return 1;
   }
   else

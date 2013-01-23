@@ -1,3 +1,5 @@
+#include <xclib.h>
+#include <string.h>
 #include "avb.h"
 #include "avb_conf.h"
 #include "avb_srp.h"
@@ -174,6 +176,8 @@ avb_srp_process_talker(int mrp_attribute_type, char *fv, int num)
     }
   }                   
 
+// Old SRP snooping mechanism
+#if 0 
   if (!registered)
 #ifndef SRP_VERSION_5
     {
@@ -182,6 +186,7 @@ avb_srp_process_talker(int mrp_attribute_type, char *fv, int num)
     }
 #else
     avb_add_detected_stream(pdu_streamId, 2, packet->DestMacAddr, num);
+#endif
 #endif
 
   return;
@@ -266,16 +271,13 @@ static int merge_listener_message(char *buf,
     srp_listener_first_value *first_value = 
       (srp_listener_first_value *) (buf + sizeof(mrp_msg_header) + sizeof(mrp_vector_header));
     unsigned * streamId = sink_info->streamId;
+    unsigned int streamid;
 
     if (num_values == 0) {
-      first_value->StreamId[0] = (unsigned char) (streamId[0] >> 24);
-      first_value->StreamId[1] = (unsigned char) (streamId[0] >> 16);
-      first_value->StreamId[2] = (unsigned char) (streamId[0] >>  8);
-      first_value->StreamId[3] = (unsigned char) (streamId[0] >>  0);
-      first_value->StreamId[4] = (unsigned char) (streamId[1] >> 24);
-      first_value->StreamId[5] = (unsigned char) (streamId[1] >> 16);
-      first_value->StreamId[6] = (unsigned char) (streamId[1] >>  8);
-      first_value->StreamId[7] = (unsigned char) (streamId[1] >>  0);
+      streamid = byterev(streamId[0]);
+      memcpy(&first_value->StreamId[0], &streamid, 4);
+      streamid = byterev(streamId[1]);
+      memcpy(&first_value->StreamId[4], &streamid, 4);
     }
     
     mrp_encode_three_packed_event(buf, vector, st->attribute_type);    
@@ -381,14 +383,14 @@ static int check_talker_merge(char *buf,
     return 0;
 
 
-  vlan = NTOH_U16(first_value->VlanID);
+  vlan = ntoh_16(first_value->VlanID);
   my_vlan = source_info->stream.vlan;
 
   if (vlan != my_vlan)
     return 0;
   
   my_framesize = avb_srp_calculate_max_framesize(source_info);
-  framesize = NTOH_U16(first_value->TSpecMaxFrameSize);  
+  framesize = ntoh_16(first_value->TSpecMaxFrameSize);  
 
   if (framesize != my_framesize)
     return 0;
@@ -431,22 +433,19 @@ static int merge_talker_message(char *buf,
     // The SRP layer
    
     if (num_values == 0) {
+      unsigned int streamid;
       for (int i=0;i<6;i++) {
         first_value->DestMacAddr[i] = source_info->dest[i];
       }
 
-      first_value->StreamId[0] = (unsigned char) (source_info->stream.streamId[0] >>  24);
-      first_value->StreamId[1] = (unsigned char) (source_info->stream.streamId[0] >>  16);
-      first_value->StreamId[2] = (unsigned char) (source_info->stream.streamId[0] >>  8);
-      first_value->StreamId[3] = (unsigned char) (source_info->stream.streamId[0] >>  0);
-      first_value->StreamId[4] = (unsigned char) (source_info->stream.streamId[1] >>  24);
-      first_value->StreamId[5] = (unsigned char) (source_info->stream.streamId[1] >>  16);
-      first_value->StreamId[6] = (unsigned char) (source_info->stream.streamId[1] >>  8);
-      first_value->StreamId[7] = (unsigned char) (source_info->stream.streamId[1] >>  0);
+      streamid = byterev(source_info->stream.streamId[0]);
+      memcpy(&first_value->StreamId[0], &streamid, 4);
+      streamid = byterev(source_info->stream.streamId[1]);
+      memcpy(&first_value->StreamId[4], &streamid, 4);
 
 #ifndef SRP_VERSION_5
       //      printintln(source_info->vlan);
-      HTON_U16(first_value->VlanID, source_info->stream.vlan);
+      hton_16(first_value->VlanID, source_info->stream.vlan);
 #endif
  
 
@@ -456,10 +455,10 @@ static int merge_talker_message(char *buf,
       
       framesize = avb_srp_calculate_max_framesize(source_info);
 
-      HTON_U16(first_value->TSpecMaxFrameSize, framesize);
-      HTON_U16(first_value->TSpecMaxIntervalFrames,
+      hton_16(first_value->TSpecMaxFrameSize, framesize);
+      hton_16(first_value->TSpecMaxIntervalFrames,
                AVB_SRP_MAX_INTERVAL_FRAMES_DEFAULT);
-      HTON_U32(first_value->AccumulatedLatency, 
+      hton_32(first_value->AccumulatedLatency, 
                AVB_SRP_ACCUMULATED_LATENCY_DEFAULT);
     }
 

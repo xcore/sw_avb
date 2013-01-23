@@ -24,10 +24,7 @@ guid_t my_guid;
 
 void avb_1722_1_init(unsigned char macaddr[6])
 {
-    for (int i=0;i<6;i++)
-    {
-        my_mac_addr[i] = macaddr[i];
-    }
+    memcpy(my_mac_addr, macaddr, 6);
 
     my_guid.c[0] = macaddr[5];
     my_guid.c[1] =  macaddr[4];

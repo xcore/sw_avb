@@ -179,3 +179,13 @@ typedef struct
 // Number of transport stream packets to allow in each 61883-4 encapsulation
 #define MAX_TS_PACKETS_PER_1722 4
 #endif
+
+
+short ntoh_16(unsigned char x[2]);
+int ntoh_32(unsigned char x[4]) ;
+void get_64(unsigned char g[8], unsigned char c[8]);
+void set_64(unsigned char g[8], unsigned char c[8]);
+
+void hton_16(unsigned char x[2], unsigned short v);
+
+void hton_32(unsigned char x[4], unsigned short v);

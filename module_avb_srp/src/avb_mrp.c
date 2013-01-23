@@ -34,8 +34,7 @@ static unsigned char mmrp_dest_mac[6] = AVB_MMRP_MACADDR;
 #ifndef AVB_EXCLUDE_MVRP
 static unsigned char mvrp_dest_mac[6] = AVB_MVRP_MACADDR;
 #endif
-static unsigned char srp_proper_dest_mac[6] = AVB_SRP_MACADDR;
-static unsigned char srp_legacy_dest_mac[6] = AVB_SRP_LEGACY_MACADDR;
+static unsigned char srp_dest_mac[6] = AVB_SRP_MACADDR;
 //!@}
 
 //! Buffer for constructing MRPDUs.  Note: It doesn't necessarily have to be this big,
@@ -311,7 +310,7 @@ void mrp_encode_three_packed_event(char *buf,
     send_ptr++;
     *vector = 0;
     attr_list_length++;
-    HTON_U16(hdr->AttributeListLength, attr_list_length);           
+    hton_16(hdr->AttributeListLength, attr_list_length);           
     endmark = buf + sizeof(mrp_msg_header) + attr_list_length - 2;
     *endmark = 0;
     *(endmark+1) = 0;
@@ -351,7 +350,7 @@ void mrp_encode_four_packed_event(char *buf,
     *vector = 0;
     attr_list_length++;
     send_ptr++;
-    HTON_U16(hdr->AttributeListLength, attr_list_length);
+    hton_16(hdr->AttributeListLength, attr_list_length);
     endmark = buf + sizeof(mrp_msg_header) + attr_list_length - 2;
     *endmark = 0;
     *(endmark+1) = 0;
@@ -379,7 +378,7 @@ static void create_empty_msg(mrp_attribute_type attr, int leave_all) {
   // Set the relevant fields
   hdr->AttributeType = encode_attr_type(attr);
   hdr->AttributeLength = first_value_length;
-  HTON_U16(hdr->AttributeListLength, attr_list_length);
+  hton_16(hdr->AttributeListLength, attr_list_length);
   
   vector_hdr->LeaveAllEventNumberOfValuesHigh = leave_all << 5;
   vector_hdr->NumberOfValuesLow = 0;
@@ -979,7 +978,7 @@ void mrp_periodic(void)
 		start_avb_timer(&joinTimer, MRP_JOINTIMER_PERIOD_CENTISECONDS);
 		sort_attrs();
 
-		configure_send_buffer(legacy_mode==1?srp_legacy_dest_mac:srp_proper_dest_mac, AVB_SRP_ETHERTYPE);
+		configure_send_buffer(srp_dest_mac, AVB_SRP_ETHERTYPE);
 		if (leave_all)
     {
 			create_empty_msg(MSRP_TALKER_ADVERTISE, 1);  send(c_tx);
