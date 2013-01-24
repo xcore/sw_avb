@@ -35,7 +35,15 @@ XCC_FLAGS_main.xc = $(XCC_FLAGS) -falways-inline
 # The USED_MODULES variable lists other module used by the application. 
 
 USED_MODULES = module_avb_1722 module_avb_1722_maap module_avb_srp module_avb_media_clock module_avb_audio module_random
-USED_MODULES += module_avb module_avb_util module_gptp module_ethernet module_ethernet_board_support module_i2c_simple module_avb_1722_1
+USED_MODULES += module_avb module_avb_util module_gptp module_ethernet module_ethernet_board_support module_avb_1722_1
+
+ifeq ($(TARGET),XR-AVB-LC-BRD)
+    USED_MODULES += module_i2c_simple
+endif
+
+ifeq ($(TARGET),SLICEKIT-L2)
+    USED_MODULES += module_i2c_single_port
+endif
 
 #=============================================================================
 # The following part of the Makefile includes the common build infrastructure

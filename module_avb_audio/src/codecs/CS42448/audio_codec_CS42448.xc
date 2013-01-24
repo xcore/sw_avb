@@ -42,9 +42,15 @@
 #define CODEC_MUTEC						(0x1b)
 
 
-static unsigned REGWR(unsigned reg, unsigned val, struct r_i2c &r_i2c)
+static unsigned REGWR(unsigned reg, unsigned val,
+                  #if I2C_COMBINE_SCL_SDA
+                     port r_i2c
+                  #else
+                     struct r_i2c &r_i2c
+                  #endif
+                     )
 {
-        unsigned char data[1];
+  unsigned char data[1];
 	data[0] = val;
 
 	return i2c_master_write_reg(DEVICE_ADRS, reg, data, 1, r_i2c);
@@ -53,8 +59,12 @@ static unsigned REGWR(unsigned reg, unsigned val, struct r_i2c &r_i2c)
 static const char error_msg[] = "CS42448 Config Failed";
 
 void audio_codec_CS42448_init(out port p_reset, 
-                              struct r_i2c &r_i2c,
-                              int mode) 
+                           #if I2C_COMBINE_SCL_SDA
+                               port r_i2c
+                           #else
+                               struct r_i2c &r_i2c
+                           #endif
+                              ,int mode) 
 {
    timer t;
    unsigned int time;

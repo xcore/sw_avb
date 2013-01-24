@@ -83,9 +83,6 @@
   * separate PLL and master clock */
 #define AVB_NUM_MEDIA_CLOCKS 1
 
-/** Add sine wave synthesis from channels ``I2S_SYNTH_FROM*2`` upwards in the I2S component */
-#define I2S_SYNTH_FROM 1
-
 /** The maximum sample rate in Hz of audio that is to be input or output */
 #define AVB_MAX_AUDIO_SAMPLE_RATE 96000
 

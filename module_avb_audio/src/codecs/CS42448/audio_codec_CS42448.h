@@ -1,5 +1,6 @@
 #ifndef _audio_codec_CS42448_h_
 #define _audio_codec_CS42448_h_
+#include "avb_conf.h"
 #include "i2c.h"
 #define CODEC_TDM 1
 #define CODEC_I2S 2
@@ -14,8 +15,12 @@
  *                      
  */
 void audio_codec_CS42448_init(out port AUD_RESET_N, 
-                              struct r_i2c &r_i2c,
-	                          int mode);
+                        #if I2C_COMBINE_SCL_SDA
+                              port r_i2c
+                        #else
+                              struct r_i2c &r_i2c
+                        #endif
+	                          ,int mode);
 
 
 

@@ -13,4 +13,12 @@
 #define ETHERNET_MII_INIT_full ETHERNET_DEFAULT_MII_INIT_full
 #define ETHERNET_SMI_INIT ETHERNET_DEFAULT_SMI_INIT
 
+#define PLL_TYPE_CS2300         1
 
+#define I2C_COMBINE_SCL_SDA     0
+
+#define AVB_I2C_TILE            1
+#define AVB_GPIO_TILE           1
+
+/** Add sine wave synthesis from channels ``I2S_SYNTH_FROM*2`` upwards in the I2S component */
+#define I2S_SYNTH_FROM 1
