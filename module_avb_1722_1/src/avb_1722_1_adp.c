@@ -174,10 +174,10 @@ static void avb_1722_1_entity_database_remove(avb_1722_1_adp_packet_t* pkt)
     {
         if (entities[i].guid.l == guid.l)
         {
-            entities[i].guid.l = 0;
 #ifdef AVB_1722_1_ADP_DEBUG_ENTITY_REMOVAL
             printstr("ADP: Removing entity who advertised departing -> GUID "); print_guid_ln(&entities[i].guid);
 #endif
+            entities[i].guid.l = 0;
         }
     }
 }
