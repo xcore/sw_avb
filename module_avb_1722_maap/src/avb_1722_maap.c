@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <xccompat.h>
 #include <print.h>
+#include <string.h>
 #include "avb_conf.h"
 #include "avb_1722_common.h"
 #include "avb_1722_maap.h"

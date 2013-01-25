@@ -40,7 +40,6 @@ void audio_codec_CS4270_init(out port p_codec_reset,
 {
    timer tmr;
    unsigned time;
-   unsigned tmp;
    char data[1]; 
 
    // Bring codec out of reset
