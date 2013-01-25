@@ -326,7 +326,6 @@ static void acmp_send_response(int message_type, avb_1722_1_acmp_cmd_resp *respo
 
 static void acmp_set_talker_response()
 {
-    int i;
     int talker = acmp_talker_rcvd_cmd_resp.talker_unique_id;
 
     acmp_talker_rcvd_cmd_resp.stream_id = acmp_talker_streams[talker].stream_id;
@@ -457,11 +456,10 @@ static void acmp_zero_listener_stream_info(int unique_id)
 
 static void acmp_add_listener_stream_info()
 {
-    int i;
     int unique_id = acmp_listener_rcvd_cmd_resp.listener_unique_id;
 
     acmp_listener_streams[unique_id].connected = 1;
-    for (i = 0; i < 6; i++) acmp_listener_streams[unique_id].destination_mac[i] = acmp_listener_rcvd_cmd_resp.stream_dest_mac[i];
+    memcpy(acmp_listener_streams[unique_id].destination_mac, acmp_listener_rcvd_cmd_resp.stream_dest_mac, 6);
     acmp_listener_streams[unique_id].stream_id = acmp_listener_rcvd_cmd_resp.stream_id;
     acmp_listener_streams[unique_id].talker_guid = acmp_listener_rcvd_cmd_resp.talker_guid;
     acmp_listener_streams[unique_id].talker_unique_id = acmp_listener_rcvd_cmd_resp.talker_unique_id;
@@ -469,7 +467,6 @@ static void acmp_add_listener_stream_info()
 
 static avb_1722_1_acmp_status_t acmp_listener_get_state()
 {
-    int i;
     int unique_id = acmp_listener_rcvd_cmd_resp.listener_unique_id;
 
     acmp_listener_rcvd_cmd_resp.stream_id = acmp_listener_streams[unique_id].stream_id;
@@ -484,7 +481,6 @@ static avb_1722_1_acmp_status_t acmp_listener_get_state()
 
 static avb_1722_1_acmp_status_t acmp_talker_get_state()
 {
-    int i;
     int unique_id = acmp_talker_rcvd_cmd_resp.talker_unique_id;
 
     acmp_talker_rcvd_cmd_resp.stream_id = acmp_talker_streams[unique_id].stream_id;
@@ -496,7 +492,6 @@ static avb_1722_1_acmp_status_t acmp_talker_get_state()
 
 static avb_1722_1_acmp_status_t acmp_talker_get_connection()
 {
-    int i;
     int unique_id = acmp_talker_rcvd_cmd_resp.talker_unique_id;
     unsigned short connection = acmp_talker_rcvd_cmd_resp.connection_count;
 
