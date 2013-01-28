@@ -141,7 +141,7 @@ Audio Component(s)
 ++++++++++++++++++
 
 Each endpoint may have several listener and talker components. Each
-listener/talker component is capable of handling four IEEE P1722
+listener/talker component is capable of handling four IEEE 1722
 streams and up to 12 channels of audio.
 
 .. list-table::

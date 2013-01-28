@@ -9,7 +9,7 @@ An XMOS AVB endpoint can keep track of several media clocks.
 A media clock can be synchronized to one of two sources:
 
  * An incoming clock signal on a port.
- * The word clock of a remote endpoint, derived from an incoming *IEEE P1722* audio stream.
+ * The word clock of a remote endpoint, derived from an incoming *IEEE 1722* audio stream.
 
 A hardware interface can be tied to a particular media
 clock, allowing the media output from the XMOS device to be
@@ -24,7 +24,7 @@ an array passed to the server at startup.
 
 The media clock server component also receives information from the
 audio listener component to track timing information of incoming
-*IEEE P1722* streams. It then sends control information back to
+*IEEE 1722* streams. It then sends control information back to
 ensure the listening component honors the presentation time of the
 incoming stream.
 

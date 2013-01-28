@@ -35,19 +35,19 @@ The 802.1Qat specification is available as a section in the `IEEE 802.1Q-2011 st
 IEC 61883-6
 -----------
 
-*IEC 61883-6* defines an audio data format that is contained in *IEEE P1722* streams. The XMOS AVB solution uses *IEC 61883-6* to convey audio sample streams.
+*IEC 61883-6* defines an audio data format that is contained in *IEEE 1722* streams. The XMOS AVB solution uses *IEC 61883-6* to convey audio sample streams.
 
 The `IEC 61883-6:2005 standard document`_ is available for purchase from the IEC website.
 
 .. _`IEC 61883-6:2005 standard document`: http://webstore.iec.ch/webstore/webstore.nsf/ArtNum_PK/46793
 
 
-IEEE P1722
+IEEE 1722
 ----------
 
-*IEEE P1722* defines an encapsulation protocol to transport audio streams over Ethernet. It is complementary to the AVB standards and in particular allows timestamping of a stream based on the *802.1AS* global clock. 
+*IEEE 1722* defines an encapsulation protocol to transport audio streams over Ethernet. It is complementary to the AVB standards and in particular allows timestamping of a stream based on the *802.1AS* global clock. 
 
-The XMOS AVB solution handles both transmission and receipt of audio streams using *IEEE P1722*. In addition it can use the *802.1AS* timestamps to accurately recover the audio master clock from an input stream.
+The XMOS AVB solution handles both transmission and receipt of audio streams using *IEEE 1722*. In addition it can use the *802.1AS* timestamps to accurately recover the audio master clock from an input stream.
 
 The `IEEE 1722-2011 standard document`_ is available for purchase from the IEEE website.
 

@@ -48,11 +48,11 @@ every application:
  * - module_avb
    - Main AVB code for control and configuration.
  * - module_avb_1722
-   - IEEE P1722 transport (listener and talker functionality).
+   - IEEE 1722 transport (listener and talker functionality).
  * - module_avb_1722_1
    - IEEE P1722.1 AVB control protocol.
  * - module_avb_1722_maap
-   - IEEE P1722 MAAP - Multicast address allocation code.
+   - IEEE 1722 MAAP - Multicast address allocation code.
  * - module_avb_audio
    - Code for media FIFOs and audio hardware interfaces (I2S/TDM etc).
  * - module_avb_media_clock

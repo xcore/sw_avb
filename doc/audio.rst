@@ -58,7 +58,7 @@ Internal Routing, Media FIFOs
    :align: center
 
 
-As described in the previous section, an IEEE P1722 audio stream may
+As described in the previous section, an IEEE 1722 audio stream may
 consist of many channels. These channels need to be routed to
 particular audio I/Os on the endpoint. To achieve maximum flexibility
 the XMOS design uses intermediate media FIFOs to route
@@ -109,9 +109,9 @@ Talker Units
    :align: center
 
 
-A talker unit consists of one logcial core which creates *IEEE P1722* packets and passes the audio samples onto the MAC. Audio
+A talker unit consists of one logcial core which creates *IEEE 1722* packets and passes the audio samples onto the MAC. Audio
 samples are passed to this component via input media FIFOs.
-Samples are pushed into this FIFO from a different task implementing the audio hardware interface. The packetizer task removes the samples and combines them into *IEEE P1722* Ethernet packets to be transmitted via the MAC component. 
+Samples are pushed into this FIFO from a different task implementing the audio hardware interface. The packetizer task removes the samples and combines them into *IEEE 1722* Ethernet packets to be transmitted via the MAC component. 
 
 When the packets are created the timestamps are converted to the time domain of the global clock provided by the PTP component, and a fixed offset is added to the timestamps to provide the *presentation time* of the samples (*i.e* the time at which the sample should be played by a Listener). 
 
@@ -138,9 +138,9 @@ Listener Units
    :align: center
 
 
-A Listener unit takes *IEEE P1722* packets from the MAC
+A Listener unit takes *IEEE 1722* packets from the MAC
 and converts them into a sample stream to be fed into a media FIFOs.
-Each audio Listener component can listen to several *IEEE P1722*
+Each audio Listener component can listen to several *IEEE 1722*
 streams.
 
 A system may have several Listener units. The instantiating of 

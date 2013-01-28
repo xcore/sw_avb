@@ -42,7 +42,7 @@ ethernet stack will be via the main AVB API (see Section
 1722 Packet Routing
 ~~~~~~~~~~~~~~~~~~~
 
-The AVB enabled Ethernet MAC also includes a *IEEE P1722* packet router
+The AVB enabled Ethernet MAC also includes a *IEEE 1722* packet router
 that routes audio packets to the listener components in the system. 
 It controls the routing by stream ID. This requires no configuration
 and is controlled implicitly via the AVB API described in Section 
