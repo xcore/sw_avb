@@ -20,5 +20,4 @@ doc/*/.support/*
 Doxyfile-e
 .DS_Store
 *.pyc
-*.pdf
 *.xmt
