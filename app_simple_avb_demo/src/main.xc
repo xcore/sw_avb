@@ -79,7 +79,6 @@ on tile[0]: in buffered port:32 p_aud_din[AVB_DEMO_NUM_CHANNELS/2] = PORT_SDATA_
 
 #if AVB_XA_SK_AUDIO_SLICE
 on tile[0]: out port p_audio_shared = PORT_AUDIO_SHARED;
-on tile[0]: out port p_spi_disable = PORT_SPI_DISABLE;
 #endif
 
 #if AVB_DEMO_ENABLE_LISTENER
@@ -107,8 +106,6 @@ void audio_hardware_setup(void)
   audio_clock_CS2300CP_init(r_i2c, MASTER_TO_WORDCLOCK_RATIO);
 #endif
 #if AVB_XA_SK_AUDIO_SLICE
-  p_spi_disable <: 0b10000000; // Enable all pins on the triangle slot
-  p_spi_disable <: 0xff;
   audio_codec_CS4270_init(p_audio_shared, 0xff, 0x90, r_i2c);
   audio_codec_CS4270_init(p_audio_shared, 0xff, 0x92, r_i2c);
 #endif

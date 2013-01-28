@@ -42,7 +42,7 @@ ifeq ($(TARGET),XR-AVB-LC-BRD)
 endif
 
 ifeq ($(TARGET),SLICEKIT-L2)
-    USED_MODULES += module_i2c_single_port
+    USED_MODULES += module_i2c_single_port module_slicekit_support
 endif
 
 #=============================================================================
