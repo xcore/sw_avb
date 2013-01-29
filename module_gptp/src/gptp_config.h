@@ -1,7 +1,9 @@
 #ifndef __gptp_config_h__
 #define __gptp_config_h__
 
+#ifdef __avb_conf_h_exists__
 #include "avb_conf.h"
+#endif
 
 #define PTP_VERSION_NUMBER       (2)
 

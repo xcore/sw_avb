@@ -5,7 +5,9 @@
    state machines into one. */
 #include <string.h>
 #include <limits.h>
+#ifdef __avb_conf_h_exists__
 #include "avb_conf.h"
+#endif
 #include "gptp.h"
 #include "gptp_config.h"
 #include "gptp_pdu.h"

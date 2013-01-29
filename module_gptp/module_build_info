@@ -9,7 +9,8 @@
 #
 # You can also set MODULE_XCC_C_FLAGS, MODULE_XCC_XC_FLAGS etc..
 
-MODULE_XCC_C_FLAGS = $(XCC_FLAGS) -Werror=implicit -Os 
-#MODULE_XCC_C_FLAGS += -DGPTP_DEBUG
+OPTIONAL_HEADERS += avb_conf.h
+
+MODULE_XCC_C_FLAGS = $(XCC_FLAGS) -Os 
 
 XCC_FLAGS_gptp_server.xc = $(XCC_FLAGS) -fsubword-select
