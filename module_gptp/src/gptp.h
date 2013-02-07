@@ -64,11 +64,16 @@ enum ptp_server_type {
   PTP_SLAVE_ONLY
 };
 
-typedef enum ptp_state_t {
+typedef enum ptp_port_role_t {
   PTP_MASTER,
   PTP_UNCERTAIN,
-  PTP_SLAVE
-} ptp_state_t;
+  PTP_SLAVE,
+  PTP_DISABLED
+} ptp_port_role_t;
+
+typedef struct ptp_port_info_t {
+  ptp_port_role_t role_state;
+} ptp_port_info_t;
 
 /** This function runs the PTP server. It takes one thread and runs 
     indefinitely
@@ -89,7 +94,7 @@ void ptp_server(chanend mac_rx, chanend mac_tx,
 // Synchronous PTP client functions
 // --------------------------------
 
-ptp_state_t ptp_get_state(chanend ptp_server);
+ptp_port_role_t ptp_get_state(chanend ptp_server);
 
 
 /** Retrieve time information from the ptp server 
@@ -251,8 +256,7 @@ unsigned ptp_mod32_timestamp_to_local(unsigned ts, REFERENCE_PARAM(ptp_time_info
  *
  */
 void ptp_timestamp_offset(REFERENCE_PARAM(ptp_timestamp, ts), int offset);
-                            
-void ptp_set_legacy_mode(chanend c, int mode);
+                          
 
 void ptp_get_current_grandmaster(chanend ptp_server, unsigned char grandmaster[8]);
 

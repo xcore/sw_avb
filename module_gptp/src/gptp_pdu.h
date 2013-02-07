@@ -46,6 +46,7 @@ typedef struct
   n8_t logMessageInterval;
 } ComMessageHdr;
 
+#define PTP_MAXIMUM_PATH_TRACE_TLV 8
 
 // PTP Announce message
 typedef struct
@@ -63,7 +64,7 @@ typedef struct
   n8_t  timeSource;  
   n16_t tlvType;
   n16_t tlvLength;
-  n64_t pathSequence;
+  n64_t pathSequence[PTP_MAXIMUM_PATH_TRACE_TLV];
 } AnnounceMessage;
 
 // PTP Sync & Delay_Req message

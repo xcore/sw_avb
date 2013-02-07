@@ -7,6 +7,8 @@
 
 #define PTP_VERSION_NUMBER       (2)
 
+#define PTP_NUM_PORTS   (2)
+
 #define PTP_LOG_MIN_PDELAY_REQ_INTERVAL            (0)
 #define PTP_LOG_SYNC_INTERVAL                      (-3)
 #define PTP_LOG_ANNOUNCE_INTERVAL (0)

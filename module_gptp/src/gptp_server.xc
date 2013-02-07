@@ -8,12 +8,11 @@
 /* These functions are the workhorse functions for the actual protocol.
    They are implemented in gptp.c  */
 void ptp_init(chanend, chanend, enum ptp_server_type stype);
-void ptp_recv(chanend, unsigned char buf[], unsigned ts);
+void ptp_recv(chanend, unsigned char buf[], unsigned ts, unsigned src_port, unsigned len);
 void ptp_periodic(chanend, unsigned);
-void ptp_server_set_legacy_mode(int legacy_mode);
 void ptp_get_reference_ptp_ts_mod_64(unsigned &hi, unsigned &lo);
 void ptp_current_grandmaster(char grandmaster[8]);
-ptp_state_t ptp_current_state(void);
+ptp_port_role_t ptp_current_state(void);
 
 #define MAX_PTP_MESG_LENGTH 100
 
@@ -46,7 +45,7 @@ void ptp_server_init(chanend c_rx, chanend c_tx,
                      enum ptp_server_type server_type,
                      timer ptp_timer,
                      int &ptp_timeout)
-{                                             
+{
 
   mac_set_custom_filter(c_rx, MAC_FILTER_PTP);
 
@@ -69,7 +68,7 @@ void ptp_recv_and_process_packet(chanend c_rx, chanend c_tx)
                    ts, 
                    src_port, 
                    MAX_PTP_MESG_LENGTH);
-  ptp_recv(c_tx, (buf, unsigned char[]), ts);
+  ptp_recv(c_tx, (buf, unsigned char[]), ts, src_port, len);
 }
 
 static void ptp_give_requested_time_info(chanend c, timer ptp_timer)
@@ -129,12 +128,6 @@ void ptp_process_client_request(chanend c, timer ptp_timer)
       }                        
       break;
     }
-    case PTP_SET_LEGACY_MODE: {
-      int mode;
-      c :> mode;
-      ptp_server_set_legacy_mode(mode);
-      break;            
-    }
     case PTP_GET_GRANDMASTER: {
       char grandmaster[8];
       ptp_current_grandmaster(grandmaster);
@@ -148,7 +141,7 @@ void ptp_process_client_request(chanend c, timer ptp_timer)
       break;
     }
     case PTP_GET_STATE: {
-      ptp_state_t ptp_state = ptp_current_state();
+      ptp_port_role_t ptp_state = ptp_current_state();
       master
       {
         c <: ptp_state;

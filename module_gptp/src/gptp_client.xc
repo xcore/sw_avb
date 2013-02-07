@@ -96,14 +96,6 @@ void ptp_get_time_info_mod64(chanend ?c,
   ptp_get_requested_time_info_mod64(c, info);
 }
 
-
-
-void ptp_set_legacy_mode(chanend c, int mode)
-{
-  send_cmd(c, PTP_SET_LEGACY_MODE);
-  c <: mode;
-}
-
 void ptp_get_current_grandmaster(chanend ptp_server, unsigned char grandmaster[8])
 {
   send_cmd(ptp_server, PTP_GET_GRANDMASTER);
@@ -116,9 +108,9 @@ void ptp_get_current_grandmaster(chanend ptp_server, unsigned char grandmaster[8
   }
 }
 
-ptp_state_t ptp_get_state(chanend ptp_server)
+ptp_port_role_t ptp_get_state(chanend ptp_server)
 {
-  ptp_state_t state;
+  ptp_port_role_t state;
   send_cmd(ptp_server, PTP_GET_STATE);
   slave
   {
