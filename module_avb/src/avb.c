@@ -860,7 +860,6 @@ int get_media_outs(int *a0)
 
 void avb_set_legacy_mode(int mode)
 {
-  ptp_set_legacy_mode(c_ptp, mode);
   avb_mrp_set_legacy_mode(mode);
 }
 
