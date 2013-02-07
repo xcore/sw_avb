@@ -1,4 +1,5 @@
 */.build*/*
+tests/*/.build/*
 */bin/*
 *.o
 *.xe
