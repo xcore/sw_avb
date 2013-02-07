@@ -35,6 +35,7 @@
 #define PTP_TIMESOURCE (0xA0) // internal oscillator
 
 #define PTP_ANNOUNCE_TLV_TYPE (0x8)
+#define PTP_MAXIMUM_PATH_TRACE_TLV (8)
 
 #define PTP_8021AS_DEST_ADDR { 0x01, 0x80, 0xc2, 0x0, 0x0, 0xe }
 

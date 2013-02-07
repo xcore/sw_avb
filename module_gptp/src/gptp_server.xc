@@ -1,6 +1,7 @@
 #include <xs1.h>
 #include "gptp.h"
 #include "gptp_cmd.h"
+#include "gptp_config.h"
 #include "ethernet_rx_client.h"
 #include "mac_filter.h"
 #include "print.h"
@@ -14,7 +15,7 @@ void ptp_get_reference_ptp_ts_mod_64(unsigned &hi, unsigned &lo);
 void ptp_current_grandmaster(char grandmaster[8]);
 ptp_port_role_t ptp_current_state(void);
 
-#define MAX_PTP_MESG_LENGTH 100
+#define MAX_PTP_MESG_LENGTH (100 + (PTP_MAXIMUM_PATH_TRACE_TLV*8))
 
 #define PTP_PERIODIC_TIME (10000)  // 0.1 milliseconds
 

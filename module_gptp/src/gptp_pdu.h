@@ -46,8 +46,6 @@ typedef struct
   n8_t logMessageInterval;
 } ComMessageHdr;
 
-#define PTP_MAXIMUM_PATH_TRACE_TLV 8
-
 // PTP Announce message
 typedef struct
 {
