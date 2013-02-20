@@ -18,6 +18,11 @@
 #include "avb_1722_1_adp.h"
 #include "app_config.h"
 
+
+#if !defined(AVB_DEMO_ENABLE_TALKER)  && !defined(AVB_DEMO_ENABLE_LISTENER)
+#error No define of form AVB_DEMO_ENABLE_TALKER or AVB_DEMO_ENABLE_LISTENER found in app_config.h. Define either or both of them as desired.
+#endif
+
 // This is the number of master clocks in a word clock
 #define MASTER_TO_WORDCLOCK_RATIO 512
 
@@ -114,12 +119,23 @@ void audio_hardware_setup(void)
 int main(void)
 {
   // Ethernet channels
+#if AVB_DEMO_ENABLE_TALKER
   chan c_mac_tx[2 + AVB_DEMO_ENABLE_TALKER];
+#else
+  chan c_mac_tx[2];
+#endif
+#if AVB_DEMO_ENABLE_LISTENER
   chan c_mac_rx[2 + AVB_DEMO_ENABLE_LISTENER];
+#else
+  chan c_mac_rx[2];
+#endif
 
   // PTP channels
+#if AVB_DEMO_ENABLE_TALKER
   chan c_ptp[1 + AVB_DEMO_ENABLE_TALKER];
-
+#else
+  chan c_ptp[1];
+#endif
   // AVB unit control
 #if AVB_DEMO_ENABLE_TALKER
   chan c_talker_ctl[AVB_NUM_TALKER_UNITS];
