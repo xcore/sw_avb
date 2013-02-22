@@ -5,6 +5,7 @@
 #include <platform.h>
 #include <xs1.h>
 #include <xclib.h>
+#include <print.h>
 
 #include "avb_1722_def.h"
 #include "avb_1722.h"
@@ -210,7 +211,8 @@ void avb_1722_talker_send_packets(chanend c_mac_tx,
       st.talker_streams[st.cur_avb_stream].active==2) {
     int packet_size;
     int t;
-    tmr :> t;
+
+    tmr :> t; 
     packet_size =
       avb1722_create_packet((st.TxBuf, unsigned char[]),
                             st.talker_streams[st.cur_avb_stream],
@@ -222,6 +224,7 @@ void avb_1722_talker_send_packets(chanend c_mac_tx,
                                   st.TxBuf,
                                   packet_size,
                                   0);
+      st.talker_streams[st.cur_avb_stream].last_transmit_time = t;
     }
   }
   if (st.max_active_avb_stream != -1) {
@@ -277,7 +280,7 @@ void avb_1722_talker(chanend c_ptp, chanend c_mac_tx,
           break;
 
           // The PTP server has sent new time information
-        case ptp_get_requested_time_info_mod64_use_timer(                                                   c_ptp, timeInfo, tmr):
+        case ptp_get_requested_time_info_mod64_use_timer(c_ptp, timeInfo, tmr):
           pending_timeinfo = 0;
           break;
 
