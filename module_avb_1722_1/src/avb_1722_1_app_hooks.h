@@ -40,8 +40,9 @@ void avb_talker_on_listener_disconnect(int source_num, REFERENCE_PARAM(guid_t, l
  * \param talker_guid       The GUID of the Talker entity that is connecting
  * \param dest_addr         The destination MAC address of the Talker stream
  * \param stream_id         The 64 bit Stream ID of the Talker stream
+ * \param my_guid           The GUID of this entity
  **/
-void avb_listener_on_talker_connect(int sink_num, REFERENCE_PARAM(guid_t, talker_guid), unsigned char dest_addr[6], unsigned int stream_id[2]);
+void avb_listener_on_talker_connect(int sink_num, REFERENCE_PARAM(guid_t, talker_guid), unsigned char dest_addr[6], unsigned int stream_id[2], REFERENCE_PARAM(guid_t, my_guid));
 
 /** A Controller has indicated to disconnect this Listener sink from a Talker stream
  *
@@ -49,8 +50,9 @@ void avb_listener_on_talker_connect(int sink_num, REFERENCE_PARAM(guid_t, talker
  * \param talker_guid       The GUID of the Talker entity that is disconnecting
  * \param dest_addr         The destination MAC address of the Talker stream
  * \param stream_id         The 64 bit Stream ID of the Talker stream
+ * \param my_guid           The GUID of this entity
  **/
-void avb_listener_on_talker_disconnect(int sink_num, REFERENCE_PARAM(guid_t, talker_guid), unsigned char dest_addr[6], unsigned int stream_id[2]);
+void avb_listener_on_talker_disconnect(int sink_num, REFERENCE_PARAM(guid_t, talker_guid), unsigned char dest_addr[6], unsigned int stream_id[2], REFERENCE_PARAM(guid_t, my_guid));
 
 
 #endif

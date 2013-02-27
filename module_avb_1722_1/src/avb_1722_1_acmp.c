@@ -939,7 +939,8 @@ void avb_1722_1_acmp_listener_periodic(chanend c_tx)
                     avb_listener_on_talker_disconnect(acmp_listener_rcvd_cmd_resp.listener_unique_id,
                                             &acmp_listener_rcvd_cmd_resp.talker_guid,
                                             acmp_listener_rcvd_cmd_resp.stream_dest_mac,
-                                            stream_id);
+                                            stream_id,
+                                            &my_guid);
                 }
                 else
                 {
@@ -975,12 +976,14 @@ void avb_1722_1_acmp_listener_periodic(chanend c_tx)
                 avb_listener_on_talker_disconnect(acmp_listener_rcvd_cmd_resp.listener_unique_id,
                                             &acmp_listener_rcvd_cmd_resp.talker_guid,
                                             acmp_listener_rcvd_cmd_resp.stream_dest_mac,
-                                            stream_id);
+                                            stream_id,
+                                            &my_guid);
 
                 avb_listener_on_talker_connect(acmp_listener_rcvd_cmd_resp.listener_unique_id,
                                             &acmp_listener_rcvd_cmd_resp.talker_guid,
                                             acmp_listener_rcvd_cmd_resp.stream_dest_mac,
-                                            stream_id);
+                                            stream_id,
+                                            &my_guid);
 
                 acmp_listener_rcvd_cmd_resp.status = ACMP_STATUS_SUCCESS;
                 acmp_listener_state = ACMP_LISTENER_WAITING;

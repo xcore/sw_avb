@@ -92,7 +92,6 @@ media_input_fifo_t ififos[AVB_NUM_MEDIA_INPUTS];
 
 void xscope_user_init(void)
 {
-  // xscope_register(0, 0, "", 0, "");
   xscope_register_no_probes();
   // Enable XScope printing
   xscope_config_io(XSCOPE_IO_BASIC);
@@ -415,9 +414,9 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl)
       }
 
       // Periodic processing
-      case tmr when timerafter(periodic_timeout) :> void:
+      case tmr when timerafter(periodic_timeout) :> unsigned int time_now:
       {
-        avb_periodic();
+        avb_periodic(time_now);
 
         simple_demo_controller(change_stream, toggle_remote, c_tx);
 
