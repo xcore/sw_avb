@@ -139,8 +139,8 @@ int main(void)
   {
     // AVB - Ethernet
     on tile[1]: avb_ethernet_server(avb_ethernet_ports,
-                                        c_mac_rx, 3,
-                                        c_mac_tx, 3);
+                                        c_mac_rx, 2 + AVB_DEMO_ENABLE_LISTENER,
+                                        c_mac_tx, 2 + AVB_DEMO_ENABLE_TALKER);
 
     on tile[0]: media_clock_server(c_media_clock_ctl,
                                    null,
@@ -154,7 +154,7 @@ int main(void)
                                    c_mac_rx[0],
                                    c_mac_tx[0],
                                    c_ptp,
-                                   2,
+                                   1 + AVB_DEMO_ENABLE_TALKER,
                                    PTP_GRANDMASTER_CAPABLE);
 
 
