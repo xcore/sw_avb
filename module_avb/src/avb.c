@@ -7,6 +7,7 @@
 #include "avb_mvrp.h"
 #include "avb_mrp.h"
 #include "avb_stream.h"
+#include "gptp_config.h"
 #include "avb_control_types.h"
 #include "c_io.h"
 #include "avb_media_clock.h"
@@ -210,13 +211,30 @@ void avb_init(chanend media_ctl[],
   mac_request_status_packets(c_mac_rx);
 }
 
-void avb_periodic(void)
+
+#define timeafter(A, B) ((int)((B) - (A)) < 0)
+
+void avb_periodic(unsigned int time_now)
 {
+  static unsigned int first_time = 1;
+  static int maap_started = 0;
+
 	mrp_periodic();
 #ifdef AVB_ENABLE_1722_1
 	avb_1722_1_periodic(c_mac_tx, c_ptp);
 #endif
 	avb_1722_maap_periodic(c_mac_tx);
+
+  if ((first_time == 1) && (time_now != 1)){
+    first_time = time_now;
+  }
+
+  if ((first_time != 1) && !maap_started && timeafter(time_now, first_time+(RECV_ANNOUNCE_TIMEOUT+ANNOUNCE_PERIOD)))
+  {
+    // Request a multicast addresses for stream transmission
+    avb_1722_maap_request_addresses(AVB_NUM_SOURCES, NULL);
+    maap_started = 1;
+  }
 }
 
 void avb_start(void)
@@ -228,8 +246,6 @@ void avb_start(void)
 #endif
   avb_1722_1_adp_discover_all();
 #endif
-  // Request a multicast addresses for stream transmission
-  avb_1722_maap_request_addresses(AVB_NUM_SOURCES, NULL);
 
   mrp_mad_begin(domain_attr);
   mrp_mad_join(domain_attr, 1);

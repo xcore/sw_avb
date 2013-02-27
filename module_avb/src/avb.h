@@ -85,7 +85,7 @@ void avb_start(void);
  *  from the main control thread at least once each ms.
  * 
  **/
-void avb_periodic(void);
+void avb_periodic(unsigned int time_now);
 
 /** Receives an 802.1Qat SRP packet or an IEEE P1722 MAAP packet.
  *
