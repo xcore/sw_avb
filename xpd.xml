@@ -107,7 +107,8 @@
     <release parenthash = "23a04342fcdf4661aa55ee065cba51fdacc8b52a" version = "5.2.0beta1" githash = "1e91b153f3338ed5fdf2a3100c394c7d789c8839"></release>
     <release parenthash = "064230b2a87dc208ff834a6f91dda3b32e7d47bc" version = "5.2.0beta2" githash = "5e3955c33cfa63e0e496d570a1f729404aaa603d"></release>
     <release parenthash = "eb7d1a3eac58c403335204f2d4b46b4c98d4e994" version = "5.2.0beta3" githash = "34bdd1baeacc7e84cc011dc6977f3bca0790361f"></release>
-    <release parenthash = "b7040a72c734549bf9fd423c20d1d42059da8ba1" version = "5.2.0beta4"></release>
+    <release parenthash = "b7040a72c734549bf9fd423c20d1d42059da8ba1" version = "5.2.0beta4" githash = "2a303380429736a2c254c7523d50219ca898d3fa"></release>
+    <release parenthash = "ced4ad2747e2860c1f349a2556fc3a8d2640600e" version = "5.2.0beta5"></release>
     <subpartnumber>XR-000008-SW</subpartnumber>
     <vendor>XMOS</vendor>
     <xcore_repo>sw_avb.git</xcore_repo>

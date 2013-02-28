@@ -1,7 +1,7 @@
 AVB Software Stack
 ..................
 
-:Latest release: 5.2.0beta4
+:Latest release: 5.2.0beta5
 :Maintainer: ajwlucas
 :Description: AVB software stack
 
