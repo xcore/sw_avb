@@ -71,19 +71,18 @@
         </component>
     </components>
     <dependency repo = "sc_i2c">
-        <githash>576de5f72f10954ce0eed83acb418890ed636bb8</githash>
-        <version>2.1.0rc0</version>
+        <githash>dedfa4dee858af88769705fbae8929c458d7c20b</githash>
     </dependency>
     <dependency repo = "sc_ethernet">
-        <githash>d7c8b93065c52b370622832c8cec1d1dc43b1d62</githash>
+        <githash>c337941276c76588b9f6d11df35fd815a60c9d63</githash>
     </dependency>
     <dependency repo = "sc_otp">
-        <githash>c58cd84295fdbdd72a970417bb4cc54342a9d71c</githash>
+        <githash>062aa923a78bc603b254b2a99b78593ab3a816ec</githash>
         <uri>https://github.com/xcore/sc_otp.git</uri>
-        <version>1.0.0alpha0</version>
+        <version>1.0.0rc0</version>
     </dependency>
     <dependency repo = "sc_util">
-        <githash>3f82b846395c07e8dd32ad9951afc209b6ed7efc</githash>
+        <githash>84c4a06e1d75e12fc0e607a4d60b434e69ed1a71</githash>
         <uri>https://github.com/xcore/sc_util.git</uri>
     </dependency>
     <description>AVB software stack</description>
@@ -107,7 +106,8 @@
     <release parenthash = "38dcca13bc5538a6004565f69650ba51628e1fe0" version = "5.2.0beta0" githash = "2754ccaaa36ec55068132c883cd6e8985bfc4bb1"></release>
     <release parenthash = "23a04342fcdf4661aa55ee065cba51fdacc8b52a" version = "5.2.0beta1" githash = "1e91b153f3338ed5fdf2a3100c394c7d789c8839"></release>
     <release parenthash = "064230b2a87dc208ff834a6f91dda3b32e7d47bc" version = "5.2.0beta2" githash = "5e3955c33cfa63e0e496d570a1f729404aaa603d"></release>
-    <release parenthash = "eb7d1a3eac58c403335204f2d4b46b4c98d4e994" version = "5.2.0beta3"></release>
+    <release parenthash = "eb7d1a3eac58c403335204f2d4b46b4c98d4e994" version = "5.2.0beta3" githash = "34bdd1baeacc7e84cc011dc6977f3bca0790361f"></release>
+    <release parenthash = "b7040a72c734549bf9fd423c20d1d42059da8ba1" version = "5.2.0beta4"></release>
     <subpartnumber>XR-000008-SW</subpartnumber>
     <vendor>XMOS</vendor>
     <xcore_repo>sw_avb.git</xcore_repo>
