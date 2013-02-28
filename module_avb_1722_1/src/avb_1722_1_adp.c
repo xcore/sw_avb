@@ -131,7 +131,7 @@ static int avb_1722_1_entity_database_add(avb_1722_1_adp_packet_t* pkt)
         entities[found_slot_index].talker_stream_sources = ntoh_16(pkt->talker_stream_sources);
         entities[found_slot_index].talker_capabilities = ntoh_16(pkt->talker_capabilities);
         entities[found_slot_index].listener_stream_sinks = ntoh_16(pkt->listener_stream_sinks);
-        entities[found_slot_index].listener_capabilites = ntoh_16(pkt->listener_capabilites);
+        entities[found_slot_index].listener_capabilities = ntoh_16(pkt->listener_capabilities);
         entities[found_slot_index].controller_capabilities = ntoh_32(pkt->controller_capabilities);
         entities[found_slot_index].available_index = ntoh_32(pkt->available_index);
         get_64(entities[found_slot_index].as_grandmaster_id.c, pkt->as_grandmaster_id);
@@ -260,7 +260,7 @@ static void avb_1722_1_create_adp_packet(int message_type, guid_t guid)
         hton_16(pkt->talker_stream_sources, AVB_1722_1_ADP_TALKER_STREAM_SOURCES);
         hton_16(pkt->talker_capabilities, AVB_1722_1_ADP_TALKER_CAPABILITIES);
         hton_16(pkt->listener_stream_sinks, AVB_1722_1_ADP_LISTENER_STREAM_SINKS);
-        hton_16(pkt->listener_capabilites, AVB_1722_1_ADP_LISTENER_CAPABILITIES);
+        hton_16(pkt->listener_capabilities, AVB_1722_1_ADP_LISTENER_CAPABILITIES);
         hton_32(pkt->controller_capabilities, AVB_1722_1_ADP_CONTROLLER_CAPABILITIES);
         hton_32(pkt->available_index, avb_1722_1_available_index);
         memcpy(pkt->as_grandmaster_id, as_grandmaster_id.c, 8);
