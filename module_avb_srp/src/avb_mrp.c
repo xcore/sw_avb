@@ -11,6 +11,7 @@
 #include "ethernet_tx_client.h"
 #include "avb_internal.h"
 #include <string.h>
+#include <print.h>
 
 /** \file avb_mrp.c
  *  \brief the core of the MRP protocols
@@ -886,7 +887,8 @@ static void attribute_type_event(mrp_attribute_type atype, mrp_event e, unsigned
   while (attr != NULL) {
     if (attr->applicant_state != MRP_DISABLED && 
         attr->applicant_state != MRP_UNUSED &&
-        attr->attribute_type == atype)  {
+        attr->attribute_type == atype &&
+        attr->port_num == port_num)  {
       mrp_update_state(e, attr, 0);
     }
     attr = attr->next;
