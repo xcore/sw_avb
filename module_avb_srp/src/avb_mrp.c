@@ -74,6 +74,7 @@ static void configure_send_buffer(unsigned char* addr, short etype) {
   current_etype = etype;
 }
 
+
 unsigned attribute_length_length(mrp_msg_header* hdr)
 {
     return (hdr->AttributeListLength[0]<<8) + hdr->AttributeListLength[1];
@@ -85,20 +86,20 @@ unsigned attribute_length_length(mrp_msg_header* hdr)
 // protocols that do not contain these fields.
 static void strip_attribute_list_length_fields()
 {
-	if (current_etype != AVB_SRP_ETHERTYPE) {
-		char *msg = &send_buf[0]+sizeof(mrp_ethernet_hdr)+sizeof(mrp_header);
-		char *end = send_ptr;
-		while (msg < end && (msg[0]!=0 || msg[1]!=0)) {
-			mrp_msg_header* hdr = (mrp_msg_header*)msg;
-			char* next = (char*)(hdr+1) + attribute_length_length(hdr);
+  if (current_etype != AVB_SRP_ETHERTYPE) {
+    char *msg = &send_buf[0]+sizeof(mrp_ethernet_hdr)+sizeof(mrp_header);
+    char *end = send_ptr;
+    while (msg < end && (msg[0]!=0 || msg[1]!=0)) {
+      mrp_msg_header* hdr = (mrp_msg_header*)msg;
+      char* next = (char*)(hdr+1) + attribute_length_length(hdr);
 
-			for (char* c=(char*)hdr->AttributeListLength; c<end-2; ++c) *c = *(c+2);
+      for (char* c=(char*)hdr->AttributeListLength; c<end-2; ++c) *c = *(c+2);
 
-			end -= 2;
-			msg = next - 2;
-		}
-		send_ptr = end;
-	}
+      end -= 2;
+      msg = next - 2;
+    }
+    send_ptr = end;
+  }
 }
 
 // this forces the sending of the current PDU.  this happens when
@@ -114,7 +115,7 @@ static void force_send(chanend c_tx)
 
   if (ptr != buf+sizeof(mrp_ethernet_hdr)+sizeof(mrp_header)) {
 
-	// Check that the buffer is long enough for a valid ethernet packet
+  // Check that the buffer is long enough for a valid ethernet packet
     char *end = ptr + 4;
     if (end < buf + 64) end = buf + 64;
 
@@ -545,12 +546,12 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
           break;
         }
     case MRP_EVENT_RECEIVE_IN:
-    	switch (st->applicant_state)
-    	{
-    	case MRP_AA:
-    	  st->applicant_state = MRP_QA;
-    	  break;
-    	}
+      switch (st->applicant_state)
+      {
+      case MRP_AA:
+        st->applicant_state = MRP_QA;
+        break;
+      }
     case MRP_EVENT_RECEIVE_JOINMT:
     case MRP_EVENT_RECEIVE_MT:
       switch (st->applicant_state) 
@@ -891,25 +892,25 @@ static void send_join_indication(mrp_attribute_state *st, int new, int four_pack
   switch (st->attribute_type)
   {
   case MSRP_TALKER_ADVERTISE:
-	  avb_srp_talker_join_ind(st, new);
-	  break;
+    avb_srp_talker_join_ind(st, new);
+    break;
   case MSRP_TALKER_FAILED:
-	  break;
+    break;
   case MSRP_LISTENER:
-	  avb_srp_listener_join_ind(st, new, four_packed_event);
-	  break;
+    avb_srp_listener_join_ind(st, new, four_packed_event);
+    break;
   case MSRP_DOMAIN_VECTOR:
-	  avb_srp_domain_join_ind(st, new);
-	  break;
+    avb_srp_domain_join_ind(st, new);
+    break;
 #ifdef AVB_INCLUDE_MMRP
   case MMRP_MAC_VECTOR:
-	  avb_mmrp_mac_vector_join_ind(st, new);
-	  break;
+    avb_mmrp_mac_vector_join_ind(st, new);
+    break;
 #endif
 #ifndef AVB_EXCLUDE_MVRP
   case MVRP_VID_VECTOR:
-	  avb_mvrp_vid_vector_join_ind(st, new);
-	  break;
+    avb_mvrp_vid_vector_join_ind(st, new);
+    break;
 #endif
   }
 }
@@ -919,120 +920,120 @@ static void send_leave_indication(mrp_attribute_state *st, int four_packed_event
   switch (st->attribute_type)
   {
   case MSRP_TALKER_ADVERTISE:
-	  avb_srp_talker_leave_ind(st);
-	  break;
+    avb_srp_talker_leave_ind(st);
+    break;
   case MSRP_TALKER_FAILED:
-	  break;
+    break;
   case MSRP_LISTENER:
-	  avb_srp_listener_leave_ind(st, four_packed_event);
-	  break;
+    avb_srp_listener_leave_ind(st, four_packed_event);
+    break;
   case MSRP_DOMAIN_VECTOR:
-	  avb_srp_domain_leave_ind(st);
-	  break;
+    avb_srp_domain_leave_ind(st);
+    break;
 #ifdef AVB_INCLUDE_MMRP
   case MMRP_MAC_VECTOR:
-	  avb_mmrp_mac_vector_leave_ind(st);
-	  break;
+    avb_mmrp_mac_vector_leave_ind(st);
+    break;
 #endif
 #ifndef AVB_EXCLUDE_MVRP
   case MVRP_VID_VECTOR:
-	  avb_mvrp_vid_vector_leave_ind(st);
-	  break;
+    avb_mvrp_vid_vector_leave_ind(st);
+    break;
 #endif
   }
 }
 
 void mrp_periodic(void)
 {
-	chanend c_tx = avb_control_get_mac_tx();
-	static int leave_all = 0;
+  chanend c_tx = avb_control_get_mac_tx();
+  static int leave_all = 0;
 
-	if (avb_timer_expired(&periodic_timer))
+  if (avb_timer_expired(&periodic_timer))
   {
-	  global_event(MRP_EVENT_PERIODIC);
-	  start_avb_timer(&periodic_timer, MRP_PERIODIC_TIMER_PERIOD_CENTISECONDS / MRP_PERIODIC_TIMER_MULTIPLIER);
-	}
+    global_event(MRP_EVENT_PERIODIC);
+    start_avb_timer(&periodic_timer, MRP_PERIODIC_TIMER_PERIOD_CENTISECONDS / MRP_PERIODIC_TIMER_MULTIPLIER);
+  }
 
 #ifdef MRP_FULL_PARTICIPANT
-	if (avb_timer_expired(&leaveall_timer))
+  if (avb_timer_expired(&leaveall_timer))
   {
-		start_avb_timer(&leaveall_timer, MRP_LEAVEALL_TIMER_PERIOD_CENTISECONDS / MRP_LEAVEALL_TIMER_MULTIPLIER);
-		leave_all = 1;
-		global_event(MRP_EVENT_RECEIVE_LEAVE_ALL);
-	}
+    start_avb_timer(&leaveall_timer, MRP_LEAVEALL_TIMER_PERIOD_CENTISECONDS / MRP_LEAVEALL_TIMER_MULTIPLIER);
+    leave_all = 1;
+    global_event(MRP_EVENT_RECEIVE_LEAVE_ALL);
+  }
 #endif
 
-	if (avb_timer_expired(&joinTimer))
+  if (avb_timer_expired(&joinTimer))
   {
-		mrp_event tx_event = leave_all ? MRP_EVENT_TX_LEAVE_ALL : MRP_EVENT_TX;
-		start_avb_timer(&joinTimer, MRP_JOINTIMER_PERIOD_CENTISECONDS);
-		sort_attrs();
+    mrp_event tx_event = leave_all ? MRP_EVENT_TX_LEAVE_ALL : MRP_EVENT_TX;
+    start_avb_timer(&joinTimer, MRP_JOINTIMER_PERIOD_CENTISECONDS);
+    sort_attrs();
 
-		configure_send_buffer(srp_dest_mac, AVB_SRP_ETHERTYPE);
-		if (leave_all)
+    configure_send_buffer(srp_dest_mac, AVB_SRP_ETHERTYPE);
+    if (leave_all)
     {
-			create_empty_msg(MSRP_TALKER_ADVERTISE, 1);  send(c_tx);
-			create_empty_msg(MSRP_TALKER_FAILED, 1);  send(c_tx);
-			create_empty_msg(MSRP_LISTENER, 1);  send(c_tx);
-			create_empty_msg(MSRP_DOMAIN_VECTOR, 1);  send(c_tx);
-		}
-		attribute_type_event(MSRP_TALKER_ADVERTISE, tx_event);
-		attribute_type_event(MSRP_LISTENER, tx_event);
-		attribute_type_event(MSRP_DOMAIN_VECTOR, tx_event);
-		force_send(c_tx);
+      create_empty_msg(MSRP_TALKER_ADVERTISE, 1);  send(c_tx);
+      create_empty_msg(MSRP_TALKER_FAILED, 1);  send(c_tx);
+      create_empty_msg(MSRP_LISTENER, 1);  send(c_tx);
+      create_empty_msg(MSRP_DOMAIN_VECTOR, 1);  send(c_tx);
+    }
+    attribute_type_event(MSRP_TALKER_ADVERTISE, tx_event);
+    attribute_type_event(MSRP_LISTENER, tx_event);
+    attribute_type_event(MSRP_DOMAIN_VECTOR, tx_event);
+    force_send(c_tx);
 
 #ifdef AVB_INCLUDE_MMRP
-		configure_send_buffer(mmrp_dest_mac,AVB_MMRP_ETHERTYPE);
-		if (leave_all)
+    configure_send_buffer(mmrp_dest_mac,AVB_MMRP_ETHERTYPE);
+    if (leave_all)
     {
-			create_empty_msg(MMRP_MAC_VECTOR, 1); send(c_tx);
-		}
-		attribute_type_event(MMRP_MAC_VECTOR, tx_event);
-		force_send(c_tx);
+      create_empty_msg(MMRP_MAC_VECTOR, 1); send(c_tx);
+    }
+    attribute_type_event(MMRP_MAC_VECTOR, tx_event);
+    force_send(c_tx);
 #endif
 
 #ifndef AVB_EXCLUDE_MVRP
-		configure_send_buffer(mvrp_dest_mac, AVB_MVRP_ETHERTYPE);
-		if (leave_all)
+    configure_send_buffer(mvrp_dest_mac, AVB_MVRP_ETHERTYPE);
+    if (leave_all)
     {
-			create_empty_msg(MVRP_VID_VECTOR, 1); send(c_tx);
-		}
-		attribute_type_event(MVRP_VID_VECTOR, tx_event);
-		force_send(c_tx);
+      create_empty_msg(MVRP_VID_VECTOR, 1); send(c_tx);
+    }
+    attribute_type_event(MVRP_VID_VECTOR, tx_event);
+    force_send(c_tx);
 #endif
 
-		leave_all = 0;
-	}
+    leave_all = 0;
+  }
 
-	for (int j=0;j<MRP_MAX_ATTRS;j++)
+  for (int j=0;j<MRP_MAX_ATTRS;j++)
   {
-		if (attrs[j].pending_indications != 0)
-		{
-			/* 5.2 TODO: Used to fire AVB_SRP_INDICATION here */
-
-			if ((attrs[j].pending_indications & PENDING_JOIN_NEW) != 0)
-      {
-				send_join_indication(&attrs[j], 1, attrs[j].four_vector_parameter);
-			}
-			if ((attrs[j].pending_indications & PENDING_JOIN) != 0)
-      {
-				send_join_indication(&attrs[j], 0, attrs[j].four_vector_parameter);
-			}
-			if ((attrs[j].pending_indications & PENDING_LEAVE) != 0)
-      {
-				send_leave_indication(&attrs[j], attrs[j].four_vector_parameter);
-			}
-			attrs[j].pending_indications = 0;
-			attrs[j].four_vector_parameter = 0;
-		}
-#ifdef MRP_FULL_PARTICIPANT
-		if (avb_timer_expired(&attrs[j].leaveTimer))
+    if (attrs[j].pending_indications != 0)
     {
-			mrp_update_state(MRP_EVENT_LEAVETIMER, &attrs[j], 0);
-		}
+      /* 5.2 TODO: Used to fire AVB_SRP_INDICATION here */
+
+      if ((attrs[j].pending_indications & PENDING_JOIN_NEW) != 0)
+      {
+        send_join_indication(&attrs[j], 1, attrs[j].four_vector_parameter);
+      }
+      if ((attrs[j].pending_indications & PENDING_JOIN) != 0)
+      {
+        send_join_indication(&attrs[j], 0, attrs[j].four_vector_parameter);
+      }
+      if ((attrs[j].pending_indications & PENDING_LEAVE) != 0)
+      {
+        send_leave_indication(&attrs[j], attrs[j].four_vector_parameter);
+      }
+      attrs[j].pending_indications = 0;
+      attrs[j].four_vector_parameter = 0;
+    }
+#ifdef MRP_FULL_PARTICIPANT
+    if (avb_timer_expired(&attrs[j].leaveTimer))
+    {
+      mrp_update_state(MRP_EVENT_LEAVETIMER, &attrs[j], 0);
+    }
 #endif
-	}
-	return;
+  }
+  return;
 }
 
 
@@ -1108,7 +1109,7 @@ static int msg_match(mrp_attribute_type attr_type,
     return avb_mvrp_match_vid_vector(attr, msg, i);
 #endif
   default:
-	return 0;
+  return 0;
   }
   return 0;
 }
@@ -1125,7 +1126,7 @@ static void process(mrp_attribute_type attr_type,
     avb_srp_process_talker(attr_type, msg, i);
     return;
   default:
-	return;
+  return;
   }
   return;
 
@@ -1190,24 +1191,24 @@ void avb_mrp_process_packet(unsigned char buf[], int etype, int len)
       for (int i=0;i<numvalues;i++)
       {
 
-      	// Get the three packed data out of the vector
-      	int three_packed_event = decode_threepacked(*(first_value + first_value_len + i/3), i%3);
+        // Get the three packed data out of the vector
+        int three_packed_event = decode_threepacked(*(first_value + first_value_len + i/3), i%3);
 
-      	// Get the four packed data out of the vector
-      	int four_packed_event = has_fourpacked_events(attr_type) ?
-      		decode_fourpacked(*(first_value + first_value_len + threepacked_len + i/4),i%4) : 0;
+        // Get the four packed data out of the vector
+        int four_packed_event = has_fourpacked_events(attr_type) ?
+          decode_fourpacked(*(first_value + first_value_len + threepacked_len + i/4),i%4) : 0;
 
-      	// This allows various modules to snoop on the individual message
-      	process(attr_type, first_value, i, three_packed_event, four_packed_event);
+        // This allows various modules to snoop on the individual message
+        process(attr_type, first_value, i, three_packed_event, four_packed_event);
 
-      	// This allows the application state machines to respond to the message
-      	for (int j=0;j<MRP_MAX_ATTRS;j++)
+        // This allows the application state machines to respond to the message
+        for (int j=0;j<MRP_MAX_ATTRS;j++)
         {
-      		if (msg_match(attr_type, &attrs[j], first_value, i, three_packed_event, four_packed_event))
+          if (msg_match(attr_type, &attrs[j], first_value, i, three_packed_event, four_packed_event))
           {
-      			mrp_in(three_packed_event, four_packed_event, &attrs[j]);
-      		}
-      	}
+            mrp_in(three_packed_event, four_packed_event, &attrs[j]);
+          }
+        }
       }
       msg = msg + len;
     }
