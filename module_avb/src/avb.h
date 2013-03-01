@@ -71,6 +71,8 @@ void avb_init(chanend media_ctl[],
               chanend c_ptp);
 #endif
 
+void avb_init_srp_only(chanend c_mac_rx, chanend c_mac_tx);
+
 
 /** Start any AVB protocol state machines.
  * 
@@ -104,7 +106,8 @@ void avb_periodic(void);
 #endif
 void avb_get_control_packet(chanend c_rx,
                             unsigned int buf[],
-                            REFERENCE_PARAM(unsigned int, nbytes));
+                            REFERENCE_PARAM(unsigned int, nbytes),
+                            REFERENCE_PARAM(unsigned int, port_num));
 
 
 
@@ -119,10 +122,12 @@ void avb_get_control_packet(chanend c_rx,
    \param buf the incoming message buffer
    \param len the length (in bytes) of the incoming buffer
    \param c_tx           chanend connected to the ethernet mac (TX)
+   \param port_num the id of the Ethernet interface the packet was received
           
  **/
 void avb_process_control_packet(unsigned int buf[], int len,
-                               chanend c_tx);
+                               chanend c_tx,
+                               unsigned int port_num);
 
 
 /**

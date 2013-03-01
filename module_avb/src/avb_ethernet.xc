@@ -19,7 +19,7 @@ void avb_ethernet_server(avb_ethernet_ports_t &ports,
 
 #endif
 
-#if (NUM_ETHERNET_PORTS == 2)
+#if (NUM_ETHERNET_PORTS == 2) && (NUM_ETHERNET_SLAVE_PORTS == 1)
 
 void avb_ethernet_server_with_phy_mode_port(avb_ethernet_ports_t &avb_port,
                                             mii_slave_interface_full_t &phy_mode_port, 

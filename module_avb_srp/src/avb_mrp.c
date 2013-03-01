@@ -57,9 +57,9 @@ static int current_etype = 0;
 
 //!@{
 //! \name Timers for the MRP state machines
-static avb_timer periodic_timer;
-static avb_timer joinTimer;
-static avb_timer leaveall_timer;
+static avb_timer periodic_timer[MRP_NUM_PORTS];
+static avb_timer joinTimer[MRP_NUM_PORTS];
+static avb_timer leaveall_timer[MRP_NUM_PORTS];
 //!@}
 
 
@@ -105,7 +105,7 @@ static void strip_attribute_list_length_fields()
 // this forces the sending of the current PDU.  this happens when
 // that PDU has had all of the attributes that it is going to get,
 // or when adding an attribute has filled the PDU up.
-static void force_send(chanend c_tx)
+static void force_send(chanend c_tx, int ifnum)
 {
   char *buf = &send_buf[0];
   char *ptr = send_ptr;
@@ -123,7 +123,7 @@ static void force_send(chanend c_tx)
     for (char *p = ptr;p<end;p++) *p = 0;
 
     // Transmit
-    mac_tx(c_tx, (unsigned int *) buf, end - buf, 0);
+    mac_tx(c_tx, (unsigned int *) buf, end - buf, ifnum);
   }
   send_ptr = buf+sizeof(mrp_ethernet_hdr)+sizeof(mrp_header);
   return;
@@ -132,11 +132,11 @@ static void force_send(chanend c_tx)
 // this considers whether the send a PDU after an attribute has been
 // added, but does not if other attributes could potentially be added
 // to it.
-static void send(chanend c_tx)
+static void send(chanend c_tx, int ifnum)
 {
   // Send only when the buffer is full
   if (send_buf + MRP_SEND_BUFFER_SIZE < send_ptr + MAX_MRP_MSG_SIZE + sizeof(mrp_footer)) {
-    force_send(c_tx);
+    force_send(c_tx, ifnum);
   }
 }
 
@@ -425,7 +425,7 @@ static void doTx(mrp_attribute_state *st,
     (void) merge_msg(msg, st, vector);
   }
 
-  send(c_tx);
+  send(c_tx, st->port_num);
 }
 
 static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_packed_event)
@@ -694,10 +694,12 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
 
 void mrp_attribute_init(mrp_attribute_state *st,
                         mrp_attribute_type t,
+                        unsigned int port_num,
                         void *info)
 {
   st->attribute_type = t;
   st->attribute_info = info;
+  st->port_num = port_num;
   return;
 }
 
@@ -740,17 +742,20 @@ void mrp_init(char *macaddr)
   }
   first_attr = &attrs[0];
 
-  init_avb_timer(&periodic_timer, MRP_PERIODIC_TIMER_MULTIPLIER);
-  start_avb_timer(&periodic_timer, MRP_PERIODIC_TIMER_PERIOD_CENTISECONDS / MRP_PERIODIC_TIMER_MULTIPLIER);
+  for (int i=0; i < MRP_NUM_PORTS; i++)
+  {
+    init_avb_timer(&periodic_timer[i], MRP_PERIODIC_TIMER_MULTIPLIER);
+    start_avb_timer(&periodic_timer[i], MRP_PERIODIC_TIMER_PERIOD_CENTISECONDS / MRP_PERIODIC_TIMER_MULTIPLIER);
 
-  init_avb_timer(&joinTimer, 1);
-  start_avb_timer(&joinTimer, MRP_JOINTIMER_PERIOD_CENTISECONDS);
+    init_avb_timer(&joinTimer[i], 1);
+    start_avb_timer(&joinTimer[i], MRP_JOINTIMER_PERIOD_CENTISECONDS);
 
 
-#ifdef MRP_FULL_PARTICIPANT
-  init_avb_timer(&leaveall_timer, MRP_LEAVEALL_TIMER_MULTIPLIER);
-  start_avb_timer(&leaveall_timer, MRP_LEAVEALL_TIMER_PERIOD_CENTISECONDS / MRP_LEAVEALL_TIMER_MULTIPLIER);
-#endif
+  #ifdef MRP_FULL_PARTICIPANT
+    init_avb_timer(&leaveall_timer[i], MRP_LEAVEALL_TIMER_MULTIPLIER);
+    start_avb_timer(&leaveall_timer[i], MRP_LEAVEALL_TIMER_PERIOD_CENTISECONDS / MRP_LEAVEALL_TIMER_MULTIPLIER);
+  #endif
+  }
 
 }
 
@@ -804,6 +809,7 @@ mrp_attribute_state *mrp_get_attr(void)
       return &attrs[i];
     }
   }
+  __builtin_trap();
   return NULL;
 }
 
@@ -875,11 +881,11 @@ static void global_event(mrp_event e) {
   
 }
 
-static void attribute_type_event(mrp_attribute_type atype, mrp_event e) {
+static void attribute_type_event(mrp_attribute_type atype, mrp_event e, unsigned int port_num) {
   mrp_attribute_state *attr = first_attr;
   while (attr != NULL) {
     if (attr->applicant_state != MRP_DISABLED && 
-        attr->applicant_state != MRP_UNUSED && 
+        attr->applicant_state != MRP_UNUSED &&
         attr->attribute_type == atype)  {
       mrp_update_state(e, attr, 0);
     }
@@ -943,95 +949,99 @@ static void send_leave_indication(mrp_attribute_state *st, int four_packed_event
   }
 }
 
+static int leave_all[MRP_NUM_PORTS];
+
 void mrp_periodic(void)
 {
   chanend c_tx = avb_control_get_mac_tx();
-  static int leave_all = 0;
 
-  if (avb_timer_expired(&periodic_timer))
+  for (int i=0; i < MRP_NUM_PORTS; i++)
   {
-    global_event(MRP_EVENT_PERIODIC);
-    start_avb_timer(&periodic_timer, MRP_PERIODIC_TIMER_PERIOD_CENTISECONDS / MRP_PERIODIC_TIMER_MULTIPLIER);
-  }
-
-#ifdef MRP_FULL_PARTICIPANT
-  if (avb_timer_expired(&leaveall_timer))
-  {
-    start_avb_timer(&leaveall_timer, MRP_LEAVEALL_TIMER_PERIOD_CENTISECONDS / MRP_LEAVEALL_TIMER_MULTIPLIER);
-    leave_all = 1;
-    global_event(MRP_EVENT_RECEIVE_LEAVE_ALL);
-  }
-#endif
-
-  if (avb_timer_expired(&joinTimer))
-  {
-    mrp_event tx_event = leave_all ? MRP_EVENT_TX_LEAVE_ALL : MRP_EVENT_TX;
-    start_avb_timer(&joinTimer, MRP_JOINTIMER_PERIOD_CENTISECONDS);
-    sort_attrs();
-
-    configure_send_buffer(srp_dest_mac, AVB_SRP_ETHERTYPE);
-    if (leave_all)
+    if (avb_timer_expired(&periodic_timer[i]))
     {
-      create_empty_msg(MSRP_TALKER_ADVERTISE, 1);  send(c_tx);
-      create_empty_msg(MSRP_TALKER_FAILED, 1);  send(c_tx);
-      create_empty_msg(MSRP_LISTENER, 1);  send(c_tx);
-      create_empty_msg(MSRP_DOMAIN_VECTOR, 1);  send(c_tx);
+      global_event(MRP_EVENT_PERIODIC);
+      start_avb_timer(&periodic_timer[i], MRP_PERIODIC_TIMER_PERIOD_CENTISECONDS / MRP_PERIODIC_TIMER_MULTIPLIER);
     }
-    attribute_type_event(MSRP_TALKER_ADVERTISE, tx_event);
-    attribute_type_event(MSRP_LISTENER, tx_event);
-    attribute_type_event(MSRP_DOMAIN_VECTOR, tx_event);
-    force_send(c_tx);
 
-#ifdef AVB_INCLUDE_MMRP
-    configure_send_buffer(mmrp_dest_mac,AVB_MMRP_ETHERTYPE);
-    if (leave_all)
+  #ifdef MRP_FULL_PARTICIPANT
+    if (avb_timer_expired(&leaveall_timer[i]))
     {
-      create_empty_msg(MMRP_MAC_VECTOR, 1); send(c_tx);
+      start_avb_timer(&leaveall_timer[i], MRP_LEAVEALL_TIMER_PERIOD_CENTISECONDS / MRP_LEAVEALL_TIMER_MULTIPLIER);
+      leave_all[i] = 1;
+      global_event(MRP_EVENT_RECEIVE_LEAVE_ALL);
     }
-    attribute_type_event(MMRP_MAC_VECTOR, tx_event);
-    force_send(c_tx);
-#endif
+  #endif
 
-#ifndef AVB_EXCLUDE_MVRP
-    configure_send_buffer(mvrp_dest_mac, AVB_MVRP_ETHERTYPE);
-    if (leave_all)
+    if (avb_timer_expired(&joinTimer[i]))
     {
-      create_empty_msg(MVRP_VID_VECTOR, 1); send(c_tx);
-    }
-    attribute_type_event(MVRP_VID_VECTOR, tx_event);
-    force_send(c_tx);
-#endif
+      mrp_event tx_event = leave_all[i] ? MRP_EVENT_TX_LEAVE_ALL : MRP_EVENT_TX;
+      start_avb_timer(&joinTimer[i], MRP_JOINTIMER_PERIOD_CENTISECONDS);
+      sort_attrs();
 
-    leave_all = 0;
-  }
-
-  for (int j=0;j<MRP_MAX_ATTRS;j++)
-  {
-    if (attrs[j].pending_indications != 0)
-    {
-      /* 5.2 TODO: Used to fire AVB_SRP_INDICATION here */
-
-      if ((attrs[j].pending_indications & PENDING_JOIN_NEW) != 0)
+      configure_send_buffer(srp_dest_mac, AVB_SRP_ETHERTYPE);
+      if (leave_all[i])
       {
-        send_join_indication(&attrs[j], 1, attrs[j].four_vector_parameter);
+        create_empty_msg(MSRP_TALKER_ADVERTISE, 1);  send(c_tx, i);
+        create_empty_msg(MSRP_TALKER_FAILED, 1);  send(c_tx, i);
+        create_empty_msg(MSRP_LISTENER, 1);  send(c_tx, i);
+        create_empty_msg(MSRP_DOMAIN_VECTOR, 1);  send(c_tx, i);
       }
-      if ((attrs[j].pending_indications & PENDING_JOIN) != 0)
+      attribute_type_event(MSRP_TALKER_ADVERTISE, tx_event, i);
+      attribute_type_event(MSRP_LISTENER, tx_event, i);
+      attribute_type_event(MSRP_DOMAIN_VECTOR, tx_event, i);
+      force_send(c_tx, i);
+
+  #ifdef AVB_INCLUDE_MMRP
+      configure_send_buffer(mmrp_dest_mac,AVB_MMRP_ETHERTYPE);
+      if (leave_all[i])
       {
-        send_join_indication(&attrs[j], 0, attrs[j].four_vector_parameter);
+        create_empty_msg(MMRP_MAC_VECTOR, 1); send(c_tx, i);
       }
-      if ((attrs[j].pending_indications & PENDING_LEAVE) != 0)
+      attribute_type_event(MMRP_MAC_VECTOR, tx_event, i);
+      force_send(c_tx, i);
+  #endif
+
+  #ifndef AVB_EXCLUDE_MVRP
+      configure_send_buffer(mvrp_dest_mac, AVB_MVRP_ETHERTYPE);
+      if (leave_all[i])
       {
-        send_leave_indication(&attrs[j], attrs[j].four_vector_parameter);
+        create_empty_msg(MVRP_VID_VECTOR, 1); send(c_tx, i);
       }
-      attrs[j].pending_indications = 0;
-      attrs[j].four_vector_parameter = 0;
+      attribute_type_event(MVRP_VID_VECTOR, tx_event, i);
+      force_send(c_tx, i);
+  #endif
+
+      leave_all[i] = 0;
     }
-#ifdef MRP_FULL_PARTICIPANT
-    if (avb_timer_expired(&attrs[j].leaveTimer))
+
+    for (int j=0;j<MRP_MAX_ATTRS;j++)
     {
-      mrp_update_state(MRP_EVENT_LEAVETIMER, &attrs[j], 0);
+      if (attrs[j].pending_indications != 0)
+      {
+        /* 5.2 TODO: Used to fire AVB_SRP_INDICATION here */
+
+        if ((attrs[j].pending_indications & PENDING_JOIN_NEW) != 0)
+        {
+          send_join_indication(&attrs[j], 1, attrs[j].four_vector_parameter);
+        }
+        if ((attrs[j].pending_indications & PENDING_JOIN) != 0)
+        {
+          send_join_indication(&attrs[j], 0, attrs[j].four_vector_parameter);
+        }
+        if ((attrs[j].pending_indications & PENDING_LEAVE) != 0)
+        {
+          send_leave_indication(&attrs[j], attrs[j].four_vector_parameter);
+        }
+        attrs[j].pending_indications = 0;
+        attrs[j].four_vector_parameter = 0;
+      }
+  #ifdef MRP_FULL_PARTICIPANT
+      if (avb_timer_expired(&attrs[j].leaveTimer))
+      {
+        mrp_update_state(MRP_EVENT_LEAVETIMER, &attrs[j], 0);
+      }
+  #endif
     }
-#endif
   }
   return;
 }
@@ -1150,7 +1160,7 @@ static int decode_fourpacked(int vector, int i)
 
                     
 
-void avb_mrp_process_packet(unsigned char buf[], int etype, int len)
+void avb_mrp_process_packet(unsigned char buf[], int etype, int len, unsigned int port_num)
 {
   char *end = (char *) &buf[0] + len;
   char *msg = (char *) &buf[0] + sizeof(mrp_header);
@@ -1185,7 +1195,7 @@ void avb_mrp_process_packet(unsigned char buf[], int etype, int len)
 
       if (leave_all)
       {
-        attribute_type_event(attr_type, MRP_EVENT_RECEIVE_LEAVE_ALL);
+        attribute_type_event(attr_type, MRP_EVENT_RECEIVE_LEAVE_ALL, port_num);
       }
       
       for (int i=0;i<numvalues;i++)

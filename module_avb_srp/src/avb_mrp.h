@@ -128,6 +128,7 @@ typedef enum {
 
 
 typedef struct mrp_attribute_state {
+  unsigned int port_num;
   unsigned char attribute_type;
   unsigned char applicant_state;
 
@@ -171,9 +172,10 @@ void mrp_init(char macaddr[]);
 /** Function: mrp_attribute_init
 
    This function initializes the state of an MRP attribute.
-
+  
    \param st the attribute state structure to intialize
    \param t the type of the attribute
+   \param port_num the id number of the Ethernet port to associate the attribute with
    \param info a void * pointer that will be associated with the attribute.
                This pointer is passed on to attribute specific functions
                (e.g. functions to send particulars PDUs)
@@ -182,6 +184,7 @@ void mrp_init(char macaddr[]);
 */
 void mrp_attribute_init(mrp_attribute_state *st,
                         mrp_attribute_type t,
+                        unsigned int port_num,
                         void *info);
 
 
@@ -245,7 +248,7 @@ void mrp_encode_four_packed_event(char *buf,
 mrp_attribute_state *mrp_get_attr(void);
 #endif
 
-void avb_mrp_process_packet(unsigned char buf[], int etype, int len);
+void avb_mrp_process_packet(unsigned char buf[], int etype, int len, unsigned int port_num);
 
 void avb_mrp_set_legacy_mode(int mode);
 

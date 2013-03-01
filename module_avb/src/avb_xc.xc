@@ -4,13 +4,13 @@
 
 void avb_get_control_packet(chanend c_rx, 
                             unsigned int buf[],
-                            unsigned int &nbytes)
+                            unsigned int &nbytes,
+                            unsigned int &port_num)
 {
-  unsigned int src_port;
   safe_mac_rx(c_rx, 
               (buf, unsigned char[]), 
               nbytes,
-              src_port,                       
+              port_num,                       
               MAX_AVB_CONTROL_PACKET_SIZE);
 }
 

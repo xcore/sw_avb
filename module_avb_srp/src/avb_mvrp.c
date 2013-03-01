@@ -24,7 +24,8 @@ void avb_mvrp_init(void)
   for (int i=0;i<AVB_MAX_NUM_VLAN;i++) {
     entries[i].active = 0;
     entries[i].attr = mrp_get_attr();
-    mrp_attribute_init(entries[i].attr, MVRP_VID_VECTOR, &entries[i].vlan);
+    // TODO: 2 port MVRP
+    mrp_attribute_init(entries[i].attr, MVRP_VID_VECTOR, 0, &entries[i].vlan);
   }
 }
 

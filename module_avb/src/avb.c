@@ -20,7 +20,7 @@
 #include "avb_1722_maap.h"
 #include "nettypes.h"
 
-#ifdef AVB_ENABLE_1722_1
+#if AVB_ENABLE_1722_1
 #include "avb_1722_1.h"
 #include "avb_1722_1_adp.h"
 #endif
@@ -58,7 +58,7 @@ static chanend c_mac_tx;
 static chanend c_mac_rx;
 static chanend c_ptp;
 
-static mrp_attribute_state *domain_attr;
+static mrp_attribute_state *domain_attr[MRP_NUM_PORTS];
 
 static void register_talkers(chanend talker_ctl[])
 {
@@ -79,9 +79,9 @@ static void register_talkers(chanend talker_ctl[])
       source->stream.srp_talker_attr = mrp_get_attr();
       source->stream.srp_talker_failed_attr = mrp_get_attr();
       source->stream.srp_listener_attr = mrp_get_attr();
-      mrp_attribute_init(source->stream.srp_talker_attr, MSRP_TALKER_ADVERTISE, source);
-      mrp_attribute_init(source->stream.srp_talker_failed_attr, MSRP_TALKER_FAILED, source);
-      mrp_attribute_init(source->stream.srp_listener_attr, MSRP_LISTENER, source);
+      mrp_attribute_init(source->stream.srp_talker_attr, MSRP_TALKER_ADVERTISE, 0, source);
+      mrp_attribute_init(source->stream.srp_talker_failed_attr, MSRP_TALKER_FAILED, 0, source);
+      mrp_attribute_init(source->stream.srp_listener_attr, MSRP_LISTENER, 0, source);
       max_talker_stream_id++;
     }
   }
@@ -108,9 +108,9 @@ static void register_listeners(chanend listener_ctl[])
       sink->stream.srp_talker_attr = mrp_get_attr();
       sink->stream.srp_talker_failed_attr = mrp_get_attr();
       sink->stream.srp_listener_attr = mrp_get_attr();
-      mrp_attribute_init(sink->stream.srp_talker_attr, MSRP_TALKER_ADVERTISE, sink);
-      mrp_attribute_init(sink->stream.srp_talker_failed_attr, MSRP_TALKER_FAILED, sink);
-      mrp_attribute_init(sink->stream.srp_listener_attr, MSRP_LISTENER, sink);
+      mrp_attribute_init(sink->stream.srp_talker_attr, MSRP_TALKER_ADVERTISE, 0, sink);
+      mrp_attribute_init(sink->stream.srp_talker_failed_attr, MSRP_TALKER_FAILED, 0, sink);
+      mrp_attribute_init(sink->stream.srp_listener_attr, MSRP_LISTENER, 0, sink);
       max_listener_stream_id++;
     }
     xc_abi_outuint(listener_ctl[i], max_link_id);
@@ -193,8 +193,11 @@ void avb_init(chanend media_ctl[],
   c_mac_tx = c_mac_tx0;
   c_ptp = c_ptp0;
 
-  domain_attr = mrp_get_attr();
-  mrp_attribute_init(domain_attr, MSRP_DOMAIN_VECTOR, NULL);
+  for(int i=0; i < MRP_NUM_PORTS; i++)
+  {
+    domain_attr[i] = mrp_get_attr();
+    mrp_attribute_init(domain_attr[i], MSRP_DOMAIN_VECTOR, i, NULL);
+  }
 
 #ifdef AVB_INCLUDE_MMRP
   avb_mmrp_init();
@@ -210,10 +213,29 @@ void avb_init(chanend media_ctl[],
   mac_request_status_packets(c_mac_rx);
 }
 
+void avb_init_srp_only(chanend c_mac_rx0,
+                       chanend c_mac_tx0)
+{
+  mac_get_macaddr(c_mac_tx0, mac_addr);
+  mrp_init((char *)mac_addr);
+
+  c_mac_rx = c_mac_rx0;
+  c_mac_tx = c_mac_tx0;
+
+  for(int i=0; i < MRP_NUM_PORTS; i++)
+  {
+    domain_attr[i] = mrp_get_attr();
+    mrp_attribute_init(domain_attr[i], MSRP_DOMAIN_VECTOR, i, NULL);
+  }
+
+  mac_set_custom_filter(c_mac_rx, MAC_FILTER_AVB_CONTROL);
+  mac_request_status_packets(c_mac_rx);
+}
+
 void avb_periodic(void)
 {
 	mrp_periodic();
-#ifdef AVB_ENABLE_1722_1
+#if AVB_ENABLE_1722_1
 	avb_1722_1_periodic(c_mac_tx, c_ptp);
 #endif
 	avb_1722_maap_periodic(c_mac_tx);
@@ -231,8 +253,11 @@ void avb_start(void)
   // Request a multicast addresses for stream transmission
   avb_1722_maap_request_addresses(AVB_NUM_SOURCES, NULL);
 
-  mrp_mad_begin(domain_attr);
-  mrp_mad_join(domain_attr, 1);
+  for (int i=0; i < MRP_NUM_PORTS; i++)
+  {
+    mrp_mad_begin(domain_attr[i]);
+    mrp_mad_join(domain_attr[i], 1);
+  }
 }
 
 static void avb_set_talker_bandwidth()
@@ -857,7 +882,7 @@ int get_media_outs(int *a0)
   return 1;
 }
 
-void avb_process_control_packet(unsigned int buf0[], int nbytes, chanend c_tx)
+void avb_process_control_packet(unsigned int buf0[], int nbytes, chanend c_tx, unsigned int port_num)
 {
   if (nbytes == STATUS_PACKET_LEN)
   {
@@ -900,12 +925,12 @@ void avb_process_control_packet(unsigned int buf0[], int nbytes, chanend c_tx)
       // TODO: #define around MMRP, disabled by default
       case AVB_MMRP_ETHERTYPE:
       case AVB_MVRP_ETHERTYPE:
-        avb_mrp_process_packet(&buf[eth_hdr_size], etype, len);
+        avb_mrp_process_packet(&buf[eth_hdr_size], etype, len, port_num);
         break;
       case AVB_1722_ETHERTYPE:
         // We know that the cd field is true because the MAC filter only forwards
         // 1722 control to this thread
-      #ifdef AVB_ENABLE_1722_1
+      #if AVB_ENABLE_1722_1
         avb_1722_1_process_packet(&buf[eth_hdr_size], &(ethernet_hdr->src_addr[0]), len, c_tx);
       #endif
         avb_1722_maap_process_packet(&buf[eth_hdr_size], &(ethernet_hdr->src_addr[0]), len, c_tx);
