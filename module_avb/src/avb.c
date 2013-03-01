@@ -857,12 +857,6 @@ int get_media_outs(int *a0)
   return 1;
 }
 
-
-void avb_set_legacy_mode(int mode)
-{
-  avb_mrp_set_legacy_mode(mode);
-}
-
 void avb_process_control_packet(unsigned int buf0[], int nbytes, chanend c_tx)
 {
   if (nbytes == STATUS_PACKET_LEN)

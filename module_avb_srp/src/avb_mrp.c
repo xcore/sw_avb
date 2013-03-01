@@ -18,7 +18,7 @@
 
 #define MAX_MRP_MSG_SIZE (sizeof(mrp_msg_header) + sizeof(srp_talker_first_value) + 1 /* for event vector */ + sizeof(mrp_msg_footer))
 
-// The size of the send buffer - currently a full ethernet frame
+// The size of the send buffer
 #ifndef MRP_SEND_BUFFER_SIZE
 #define MRP_SEND_BUFFER_SIZE (500)
 #endif
@@ -55,9 +55,6 @@ static char *send_ptr= &send_buf[0] + sizeof(mrp_ethernet_hdr) + sizeof(mrp_head
 //! since the information is in the packet anyway
 static int current_etype = 0;
 
-//! Legacy mode changes the destination MAC addresses
-static int legacy_mode = 0;
-
 //!@{
 //! \name Timers for the MRP state machines
 static avb_timer periodic_timer;
@@ -75,13 +72,6 @@ static void configure_send_buffer(unsigned char* addr, short etype) {
   hdr->ethertype[0] = (etype >> 8);
   hdr->ethertype[1] = etype & 0xff;
   current_etype = etype;
-}
-
-
-// in legacy mode we use different destination mac addresses
-void avb_mrp_set_legacy_mode(int mode)
-{
-  legacy_mode = 1;
 }
 
 unsigned attribute_length_length(mrp_msg_header* hdr)
