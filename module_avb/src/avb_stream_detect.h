@@ -1,16 +1,6 @@
 #ifndef __avb_stream_detect_h__
 #define __avb_stream_detect_h__
 #include <xccompat.h>
-#ifdef __XC__
-#define NULLABLE ?
-#else
-#define NULLABLE 
-#endif
-
-void avb_add_detected_stream(unsigned streamId[2], unsigned vlan,
-                             unsigned char NULLABLE addr[6],
-                             int addr_offset);
-
 
 /** Check whether a new incoming AVB stream has been detected.
  *
