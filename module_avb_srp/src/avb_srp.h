@@ -1,6 +1,8 @@
 #ifndef _avb_srp_h_
 #define _avb_srp_h_
 #include <xccompat.h>
+#include "avb_srp_pdu.h"
+#include "avb_stream_detect.h"
 #include "avb_1722_talker.h"
 #include "avb_mrp.h"
 #include "avb_control_types.h"
@@ -13,7 +15,23 @@
 #define MAX_AVB_SRP_PDU_SIZE (64)
 
 
+#ifndef __XC__
+typedef struct avb_srp_info_t {
+  unsigned stream_id[2];
+  unsigned char dest_mac_addr[6];
+  short vlan_id;
+  short tspec_max_frame_size;
+  short tspec_max_interval;
+  unsigned char tspec;
+  unsigned accumulated_latency;
+} avb_srp_info_t;
 
+int avb_srp_match_stream_id(unsigned streamId[2], avb_srp_info_t **stream);
+
+int avb_add_detected_stream(srp_talker_first_value *fv,
+                            unsigned streamId[2],
+                             int addr_offset,
+                             avb_srp_info_t **stream);
 
 
 /** Get the stream id of a failed reservation. 
@@ -27,7 +45,6 @@
 void avb_srp_get_failed_stream(unsigned int streamId[2]);
 
 
-#ifndef __XC__
 typedef struct srp_stream_state {
   union {
     mrp_attribute_state talker; 
@@ -38,9 +55,10 @@ typedef struct srp_stream_state {
 
 
 /* The following functions are called from avb_mrp.c */
-void avb_srp_process_talker(int attribute_type,
+int avb_srp_process_attribute(int attribute_type,
                             char *fv, 
-                            int num);
+                            int num,
+                            avb_srp_info_t **stream);
 
 int avb_srp_compare_talker_attributes(mrp_attribute_state *a,
                                       mrp_attribute_state *b);
@@ -48,7 +66,7 @@ int avb_srp_compare_talker_attributes(mrp_attribute_state *a,
 int avb_srp_compare_listener_attributes(mrp_attribute_state *a,
                                         mrp_attribute_state *b);
 
-int avb_srp_merge_message(char *buf,
+int avb_srp_encode_message(char *buf,
                           mrp_attribute_state *st,
                           int vector);
 

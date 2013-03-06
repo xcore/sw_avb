@@ -1,7 +1,6 @@
 #ifndef _avb_srp_pdu_h_
 #define _avb_srp_pdu_h_
 
-//#define SRP_VERSION_5 1
 #define AVB_SRP_ATTRIBUTE_TYPE_TALKER_ADVERTISE 1
 #define AVB_SRP_ATTRIBUTE_TYPE_TALKER_FAILED 2
 #define AVB_SRP_ATTRIBUTE_TYPE_LISTENER 3
@@ -9,9 +8,7 @@
 typedef struct srp_talker_first_value {
   unsigned char StreamId[8];
   unsigned char DestMacAddr[6];
-#ifndef SRP_VERSION_5
   unsigned char VlanID[2];
-#endif
   unsigned char TSpecMaxFrameSize[2];
   unsigned char TSpecMaxIntervalFrames[2];
   unsigned char TSpec;
@@ -21,9 +18,7 @@ typedef struct srp_talker_first_value {
 typedef struct srp_talker_failed_first_value {
   unsigned char StreamId[8];
   unsigned char DestMacAddr[6];
-#ifndef SRP_VERSION_5
   unsigned char VlanID[2];
-#endif
   unsigned char TSpecMaxFrameSize[2];
   unsigned char TSpecMaxIntervalFrames[2];
   unsigned char TSpec;

@@ -12,6 +12,7 @@
 #include "avb_internal.h"
 #include <string.h>
 #include <print.h>
+#include "simple_printf.h"
 
 /** \file avb_mrp.c
  *  \brief the core of the MRP protocols
@@ -379,7 +380,7 @@ static void create_empty_msg(mrp_attribute_type attr, int leave_all) {
 }
 
 
-static int merge_msg(char *msg, mrp_attribute_state* st, int vector)
+static int encode_msg(char *msg, mrp_attribute_state* st, int vector)
 {
   switch (st->attribute_type) 
     {
@@ -387,7 +388,7 @@ static int merge_msg(char *msg, mrp_attribute_state* st, int vector)
     case MSRP_TALKER_FAILED: 
     case MSRP_LISTENER:
     case MSRP_DOMAIN_VECTOR:             
-      return avb_srp_merge_message(msg, st, vector);
+      return avb_srp_encode_message(msg, st, vector);
       break;
 #ifdef AVB_INCLUDE_MMRP
     case MMRP_MAC_VECTOR:
@@ -416,14 +417,14 @@ static void doTx(mrp_attribute_state *st,
          (*msg != 0 || *(msg+1) != 0)) {      
     mrp_msg_header *hdr = (mrp_msg_header *) &msg[0];
 
-    merged = merge_msg(msg, st, vector);
+    merged = encode_msg(msg, st, vector);
     
     msg = msg + sizeof(mrp_msg_header) + attribute_length_length(hdr);
   }   
 
   if (!merged) {
     create_empty_msg(st->attribute_type, 0);
-    (void) merge_msg(msg, st, vector);
+    (void) encode_msg(msg, st, vector);
   }
 
   send(c_tx, st->port_num);
@@ -701,6 +702,7 @@ void mrp_attribute_init(mrp_attribute_state *st,
   st->attribute_type = t;
   st->attribute_info = info;
   st->port_num = port_num;
+  st->here = 0;
   return;
 }
 
@@ -871,11 +873,12 @@ static void sort_attrs()
 
 }
 
-static void global_event(mrp_event e) {
+static void global_event(mrp_event e, unsigned int port_num) {
   mrp_attribute_state *attr = first_attr;
   while (attr != NULL) {
     if (attr->applicant_state != MRP_DISABLED &&
-        attr->applicant_state != MRP_UNUSED) 
+        attr->applicant_state != MRP_UNUSED &&
+        attr->port_num == port_num) 
       mrp_update_state(e, attr, 0);
     attr = attr->next;
   }
@@ -961,7 +964,7 @@ void mrp_periodic(void)
   {
     if (avb_timer_expired(&periodic_timer[i]))
     {
-      global_event(MRP_EVENT_PERIODIC);
+      global_event(MRP_EVENT_PERIODIC, i);
       start_avb_timer(&periodic_timer[i], MRP_PERIODIC_TIMER_PERIOD_CENTISECONDS / MRP_PERIODIC_TIMER_MULTIPLIER);
     }
 
@@ -970,7 +973,7 @@ void mrp_periodic(void)
     {
       start_avb_timer(&leaveall_timer[i], MRP_LEAVEALL_TIMER_PERIOD_CENTISECONDS / MRP_LEAVEALL_TIMER_MULTIPLIER);
       leave_all[i] = 1;
-      global_event(MRP_EVENT_RECEIVE_LEAVE_ALL);
+      global_event(MRP_EVENT_RECEIVE_LEAVE_ALL, i);
     }
   #endif
 
@@ -1157,10 +1160,7 @@ static int decode_fourpacked(int vector, int i)
   for (int j=0;j<(3-i);j++)
     vector /= 4;
   return (vector % 4);
-}
-
-
-                    
+}          
 
 void avb_mrp_process_packet(unsigned char buf[], int etype, int len, unsigned int port_num)
 {
@@ -1202,7 +1202,7 @@ void avb_mrp_process_packet(unsigned char buf[], int etype, int len, unsigned in
       
       for (int i=0;i<numvalues;i++)
       {
-
+        int matched_attribute = 0;
         // Get the three packed data out of the vector
         int three_packed_event = decode_threepacked(*(first_value + first_value_len + i/3), i%3);
 
@@ -1210,17 +1210,42 @@ void avb_mrp_process_packet(unsigned char buf[], int etype, int len, unsigned in
         int four_packed_event = has_fourpacked_events(attr_type) ?
           decode_fourpacked(*(first_value + first_value_len + threepacked_len + i/4),i%4) : 0;
 
-        // This allows various modules to snoop on the individual message
-        process(attr_type, first_value, i, three_packed_event, four_packed_event);
 
         // This allows the application state machines to respond to the message
         for (int j=0;j<MRP_MAX_ATTRS;j++)
         {
+          // Attempt to match to this endpoint's attributes
           if (msg_match(attr_type, &attrs[j], first_value, i, three_packed_event, four_packed_event))
           {
+            matched_attribute = 1;
             mrp_in(three_packed_event, four_packed_event, &attrs[j]);
           }
         }
+
+        if (!matched_attribute)
+        {
+            if (attr_type == MSRP_TALKER_ADVERTISE ||
+                attr_type == MSRP_TALKER_FAILED ||
+                attr_type == MSRP_LISTENER)
+            {
+              avb_srp_info_t *stream_data;
+              if (avb_srp_process_attribute(attr_type, first_value, i, &stream_data))
+              {
+                mrp_attribute_state *st = mrp_get_attr();
+                mrp_attribute_init(st, attr_type, port_num, stream_data);
+                simple_printf("mrp_attribute_init: %d, %d\n", attr_type, port_num);
+                mrp_in(three_packed_event, four_packed_event, st);
+              }
+              else
+              {
+                // simple_printf("didn't match %d\n", attr_type);
+              }
+            }
+        }
+
+        // This allows various modules to snoop on the individual message
+        // process(attr_type, first_value, i, three_packed_event, four_packed_event);
+
       }
       msg = msg + len;
     }

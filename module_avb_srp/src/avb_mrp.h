@@ -148,6 +148,8 @@ typedef struct mrp_attribute_state {
   //! While sorting the attributes, this contains a linked list of sorted attributes
   struct mrp_attribute_state *next;
 
+  char here;
+
   //! Generic pointer to allow random data to be stored alongside the attribute
   void *attribute_info;
 } mrp_attribute_state;
