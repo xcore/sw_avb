@@ -60,6 +60,7 @@ void avb_1722_1_adp_init()
     init_avb_timer(&adp_discovery_timer, 200);
     init_avb_timer(&ptp_monitor_timer, 100);
 
+    adp_advertise_state = ADP_ADVERTISE_IDLE;
     adp_discovery_state = ADP_DISCOVERY_WAITING;
     start_avb_timer(&adp_discovery_timer, 1);
 }

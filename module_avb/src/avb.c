@@ -241,9 +241,7 @@ void avb_start(void)
 {
 #if AVB_ENABLE_1722_1
   avb_1722_1_adp_init();
-#if AVB_NUM_SOURCES == 0 // Only begin advertising entity here if listener only
   avb_1722_1_adp_announce();
-#endif
   avb_1722_1_adp_discover_all();
 #endif
 
