@@ -149,6 +149,7 @@ typedef struct mrp_attribute_state {
   struct mrp_attribute_state *next;
 
   char here;
+  char propagate;
 
   //! Generic pointer to allow random data to be stored alongside the attribute
   void *attribute_info;

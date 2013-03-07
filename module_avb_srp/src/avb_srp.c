@@ -135,7 +135,7 @@ static void avb_srp_map_join(mrp_attribute_state *attr, int new)
 {
   printstrln("MAD_Join.indication");
   // Attribute propagation:
-  attr->port_num = !(attr->port_num); // Propagate to other port
+  attr->propagate = 1; // Propagate to other port
   mrp_mad_join(attr, new);
 }
 
@@ -143,7 +143,7 @@ static void avb_srp_map_leave(mrp_attribute_state *attr)
 {
   printstrln("MAD_Leave.indication");
   // Attribute propagation:
-  attr->port_num = !(attr->port_num); // Propagate to other port
+  attr->propagate = 1;  // Propagate to other port
   mrp_mad_leave(attr);
 }
 
@@ -576,7 +576,7 @@ static int encode_talker_message(char *buf,
         tspec_max_interval = here ? AVB_SRP_MAX_INTERVAL_FRAMES_DEFAULT : attribute_info->tspec_max_interval;
         tspec = here ? (AVB_SRP_TSPEC_PRIORITY_DEFAULT << 5 |
           AVB_SRP_TSPEC_RANK_DEFAULT << 4 |
-          AVB_SRP_TSPEC_RESERVED_VALUE) : attribute_info->tspec_max_interval;
+          AVB_SRP_TSPEC_RESERVED_VALUE) : attribute_info->tspec;
         accumulated_latency = here ? AVB_SRP_ACCUMULATED_LATENCY_DEFAULT : attribute_info->accumulated_latency;
 
         first_value->TSpec = tspec;

@@ -427,7 +427,7 @@ static void doTx(mrp_attribute_state *st,
     (void) encode_msg(msg, st, vector);
   }
 
-  send(c_tx, st->port_num);
+  send(c_tx, st->propagate ? !st->port_num : st->port_num);
 }
 
 static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_packed_event)
@@ -702,6 +702,7 @@ void mrp_attribute_init(mrp_attribute_state *st,
   st->attribute_type = t;
   st->attribute_info = info;
   st->port_num = port_num;
+  st->propagate = 0;
   st->here = 0;
   return;
 }
@@ -878,7 +879,7 @@ static void global_event(mrp_event e, unsigned int port_num) {
   while (attr != NULL) {
     if (attr->applicant_state != MRP_DISABLED &&
         attr->applicant_state != MRP_UNUSED &&
-        attr->port_num == port_num) 
+        ((attr->port_num != port_num) && attr->propagate))
       mrp_update_state(e, attr, 0);
     attr = attr->next;
   }
@@ -891,7 +892,7 @@ static void attribute_type_event(mrp_attribute_type atype, mrp_event e, unsigned
     if (attr->applicant_state != MRP_DISABLED && 
         attr->applicant_state != MRP_UNUSED &&
         attr->attribute_type == atype &&
-        attr->port_num == port_num)  {
+        ((attr->port_num != port_num) && attr->propagate))  {
       mrp_update_state(e, attr, 0);
     }
     attr = attr->next;
