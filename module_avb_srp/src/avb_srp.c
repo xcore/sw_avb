@@ -77,7 +77,11 @@ int avb_add_detected_stream(srp_talker_first_value *fv,
 
     x += addr_offset;
 
-    memcpy(stream_history[wrPtr].dest_mac_addr, &x, 6);
+    int tmp = byterev(x);
+    memcpy(&stream_history[wrPtr].dest_mac_addr[2], &tmp, 4);
+    tmp = byterev(x>>32)>>16;
+    memcpy(&stream_history[wrPtr].dest_mac_addr, &tmp, 2);
+
     stream_history[wrPtr].tspec_max_frame_size = ntoh_16(fv->TSpecMaxFrameSize);
     stream_history[wrPtr].tspec_max_interval = ntoh_16(fv->TSpecMaxIntervalFrames);
     stream_history[wrPtr].tspec = fv->TSpec;
@@ -95,41 +99,12 @@ int avb_add_detected_stream(srp_talker_first_value *fv,
                   );
 
     *stream = &stream_history[wrPtr];
-
-    /*
-    for(int i=5;i>=0;i--) {
-      stream_history[wrPtr].addr[i] = x & 0xff;
-      x>>=8;
-    }
-    */
       
     wrPtr = new_wrPtr;
   }
   
   return 1;
 }
-
-/*
-int avb_check_for_new_stream(unsigned stream_id[2], unsigned *vlan,
-                             unsigned char addr[6])
-{
-  if (AVB_STREAM_DETECT_HISTORY_SIZE == 0)
-    return 0;
-
-  if (rdPtr != wrPtr) {
-    stream_id[0] = stream_history[rdPtr].stream_id[0];
-    stream_id[1] = stream_history[rdPtr].stream_id[1];
-    *vlan = stream_history[rdPtr].vlan;
-    for (int i=0;i<6;i++)
-      addr[i] = stream_history[rdPtr].addr[i];
-    rdPtr++;
-    if (rdPtr==AVB_STREAM_DETECT_HISTORY_SIZE)
-      rdPtr = 0;    
-    return 1;
-  }
-  return 0;
-}
-*/
 
 static void avb_srp_map_join(mrp_attribute_state *attr, int new)
 {
