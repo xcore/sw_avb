@@ -31,9 +31,9 @@ typedef struct i2s_ports_t {
 extern unsigned int i2s_sine[I2S_SINE_TABLE_SIZE];
 
 void i2s_master_configure_ports(REFERENCE_PARAM(i2s_ports_t, p),
-                                out buffered port:32 p_dout[],
+                                out buffered port:32 ?p_dout[],
                                 int num_out,
-                                in buffered port:32 p_din[],             
+                                in buffered port:32 ?p_din[],
                                 int num_in);
 
 /** Input and output audio data using I2S format with the XCore acting 
@@ -82,9 +82,9 @@ inline void i2s_master_upto_8(const clock mclk,
                               clock bclk,
                               out buffered port:32 p_bclk,
                               out buffered port:32 p_lrclk,
-                              out buffered port:32 p_dout[],
+                              out buffered port:32 ?p_dout[],
                               int num_out,
-                              in buffered port:32 p_din[],
+                              in buffered port:32 ?p_din[],
                               int num_in,
                               int master_to_word_clock_ratio,
                               streaming chanend ?c_listener,
@@ -239,9 +239,9 @@ inline void i2s_master_upto_4(const clock mclk,
                               clock bclk,
                               out buffered port:32 p_bclk,
                               out buffered port:32 p_lrclk,
-                              out buffered port:32 p_dout[],
+                              out buffered port:32 ?p_dout[],
                               int num_out,
-                              in buffered port:32 p_din[],
+                              in buffered port:32 ?p_din[],
                               int num_in,
                               int master_to_word_clock_ratio,
                               media_input_fifo_t ?input_fifos[],
@@ -431,9 +431,12 @@ static inline void i2s_master(i2s_ports_t &ports,
   {
     streaming chan c_samples_to_codec;
     par {
-      media_output_fifo_to_xc_channel_split_lr(c_samples_to_codec,
+      if (num_out > 0)
+      {
+        media_output_fifo_to_xc_channel_split_lr(c_samples_to_codec,
                                                output_fifos,
                                                num_out);
+      }
       i2s_master_upto_8(ports.mclk,
                         ports.bclk,
                         ports.p_bclk,

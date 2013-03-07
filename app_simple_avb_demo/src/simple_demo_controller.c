@@ -14,7 +14,6 @@
 #endif
 
 extern avb_1722_1_entity_record entities[AVB_1722_1_MAX_ENTITIES];
-static int entity_elected_master_clock = 0;
 static int controller_state = 0;
 
 #define XMOS_VENDOR_ID 0x00229700
@@ -47,10 +46,11 @@ void avb_entity_on_new_entity_available(guid_t *my_guid, avb_1722_1_entity_recor
   get_avb_source_state(0, &state);
 
   // If our first Talker stream isn't connected already, connect to the first XMOS listener we see
-  if (state == AVB_SOURCE_STATE_DISABLED)
+  if (AVB_DEMO_ENABLE_TALKER && state == AVB_SOURCE_STATE_DISABLED)
   {
+
     if ((entity->vendor_id == XMOS_VENDOR_ID) &&
-       ((entity->listener_capabilites & AVB_1722_1_ADP_LISTENER_CAPABILITIES_AUDIO_SINK) == AVB_1722_1_ADP_LISTENER_CAPABILITIES_AUDIO_SINK) &&
+       ((entity->listener_capabilities & AVB_1722_1_ADP_LISTENER_CAPABILITIES_AUDIO_SINK) == AVB_1722_1_ADP_LISTENER_CAPABILITIES_AUDIO_SINK) &&
        (entity->listener_stream_sinks >= 1))
     {
       avb_1722_1_controller_connect(my_guid, &entity->guid, 0, 0, c_tx);
@@ -60,7 +60,7 @@ void avb_entity_on_new_entity_available(guid_t *my_guid, avb_1722_1_entity_recor
 #endif
 
 /* The controller has indicated to connect this listener sink to a talker stream */
-void avb_listener_on_talker_connect(int sink_num, REFERENCE_PARAM(guid_t, talker_guid), unsigned char dest_addr[6], unsigned int stream_id[2])
+void avb_listener_on_talker_connect(int sink_num, guid_t *talker_guid, unsigned char dest_addr[6], unsigned int stream_id[2], guid_t *my_guid)
 {
   int map[AVB_NUM_MEDIA_OUTPUTS];
   for (int i = 0; i < AVB_NUM_MEDIA_OUTPUTS; i++) map[i] = i;
@@ -74,11 +74,23 @@ void avb_listener_on_talker_connect(int sink_num, REFERENCE_PARAM(guid_t, talker
   }
   else
   {
-    // If we were previously master clock, restore this on connection to an XMOS talker
-    if (entity_elected_master_clock)
+    if (AVB_DEMO_ENABLE_TALKER && AVB_DEMO_ENABLE_LISTENER && (talker_guid->l < my_guid->l))
     {
-      set_device_media_clock_type(0, DEVICE_MEDIA_CLOCK_LOCAL_CLOCK);
-      printstrln("Entity is Master audio clock");
+      for (int i=0; i < AVB_1722_1_MAX_ENTITIES; i++)
+      {
+        if (entities[i].guid.l == talker_guid->l)
+        {
+          // Check if the remote Talker is also a Listener
+          if (entities[i].listener_stream_sinks >= 1)
+          {
+            // We can be master clock
+            set_device_media_clock_type(0, DEVICE_MEDIA_CLOCK_LOCAL_CLOCK);
+            printstrln("Entity elected Master audio clock");
+            break;
+          }
+          // else we remain input stream derived
+        }
+      }
     }
   }
 
@@ -110,26 +122,5 @@ void avb_talker_on_source_address_reserved(int source_num, unsigned char mac_add
   avb_1722_1_acmp_talker_init();
   avb_1722_1_talker_set_mac_address(source_num, mac_addr);
   avb_1722_1_adp_announce();
-
-  for (int i=0; i < AVB_1722_1_MAX_ENTITIES; i++)
-  {
-    if (entities[i].guid.l != 0)
-    {
-      // Check to see if we are the only XMOS talker on the network
-      if (((entities[i].talker_capabilities & AVB_1722_1_ADP_TALKER_CAPABILITIES_AUDIO_SOURCE)
-           == AVB_1722_1_ADP_TALKER_CAPABILITIES_AUDIO_SOURCE))
-      {
-        break;
-      }
-    }
-
-    if (i == AVB_1722_1_MAX_ENTITIES-1)
-    {
-      // Set us to the master audio clock
-      set_device_media_clock_type(0, LOCAL_CLOCK);
-      printstrln("Entity elected Master audio clock");
-      entity_elected_master_clock = 1;
-    }
-  }
 
 }

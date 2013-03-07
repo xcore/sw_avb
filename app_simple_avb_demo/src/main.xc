@@ -92,7 +92,6 @@ media_input_fifo_t ififos[AVB_NUM_MEDIA_INPUTS];
 
 void xscope_user_init(void)
 {
-  // xscope_register(0, 0, "", 0, "");
   xscope_register_no_probes();
   // Enable XScope printing
   xscope_config_io(XSCOPE_IO_BASIC);
@@ -140,8 +139,8 @@ int main(void)
   {
     // AVB - Ethernet
     on tile[1]: avb_ethernet_server(avb_ethernet_ports,
-                                        c_mac_rx, 3,
-                                        c_mac_tx, 3);
+                                        c_mac_rx, 2 + AVB_DEMO_ENABLE_LISTENER,
+                                        c_mac_tx, 2 + AVB_DEMO_ENABLE_TALKER);
 
     on tile[0]: media_clock_server(c_media_clock_ctl,
                                    null,
@@ -155,7 +154,7 @@ int main(void)
                                    c_mac_rx[0],
                                    c_mac_tx[0],
                                    c_ptp,
-                                   2,
+                                   1 + AVB_DEMO_ENABLE_TALKER,
                                    PTP_GRANDMASTER_CAPABLE);
 
 
@@ -415,9 +414,9 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl)
       }
 
       // Periodic processing
-      case tmr when timerafter(periodic_timeout) :> void:
+      case tmr when timerafter(periodic_timeout) :> unsigned int time_now:
       {
-        avb_periodic();
+        avb_periodic(time_now);
 
         simple_demo_controller(change_stream, toggle_remote, c_tx);
 

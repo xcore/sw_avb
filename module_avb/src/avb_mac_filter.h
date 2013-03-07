@@ -39,10 +39,6 @@ inline int mac_custom_filter(unsigned int buf[])
     case HTONS(AVB_MVRP_ETHERTYPE):
       result = MAC_FILTER_AVB_CONTROL;
       break;
-    case 0x0608:
-    case 0x0008:
-      result = MAC_FILTER_ARPIP;
-      break;
     case (((AVB_1722_ETHERTYPE & 0xff) << 8) | (AVB_1722_ETHERTYPE >> 8)):
       {
         int cd_flag;

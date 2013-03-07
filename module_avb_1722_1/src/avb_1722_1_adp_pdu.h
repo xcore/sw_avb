@@ -53,7 +53,7 @@ typedef struct {
     unsigned char talker_stream_sources[2];
     unsigned char talker_capabilities[2];
     unsigned char listener_stream_sinks[2];
-    unsigned char listener_capabilites[2];
+    unsigned char listener_capabilities[2];
     unsigned char controller_capabilities[4];
     unsigned char available_index[4];
     unsigned char as_grandmaster_id[8];
@@ -73,7 +73,7 @@ typedef struct {
     unsigned short talker_stream_sources;
     unsigned short talker_capabilities;
     unsigned short listener_stream_sinks;
-    unsigned short listener_capabilites;
+    unsigned short listener_capabilities;
     unsigned int controller_capabilities;
     unsigned int available_index;
     gmid_t as_grandmaster_id;

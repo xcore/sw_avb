@@ -5,6 +5,7 @@
 #include <platform.h>
 #include <xs1.h>
 #include <xclib.h>
+#include <print.h>
 
 #include "avb_1722_def.h"
 #include "avb_1722.h"
@@ -22,93 +23,93 @@
 
 #pragma unsafe arrays
 static void configure_stream(chanend avb1722_tx_config,
-							 avb1722_Talker_StreamConfig_t &stream,
-							 unsigned char mac_addr[]) {
-	unsigned int streamIdExt;
-	unsigned int rate;
-	unsigned int tmp;
-	int samplesPerPacket;
-	avb1722_tx_config :> stream.sampleType;
+               avb1722_Talker_StreamConfig_t &stream,
+               unsigned char mac_addr[]) {
+  unsigned int streamIdExt;
+  unsigned int rate;
+  unsigned int tmp;
+  int samplesPerPacket;
+  avb1722_tx_config :> stream.sampleType;
 
-	for (int i = 0; i < MAC_ADRS_BYTE_COUNT; i++) {
-		int x;
-		avb1722_tx_config :> x;
-		stream.destMACAdrs[i] = x;
-		stream.srcMACAdrs[i] = mac_addr[i];
-	}
+  for (int i = 0; i < MAC_ADRS_BYTE_COUNT; i++) {
+    int x;
+    avb1722_tx_config :> x;
+    stream.destMACAdrs[i] = x;
+    stream.srcMACAdrs[i] = mac_addr[i];
+  }
 
-	stream.streamId[1] =
-	((unsigned) stream.srcMACAdrs[0] << 24) |
-	((unsigned) stream.srcMACAdrs[1] << 16) |
-	((unsigned) stream.srcMACAdrs[2] << 8) |
-	((unsigned) stream.srcMACAdrs[3]);
+  stream.streamId[1] =
+  ((unsigned) stream.srcMACAdrs[0] << 24) |
+  ((unsigned) stream.srcMACAdrs[1] << 16) |
+  ((unsigned) stream.srcMACAdrs[2] << 8) |
+  ((unsigned) stream.srcMACAdrs[3]);
 
-	stream.streamId[0] =
-	((unsigned) stream.srcMACAdrs[4] << 24) |
-	((unsigned) stream.srcMACAdrs[5] << 16);
+  stream.streamId[0] =
+  ((unsigned) stream.srcMACAdrs[4] << 24) |
+  ((unsigned) stream.srcMACAdrs[5] << 16);
 
-	avb1722_tx_config :> streamIdExt;
+  avb1722_tx_config :> streamIdExt;
 
-	stream.streamId[0] |= streamIdExt;
+  stream.streamId[0] |= streamIdExt;
 
-	avb1722_tx_config :> stream.num_channels;
+  avb1722_tx_config :> stream.num_channels;
 
-	avb1722_tx_config :> stream.fifo_mask;
+  avb1722_tx_config :> stream.fifo_mask;
 
-	for (int i=0;i<stream.num_channels;i++) {
-		avb1722_tx_config :> stream.map[i];
-	}
+  for (int i=0;i<stream.num_channels;i++) {
+    avb1722_tx_config :> stream.map[i];
+  }
 
-	avb1722_tx_config :> rate;
+  avb1722_tx_config :> rate;
 
-	for (int i=0;i<stream.num_channels;i++) {
-		samplesPerPacket = media_input_fifo_enable(stream.map[i], rate);
-	}
+  for (int i=0;i<stream.num_channels;i++) {
+    samplesPerPacket = media_input_fifo_enable(stream.map[i], rate);
+  }
 
-	avb1722_tx_config :> stream.presentation_delay;
+  avb1722_tx_config :> stream.presentation_delay;
 
-	stream.samples_per_fifo_packet = samplesPerPacket;
+  stream.samples_per_fifo_packet = samplesPerPacket;
 
-	tmp = ((rate / 100) << 16) / (AVB1722_PACKET_RATE / 100);
-	stream.samples_per_packet_base = tmp >> 16;
-	stream.samples_per_packet_fractional = tmp & 0xffff;
-	stream.rem = 0;
+  tmp = ((rate / 100) << 16) / (AVB1722_PACKET_RATE / 100);
+  stream.samples_per_packet_base = tmp >> 16;
+  stream.samples_per_packet_fractional = tmp & 0xffff;
+  stream.rem = 0;
 
-	stream.samples_left_in_fifo_packet = 0;
-	stream.initial = 1;
-	stream.dbc_at_start_of_last_fifo_packet = 0;
-	stream.active = 1;
-	stream.transmit_ok = 1;
-	stream.sequence_number = 0;
+  stream.samples_left_in_fifo_packet = 0;
+  stream.initial = 1;
+  stream.dbc_at_start_of_last_fifo_packet = 0;
+  stream.active = 1;
+  stream.transmit_ok = 1;
+  stream.sequence_number = 0;
 }
 
 #pragma unsafe arrays
 static void disable_stream(avb1722_Talker_StreamConfig_t &stream) {
 
-	stream.streamId[1] = 0;
-	stream.streamId[0] = 0;
+  stream.streamId[1] = 0;
+  stream.streamId[0] = 0;
 
-	media_input_fifo_disable_fifos(stream.fifo_mask);
+  media_input_fifo_disable_fifos(stream.fifo_mask);
 
-	for (int i=0;i<stream.num_channels;i++) {
-		media_input_fifo_disable(stream.map[i]);
-	}
+  for (int i=0;i<stream.num_channels;i++) {
+    media_input_fifo_disable(stream.map[i]);
+  }
 
-	stream.active = 0;
+  stream.active = 0;
 }
 
 
 static void start_stream(avb1722_Talker_StreamConfig_t &stream) {
-	media_input_fifo_enable_fifos(stream.fifo_mask);
-	stream.samples_left_in_fifo_packet = 0;
-	stream.sequence_number = 0;
-	stream.initial = 1;
-	stream.active = 2;
+  media_input_fifo_enable_fifos(stream.fifo_mask);
+  stream.samples_left_in_fifo_packet = 0;
+  stream.sequence_number = 0;
+  stream.initial = 1;
+  stream.active = 2;
 }
 
 static void stop_stream(avb1722_Talker_StreamConfig_t &stream) {
-	media_input_fifo_disable_fifos(stream.fifo_mask);
-	stream.active = 1;
+  media_input_fifo_disable_fifos(stream.fifo_mask);
+  stream.active = 1;
 }
 
 
@@ -210,7 +211,8 @@ void avb_1722_talker_send_packets(chanend c_mac_tx,
       st.talker_streams[st.cur_avb_stream].active==2) {
     int packet_size;
     int t;
-    tmr :> t;
+
+    tmr :> t; 
     packet_size =
       avb1722_create_packet((st.TxBuf, unsigned char[]),
                             st.talker_streams[st.cur_avb_stream],
@@ -222,6 +224,7 @@ void avb_1722_talker_send_packets(chanend c_mac_tx,
                                   st.TxBuf,
                                   packet_size,
                                   0);
+      st.talker_streams[st.cur_avb_stream].last_transmit_time = t;
     }
   }
   if (st.max_active_avb_stream != -1) {
@@ -256,38 +259,38 @@ void avb_1722_talker(chanend c_ptp, chanend c_mac_tx,
   ptp_request_time_info_mod64(c_ptp);
   ptp_get_requested_time_info_mod64_use_timer(c_ptp, timeInfo, tmr);
 
-  tmr	:> t;
+  tmr :> t;
   t+=TIMEINFO_UPDATE_INTERVAL;
 
   // main loop.
   while (1)
+  {
+    select
     {
-      select
-        {
-          // Process commands from the AVB control/application thread
-        case avb_1722_talker_handle_cmd(c_talker_ctl, st): break;
+        // Process commands from the AVB control/application thread
+      case avb_1722_talker_handle_cmd(c_talker_ctl, st): break;
 
-          // Periodically ask the PTP server for new time information
-        case tmr when timerafter(t) :> t:
-          if (!pending_timeinfo) {
-            ptp_request_time_info_mod64(c_ptp);
-            pending_timeinfo = 1;
-          }
-          t+=TIMEINFO_UPDATE_INTERVAL;
-          break;
-
-          // The PTP server has sent new time information
-        case ptp_get_requested_time_info_mod64_use_timer(                                                   c_ptp, timeInfo, tmr):
-          pending_timeinfo = 0;
-          break;
-
-
-          // Call the 1722 packet construction
-        default:
-          avb_1722_talker_send_packets(c_mac_tx, st, timeInfo, tmr);
-          break;
+        // Periodically ask the PTP server for new time information
+      case tmr when timerafter(t) :> t:
+        if (!pending_timeinfo) {
+          ptp_request_time_info_mod64(c_ptp);
+          pending_timeinfo = 1;
         }
+        t+=TIMEINFO_UPDATE_INTERVAL;
+        break;
+
+        // The PTP server has sent new time information
+      case ptp_get_requested_time_info_mod64_use_timer(c_ptp, timeInfo, tmr):
+        pending_timeinfo = 0;
+        break;
+
+
+        // Call the 1722 packet construction
+      default:
+        avb_1722_talker_send_packets(c_mac_tx, st, timeInfo, tmr);
+        break;
     }
+  }
 }
 
 #endif // AVB_NUM_SOURCES != 0
