@@ -31,7 +31,7 @@ void avb_mmrp_init(void)
   for (int i=0;i<AVB_MAX_MMRP_GROUPS;i++) {
     entries[i].active = 0;
     entries[i].attr = mrp_get_attr();
-    mrp_attribute_init(entries[i].attr, MMRP_MAC_VECTOR, 0, &entries[i].addr);
+    mrp_attribute_init(entries[i].attr, MMRP_MAC_VECTOR, 0, 1, &entries[i].addr);
   }
 }
 

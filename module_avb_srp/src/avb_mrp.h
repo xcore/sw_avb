@@ -188,6 +188,7 @@ void mrp_init(char macaddr[]);
 void mrp_attribute_init(mrp_attribute_state *st,
                         mrp_attribute_type t,
                         unsigned int port_num,
+                        unsigned int here,
                         void *info);
 
 

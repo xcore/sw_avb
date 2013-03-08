@@ -294,7 +294,7 @@ void avb_1722_1_adp_discovery_periodic(chanend c_tx)
         case ADP_DISCOVERY_DISCOVER:
         {
             avb_1722_1_create_adp_packet(ENTITY_DISCOVER, discover_guid);
-            mac_tx(c_tx, avb_1722_1_buf, AVB_1722_1_ADP_PACKET_SIZE, 0);
+            mac_tx(c_tx, avb_1722_1_buf, AVB_1722_1_ADP_PACKET_SIZE, -1);
             adp_discovery_state = ADP_DISCOVERY_WAITING;
             break;
         }
@@ -339,7 +339,7 @@ void avb_1722_1_adp_advertising_periodic(chanend c_tx, chanend ptp)
 
         case ADP_ADVERTISE_ADVERTISE_1:
             avb_1722_1_create_adp_packet(ENTITY_AVAILABLE, my_guid);
-            mac_tx(c_tx, avb_1722_1_buf, AVB_1722_1_ADP_PACKET_SIZE, 0);
+            mac_tx(c_tx, avb_1722_1_buf, AVB_1722_1_ADP_PACKET_SIZE, -1);
 
             start_avb_timer(&adp_readvertise_timer, AVB_1722_1_ADP_REPEAT_TIME);
             adp_advertise_state = ADP_ADVERTISE_WAITING;
@@ -348,7 +348,7 @@ void avb_1722_1_adp_advertising_periodic(chanend c_tx, chanend ptp)
 
         case ADP_ADVERTISE_DEPARTING:
             avb_1722_1_create_adp_packet(ENTITY_DEPARTING, my_guid);
-            mac_tx(c_tx, avb_1722_1_buf, AVB_1722_1_ADP_PACKET_SIZE, 0);
+            mac_tx(c_tx, avb_1722_1_buf, AVB_1722_1_ADP_PACKET_SIZE, -1);
 
             adp_advertise_state = ADP_ADVERTISE_IDLE;
             avb_1722_1_available_index = 0;

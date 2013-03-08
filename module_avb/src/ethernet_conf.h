@@ -1,4 +1,8 @@
+#include "avb_conf.h"
+
+#ifndef ETHERNET_DEFAULT_IMPLEMENTATION
 #define ETHERNET_DEFAULT_IMPLEMENTATION full
+#endif
 
 #ifndef ETHERNET_RX_HP_QUEUE 
 #define ETHERNET_RX_HP_QUEUE 1
@@ -10,13 +14,16 @@
 
 //#define ETHERNET_TRAFFIC_SHAPER 1
 
+#ifndef ETHERNET_RX_ENABLE_TIMER_OFFSET_REQ
 #define ETHERNET_RX_ENABLE_TIMER_OFFSET_REQ 1
+#endif
 
 #if !defined(ETHERNET_USE_AVB_FILTER) || ETHERNET_USE_AVB_FILTER
 #define ETHERNET_CUSTOM_FILTER_HEADER "avb_mac_filter.h"
 #endif
 
+#ifndef MAC_CUSTOM_FILTER
 #define MAC_CUSTOM_FILTER 1
+#endif
 #define AVB_MAC
-#include "avb_conf.h"
 

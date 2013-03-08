@@ -190,7 +190,7 @@ void avb_1722_maap_periodic(chanend c_tx)
                                   (char *) &maap_buf[0],
                                   NULL, 0,
                                   NULL, 0);
-      mac_tx(c_tx, maap_buf, nbytes, 0);
+      mac_tx(c_tx, maap_buf, nbytes, -1);
       maap_addr.probe_count--;
 
       if (maap_addr.probe_count == 0)
@@ -239,7 +239,7 @@ void avb_1722_maap_periodic(chanend c_tx)
                                   (char *) &maap_buf[0],
                                   NULL, 0,
                                   NULL, 0);
-      mac_tx(c_tx, maap_buf, nbytes, 0);
+      mac_tx(c_tx, maap_buf, nbytes, -1);
 
       if (!maap_addr.immediately)
       {
@@ -399,7 +399,7 @@ void avb_1722_maap_process_packet(unsigned char buf[], unsigned char src_addr[6]
                                   test_count,
                                   conflict_addr,
                                   conflict_count);
-        mac_tx(c_tx, maap_buf, len, 0);
+        mac_tx(c_tx, maap_buf, len, -1);
       #if AVB_DEBUG_MAAP
         printstrln("MAAP: Tx defend");
       #endif

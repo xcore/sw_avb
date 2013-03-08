@@ -17,9 +17,11 @@
 
 #define HTONS(x) ((x>>8)|(((x&0xff)<<8)))
 
+#define MII_FILTER_FORWARD_TO_OTHER_PORTS (0x80000000)
+
 #if defined(__XC__) && (!defined(ETHERNET_USE_AVB_FILTER) || ETHERNET_USE_AVB_FILTER)
 #pragma unsafe arrays
-inline int mac_custom_filter(unsigned int buf[])
+inline int mac_custom_filter(unsigned int buf[], unsigned int mac[2])
 {
   int result = 0;
   unsigned short etype = (unsigned short) buf[3];
@@ -49,7 +51,16 @@ inline int mac_custom_filter(unsigned int buf[])
           cd_flag = (buf[3] >> 23) & 1;
         }
         if (cd_flag) 
+        {
           result = MAC_FILTER_AVB_CONTROL;
+#if NUM_ETHERNET_MASTER_PORTS == 2
+          if ((buf[0] & 0x1) || // Broadcast 
+          (buf[0] != mac[0] || buf[1] != mac[1])) // Not unicast
+          {
+            result |= MII_FILTER_FORWARD_TO_OTHER_PORTS;
+          }
+#endif
+        }
         else {
           // route the 1722 streams
           unsigned id0, id1;
@@ -73,11 +84,21 @@ inline int mac_custom_filter(unsigned int buf[])
             buf[1] = 0x0;
             result = ROUTER_LINK(link);
           }
+#if NUM_ETHERNET_MASTER_PORTS == 2
+          result |= MII_FILTER_FORWARD_TO_OTHER_PORTS;
+#endif
 
         }
       }
       break;
     default:
+#if NUM_ETHERNET_MASTER_PORTS == 2
+      if ((buf[0] & 0x1) || // Broadcast 
+          (buf[0] != mac[0] || buf[1] != mac[1])) // Not unicast
+      {
+        result |= MII_FILTER_FORWARD_TO_OTHER_PORTS;
+      }
+#endif
       break;
   }
 

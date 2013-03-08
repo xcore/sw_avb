@@ -547,7 +547,7 @@ static int encode_talker_message(char *buf,
         unsigned char tspec;
         unsigned accumulated_latency;
 
-        tspec_max_frame_size = here ? avb_srp_calculate_max_framesize(attribute_info) : attribute_info->tspec_max_frame_size;
+        tspec_max_frame_size = here ? avb_srp_calculate_max_framesize(source_info) : attribute_info->tspec_max_frame_size;
         tspec_max_interval = here ? AVB_SRP_MAX_INTERVAL_FRAMES_DEFAULT : attribute_info->tspec_max_interval;
         tspec = here ? (AVB_SRP_TSPEC_PRIORITY_DEFAULT << 5 |
           AVB_SRP_TSPEC_RANK_DEFAULT << 4 |

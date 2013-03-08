@@ -80,9 +80,9 @@ static void register_talkers(chanend talker_ctl[])
       source->stream.srp_talker_attr = mrp_get_attr();
       source->stream.srp_talker_failed_attr = mrp_get_attr();
       source->stream.srp_listener_attr = mrp_get_attr();
-      mrp_attribute_init(source->stream.srp_talker_attr, MSRP_TALKER_ADVERTISE, 0, source);
-      mrp_attribute_init(source->stream.srp_talker_failed_attr, MSRP_TALKER_FAILED, 0, source);
-      mrp_attribute_init(source->stream.srp_listener_attr, MSRP_LISTENER, 0, source);
+      mrp_attribute_init(source->stream.srp_talker_attr, MSRP_TALKER_ADVERTISE, 0, 1, source);
+      mrp_attribute_init(source->stream.srp_talker_failed_attr, MSRP_TALKER_FAILED, 0, 1, source);
+      mrp_attribute_init(source->stream.srp_listener_attr, MSRP_LISTENER, 0, 1, source);
       max_talker_stream_id++;
     }
   }
@@ -109,9 +109,9 @@ static void register_listeners(chanend listener_ctl[])
       sink->stream.srp_talker_attr = mrp_get_attr();
       sink->stream.srp_talker_failed_attr = mrp_get_attr();
       sink->stream.srp_listener_attr = mrp_get_attr();
-      mrp_attribute_init(sink->stream.srp_talker_attr, MSRP_TALKER_ADVERTISE, 0, sink);
-      mrp_attribute_init(sink->stream.srp_talker_failed_attr, MSRP_TALKER_FAILED, 0, sink);
-      mrp_attribute_init(sink->stream.srp_listener_attr, MSRP_LISTENER, 0, sink);
+      mrp_attribute_init(sink->stream.srp_talker_attr, MSRP_TALKER_ADVERTISE, 0, 1, sink);
+      mrp_attribute_init(sink->stream.srp_talker_failed_attr, MSRP_TALKER_FAILED, 0, 1, sink);
+      mrp_attribute_init(sink->stream.srp_listener_attr, MSRP_LISTENER, 0, 1, sink);
       max_listener_stream_id++;
     }
     xc_abi_outuint(listener_ctl[i], max_link_id);
@@ -197,7 +197,7 @@ void avb_init(chanend media_ctl[],
   for(int i=0; i < MRP_NUM_PORTS; i++)
   {
     domain_attr[i] = mrp_get_attr();
-    mrp_attribute_init(domain_attr[i], MSRP_DOMAIN_VECTOR, i, NULL);
+    mrp_attribute_init(domain_attr[i], MSRP_DOMAIN_VECTOR, i, 1, NULL);
   }
 
 #ifdef AVB_INCLUDE_MMRP
@@ -226,7 +226,7 @@ void avb_init_srp_only(chanend c_mac_rx0,
   for(int i=0; i < MRP_NUM_PORTS; i++)
   {
     domain_attr[i] = mrp_get_attr();
-    mrp_attribute_init(domain_attr[i], MSRP_DOMAIN_VECTOR, i, NULL);
+    mrp_attribute_init(domain_attr[i], MSRP_DOMAIN_VECTOR, i, 1, NULL);
   }
 
   mac_set_custom_filter(c_mac_rx, MAC_FILTER_AVB_CONTROL);

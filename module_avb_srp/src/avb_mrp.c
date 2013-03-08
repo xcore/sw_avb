@@ -697,13 +697,14 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
 void mrp_attribute_init(mrp_attribute_state *st,
                         mrp_attribute_type t,
                         unsigned int port_num,
+                        unsigned int here,
                         void *info)
 {
   st->attribute_type = t;
   st->attribute_info = info;
   st->port_num = port_num;
   st->propagate = 0;
-  st->here = 0;
+  st->here = here;
   return;
 }
 
@@ -879,7 +880,7 @@ static void global_event(mrp_event e, unsigned int port_num) {
   while (attr != NULL) {
     if (attr->applicant_state != MRP_DISABLED &&
         attr->applicant_state != MRP_UNUSED &&
-        ((attr->port_num != port_num) && attr->propagate))
+        ((attr->port_num == port_num) || attr->propagate))
       mrp_update_state(e, attr, 0);
     attr = attr->next;
   }
@@ -892,7 +893,7 @@ static void attribute_type_event(mrp_attribute_type atype, mrp_event e, unsigned
     if (attr->applicant_state != MRP_DISABLED && 
         attr->applicant_state != MRP_UNUSED &&
         attr->attribute_type == atype &&
-        ((attr->port_num != port_num) && attr->propagate))  {
+        ((attr->port_num == port_num) || attr->propagate))  {
       mrp_update_state(e, attr, 0);
     }
     attr = attr->next;
@@ -1233,7 +1234,7 @@ void avb_mrp_process_packet(unsigned char buf[], int etype, int len, unsigned in
               if (avb_srp_process_attribute(attr_type, first_value, i, &stream_data))
               {
                 mrp_attribute_state *st = mrp_get_attr();
-                mrp_attribute_init(st, attr_type, port_num, stream_data);
+                mrp_attribute_init(st, attr_type, port_num, 0, stream_data);
                 simple_printf("mrp_attribute_init: %d, %d\n", attr_type, port_num);
                 mrp_in(three_packed_event, four_packed_event, st);
               }

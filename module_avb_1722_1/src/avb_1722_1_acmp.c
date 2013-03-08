@@ -302,7 +302,7 @@ static void acmp_send_command(int entity_type, int message_type, avb_1722_1_acmp
     sequence_id[entity_type]++;
 
     avb_1722_1_create_acmp_packet(command, message_type, ACMP_STATUS_SUCCESS);
-    mac_tx(c_tx, avb_1722_1_buf, AVB_1722_1_ACMP_PACKET_SIZE, 0);
+    mac_tx(c_tx, avb_1722_1_buf, AVB_1722_1_ACMP_PACKET_SIZE, -1);
     process_avb_1722_1_acmp_packet((avb_1722_1_acmp_packet_t*)pkt_without_eth_header, c_tx);
 
     if (!retry)
@@ -321,7 +321,7 @@ static void acmp_send_command(int entity_type, int message_type, avb_1722_1_acmp
 static void acmp_send_response(int message_type, avb_1722_1_acmp_cmd_resp *response, int status, chanend c_tx)
 {
     avb_1722_1_create_acmp_packet(response, message_type, status);
-    mac_tx(c_tx, avb_1722_1_buf, AVB_1722_1_ACMP_PACKET_SIZE, 0);
+    mac_tx(c_tx, avb_1722_1_buf, AVB_1722_1_ACMP_PACKET_SIZE, -1);
 }
 
 static void acmp_set_talker_response()
