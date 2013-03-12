@@ -2,6 +2,7 @@
 #include "media_input_fifo.h"
 #include "hwlock.h"
 #include "avb_1722_def.h"
+#include <xscope.h>
 
 static hwlock_t enable_lock;
 unsigned int enable_request_state = 0;
@@ -109,8 +110,8 @@ void media_input_fifo_push_sample(media_input_fifo_t media_input_fifo0,
     wrIndex = (int *) media_input_fifo->startIndex;
     int spaceLeft = ((int *) media_input_fifo->rdIndex) - wrIndex;
 
-    spaceLeft &= (MEDIA_INPUT_FIFO_SAMPLE_FIFO_SIZE-1);
-    
+    spaceLeft &= (MEDIA_INPUT_FIFO_SAMPLE_FIFO_SIZE-1); 
+
     if (spaceLeft && (spaceLeft < packetSize)) return;
 
     wrIndex[0] = ts;
@@ -141,6 +142,22 @@ void media_input_fifo_push_sample(media_input_fifo_t media_input_fifo0,
 
   media_input_fifo->sampleCountInPacket = sampleCountInPacket;
   media_input_fifo->wrIndex = (int) wrIndex;
+}
+
+int media_input_fifo_fill_level(media_input_fifo_t media_input_fifo0) 
+{
+  volatile ififo_t *media_input_fifo =  (ififo_t *) media_input_fifo0;
+  int *rdIndex = (int *) media_input_fifo->rdIndex;
+  int *wrIndex = (int *) media_input_fifo->startIndex;
+  int fill = 0;
+  while (rdIndex != wrIndex) {
+    int packetSize = media_input_fifo->packetSize;
+    rdIndex += packetSize;
+    if (rdIndex + packetSize > (int *) media_input_fifo->fifoEnd)
+      rdIndex = (int *) &media_input_fifo->buf[0];    
+    fill += packetSize - 2;
+  }
+  return fill;
 }
 
 int media_input_fifo_empty(media_input_fifo_t media_input_fifo0)
