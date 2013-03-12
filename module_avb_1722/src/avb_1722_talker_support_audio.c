@@ -2,6 +2,8 @@
  * \file avb_1722_talker_support_audio.c
  * \brief 1722 Talker support C functions
  */
+ #include <print.h>
+ #include <xscope.h>
 #include "avb_conf.h"
 
 #if AVB_NUM_SOURCES > 0 && (defined(AVB_1722_FORMAT_61883_6) || defined(AVB_1722_FORMAT_SAF))
@@ -172,6 +174,11 @@ int avb1722_create_packet(unsigned char Buf0[],
     if (stream_info->rem & 0xffff0000) {
         samples_in_packet += 1;
         stream_info->rem &= 0xffff;
+    }
+
+    if (stream_info->initial)
+    {
+        if (media_input_fifo_fill_level(map[0]) < MEDIA_INPUT_FIFO_SAMPLE_FIFO_SIZE/2) return 0;
     }
 
     // Check to see if there is something that can be transmitted.  If there is not, then we give up

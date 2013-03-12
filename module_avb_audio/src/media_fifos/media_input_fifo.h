@@ -125,6 +125,9 @@ init_media_input_fifos(media_input_fifo_t ififos[],
  */
 media_input_fifo_t get_media_input_fifo(int stream_num);
 
+
+int media_input_fifo_fill_level(media_input_fifo_t media_input_fifo0);
+
 /**
  *  \brief Check if the FIFO is empty
  */
