@@ -162,6 +162,7 @@ targetID="org.eclipse.cdt.build.MakeTargetBuilder">
                                     <listOptionValue builtIn="false" value='&quot;${XMOS_DOC_PATH}/../target/include/c++/4.2.1&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${XMOS_DOC_PATH}/../target/include/c++/4.2.1/xcore-xmos-elf&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/interfaces}&quot;' />
+<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/codecs/CS4270}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/interfaces/spdif}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/interfaces/tdm}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/codecs}&quot;' />
@@ -176,6 +177,7 @@ targetID="org.eclipse.cdt.build.MakeTargetBuilder">
                                 <inputType id = "com.xmos.cdt.xc.compiler.input.21914320" name="XC Sources" superClass="com.xmos.cdt.xc.compiler.input" />
                                 <option id = "gnu.c.compiler.option.include.paths.84532931" valueType="includePath" superClass="gnu.c.compiler.option.include.paths">
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/interfaces}&quot;' />
+<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/codecs/CS4270}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/interfaces/spdif}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/interfaces/tdm}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/codecs}&quot;' />
@@ -191,6 +193,7 @@ targetID="org.eclipse.cdt.build.MakeTargetBuilder">
                             <tool id = "com.xmos.cdt.xc.compiler.base.10607287" name="com.xmos.cdt.xc.compiler.base" superClass="com.xmos.cdt.xc.compiler.base">
                                 <option id = "gnu.c.compiler.option.include.paths.52469247" valueType="includePath" superClass="gnu.c.compiler.option.include.paths">
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/interfaces}&quot;' />
+<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/codecs/CS4270}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/interfaces/spdif}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/interfaces/tdm}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/codecs}&quot;' />
@@ -204,6 +207,7 @@ targetID="org.eclipse.cdt.build.MakeTargetBuilder">
                                 </option>
                                 <option id = "com.xmos.c.compiler.option.include.paths.42394193" valueType="includePath" superClass="com.xmos.c.compiler.option.include.paths">
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/interfaces}&quot;' />
+<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/codecs/CS4270}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/interfaces/spdif}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/interfaces/tdm}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/codecs}&quot;' />
@@ -219,6 +223,7 @@ targetID="org.eclipse.cdt.build.MakeTargetBuilder">
                             <tool id = "com.xmos.cdt.c.compiler.base.47214542" name="com.xmos.cdt.c.compiler.base" superClass="com.xmos.cdt.c.compiler.base">
                                 <option id = "gnu.c.compiler.option.include.paths.1993031" valueType="includePath" superClass="gnu.c.compiler.option.include.paths">
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/interfaces}&quot;' />
+<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/codecs/CS4270}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/interfaces/spdif}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/interfaces/tdm}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/codecs}&quot;' />
@@ -232,6 +237,7 @@ targetID="org.eclipse.cdt.build.MakeTargetBuilder">
                                 </option>
                                 <option id = "com.xmos.c.compiler.option.include.paths.19704807" valueType="includePath" superClass="com.xmos.c.compiler.option.include.paths">
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/interfaces}&quot;' />
+<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/codecs/CS4270}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/interfaces/spdif}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/interfaces/tdm}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/codecs}&quot;' />
@@ -247,6 +253,7 @@ targetID="org.eclipse.cdt.build.MakeTargetBuilder">
                             <tool id = "com.xmos.cdt.cpp.compiler.base.3648569" name="com.xmos.cdt.cpp.compiler.base" superClass="com.xmos.cdt.cpp.compiler.base">
                                 <option id = "gnu.c.compiler.option.include.paths.6442063" valueType="includePath" superClass="gnu.c.compiler.option.include.paths">
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/interfaces}&quot;' />
+<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/codecs/CS4270}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/interfaces/spdif}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/interfaces/tdm}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/codecs}&quot;' />
@@ -260,6 +267,7 @@ targetID="org.eclipse.cdt.build.MakeTargetBuilder">
                                 </option>
                                 <option id = "com.xmos.c.compiler.option.include.paths.8786829" valueType="includePath" superClass="com.xmos.c.compiler.option.include.paths">
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/interfaces}&quot;' />
+<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/codecs/CS4270}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/interfaces/spdif}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/interfaces/tdm}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/codecs}&quot;' />
@@ -275,6 +283,7 @@ targetID="org.eclipse.cdt.build.MakeTargetBuilder">
                             <tool id = "com.xmos.cdt.core.assembler.base.62015971" name="com.xmos.cdt.core.assembler.base" superClass="com.xmos.cdt.core.assembler.base">
                                 <option id = "gnu.c.compiler.option.include.paths.68580584" valueType="includePath" superClass="gnu.c.compiler.option.include.paths">
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/interfaces}&quot;' />
+<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/codecs/CS4270}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/interfaces/spdif}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/interfaces/tdm}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/codecs}&quot;' />
@@ -288,6 +297,7 @@ targetID="org.eclipse.cdt.build.MakeTargetBuilder">
                                 </option>
                                 <option id = "com.xmos.c.compiler.option.include.paths.70450317" valueType="includePath" superClass="com.xmos.c.compiler.option.include.paths">
                                     <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/interfaces}&quot;' />
+<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/codecs/CS4270}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/interfaces/spdif}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/interfaces/tdm}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_audio/src/codecs}&quot;' />
