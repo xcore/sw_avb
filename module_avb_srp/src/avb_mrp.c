@@ -881,7 +881,12 @@ static void global_event(mrp_event e, unsigned int port_num) {
     if (attr->applicant_state != MRP_DISABLED &&
         attr->applicant_state != MRP_UNUSED &&
         ((attr->port_num == port_num) || attr->propagate))
-      mrp_update_state(e, attr, 0);
+    {
+      if (e != MRP_EVENT_PERIODIC || attr->attribute_type == MVRP_VID_VECTOR)
+      {
+        mrp_update_state(e, attr, 0);
+      }
+    }
     attr = attr->next;
   }
   
