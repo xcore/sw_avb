@@ -18,8 +18,6 @@
 #define AVB_I2C_TILE            0
 #define AVB_GPIO_TILE           0
 
-// 1V0 AUDIO SLICE
-
 #define PORT_I2C                on tile[AVB_I2C_TILE]:XS1_PORT_4F
 
 // PLL frequency control
@@ -28,11 +26,11 @@
 // I2S ports
 #define PORT_MCLK               on tile[0]:XS1_PORT_1E
 #define PORT_SCLK               on tile[0]:XS1_PORT_1A
-#define PORT_LRCLK              on tile[0]:XS1_PORT_1H
+#define PORT_LRCLK              on tile[0]:XS1_PORT_1I
 
-#define PORT_SDATA_OUT          {on tile[0]:XS1_PORT_1D,on tile[0]:XS1_PORT_1M}
+#define PORT_SDATA_OUT          {on tile[0]:XS1_PORT_1D,on tile[0]:XS1_PORT_1H}
 
-#define PORT_SDATA_IN           {on tile[0]:XS1_PORT_1I,on tile[0]:XS1_PORT_1L}
+#define PORT_SDATA_IN           {on tile[0]:XS1_PORT_1K,on tile[0]:XS1_PORT_1L}
 
 #define PORT_BUTTONS            on tile[AVB_GPIO_TILE]:XS1_PORT_4C
 

@@ -108,7 +108,7 @@ int avb_add_detected_stream(srp_talker_first_value *fv,
 
 static void avb_srp_map_join(mrp_attribute_state *attr, int new)
 {
-  printstrln("MAD_Join.indication");
+  // printstrln("MAD_Join.indication");
   // Attribute propagation:
   attr->propagate = 1; // Propagate to other port
   mrp_mad_join(attr, new);
