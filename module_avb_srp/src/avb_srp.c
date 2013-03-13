@@ -108,7 +108,7 @@ int avb_add_detected_stream(srp_talker_first_value *fv,
 
 static void avb_srp_map_join(mrp_attribute_state *attr, int new)
 {
-  // printstrln("MAD_Join.indication");
+  printstrln("MAD_Join.indication");
   // Attribute propagation:
   attr->propagate = 1; // Propagate to other port
   mrp_mad_join(attr, new);
@@ -195,8 +195,9 @@ void avb_srp_listener_join_ind(mrp_attribute_state *attr, int new, int four_pack
   enum avb_source_state_t state;
 	unsigned stream = avb_get_source_stream_index_from_pointer(attr->attribute_info);
 
-	if (stream == -1u)
+	if (stream == -1u && new)
   {
+    printstr("Listener ");
     avb_srp_map_join(attr, new);
     return;
   }
@@ -275,12 +276,17 @@ void avb_srp_talker_join_ind(mrp_attribute_state *attr, int new)
 {
 	unsigned stream = avb_get_sink_stream_index_from_pointer(attr->attribute_info);
 
-	if (stream != -1u) {
+	// if (stream != -1u)
+  {
 		// This could be used to report talker advertising instead of the snooping scheme above
 	}
-  else
+  // else
   {
-    avb_srp_map_join(attr, new);
+    if (new)
+    {
+      printstr("Talker ");
+      avb_srp_map_join(attr, new);
+    }
   }
 }
 

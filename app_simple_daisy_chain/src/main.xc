@@ -85,6 +85,9 @@ on tile[0]: in buffered port:32 p_aud_din[AVB_DEMO_NUM_CHANNELS/2] = PORT_SDATA_
 on tile[0]: out port p_audio_shared = PORT_AUDIO_SHARED;
 #endif
 
+// PTP sync port
+on tile[0]: port ptp_sync_port = XS1_PORT_1C;
+
 #if AVB_DEMO_ENABLE_LISTENER
 media_output_fifo_data_t ofifo_data[AVB_NUM_MEDIA_OUTPUTS];
 media_output_fifo_t ofifos[AVB_NUM_MEDIA_OUTPUTS];
@@ -124,7 +127,7 @@ int main(void)
   chan c_mac_rx[2 + AVB_DEMO_ENABLE_LISTENER];
 
   // PTP channels
-  chan c_ptp[1 + AVB_DEMO_ENABLE_TALKER];
+  chan c_ptp[2 + AVB_DEMO_ENABLE_TALKER];
 
   // AVB unit control
 #if AVB_DEMO_ENABLE_TALKER
@@ -171,7 +174,7 @@ int main(void)
                                    c_mac_rx[0],
                                    c_mac_tx[0],
                                    c_ptp,
-                                   1 + AVB_DEMO_ENABLE_TALKER,
+                                   2 + AVB_DEMO_ENABLE_TALKER,
                                    PTP_GRANDMASTER_CAPABLE);
 
 
@@ -246,7 +249,7 @@ int main(void)
                                   AVB_NUM_SINKS);
 #endif
 
-    on tile[AVB_GPIO_TILE]: gpio_task(c_gpio_ctl);
+    // on tile[AVB_GPIO_TILE]: gpio_task(c_gpio_ctl);
 
     // Application
     on tile[1]:
@@ -271,6 +274,9 @@ int main(void)
 
       demo(c_mac_rx[1], c_mac_tx[1], c_gpio_ctl);
     }
+
+    on tile[0]: ptp_output_test_clock(c_ptp[2], ptp_sync_port, 100000000);
+
   }
 
     return 0;
