@@ -4,7 +4,7 @@
 /***** APPLICATION CONFIGURATION ******/
 
 /** Global switch to enable or disable AVB Talker functionality in the demo */
-#define AVB_DEMO_ENABLE_TALKER 1
+#define AVB_DEMO_ENABLE_TALKER 0
 /** Global switch to enable or disable AVB Listener functionality in the demo */
 #define AVB_DEMO_ENABLE_LISTENER 1
 

@@ -108,7 +108,7 @@ int avb_add_detected_stream(srp_talker_first_value *fv,
 
 static void avb_srp_map_join(mrp_attribute_state *attr, int new)
 {
-  printstrln("MAD_Join.indication");
+  // printstrln("MAD_Join.indication");
   // Attribute propagation:
   attr->propagate = 1; // Propagate to other port
   mrp_mad_join(attr, new);
@@ -197,7 +197,7 @@ void avb_srp_listener_join_ind(mrp_attribute_state *attr, int new, int four_pack
 
 	if (stream == -1u && new)
   {
-    printstr("Listener ");
+    // printstr("Listener ");
     avb_srp_map_join(attr, new);
     return;
   }
@@ -284,7 +284,7 @@ void avb_srp_talker_join_ind(mrp_attribute_state *attr, int new)
   {
     if (new)
     {
-      printstr("Talker ");
+      // printstr("Talker ");
       avb_srp_map_join(attr, new);
     }
   }

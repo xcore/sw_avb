@@ -275,7 +275,7 @@ int main(void)
       demo(c_mac_rx[1], c_mac_tx[1], c_gpio_ctl);
     }
 
-    on tile[0]: ptp_output_test_clock(c_ptp[2], ptp_sync_port, 100000000);
+    on tile[0]: ptp_output_test_clock(c_ptp[1 + AVB_DEMO_ENABLE_TALKER], ptp_sync_port, 100000000);
 
   }
 
