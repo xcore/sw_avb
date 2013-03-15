@@ -125,27 +125,27 @@ void avb_1722_listener_handle_packet(chanend c_mac_rx,
                                      ptp_time_info_mod64 &?timeInfo)
 {
   unsigned pktByteCnt;
-  unsigned int avb_hash;
   unsigned int RxBuf[(MAX_PKT_BUF_SIZE_LISTENER+3)/4];
   unsigned int src_port;
+  int stream_id;
 
   mac_rx_offset2(c_mac_rx,
                  (RxBuf, unsigned char[]),
                  pktByteCnt,
+                 stream_id,
                  src_port);
   pktByteCnt -= 4;
-  avb_hash = RxBuf[1];
 
   // process the audio packet if enabled.
-  if (avb_hash < MAX_AVB_STREAMS_PER_LISTENER &&
-      st.listener_streams[avb_hash].active) {
+  if (stream_id < MAX_AVB_STREAMS_PER_LISTENER &&
+      st.listener_streams[stream_id].active) {
     // process the current packet
     avb_1722_listener_process_packet(c_buf_ctl,
                                      (RxBuf, unsigned char[]),
                                      pktByteCnt,
-                                     st.listener_streams[avb_hash],
+                                     st.listener_streams[stream_id],
                                      timeInfo,
-                                     avb_hash,
+                                     stream_id,
                                      st.notified_buf_ctl);
   }
 }

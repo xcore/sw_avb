@@ -61,8 +61,8 @@ static inline int hash(int key0, int key1, int poly)
 
 int avb_1722_router_table_lookup_hash(int key0,
                                       int key1, 
-                                      unsigned int *link, 
-                                      unsigned int *avb_hash) 
+                                      int *link, 
+                                      int *avb_hash) 
 {
   unsigned int x;
 

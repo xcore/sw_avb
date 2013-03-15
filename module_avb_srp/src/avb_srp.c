@@ -31,7 +31,7 @@ int avb_srp_match_listener_to_talker_stream_id(unsigned stream_id[2], avb_srp_in
   for(int i=0;i<AVB_STREAM_DETECT_HISTORY_SIZE;i++)
     if (stream_id[0] == stream_history[i].stream_id[0] &&
         stream_id[1] == stream_history[i].stream_id[1]) {
-      *stream = &stream_history[i];
+      if (stream != NULL) *stream = &stream_history[i];
     return 1;
     }
 
@@ -106,10 +106,19 @@ int avb_add_detected_stream(srp_talker_first_value *fv,
   return 1;
 }
 
-static void avb_srp_map_join(mrp_attribute_state *attr, int new)
+static void avb_srp_map_join(mrp_attribute_state *attr, int new, int listener)
 {
+  avb_srp_info_t *attribute_info = attr->attribute_info;
   // printstrln("MAD_Join.indication");
   // Attribute propagation:
+  if (listener && avb_srp_match_listener_to_talker_stream_id(attribute_info->stream_id, NULL))
+  {
+    avb_1722_add_stream_mapping(avb_control_get_mac_tx(),
+                              attribute_info->stream_id,
+                              -1,
+                              0,
+                              1);
+  }
   attr->propagate = 1; // Propagate to other port
   mrp_mad_join(attr, new);
 }
@@ -198,7 +207,7 @@ void avb_srp_listener_join_ind(mrp_attribute_state *attr, int new, int four_pack
 	if (stream == -1u && new)
   {
     // printstr("Listener ");
-    avb_srp_map_join(attr, new);
+    avb_srp_map_join(attr, new, 1);
     return;
   }
 
@@ -285,7 +294,7 @@ void avb_srp_talker_join_ind(mrp_attribute_state *attr, int new)
     if (new)
     {
       // printstr("Talker ");
-      avb_srp_map_join(attr, new);
+      avb_srp_map_join(attr, new, 0);
     }
   }
 }

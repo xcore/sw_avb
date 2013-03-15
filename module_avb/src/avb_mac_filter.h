@@ -21,7 +21,7 @@
 
 #if defined(__XC__) && (!defined(ETHERNET_USE_AVB_FILTER) || ETHERNET_USE_AVB_FILTER)
 #pragma unsafe arrays
-inline int mac_custom_filter(unsigned int buf[], unsigned int mac[2])
+inline int mac_custom_filter(unsigned int buf[], unsigned int mac[2], int &user_data)
 {
   int result = 0;
   unsigned short etype = (unsigned short) buf[3];
@@ -64,7 +64,7 @@ inline int mac_custom_filter(unsigned int buf[], unsigned int mac[2])
         else {
           // route the 1722 streams
           unsigned id0, id1;
-          unsigned link, hash;
+          int link, hash, forward;
           int lookup;
           if (qhdr) {
             id0 = (buf[7] << 16 | buf[5]>>16);
@@ -78,15 +78,19 @@ inline int mac_custom_filter(unsigned int buf[], unsigned int mac[2])
             avb_1722_router_table_lookup(id0,
                                          id1,
                                          link,
-                                         hash);
+                                         hash,
+                                         forward);
+
           if (lookup) {
-            buf[0] = hash << 16;
-            buf[1] = 0x0;
             result = ROUTER_LINK(link);
-          }
+            user_data = hash;
 #if NUM_ETHERNET_MASTER_PORTS == 2
-          result |= MII_FILTER_FORWARD_TO_OTHER_PORTS;
+            if (forward)
+            {
+              result |= MII_FILTER_FORWARD_TO_OTHER_PORTS;
+            }
 #endif
+          }
 
         }
       }

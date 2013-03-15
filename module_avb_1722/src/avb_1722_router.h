@@ -68,7 +68,8 @@ int avb_1722_check_new_stream(unsigned int streamId[2]);
 int avb_1722_add_stream_mapping(chanend c_tx,
                                 unsigned int streamId[2],
                                int link_num,
-                               int avb_hash); 
+                               int avb_hash,
+                               int forward); 
 
 int avb_1722_disconnect_stream_mapping(chanend c_tx,
                                        unsigned int streamId[2]);

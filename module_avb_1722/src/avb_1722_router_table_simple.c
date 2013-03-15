@@ -6,24 +6,34 @@
 
 #include <xs1.h>
 #include <print.h>
-#include "hwlock.h"
+#include "simple_printf.h"
+#include "swlock.h"
 #include "string.h"
 #include "avb_1722_router_table.h"
+
+ #define AVB_MAX_NUM_SINK_AND_FORWARD_STREAMS 8
 
 typedef struct avb_1722_router_table_entry_t 
 {
   int id[2];
   int link;
+  int avb_hash;
 } avb_1722_router_table_entry_t;
 
-static avb_1722_router_table_entry_t router_table[AVB_NUM_SINKS];
-static hwlock_t table_lock;
+static avb_1722_router_table_entry_t router_table[AVB_MAX_NUM_SINK_AND_FORWARD_STREAMS];
+// static hwlock_t table_lock;
+static swlock_t table_lock;
+
+#define __hwlock_init() swlock_init(&table_lock)
+#define __hwlock_release(x) swlock_release(&x)
+#define __hwlock_acquire(x) swlock_acquire(&x)
 
 void init_avb_1722_router_table_simple()
 {
   int i;
-  table_lock = __hwlock_init();
-  for(i=0;i<AVB_NUM_SINKS;i++) {
+  // table_lock = __hwlock_init();
+  swlock_init(&table_lock);
+  for(i=0;i<AVB_MAX_NUM_SINK_AND_FORWARD_STREAMS;i++) {
     router_table[i].id[0] = 0;
     router_table[i].id[1] = 0;
   }    
@@ -35,22 +45,32 @@ void init_avb_1722_router_table_simple()
 
 int avb_1722_router_table_lookup_simple(int key0,
                                         int key1, 
-                                        unsigned int *link, 
-                                        unsigned int *sink_num) 
+                                        int *link, 
+                                        int *avb_hash,
+                                        int *forward) 
 {
 
   if (key0==0 && key1==0)
     return 0;
   __hwlock_acquire(table_lock);      
-  for(int i=0;i<AVB_NUM_SINKS;i++) {
-    __asm__(".xtaloop " STRINGIFY(AVB_NUM_SINKS) "\n");
+  for(int i=0;i<AVB_MAX_NUM_SINK_AND_FORWARD_STREAMS;i++) {
+    __asm__(".xtaloop " STRINGIFY(AVB_MAX_NUM_SINK_AND_FORWARD_STREAMS) "\n");
     if (key0 == router_table[i].id[0] &&
         key1 == router_table[i].id[1]) {
-      *sink_num = i;
+      if ((router_table[i].avb_hash & 0x80000000) == 0x80000000) {
+        *forward = 1;
+        *avb_hash = router_table[i].avb_hash & ~(0x80000000);
+      }
+      else
+      {
+        *avb_hash = router_table[i].avb_hash;
+        *forward = 0;
+      }
       *link = router_table[i].link;
       __hwlock_release(table_lock);
       return 1;
     }
+
   }
   __hwlock_release(table_lock);
   return 0;
@@ -61,12 +81,38 @@ int avb_1722_router_table_lookup_simple(int key0,
 void avb_1722_router_table_add_entry_simple(int key0,
                                             int key1,
                                             int link,
-                                            int sink_num)
+                                            int avb_hash,
+                                            int forward)
 {
   __hwlock_acquire(table_lock);
-  router_table[sink_num].id[0] = key0;
-  router_table[sink_num].id[1] = key1;
-  router_table[sink_num].link = link;
+
+  if (forward) avb_hash |= 0x80000000;
+
+  for(int i=0;i<AVB_MAX_NUM_SINK_AND_FORWARD_STREAMS;i++) {
+    if (key0 == router_table[i].id[0] &&
+        key1 == router_table[i].id[1]) {
+      // Found an existing entry with this stream ID, update it
+      if (!forward) {
+        router_table[i].link = link;
+      }
+      router_table[i].avb_hash = avb_hash;
+      // simple_printf("Updated table entry %x, hash: %d, link: %d, forward: %d\n", router_table[i].id[1], router_table[i].avb_hash, router_table[i].link, forward);
+      __hwlock_release(table_lock);
+      return;
+    }
+  }
+
+  // Add a new entry
+  for(int i=0;i<AVB_MAX_NUM_SINK_AND_FORWARD_STREAMS;i++) {
+    if (router_table[i].id[0] == 0) {
+      // simple_printf("Added table entry %x, hash: %d, link: %d, forward: %d\n", key1, avb_hash, link, forward);
+      router_table[i].link = link;
+      router_table[i].avb_hash = avb_hash;
+      router_table[i].id[0] = key0;
+      router_table[i].id[1] = key1;
+      break;
+    }
+  }
   __hwlock_release(table_lock);
 
   return;

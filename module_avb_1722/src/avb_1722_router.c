@@ -29,17 +29,20 @@ void avb_1722_register_routes(chanend link0,
 
 
 void send_avb_1722_router_cmd(chanend,
-                              unsigned,
-                              unsigned,
-                              unsigned,
-                              unsigned);
+                              int,
+                              int,
+                              int,
+                              int,
+                              int);
 
 int avb_1722_add_stream_mapping(chanend c_tx,
                                 unsigned int streamId[2],
                                 int link_num,
-                                int avb_hash)
+                                int avb_hash,
+                                int forward)
 {
   unsigned char *s = (unsigned char *) streamId;
+  // FIXME: Memory optimisation here
   int key0 = 
         (s[3] << 0)  |
         (s[2] << 8)  |
@@ -54,8 +57,9 @@ int avb_1722_add_stream_mapping(chanend c_tx,
   send_avb_1722_router_cmd(c_tx, 
                            key0, 
                            key1, 
-                           avb_1722_links[link_num], 
-                           avb_hash);
+                           link_num >= 0 ? avb_1722_links[link_num] : 0,
+                           avb_hash,
+                           forward);
 
   return 0;
 }
@@ -80,6 +84,7 @@ int avb_1722_disconnect_stream_mapping(chanend c_tx,
   send_avb_1722_router_cmd(c_tx,
                            key0,
                            key1,
+                           0,
                            0,
                            0);
   return 0;
