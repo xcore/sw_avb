@@ -82,7 +82,7 @@ typedef enum ptp_state_t {
                        or ``PTP_SLAVE_ONLY``) 
  **/
 void ptp_server(chanend mac_rx, chanend mac_tx, 
-                chanend client[], int num_clients,
+                chanend ptp_clients[], int num_clients,
                 enum ptp_server_type server_type);
 
 
