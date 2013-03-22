@@ -138,14 +138,17 @@ static int create_aem_read_descriptor_response(unsigned short read_type, unsigne
     if (read_type == AEM_AUDIO_CLUSTER_TYPE && read_id < (AVB_NUM_MEDIA_OUTPUTS+AVB_NUM_MEDIA_INPUTS))
     {
       descriptor = &desc_audio_cluster_template[0];
+      desc_size_bytes = sizeof(desc_audio_cluster_template);
     }
     else if ((read_type == AEM_STREAM_INPUT_TYPE && read_id < AVB_NUM_SINKS))
     {
       descriptor = &desc_stream_input_0[0];
+      desc_size_bytes = sizeof(desc_stream_input_0);
     }
     else if ((read_type == AEM_STREAM_OUTPUT_TYPE && read_id < AVB_NUM_SOURCES))
     {
       descriptor = &desc_stream_output_0[0];
+      desc_size_bytes = sizeof(desc_stream_output_0);
     }
 
     if (descriptor != NULL)
@@ -176,7 +179,6 @@ static int create_aem_read_descriptor_response(unsigned short read_type, unsigne
         descriptor[offset] = id_num + 0x30;
       }
       descriptor[offset+1] = '\0'; // NUL
-      desc_size_bytes = sizeof(desc_audio_cluster_template);
       found_descriptor = 1;
     }
   }
