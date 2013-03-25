@@ -428,7 +428,10 @@ static void process_aem_cmd_startstop_streaming(avb_1722_1_aecp_packet_t *pkt, u
       }
       else
       {
-        set_avb_sink_state(stream_index, AVB_SINK_STATE_POTENTIAL);
+        if (state == AVB_SINK_STATE_ENABLED)
+        {
+          set_avb_sink_state(stream_index, AVB_SINK_STATE_POTENTIAL);
+        }
       }
     }
     else *status = AECP_AEM_STATUS_NO_SUCH_DESCRIPTOR;
@@ -445,7 +448,10 @@ static void process_aem_cmd_startstop_streaming(avb_1722_1_aecp_packet_t *pkt, u
       }
       else
       {
-        set_avb_source_state(stream_index, AVB_SINK_STATE_POTENTIAL);
+        if (state == AVB_SINK_STATE_ENABLED)
+        {
+          set_avb_source_state(stream_index, AVB_SOURCE_STATE_POTENTIAL);
+        }
       }
     }
     else *status = AECP_AEM_STATUS_NO_SUCH_DESCRIPTOR;

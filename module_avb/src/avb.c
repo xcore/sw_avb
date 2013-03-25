@@ -677,7 +677,7 @@ int getset_avb_sink_state(int set,
       if (sink->stream.state == AVB_SINK_STATE_DISABLED &&
           *state == AVB_SINK_STATE_POTENTIAL) {
         chanend c = sink->listener_ctl;
-        int clk_ctl = -1;
+        int clk_ctl = outputs[sink->map[0]].clk_ctl;
         simple_printf("Listener sink #%d chan map:\n", sink_num);
         xc_abi_outuint(c, AVB1722_CONFIGURE_LISTENER_STREAM);
         xc_abi_outuint(c, sink->stream.local_id);
@@ -693,10 +693,6 @@ int getset_avb_sink_state(int set,
           }
           else
           {
-            if (clk_ctl == -1)
-            {
-              clk_ctl = outputs[sink->map[i]].clk_ctl;
-            }
             xc_abi_outuint(c, outputs[sink->map[i]].fifo);
             simple_printf("  %d -> %x\n", i, sink->map[i]);
           }
