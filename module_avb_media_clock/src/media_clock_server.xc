@@ -254,7 +254,7 @@ static void update_media_clock_divide(media_clock_t &clk)
 
 static void init_media_clock(media_clock_t &clk,
                              timer tmr,
-                             out port p) {
+                             out buffered port:32 p) {
   int ptime, time;
   clk.active = 0;
   clk.count = 0;
@@ -274,7 +274,7 @@ static void init_media_clock(media_clock_t &clk,
 
 
 static void do_media_clock_output(media_clock_t &clk,
-                                  out port p)
+                                  out buffered port:32 p)
 {
   const unsigned int bitMask = (1 << WC_FRACTIONAL_BITS) - 1;
   const unsigned mult = PLL_TO_WORD_MULTIPLIER/(2*INTERNAL_CLOCK_DIVIDE);
@@ -322,7 +322,7 @@ void media_clock_server(chanend media_clock_ctl,
                         chanend ?ptp_svr,
                         chanend ?buf_ctl[],
                         int num_buf_ctl,
-                        out port p_fs[]
+                        out buffered port:32 p_fs[]
 #if COMBINE_MEDIA_CLOCK_AND_PTP
                         ,chanend c_rx,
                         chanend c_tx,
