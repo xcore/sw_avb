@@ -10,6 +10,7 @@
 #include "avb_1722_1_protocol.h"
 #include "avb_1722_1_acmp.h"
 #include "avb_1722_1_adp.h"
+#include "avb_1722_1_aecp.h"
 #endif
 #include "avb_1722_1_app_hooks.h"
 
@@ -86,4 +87,16 @@ void __attribute__((weak)) avb_listener_on_talker_disconnect(int sink_num, guid_
   simple_printf("DISCONNECTING Listener sink #%d -> Talker stream %x%x, DA: ", sink_num, stream_id[0], stream_id[1]); print_mac_ln(dest_addr);
 
   set_avb_sink_state(sink_num, AVB_SINK_STATE_DISABLED);
+}
+
+unsigned short __attribute__((weak)) avb_entity_set_control_value(unsigned short control_type, unsigned short control_index, unsigned short values_length, unsigned char values[510])
+{
+  simple_printf("Setting Control type %x index %x value length %u\n", control_type, control_index, values_length);
+  return AECP_AEM_STATUS_NO_SUCH_DESCRIPTOR;
+}
+
+unsigned short __attribute__((weak)) avb_entity_get_control_value(unsigned short control_type, unsigned short control_index, unsigned short *values_length, unsigned char values[510])
+{
+  simple_printf("Getting Control type %x index %x value\n", control_type, control_index);
+  return AECP_AEM_STATUS_NO_SUCH_DESCRIPTOR;
 }

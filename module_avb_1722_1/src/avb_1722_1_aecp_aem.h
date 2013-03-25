@@ -89,11 +89,23 @@ typedef struct {
     unsigned char msrp_failure_bridge_id[8];
 } avb_1722_1_aem_getset_stream_info_t;
 
+/* 7.4.25.1 SET_CONTROL */
+typedef struct {
+    unsigned char descriptor_type[2];
+    unsigned char descriptor_id[2];
+} avb_1722_1_aem_getset_control_t;
+
 /* 7.4.35.1 START_STREAMING */
 typedef struct {
     unsigned char descriptor_type[2];
     unsigned char descriptor_id[2];
 } avb_1722_1_aem_startstop_streaming_t;
+
+/* 7.4.39.1 IDENTIFY_NOTIFICATION */
+typedef struct {
+    unsigned char descriptor_type[2];
+    unsigned char descriptor_index[2];
+} avb_1722_1_aem_identify_notification_t;
 
 
 #endif /* AVB_1722_1_AECP_AEM_H_ */

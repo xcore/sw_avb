@@ -260,21 +260,34 @@ static void acmp_add_inflight(int entity_type, unsigned int message_type, unsign
 
 static avb_1722_1_acmp_inflight_command *acmp_remove_inflight(int entity_type)
 {
-    avb_1722_1_acmp_cmd_resp *acmp_command;
-    avb_1722_1_acmp_inflight_command *inflight = acmp_get_inflight_list(entity_type);
-    int index;
+	avb_1722_1_acmp_cmd_resp *acmp_command;
+	avb_1722_1_acmp_inflight_command *inflight = acmp_get_inflight_list(entity_type);
+	int index;
+	avb_1722_1_acmp_inflight_command *result = 0;
+	
+	switch (entity_type)
+	{
+		case CONTROLLER: acmp_command = &acmp_controller_cmd; break;
+		case LISTENER: acmp_command = &acmp_listener_rcvd_cmd_resp; break;
+	}
 
-    switch (entity_type)
-    {
-        case CONTROLLER: acmp_command = &acmp_controller_cmd; break;
-        case LISTENER: acmp_command = &acmp_listener_rcvd_cmd_resp; break;
-    }
-
-    index = acmp_get_inflight_from_sequence_id(entity_type, acmp_command->sequence_id);
-
-    inflight[index].in_use = 0;
-
-    return &inflight[index];
+	index = acmp_get_inflight_from_sequence_id(entity_type, acmp_command->sequence_id);
+	
+	if(index >= 0)
+	{
+		inflight[index].in_use = 0;
+		result = &inflight[index];
+	}
+	else
+	{
+#ifdef AVB_1722_1_ACMP_DEBUG_INFLIGHT
+		simple_printf("ACMP %s: Trying to find entry for seq id: %d but it doesn't exist\n",
+						(CONTROLLER == entity_type) ? "Controller" : "Listener",
+						acmp_command->sequence_id);
+#endif
+	}
+	
+	return result;
 }
 
 static int acmp_check_inflight_command_timeouts(int entity_type)
@@ -422,28 +435,32 @@ static unsigned acmp_listener_valid_listener_unique()
  */
 static unsigned acmp_listener_is_connected(int connected_to)
 {
-    enum avb_sink_state_t state;
-    unsigned stream_is_reserved;
-    int unique_id = acmp_listener_rcvd_cmd_resp.listener_unique_id;
+	enum avb_sink_state_t state;
+	unsigned stream_is_reserved;
+	int unique_id = acmp_listener_rcvd_cmd_resp.listener_unique_id;
 
-    get_avb_sink_state(unique_id, &state);
-    stream_is_reserved = (state != AVB_SINK_STATE_DISABLED);
+	get_avb_sink_state(unique_id, &state);
+	stream_is_reserved = (state != AVB_SINK_STATE_DISABLED);
 
-    if (stream_is_reserved)
-    {
-        if( acmp_listener_streams[unique_id].talker_guid.l == acmp_listener_rcvd_cmd_resp.talker_guid.l &&
-            acmp_listener_streams[unique_id].talker_unique_id == acmp_listener_rcvd_cmd_resp.talker_unique_id)
-        {
-            if (connected_to) return 1;
-            else return 0;
-        }
-        else
-        {
-            if(!connected_to) return 1;
-        }
-    }
+	if (stream_is_reserved)
+	{
+		if(	acmp_listener_streams[unique_id].talker_guid.l == acmp_listener_rcvd_cmd_resp.talker_guid.l &&
+			acmp_listener_streams[unique_id].talker_unique_id == acmp_listener_rcvd_cmd_resp.talker_unique_id)
+		{
+			//simple_printf("acmp_listener_is_connected: connected and is connected to same. connected_to %u\n", connected_to);
+			if (connected_to) return 1;
+			else return 0;
+		}
+		else
+		{
+			//simple_printf("acmp_listener_is_connected: connected and is NOT connected to same. connected_to\n", connected_to);
+			//print_guid_ln(&acmp_listener_streams[unique_id].talker_guid);
+			//print_guid_ln(&acmp_listener_rcvd_cmd_resp.talker_guid);
+			if(!connected_to) return 1;
+		}
+	}
 
-    return 0;
+	return 0;
 }
 
 /**
@@ -777,10 +794,13 @@ void avb_1722_1_acmp_controller_periodic(chanend c_tx)
             avb_1722_1_acmp_inflight_command *inflight = acmp_remove_inflight(CONTROLLER);
 
 #ifdef AVB_1722_1_ACMP_DEBUG_INFLIGHT
-            simple_printf("ACMP Controller: Removed inflight %s with response %s - seq id: %d\n",
-                    debug_acmp_message_s[inflight->command.message_type],
-                    debug_acmp_status_s[inflight->command.status],
-                    inflight->original_sequence_id);
+			if(inflight)
+			{
+				simple_printf("ACMP Controller: Removed inflight %s with response %s - seq id: %d\n",
+						debug_acmp_message_s[inflight->command.message_type],
+						debug_acmp_status_s[inflight->command.status],
+						inflight->original_sequence_id);
+			}
 #endif
 
             acmp_controller_state = ACMP_CONTROLLER_WAITING;
@@ -881,197 +901,211 @@ void avb_1722_1_acmp_talker_periodic(chanend c_tx)
 
 void avb_1722_1_acmp_listener_periodic(chanend c_tx)
 {
-    switch (acmp_listener_state)
-    {
-        case ACMP_LISTENER_IDLE:
-        {
-            break;
-        }
-        case ACMP_LISTENER_WAITING:
-        {
-            acmp_progress_inflight_timer(LISTENER);
+	switch (acmp_listener_state)
+	{
+		case ACMP_LISTENER_IDLE:
+		{
+			break;
+		}
+		case ACMP_LISTENER_WAITING:
+		{
+			acmp_progress_inflight_timer(LISTENER);
 
-            acmp_inflight_timeout_idx[LISTENER] = acmp_check_inflight_command_timeouts(LISTENER);
+			acmp_inflight_timeout_idx[LISTENER] = acmp_check_inflight_command_timeouts(LISTENER);
 
-            if (acmp_inflight_timeout_idx[LISTENER] >= 0)   // An inflight command has timed out
-            {
-                acmp_listener_state = ACMP_LISTENER_RX_TIMEOUT;
-            }
-            break;
-        }
+			if (acmp_inflight_timeout_idx[LISTENER] >= 0)	// An inflight command has timed out
+			{
+				acmp_listener_state = ACMP_LISTENER_RX_TIMEOUT;
+			}
+			break;
+		}
 
-        case ACMP_LISTENER_CONNECT_RX_COMMAND:
-        {
-            if (!acmp_listener_valid_listener_unique())
-            {
-                acmp_send_response(ACMP_CMD_CONNECT_RX_RESPONSE, &acmp_listener_rcvd_cmd_resp, ACMP_STATUS_LISTENER_UNKNOWN_ID, c_tx);
-            }
-            else
-            {
-                if (acmp_listener_is_connected(0))
-                {
-                    acmp_send_response(ACMP_CMD_CONNECT_RX_RESPONSE, &acmp_listener_rcvd_cmd_resp, ACMP_STATUS_LISTENER_EXCLUSIVE, c_tx);
-                }
-                else
-                {
-                    acmp_send_command(LISTENER, ACMP_CMD_CONNECT_TX_COMMAND, &acmp_listener_rcvd_cmd_resp, FALSE, -1, c_tx);
-                }
-            }
-            acmp_listener_state = ACMP_LISTENER_WAITING;
-            break;
-        }
-        case ACMP_LISTENER_DISCONNECT_RX_COMMAND:
-        {
-            if (!acmp_listener_valid_listener_unique())
-            {
-                acmp_send_response(ACMP_CMD_DISCONNECT_RX_RESPONSE, &acmp_listener_rcvd_cmd_resp, ACMP_STATUS_LISTENER_UNKNOWN_ID, c_tx);
-            }
-            else
-            {
-                if (acmp_listener_is_connected(1))
-                {
-                    unsigned stream_id[2];
-                    acmp_send_command(LISTENER, ACMP_CMD_DISCONNECT_TX_COMMAND, &acmp_listener_rcvd_cmd_resp, FALSE, -1, c_tx);
+		case ACMP_LISTENER_CONNECT_RX_COMMAND:
+		{
+			if (!acmp_listener_valid_listener_unique())
+			{
+				acmp_send_response(ACMP_CMD_CONNECT_RX_RESPONSE, &acmp_listener_rcvd_cmd_resp, ACMP_STATUS_LISTENER_UNKNOWN_ID, c_tx);
+			}
+			else
+			{
+				//simple_printf("ACMP_LISTENER_CONNECT_RX_COMMAND:\n");
+				if (acmp_listener_is_connected(0))
+				{
+					acmp_send_response(ACMP_CMD_CONNECT_RX_RESPONSE, &acmp_listener_rcvd_cmd_resp, ACMP_STATUS_LISTENER_EXCLUSIVE, c_tx);
+				}
+				else
+				{
+					acmp_send_command(LISTENER, ACMP_CMD_CONNECT_TX_COMMAND, &acmp_listener_rcvd_cmd_resp, FALSE, -1, c_tx);
+				}
+			}
+			acmp_listener_state = ACMP_LISTENER_WAITING;
+			break;
+		}
+		case ACMP_LISTENER_DISCONNECT_RX_COMMAND:
+		{
+			if (!acmp_listener_valid_listener_unique())
+			{
+				acmp_send_response(ACMP_CMD_DISCONNECT_RX_RESPONSE, &acmp_listener_rcvd_cmd_resp, ACMP_STATUS_LISTENER_UNKNOWN_ID, c_tx);
+			}
+			else
+			{
+				if (acmp_listener_is_connected(1))
+				{
+					unsigned stream_id[2];
+					acmp_send_command(LISTENER, ACMP_CMD_DISCONNECT_TX_COMMAND, &acmp_listener_rcvd_cmd_resp, FALSE, -1, c_tx);
 
-                    stream_id[1] = (unsigned)(acmp_listener_rcvd_cmd_resp.stream_id.l >> 0);
-                    stream_id[0] = (unsigned)(acmp_listener_rcvd_cmd_resp.stream_id.l >> 32);
+					stream_id[1] = (unsigned)(acmp_listener_rcvd_cmd_resp.stream_id.l >> 0);
+					stream_id[0] = (unsigned)(acmp_listener_rcvd_cmd_resp.stream_id.l >> 32);
 
-                    avb_listener_on_talker_disconnect(acmp_listener_rcvd_cmd_resp.listener_unique_id,
-                                            &acmp_listener_rcvd_cmd_resp.talker_guid,
-                                            acmp_listener_rcvd_cmd_resp.stream_dest_mac,
-                                            stream_id,
+					avb_listener_on_talker_disconnect(acmp_listener_rcvd_cmd_resp.listener_unique_id,
+											&acmp_listener_rcvd_cmd_resp.talker_guid,
+											acmp_listener_rcvd_cmd_resp.stream_dest_mac,
+											stream_id,
                                             &my_guid);
-                }
-                else
-                {
-                    acmp_send_response(ACMP_CMD_DISCONNECT_RX_RESPONSE, &acmp_listener_rcvd_cmd_resp, ACMP_STATUS_NOT_CONNECTED, c_tx);
-                }
-            }
-            acmp_listener_state = ACMP_LISTENER_WAITING;
-            break;
-        }
-        case ACMP_LISTENER_CONNECT_TX_RESPONSE:
-        {
-            if (acmp_listener_valid_listener_unique())
-            {
-                unsigned stream_id[2];
-                avb_1722_1_acmp_inflight_command *inflight;
-                inflight = acmp_remove_inflight(LISTENER);
-                acmp_listener_rcvd_cmd_resp.sequence_id = inflight->original_sequence_id; // FIXME: This is a bit messy
+				}
+				else
+				{
+					acmp_send_response(ACMP_CMD_DISCONNECT_RX_RESPONSE, &acmp_listener_rcvd_cmd_resp, ACMP_STATUS_NOT_CONNECTED, c_tx);
+				}
+			}
+			acmp_listener_state = ACMP_LISTENER_WAITING;
+			break;
+		}
+		case ACMP_LISTENER_CONNECT_TX_RESPONSE:
+		{
+			if (acmp_listener_valid_listener_unique())
+			{
+				unsigned stream_id[2];
+				avb_1722_1_acmp_inflight_command *inflight;
+				inflight = acmp_remove_inflight(LISTENER);
+				
+				if(inflight)
+				{
+					acmp_listener_rcvd_cmd_resp.sequence_id = inflight->original_sequence_id; // FIXME: This is a bit messy
+	
+					acmp_send_response(ACMP_CMD_CONNECT_RX_RESPONSE, &acmp_listener_rcvd_cmd_resp, acmp_listener_rcvd_cmd_resp.status, c_tx);
+					acmp_add_listener_stream_info();
+	
+	#ifdef AVB_1722_1_ACMP_DEBUG_INFLIGHT
+					simple_printf("ACMP Listener: Removed inflight %d CONNECT_TX_COMMAND with response %s - seq id: %d\n",
+							(int)inflight,
+							debug_acmp_status_s[inflight->command.status],
+							inflight->command.sequence_id);
+	#endif
+					
+					/* FIXME: Make stream ID representation consistent: we have long long, 2 ints and 6 chars */
+	
+					stream_id[1] = (unsigned)(acmp_listener_rcvd_cmd_resp.stream_id.l >> 0);
+					stream_id[0] = (unsigned)(acmp_listener_rcvd_cmd_resp.stream_id.l >> 32);
+	
+					avb_listener_on_talker_disconnect(acmp_listener_rcvd_cmd_resp.listener_unique_id,
+												&acmp_listener_rcvd_cmd_resp.talker_guid,
+												acmp_listener_rcvd_cmd_resp.stream_dest_mac,
+												stream_id,
+												&my_guid);
+	
+					avb_listener_on_talker_connect(acmp_listener_rcvd_cmd_resp.listener_unique_id,
+												&acmp_listener_rcvd_cmd_resp.talker_guid,
+												acmp_listener_rcvd_cmd_resp.stream_dest_mac,
+												stream_id,
+												&my_guid);
+				}
 
-                acmp_send_response(ACMP_CMD_CONNECT_RX_RESPONSE, &acmp_listener_rcvd_cmd_resp, acmp_listener_rcvd_cmd_resp.status, c_tx);
-                acmp_add_listener_stream_info();
+				acmp_listener_rcvd_cmd_resp.status = ACMP_STATUS_SUCCESS;
+				acmp_listener_state = ACMP_LISTENER_WAITING;
+
+				return;
+			}
+			break;
+		}
+		case ACMP_LISTENER_DISCONNECT_TX_RESPONSE:
+		{
+			if (acmp_listener_valid_listener_unique())
+			{
+				avb_1722_1_acmp_inflight_command *inflight;
+				inflight = acmp_remove_inflight(LISTENER);
+				
+				if(inflight)
+				{
+					acmp_listener_rcvd_cmd_resp.sequence_id = inflight->original_sequence_id;
+	
+					acmp_send_response(ACMP_CMD_DISCONNECT_RX_RESPONSE, &acmp_listener_rcvd_cmd_resp, acmp_listener_rcvd_cmd_resp.status, c_tx);
+					acmp_zero_listener_stream_info(acmp_listener_rcvd_cmd_resp.listener_unique_id);
+	
+	#ifdef AVB_1722_1_ACMP_DEBUG_INFLIGHT
+					simple_printf("ACMP Listener: Removed inflight %d DISCONNECT_TX_COMMAND with response %s - seq id: %d\n",
+							(int)inflight,
+							debug_acmp_status_s[inflight->command.status],
+							inflight->command.sequence_id);
+	#endif
+				}
+				
+
+				acmp_listener_rcvd_cmd_resp.status = ACMP_STATUS_SUCCESS;
+				acmp_listener_state = ACMP_LISTENER_WAITING;
+
+				return;
+			}
+			break;
+		}
+		case ACMP_LISTENER_GET_STATE:
+		{
+			int status;
+
+			if (!acmp_listener_valid_listener_unique())
+			{
+				status = ACMP_STATUS_LISTENER_UNKNOWN_ID;
+			}
+			else
+			{
+				/* Sets appropriate state fields in acmp_listener_rcvd_cmd_resp for responding and returns status message */
+				status = acmp_listener_get_state();
+			}
+
+			acmp_send_response(ACMP_CMD_GET_RX_STATE_RESPONSE, &acmp_listener_rcvd_cmd_resp, status, c_tx);
+
+			acmp_listener_state = ACMP_LISTENER_WAITING;
+			break;
+		}
+		case ACMP_LISTENER_RX_TIMEOUT:
+		{
+			int i = acmp_inflight_timeout_idx[LISTENER];
+			avb_1722_1_acmp_inflight_command *inflight = &acmp_listener_inflight_commands[i];
+			if (inflight->retried)
+			{
+				inflight->command.sequence_id = inflight->original_sequence_id;
+				acmp_send_response(inflight->command.message_type + 1, &inflight->command, ACMP_STATUS_LISTENER_TALKER_TIMEOUT, c_tx);
+				// Remove inflight command
+				inflight->in_use = 0;
 
 #ifdef AVB_1722_1_ACMP_DEBUG_INFLIGHT
-                simple_printf("ACMP Listener: Removed inflight CONNECT_TX_COMMAND with response %s - seq id: %d\n",
-                        debug_acmp_status_s[inflight->command.status],
-                        inflight->command.sequence_id);
+				simple_printf("ACMP Listener: Removed inflight %d %s with timed out retry - seq id: %d\n",
+						(int)inflight,
+						debug_acmp_message_s[inflight->command.message_type],
+						inflight->command.sequence_id);
 #endif
+			}
+			else
+			{
+				int message_type = inflight->command.message_type;
 
-                /* FIXME: Make stream ID representation consistent: we have long long, 2 ints and 6 chars */
-
-                stream_id[1] = (unsigned)(acmp_listener_rcvd_cmd_resp.stream_id.l >> 0);
-                stream_id[0] = (unsigned)(acmp_listener_rcvd_cmd_resp.stream_id.l >> 32);
-
-                avb_listener_on_talker_disconnect(acmp_listener_rcvd_cmd_resp.listener_unique_id,
-                                            &acmp_listener_rcvd_cmd_resp.talker_guid,
-                                            acmp_listener_rcvd_cmd_resp.stream_dest_mac,
-                                            stream_id,
-                                            &my_guid);
-
-                avb_listener_on_talker_connect(acmp_listener_rcvd_cmd_resp.listener_unique_id,
-                                            &acmp_listener_rcvd_cmd_resp.talker_guid,
-                                            acmp_listener_rcvd_cmd_resp.stream_dest_mac,
-                                            stream_id,
-                                            &my_guid);
-
-                acmp_listener_rcvd_cmd_resp.status = ACMP_STATUS_SUCCESS;
-                acmp_listener_state = ACMP_LISTENER_WAITING;
-
-                return;
-            }
-            break;
-        }
-        case ACMP_LISTENER_DISCONNECT_TX_RESPONSE:
-        {
-            if (acmp_listener_valid_listener_unique())
-            {
-                avb_1722_1_acmp_inflight_command *inflight;
-                inflight = acmp_remove_inflight(LISTENER);
-                acmp_listener_rcvd_cmd_resp.sequence_id = inflight->original_sequence_id;
-
-                acmp_send_response(ACMP_CMD_DISCONNECT_RX_RESPONSE, &acmp_listener_rcvd_cmd_resp, acmp_listener_rcvd_cmd_resp.status, c_tx);
-                acmp_zero_listener_stream_info(acmp_listener_rcvd_cmd_resp.listener_unique_id);
+				acmp_send_command(LISTENER, message_type, &inflight->command, TRUE, i, c_tx);
 
 #ifdef AVB_1722_1_ACMP_DEBUG_INFLIGHT
-                simple_printf("ACMP Listener: Removed inflight DISCONNECT_TX_COMMAND with response %s - seq id: %d\n",
-                        debug_acmp_status_s[inflight->command.status],
-                        inflight->command.sequence_id);
+				simple_printf("ACMP Listener:  Sent retry for timed out %d %s - seq id: %d\n",
+						(int)inflight,
+						debug_acmp_message_s[inflight->command.message_type],
+						inflight->command.sequence_id);
 #endif
+			}
 
-                acmp_listener_rcvd_cmd_resp.status = ACMP_STATUS_SUCCESS;
-                acmp_listener_state = ACMP_LISTENER_WAITING;
+			acmp_listener_state = ACMP_LISTENER_WAITING;
+			break;
+		}
 
-                return;
-            }
-            break;
-        }
-        case ACMP_LISTENER_GET_STATE:
-        {
-            int status;
+	}
 
-            if (!acmp_listener_valid_listener_unique())
-            {
-                status = ACMP_STATUS_LISTENER_UNKNOWN_ID;
-            }
-            else
-            {
-                /* Sets appropriate state fields in acmp_listener_rcvd_cmd_resp for responding and returns status message */
-                status = acmp_listener_get_state();
-            }
-
-            acmp_send_response(ACMP_CMD_GET_RX_STATE_RESPONSE, &acmp_listener_rcvd_cmd_resp, status, c_tx);
-
-            acmp_listener_state = ACMP_LISTENER_WAITING;
-            break;
-        }
-        case ACMP_LISTENER_RX_TIMEOUT:
-        {
-            int i = acmp_inflight_timeout_idx[LISTENER];
-            avb_1722_1_acmp_inflight_command *inflight = &acmp_listener_inflight_commands[i];
-            if (inflight->retried)
-            {
-                inflight->command.sequence_id = inflight->original_sequence_id;
-                acmp_send_response(inflight->command.message_type + 1, &inflight->command, ACMP_STATUS_LISTENER_TALKER_TIMEOUT, c_tx);
-                // Remove inflight command
-                inflight->in_use = 0;
-
-#ifdef AVB_1722_1_ACMP_DEBUG_INFLIGHT
-                simple_printf("ACMP Listener: Removed inflight %s with timed out retry - seq id: %d\n",
-                        debug_acmp_message_s[inflight->command.message_type],
-                        inflight->command.sequence_id);
-#endif
-            }
-            else
-            {
-                int message_type = inflight->command.message_type;
-
-                acmp_send_command(LISTENER, message_type, &inflight->command, TRUE, i, c_tx);
-
-#ifdef AVB_1722_1_ACMP_DEBUG_INFLIGHT
-                simple_printf("ACMP Listener:  Sent retry for timed out %s - seq id: %d\n",
-                        debug_acmp_message_s[inflight->command.message_type],
-                        inflight->command.sequence_id);
-#endif
-            }
-
-            acmp_listener_state = ACMP_LISTENER_WAITING;
-            break;
-        }
-
-    }
-
-    return;
+	return;
 }
 
 void avb_1722_1_talker_set_mac_address(unsigned talker_unique_id, unsigned char macaddr[])

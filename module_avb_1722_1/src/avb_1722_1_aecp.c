@@ -7,6 +7,8 @@
 #include <print.h>
 #include "simple_printf.h"
 #include "xccompat.h"
+#include "simple_printf.h"
+#include "avb_1722_1_app_hooks.h"
 
 #if AVB_1722_1_USE_AVC
 #include "avc_commands.h"
@@ -40,6 +42,26 @@ static enum {
     AECP_AEM_CONTROLLER_AVAILABLE_TIMEOUT,
     AECP_AEM_LOCK_TIMEOUT
 } aecp_aem_state = AECP_AEM_IDLE;
+
+
+static enum {
+	AECP_AEM_IDENTIFY_INIT,
+	AECP_AEM_IDENTIFY_WAITING,
+	AECP_AEM_IDENTIFY_IDENTIFY_TX,
+	AECP_AEM_IDENTIFY_IDENTIFY_WAIT,
+} aecp_aem_identify_state = AECP_AEM_IDENTIFY_INIT;
+
+
+static avb_timer aecp_aem_identify_timer;
+static unsigned short aecp_aem_identify_sequence_id = 0;
+static unsigned char aecp_aem_identify_tx_count = 0;
+static unsigned char aecp_aem_identify_button_pressed = 0;
+
+static unsigned char aecp_aem_identify_mac_addr[6] = {0x91, 0xe0, 0xf0, 0x01, 0x00, 0x01};
+static guid_t aecp_aem_identify_controller_id = {0x91e0f0fffe010001llu};//{.c = {0x91, 0xe0, 0xf0, 0xff, 0xfe, 0x01, 0x00, 0x01}};
+
+#define AECP_AEM_IDENTIFY_TX_PERIOD_COUNT	3
+#define AECP_AEM_IDENTIFY_WAIT_PERIOD_COUNT	14
 
 // Called on startup to initialise certain static descriptor fields
 void avb_1722_1_aem_descriptors_init()
@@ -75,6 +97,7 @@ void avb_1722_1_aecp_aem_init()
 {
   avb_1722_1_aem_descriptors_init();
   init_avb_timer(&aecp_aem_lock_timer, 100);
+  init_avb_timer(&aecp_aem_identify_timer, 5);
 
   aecp_aem_state = AECP_AEM_WAITING;
 }
@@ -445,11 +468,30 @@ static void process_aem_cmd_startstop_streaming(avb_1722_1_aecp_packet_t *pkt, u
       }
       else
       {
-        set_avb_source_state(stream_index, AVB_SINK_STATE_POTENTIAL);
+        set_avb_source_state(stream_index, AVB_SOURCE_STATE_POTENTIAL);
       }
     }
     else *status = AECP_AEM_STATUS_NO_SUCH_DESCRIPTOR;
   }
+}
+
+static unsigned short process_aem_cmd_getset_control(avb_1722_1_aecp_packet_t *pkt, unsigned char *status, unsigned short command_type)
+{
+  avb_1722_1_aem_getset_control_t *cmd = (avb_1722_1_aem_getset_control_t *)(pkt->data.aem.command.payload);
+  unsigned short control_index = ntoh_16(cmd->descriptor_id);
+  unsigned short control_type = ntoh_16(cmd->descriptor_type);
+  unsigned char *values = pkt->data.aem.command.payload + sizeof(avb_1722_1_aem_getset_control_t);
+  unsigned short values_length = GET_1722_1_DATALENGTH(&(pkt->header)) - sizeof(avb_1722_1_aem_getset_control_t) - AVB_1722_1_AECP_COMMAND_DATA_OFFSET;
+
+  if (command_type == AECP_AEM_CMD_GET_CONTROL)
+  {
+    *status = avb_entity_get_control_value(control_type, control_index, &values_length, values);
+  }
+  else // AECP_AEM_CMD_SET_CONTROL
+  {
+    *status = avb_entity_set_control_value(control_type, control_index, values_length, values);
+  }
+  return values_length;
 }
 
 static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsigned char src_addr[6], int message_type, int num_pkt_bytes, chanend c_tx)
@@ -547,7 +589,7 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
             
             for(int i=0; i < 8; i++)
             {
-              acquired_controller_guid.c[i] = pkt->controller_guid[i];
+              acquired_controller_guid.c[7-i] = pkt->controller_guid[i];
               acquired_controller_mac[i] = src_addr[i];
             }
             status = AECP_AEM_STATUS_SUCCESS;
@@ -559,8 +601,8 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
 
         for (int i=0; i < 8; i++)
         {
-          cmd->owner_guid[i] = acquired_controller_guid.c[i];
-          printhex(acquired_controller_guid.c[i]);
+          cmd->owner_guid[i] = acquired_controller_guid.c[7-i];
+          printhex(acquired_controller_guid.c[7-i]);
         }
         printstrln(" acquired entity");
 
@@ -672,6 +714,12 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
         cd_len = sizeof(avb_1722_1_aem_startstop_streaming_t);
         break;
       }
+      case AECP_AEM_CMD_GET_CONTROL:
+      case AECP_AEM_CMD_SET_CONTROL:
+      {
+        cd_len = process_aem_cmd_getset_control(pkt, &status, command_type) + sizeof(avb_1722_1_aem_getset_control_t) + AVB_1722_1_AECP_COMMAND_DATA_OFFSET;
+        break;
+      }
       // TODO: ENTITY_AVAILABLE
       default:
       {
@@ -684,7 +732,14 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
     if (cd_len > 0)
     {
       avb_1722_1_create_aecp_aem_response(src_addr, status, cd_len, pkt);
-      mac_tx(c_tx, avb_1722_1_buf, 64, 0);
+      int num_tx_bytes = cd_len + AVB_1722_1_AECP_PAYLOAD_OFFSET;
+      
+      if(num_tx_bytes < 64)
+      {
+        num_tx_bytes = 64;
+      }
+      
+      mac_tx(c_tx, avb_1722_1_buf, num_tx_bytes, 0);
     }
   }
   else // AECP_CMD_AEM_RESPONSE
@@ -750,6 +805,35 @@ void process_avb_1722_1_aecp_packet(unsigned char src_addr[6], avb_1722_1_aecp_p
   return;
 }
 
+static void avb_1722_1_create_identify_response_packet(void)
+{
+  struct ethernet_hdr_t *hdr = (ethernet_hdr_t*) &avb_1722_1_buf[0];
+  avb_1722_1_aecp_packet_t *pkt = (avb_1722_1_aecp_packet_t*) (hdr + AVB_1722_1_PACKET_BODY_POINTER_OFFSET);
+  avb_1722_1_aecp_aem_msg_t *aem_msg = &(pkt->data.aem);
+
+  avb_1722_1_create_1722_1_header(aecp_aem_identify_mac_addr, DEFAULT_1722_1_AECP_SUBTYPE, AECP_CMD_AEM_RESPONSE, AECP_AEM_STATUS_SUCCESS, 16, hdr);
+
+  set_64(pkt->target_guid, my_guid.c);
+  set_64(pkt->controller_guid, aecp_aem_identify_controller_id.c);
+  hton_16(pkt->sequence_id, aecp_aem_identify_sequence_id);
+  
+  AEM_MSG_SET_COMMAND_TYPE(aem_msg, AECP_AEM_CMD_IDENTIFY_NOTIFICATION);
+  AEM_MSG_SET_U_FLAG(aem_msg, 1);
+  
+ avb_1722_1_aem_identify_notification_t *resp = (avb_1722_1_aem_identify_notification_t *)&(aem_msg->command.identify_notfication_resp);
+ 
+  //Set descriptor type and descriptor index
+#ifdef DESCRIPTOR_INDEX_CONTROL_IDENTIFY
+        hton_16(resp->descriptor_type, AEM_CONTROL_TYPE);
+        hton_16(resp->descriptor_index, DESCRIPTOR_INDEX_CONTROL_IDENTIFY);
+#else
+        hton_16(resp->descriptor_type, 0);
+        hton_16(resp->descriptor_index, 0);
+#endif
+  
+  simple_printf("avb_1722_1_create_identify_response_packet: %d\n", aecp_aem_identify_sequence_id);
+}
+
 void avb_1722_1_aecp_aem_periodic(chanend c_tx)
 {
   switch (aecp_aem_state)
@@ -768,5 +852,65 @@ void avb_1722_1_aecp_aem_periodic(chanend c_tx)
       break;
     }
   }
+  
+  if(avb_timer_expired(&aecp_aem_identify_timer))
+  {
+    simple_printf("avb_1722_1_aecp_aem_periodic: aecp_aem_identify_state %d aecp_aem_identify_tx_count %d\n", aecp_aem_identify_state, aecp_aem_identify_tx_count);
+    
+    switch (aecp_aem_identify_state)
+    {
+      case AECP_AEM_IDENTIFY_IDENTIFY_TX:
+        avb_1722_1_create_identify_response_packet();
+        mac_tx(c_tx, avb_1722_1_buf, 64, 0);
+        
+        aecp_aem_identify_tx_count++;
+        
+        if(aecp_aem_identify_tx_count > 2)
+        {
+          aecp_aem_identify_tx_count = 0;
+          if(aecp_aem_identify_button_pressed)
+          {
+            aecp_aem_identify_state = AECP_AEM_IDENTIFY_IDENTIFY_WAIT;
+            start_avb_timer(&aecp_aem_identify_timer, 70);
+          }
+          else
+          {
+            aecp_aem_identify_state = AECP_AEM_IDENTIFY_WAITING;
+          }
+          aecp_aem_identify_sequence_id++;
+        }
+        else
+        {
+          start_avb_timer(&aecp_aem_identify_timer, 15);
+        }
+        break;
+      case AECP_AEM_IDENTIFY_IDENTIFY_WAIT:
+        if(aecp_aem_identify_button_pressed)
+        {
+          avb_1722_1_create_identify_response_packet();
+          mac_tx(c_tx, avb_1722_1_buf, 64, 0);
+          
+          aecp_aem_identify_tx_count = 1;
+          aecp_aem_identify_state = AECP_AEM_IDENTIFY_IDENTIFY_TX;
+          start_avb_timer(&aecp_aem_identify_timer, 15);
+        }
+        else
+        {
+          aecp_aem_identify_state = AECP_AEM_IDENTIFY_WAITING;
+        }
+        break;
+    };
+  }
+  
+}
 
+void avb_1722_1_aecp_aem_identify_set_button_pressed(unsigned char buttonPressed)
+{
+  aecp_aem_identify_button_pressed = buttonPressed;
+  simple_printf("avb_1722_1_aecp_aem_identify_set_button_pressed: %d\n", buttonPressed);
+  if(AECP_AEM_IDENTIFY_INIT == aecp_aem_identify_state || AECP_AEM_IDENTIFY_WAITING == aecp_aem_identify_state)
+  {
+    aecp_aem_identify_state = AECP_AEM_IDENTIFY_IDENTIFY_WAIT;
+    start_avb_timer(&aecp_aem_identify_timer, 1);
+  }
 }

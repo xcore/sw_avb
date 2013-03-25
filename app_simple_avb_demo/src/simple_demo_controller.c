@@ -49,7 +49,7 @@ void avb_entity_on_new_entity_available(guid_t *my_guid, avb_1722_1_entity_recor
   if (AVB_DEMO_ENABLE_TALKER && state == AVB_SOURCE_STATE_DISABLED)
   {
 
-    if ((entity->vendor_id == XMOS_VENDOR_ID) &&
+    if (((entity->entity_model_id.l >> 32) == XMOS_VENDOR_ID) &&
        ((entity->listener_capabilities & AVB_1722_1_ADP_LISTENER_CAPABILITIES_AUDIO_SINK) == AVB_1722_1_ADP_LISTENER_CAPABILITIES_AUDIO_SINK) &&
        (entity->listener_stream_sinks >= 1))
     {

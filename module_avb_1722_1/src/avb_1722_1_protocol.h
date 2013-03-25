@@ -17,7 +17,7 @@ typedef struct avb_1722_1_packet_header_t {
 typedef union {
 	unsigned long long l;
 	unsigned char c[8];
-} guid_t, stream_t, gmid_t;
+} guid_t, eui64_t, stream_t, gmid_t;
 
 #define DEFAULT_1722_1_CD_FLAG (1)
 #define DEFAULT_1722_1_AVB_VERSION (0x0)

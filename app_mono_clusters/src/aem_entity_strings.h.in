@@ -1,0 +1,50 @@
+//Entity Descriptor Strings
+#define AVB_1722_1_ENTITY_NAME_STRING 			"XMOS AVB Endpoint"
+#define AVB_1722_1_FIRMWARE_VERSION_STRING 		"5.2.0beta5"
+#define AVB_1722_1_GROUP_NAME_STRING 			"XMOS AVB Group"
+#define AVB_1722_1_SERIAL_NUMBER_STRING 		"0123456789"
+
+//Strings 0
+#define AVB_1722_1_VENDOR_NAME_STRING			"XMOS"
+#define AVB_1722_1_MODEL_NAME_STRING			"XR-AVB-LC-BRD"
+#define AVB_1722_1_CONFIGURATION_NAME_STRING	"Analog Audio"
+#define AVB_1722_1_AUDIO_UNIT_NAME_STRING		"Audio IO"
+#define AVB_1722_1_LEFT_INPUT_NAME_STRING		"Left Input"
+#define AVB_1722_1_RIGHT_INPUT_NAME_STRING		"Right Input"
+#define AVB_1722_1_LEFT_OUTPUT_NAME_STRING		"Left Output"
+
+//Strings 1
+#define AVB_1722_1_RIGHT_OUTPUT_NAME_STRING		"Right Output"
+#define AVB_1722_1_IDENTIFY_NAME_STRING			"Identify"
+#define AVB_1722_1_MUTE_NAME_STRING				"Mute"
+#define AVB_1722_1_VOLUME_NAME_STRING			"Volume"
+#define AVB_1722_1_INPUT_STREAM_NAME_STRING		"Input Stream"
+#define AVB_1722_1_OUTPUT_STREAM_NAME_STRING	"Output Stream"
+#define AVB_1722_1_STEREO_JACK_NAME_STRING		"3.5mm Stereo Jack"
+
+//Strings 2
+#define AVB_1722_1_AVB_INTERFACE_NAME_STRING	"en0"
+#define AVB_1722_1_INTERNAL_CLOCK_NAME_STRING	"Internal Clock"
+#define AVB_1722_1_CLOCK_DOMAIN_NAME_STRING		"Clock Domain"
+//#define AVB_1722_1__NAME_STRING	""
+//#define AVB_1722_1__NAME_STRING	""
+//#define AVB_1722_1__NAME_STRING	""
+//#define AVB_1722_1__NAME_STRING	""
+
+
+
+
+
+
+////Strings N
+//#define AVB_1722_1__NAME_STRING	""
+//#define AVB_1722_1__NAME_STRING	""
+//#define AVB_1722_1__NAME_STRING	""
+//#define AVB_1722_1__NAME_STRING	""
+//#define AVB_1722_1__NAME_STRING	""
+//#define AVB_1722_1__NAME_STRING	""
+//#define AVB_1722_1__NAME_STRING	""
+
+
+
+

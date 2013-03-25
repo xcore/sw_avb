@@ -88,4 +88,7 @@ void avb_1722_1_periodic(chanend c_tx, chanend c_ptp)
 #if (AVB_1722_1_LISTENER_ENABLED)
 	avb_1722_1_acmp_listener_periodic(c_tx);
 #endif
+#if (AVB_1722_1_AEM_ENABLED)
+	avb_1722_1_aecp_aem_periodic(c_tx);
+#endif
 }

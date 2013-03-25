@@ -55,4 +55,25 @@ void avb_listener_on_talker_connect(int sink_num, REFERENCE_PARAM(guid_t, talker
 void avb_listener_on_talker_disconnect(int sink_num, REFERENCE_PARAM(guid_t, talker_guid), unsigned char dest_addr[6], unsigned int stream_id[2], REFERENCE_PARAM(guid_t, my_guid));
 
 
+
+/** A Controller has asked to set a control value
+ *
+ * \param control_type      The descriptor_type from the SET_CONTROL command
+ * \param control_index     The descriptor_index from the SET_CONTROL command
+ * \param values_length     The number of bytes used in the values array
+ * \param values            The values from the SET_CONTROL command
+ * \result                  The status code for the response
+ **/
+unsigned short avb_entity_set_control_value(unsigned short control_type, unsigned short control_index, unsigned short values_length, unsigned char values[510]);
+
+/** A Controller has asked to set a control value
+ *
+ * \param control_type      The descriptor_type from the GET_CONTROL command
+ * \param control_index     The descriptor_index from the GET_CONTROL command
+ * \param values_length     The number of bytes used in the values array
+ * \param values            The values for the GET_CONTROL response
+ * \result                  The status code for the response
+ **/
+unsigned short avb_entity_get_control_value(unsigned short control_type, unsigned short control_index, REFERENCE_PARAM(unsigned short, values_length), unsigned char values[510]);
+
 #endif
