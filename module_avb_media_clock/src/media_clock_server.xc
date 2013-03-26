@@ -197,7 +197,9 @@ static void manage_buffer(buf_info_t &b,
   }
 
   if (!locked && (b.stability_count > STABLE_THRESHOLD)) {
-      if (fill - sample_diff > MEDIA_OUTPUT_FIFO_WORD_SIZE-MAX_SAMPLES_PER_1722_PACKET) {
+      int max_adjust = MEDIA_OUTPUT_FIFO_WORD_SIZE-MAX_SAMPLES_PER_1722_PACKET;
+      if (fill - sample_diff > max_adjust || 
+          fill - sample_diff < -max_adjust) {
 #ifdef DEBUG_MEDIA_CLOCK
     	simple_printf("Media output %d compensation too large: %d samples\n", index, sample_diff);
 #endif
