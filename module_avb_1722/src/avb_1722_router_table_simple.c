@@ -25,8 +25,8 @@ static avb_1722_router_table_entry_t router_table[AVB_MAX_NUM_SINK_AND_FORWARD_S
 static swlock_t table_lock;
 
 #define __hwlock_init() swlock_init(&table_lock)
-#define __hwlock_release(x) swlock_release(&x)
-#define __hwlock_acquire(x) swlock_acquire(&x)
+#define hwlock_release(x) swlock_release(&x)
+#define hwlock_acquire(x) swlock_acquire(&x)
 
 void init_avb_1722_router_table_simple()
 {
@@ -52,7 +52,7 @@ int avb_1722_router_table_lookup_simple(int key0,
 
   if (key0==0 && key1==0)
     return 0;
-  __hwlock_acquire(table_lock);      
+  hwlock_acquire(table_lock);      
   for(int i=0;i<AVB_MAX_NUM_SINK_AND_FORWARD_STREAMS;i++) {
     __asm__(".xtaloop " STRINGIFY(AVB_MAX_NUM_SINK_AND_FORWARD_STREAMS) "\n");
     if (key0 == router_table[i].id[0] &&
@@ -67,12 +67,12 @@ int avb_1722_router_table_lookup_simple(int key0,
         *forward = 0;
       }
       *link = router_table[i].link;
-      __hwlock_release(table_lock);
+      hwlock_release(table_lock);
       return 1;
     }
 
   }
-  __hwlock_release(table_lock);
+  hwlock_release(table_lock);
   return 0;
 }
 
@@ -84,7 +84,7 @@ void avb_1722_router_table_add_entry_simple(int key0,
                                             int avb_hash,
                                             int forward)
 {
-  __hwlock_acquire(table_lock);
+  hwlock_acquire(table_lock);
 
   if (forward) avb_hash |= 0x80000000;
 
@@ -97,7 +97,7 @@ void avb_1722_router_table_add_entry_simple(int key0,
       }
       router_table[i].avb_hash = avb_hash;
       // simple_printf("Updated table entry %x, hash: %d, link: %d, forward: %d\n", router_table[i].id[1], router_table[i].avb_hash, router_table[i].link, forward);
-      __hwlock_release(table_lock);
+      hwlock_release(table_lock);
       return;
     }
   }
@@ -113,7 +113,7 @@ void avb_1722_router_table_add_entry_simple(int key0,
       break;
     }
   }
-  __hwlock_release(table_lock);
+  hwlock_release(table_lock);
 
   return;
 }
