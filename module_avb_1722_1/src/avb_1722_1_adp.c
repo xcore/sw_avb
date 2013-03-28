@@ -67,9 +67,12 @@ void avb_1722_1_adp_init()
 
 void avb_1722_1_adp_announce()
 {
-    if (adp_advertise_state == ADP_ADVERTISE_IDLE) adp_advertise_state = ADP_ADVERTISE_ADVERTISE_0;
+    if (adp_advertise_state == ADP_ADVERTISE_IDLE || 
+        adp_advertise_state == ADP_ADVERTISE_WAITING)
+    {
+        adp_advertise_state = ADP_ADVERTISE_ADVERTISE_0;
+    }
 }
-
 
 void avb_1722_1_adp_depart()
 {
@@ -100,6 +103,16 @@ void avb_1722_1_adp_change_ptp_grandmaster(unsigned char grandmaster[8])
 int avb_1722_1_get_latest_new_entity_idx()
 {
     return adp_latest_entity_added_index;
+}
+
+int avb_1722_1_entity_database_find(const_guid_ref_t guid)
+{
+    for (int i=0; i < AVB_1722_1_MAX_ENTITIES; ++i)
+    {
+        if (entities[i].guid.l == guid->l)
+            return i;
+    }
+    return AVB_1722_1_MAX_ENTITIES;
 }
 
 static int avb_1722_1_entity_database_add(avb_1722_1_adp_packet_t* pkt)
@@ -171,15 +184,14 @@ static void avb_1722_1_entity_database_remove(avb_1722_1_adp_packet_t* pkt)
     int i;
     get_64(guid.c, pkt->entity_guid);
 
-    for (i=0; i < AVB_1722_1_MAX_ENTITIES; ++i)
+    i = avb_1722_1_entity_database_find(&guid);
+
+    if (i != AVB_1722_1_MAX_ENTITIES)
     {
-        if (entities[i].guid.l == guid.l)
-        {
 #ifdef AVB_1722_1_ADP_DEBUG_ENTITY_REMOVAL
-            printstr("ADP: Removing entity who advertised departing -> GUID "); print_guid_ln(&entities[i].guid);
+        printstr("ADP: Removing entity who advertised departing -> GUID "); print_guid_ln(&entities[i].guid);
 #endif
-            entities[i].guid.l = 0;
-        }
+        entities[i].guid.l = 0;
     }
 }
 
@@ -237,8 +249,6 @@ void process_avb_1722_1_adp_packet(avb_1722_1_adp_packet_t* pkt, chanend c_tx)
             return;
         }
     }
-
-    return;
 }
 
 static void avb_1722_1_create_adp_packet(int message_type, guid_t guid)
@@ -311,8 +321,6 @@ void avb_1722_1_adp_discovery_periodic(chanend c_tx)
             break;
         }
     }
-
-    return;
 }
 
 void avb_1722_1_adp_advertising_periodic(chanend c_tx, chanend ptp)
@@ -372,6 +380,4 @@ void avb_1722_1_adp_advertising_periodic(chanend c_tx, chanend ptp)
             start_avb_timer(&ptp_monitor_timer, 1); //Every second
         }
     }
-
-    return;
 }
