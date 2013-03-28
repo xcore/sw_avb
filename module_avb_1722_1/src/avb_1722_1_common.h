@@ -6,7 +6,7 @@
 #include "ethernet_tx_client.h"
 #include "avb_1722_1_protocol.h"
 
-void print_guid_ln(guid_t *g);
+void print_guid_ln(const_guid_ref_t g);
 void print_mac_ln(unsigned char *c);
 unsigned compare_guid(unsigned char *a, guid_t *b);
 
