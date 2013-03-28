@@ -86,7 +86,6 @@ static void register_talkers(chanend talker_ctl[])
       max_talker_stream_id++;
     }
   }
-  return;
 }
 
 
@@ -117,7 +116,6 @@ static void register_listeners(chanend listener_ctl[])
     xc_abi_outuint(listener_ctl[i], max_link_id);
     max_link_id++;
   }
-  return;
 }
 
 static void register_media(chanend media_ctl[])
@@ -154,7 +152,6 @@ static void register_media(chanend media_ctl[])
       output_id++;
     }
   }
-  return;
 }
 
 static void init_media_clock_server(chanend media_clock_ctl)

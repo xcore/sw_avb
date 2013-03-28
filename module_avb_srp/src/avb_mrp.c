@@ -135,7 +135,6 @@ static void force_send(chanend c_tx)
     mac_tx(c_tx, (unsigned int *) buf, end - buf, 0);
   }
   send_ptr = buf+sizeof(mrp_ethernet_hdr)+sizeof(mrp_header);
-  return;
 }
 
 // this considers whether the send a PDU after an attribute has been
@@ -317,7 +316,6 @@ void mrp_encode_three_packed_event(char *buf,
   }
   
   *vector = encode_three_packed(event, num_values % 3, *vector);
-  return;
 }
 
 
@@ -357,7 +355,6 @@ void mrp_encode_four_packed_event(char *buf,
   }
   
   *vector = encode_four_packed(event, num_values % 4, *vector);
-  return;
 }
 
 // Send an empty leave all message
@@ -707,7 +704,6 @@ void mrp_attribute_init(mrp_attribute_state *st,
 {
   st->attribute_type = t;
   st->attribute_info = info;
-  return;
 }
 
 
@@ -1047,7 +1043,6 @@ void mrp_periodic(void)
 		}
 #endif
 	}
-	return;
 }
 
 
@@ -1140,10 +1135,8 @@ static void process(mrp_attribute_type attr_type,
     avb_srp_process_talker(attr_type, msg, i);
     return;
   default:
-	return;
+    return;
   }
-  return;
-
 }
 
 
@@ -1228,7 +1221,5 @@ void avb_mrp_process_packet(unsigned char buf[], int etype, int len)
     }
     msg += 2;
   }
- 
-  return;
 }
 
