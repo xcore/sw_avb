@@ -30,8 +30,8 @@ void avb_1722_1_acmp_listener_periodic(chanend c_tx);
  *  \param c_tx             a transmit chanend to the Ethernet server
  *  
  **/
-void avb_1722_1_controller_connect(REFERENCE_PARAM(guid_t, talker_guid), 
-                                   REFERENCE_PARAM(guid_t, listener_guid),
+void avb_1722_1_controller_connect(const_guid_ref_t talker_guid, 
+                                   const_guid_ref_t listener_guid,
                                    int talker_id,
                                    int listener_id,
                                    chanend c_tx);
@@ -50,8 +50,8 @@ void avb_1722_1_controller_connect(REFERENCE_PARAM(guid_t, talker_guid),
  *  \param c_tx             a transmit chanend to the Ethernet server
  *  
  **/
-void avb_1722_1_controller_disconnect(REFERENCE_PARAM(guid_t, talker_guid), 
-                                      REFERENCE_PARAM(guid_t, listener_guid),
+void avb_1722_1_controller_disconnect(const_guid_ref_t talker_guid, 
+                                      const_guid_ref_t listener_guid,
                                       int talker_id,
                                       int listener_id,
                                       chanend c_tx);
