@@ -43,6 +43,14 @@ void avb_1722_1_adp_discover_all(void);
  */
 void avb_1722_1_adp_change_ptp_grandmaster(unsigned char grandmaster[8]);
 
+/** Find a GUID within the entities list.
+ *
+ *  \param guid  the GUID to be found
+ *  
+ *  \return      AVB_1722_1_MAX_ENTITIES if not found, otherwise the index of the entity.
+ */
+int avb_1722_1_entity_database_find(const_guid_ref_t guid);
+
 /** Remove all discovered entities from the database
  *
  */
