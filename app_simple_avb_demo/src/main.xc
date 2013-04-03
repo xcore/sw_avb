@@ -364,6 +364,7 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl)
       }
 
       // Receive any events from user button presses from the GPIO task
+#if AVB_GPIO_ENABLED
       case c_gpio_ctl :> int cmd:
       {
         switch (cmd)
@@ -412,7 +413,7 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl)
         }
         break;
       }
-
+#endif
       // Periodic processing
       case tmr when timerafter(periodic_timeout) :> unsigned int time_now:
       {
