@@ -188,8 +188,6 @@ avb_srp_process_talker(int mrp_attribute_type, char *fv, int num)
     avb_add_detected_stream(pdu_streamId, 2, packet->DestMacAddr, num);
 #endif
 #endif
-
-  return;
 }
 
 void avb_srp_talker_join_ind(mrp_attribute_state *attr, int new)
@@ -213,7 +211,6 @@ void avb_srp_get_failed_stream(unsigned int streamId[2])
 {
   streamId[0] = failed_streamId[0];
   streamId[1] = failed_streamId[1];
-  return;
 }
 
 static int check_listener_merge(char *buf, 
