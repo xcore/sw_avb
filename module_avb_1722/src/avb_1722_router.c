@@ -24,7 +24,6 @@ void avb_1722_register_routes(chanend link0,
     avb_1722_links[2] = link2;
   if (num_clients >= 4)
     avb_1722_links[3] = link3;  
-  return;
 }
 
 

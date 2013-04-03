@@ -126,8 +126,11 @@ static int avb_1722_1_entity_database_add(avb_1722_1_adp_packet_t* pkt)
 
     for (i=0; i < AVB_1722_1_MAX_ENTITIES; ++i)
     {
-        if (entities[i].guid.l == 0) found_slot_index = i;  // Found an empty entry in the database
-        if (entities[i].guid.l == guid.l)
+        if (entities[i].guid.l == 0)
+        {
+            found_slot_index = i;  // Found an empty entry in the database
+        }
+        else if (entities[i].guid.l == guid.l)
         {
             // Entity is already in the database - break from loop early and update it
             found_slot_index = i;
@@ -369,10 +372,10 @@ void avb_1722_1_adp_advertising_periodic(chanend c_tx, chanend ptp)
 
     if (ADP_ADVERTISE_IDLE != adp_advertise_state)
     {
-        if(avb_timer_expired(&ptp_monitor_timer))
+        if (avb_timer_expired(&ptp_monitor_timer))
         {
             ptp_get_current_grandmaster(ptp, ptp_current.c);
-            if(as_grandmaster_id.l != ptp_current.l)
+            if (as_grandmaster_id.l != ptp_current.l)
             {
                 avb_1722_1_adp_change_ptp_grandmaster(ptp_current.c);
                 adp_advertise_state = ADP_ADVERTISE_ADVERTISE_1;

@@ -18,5 +18,5 @@ void xc_abi_outuint(chanend c, unsigned x)
       "out    res[%0], %1;"
       "outct  res[%0], 0x1;"
       "chkct  res[%0], 0x1;"  :: "r"(c),"r"(x));
-  return;
 }
+

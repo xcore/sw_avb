@@ -753,7 +753,6 @@ void process_avb_1722_1_aecp_packet(unsigned char src_addr[6], avb_1722_1_aecp_p
       // This node is not expecting a response
       break;
   }
-  return;
 }
 
 void avb_1722_1_aecp_aem_periodic(chanend c_tx)
