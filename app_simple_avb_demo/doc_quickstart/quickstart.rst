@@ -81,7 +81,7 @@ Connection via an Ethernet switch
 
 To evaluate more than two endpoints, or operate a third party 1722.1 Controller, 
 an AVB-enabled switch is required. A number of options are available from switch provider Extreme Networks and other vendors. 
-See the AVB System Requirements Guide for further information: TODO xref doc
+See the AVB System Requirements Guide for further information.
 
 Management by an external 1722.1 Controller
 +++++++++++++++++++++++++++++++++++++++++++
@@ -90,7 +90,7 @@ To disable the internal 'plug and play' 1722.1 Controller that auto-connects str
 press the **Remote** button on all development boards. All active streams will be disconnected.
 
 A third party 1722.1 Controller application running on a PC, for example, 
-can then be used to make and break connections between the endpoints.
+can then be used to connect and disconnect streams between the endpoints.
 
 Next Steps
 ----------
