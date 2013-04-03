@@ -431,7 +431,7 @@ static unsigned acmp_listener_is_connected(int connected_to)
 
     if (stream_is_reserved)
     {
-        if( acmp_listener_streams[unique_id].talker_guid.l == acmp_listener_rcvd_cmd_resp.talker_guid.l &&
+        if (acmp_listener_streams[unique_id].talker_guid.l == acmp_listener_rcvd_cmd_resp.talker_guid.l &&
             acmp_listener_streams[unique_id].talker_unique_id == acmp_listener_rcvd_cmd_resp.talker_unique_id)
         {
             if (connected_to) return 1;
@@ -439,7 +439,7 @@ static unsigned acmp_listener_is_connected(int connected_to)
         }
         else
         {
-            if(!connected_to) return 1;
+            if (!connected_to) return 1;
         }
     }
 

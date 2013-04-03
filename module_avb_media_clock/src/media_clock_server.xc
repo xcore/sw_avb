@@ -64,7 +64,6 @@ void update_stream_derived_clocks(int source_num,
                                        fill);
       }
   }
-  return;
 }
 
 
