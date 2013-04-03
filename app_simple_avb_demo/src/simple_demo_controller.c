@@ -70,6 +70,9 @@ void avb_talker_on_listener_connect_failed(const_guid_ref_t my_guid, int source_
 /* The controller has indicated to connect this listener sink to a talker stream */
 avb_1722_1_acmp_status_t avb_listener_on_talker_connect(int sink_num, const_guid_ref_t talker_guid, unsigned char dest_addr[6], unsigned int stream_id[2], const_guid_ref_t my_guid)
 {
+  // Ensure XMOS devices only connect when they are known entities to ensure correct synchronisation
+  int do_connect = 0;
+
   int map[AVB_NUM_MEDIA_OUTPUTS];
   for (int i = 0; i < AVB_NUM_MEDIA_OUTPUTS; i++) map[i] = i;
 
@@ -77,6 +80,7 @@ avb_1722_1_acmp_status_t avb_listener_on_talker_connect(int sink_num, const_guid
   {
     set_device_media_clock_type(0, DEVICE_MEDIA_CLOCK_INPUT_STREAM_DERIVED);
     printstrln("Non XMOS talker: setting input stream derived clock");
+    do_connect = 1;
   }
   else
   {
@@ -84,16 +88,7 @@ avb_1722_1_acmp_status_t avb_listener_on_talker_connect(int sink_num, const_guid
 
     if (i != AVB_1722_1_MAX_ENTITIES)
     {
-      simple_printf("CONNECTING Listener sink #%d -> Talker stream %x%x, DA: ", sink_num, stream_id[0], stream_id[1]); print_mac_ln(dest_addr);
-
-      set_avb_sink_sync(sink_num, 0);
-      set_avb_sink_channels(sink_num, AVB_NUM_MEDIA_OUTPUTS);
-      set_avb_sink_map(sink_num, map, AVB_NUM_MEDIA_OUTPUTS);
-      set_avb_sink_id(sink_num, stream_id);
-      set_avb_sink_addr(sink_num, dest_addr, 6);
-
-      set_avb_sink_state(sink_num, AVB_SINK_STATE_POTENTIAL);
-
+      do_connect = 1;
       if (AVB_DEMO_ENABLE_TALKER && AVB_DEMO_ENABLE_LISTENER && (talker_guid->l < my_guid->l))
       {
         // Check if the remote Talker is also a Listener
@@ -105,9 +100,21 @@ avb_1722_1_acmp_status_t avb_listener_on_talker_connect(int sink_num, const_guid
         }
         // else we remain input stream derived
       }
-
-      return ACMP_STATUS_SUCCESS;
     }
+  }
+
+  if (do_connect)
+  {
+    simple_printf("CONNECTING Listener sink #%d -> Talker stream %x%x, DA: ", sink_num, stream_id[0], stream_id[1]); print_mac_ln(dest_addr);
+
+    set_avb_sink_sync(sink_num, 0);
+    set_avb_sink_channels(sink_num, AVB_NUM_MEDIA_OUTPUTS);
+    set_avb_sink_map(sink_num, map, AVB_NUM_MEDIA_OUTPUTS);
+    set_avb_sink_id(sink_num, stream_id);
+    set_avb_sink_addr(sink_num, dest_addr, 6);
+
+    set_avb_sink_state(sink_num, AVB_SINK_STATE_POTENTIAL);
+    return ACMP_STATUS_SUCCESS;
   }
 
   simple_printf("CONNECTING Listener : entity not found : "); print_guid_ln(talker_guid);

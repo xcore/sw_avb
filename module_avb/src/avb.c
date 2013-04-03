@@ -697,7 +697,7 @@ int getset_avb_sink_state(int set,
         (void) xc_abi_inuint(c);
 
         if (!isnull(media_clock_svr)) {
-        	media_clock_register(media_clock_svr, clk_ctl, sink->stream.sync);
+          media_clock_register(media_clock_svr, clk_ctl, sink->stream.sync);
         }
 
         { int router_link;
