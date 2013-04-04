@@ -15,7 +15,8 @@ static enum { ADP_ADVERTISE_IDLE,
        ADP_ADVERTISE_WAITING,
        ADP_ADVERTISE_ADVERTISE_0,
        ADP_ADVERTISE_ADVERTISE_1,
-       ADP_ADVERTISE_DEPARTING
+       ADP_ADVERTISE_DEPARTING,
+       ADP_ADVERTISE_DEPART_THEN_ADVERTISE
 } adp_advertise_state = ADP_ADVERTISE_IDLE;
 
 static enum { ADP_DISCOVERY_IDLE,
@@ -76,7 +77,20 @@ void avb_1722_1_adp_announce()
 
 void avb_1722_1_adp_depart()
 {
-    if (adp_advertise_state == ADP_ADVERTISE_WAITING) adp_advertise_state = ADP_ADVERTISE_DEPARTING;
+    if (adp_advertise_state == ADP_ADVERTISE_IDLE || 
+        adp_advertise_state == ADP_ADVERTISE_WAITING)
+    {
+        adp_advertise_state = ADP_ADVERTISE_DEPARTING;
+    }
+}
+
+void avb_1722_1_adp_depart_then_announce()
+{
+    if (adp_advertise_state == ADP_ADVERTISE_IDLE || 
+        adp_advertise_state == ADP_ADVERTISE_WAITING)
+    {
+        adp_advertise_state = ADP_ADVERTISE_DEPART_THEN_ADVERTISE;
+    }    
 }
 
 void avb_1722_1_adp_discover(guid_t *guid)
@@ -357,11 +371,12 @@ void avb_1722_1_adp_advertising_periodic(chanend c_tx, chanend ptp)
             avb_1722_1_available_index++;
             break;
 
+        case ADP_ADVERTISE_DEPART_THEN_ADVERTISE:
         case ADP_ADVERTISE_DEPARTING:
             avb_1722_1_create_adp_packet(ENTITY_DEPARTING, my_guid);
             mac_tx(c_tx, avb_1722_1_buf, AVB_1722_1_ADP_PACKET_SIZE, 0);
 
-            adp_advertise_state = ADP_ADVERTISE_IDLE;
+            adp_advertise_state = ADP_ADVERTISE_DEPART_THEN_ADVERTISE ? ADP_ADVERTISE_ADVERTISE_0 : ADP_ADVERTISE_IDLE;
             avb_1722_1_available_index = 0;
 
             break;
