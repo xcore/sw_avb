@@ -436,13 +436,13 @@ static unsigned acmp_listener_valid_listener_unique()
 static unsigned acmp_listener_is_connected(int connected_to)
 {
     enum avb_sink_state_t state;
-    unsigned stream_is_connected;
+    unsigned stream_is_reserved;
     int unique_id = acmp_listener_rcvd_cmd_resp.listener_unique_id;
 
     get_avb_sink_state(unique_id, &state);
-    stream_is_connected = (state == AVB_SINK_STATE_ENABLED);
+    stream_is_reserved = (state != AVB_SINK_STATE_DISABLED);
 
-    if (stream_is_connected)
+    if (stream_is_reserved)
     {
         if (acmp_listener_streams[unique_id].talker_guid.l == acmp_listener_rcvd_cmd_resp.talker_guid.l &&
             acmp_listener_streams[unique_id].talker_unique_id == acmp_listener_rcvd_cmd_resp.talker_unique_id)
