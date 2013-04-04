@@ -10,17 +10,17 @@ unsigned int enable_indication_state = 0;
 void media_input_fifo_enable_fifos(unsigned int enable)
 {
 	if (!enable_lock) return;
-	__hwlock_acquire(enable_lock);
+	hwlock_acquire(enable_lock);
 	enable_request_state |= enable;
-	__hwlock_release(enable_lock);
+	hwlock_release(enable_lock);
 }
 
 void media_input_fifo_disable_fifos(unsigned int enable)
 {
 	if (!enable_lock) return;
-	__hwlock_acquire(enable_lock);
+	hwlock_acquire(enable_lock);
 	enable_request_state &= ~enable;
-	__hwlock_release(enable_lock);
+	hwlock_release(enable_lock);
 }
 
 unsigned int media_input_fifo_enable_ind_state()
@@ -36,9 +36,9 @@ unsigned int media_input_fifo_enable_req_state()
 void media_input_fifo_update_enable_ind_state(unsigned int enable, unsigned int mask)
 {
 	if (!enable_lock) return;
-	__hwlock_acquire(enable_lock);
+	hwlock_acquire(enable_lock);
 	enable_indication_state = (enable_indication_state & ~mask) | enable;
-	__hwlock_release(enable_lock);
+	hwlock_release(enable_lock);
 }
 
 
@@ -202,7 +202,7 @@ init_media_input_fifos(media_input_fifo_t ififos[],
                        media_input_fifo_data_t ififo_data[],
                        int n)
 {
-	enable_lock = __hwlock_init();
+	enable_lock = hwlock_alloc();
 	for(int i=0;i<n;i++) {
 		ififos[i] = (unsigned int) &ififo_data[i];
 	}

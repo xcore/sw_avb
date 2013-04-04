@@ -36,7 +36,7 @@ static unsigned int c=1013904223;
 void init_avb_1722_router_table_hash()
 {
   int i;
-  table_lock = __hwlock_init();
+  table_lock = hwlock_alloc();
   num_entries = 0;
   for(i=0;i<AVB_1722_ROUTER_TABLE_SIZE;i++) {
     router_table[i].id[0] = 0;
@@ -69,7 +69,7 @@ int avb_1722_router_table_lookup_hash(int key0,
   if (key0==0 && key1==0)
     return 0;
 
-  __hwlock_acquire(table_lock);      
+  hwlock_acquire(table_lock);      
   x = hash(key0, key1, router_table_poly[0]);
   
   if (key0 == router_table[x].id[0] &&
@@ -77,7 +77,7 @@ int avb_1722_router_table_lookup_hash(int key0,
 
     *link = router_table[x].link;
     *avb_hash = router_table[x].avb_hash;
-    __hwlock_release(table_lock);
+    hwlock_release(table_lock);
     return 1;
   }
 
@@ -87,10 +87,10 @@ int avb_1722_router_table_lookup_hash(int key0,
       key1 == router_table[x].id[1]) {
     *link = router_table[x].link;
     *avb_hash = router_table[x].avb_hash;
-    __hwlock_release(table_lock);
+    hwlock_release(table_lock);
     return 1;
   }
-  __hwlock_release(table_lock);
+  hwlock_release(table_lock);
   return 0;
 }
 
@@ -200,11 +200,11 @@ void avb_1722_router_table_add_entry_hash(int key0,
     if (success) {
       avb_1722_router_table_entry_t *old_table = router_table;
       // flip the tables      
-      __hwlock_acquire(table_lock);
+      hwlock_acquire(table_lock);
       router_table = backup_table;
       router_table_poly[0] = backup_table_poly[0];
       router_table_poly[1] = backup_table_poly[1];
-      __hwlock_release(table_lock);
+      hwlock_release(table_lock);
       backup_table = old_table;
       // make sure both tables contain the same
       memcpy(backup_table, router_table, sizeof(router_table0));
