@@ -4,6 +4,7 @@ AVB Quick Start Guide
 =====================
 
 This guide is intended for customers who have purchased the Low-Cost AVB Audio Endpoint Kit.
+It applies to version 5.2 of the reference design firmware.
 
 Obtaining the latest firmware
 -----------------------------
