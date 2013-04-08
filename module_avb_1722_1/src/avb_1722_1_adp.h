@@ -25,6 +25,13 @@ void avb_1722_1_adp_announce(void);
  */
 void avb_1722_1_adp_depart(void);
 
+
+/**
+ *
+ *  Stop then start advertising information about this entity via ADP
+ */
+void avb_1722_1_adp_depart_then_announce(void);
+
 /** Ask to discover the information for a specific entity GUID
  * 
  * \param   guid    The GUID of the entity to discover

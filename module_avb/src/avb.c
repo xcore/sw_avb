@@ -238,7 +238,7 @@ void avb_start(void)
 {
 #if AVB_ENABLE_1722_1
   avb_1722_1_adp_init();
-  avb_1722_1_adp_announce();
+  avb_1722_1_adp_depart_then_announce();
   avb_1722_1_adp_discover_all();
 #endif
 
@@ -374,7 +374,7 @@ int getset_avb_source_state(int set,
         // enable the source
         int valid = 1;
         int clk_ctl;
-
+ 
         if (source->stream.num_channels <= 0)
           valid = 0;
 
@@ -881,10 +881,15 @@ void avb_process_control_packet(unsigned int buf0[], int nbytes, chanend c_tx)
     }
     else // Link down
     {
-      for(int i=0; i < AVB_NUM_SOURCES; i++)
+      for (int i=0; i < AVB_NUM_SOURCES; i++)
       {
         set_avb_source_state(i, AVB_SOURCE_STATE_DISABLED);
       }
+
+      for (int i=0; i < AVB_NUM_SINKS; i++)
+      {
+        set_avb_sink_state(i, AVB_SOURCE_STATE_DISABLED);
+      }      
     }
   }
   else
