@@ -76,10 +76,11 @@ avb_1722_1_acmp_status_t avb_listener_on_talker_connect(int sink_num, const_guid
   int map[AVB_NUM_MEDIA_OUTPUTS];
   for (int i = 0; i < AVB_NUM_MEDIA_OUTPUTS; i++) map[i] = i;
 
+  set_device_media_clock_type(0, DEVICE_MEDIA_CLOCK_INPUT_STREAM_DERIVED);
+
   if ((talker_guid->l >> 40) != (XMOS_VENDOR_ID>>8))
   {
-    set_device_media_clock_type(0, DEVICE_MEDIA_CLOCK_INPUT_STREAM_DERIVED);
-    printstrln("Non XMOS talker: setting input stream derived clock");
+    // Non XMOS talker
     do_connect = 1;
   }
   else
