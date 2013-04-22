@@ -380,32 +380,46 @@ static void create_empty_msg(mrp_attribute_type attr, int leave_all) {
 }
 
 
-static int encode_msg(char *msg, mrp_attribute_state* st, int vector)
+static int encode_msg(char *msg, mrp_attribute_state* st, int vector, unsigned int port_num)
 {
-  switch (st->attribute_type) 
+  int port_to_transmit = st->propagate ? !st->port_num : st->port_num;
+  /*
+  simple_printf("st->port_num: %d\n port_num: %d\n st->propagate: %d\n", st->port_num, port_num, st->propagate);
+  if (st->attribute_type == MSRP_LISTENER)
+  {
+    printstrln("LR!!");
+  }
+  printintln(port_to_transmit);
+  */
+  
+  if (port_num == port_to_transmit)
+  {
+    switch (st->attribute_type) 
     {
-    case MSRP_TALKER_ADVERTISE: 
-    case MSRP_TALKER_FAILED: 
-    case MSRP_LISTENER:
-    case MSRP_DOMAIN_VECTOR:             
-      return avb_srp_encode_message(msg, st, vector);
-      break;
-#ifdef AVB_INCLUDE_MMRP
-    case MMRP_MAC_VECTOR:
-      return avb_mmrp_merge_message(msg, st, vector);
-      break;
-#endif
-#ifndef AVB_EXCLUDE_MVRP
-    case MVRP_VID_VECTOR:
-      return avb_mvrp_merge_message(msg, st, vector);
-      break;
-#endif
+      case MSRP_TALKER_ADVERTISE: 
+      case MSRP_TALKER_FAILED: 
+      case MSRP_LISTENER:
+      case MSRP_DOMAIN_VECTOR:             
+        return avb_srp_encode_message(msg, st, vector);
+        break;
+  #ifdef AVB_INCLUDE_MMRP
+      case MMRP_MAC_VECTOR:
+        return avb_mmrp_merge_message(msg, st, vector);
+        break;
+  #endif
+  #ifndef AVB_EXCLUDE_MVRP
+      case MVRP_VID_VECTOR:
+        return avb_mvrp_merge_message(msg, st, vector);
+        break;
+  #endif
+    }
   }
   return 0;
 }
 
 static void doTx(mrp_attribute_state *st,
-                 int vector)
+                 int vector,
+                 unsigned int port_num)
 {
   chanend c_tx = avb_control_get_mac_tx();
   int merged = 0;
@@ -417,20 +431,20 @@ static void doTx(mrp_attribute_state *st,
          (*msg != 0 || *(msg+1) != 0)) {      
     mrp_msg_header *hdr = (mrp_msg_header *) &msg[0];
 
-    merged = encode_msg(msg, st, vector);
+    merged = encode_msg(msg, st, vector, port_num);
     
     msg = msg + sizeof(mrp_msg_header) + attribute_length_length(hdr);
   }   
 
   if (!merged) {
     create_empty_msg(st->attribute_type, 0);
-    (void) encode_msg(msg, st, vector);
+    (void) encode_msg(msg, st, vector, port_num);
   }
 
   send(c_tx, st->propagate ? !st->port_num : st->port_num);
 }
 
-static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_packed_event)
+static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_packed_event, unsigned int port_num)
 {
 #ifdef MRP_FULL_PARTICIPANT
   // Registrar state machine
@@ -624,7 +638,7 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
 #endif
           {
           int vector = makeTxEvent(e, st, 0);
-          doTx(st, vector);
+          doTx(st, vector, port_num);
           break;
           }
         }
@@ -663,7 +677,7 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
         case MRP_QP:
           {         
           int vector = makeTxEvent(e, st, 1);
-          doTx(st, vector);
+          doTx(st, vector, port_num);
         }
         }
       switch (st->applicant_state) 
@@ -714,21 +728,21 @@ void mrp_mad_begin(mrp_attribute_state *st)
 #ifdef MRP_FULL_PARTICIPANT
   init_avb_timer(&st->leaveTimer, 1);
 #endif
-  mrp_update_state(MRP_EVENT_BEGIN, st, 0);
+  mrp_update_state(MRP_EVENT_BEGIN, st, 0, st->port_num);
 }
 
 void mrp_mad_join(mrp_attribute_state *st, int new)
 {
   if (new) {
-    mrp_update_state(MRP_EVENT_NEW, st, 0);
+    mrp_update_state(MRP_EVENT_NEW, st, 0, st->port_num);
   } else {
-    mrp_update_state(MRP_EVENT_JOIN, st, 0);
+    mrp_update_state(MRP_EVENT_JOIN, st, 0, st->port_num);
   }
 }
 
 void mrp_mad_leave(mrp_attribute_state *st)
 {
-  mrp_update_state(MRP_EVENT_LV, st, 0);
+  mrp_update_state(MRP_EVENT_LV, st, 0, st->port_num);
 }
 
 void mrp_init(char *macaddr)
@@ -884,7 +898,7 @@ static void global_event(mrp_event e, unsigned int port_num) {
     {
       if (e != MRP_EVENT_PERIODIC || attr->attribute_type == MVRP_VID_VECTOR)
       {
-        mrp_update_state(e, attr, 0);
+        mrp_update_state(e, attr, 0, port_num);
       }
     }
     attr = attr->next;
@@ -899,7 +913,7 @@ static void attribute_type_event(mrp_attribute_type atype, mrp_event e, unsigned
         attr->applicant_state != MRP_UNUSED &&
         attr->attribute_type == atype &&
         ((attr->port_num == port_num) || attr->propagate))  {
-      mrp_update_state(e, attr, 0);
+      mrp_update_state(e, attr, 0, port_num);
     }
     attr = attr->next;
   }
@@ -1050,7 +1064,7 @@ void mrp_periodic(void)
   #ifdef MRP_FULL_PARTICIPANT
       if (avb_timer_expired(&attrs[j].leaveTimer))
       {
-        mrp_update_state(MRP_EVENT_LEAVETIMER, &attrs[j], 0);
+        mrp_update_state(MRP_EVENT_LEAVETIMER, &attrs[j], 0, i);
       }
   #endif
     }
@@ -1059,27 +1073,27 @@ void mrp_periodic(void)
 }
 
 
-static void mrp_in(int three_packed_event, int four_packed_event, mrp_attribute_state *st)
+static void mrp_in(int three_packed_event, int four_packed_event, mrp_attribute_state *st, unsigned int port_num)
 {
   switch (three_packed_event)
     {
     case MRP_ATTRIBUTE_EVENT_NEW:
-      mrp_update_state(MRP_EVENT_RECEIVE_NEW, st, four_packed_event);
+      mrp_update_state(MRP_EVENT_RECEIVE_NEW, st, four_packed_event, port_num);
       break;
     case MRP_ATTRIBUTE_EVENT_JOININ:
-      mrp_update_state(MRP_EVENT_RECEIVE_JOININ, st, four_packed_event);
+      mrp_update_state(MRP_EVENT_RECEIVE_JOININ, st, four_packed_event, port_num);
       break;
     case MRP_ATTRIBUTE_EVENT_IN:
-      mrp_update_state(MRP_EVENT_RECEIVE_IN, st, four_packed_event);
+      mrp_update_state(MRP_EVENT_RECEIVE_IN, st, four_packed_event, port_num);
       break;
     case MRP_ATTRIBUTE_EVENT_JOINMT:
-      mrp_update_state(MRP_EVENT_RECEIVE_JOINMT, st, four_packed_event);
+      mrp_update_state(MRP_EVENT_RECEIVE_JOINMT, st, four_packed_event, port_num);
       break;
     case MRP_ATTRIBUTE_EVENT_MT:
-      mrp_update_state(MRP_EVENT_RECEIVE_MT, st, four_packed_event);
+      mrp_update_state(MRP_EVENT_RECEIVE_MT, st, four_packed_event, port_num);
       break;
     case MRP_ATTRIBUTE_EVENT_LV:   
-      mrp_update_state(MRP_EVENT_RECEIVE_LEAVE, st, four_packed_event);
+      mrp_update_state(MRP_EVENT_RECEIVE_LEAVE, st, four_packed_event, port_num);
       break;
   }
 }
@@ -1225,7 +1239,7 @@ void avb_mrp_process_packet(unsigned char buf[], int etype, int len, unsigned in
           if (msg_match(attr_type, &attrs[j], first_value, i, three_packed_event, four_packed_event))
           {
             matched_attribute = 1;
-            mrp_in(three_packed_event, four_packed_event, &attrs[j]);
+            mrp_in(three_packed_event, four_packed_event, &attrs[j], port_num);
           }
         }
 
@@ -1241,7 +1255,7 @@ void avb_mrp_process_packet(unsigned char buf[], int etype, int len, unsigned in
                 mrp_attribute_state *st = mrp_get_attr();
                 mrp_attribute_init(st, attr_type, port_num, 0, stream_data);
                 simple_printf("mrp_attribute_init: %d, %d\n", attr_type, port_num);
-                mrp_in(three_packed_event, four_packed_event, st);
+                mrp_in(three_packed_event, four_packed_event, st, port_num);
               }
               else
               {

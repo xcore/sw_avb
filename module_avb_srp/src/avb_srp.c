@@ -109,7 +109,7 @@ int avb_add_detected_stream(srp_talker_first_value *fv,
 static void avb_srp_map_join(mrp_attribute_state *attr, int new, int listener)
 {
   avb_srp_info_t *attribute_info = attr->attribute_info;
-  // printstrln("MAD_Join.indication");
+  if (listener) printstrln("Listener MAD_Join.indication");
   // Attribute propagation:
   if (listener && avb_srp_match_listener_to_talker_stream_id(attribute_info->stream_id, NULL))
   {
@@ -206,7 +206,6 @@ void avb_srp_listener_join_ind(mrp_attribute_state *attr, int new, int four_pack
 
 	if (stream == -1u && new)
   {
-    // printstr("Listener ");
     avb_srp_map_join(attr, new, 1);
     return;
   }
@@ -598,14 +597,18 @@ int avb_srp_encode_message(char *buf,
                           mrp_attribute_state *st,
                           int vector)
 {
+  int port_to_transmit = st->propagate ? !st->port_num : st->port_num;
   switch (st->attribute_type) {
   case MSRP_TALKER_ADVERTISE:
+    simple_printf("%d:TA\n", port_to_transmit);
     return encode_talker_message(buf, st, vector);
     break;
   case MSRP_LISTENER:
+    simple_printf("%d:LR\n", port_to_transmit);
     return encode_listener_message(buf, st, vector);
     break;
   case MSRP_DOMAIN_VECTOR:
+    simple_printf("%d:DM\n", port_to_transmit);
     return encode_domain_message(buf, st, vector);
     break;
 
