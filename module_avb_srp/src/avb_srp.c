@@ -316,7 +316,6 @@ void avb_srp_get_failed_stream(unsigned int streamId[2])
 {
   streamId[0] = failed_streamId[0];
   streamId[1] = failed_streamId[1];
-  return;
 }
 
 static int check_listener_firstvalue_merge(char *buf, 

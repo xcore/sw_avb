@@ -251,7 +251,6 @@ void avb_1722_maap_periodic(chanend c_tx)
     }
     break;
   } 
-  return;
 }
 
 static int maap_compare_mac(unsigned char src_addr[6])
@@ -426,7 +425,5 @@ void avb_1722_maap_process_packet(unsigned char buf[], unsigned char src_addr[6]
     }
     break;
   }
-
-  return;
 }
 

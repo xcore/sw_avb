@@ -115,7 +115,6 @@ void local_timestamp_to_ptp_mod64(unsigned local_ts,
 
   *hi = ptp_mod64 >> 32;
   *lo = (unsigned) ptp_mod64;
-  return;
 }
 
 
@@ -161,8 +160,6 @@ static void ptp_timestamp_offset64(ptp_timestamp *dst,
   dst->seconds[0] = (unsigned) sec;
   
   dst->nanoseconds = nanosec;
-
-  return;
 }
 
 
@@ -223,8 +220,6 @@ static void _local_timestamp_to_ptp(ptp_timestamp *ptp_ts,
   unsigned long long diff = local_time_to_ptp_time(local_diff, ptp_adjust);
 
   ptp_timestamp_offset64(ptp_ts, reference_ptp_ts, diff);
-
-  return;
 }                
 
 void local_timestamp_to_ptp(ptp_timestamp *ptp_ts,
@@ -236,8 +231,6 @@ void local_timestamp_to_ptp(ptp_timestamp *ptp_ts,
                           info->local_ts,
                           &info->ptp_ts,
                           info->ptp_adjust);
-
-  return;
 }
 
 #define local_to_ptp_ts(ptp_ts, local_ts) _local_timestamp_to_ptp(ptp_ts, local_ts, ptp_reference_local_ts, &ptp_reference_ptp_ts, g_ptp_adjust)
@@ -287,8 +280,6 @@ static void set_new_role(enum ptp_port_role_t new_role,
 
   if ((new_role == PTP_MASTER || new_role == PTP_UNCERTAIN) && (ptp_port_info[!port_num].role_state == PTP_MASTER))
     create_my_announce_msg(&best_announce_msg);
-
-  return;
 }
 
 
@@ -393,7 +384,6 @@ static void update_adjust(ptp_timestamp *master_ts,
   prev_adjust_local_ts = local_ts;
   prev_adjust_master_ts = *master_ts;
   prev_adjust_valid = 1;
-  return;
 }
 
 static void update_reference_timestamps(ptp_timestamp *master_egress_ts,
@@ -406,8 +396,6 @@ static void update_reference_timestamps(ptp_timestamp *master_egress_ts,
   /* Update the reference timestamps */
   ptp_reference_local_ts = local_ingress_ts;
   ptp_reference_ptp_ts = master_ingress_ts;
-  
-  return;
 }
 
 #define UPDATE_REFERENCE_TIMESTAMP_PERIOD (500000000) // 5 sec
@@ -427,7 +415,6 @@ static void periodic_update_reference_timestamps(unsigned int local_ts)
                            &ptp_reference_ptp_ts,
                            ptp_diff);
   }
-  return;
 }
 
 
@@ -482,8 +469,6 @@ static void update_path_delay(ptp_timestamp *master_ingress_ts,
     ptp_path_delay = delay;
     ptp_path_delay_valid = 1;
   }
-
-  return;
 }
 
 /* Returns:
@@ -588,8 +573,6 @@ static void bmca_update_roles(char *msg, unsigned t, int port_num)
       master_port_id = pComMesgHdr->sourcePortIdentity;    
     }
   }
-
-  return;
 }
 
 
@@ -614,8 +597,6 @@ static void timestamp_to_network(n80_t *msg,
   msg->data[7] = nsec_p[2];
   msg->data[8] = nsec_p[1];
   msg->data[9] = nsec_p[0];
-  
-  return;
 }
 
 static void network_to_ptp_timestamp(ptp_timestamp *ts,
@@ -639,8 +620,6 @@ static void network_to_ptp_timestamp(ptp_timestamp *ts,
   nsec_p[2] = msg->data[7];
   nsec_p[1] = msg->data[8];
   nsec_p[0] = msg->data[9];
-  
-  return;
 }
 
 static int port_id_equal(n80_t *a, n80_t *b)
@@ -679,7 +658,6 @@ static void ptp_tx_timed(chanend c_tx,
   len = len < 64 ? 64 : len;
   mac_tx_timed(c_tx, buf, len, ts, port_num);
   *ts = *ts - tile_timer_offset;
-  return;
 }
 
 static unsigned char src_mac_addr[6];
@@ -699,8 +677,6 @@ static void set_ptp_ethernet_hdr(unsigned char *buf)
   
   hdr->ethertype[0] = (PTP_ETHERTYPE >> 8);
   hdr->ethertype[1] = (PTP_ETHERTYPE & 0xff);
-
-  return;
 }
 
 // Estimate of announce message processing time delay.
@@ -1372,7 +1348,6 @@ void ptp_periodic(chanend c_tx, unsigned t)
   }
 
   periodic_update_reference_timestamps(t);
-  return;
 }
 
 void ptp_current_grandmaster(char grandmaster[8])

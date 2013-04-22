@@ -128,7 +128,6 @@ static void force_send(chanend c_tx, int ifnum)
     mac_tx(c_tx, (unsigned int *) buf, end - buf, ifnum);
   }
   send_ptr = buf+sizeof(mrp_ethernet_hdr)+sizeof(mrp_header);
-  return;
 }
 
 // this considers whether the send a PDU after an attribute has been
@@ -310,7 +309,6 @@ void mrp_encode_three_packed_event(char *buf,
   }
   
   *vector = encode_three_packed(event, num_values % 3, *vector);
-  return;
 }
 
 
@@ -350,7 +348,6 @@ void mrp_encode_four_packed_event(char *buf,
   }
   
   *vector = encode_four_packed(event, num_values % 4, *vector);
-  return;
 }
 
 // Send an empty leave all message
@@ -1032,30 +1029,29 @@ void mrp_periodic(void)
       {
         /* 5.2 TODO: Used to fire AVB_SRP_INDICATION here */
 
-        if ((attrs[j].pending_indications & PENDING_JOIN_NEW) != 0)
-        {
-          send_join_indication(&attrs[j], 1, attrs[j].four_vector_parameter);
-        }
-        if ((attrs[j].pending_indications & PENDING_JOIN) != 0)
-        {
-          send_join_indication(&attrs[j], 0, attrs[j].four_vector_parameter);
-        }
-        if ((attrs[j].pending_indications & PENDING_LEAVE) != 0)
-        {
-          send_leave_indication(&attrs[j], attrs[j].four_vector_parameter);
-        }
-        attrs[j].pending_indications = 0;
-        attrs[j].four_vector_parameter = 0;
-      }
-  #ifdef MRP_FULL_PARTICIPANT
-      if (avb_timer_expired(&attrs[j].leaveTimer))
+			if ((attrs[j].pending_indications & PENDING_JOIN_NEW) != 0)
       {
-        mrp_update_state(MRP_EVENT_LEAVETIMER, &attrs[j], 0);
-      }
-  #endif
-    }
-  }
-  return;
+				send_join_indication(&attrs[j], 1, attrs[j].four_vector_parameter);
+			}
+			if ((attrs[j].pending_indications & PENDING_JOIN) != 0)
+      {
+				send_join_indication(&attrs[j], 0, attrs[j].four_vector_parameter);
+			}
+			if ((attrs[j].pending_indications & PENDING_LEAVE) != 0)
+      {
+				send_leave_indication(&attrs[j], attrs[j].four_vector_parameter);
+			}
+			attrs[j].pending_indications = 0;
+			attrs[j].four_vector_parameter = 0;
+		}
+#ifdef MRP_FULL_PARTICIPANT
+		if (avb_timer_expired(&attrs[j].leaveTimer))
+    {
+			mrp_update_state(MRP_EVENT_LEAVETIMER, &attrs[j], 0);
+		}
+#endif
+	}
+	return;
 }
 
 
@@ -1148,10 +1144,8 @@ static void process(mrp_attribute_type attr_type,
     avb_srp_process_talker(attr_type, msg, i);
     return;
   default:
-  return;
+	return;
   }
-  return;
-
 }
 
 
@@ -1258,7 +1252,5 @@ void avb_mrp_process_packet(unsigned char buf[], int etype, int len, unsigned in
     }
     msg += 2;
   }
- 
-  return;
 }
 

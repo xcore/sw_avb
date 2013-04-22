@@ -1,6 +1,6 @@
-*/.build*/*
-tests/*/.build/*
-*/bin/*
+**/.build*/*
+bin/
+_build/
 *.o
 *.xe
 *.vcd

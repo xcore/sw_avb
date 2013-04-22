@@ -185,8 +185,6 @@ static void refill_backup_table() {
           }
     }    
   } while (!success);
-
-  return;
 }
 
 void avb_1722_router_table_add_entry_hash(int key0,
@@ -216,6 +214,5 @@ void avb_1722_router_table_add_entry_hash(int key0,
       refill_backup_table();
     }
   }
-
-  return;
 }
+

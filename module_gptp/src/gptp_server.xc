@@ -161,7 +161,7 @@ void ptp_process_client_request(chanend c, timer ptp_timer)
 
 
 void ptp_server(chanend c_rx, chanend c_tx, 
-                chanend client[], int num_clients,
+                chanend ptp_clients[], int num_clients,
                 enum ptp_server_type server_type)
 {
   timer ptp_timer;
@@ -171,7 +171,7 @@ void ptp_server(chanend c_rx, chanend c_tx,
   while (1) {
     select 
       {
-        do_ptp_server(c_rx, c_tx, client, num_clients, ptp_timer, ptp_timeout);
+        do_ptp_server(c_rx, c_tx, ptp_clients, num_clients, ptp_timer, ptp_timeout);
       }
   }
 }

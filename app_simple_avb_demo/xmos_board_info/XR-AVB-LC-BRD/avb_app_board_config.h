@@ -17,6 +17,7 @@
 
 #define I2C_COMBINE_SCL_SDA     0
 
+#define AVB_GPIO_ENABLED        1
 #define AVB_I2C_TILE            1
 #define AVB_GPIO_TILE           1
 
