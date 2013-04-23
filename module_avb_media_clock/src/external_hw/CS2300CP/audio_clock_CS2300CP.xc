@@ -4,6 +4,9 @@
 #include "print.h"
 #include "i2c.h"
 #include <stdlib.h>
+#include "gptp.h"
+
+#define AVB_PTP_CLKOUT_PERIOD 20000   // 20us
 
 /*** Private Definitions ***/
 #define CTL_SCLK_PERIOD_LOW_TICKS      (1000)
@@ -33,8 +36,16 @@
 // This is the number of word clocks per cycle of the PLL output clock
 #define PLL_TO_WORD_MULTIPLIER 100
 
+#ifdef AVB_PTP_GEN_DEBUG_CLK_IN_PLL_DRIVER
+extern port p_debug;
+#endif
+
 // outputs a clock of media clock
+#ifdef AVB_PTP_GEN_DEBUG_CLK_IN_PLL_DRIVER
+void audio_gen_CS2300CP_clock(out port p, chanend clk_ctl, chanend ptp_svr)
+#else
 void audio_gen_CS2300CP_clock(out port p, chanend clk_ctl)
+#endif
 {
   int bit = 0x0;
   unsigned int wordTime;
@@ -49,6 +60,33 @@ void audio_gen_CS2300CP_clock(out port p, chanend clk_ctl)
   
   // this is the number of word clocks in one PLL output
   unsigned mult = PLL_TO_WORD_MULTIPLIER;
+
+#ifdef AVB_PTP_GEN_DEBUG_CLK_IN_PLL_DRIVER
+  int x = 0;
+  timer tmr_clk;
+  int t;
+  ptp_timestamp ptp_ts;
+  ptp_time_info ptp_info;
+  int t0;
+  int discontinuity = 0;
+
+
+  ptp_get_time_info(ptp_svr, ptp_info);
+
+  //    tmr :> t;
+  //    t += 200000000;
+  //    tmr when timerafter(t) :> void;
+
+  tmr_clk :> t;
+  local_timestamp_to_ptp(ptp_ts, t, ptp_info);
+
+  ptp_ts.seconds[0] += 2;
+  ptp_ts.nanoseconds = 0;
+
+  t = ptp_timestamp_to_local(ptp_ts, ptp_info);
+
+  x = ptp_ts.seconds[0] & 1;
+#endif
 
   // we need 2 ticks per sample
   mult = mult/2;
@@ -104,6 +142,22 @@ void audio_gen_CS2300CP_clock(out port p, chanend clk_ctl)
         	break;
         }
       break;
+
+#ifdef AVB_PTP_GEN_DEBUG_CLK_IN_PLL_DRIVER
+    case tmr_clk when timerafter(t) :> void:
+            p_debug <: x;
+            t0 = t + AVB_PTP_CLKOUT_PERIOD/2/10;
+            x = ~x;
+            ptp_get_time_info(ptp_svr, ptp_info);
+            ptp_timestamp_offset(ptp_ts, AVB_PTP_CLKOUT_PERIOD/2);
+            t = ptp_timestamp_to_local(ptp_ts, ptp_info);
+            t0 = t - t0;
+            if (t0<0) t0 = -t0;
+            if (t0 > 2000)
+              discontinuity = 1;
+            break;
+#endif
+
     default:
       break;
     }
