@@ -23,6 +23,7 @@
 #define MIN_FILL_LEVEL 5
 #define MAX_SAMPLES_PER_1722_PACKET 12
 
+
 static media_clock_t media_clocks[MAX_NUM_MEDIA_CLOCKS];
 
 void clk_ctl_set_rate(chanend clk_ctl, int wordLength)
@@ -207,9 +208,9 @@ static void manage_buffer(buf_info_t &b,
   sample_diff = diff / ((int) ((wordLength*10) >> WC_FRACTIONAL_BITS));
 
 #ifdef USE_XSCOPE_PROBES
-			xscope_probe_data(8, (unsigned int) diff);
-			xscope_probe_data(9, (unsigned int) sample_diff);
-			xscope_probe_data(10, (unsigned int) fill);
+			//xscope_probe_data(8, (unsigned int) diff);
+			xscope_probe_data(5, (unsigned int) sample_diff);
+			xscope_probe_data(6, (unsigned int) fill);
 #endif
 
   if (locked && b.lock_count < LOCK_COUNT_THRESHOLD) {   
@@ -291,6 +292,7 @@ void media_clock_server(chanend media_clock_ctl,
   unsigned char buf_ctl_cmd;
 #endif
 
+
 #if (AVB_NUM_MEDIA_OUTPUTS != 0)
   init_buffers();
 
@@ -308,6 +310,8 @@ void media_clock_server(chanend media_clock_ctl,
   tmr :> clk_time;
 
   clk_time += CLOCK_RECOVERY_PERIOD;  
+
+
   while (1) {
     select 
       {
@@ -323,7 +327,7 @@ void media_clock_server(chanend media_clock_ctl,
                                  CLOCK_RECOVERY_PERIOD);
 
 #ifdef USE_XSCOPE_PROBES
-			xscope_probe_data(4, (unsigned) media_clocks[i].wordLength);
+			xscope_probe_data(7, (unsigned) media_clocks[i].wordLength);
 #endif
             for (int j=0;j<num_clk_ctl;j++) {
               if (registered[j]==i)
