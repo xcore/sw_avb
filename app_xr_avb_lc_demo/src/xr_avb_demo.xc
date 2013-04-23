@@ -10,7 +10,6 @@
 #include "i2c.h"
 #include "avb.h"
 #include "audio_clock_CS2300CP.h"
-#include "audio_codec_CS42448.h"
 #include "media_fifo.h"
 #include "mdns.h"
 #include "control_api_server.h"
@@ -18,7 +17,8 @@
 #include "demo_stream_manager.h"
 
 // this is the sample rate, the frequency of the word clock
-#define SAMPLE_RATE 48000
+//#define SAMPLE_RATE 48000
+#define SAMPLE_RATE 44100
 
 // This is the number of master clocks in a word clock
 #define MASTER_TO_WORDCLOCK_RATIO 512
