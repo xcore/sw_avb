@@ -98,9 +98,9 @@ int main()
           }
 
           // Periodic processing
-          case tmr when timerafter(periodic_timeout) :> void:
+          case tmr when timerafter(periodic_timeout) :> unsigned int time_now:
           {
-            avb_periodic();
+            avb_periodic(time_now);
 
             periodic_timeout += PERIODIC_POLL_TIME;
             break;

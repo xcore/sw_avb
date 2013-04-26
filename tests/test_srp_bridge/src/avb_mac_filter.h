@@ -19,7 +19,8 @@
 
 #define MII_FILTER_FORWARD_TO_OTHER_PORTS (0x80000000)
 
-inline int mac_custom_filter(unsigned int buf[], unsigned int mac[2])
+#if defined(__XC__)
+inline int mac_custom_filter(unsigned int buf[], unsigned int mac[2], int &user_data)
 {
   int result = 0;
   unsigned short etype = (unsigned short) buf[3];
@@ -50,5 +51,6 @@ inline int mac_custom_filter(unsigned int buf[], unsigned int mac[2])
 
   return result;
 }
+#endif
 
 #endif 
