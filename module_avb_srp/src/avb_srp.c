@@ -204,6 +204,19 @@ int avb_srp_match_listener(mrp_attribute_state *attr,
   stream_id += i;
 
   simple_printf("match_listener!!! %x:%x\n", stream_id, my_stream_id);
+  simple_printf("my_stream_id[0]: %x, my_stream_id[1]: %x, ", 
+    sink_info->reservation.stream_id[0],
+    sink_info->reservation.stream_id[1]);
+  simple_printf("%x:%x:%x:%x:%x:%x:%x:%x\n", 
+    first_value->StreamId[0],
+    first_value->StreamId[1],
+    first_value->StreamId[2],
+    first_value->StreamId[3],
+    first_value->StreamId[4],
+    first_value->StreamId[5],
+    first_value->StreamId[6],
+    first_value->StreamId[7]);
+  simple_printf("RESULT: %d\n",(my_stream_id == stream_id) );
 
   return (my_stream_id == stream_id);
 }
@@ -291,7 +304,7 @@ int avb_srp_process_attribute(int mrp_attribute_type, char *fv, int num, avb_srp
     {
       // Returns 1 if found --> add new attribute
       // Returns 0 if not found
-      return avb_srp_match_listener_to_talker_stream_id(pdu_streamId, stream);
+      return avb_add_detected_stream(packet, pdu_streamId, num, stream); // !avb_srp_match_listener_to_talker_stream_id(pdu_streamId, stream);
     }
   }
 
