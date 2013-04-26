@@ -446,6 +446,7 @@ static void doTx(mrp_attribute_state *st,
 
 static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_packed_event, unsigned int port_num)
 {
+  // simple_printf("mrp_event: %d\n", e);
 #ifdef MRP_FULL_PARTICIPANT
   // Registrar state machine
   switch (e) 
@@ -458,6 +459,7 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
         stop_avb_timer(&st->leaveTimer);
       st->registrar_state = MRP_IN;
       st->pending_indications |= PENDING_JOIN_NEW;
+      printstrln("Pending join new");
       st->four_vector_parameter = four_packed_event;
       break;
     case MRP_EVENT_RECEIVE_JOININ:
@@ -1075,9 +1077,11 @@ void mrp_periodic(void)
 
 static void mrp_in(int three_packed_event, int four_packed_event, mrp_attribute_state *st, unsigned int port_num)
 {
+  simple_printf("mrp_in event: %d\n", three_packed_event);
   switch (three_packed_event)
     {
     case MRP_ATTRIBUTE_EVENT_NEW:
+      printstrln("MRP_ATTRIBUTE_EVENT_NEW");
       mrp_update_state(MRP_EVENT_RECEIVE_NEW, st, four_packed_event, port_num);
       break;
     case MRP_ATTRIBUTE_EVENT_JOININ:
@@ -1120,8 +1124,12 @@ static int msg_match(mrp_attribute_type attr_type,
               int three_packed_event,
               int four_packed_event)
 {
+  /*
   if (attr->applicant_state == MRP_UNUSED ||
       attr->applicant_state == MRP_DISABLED)
+    return 0;
+  */
+  if (attr->applicant_state == MRP_UNUSED)
     return 0;
 
   if (attr->attribute_type != attr_type)
@@ -1256,10 +1264,11 @@ void avb_mrp_process_packet(unsigned char buf[], int etype, int len, unsigned in
                 mrp_attribute_init(st, attr_type, port_num, 0, stream_data);
                 simple_printf("mrp_attribute_init: %d, %d\n", attr_type, port_num);
                 mrp_in(three_packed_event, four_packed_event, st, port_num);
+                simple_printf("STATE AFTER IN: %d\n", st->applicant_state); 
               }
               else
               {
-                // simple_printf("didn't match %d\n", attr_type);
+                simple_printf("Attr didn't match: %d\n", attr_type);
               }
             }
         }

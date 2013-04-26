@@ -29,11 +29,22 @@ static int wrPtr = 0;
 int avb_srp_match_listener_to_talker_stream_id(unsigned stream_id[2], avb_srp_info_t **stream)
 {
   for(int i=0;i<AVB_STREAM_DETECT_HISTORY_SIZE;i++)
+  {
+    simple_printf("compare %x:%x to %x:%x\n", stream_id[0], stream_id[1], stream_history[i].stream_id[0], stream_history[i].stream_id[1]);
     if (stream_id[0] == stream_history[i].stream_id[0] &&
         stream_id[1] == stream_history[i].stream_id[1]) {
-      if (stream != NULL) *stream = &stream_history[i];
-    return 1;
+      if (stream != NULL)
+      {
+        *stream = &stream_history[i];
+      }
+      else
+      {
+        printstrln("null stream");
+      }
+      printstrln("match");
+      return 1;
     }
+  }
 
   return 0;
 }
@@ -178,8 +189,10 @@ int avb_srp_match_listener(mrp_attribute_state *attr,
   unsigned long long stream_id=0, my_stream_id=0;
   srp_listener_first_value *first_value = (srp_listener_first_value *) fv;
 
+  /*
   if (four_packed_event != AVB_SRP_FOUR_PACKED_EVENT_READY)
     return 0;
+  */
 
   my_stream_id = sink_info->reservation.stream_id[0];
   my_stream_id = (my_stream_id << 32) + sink_info->reservation.stream_id[1];
@@ -189,6 +202,8 @@ int avb_srp_match_listener(mrp_attribute_state *attr,
   }
   
   stream_id += i;
+
+  simple_printf("match_listener!!! %x:%x\n", stream_id, my_stream_id);
 
   return (my_stream_id == stream_id);
 }
@@ -260,6 +275,8 @@ int avb_srp_process_attribute(int mrp_attribute_type, char *fv, int num, avb_srp
 
   pdu_streamId[0] = streamId >> 32;
   pdu_streamId[1] = (unsigned) streamId;
+
+  simple_printf("matching %x:%x\n", pdu_streamId[0], pdu_streamId[1]);
 
   switch (mrp_attribute_type)
   {
@@ -357,10 +374,13 @@ static int encode_listener_message(char *buf,
 
   int num_values;
 
+  simple_printf(",AttributeType: %d ", mrp_hdr->AttributeType);
+
   if (mrp_hdr->AttributeType != AVB_SRP_ATTRIBUTE_TYPE_LISTENER)
     return 0;
 
   num_values = hdr->NumberOfValuesLow;
+  simple_printf(",num_values: %d, ", num_values);
                            
   if (num_values == 0) 
     merge = 1;
@@ -379,6 +399,9 @@ static int encode_listener_message(char *buf,
       memcpy(&first_value->StreamId[0], &streamid, 4);
       streamid = byterev(streamId[1]);
       memcpy(&first_value->StreamId[4], &streamid, 4);
+
+      simple_printf("stream %x:%x\n", streamId[0], streamId[1]);
+
     }
     
     mrp_encode_three_packed_event(buf, vector, st->attribute_type);    
@@ -547,6 +570,8 @@ static int encode_talker_message(char *buf,
       streamid = byterev(attribute_info->stream_id[1]);
       memcpy(&first_value->StreamId[4], &streamid, 4);
 
+      simple_printf("stream %x:%x\n", attribute_info->stream_id[0], attribute_info->stream_id[1]);
+
       hton_16(first_value->VlanID, attribute_info->vlan_id);
 
       char here = st->here;
@@ -600,15 +625,15 @@ int avb_srp_encode_message(char *buf,
   int port_to_transmit = st->propagate ? !st->port_num : st->port_num;
   switch (st->attribute_type) {
   case MSRP_TALKER_ADVERTISE:
-    simple_printf("%d:TA\n", port_to_transmit);
+    simple_printf("%d:TA, ", port_to_transmit);
     return encode_talker_message(buf, st, vector);
     break;
   case MSRP_LISTENER:
-    simple_printf("%d:LR\n", port_to_transmit);
+    simple_printf("%d:LR, ", port_to_transmit);
     return encode_listener_message(buf, st, vector);
     break;
   case MSRP_DOMAIN_VECTOR:
-    simple_printf("%d:DM\n", port_to_transmit);
+    // simple_printf("%d:DM\n", port_to_transmit);
     return encode_domain_message(buf, st, vector);
     break;
 
