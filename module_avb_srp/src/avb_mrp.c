@@ -1239,6 +1239,8 @@ void avb_mrp_process_packet(unsigned char buf[], int etype, int len, unsigned in
         int four_packed_event = has_fourpacked_events(attr_type) ?
           decode_fourpacked(*(first_value + first_value_len + threepacked_len + i/4),i%4) : 0;
 
+        if (attr_type == MSRP_LISTENER) simple_printf("Port %d in: MSRP_LISTENER\n", port_num);
+        if (attr_type == MSRP_TALKER_ADVERTISE) simple_printf("Port %d in: MSRP_TALKER_ADVERTISE\n", port_num);
 
         // This allows the application state machines to respond to the message
         for (int j=0;j<MRP_MAX_ATTRS;j++)
@@ -1258,13 +1260,16 @@ void avb_mrp_process_packet(unsigned char buf[], int etype, int len, unsigned in
                 attr_type == MSRP_LISTENER)
             {
               avb_srp_info_t *stream_data;
-              if (avb_srp_process_attribute(attr_type, first_value, i, &stream_data))
+              avb_srp_process_attribute(attr_type, first_value, i, &stream_data);
+              // if (avb_srp_process_attribute(attr_type, first_value, i, &stream_data))
+              if (1)
               {
                 mrp_attribute_state *st = mrp_get_attr();
                 mrp_attribute_init(st, attr_type, port_num, 0, stream_data);
-                simple_printf("mrp_attribute_init: %d, %d\n", attr_type, port_num);
+                simple_printf("mrp_attribute_init: %d, %d, STREAM_ID[0]: %x\n", attr_type, port_num, stream_data->stream_id[0]);
+
                 mrp_in(three_packed_event, four_packed_event, st, port_num);
-                simple_printf("STATE AFTER IN: %d\n", st->applicant_state); 
+                // simple_printf("STATE AFTER IN: %d\n", st->applicant_state); 
               }
               else
               {

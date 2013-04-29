@@ -18,24 +18,25 @@
 
 static unsigned int failed_streamId[2];
 
-#ifndef AVB_STREAM_DETECT_HISTORY_SIZE
-#define AVB_STREAM_DETECT_HISTORY_SIZE 10
+#ifndef AVB_STREAM_LIST_SIZE
+#define AVB_STREAM_LIST_SIZE 10
 #endif
 
-static avb_srp_info_t stream_history[AVB_STREAM_DETECT_HISTORY_SIZE];
+static avb_srp_info_t stream_list[AVB_STREAM_LIST_SIZE];
 static int rdPtr=0;
 static int wrPtr = 0;
 
 int avb_srp_match_listener_to_talker_stream_id(unsigned stream_id[2], avb_srp_info_t **stream)
 {
-  for(int i=0;i<AVB_STREAM_DETECT_HISTORY_SIZE;i++)
+  for(int i=0;i<AVB_STREAM_LIST_SIZE;i++)
   {
-    simple_printf("compare %x:%x to %x:%x\n", stream_id[0], stream_id[1], stream_history[i].stream_id[0], stream_history[i].stream_id[1]);
-    if (stream_id[0] == stream_history[i].stream_id[0] &&
-        stream_id[1] == stream_history[i].stream_id[1]) {
+    simple_printf("compare %x:%x to %x:%x\n", stream_id[0], stream_id[1], stream_list[i].stream_id[0], stream_list[i].stream_id[1]);
+    if (stream_list[i].tspec_max_frame_size != 0 &&
+        stream_id[0] == stream_list[i].stream_id[0] &&
+        stream_id[1] == stream_list[i].stream_id[1]) {
       if (stream != NULL)
       {
-        *stream = &stream_history[i];
+        *stream = &stream_list[i];
       }
       else
       {
@@ -50,38 +51,58 @@ int avb_srp_match_listener_to_talker_stream_id(unsigned stream_id[2], avb_srp_in
 }
 
 // FIXME: Rename me?
-int avb_add_detected_stream(srp_talker_first_value *fv,
+int avb_add_new_stream_entry(srp_talker_first_value *fv,
                             unsigned stream_id[2],
                              int addr_offset,
-                             avb_srp_info_t **stream)
-{  
-  if (AVB_STREAM_DETECT_HISTORY_SIZE == 0)
+                             avb_srp_info_t **stream,
+                             int talker_attr)
+{
+  if (AVB_STREAM_LIST_SIZE == 0)
     return 0;
 
+  int matched_stream_idx = -1;
+  int new_wrPtr = wrPtr + 1;
+
   // FIXME: This kind of search should use a linked list when list is big?
-  for(int i=0;i<AVB_STREAM_DETECT_HISTORY_SIZE;i++)
-    if (stream_id[0] == stream_history[i].stream_id[0] &&
-        stream_id[1] == stream_history[i].stream_id[1]) {
-      return 0;
-    }
-
+  for(int i=0;i<AVB_STREAM_LIST_SIZE;i++)
   {
-    // FIXME: Should be a linked list instead of FIFO
-    int new_wrPtr = wrPtr + 1;
-    unsigned long long x;
+    if (stream_id[0] == stream_list[i].stream_id[0] &&
+        stream_id[1] == stream_list[i].stream_id[1]) {
 
-    if (new_wrPtr==AVB_STREAM_DETECT_HISTORY_SIZE)
+      matched_stream_idx = i;
+      // If it is a talker attribute, we always continue and update the entry because it could have been
+      // created by a listener attribute and hence isn't complete
+      if (!talker_attr)
+      {
+        *stream = &stream_list[i];
+        return 0;
+      }
+    }
+  }
+
+  if (matched_stream_idx < 0)
+  {
+    // FIXME: Should be a linked list instead of FIFO. Can/should we drop entries?
+
+    if (new_wrPtr==AVB_STREAM_LIST_SIZE)
       new_wrPtr = 0;
     if (new_wrPtr==rdPtr) {
       // fifo is full, drop oldest
       rdPtr++;
-      if (rdPtr==AVB_STREAM_DETECT_HISTORY_SIZE)
+      if (rdPtr==AVB_STREAM_LIST_SIZE)
         rdPtr = 0;
     }
-    
-    stream_history[wrPtr].stream_id[0] = stream_id[0];
-    stream_history[wrPtr].stream_id[1] = stream_id[1];
-    stream_history[wrPtr].vlan_id = ntoh_16(fv->VlanID);
+
+    matched_stream_idx = wrPtr;
+  }
+  
+  stream_list[matched_stream_idx].stream_id[0] = stream_id[0];
+  stream_list[matched_stream_idx].stream_id[1] = stream_id[1];
+
+  if (talker_attr)
+  {
+    unsigned long long x;
+    stream_list[matched_stream_idx].vlan_id = ntoh_16(fv->VlanID);
       
     for(int i=0;i<6;i++) 
       x = (x<<8) + fv->DestMacAddr[i];
@@ -89,28 +110,38 @@ int avb_add_detected_stream(srp_talker_first_value *fv,
     x += addr_offset;
 
     int tmp = byterev(x);
-    memcpy(&stream_history[wrPtr].dest_mac_addr[2], &tmp, 4);
+    memcpy(&stream_list[matched_stream_idx].dest_mac_addr[2], &tmp, 4);
     tmp = byterev(x>>32)>>16;
-    memcpy(&stream_history[wrPtr].dest_mac_addr, &tmp, 2);
+    memcpy(&stream_list[matched_stream_idx].dest_mac_addr, &tmp, 2);
 
-    stream_history[wrPtr].tspec_max_frame_size = ntoh_16(fv->TSpecMaxFrameSize);
-    stream_history[wrPtr].tspec_max_interval = ntoh_16(fv->TSpecMaxIntervalFrames);
-    stream_history[wrPtr].tspec = fv->TSpec;
-    stream_history[wrPtr].accumulated_latency = ntoh_32(fv->AccumulatedLatency);
+    stream_list[matched_stream_idx].tspec_max_frame_size = ntoh_16(fv->TSpecMaxFrameSize);
+    stream_list[matched_stream_idx].tspec_max_interval = ntoh_16(fv->TSpecMaxIntervalFrames);
+    stream_list[matched_stream_idx].tspec = fv->TSpec;
+    stream_list[matched_stream_idx].accumulated_latency = ntoh_32(fv->AccumulatedLatency);
+  }
+  else
+  {
+    memset(stream_list[matched_stream_idx].dest_mac_addr, 0, sizeof(avb_srp_info_t)-8);
+  }
 
-    simple_printf("Added stream:\n ID: %x%x\n \
-                  DA: %x:%x:%x:%x:%x:%x\n \
-                  max size: %d\n \
-                  interval: %d\n",
-                  stream_id[0], stream_id[1],
-                  stream_history[wrPtr].dest_mac_addr[0], stream_history[wrPtr].dest_mac_addr[1], stream_history[wrPtr].dest_mac_addr[2],
-                  stream_history[wrPtr].dest_mac_addr[3], stream_history[wrPtr].dest_mac_addr[4], stream_history[wrPtr].dest_mac_addr[5],
-                  stream_history[wrPtr].tspec_max_frame_size,
-                  stream_history[wrPtr].tspec_max_interval
-                  );
+  // FIXME: We may add a stream entry based on a Listener attribute, and we don't have any
+  // fields other than the Stream ID
 
-    *stream = &stream_history[wrPtr];
-      
+  simple_printf("Added stream:\n ID: %x%x\n \
+                DA: %x:%x:%x:%x:%x:%x\n \
+                max size: %d\n \
+                interval: %d\n",
+                stream_id[0], stream_id[1],
+                stream_list[matched_stream_idx].dest_mac_addr[0], stream_list[matched_stream_idx].dest_mac_addr[1], stream_list[matched_stream_idx].dest_mac_addr[2],
+                stream_list[matched_stream_idx].dest_mac_addr[3], stream_list[matched_stream_idx].dest_mac_addr[4], stream_list[matched_stream_idx].dest_mac_addr[5],
+                stream_list[matched_stream_idx].tspec_max_frame_size,
+                stream_list[matched_stream_idx].tspec_max_interval
+                );
+
+  *stream = &stream_list[matched_stream_idx];
+    
+  if (matched_stream_idx < 0)
+  {
     wrPtr = new_wrPtr;
   }
   
@@ -122,8 +153,10 @@ static void avb_srp_map_join(mrp_attribute_state *attr, int new, int listener)
   avb_srp_info_t *attribute_info = attr->attribute_info;
   if (listener) printstrln("Listener MAD_Join.indication");
   // Attribute propagation:
-  if (listener && avb_srp_match_listener_to_talker_stream_id(attribute_info->stream_id, NULL))
+  if (avb_srp_match_listener_to_talker_stream_id(attribute_info->stream_id, NULL))
   {
+    printstrln("#######################################");
+    printstrln("adding streaming mapping + setting prop");
     avb_1722_add_stream_mapping(avb_control_get_mac_tx(),
                               attribute_info->stream_id,
                               -1,
@@ -176,6 +209,21 @@ int avb_srp_match_talker_advertise(mrp_attribute_state *attr,
   }
 
   stream_id += i;
+
+  simple_printf("match_talker!!! %x:%x\n", stream_id, my_stream_id);
+  simple_printf("my_stream_id[0]: %x, my_stream_id[1]: %x, ", 
+    source_info->reservation.stream_id[0],
+    source_info->reservation.stream_id[1]);
+  simple_printf("%x:%x:%x:%x:%x:%x:%x:%x\n", 
+    first_value->StreamId[0],
+    first_value->StreamId[1],
+    first_value->StreamId[2],
+    first_value->StreamId[3],
+    first_value->StreamId[4],
+    first_value->StreamId[5],
+    first_value->StreamId[6],
+    first_value->StreamId[7]);
+  simple_printf("RESULT: %d\n",(my_stream_id == stream_id) );
 
   return (my_stream_id == stream_id);
 }
@@ -298,13 +346,13 @@ int avb_srp_process_attribute(int mrp_attribute_type, char *fv, int num, avb_srp
     {
       // Returns 1 if not found and added --> add new attribute
       // Return 0 if found and not added
-      return avb_add_detected_stream(packet, pdu_streamId, num, stream);
+      return avb_add_new_stream_entry(packet, pdu_streamId, num, stream, 1);
     }
     case MSRP_LISTENER:
     {
       // Returns 1 if found --> add new attribute
       // Returns 0 if not found
-      return avb_add_detected_stream(packet, pdu_streamId, num, stream); // !avb_srp_match_listener_to_talker_stream_id(pdu_streamId, stream);
+      return avb_add_new_stream_entry(packet, pdu_streamId, num, stream, 0); // !avb_srp_match_listener_to_talker_stream_id(pdu_streamId, stream);
     }
   }
 
@@ -638,11 +686,11 @@ int avb_srp_encode_message(char *buf,
   int port_to_transmit = st->propagate ? !st->port_num : st->port_num;
   switch (st->attribute_type) {
   case MSRP_TALKER_ADVERTISE:
-    simple_printf("%d:TA, ", port_to_transmit);
+    simple_printf("Port %d out: MSRP_TALKER_ADVERTISE, ", port_to_transmit);
     return encode_talker_message(buf, st, vector);
     break;
   case MSRP_LISTENER:
-    simple_printf("%d:LR, ", port_to_transmit);
+    simple_printf("Port %d out: MSRP_LISTENER, ", port_to_transmit);
     return encode_listener_message(buf, st, vector);
     break;
   case MSRP_DOMAIN_VECTOR:
