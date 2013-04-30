@@ -161,91 +161,91 @@ targetID="org.eclipse.cdt.build.MakeTargetBuilder">
                                     <listOptionValue builtIn="false" value='&quot;${XMOS_DOC_PATH}/../target/include/gcc&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${XMOS_DOC_PATH}/../target/include/c++/4.2.1&quot;' />
                                     <listOptionValue builtIn="false" value='&quot;${XMOS_DOC_PATH}/../target/include/c++/4.2.1/xcore-xmos-elf&quot;' />
-                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw}&quot;' />
-<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2300CP}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2300CP}&quot;' />
+<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw}&quot;' />
+<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2100CP}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock}&quot;' />
-<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2100}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src}&quot;' />
 
                                 </option>
                                 <inputType id = "com.xmos.cdt.xc.compiler.input.58865306" name="XC Sources" superClass="com.xmos.cdt.xc.compiler.input" />
                                 <option id = "gnu.c.compiler.option.include.paths.6989112" valueType="includePath" superClass="gnu.c.compiler.option.include.paths">
-                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw}&quot;' />
-<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2300CP}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2300CP}&quot;' />
+<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw}&quot;' />
+<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2100CP}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock}&quot;' />
-<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2100}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src}&quot;' />
 
                                 </option>
                             </tool>
                             <tool id = "com.xmos.cdt.xc.compiler.base.73945432" name="com.xmos.cdt.xc.compiler.base" superClass="com.xmos.cdt.xc.compiler.base">
                                 <option id = "gnu.c.compiler.option.include.paths.93756133" valueType="includePath" superClass="gnu.c.compiler.option.include.paths">
-                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw}&quot;' />
-<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2300CP}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2300CP}&quot;' />
+<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw}&quot;' />
+<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2100CP}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock}&quot;' />
-<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2100}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src}&quot;' />
 
                                 </option>
                                 <option id = "com.xmos.c.compiler.option.include.paths.80987764" valueType="includePath" superClass="com.xmos.c.compiler.option.include.paths">
-                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw}&quot;' />
-<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2300CP}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2300CP}&quot;' />
+<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw}&quot;' />
+<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2100CP}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock}&quot;' />
-<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2100}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src}&quot;' />
 
                                 </option>
                             </tool>
                             <tool id = "com.xmos.cdt.c.compiler.base.79008134" name="com.xmos.cdt.c.compiler.base" superClass="com.xmos.cdt.c.compiler.base">
                                 <option id = "gnu.c.compiler.option.include.paths.72396672" valueType="includePath" superClass="gnu.c.compiler.option.include.paths">
-                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw}&quot;' />
-<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2300CP}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2300CP}&quot;' />
+<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw}&quot;' />
+<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2100CP}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock}&quot;' />
-<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2100}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src}&quot;' />
 
                                 </option>
                                 <option id = "com.xmos.c.compiler.option.include.paths.64173179" valueType="includePath" superClass="com.xmos.c.compiler.option.include.paths">
-                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw}&quot;' />
-<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2300CP}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2300CP}&quot;' />
+<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw}&quot;' />
+<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2100CP}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock}&quot;' />
-<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2100}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src}&quot;' />
 
                                 </option>
                             </tool>
                             <tool id = "com.xmos.cdt.cpp.compiler.base.62843166" name="com.xmos.cdt.cpp.compiler.base" superClass="com.xmos.cdt.cpp.compiler.base">
                                 <option id = "gnu.c.compiler.option.include.paths.25312317" valueType="includePath" superClass="gnu.c.compiler.option.include.paths">
-                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw}&quot;' />
-<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2300CP}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2300CP}&quot;' />
+<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw}&quot;' />
+<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2100CP}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock}&quot;' />
-<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2100}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src}&quot;' />
 
                                 </option>
                                 <option id = "com.xmos.c.compiler.option.include.paths.8395205" valueType="includePath" superClass="com.xmos.c.compiler.option.include.paths">
-                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw}&quot;' />
-<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2300CP}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2300CP}&quot;' />
+<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw}&quot;' />
+<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2100CP}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock}&quot;' />
-<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2100}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src}&quot;' />
 
                                 </option>
                             </tool>
                             <tool id = "com.xmos.cdt.core.assembler.base.95406944" name="com.xmos.cdt.core.assembler.base" superClass="com.xmos.cdt.core.assembler.base">
                                 <option id = "gnu.c.compiler.option.include.paths.49891010" valueType="includePath" superClass="gnu.c.compiler.option.include.paths">
-                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw}&quot;' />
-<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2300CP}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2300CP}&quot;' />
+<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw}&quot;' />
+<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2100CP}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock}&quot;' />
-<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2100}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src}&quot;' />
 
                                 </option>
                                 <option id = "com.xmos.c.compiler.option.include.paths.74327280" valueType="includePath" superClass="com.xmos.c.compiler.option.include.paths">
-                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw}&quot;' />
-<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2300CP}&quot;' />
+                                    <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2300CP}&quot;' />
+<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw}&quot;' />
+<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2100CP}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock}&quot;' />
-<listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src/external_hw/CS2100}&quot;' />
 <listOptionValue builtIn="false" value='&quot;${workspace_loc:/module_avb_media_clock/src}&quot;' />
 
                                 </option>

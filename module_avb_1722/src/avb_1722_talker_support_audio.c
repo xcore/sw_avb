@@ -2,6 +2,8 @@
  * \file avb_1722_talker_support_audio.c
  * \brief 1722 Talker support C functions
  */
+ #include <print.h>
+ #include <xscope.h>
 #include "avb_conf.h"
 
 #if AVB_NUM_SOURCES > 0 && (defined(AVB_1722_FORMAT_61883_6) || defined(AVB_1722_FORMAT_SAF))
@@ -162,6 +164,11 @@ int avb1722_create_packet(unsigned char Buf0[],
     for (i = 0; i < MAC_ADRS_BYTE_COUNT; i++) {
         pEtherHdr->DA[i] = stream_info->destMACAdrs[i];
     } 
+
+    if (stream_info->initial)
+    {
+        if (media_input_fifo_fill_level(map[0]) < MEDIA_INPUT_FIFO_SAMPLE_FIFO_SIZE/2) return 0;
+    }
 
     // Check to see if there is something that can be transmitted.  If there is not, then we give up
     // transmitting this packet, because there may be other streams serviced by this thread which

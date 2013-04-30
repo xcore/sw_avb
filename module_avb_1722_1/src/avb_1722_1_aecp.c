@@ -128,33 +128,57 @@ static void avb_1722_1_create_aecp_aem_response(unsigned char src_addr[6], unsig
 static int create_aem_read_descriptor_response(unsigned short read_type, unsigned short read_id, unsigned char src_addr[6], avb_1722_1_aecp_packet_t *pkt)
 {
   int desc_size_bytes = 0, i = 0;
-  unsigned char *descriptor;
+  unsigned char *descriptor = NULL;
   int found_descriptor = 0;
 
 #if AEM_GENERATE_CLUSTERS_MAP_ON_FLY
   // Generate audio clusters on the fly (to reduce memory)
-  if (read_type == AEM_AUDIO_CLUSTER_TYPE)
+  if (read_type == AEM_AUDIO_CLUSTER_TYPE || read_type == AEM_STREAM_INPUT_TYPE || read_type == AEM_STREAM_OUTPUT_TYPE)
   {
-    if (read_id < (AVB_NUM_MEDIA_OUTPUTS+AVB_NUM_MEDIA_INPUTS))
+    if (read_type == AEM_AUDIO_CLUSTER_TYPE && read_id < (AVB_NUM_MEDIA_OUTPUTS+AVB_NUM_MEDIA_INPUTS))
     {
-      char chan_id;
       descriptor = &desc_audio_cluster_template[0];
+      desc_size_bytes = sizeof(desc_audio_cluster_template);
+    }
+    else if ((read_type == AEM_STREAM_INPUT_TYPE && read_id < AVB_NUM_SINKS))
+    {
+      descriptor = &desc_stream_input_0[0];
+      desc_size_bytes = sizeof(desc_stream_input_0);
+    }
+    else if ((read_type == AEM_STREAM_OUTPUT_TYPE && read_id < AVB_NUM_SOURCES))
+    {
+      descriptor = &desc_stream_output_0[0];
+      desc_size_bytes = sizeof(desc_stream_output_0);
+    }
+
+    if (descriptor != NULL)
+    {
+      char id_num = (char)read_id;
+      int offset = 11;
+
       // The descriptor id is also the channel number
       descriptor[3] = (unsigned char)read_id;
-      if (read_id < AVB_NUM_MEDIA_OUTPUTS)
+      if ((read_type == AEM_AUDIO_CLUSTER_TYPE && read_id < AVB_NUM_MEDIA_OUTPUTS) || read_type == AEM_STREAM_OUTPUT_TYPE)
       {
-        chan_id = (char)read_id;
-        strcpy((char*)&descriptor[4], "Output ");
-        descriptor[11] = chan_id + 0x30;
+        if (read_type != AEM_STREAM_OUTPUT_TYPE)
+        {
+          strcpy((char*)&descriptor[4], "Output ");
+        }
+        else offset = 18;
+        descriptor[offset] = id_num + 0x30;
       }
       else
       {
-        chan_id = (char)read_id - AVB_NUM_MEDIA_OUTPUTS;
-        strcpy((char*)&descriptor[4], "Input ");
-        descriptor[10] = chan_id + 0x30;
-        descriptor[11] = '\0'; // NUL
+        if (read_type != AEM_STREAM_INPUT_TYPE)
+        {
+          id_num = (char)read_id - AVB_NUM_MEDIA_OUTPUTS;
+          strcpy((char*)&descriptor[4], "Input ");
+        }
+        else offset = 17;
+        
+        descriptor[offset] = id_num + 0x30;
       }
-      desc_size_bytes = sizeof(desc_audio_cluster_template);
+      descriptor[offset+1] = '\0'; // NUL
       found_descriptor = 1;
     }
   }
