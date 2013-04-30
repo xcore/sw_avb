@@ -22,27 +22,35 @@ static unsigned int failed_streamId[2];
 #define AVB_STREAM_LIST_SIZE 10
 #endif
 
-static avb_srp_info_t stream_list[AVB_STREAM_LIST_SIZE];
+typedef struct avb_stream_entry 
+{
+  avb_srp_info_t reservation;
+  int listener_present;
+  int talker_present;
+} avb_stream_entry;
+
+static avb_stream_entry stream_list[AVB_STREAM_LIST_SIZE];
 static int rdPtr=0;
 static int wrPtr = 0;
 
-int avb_srp_match_listener_to_talker_stream_id(unsigned stream_id[2], avb_srp_info_t **stream)
+int avb_srp_match_listener_to_talker_stream_id(unsigned stream_id[2], avb_srp_info_t **stream, int is_listener)
 {
   for(int i=0;i<AVB_STREAM_LIST_SIZE;i++)
   {
-    simple_printf("compare %x:%x to %x:%x\n", stream_id[0], stream_id[1], stream_list[i].stream_id[0], stream_list[i].stream_id[1]);
-    if (stream_list[i].tspec_max_frame_size != 0 &&
-        stream_id[0] == stream_list[i].stream_id[0] &&
-        stream_id[1] == stream_list[i].stream_id[1]) {
+    // simple_printf("compare %x:%x to %x:%x\n", stream_id[0], stream_id[1], stream_list[i].stream_id[0], stream_list[i].stream_id[1]);
+    if (((is_listener && stream_list[i].talker_present == 1) || 
+        (!is_listener && stream_list[i].listener_present == 1)) &&
+        stream_id[0] == stream_list[i].reservation.stream_id[0] &&
+        stream_id[1] == stream_list[i].reservation.stream_id[1]) {
       if (stream != NULL)
       {
-        *stream = &stream_list[i];
+        *stream = &stream_list[i].reservation;
       }
       else
       {
-        printstrln("null stream");
+        // printstrln("null stream");
       }
-      printstrln("match");
+      // printstrln("match");
       return 1;
     }
   }
@@ -66,15 +74,15 @@ int avb_add_new_stream_entry(srp_talker_first_value *fv,
   // FIXME: This kind of search should use a linked list when list is big?
   for(int i=0;i<AVB_STREAM_LIST_SIZE;i++)
   {
-    if (stream_id[0] == stream_list[i].stream_id[0] &&
-        stream_id[1] == stream_list[i].stream_id[1]) {
+    if (stream_id[0] == stream_list[i].reservation.stream_id[0] &&
+        stream_id[1] == stream_list[i].reservation.stream_id[1]) {
 
       matched_stream_idx = i;
       // If it is a talker attribute, we always continue and update the entry because it could have been
       // created by a listener attribute and hence isn't complete
       if (!talker_attr)
       {
-        *stream = &stream_list[i];
+        *stream = &stream_list[i].reservation;
         return 0;
       }
     }
@@ -96,13 +104,13 @@ int avb_add_new_stream_entry(srp_talker_first_value *fv,
     matched_stream_idx = wrPtr;
   }
   
-  stream_list[matched_stream_idx].stream_id[0] = stream_id[0];
-  stream_list[matched_stream_idx].stream_id[1] = stream_id[1];
+  stream_list[matched_stream_idx].reservation.stream_id[0] = stream_id[0];
+  stream_list[matched_stream_idx].reservation.stream_id[1] = stream_id[1];
 
   if (talker_attr)
   {
     unsigned long long x;
-    stream_list[matched_stream_idx].vlan_id = ntoh_16(fv->VlanID);
+    stream_list[matched_stream_idx].reservation.vlan_id = ntoh_16(fv->VlanID);
       
     for(int i=0;i<6;i++) 
       x = (x<<8) + fv->DestMacAddr[i];
@@ -110,18 +118,21 @@ int avb_add_new_stream_entry(srp_talker_first_value *fv,
     x += addr_offset;
 
     int tmp = byterev(x);
-    memcpy(&stream_list[matched_stream_idx].dest_mac_addr[2], &tmp, 4);
+    memcpy(&stream_list[matched_stream_idx].reservation.dest_mac_addr[2], &tmp, 4);
     tmp = byterev(x>>32)>>16;
-    memcpy(&stream_list[matched_stream_idx].dest_mac_addr, &tmp, 2);
+    memcpy(&stream_list[matched_stream_idx].reservation.dest_mac_addr, &tmp, 2);
 
-    stream_list[matched_stream_idx].tspec_max_frame_size = ntoh_16(fv->TSpecMaxFrameSize);
-    stream_list[matched_stream_idx].tspec_max_interval = ntoh_16(fv->TSpecMaxIntervalFrames);
-    stream_list[matched_stream_idx].tspec = fv->TSpec;
-    stream_list[matched_stream_idx].accumulated_latency = ntoh_32(fv->AccumulatedLatency);
+    stream_list[matched_stream_idx].reservation.tspec_max_frame_size = ntoh_16(fv->TSpecMaxFrameSize);
+    stream_list[matched_stream_idx].reservation.tspec_max_interval = ntoh_16(fv->TSpecMaxIntervalFrames);
+    stream_list[matched_stream_idx].reservation.tspec = fv->TSpec;
+    stream_list[matched_stream_idx].reservation.accumulated_latency = ntoh_32(fv->AccumulatedLatency);
+
+    stream_list[matched_stream_idx].talker_present = 1;
   }
   else
   {
-    memset(stream_list[matched_stream_idx].dest_mac_addr, 0, sizeof(avb_srp_info_t)-8);
+    stream_list[matched_stream_idx].listener_present = 1;
+    memset(stream_list[matched_stream_idx].reservation.dest_mac_addr, 0, sizeof(avb_srp_info_t)-8);
   }
 
   // FIXME: We may add a stream entry based on a Listener attribute, and we don't have any
@@ -132,13 +143,13 @@ int avb_add_new_stream_entry(srp_talker_first_value *fv,
                 max size: %d\n \
                 interval: %d\n",
                 stream_id[0], stream_id[1],
-                stream_list[matched_stream_idx].dest_mac_addr[0], stream_list[matched_stream_idx].dest_mac_addr[1], stream_list[matched_stream_idx].dest_mac_addr[2],
-                stream_list[matched_stream_idx].dest_mac_addr[3], stream_list[matched_stream_idx].dest_mac_addr[4], stream_list[matched_stream_idx].dest_mac_addr[5],
-                stream_list[matched_stream_idx].tspec_max_frame_size,
-                stream_list[matched_stream_idx].tspec_max_interval
+                stream_list[matched_stream_idx].reservation.dest_mac_addr[0], stream_list[matched_stream_idx].reservation.dest_mac_addr[1], stream_list[matched_stream_idx].reservation.dest_mac_addr[2],
+                stream_list[matched_stream_idx].reservation.dest_mac_addr[3], stream_list[matched_stream_idx].reservation.dest_mac_addr[4], stream_list[matched_stream_idx].reservation.dest_mac_addr[5],
+                stream_list[matched_stream_idx].reservation.tspec_max_frame_size,
+                stream_list[matched_stream_idx].reservation.tspec_max_interval
                 );
 
-  *stream = &stream_list[matched_stream_idx];
+  *stream = &stream_list[matched_stream_idx].reservation;
     
   if (matched_stream_idx < 0)
   {
@@ -152,8 +163,9 @@ static void avb_srp_map_join(mrp_attribute_state *attr, int new, int listener)
 {
   avb_srp_info_t *attribute_info = attr->attribute_info;
   if (listener) printstrln("Listener MAD_Join.indication");
+  else printstrln("Talker MAD_Join.indication");
   // Attribute propagation:
-  if (avb_srp_match_listener_to_talker_stream_id(attribute_info->stream_id, NULL))
+  if (avb_srp_match_listener_to_talker_stream_id(attribute_info->stream_id, NULL, listener))
   {
     printstrln("#######################################");
     printstrln("adding streaming mapping + setting prop");
@@ -210,6 +222,7 @@ int avb_srp_match_talker_advertise(mrp_attribute_state *attr,
 
   stream_id += i;
 
+  /*
   simple_printf("match_talker!!! %x:%x\n", stream_id, my_stream_id);
   simple_printf("my_stream_id[0]: %x, my_stream_id[1]: %x, ", 
     source_info->reservation.stream_id[0],
@@ -224,6 +237,7 @@ int avb_srp_match_talker_advertise(mrp_attribute_state *attr,
     first_value->StreamId[6],
     first_value->StreamId[7]);
   simple_printf("RESULT: %d\n",(my_stream_id == stream_id) );
+  */
 
   return (my_stream_id == stream_id);
 }
@@ -251,6 +265,7 @@ int avb_srp_match_listener(mrp_attribute_state *attr,
   
   stream_id += i;
 
+  /*
   simple_printf("match_listener!!! %x:%x\n", stream_id, my_stream_id);
   simple_printf("my_stream_id[0]: %x, my_stream_id[1]: %x, ", 
     sink_info->reservation.stream_id[0],
@@ -265,6 +280,7 @@ int avb_srp_match_listener(mrp_attribute_state *attr,
     first_value->StreamId[6],
     first_value->StreamId[7]);
   simple_printf("RESULT: %d\n",(my_stream_id == stream_id) );
+  */
 
   return (my_stream_id == stream_id);
 }
@@ -337,7 +353,7 @@ int avb_srp_process_attribute(int mrp_attribute_type, char *fv, int num, avb_srp
   pdu_streamId[0] = streamId >> 32;
   pdu_streamId[1] = (unsigned) streamId;
 
-  simple_printf("matching %x:%x\n", pdu_streamId[0], pdu_streamId[1]);
+  // simple_printf("matching %x:%x\n", pdu_streamId[0], pdu_streamId[1]);
 
   switch (mrp_attribute_type)
   {

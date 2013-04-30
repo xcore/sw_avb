@@ -382,7 +382,6 @@ static void create_empty_msg(mrp_attribute_type attr, int leave_all) {
 
 static int encode_msg(char *msg, mrp_attribute_state* st, int vector, unsigned int port_num)
 {
-  int port_to_transmit = st->propagate ? !st->port_num : st->port_num;
   /*
   simple_printf("st->port_num: %d\n port_num: %d\n st->propagate: %d\n", st->port_num, port_num, st->propagate);
   if (st->attribute_type == MSRP_LISTENER)
@@ -392,28 +391,26 @@ static int encode_msg(char *msg, mrp_attribute_state* st, int vector, unsigned i
   printintln(port_to_transmit);
   */
   
-  if (port_num == port_to_transmit)
+  switch (st->attribute_type) 
   {
-    switch (st->attribute_type) 
-    {
-      case MSRP_TALKER_ADVERTISE: 
-      case MSRP_TALKER_FAILED: 
-      case MSRP_LISTENER:
-      case MSRP_DOMAIN_VECTOR:             
-        return avb_srp_encode_message(msg, st, vector);
-        break;
-  #ifdef AVB_INCLUDE_MMRP
-      case MMRP_MAC_VECTOR:
-        return avb_mmrp_merge_message(msg, st, vector);
-        break;
-  #endif
-  #ifndef AVB_EXCLUDE_MVRP
-      case MVRP_VID_VECTOR:
-        return avb_mvrp_merge_message(msg, st, vector);
-        break;
-  #endif
-    }
+    case MSRP_TALKER_ADVERTISE: 
+    case MSRP_TALKER_FAILED: 
+    case MSRP_LISTENER:
+    case MSRP_DOMAIN_VECTOR:             
+      return avb_srp_encode_message(msg, st, vector);
+      break;
+#ifdef AVB_INCLUDE_MMRP
+    case MMRP_MAC_VECTOR:
+      return avb_mmrp_merge_message(msg, st, vector);
+      break;
+#endif
+#ifndef AVB_EXCLUDE_MVRP
+    case MVRP_VID_VECTOR:
+      return avb_mvrp_merge_message(msg, st, vector);
+      break;
+#endif
   }
+
   return 0;
 }
 
@@ -437,8 +434,12 @@ static void doTx(mrp_attribute_state *st,
   }   
 
   if (!merged) {
-    create_empty_msg(st->attribute_type, 0);
-    (void) encode_msg(msg, st, vector, port_num);
+    int port_to_transmit = st->propagate ? !st->port_num : st->port_num;
+    if (port_num == port_to_transmit)
+    {
+      create_empty_msg(st->attribute_type, 0);
+      (void) encode_msg(msg, st, vector, port_num);
+    }
   }
 
   send(c_tx, st->propagate ? !st->port_num : st->port_num);
@@ -459,7 +460,7 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
         stop_avb_timer(&st->leaveTimer);
       st->registrar_state = MRP_IN;
       st->pending_indications |= PENDING_JOIN_NEW;
-      printstrln("Pending join new");
+      // printstrln("Pending join new");
       st->four_vector_parameter = four_packed_event;
       break;
     case MRP_EVENT_RECEIVE_JOININ:
@@ -1077,11 +1078,11 @@ void mrp_periodic(void)
 
 static void mrp_in(int three_packed_event, int four_packed_event, mrp_attribute_state *st, unsigned int port_num)
 {
-  simple_printf("mrp_in event: %d\n", three_packed_event);
+  // simple_printf("mrp_in event: %d\n", three_packed_event);
   switch (three_packed_event)
     {
     case MRP_ATTRIBUTE_EVENT_NEW:
-      printstrln("MRP_ATTRIBUTE_EVENT_NEW");
+      // printstrln("MRP_ATTRIBUTE_EVENT_NEW");
       mrp_update_state(MRP_EVENT_RECEIVE_NEW, st, four_packed_event, port_num);
       break;
     case MRP_ATTRIBUTE_EVENT_JOININ:
