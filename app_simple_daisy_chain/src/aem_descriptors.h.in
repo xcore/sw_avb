@@ -44,15 +44,19 @@ unsigned char desc_configuration_0[] =
   U16(0),                                     /* 2-3 descriptor_id */
   "Configuration 0",                          /* 4-67 object_name */
   U16(AEM_NO_STRING),                         /* 68-69 localized_description */
-  U16(9),                                    /* 70-71 descriptor_counts_count */
+  U16(9-!AVB_DEMO_ENABLE_LISTENER-!AVB_DEMO_ENABLE_TALKER),                                    /* 70-71 descriptor_counts_count */
   U16(74),                                    /* 72-73 descriptor_counts_offset */
   /* 74-> descriptor_counts */
   U16(AEM_AUDIO_UNIT_TYPE),
   U16(1),
+#if AVB_DEMO_ENABLE_LISTENER
   U16(AEM_STREAM_INPUT_TYPE),
   U16(AVB_NUM_SINKS),
+#endif
+#if AVB_DEMO_ENABLE_TALKER
   U16(AEM_STREAM_OUTPUT_TYPE),
   U16(AVB_NUM_SOURCES),
+#endif
   U16(AEM_JACK_INPUT_TYPE),
   U16(1),
   U16(AEM_JACK_OUTPUT_TYPE),
