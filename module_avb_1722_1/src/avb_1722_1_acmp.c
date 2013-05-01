@@ -976,7 +976,10 @@ void avb_1722_1_acmp_listener_periodic(chanend c_tx)
             {
                 unsigned stream_id[2];
                 avb_1722_1_acmp_inflight_command *inflight = acmp_remove_inflight(LISTENER);
-                acmp_listener_rcvd_cmd_resp.sequence_id = inflight->original_sequence_id; // FIXME: This is a bit messy
+
+                if (inflight)
+                {
+                    acmp_listener_rcvd_cmd_resp.sequence_id = inflight->original_sequence_id; // FIXME: This is a bit messy
 
 #ifdef AVB_1722_1_ACMP_DEBUG_INFLIGHT
                     simple_printf("ACMP Listener: Removed inflight CONNECT_TX_COMMAND with response %s - seq id: %d\n",
@@ -984,26 +987,27 @@ void avb_1722_1_acmp_listener_periodic(chanend c_tx)
                             inflight->command.sequence_id);
 #endif
 
-                    /* FIXME: Make stream ID representation consistent: we have long long, 2 ints and 6 chars */
+                        /* FIXME: Make stream ID representation consistent: we have long long, 2 ints and 6 chars */
 
-                    stream_id[1] = (unsigned)(acmp_listener_rcvd_cmd_resp.stream_id.l >> 0);
-                    stream_id[0] = (unsigned)(acmp_listener_rcvd_cmd_resp.stream_id.l >> 32);
+                        stream_id[1] = (unsigned)(acmp_listener_rcvd_cmd_resp.stream_id.l >> 0);
+                        stream_id[0] = (unsigned)(acmp_listener_rcvd_cmd_resp.stream_id.l >> 32);
 
-                    avb_listener_on_talker_disconnect(acmp_listener_rcvd_cmd_resp.listener_unique_id,
+                        avb_listener_on_talker_disconnect(acmp_listener_rcvd_cmd_resp.listener_unique_id,
+                                                    &acmp_listener_rcvd_cmd_resp.talker_guid,
+                                                    acmp_listener_rcvd_cmd_resp.stream_dest_mac,
+                                                    stream_id,
+                                                    &my_guid);
+
+                    acmp_listener_rcvd_cmd_resp.status = 
+                        avb_listener_on_talker_connect(acmp_listener_rcvd_cmd_resp.listener_unique_id,
                                                 &acmp_listener_rcvd_cmd_resp.talker_guid,
                                                 acmp_listener_rcvd_cmd_resp.stream_dest_mac,
                                                 stream_id,
                                                 &my_guid);
 
-                acmp_listener_rcvd_cmd_resp.status = 
-                    avb_listener_on_talker_connect(acmp_listener_rcvd_cmd_resp.listener_unique_id,
-                                            &acmp_listener_rcvd_cmd_resp.talker_guid,
-                                            acmp_listener_rcvd_cmd_resp.stream_dest_mac,
-                                            stream_id,
-                                            &my_guid);
-
-                acmp_send_response(ACMP_CMD_CONNECT_RX_RESPONSE, &acmp_listener_rcvd_cmd_resp, acmp_listener_rcvd_cmd_resp.status, c_tx);
-                acmp_add_listener_stream_info();
+                    acmp_send_response(ACMP_CMD_CONNECT_RX_RESPONSE, &acmp_listener_rcvd_cmd_resp, acmp_listener_rcvd_cmd_resp.status, c_tx);
+                    acmp_add_listener_stream_info();
+                }
 
                 acmp_listener_state = ACMP_LISTENER_WAITING;
 
