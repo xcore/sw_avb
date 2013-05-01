@@ -451,13 +451,10 @@ static int encode_listener_message(char *buf,
 
   int num_values;
 
-  simple_printf(",AttributeType: %d ", mrp_hdr->AttributeType);
-
   if (mrp_hdr->AttributeType != AVB_SRP_ATTRIBUTE_TYPE_LISTENER)
     return 0;
 
   num_values = hdr->NumberOfValuesLow;
-  simple_printf(",num_values: %d, ", num_values);
                            
   if (num_values == 0) 
     merge = 1;
@@ -477,7 +474,8 @@ static int encode_listener_message(char *buf,
       streamid = byterev(streamId[1]);
       memcpy(&first_value->StreamId[4], &streamid, 4);
 
-      simple_printf("stream %x:%x\n", streamId[0], streamId[1]);
+      int port_to_transmit = st->propagate ? !st->port_num : st->port_num;
+      simple_printf("Port %d out: MSRP_LISTENER, stream %x:%x\n", port_to_transmit, streamId[0], streamId[1]);
 
     }
     
@@ -647,7 +645,8 @@ static int encode_talker_message(char *buf,
       streamid = byterev(attribute_info->stream_id[1]);
       memcpy(&first_value->StreamId[4], &streamid, 4);
 
-      simple_printf("stream %x:%x\n", attribute_info->stream_id[0], attribute_info->stream_id[1]);
+      int port_to_transmit = st->propagate ? !st->port_num : st->port_num;  
+      simple_printf("Port %d out: MSRP_TALKER_ADVERTISE, stream %x:%x\n", port_to_transmit, attribute_info->stream_id[0], attribute_info->stream_id[1]);
 
       hton_16(first_value->VlanID, attribute_info->vlan_id);
 
@@ -699,14 +698,11 @@ int avb_srp_encode_message(char *buf,
                           mrp_attribute_state *st,
                           int vector)
 {
-  int port_to_transmit = st->propagate ? !st->port_num : st->port_num;
   switch (st->attribute_type) {
   case MSRP_TALKER_ADVERTISE:
-    simple_printf("Port %d out: MSRP_TALKER_ADVERTISE, ", port_to_transmit);
     return encode_talker_message(buf, st, vector);
     break;
   case MSRP_LISTENER:
-    simple_printf("Port %d out: MSRP_LISTENER, ", port_to_transmit);
     return encode_listener_message(buf, st, vector);
     break;
   case MSRP_DOMAIN_VECTOR:
