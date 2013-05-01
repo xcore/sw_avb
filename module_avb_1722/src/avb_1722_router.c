@@ -8,6 +8,7 @@
 #include "avb_1722_router_table.h"
 #include "avb_srp.h"
 #include "print.h"
+#include "simple_printf.h"
 static chanend avb_1722_links[MAX_AVB_1722_ROUTER_LINKS];
 
 void avb_1722_register_routes(chanend link0,
@@ -51,7 +52,9 @@ int avb_1722_add_stream_mapping(chanend c_tx,
         (s[1] << 0)  |
         (s[0] << 8)  |
         (s[7] << 16) | 
-        (s[6] << 24);    
+        (s[6] << 24);
+
+  simple_printf("avb_1722_add_stream_mapping, forward: %d\n", forward);    
 
   send_avb_1722_router_cmd(c_tx, 
                            key0, 
