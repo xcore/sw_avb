@@ -1,6 +1,7 @@
 #include <xs1.h>
 #include "avb_mrp.h"
 #include "avb_srp.h"
+#include "avb_stream.h"
 #include "avb_mmrp.h"
 #include "avb_mvrp.h"
 #include "avb_mrp_pdu.h"
@@ -1116,14 +1117,47 @@ int mrp_is_observer(mrp_attribute_state *st)
     }
 }
 
+int mrp_match_attribute_by_stream_id(mrp_attribute_state *attr)
+{
+  for (int j=0;j<MRP_MAX_ATTRS;j++) {
+    if (attr->applicant_state == MRP_UNUSED) {
+      continue;
+    }
+    if ((attr->attribute_type == MSRP_TALKER_ADVERTISE && attrs[j].attribute_type == MSRP_LISTENER) || 
+        (attr->attribute_type == MSRP_LISTENER && attrs[j].attribute_type == MSRP_TALKER_ADVERTISE))
+    {
+      avb_sink_info_t *sink_info = (avb_sink_info_t *) attr->attribute_info;
+      avb_source_info_t *source_info = (avb_source_info_t *) attrs[j].attribute_info;
+
+      if (sink_info == NULL || source_info == NULL) continue;
+
+      simple_printf("Compare %x:%x to %x:%x\n", sink_info->reservation.stream_id[0], sink_info->reservation.stream_id[1],
+        source_info->reservation.stream_id[0], source_info->reservation.stream_id[1]);
+
+      // Don't match the local attributes
+      // if (attr->here && attrs[j].here) continue;
+
+      if (attr->port_num == attrs[j].port_num) continue;
 
 
-static int msg_match(mrp_attribute_type attr_type, 
+      if (sink_info->reservation.stream_id[0] == source_info->reservation.stream_id[0] && 
+          sink_info->reservation.stream_id[1] == source_info->reservation.stream_id[1])
+      {
+        printstrln("MATCHED ATTRIBUTE BY STREAM ID");
+        return 1;
+      }   
+    }
+  }
+  return 0;
+}
+
+static int match_attribute_of_same_type(mrp_attribute_type attr_type, 
               mrp_attribute_state *attr, 
               char *msg, 
               int i, 
               int three_packed_event,
-              int four_packed_event)
+              int four_packed_event,
+              unsigned int port_num)
 {
   /*
   if (attr->applicant_state == MRP_UNUSED ||
@@ -1131,6 +1165,9 @@ static int msg_match(mrp_attribute_type attr_type,
     return 0;
   */
   if (attr->applicant_state == MRP_UNUSED)
+    return 0;
+
+  if (attr->port_num != port_num)
     return 0;
 
   if (attr->attribute_type != attr_type)
@@ -1247,7 +1284,7 @@ void avb_mrp_process_packet(unsigned char buf[], int etype, int len, unsigned in
         for (int j=0;j<MRP_MAX_ATTRS;j++)
         {
           // Attempt to match to this endpoint's attributes
-          if (msg_match(attr_type, &attrs[j], first_value, i, three_packed_event, four_packed_event))
+          if (match_attribute_of_same_type(attr_type, &attrs[j], first_value, i, three_packed_event, four_packed_event, port_num))
           {
             matched_attribute = 1;
             mrp_in(three_packed_event, four_packed_event, &attrs[j], port_num);

@@ -54,7 +54,7 @@ int avb_1722_add_stream_mapping(chanend c_tx,
         (s[7] << 16) | 
         (s[6] << 24);
 
-  simple_printf("avb_1722_add_stream_mapping, forward: %d\n", forward);    
+  simple_printf("avb_1722_add_stream_mapping %x:%x, forward: %d\n", streamId[0], streamId[1], forward);    
 
   send_avb_1722_router_cmd(c_tx, 
                            key0, 

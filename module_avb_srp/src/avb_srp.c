@@ -164,8 +164,13 @@ static void avb_srp_map_join(mrp_attribute_state *attr, int new, int listener)
   avb_srp_info_t *attribute_info = attr->attribute_info;
   if (listener) printstrln("Listener MAD_Join.indication");
   else printstrln("Talker MAD_Join.indication");
+  int matched = mrp_match_attribute_by_stream_id(attr);
   // Attribute propagation:
-  if (avb_srp_match_listener_to_talker_stream_id(attribute_info->stream_id, NULL, listener))
+  if (!listener)
+  {
+    attr->propagate = 1; // Propagate to other port
+  }
+  if (matched)
   {
     printstrln("#######################################");
     printstrln("adding streaming mapping + setting prop");
@@ -174,8 +179,9 @@ static void avb_srp_map_join(mrp_attribute_state *attr, int new, int listener)
                               -1,
                               0,
                               1);
+    attr->propagate = 1;
   }
-  attr->propagate = 1; // Propagate to other port
+  
   mrp_mad_join(attr, new);
 }
 
