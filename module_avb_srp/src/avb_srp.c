@@ -189,7 +189,7 @@ static void avb_srp_map_leave(mrp_attribute_state *attr)
 {
   printstrln("MAD_Leave.indication");
   // Attribute propagation:
-  attr->propagate = 1;  // Propagate to other port
+  // attr->propagate = 1;  // Propagate to other port
   mrp_mad_leave(attr);
 }
 
