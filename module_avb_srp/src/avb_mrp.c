@@ -1291,7 +1291,7 @@ void avb_mrp_process_packet(unsigned char buf[], int etype, int len, unsigned in
           }
         }
 
-        if (!matched_attribute)
+        if (!matched_attribute && !leave_all)
         {
             if (attr_type == MSRP_TALKER_ADVERTISE ||
                 attr_type == MSRP_TALKER_FAILED ||
