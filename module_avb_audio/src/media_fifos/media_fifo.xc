@@ -27,7 +27,5 @@ void media_ctl_register(chanend media_ctl,
 
     media_output_fifo_init(output_fifos[i], stream_num);
   }
-
-  return;
 }
 

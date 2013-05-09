@@ -49,7 +49,7 @@ typedef enum media_clock_type_t {
 void media_clock_server(chanend media_clock_ctl,
                         chanend ?ptp_svr,
                         chanend ?buf_ctl[], int buf_ctl_size,
-                        out port p_fs[]
+                        out buffered port:32 p_fs[]
 #if COMBINE_MEDIA_CLOCK_AND_PTP
                         ,chanend c_rx,
                         chanend c_tx,

@@ -12,9 +12,6 @@
 #include "nettypes.h"
 #include "random.h"
 
-// Macro that defines a constructor to initiliase the random number generator at startup
-RANDOM_SIMPLE_INIT_SEED
-
 typedef enum {
   MAAP_DISABLED,
   MAAP_PROBING,
@@ -32,6 +29,8 @@ typedef struct {
 
 static unsigned char my_mac_addr[6];
 static unsigned char maap_dest_addr[6] = MAAP_PROTOCOL_DEST_ADDR;
+
+static random_generator_t random_gen;
 
 static maap_address_range maap_addr =
 {
@@ -109,8 +108,7 @@ void avb_1722_maap_init(unsigned char macaddr[6])
 
   memcpy(my_mac_addr, macaddr, 6);
 
-  randomSimpleSeed((macaddr[3]<<24)+(macaddr[4]<<8)+(macaddr[5]));
-  randomSimpleRandomiseSeed();
+  random_gen = random_create_generator_from_hw_seed();
 
   init_avb_timer(&maap_timer, 1);
 }
@@ -129,7 +127,7 @@ void avb_1722_maap_request_addresses(int num_addr, char start_address[])
   {
     int range_offset;
     // Set the base address randomly in the allocated maap address range
-    range_offset = randomSimple() % (MAAP_ALLOCATION_POOL_SIZE - maap_addr.range);
+    range_offset = random_get_random_number(&random_gen) % (MAAP_ALLOCATION_POOL_SIZE - maap_addr.range);
     
     maap_addr.base[4] = (range_offset >> 8) & 0xFF;
     maap_addr.base[5] = range_offset & 0xFF;
@@ -253,7 +251,6 @@ void avb_1722_maap_periodic(chanend c_tx)
     }
     break;
   } 
-  return;
 }
 
 static int maap_compare_mac(unsigned char src_addr[6])
@@ -428,7 +425,5 @@ void avb_1722_maap_process_packet(unsigned char buf[], unsigned char src_addr[6]
     }
     break;
   }
-
-  return;
 }
 

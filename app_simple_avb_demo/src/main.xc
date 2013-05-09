@@ -63,7 +63,7 @@ on tile[AVB_I2C_TILE]: port r_i2c = PORT_I2C;
 on tile[AVB_I2C_TILE]: struct r_i2c r_i2c = { PORT_I2C_SCL, PORT_I2C_SDA };
 #endif
 
-on tile[0]: out port p_fs[1] = { PORT_SYNC_OUT };
+on tile[0]: out buffered port:32 p_fs[1] = { PORT_SYNC_OUT };
 on tile[0]: i2s_ports_t i2s_ports =
 {
   XS1_CLKBLK_3,
@@ -364,6 +364,7 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl)
       }
 
       // Receive any events from user button presses from the GPIO task
+#if AVB_GPIO_ENABLED
       case c_gpio_ctl :> int cmd:
       {
         switch (cmd)
@@ -412,7 +413,7 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl)
         }
         break;
       }
-
+#endif
       // Periodic processing
       case tmr when timerafter(periodic_timeout) :> unsigned int time_now:
       {

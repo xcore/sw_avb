@@ -86,7 +86,6 @@ static void register_talkers(chanend talker_ctl[])
       max_talker_stream_id++;
     }
   }
-  return;
 }
 
 
@@ -117,7 +116,6 @@ static void register_listeners(chanend listener_ctl[])
     xc_abi_outuint(listener_ctl[i], max_link_id);
     max_link_id++;
   }
-  return;
 }
 
 static void register_media(chanend media_ctl[])
@@ -154,7 +152,6 @@ static void register_media(chanend media_ctl[])
       output_id++;
     }
   }
-  return;
 }
 
 static void init_media_clock_server(chanend media_clock_ctl)
@@ -241,7 +238,7 @@ void avb_start(void)
 {
 #if AVB_ENABLE_1722_1
   avb_1722_1_adp_init();
-  avb_1722_1_adp_announce();
+  avb_1722_1_adp_depart_then_announce();
   avb_1722_1_adp_discover_all();
 #endif
 
@@ -377,7 +374,7 @@ int getset_avb_source_state(int set,
         // enable the source
         int valid = 1;
         int clk_ctl;
-
+ 
         if (source->stream.num_channels <= 0)
           valid = 0;
 
@@ -677,7 +674,7 @@ int getset_avb_sink_state(int set,
       if (sink->stream.state == AVB_SINK_STATE_DISABLED &&
           *state == AVB_SINK_STATE_POTENTIAL) {
         chanend c = sink->listener_ctl;
-        int clk_ctl = -1;
+        int clk_ctl = outputs[sink->map[0]].clk_ctl;
         simple_printf("Listener sink #%d chan map:\n", sink_num);
         xc_abi_outuint(c, AVB1722_CONFIGURE_LISTENER_STREAM);
         xc_abi_outuint(c, sink->stream.local_id);
@@ -693,10 +690,6 @@ int getset_avb_sink_state(int set,
           }
           else
           {
-            if (clk_ctl == -1)
-            {
-              clk_ctl = outputs[sink->map[i]].clk_ctl;
-            }
             xc_abi_outuint(c, outputs[sink->map[i]].fifo);
             simple_printf("  %d -> %x\n", i, sink->map[i]);
           }
@@ -704,7 +697,7 @@ int getset_avb_sink_state(int set,
         (void) xc_abi_inuint(c);
 
         if (!isnull(media_clock_svr)) {
-        	media_clock_register(media_clock_svr, clk_ctl, sink->stream.sync);
+          media_clock_register(media_clock_svr, clk_ctl, sink->stream.sync);
         }
 
         { int router_link;
@@ -888,10 +881,15 @@ void avb_process_control_packet(unsigned int buf0[], int nbytes, chanend c_tx)
     }
     else // Link down
     {
-      for(int i=0; i < AVB_NUM_SOURCES; i++)
+      for (int i=0; i < AVB_NUM_SOURCES; i++)
       {
         set_avb_source_state(i, AVB_SOURCE_STATE_DISABLED);
       }
+
+      for (int i=0; i < AVB_NUM_SINKS; i++)
+      {
+        set_avb_sink_state(i, AVB_SOURCE_STATE_DISABLED);
+      }      
     }
   }
   else

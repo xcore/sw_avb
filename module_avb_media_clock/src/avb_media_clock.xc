@@ -18,7 +18,6 @@ void media_clock_set_rate(chanend media_clock_svr, int media_clock_num, int rate
     media_clock_svr <: media_clock_num;
     media_clock_svr <: rate;
   }
-  return;
 }
 
 int  media_clock_get_rate(chanend media_clock_svr, int media_clock_num)
@@ -40,7 +39,6 @@ void media_clock_set_type(chanend media_clock_svr, int media_clock_num, int type
     media_clock_svr <: media_clock_num;
     media_clock_svr <: type;
   }
-  return;
 }
 
 int  media_clock_get_type(chanend media_clock_svr, int media_clock_num)
@@ -63,7 +61,6 @@ void media_clock_set_source(chanend media_clock_svr, int media_clock_num,
     media_clock_svr <: media_clock_num;
     media_clock_svr <: x;
   }
-  return;
 }
 
 
@@ -75,7 +72,6 @@ void media_clock_get_source(chanend media_clock_svr, int media_clock_num,
     media_clock_svr <: media_clock_num;
     media_clock_svr :> x;
   }
-  return;
 }
 
 
@@ -87,7 +83,6 @@ void media_clock_set_state(chanend media_clock_svr, int media_clock_num, int sta
     media_clock_svr <: media_clock_num;
     media_clock_svr <: state;
   }
-  return;
 }
 
 int  media_clock_get_state(chanend media_clock_svr, int media_clock_num)

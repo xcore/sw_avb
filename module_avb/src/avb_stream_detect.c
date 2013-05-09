@@ -33,8 +33,7 @@ void avb_add_detected_stream(unsigned streamId[2],
     get_avb_source_id(i, my_stream_id);
 
     // Detect if we are trying to add our own talker stream
-    if (my_stream_id[0] == streamId[0] && my_stream_id[1] == streamId[1])
-    {
+    if (my_stream_id[0] == streamId[0] && my_stream_id[1] == streamId[1]) {
       return;
     }
   }
@@ -74,14 +73,13 @@ void avb_add_detected_stream(unsigned streamId[2],
         x>>=8;
       }
     }
-    else
+    else {
       for(int i=0;i<6;i++)
         stream_history[wrPtr].addr[i] = 0;
+    }
       
     wrPtr = new_wrPtr;
   }
-  
-  return;
 }
 
 int avb_check_for_new_stream(unsigned streamId[2], unsigned *vlan,

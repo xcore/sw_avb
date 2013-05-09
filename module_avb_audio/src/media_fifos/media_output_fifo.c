@@ -82,7 +82,6 @@ enable_media_output_fifo(int s0, int media_clock)
   s->sample_count = 0;
   s->media_clock = media_clock;
   s->pending_init_notification = 1;
-  return;
 }
 
 
@@ -273,9 +272,7 @@ media_output_fifo_strided_push(media_output_fifo_t s0,
 
   s->wrptr = wrptr;
   s->sample_count+=count;
-  return;
 }
-
 
 // 1722 thread
 void
@@ -350,7 +347,6 @@ media_output_fifo_handle_buf_ctl(chanend buf_ctl,
     default:
       break;
     }            
-  return;
 }
 
 void
@@ -361,7 +357,6 @@ media_output_fifo_set_volume(media_output_fifo_t s0,
 	  s->volume = volume;
 }
 
-
 void
 init_media_output_fifos(media_output_fifo_t ofifos[],
                        media_output_fifo_data_t ofifo_data[],
@@ -369,6 +364,5 @@ init_media_output_fifos(media_output_fifo_t ofifos[],
 {
   for(int i=0;i<n;i++) {
     ofifos[i] = (unsigned int) &ofifo_data[i];
-    
   }
 }

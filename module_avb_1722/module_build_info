@@ -10,7 +10,7 @@
 # You can also set MODULE_XCC_C_FLAGS, MODULE_XCC_XC_FLAGS etc..
 
 
-MODULE_XCC_C_FLAGS = $(XCC_FLAGS) -std=c99
+MODULE_XCC_C_FLAGS = $(XCC_FLAGS)
 
 XCC_FLAGS_avb_1722_listener.xc = $(XCC_FLAGS) -fsubword-select
 
