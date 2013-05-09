@@ -160,10 +160,21 @@ int avb1722_create_packet(unsigned char Buf0[],
     int dbc;
     int pkt_data_length;
     
-    AVB_Frame_t *pEtherHdr = (AVB_Frame_t *) &(Buf[0]);
-    for (i = 0; i < MAC_ADRS_BYTE_COUNT; i++) {
-        pEtherHdr->DA[i] = stream_info->destMACAdrs[i];
-    } 
+    if (stream_info->initial)
+    {
+        if (media_input_fifo_fill_level(map[0]) < MEDIA_INPUT_FIFO_SAMPLE_FIFO_SIZE/2)
+            return 0;
+    }
+
+    // Figure out the number of samples in the 1722 packet
+    samples_in_packet = stream_info->samples_per_packet_base;
+
+    stream_info->rem += stream_info->samples_per_packet_fractional;
+
+    if (stream_info->rem & 0xffff0000) {
+        samples_in_packet += 1;
+        stream_info->rem &= 0xffff;
+    }
 
     if (stream_info->initial)
     {
@@ -179,14 +190,25 @@ int avb1722_create_packet(unsigned char Buf0[],
     // packets, that we will occasionally not transmit when we could do. The period of this is
     // 1/(ceil(rate/8000)-(rate/8000))
     for (i = 0; i < num_channels; i++) {
-        if (media_input_fifo_empty(map[i])) return 0;
+        // If more data is required from the media_fifo then check there are
+        // enough samples present so that this thread won't wait for data
+        //
+        // The worst-case is that it will read twice from the media_input_fifo
+        const int need_more_data = stream_info->initial != 0 ||
+            stream_info->samples_left_in_fifo_packet < samples_in_packet;
+        if (need_more_data)
+        {
+            const int not_enough_data = media_input_fifo_fill_level(map[i]) < (2 * stream_info->samples_per_packet_base);
+            if (not_enough_data)
+                return 0;
+        }
     }
 
     // If the FIFOs are not being filled then also do not process the packet
-    if ((media_input_fifo_enable_ind_state() & stream_info->fifo_mask) == 0) return 0;
+    if ((media_input_fifo_enable_ind_state() & stream_info->fifo_mask) == 0)
+        return 0;
 
     // Figure out if it is time to transmit a packet
-
     if (!stream_info->initial && !stream_info->transmit_ok) {
         int elapsed = time - stream_info->last_transmit_time;
         if (elapsed < AVB1722_PACKET_PERIOD_TIMER_TICKS)
@@ -195,15 +217,10 @@ int avb1722_create_packet(unsigned char Buf0[],
         stream_info->transmit_ok = 1;
     }
 
-    // Figure out the number of samples in the 1722 packet
-    samples_in_packet = stream_info->samples_per_packet_base;
-
-    stream_info->rem += stream_info->samples_per_packet_fractional;
-
-    if (stream_info->rem & 0xffff0000) {
-        samples_in_packet += 1;
-        stream_info->rem &= 0xffff;
-    }
+    AVB_Frame_t *pEtherHdr = (AVB_Frame_t *) &(Buf[0]);
+    for (i = 0; i < MAC_ADRS_BYTE_COUNT; i++) {
+        pEtherHdr->DA[i] = stream_info->destMACAdrs[i];
+    } 
 
     num_audio_samples = samples_in_packet * num_channels;
 
@@ -225,7 +242,10 @@ int avb1722_create_packet(unsigned char Buf0[],
     // the timestamp is index 0
     if (stream_info->initial != 0) {
         for (i = 0; i < num_channels; i++) {
-            int *src = (int *) media_input_fifo_get_packet(map[i], &presentationTime, &(stream_info->dbc_at_start_of_last_fifo_packet));
+            int *src = (int *)media_input_fifo_get_packet(map[i],
+                    &presentationTime,
+                    &(stream_info->dbc_at_start_of_last_fifo_packet));
+
             media_input_fifo_set_ptr(map[i], src);
         }
         timerValid = 1;
@@ -240,7 +260,9 @@ int avb1722_create_packet(unsigned char Buf0[],
                 int *src = media_input_fifo_get_ptr(map[i]);
                 sample_copy_strided(src, dest, stride, stream_info->samples_left_in_fifo_packet);
                 media_input_fifo_release_packet(map[i]);
-                src = (int *) media_input_fifo_get_packet(map[i], &presentationTime, &(stream_info->dbc_at_start_of_last_fifo_packet));
+                src = (int *)media_input_fifo_get_packet(map[i],
+                        &presentationTime,
+                        &(stream_info->dbc_at_start_of_last_fifo_packet));
                 media_input_fifo_set_ptr(map[i], src);
                 dest += 1;
                 timerValid = 1;
