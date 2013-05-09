@@ -16,7 +16,6 @@ void waitfor(unsigned t)
 {
   timer tmr;
   tmr when timerafter(t) :> void;
-   return;
 }
 
 

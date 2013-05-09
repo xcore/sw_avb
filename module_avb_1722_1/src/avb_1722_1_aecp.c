@@ -452,7 +452,10 @@ static void process_aem_cmd_startstop_streaming(avb_1722_1_aecp_packet_t *pkt, u
       }
       else
       {
-        set_avb_sink_state(stream_index, AVB_SINK_STATE_POTENTIAL);
+        if (state == AVB_SINK_STATE_ENABLED)
+        {
+          set_avb_sink_state(stream_index, AVB_SINK_STATE_POTENTIAL);
+        }
       }
     }
     else *status = AECP_AEM_STATUS_NO_SUCH_DESCRIPTOR;
@@ -469,7 +472,10 @@ static void process_aem_cmd_startstop_streaming(avb_1722_1_aecp_packet_t *pkt, u
       }
       else
       {
-        set_avb_source_state(stream_index, AVB_SINK_STATE_POTENTIAL);
+        if (state == AVB_SINK_STATE_ENABLED)
+        {
+          set_avb_source_state(stream_index, AVB_SOURCE_STATE_POTENTIAL);
+        }
       }
     }
     else *status = AECP_AEM_STATUS_NO_SUCH_DESCRIPTOR;
@@ -771,7 +777,6 @@ void process_avb_1722_1_aecp_packet(unsigned char src_addr[6], avb_1722_1_aecp_p
       // This node is not expecting a response
       break;
   }
-  return;
 }
 
 void avb_1722_1_aecp_aem_periodic(chanend c_tx)

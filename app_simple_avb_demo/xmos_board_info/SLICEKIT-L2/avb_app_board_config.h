@@ -15,6 +15,7 @@
 // CODEC and PLL control ports
 #define I2C_COMBINE_SCL_SDA     1
 
+#define AVB_GPIO_ENABLED        0
 #define AVB_I2C_TILE            0
 #define AVB_GPIO_TILE           0
 

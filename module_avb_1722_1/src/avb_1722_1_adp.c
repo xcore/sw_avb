@@ -15,7 +15,8 @@ static enum { ADP_ADVERTISE_IDLE,
        ADP_ADVERTISE_WAITING,
        ADP_ADVERTISE_ADVERTISE_0,
        ADP_ADVERTISE_ADVERTISE_1,
-       ADP_ADVERTISE_DEPARTING
+       ADP_ADVERTISE_DEPARTING,
+       ADP_ADVERTISE_DEPART_THEN_ADVERTISE
 } adp_advertise_state = ADP_ADVERTISE_IDLE;
 
 static enum { ADP_DISCOVERY_IDLE,
@@ -67,13 +68,29 @@ void avb_1722_1_adp_init()
 
 void avb_1722_1_adp_announce()
 {
-    if (adp_advertise_state == ADP_ADVERTISE_IDLE) adp_advertise_state = ADP_ADVERTISE_ADVERTISE_0;
+    if (adp_advertise_state == ADP_ADVERTISE_IDLE || 
+        adp_advertise_state == ADP_ADVERTISE_WAITING)
+    {
+        adp_advertise_state = ADP_ADVERTISE_ADVERTISE_0;
+    }
 }
-
 
 void avb_1722_1_adp_depart()
 {
-    if (adp_advertise_state == ADP_ADVERTISE_WAITING) adp_advertise_state = ADP_ADVERTISE_DEPARTING;
+    if (adp_advertise_state == ADP_ADVERTISE_IDLE || 
+        adp_advertise_state == ADP_ADVERTISE_WAITING)
+    {
+        adp_advertise_state = ADP_ADVERTISE_DEPARTING;
+    }
+}
+
+void avb_1722_1_adp_depart_then_announce()
+{
+    if (adp_advertise_state == ADP_ADVERTISE_IDLE || 
+        adp_advertise_state == ADP_ADVERTISE_WAITING)
+    {
+        adp_advertise_state = ADP_ADVERTISE_DEPART_THEN_ADVERTISE;
+    }    
 }
 
 void avb_1722_1_adp_discover(guid_t *guid)
@@ -102,6 +119,16 @@ int avb_1722_1_get_latest_new_entity_idx()
     return adp_latest_entity_added_index;
 }
 
+int avb_1722_1_entity_database_find(const_guid_ref_t guid)
+{
+    for (int i=0; i < AVB_1722_1_MAX_ENTITIES; ++i)
+    {
+        if (entities[i].guid.l == guid->l)
+            return i;
+    }
+    return AVB_1722_1_MAX_ENTITIES;
+}
+
 static int avb_1722_1_entity_database_add(avb_1722_1_adp_packet_t* pkt)
 {
     guid_t guid;
@@ -113,8 +140,11 @@ static int avb_1722_1_entity_database_add(avb_1722_1_adp_packet_t* pkt)
 
     for (i=0; i < AVB_1722_1_MAX_ENTITIES; ++i)
     {
-        if (entities[i].guid.l == 0) found_slot_index = i;  // Found an empty entry in the database
-        if (entities[i].guid.l == guid.l)
+        if (entities[i].guid.l == 0)
+        {
+            found_slot_index = i;  // Found an empty entry in the database
+        }
+        else if (entities[i].guid.l == guid.l)
         {
             // Entity is already in the database - break from loop early and update it
             found_slot_index = i;
@@ -171,15 +201,14 @@ static void avb_1722_1_entity_database_remove(avb_1722_1_adp_packet_t* pkt)
     int i;
     get_64(guid.c, pkt->entity_guid);
 
-    for (i=0; i < AVB_1722_1_MAX_ENTITIES; ++i)
+    i = avb_1722_1_entity_database_find(&guid);
+
+    if (i != AVB_1722_1_MAX_ENTITIES)
     {
-        if (entities[i].guid.l == guid.l)
-        {
 #ifdef AVB_1722_1_ADP_DEBUG_ENTITY_REMOVAL
-            printstr("ADP: Removing entity who advertised departing -> GUID "); print_guid_ln(&entities[i].guid);
+        printstr("ADP: Removing entity who advertised departing -> GUID "); print_guid_ln(&entities[i].guid);
 #endif
-            entities[i].guid.l = 0;
-        }
+        entities[i].guid.l = 0;
     }
 }
 
@@ -237,8 +266,6 @@ void process_avb_1722_1_adp_packet(avb_1722_1_adp_packet_t* pkt, chanend c_tx)
             return;
         }
     }
-
-    return;
 }
 
 static void avb_1722_1_create_adp_packet(int message_type, guid_t guid)
@@ -311,8 +338,6 @@ void avb_1722_1_adp_discovery_periodic(chanend c_tx)
             break;
         }
     }
-
-    return;
 }
 
 void avb_1722_1_adp_advertising_periodic(chanend c_tx, chanend ptp)
@@ -346,11 +371,12 @@ void avb_1722_1_adp_advertising_periodic(chanend c_tx, chanend ptp)
             avb_1722_1_available_index++;
             break;
 
+        case ADP_ADVERTISE_DEPART_THEN_ADVERTISE:
         case ADP_ADVERTISE_DEPARTING:
             avb_1722_1_create_adp_packet(ENTITY_DEPARTING, my_guid);
             mac_tx(c_tx, avb_1722_1_buf, AVB_1722_1_ADP_PACKET_SIZE, 0);
 
-            adp_advertise_state = ADP_ADVERTISE_IDLE;
+            adp_advertise_state = ADP_ADVERTISE_DEPART_THEN_ADVERTISE ? ADP_ADVERTISE_ADVERTISE_0 : ADP_ADVERTISE_IDLE;
             avb_1722_1_available_index = 0;
 
             break;
@@ -361,10 +387,10 @@ void avb_1722_1_adp_advertising_periodic(chanend c_tx, chanend ptp)
 
     if (ADP_ADVERTISE_IDLE != adp_advertise_state)
     {
-        if(avb_timer_expired(&ptp_monitor_timer))
+        if (avb_timer_expired(&ptp_monitor_timer))
         {
             ptp_get_current_grandmaster(ptp, ptp_current.c);
-            if(as_grandmaster_id.l != ptp_current.l)
+            if (as_grandmaster_id.l != ptp_current.l)
             {
                 avb_1722_1_adp_change_ptp_grandmaster(ptp_current.c);
                 adp_advertise_state = ADP_ADVERTISE_ADVERTISE_1;
@@ -372,6 +398,4 @@ void avb_1722_1_adp_advertising_periodic(chanend c_tx, chanend ptp)
             start_avb_timer(&ptp_monitor_timer, 1); //Every second
         }
     }
-
-    return;
 }

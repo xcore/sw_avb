@@ -5,7 +5,7 @@
 
 extern unsigned char my_mac_addr[6];
 
-void print_guid_ln(guid_t *g)
+void print_guid_ln(const_guid_ref_t g)
 {
     for (int i=7; i >= 0; i--)
     {

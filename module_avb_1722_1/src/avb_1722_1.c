@@ -71,8 +71,6 @@ void avb_1722_1_process_packet(unsigned char buf[], unsigned char src_addr[6], i
     default:
         return;
     }
-
-    return;
 }
 
 void avb_1722_1_periodic(chanend c_tx, chanend c_ptp)
@@ -89,3 +87,4 @@ void avb_1722_1_periodic(chanend c_tx, chanend c_ptp)
 	avb_1722_1_acmp_listener_periodic(c_tx);
 #endif
 }
+
