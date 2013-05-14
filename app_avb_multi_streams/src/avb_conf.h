@@ -24,7 +24,7 @@
 #if AVB_DEMO_ENABLE_TALKER
 
 /** The total number of AVB sources (streams that are to be transmitted). */
-#define AVB_NUM_SOURCES 4
+#define AVB_NUM_SOURCES 8
 /** The total number or Talker components (typically the number of
   * tasks running the  :c:func:`avb_1722_talker` function). */
 #define AVB_NUM_TALKER_UNITS 1
@@ -46,7 +46,7 @@
 #if AVB_DEMO_ENABLE_LISTENER
 
 /** The total number of AVB sinks (incoming streams that can be listened to) */
-#define AVB_NUM_SINKS 4
+#define AVB_NUM_SINKS 8
 /** The total number or listener components
   * (typically the number of tasks running the  :c:func:`avb_1722_listener` function) */
 #define AVB_NUM_LISTENER_UNITS 1
@@ -54,6 +54,8 @@
 #define AVB_NUM_MEDIA_OUTPUTS AVB_DEMO_NUM_CHANNELS
 /** Enable the 1722.1 Listener functionality */
 #define AVB_1722_1_LISTENER_ENABLED 1
+
+#define MAX_AVB_STREAMS_PER_LISTENER 8
 
 #else
 
