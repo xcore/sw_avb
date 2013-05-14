@@ -209,8 +209,10 @@ void avb_1722_talker_send_packets(chanend c_mac_tx,
                                   ptp_time_info_mod64 &timeInfo,
                                   timer tmr)
 {
-  if (st.max_active_avb_stream != -1 &&
-      st.talker_streams[st.cur_avb_stream].active==2) {
+  if (st.max_active_avb_stream == -1)
+      return;
+
+  if (st.talker_streams[st.cur_avb_stream].active==2) {
     int packet_size;
     int t;
 
@@ -227,12 +229,17 @@ void avb_1722_talker_send_packets(chanend c_mac_tx,
                                   packet_size,
                                   st.talker_streams[st.cur_avb_stream].txport);
       st.talker_streams[st.cur_avb_stream].last_transmit_time = t;
+
+      st.cur_avb_stream++;
+      if (st.cur_avb_stream > st.max_active_avb_stream)
+        st.cur_avb_stream = 0;
     }
   }
-  if (st.max_active_avb_stream != -1) {
+  else
+  {
     st.cur_avb_stream++;
-    if (st.cur_avb_stream>st.max_active_avb_stream)
-      st.cur_avb_stream=0;
+    if (st.cur_avb_stream > st.max_active_avb_stream)
+      st.cur_avb_stream = 0;
   }
 }
 

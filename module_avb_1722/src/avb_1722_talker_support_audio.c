@@ -191,7 +191,7 @@ int avb1722_create_packet(unsigned char Buf0[],
             stream_info->samples_left_in_fifo_packet < samples_in_packet;
         if (need_more_data)
         {
-            const int not_enough_data = media_input_fifo_fill_level(map[i]) < (2 * stream_info->samples_per_packet_base);
+            const int not_enough_data = media_input_fifo_fill_level(map[i]) < (2 * samples_per_fifo_packet);
             if (not_enough_data)
                 return 0;
         }
