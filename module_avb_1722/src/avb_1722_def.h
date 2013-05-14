@@ -131,5 +131,5 @@ typedef struct
 #define TALKER_NUM_AUDIO_SAMPLES_PER_CHANNEL_PER_AVB1722_PKT (AVB_MAX_AUDIO_SAMPLE_RATE / AVB1722_PACKET_RATE)
 
 // We add a 2% fudge factor plus overheads to handle clock difference in the stream transmission shaping
-#define AVB1722_PACKET_PERIOD_TIMER_TICKS (((100000000 / AVB1722_PACKET_RATE)*96)/100)
+#define AVB1722_PACKET_PERIOD_TIMER_TICKS (((100000000 / AVB1722_PACKET_RATE)*98)/100)
 #endif

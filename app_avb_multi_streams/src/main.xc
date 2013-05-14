@@ -321,6 +321,7 @@ void gpio_task(chanend c_gpio_ctl)
 void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl)
 {
   timer tmr;
+  int channels_per_stream = AVB_NUM_MEDIA_INPUTS/AVB_NUM_SOURCES;
 #if AVB_DEMO_ENABLE_TALKER
   int map[AVB_NUM_MEDIA_INPUTS/AVB_NUM_SOURCES];
 #endif
@@ -337,10 +338,10 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl)
 #if AVB_DEMO_ENABLE_TALKER
   for (int j=0; j < AVB_NUM_SOURCES; j++)
   {
-    set_avb_source_channels(j, AVB_NUM_MEDIA_INPUTS/AVB_NUM_SOURCES);
-    for (int i = 0; i < AVB_NUM_MEDIA_INPUTS/AVB_NUM_SOURCES; i++)
-      map[i] = j ? j*2+i  : j+i;
-    set_avb_source_map(j, map, AVB_NUM_MEDIA_INPUTS/AVB_NUM_SOURCES);
+    set_avb_source_channels(j, channels_per_stream);
+    for (int i = 0; i < channels_per_stream; i++)
+      map[i] = j ? j*(channels_per_stream)+i  : j+i;
+    set_avb_source_map(j, map, channels_per_stream);
     set_avb_source_format(j, AVB_SOURCE_FORMAT_MBLA_24BIT, sample_rate);
     set_avb_source_sync(j, 0); // use the media_clock defined above
   }
