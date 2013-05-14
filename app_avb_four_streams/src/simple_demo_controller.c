@@ -74,8 +74,9 @@ avb_1722_1_acmp_status_t avb_listener_on_talker_connect(int sink_num, const_guid
   // Ensure XMOS devices only connect when they are known entities to ensure correct synchronisation
   int do_connect = 0;
 
-	int map[AVB_NUM_MEDIA_OUTPUTS/AVB_NUM_SINKS];
-  for (int i = 0; i < AVB_NUM_MEDIA_OUTPUTS/AVB_NUM_SINKS; i++) map[i] = sink_num ? sink_num*2+i  : sink_num+i;
+  int channels_per_stream = AVB_NUM_MEDIA_OUTPUTS/AVB_NUM_SINKS;
+	int map[channels_per_stream];
+  for (int i = 0; i < channels_per_stream; i++) map[i] = sink_num ? sink_num*channels_per_stream+i  : sink_num+i;
 
 
   set_device_media_clock_type(0, DEVICE_MEDIA_CLOCK_INPUT_STREAM_DERIVED);
@@ -111,8 +112,8 @@ avb_1722_1_acmp_status_t avb_listener_on_talker_connect(int sink_num, const_guid
     simple_printf("CONNECTING Listener sink #%d -> Talker stream %x%x, DA: ", sink_num, stream_id[0], stream_id[1]); print_mac_ln(dest_addr);
 
     set_avb_sink_sync(sink_num, 0);
-    set_avb_sink_channels(sink_num, AVB_NUM_MEDIA_OUTPUTS/AVB_NUM_SINKS);
-    set_avb_sink_map(sink_num, map, AVB_NUM_MEDIA_OUTPUTS/AVB_NUM_SINKS);
+    set_avb_sink_channels(sink_num, channels_per_stream);
+    set_avb_sink_map(sink_num, map, channels_per_stream);
     set_avb_sink_id(sink_num, stream_id);
     set_avb_sink_addr(sink_num, dest_addr, 6);
 
