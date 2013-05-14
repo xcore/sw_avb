@@ -3,7 +3,7 @@
 AVB Quick Start Guide
 =====================
 
-This guide is intended for customers who have purchased the Low-Cost AVB Audio Endpoint Kit.
+This guide is intended for customers who have purchased the Low-Cost AVB Audio Endpoint Kit (XK-AVB-LC-SYS).
 It applies to version 5.2 of the reference design firmware.
 
 Obtaining the latest firmware
@@ -15,16 +15,16 @@ Obtaining the latest firmware
 #. Do not extract the firmware .zip file
 
 
-Installing the xTIMEcomposer studio
------------------------------------
+Installing xTIMEcomposer Studio
+-------------------------------
 
-The latest development tools can be obtained at the following URL https://www.xmos.com/resources/downloads
+The latest development tools can be obtained at the following URL https://www.xmos.com/downloads
 
 
 Importing and building the firmware
 -----------------------------------
 
-To import and build the firmware, open the xTIMEcomposer Studio and
+To import and build the firmware, open xTIMEcomposer Studio and
 follow these steps:
 
 #. Choose `File` |submenu| `Import`.
@@ -40,18 +40,19 @@ follow these steps:
  
 #. Click **Finish**.
 
-#. Select the ``app_simple_avb_demo`` project in the Project Explorer and click the **Build** icon.
+#. Select the ``app_simple_avb_demo`` project in the Project Explorer and click the **Build** icon in the main toolbar.
 
 Installing the application onto flash
 -------------------------------------
 
 #. Connect the 20-way IDC header on the XTAG-2 debug adapter to the XSYS connector on the 
-   first development board, then plug the XTAG-2 into your development system via USB.
-#. In the xTIMEcomposer Studio, Right click on the binary within the bin folder of the project.
-#. Choose `Flash As` |submenu| `Flash Configurations`
-#. Double click `xCORE Application` in the left panel
-#. Choose `hardware` in `Device options` and select the relevant XTAG-2 adapter
-#. Click on **Apply** if configuration has changed
+   first development board. 
+#. Plug the XTAG-2 into your development system via USB.
+#. In xTIMEcomposer Studio, right-click on the binary within the *bin* folder of the project.
+#. Choose `Flash As` |submenu| `Flash Configurations`.
+#. Double click `xCORE Application` in the left panel.
+#. Choose `hardware` in `Device options` and select the relevant XTAG-2 adapter.
+#. Click on **Apply** if configuration has changed.
 #. Click on **Flash**. Note that the firmware will not run until the board is reset.
 #. Repeat steps 1 through 8 for the second development board.
 
@@ -82,7 +83,7 @@ Connection via an Ethernet switch
 
 To evaluate more than two endpoints, or operate a third party 1722.1 Controller, 
 an AVB-enabled switch is required. A number of options are available from switch provider Extreme Networks and other vendors. 
-See the AVB System Requirements Guide for further information.
+See the *AVB System Requirements Guide* for further information.
 
 Management by an external 1722.1 Controller
 +++++++++++++++++++++++++++++++++++++++++++
@@ -96,6 +97,6 @@ can then be used to connect and disconnect streams between the endpoints.
 Next Steps
 ----------
 
-Read the AVB Design Guide to learn more about the XMOS AVB reference design and begin customising the firmware: https://www.xmos.com/published/avb-reference-design-guide-0
+Read the *AVB Design Guide* to learn more about the XMOS AVB reference design and begin customizing the firmware: https://www.xmos.com/published/avb-reference-design-guide-0
 
-Design files for the XR-AVB-LC-BRD board can be obtained under xKITS Resources on xmos.com: https://www.xmos.com/resources/xkits?category=Low-cost+AVB+Audio+Endpoint+Kit
+Design files for the XR-AVB-LC-BRD board are available from xmos.com: https://www.xmos.com/resources/xkits?category=Low-cost+AVB+Audio+Endpoint+Kit
