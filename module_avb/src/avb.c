@@ -480,8 +480,20 @@ int getset_avb_source_state(int set,
           (void) xc_abi_inuint(c); //ACK
 
 #ifndef AVB_EXCLUDE_MVRP
-        if (source->stream.vlan)
-          avb_leave_vlan(source->stream.vlan);
+        if (source->stream.vlan) {
+          int all_streams_disabled = 1;
+          for (int i=0; i < AVB_NUM_SOURCES; i++) {
+            if (i == source_num) continue;
+            avb_source_info_t *source = &sources[i];
+            if (source->stream.state != AVB_SOURCE_STATE_DISABLED) {
+              all_streams_disabled = 0;
+              break;
+            }
+          }
+          if (all_streams_disabled) {
+            avb_leave_vlan(source->stream.vlan);
+          }
+        }
 #endif
 
           // And remove the group
@@ -742,8 +754,20 @@ int getset_avb_sink_state(int set,
 #endif
 
 #ifndef AVB_EXCLUDE_MVRP
-        if (sink->stream.vlan)
-          avb_leave_vlan(sink->stream.vlan);
+        if (sink->stream.vlan) {
+          int all_streams_disabled = 1;
+          for (int i=0; i < AVB_NUM_SINKS; i++) {
+            if (i == sink_num) continue;
+            avb_sink_info_t *sink = &sinks[i];
+            if (sink->stream.state != AVB_SINK_STATE_DISABLED) {
+              all_streams_disabled = 0;
+              break;
+            }
+          }
+          if (all_streams_disabled) {
+            avb_leave_vlan(sink->stream.vlan);
+          }
+        }
 #endif
       }
       sink->stream.state = *state;
