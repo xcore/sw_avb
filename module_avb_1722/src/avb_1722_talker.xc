@@ -145,22 +145,22 @@ void avb_1722_talker_handle_cmd(chanend c_talker_ctl,
     switch (cmd)
     {
     case AVB1722_CONFIGURE_TALKER_STREAM:
-    {
-      int stream_num;
-      c_talker_ctl :> stream_num;
-      configure_stream(c_talker_ctl,
-                       st.talker_streams[stream_num],
-                       st.mac_addr);
-      if (stream_num > st.max_active_avb_stream)
-        st.max_active_avb_stream = stream_num;
+      {
+        int stream_num;
+        c_talker_ctl :> stream_num;
+        configure_stream(c_talker_ctl,
+                         st.talker_streams[stream_num],
+                         st.mac_addr);
+        if (stream_num > st.max_active_avb_stream)
+          st.max_active_avb_stream = stream_num;
 
-      // Eventually this will have to be changed
-      // to create per-stream headers
-      // for now assume sampling rate etc. the same
-      // on all streams
-      AVB1722_Talker_bufInit((st.TxBuf,unsigned char[]),
-                             st.talker_streams[stream_num],
-                             st.vlan);
+        // Eventually this will have to be changed
+        // to create per-stream headers
+        // for now assume sampling rate etc. the same
+        // on all streams
+        AVB1722_Talker_bufInit((st.TxBuf,unsigned char[]),
+                               st.talker_streams[stream_num],
+                               st.vlan);
 
     }
     break;
@@ -230,6 +230,9 @@ void avb_1722_talker_send_packets(chanend c_mac_tx,
                                   st.talker_streams[st.cur_avb_stream].txport);
       st.talker_streams[st.cur_avb_stream].last_transmit_time = t;
 
+    }
+    if (packet_size || st.talker_streams[st.cur_avb_stream].initial)
+    {
       st.cur_avb_stream++;
       if (st.cur_avb_stream > st.max_active_avb_stream)
         st.cur_avb_stream = 0;
