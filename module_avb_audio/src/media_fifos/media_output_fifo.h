@@ -211,12 +211,12 @@ void media_output_fifo_set_ptp_timestamp(media_output_fifo_t s0,
  *
  *  \param buf_ctl  the communication channel with the clock recovery service
  *  \param stream_num  the number of the stream which is being handled
- *  \param buf_ctl_notified pointer to the flag which indicates whether the clock recovery thread has been notified of a timing event
+ *  \param notified_buf_ctl pointer to the flag which indicates whether the clock recovery thread has been notified of a timing event
  */
 void
 media_output_fifo_handle_buf_ctl(chanend buf_ctl, 
                                  int stream_num,
-                                 REFERENCE_PARAM(int, buf_ctl_notified),
+                                 REFERENCE_PARAM(int, notified_buf_ctl),
                                  timer tmr);
 
 /**
