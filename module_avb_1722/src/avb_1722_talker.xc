@@ -18,6 +18,7 @@
 #include "avb_srp.h"
 #include "avb_unit.h"
 #include "avb_conf.h"
+#include <xscope.h>
 
 #if AVB_NUM_SOURCES != 0
 
@@ -226,8 +227,12 @@ void avb_1722_talker_send_packets(chanend c_mac_tx,
                                   st.TxBuf,
                                   packet_size,
                                   0);
+
       st.talker_streams[st.cur_avb_stream].last_transmit_time = t;
 
+    }
+    if (packet_size || st.talker_streams[st.cur_avb_stream].initial)
+    {
       st.cur_avb_stream++;
       if (st.cur_avb_stream > st.max_active_avb_stream)
         st.cur_avb_stream = 0;
