@@ -255,8 +255,13 @@ static void avb_set_talker_bandwidth()
     if (source->stream.state == AVB_SOURCE_STATE_POTENTIAL ||
         source->stream.state == AVB_SOURCE_STATE_ENABLED)
       {
+        const int preamble_plus_ifg_bytes = 8 + (96/8);
+        const int eth_header_bytes = 18;
+        const int avb_1722_header_bytes = 32;
+
         int samples_per_packet = (source->stream.rate + (AVB1722_PACKET_RATE-1))/AVB1722_PACKET_RATE;
-        data_size += 18 + 32 + (source->stream.num_channels * samples_per_packet * 4);
+        data_size += eth_header_bytes + avb_1722_header_bytes +
+            (source->stream.num_channels * samples_per_packet * 4) + preamble_plus_ifg_bytes;
       }
   }
   mac_set_qav_bandwidth(c_mac_tx, (data_size*8*AVB1722_PACKET_RATE*102)/100);
