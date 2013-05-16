@@ -278,7 +278,7 @@ media_output_fifo_strided_push(media_output_fifo_t s0,
 void
 media_output_fifo_handle_buf_ctl(chanend buf_ctl, 
                                  int s0,
-                                 int *buf_ctl_notified,
+                                 int *notified_buf_ctl,
                                  timer tmr)
 {
   int cmd;              
@@ -303,7 +303,7 @@ media_output_fifo_handle_buf_ctl(chanend buf_ctl,
       send_buf_ctl_new_stream_info(buf_ctl,                         
                                    s->media_clock);
       buf_ctl_ack(buf_ctl);      
-      *buf_ctl_notified = 0;
+      *notified_buf_ctl = 0;
       break;
     }
     case BUF_CTL_ADJUST_FILL:
@@ -327,7 +327,7 @@ media_output_fifo_handle_buf_ctl(chanend buf_ctl,
       s->local_ts = 0;
       s->marker = (unsigned int *) 0;
       buf_ctl_ack(buf_ctl); 
-      *buf_ctl_notified = 0;
+      *notified_buf_ctl = 0;
       break;
     case BUF_CTL_RESET:
       s->state = ZEROING;
@@ -338,11 +338,11 @@ media_output_fifo_handle_buf_ctl(chanend buf_ctl,
       s->zero_flag = 1;
       *s->zero_marker = 1;
       buf_ctl_ack(buf_ctl); 
-      *buf_ctl_notified = 0;
+      *notified_buf_ctl = 0;
       break;
     case BUF_CTL_ACK:
       buf_ctl_ack(buf_ctl); 
-      *buf_ctl_notified = 0;
+      *notified_buf_ctl = 0;
       break;
     default:
       break;
