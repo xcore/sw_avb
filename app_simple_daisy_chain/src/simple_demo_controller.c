@@ -136,10 +136,10 @@ void avb_talker_on_source_address_reserved(int source_num, unsigned char mac_add
 
   set_avb_source_dest(source_num, mac_addr, 6);
 
-  /* NOTE: acmp_talker_init() must be called BEFORE talker_set_mac_address() otherwise it will zero
-   * what was just set */
-  avb_1722_1_acmp_talker_init();
   avb_1722_1_talker_set_mac_address(source_num, mac_addr);
   avb_1722_1_adp_announce();
+
+  if (source_num == (AVB_1722_1_MAX_TALKERS - 1))
+      avb_1722_1_acmp_talker_init();
 }
 

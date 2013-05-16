@@ -1,4 +1,3 @@
-#include <string.h>
 #include <print.h>
 #include "avb_1722_common.h"
 #include "avb_1722_1_common.h"
@@ -81,7 +80,6 @@ static avb_1722_1_acmp_cmd_resp acmp_listener_rcvd_cmd_resp;
 static short sequence_id[2];
 
 static void acmp_zero_listener_stream_info(int unique_id);
-static void acmp_zero_talker_stream_info(int unique_id);
 
 /**
  * Initialises ACMP state machines, data structures and timers.
@@ -107,10 +105,7 @@ void avb_1722_1_acmp_controller_deinit()
 
 void avb_1722_1_acmp_talker_init()
 {
-    int i;
     acmp_talker_state = ACMP_TALKER_WAITING;
-
-    for (i = 0; i < AVB_1722_1_MAX_TALKERS; i++) acmp_zero_talker_stream_info(i);
 }
 
 void avb_1722_1_acmp_listener_init()
@@ -486,6 +481,9 @@ static avb_1722_1_acmp_status_t acmp_listener_get_state()
     memcpy(acmp_listener_rcvd_cmd_resp.stream_dest_mac, acmp_listener_streams[unique_id].destination_mac, 6);
     acmp_listener_rcvd_cmd_resp.talker_guid = acmp_listener_streams[unique_id].talker_guid;
     acmp_listener_rcvd_cmd_resp.talker_unique_id = acmp_listener_streams[unique_id].talker_unique_id;
+    acmp_listener_rcvd_cmd_resp.connection_count = acmp_listener_streams[unique_id].connected;
+    /* TODO: Add flags */
+    /* TODO: Add stream_vlan */
 
     /* If for some reason we couldn't get the state, we could return a STATE_UNVAILABLE status instead */
 
@@ -499,6 +497,8 @@ static avb_1722_1_acmp_status_t acmp_talker_get_state()
     acmp_talker_rcvd_cmd_resp.stream_id = acmp_talker_streams[unique_id].stream_id;
     memcpy(acmp_talker_rcvd_cmd_resp.stream_dest_mac, acmp_talker_streams[unique_id].destination_mac, 6);
     acmp_talker_rcvd_cmd_resp.connection_count = acmp_talker_streams[unique_id].connection_count;
+
+    /* TODO: Add stream_vlan */
 
     return ACMP_STATUS_SUCCESS;
 }
@@ -568,17 +568,6 @@ static void acmp_remove_talker_stream_info()
             return;
         }
     }
-}
-
-/**
- * Sets all fields in the talker stream info entry with unique_id to zero
- */
-static void acmp_zero_talker_stream_info(int unique_id)
-{
-#ifdef AVB_1722_1_ENABLE_ASSERTIONS
-    assert(unique_id < AVB_1722_1_MAX_TALKERS);
-#endif
-    memset(&acmp_talker_streams[unique_id], 0, sizeof(avb_1722_1_acmp_talker_stream_info));
 }
 
 /**
