@@ -1,3 +1,4 @@
+#include <string.h>
 #include <print.h>
 #include "avb_1722_common.h"
 #include "avb_1722_1_common.h"
