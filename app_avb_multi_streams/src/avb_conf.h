@@ -69,7 +69,7 @@
 /** The maximum number of channels permitted per 1722 Talker stream */
 #define AVB_MAX_CHANNELS_PER_TALKER_STREAM AVB_DEMO_NUM_CHANNELS/AVB_NUM_SOURCES
 /** The maximum number of channels permitted per 1722 Listener stream */
-#define AVB_MAX_CHANNELS_PER_LISTENER_STREAM AVB_DEMO_NUM_CHANNELS/AVB_NUM_SINKS
+#define AVB_MAX_CHANNELS_PER_LISTENER_STREAM 8
 
 /** Enable combination of the media clock server and PTP server in a single core */
 #define COMBINE_MEDIA_CLOCK_AND_PTP 1
