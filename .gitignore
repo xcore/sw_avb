@@ -1,6 +1,8 @@
 **/.build*/*
 bin/
 _build/
+.build/
+*.*.orig
 *.o
 *.xe
 *.vcd
@@ -22,3 +24,4 @@ Doxyfile-e
 .DS_Store
 *.pyc
 *.xmt
+*.zip
