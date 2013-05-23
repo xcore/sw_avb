@@ -759,7 +759,7 @@ int getset_avb_sink_state(int set,
 		  xc_abi_outuint(c, sink->stream.local_id);
 		  (void) xc_abi_inuint(c);
 
-    	  mrp_mad_leave(sink->stream.srp_listener_attr);
+    	  avb_srp_map_leave(sink->stream.srp_listener_attr);
 
 #ifdef AVB_INCLUDE_MMRP
         if (sink->addr[0] & 1)

@@ -185,12 +185,24 @@ static void avb_srp_map_join(mrp_attribute_state *attr, int new, int listener)
   mrp_mad_join(attr, new);
 }
 
-static void avb_srp_map_leave(mrp_attribute_state *attr)
+void avb_srp_map_leave(mrp_attribute_state *attr)
 {
   printstrln("MAD_Leave.indication");
-  // Attribute propagation:
-  // attr->propagate = 1;  // Propagate to other port
-  mrp_mad_leave(attr);
+
+  if (attr->attribute_type == MSRP_LISTENER)
+  {
+    if (mrp_match_multiple_attrs_by_stream_and_type(attr))
+    {
+      printstrln("MULTIPLE LISTENER ATTRS WITH SAME STREAM ID!!");
+      // If we have multiple Listener attrs and they are not all leaves, we do not generate a leave
+    }
+    else
+    {
+      // FIXME: This will only generate a leave on port 0 because we register the attribute there
+      // Instead, it should be the port that the Talker advertise matches
+      mrp_mad_leave(attr);
+    }
+  }
 }
 
 static unsigned avb_srp_calculate_max_framesize(avb_source_info_t *source_info)

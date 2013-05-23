@@ -85,6 +85,8 @@ int avb_srp_match_domain(mrp_attribute_state *attr,
                          char *msg,
                          int i);
 
+void avb_srp_map_leave(mrp_attribute_state *attr);
+
 //!@{
 //! \name Indications from the MRP state machine
 void avb_srp_listener_join_ind(mrp_attribute_state *attr, int new, int four_packed_event);

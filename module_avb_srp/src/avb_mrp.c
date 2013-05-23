@@ -1117,6 +1117,35 @@ int mrp_is_observer(mrp_attribute_state *st)
     }
 }
 
+int mrp_match_multiple_attrs_by_stream_and_type(mrp_attribute_state *attr)
+{
+  int matches = 0;
+
+  for (int j=0;j<MRP_MAX_ATTRS;j++) {
+    if (attr->applicant_state == MRP_UNUSED) {
+      continue;
+    }
+    if (attr->attribute_type == attrs[j].attribute_type)
+    {
+      avb_sink_info_t *sink_info = (avb_sink_info_t *) attr->attribute_info;
+      avb_source_info_t *source_info = (avb_source_info_t *) attrs[j].attribute_info;
+
+      if (sink_info == NULL || source_info == NULL) continue;
+
+      if (sink_info->reservation.stream_id[0] == source_info->reservation.stream_id[0] && 
+          sink_info->reservation.stream_id[1] == source_info->reservation.stream_id[1])
+      {
+        matches++;
+        if (matches == 2)
+        {
+          return 1;
+        }
+      }   
+    }
+  }
+  return 0;
+}
+
 int mrp_match_attribute_by_stream_id(mrp_attribute_state *attr)
 {
   for (int j=0;j<MRP_MAX_ATTRS;j++) {
