@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Network xmlns="http://www.xmos.com"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.xmos.com http://www.xmos.com">
+	<Type>Board</Type>
+	<Name>D4U-AVB-Dongle (L16)</Name>
+
+	<Declarations>
+		<Declaration>tileref tile[2]</Declaration>
+	</Declarations>
+
+	<Packages>
+		<Package Id="0" Type="XS1-LnA-128-QF124" >
+			<Nodes>
+				<Node Id="0" InPackageId="0" Type="XS1-L8A-64" Oscillator="25MHz" SystemFrequency="500MHz">
+				
+					<Boot>
+						<Source Location="SPI:bootFlash"/>
+						<Bootee NodeId="1" Tile="0"/>
+					</Boot>
+					<Tile Number="0" Reference="tile[0]">
+						<!-- To SPI Flash for firmware bootup/ IO connected to MCU -->
+						<!-- Warning when enable the PIC USB port, (MISO and CLK) pins will not work -->
+						<Port Location="XS1_PORT_1A" Name="PORT_SPI_MISO"/> 			<!-- MCU IO Pin RPB5 (Pin no 15) -->
+						<Port Location="XS1_PORT_1B" Name="PORT_SPI_SS"/>				<!-- MCU IO Pin RPB9 (Pin no 19) -->
+						<Port Location="XS1_PORT_1C" Name="PORT_SPI_CLK"/> 				<!-- MCU IO Pin RPB14 (Pin no 28) -->
+						<Port Location="XS1_PORT_1D" Name="PORT_SPI_MOSI"/>				<!-- MCU IO Pin RPB8 (Pin no 18) -->
+
+						<!-- To Ethernet Phy LAN8710A -->
+						<Port Location="XS1_PORT_1P" Name="PORT_ETH_RXCLK"/>
+						<Port Location="XS1_PORT_1E" Name="PORT_ETH_RXER"/>
+						<Port Location="XS1_PORT_1L" Name="PORT_ETH_TXCLK"/>
+						<Port Location="XS1_PORT_1F" Name="PORT_ETH_RXDV"/>
+						<Port Location="XS1_PORT_1K" Name="PORT_ETH_TXEN"/>
+						<Port Location="XS1_PORT_1N" Name="PORT_ETH_MDIO"/>
+						<Port Location="XS1_PORT_1O" Name="PORT_ETH_RSTN"/>
+						<Port Location="XS1_PORT_1M" Name="PORT_ETH_MDC"/>
+						<Port Location="XS1_PORT_4D" Name="PORT_ETH_RXD"/>
+						<Port Location="XS1_PORT_4C" Name="PORT_ETH_TXD"/>
+						
+						
+						<Port Location="XS1_PORT_1G" Name="PORT_PIC_MCLR"/>				<!-- MCU Reset Pin (Pin no 32). L: MCU Reset, H: MCU normal -->
+						<Port Location="XS1_PORT_1H" Name="PORT_PIC_RPC9"/>				<!-- MCU IO Pin RPC9 (Pin no 20) -->
+						<Port Location="XS1_PORT_1I" Name="PORT_PIC_RPB1"/>				<!-- MCU IO Pin RPB1 (Pin no 36) -->
+						<Port Location="XS1_PORT_1J" Name="PORT_PIC_RPB7"/>				<!-- MCU IO Pin RPB5 (Pin no 15) -->
+						
+						<Port Location="XS1_PORT_4E" Name="PORT_UART_RX"/>				<!-- 4E0 connected to MCU IO Pin RPC0 (Pin no 3)/ External Connector J2-6 -->
+						<Port Location="XS1_PORT_4F" Name="PORT_UART_TX"/>				<!-- 4F0 connected to MCU IO Pin RPC1 (Pin no 4)/ External Connector J2-7 -->
+					</Tile>
+				</Node>
+				<Node Id="1" InPackageId="1" Type="XS1-L8A-64" Oscillator="25MHz" SystemFrequency="500MHz">
+					<Boot>
+						<Source Location="LINK"/>
+					</Boot>
+					<Tile Number="0" Reference="tile[1]">
+						<!-- I2C Bus to CS2300CP, MCU, EEPROM, External Connector -->
+						<Port Location="XS1_PORT_4A" Name="PORT_I2C_SDA"/>				<!-- MCU IO Pin RPB2 (Pin no 1) -->
+						<Port Location="XS1_PORT_4B" Name="PORT_I2C_SCL"/>  			<!-- MCU IO Pin RPB3 (Pin no 2) -->
+		
+						<Port Location="XS1_PORT_1K" Name="PORT_SYNC_OUT"/>				<!-- To CS2300CP Clock In -->
+						<Port Location="XS1_PORT_1C" Name="PORT_LRCLK"/>
+						<Port Location="XS1_PORT_1D" Name="PORT_SCLK"/>
+						<Port Location="XS1_PORT_1O" Name="PORT_SDATA_OUT0"/>
+						<Port Location="XS1_PORT_1P" Name="PORT_SDATA_OUT1"/>
+						<Port Location="XS1_PORT_1A" Name="PORT_SDATA_OUT2"/>
+						<Port Location="XS1_PORT_1B" Name="PORT_SDATA_OUT3"/>
+						<Port Location="XS1_PORT_1L" Name="PORT_MCLK"/>
+						<Port Location="XS1_PORT_1E" Name="PORT_SDATA_IN3"/>
+						<Port Location="XS1_PORT_1F" Name="PORT_SDATA_IN2"/>
+						<Port Location="XS1_PORT_1M" Name="PORT_SDATA_IN1"/>
+						<Port Location="XS1_PORT_1N" Name="PORT_SDATA_IN0"/>
+		
+						<Port Location="XS1_PORT_1G" Name="PORT_PIC_RPB13"/>			<!-- MCU IO Pin RPB13 (Pin no 27) -->
+						<Port Location="XS1_PORT_1H" Name="PORT_PIC_RPB15"/>			<!-- MCU IO Pin RPB15 (Pin no 29) -->
+						<Port Location="XS1_PORT_1I" Name="PORT_PIC_RPC3"/>				<!-- MCU IO Pin RPC3 (Pin no 11) -->
+						<Port Location="XS1_PORT_1J" Name="PORT_PIC_RPB0"/>				<!-- MCU IO Pin RPB0 (Pin no 35) -->
+		
+						<Port Location="XS1_PORT_4F" Name="PORT_MODE"/>
+						
+						
+						<!-- Dummy Port to match the code -->
+						<Port Location="XS1_PORT_4C" Name="PORT_SHARED_OUT"/>
+						<Port Location="XS1_PORT_4D" Name="PORT_SHARED_IN"/>
+						<Port Location="XS1_PORT_4E" Name="PORT_LEDS"/>
+						
+					</Tile>
+				</Node>
+			</Nodes>
+		</Package>
+	</Packages>
+
+    <Links>
+		<Link Encoding="5wire" Delays="0,1">
+			<LinkEndpoint NodeId="0" Link="XLG"/>
+			<LinkEndpoint NodeId="1" Link="XLF"/>
+		</Link>
+		<Link Encoding="5wire" Delays="0,1">
+			<LinkEndpoint NodeId="0" Link="XLH"/>
+			<LinkEndpoint NodeId="1" Link="XLE"/>
+		</Link>
+		<Link Encoding="5wire" Delays="0,1">
+			<LinkEndpoint NodeId="0" Link="XLE"/>
+			<LinkEndpoint NodeId="1" Link="XLH"/>
+		</Link>
+		<Link Encoding="5wire" Delays="0,1">
+			<LinkEndpoint NodeId="0" Link="XLF"/>
+			<LinkEndpoint NodeId="1" Link="XLG"/>
+		</Link>
+		
+	<Link Encoding="2wire" Delays="4,4" Flags="XSCOPE">
+			<LinkEndpoint NodeId="0" Link="X0LA" />
+			<LinkEndpoint RoutingId="0x8000" Chanend="1" />
+		</Link>
+ 		
+	</Links>
+
+	<ExternalDevices>
+		<Device NodeId="0" Tile="0" Name="bootFlash" Class="SPIFlash" Type="AT25DF041A">
+			<Attribute Name="PORT_SPI_MISO" Value="PORT_SPI_MISO"/>
+			<Attribute Name="PORT_SPI_SS"   Value="PORT_SPI_SS"/>
+			<Attribute Name="PORT_SPI_CLK"  Value="PORT_SPI_CLK"/>
+			<Attribute Name="PORT_SPI_MOSI" Value="PORT_SPI_MOSI"/>
+		</Device>
+	</ExternalDevices>
+
+	<JTAGChain>
+		<JTAGDevice NodeId="0"/>
+		<JTAGDevice NodeId="1"/>
+	</JTAGChain>
+ 
+</Network>

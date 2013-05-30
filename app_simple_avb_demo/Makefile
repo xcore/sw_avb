@@ -28,7 +28,7 @@ OPTIONAL_HEADERS = avb_app_board_config.h
 # If the variable XCC_MAP_FLAGS is set it overrides the flags passed to 
 # xcc for the final link (mapping) stage.
 
-XCC_FLAGS = -O2 -save-temps -g -report -Xmapper --map -Xmapper MAPFILE -fxscope
+XCC_FLAGS = -O2 -save-temps -g -report -Xmapper --map -Xmapper MAPFILE
 
 XCC_FLAGS_main.xc = $(XCC_FLAGS) -falways-inline
 
@@ -37,8 +37,13 @@ XCC_FLAGS_main.xc = $(XCC_FLAGS) -falways-inline
 USED_MODULES = module_avb_1722 module_avb_1722_maap module_avb_srp module_avb_media_clock module_avb_audio module_random
 USED_MODULES += module_avb module_avb_util module_gptp module_ethernet module_ethernet_board_support module_avb_1722_1
 
-ifeq ($(TARGET),XR-AVB-LC-BRD)
+ifeq ($(TARGET),$(filter $(TARGET),XR-AVB-LC-BRD D4U-AVB-DG))
     USED_MODULES += module_i2c_simple
+endif
+
+ifeq ($(TARGET),$(filter $(TARGET),XR-AVB-LC-BRD SLICEKIT-L2))
+    XCC_FLAGS += -fxscope
+    XCC_FLAGS += -DENABLE_XSCOPE=1
 endif
 
 ifeq ($(TARGET),SLICEKIT-L2)

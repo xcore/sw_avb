@@ -1,6 +1,8 @@
 #include <xs1.h>
 #include "avb_xscope.h"
 
+#if ENABLE_XSCOPE
+
 extern void xscope_xlink_close(void);
 extern void xscope_xlink_put_ch(unsigned char data);
 extern void xscope_xlink_put_ct(void);
@@ -24,3 +26,4 @@ void xscope_register_no_probes(void)
     xscope_xlink_close();
   }
 }
+#endif

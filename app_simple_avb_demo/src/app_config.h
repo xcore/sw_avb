@@ -8,11 +8,6 @@
 /** Global switch to enable or disable AVB Listener functionality in the demo */
 #define AVB_DEMO_ENABLE_LISTENER 1
 
-/** Number of input/output audio channels in the demo application 
-  * For simplicity, input and output is identical in size but can be configured
-  * differently in ``avb_conf.h``. */
-#define AVB_DEMO_NUM_CHANNELS 8
-
 /***** PORTS *********/
 
 // This include fill will get included if you use a XMOS development target
@@ -21,6 +16,13 @@
 
 #ifdef __avb_app_board_config_h_exists__
 #include "avb_app_board_config.h"
+#endif
+
+/** Number of input/output audio channels in the demo application 
+  * For simplicity, input and output is identical in size but can be configured
+  * differently in ``avb_conf.h``. */
+#ifndef AVB_DEMO_NUM_CHANNELS
+#define AVB_DEMO_NUM_CHANNELS 8
 #endif
 
 // If you are not using a standard dev board (e.g. creating an application for
