@@ -14,8 +14,12 @@
 #include "gptp.h"
 #include "media_output_fifo.h"
 
-#ifndef MAX_INCOMING_AVB_STREAMS 
+#ifndef MAX_INCOMING_AVB_STREAMS
+#if AVB_NUM_SINKS > 0 
 #define MAX_INCOMING_AVB_STREAMS (AVB_NUM_SINKS)
+#else
+#define MAX_INCOMING_AVB_STREAMS 1 // Just set to get Listener to compile when disabled
+#endif
 #endif
 
 #ifndef AVB_MAX_CHANNELS_PER_LISTENER_STREAM 

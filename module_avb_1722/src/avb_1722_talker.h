@@ -13,11 +13,11 @@
 #include "gptp.h"
 #include "media_input_fifo.h"
 
-#if AVB_NUM_SOURCES > 0
-
 #ifndef AVB_MAX_CHANNELS_PER_TALKER_STREAM 
 #define AVB_MAX_CHANNELS_PER_TALKER_STREAM 8
 #endif
+
+#if AVB_NUM_SOURCES > 0
 
 #ifndef AVB_MAX_STREAMS_PER_TALKER_UNIT
 #define AVB_MAX_STREAMS_PER_TALKER_UNIT (AVB_NUM_SOURCES)

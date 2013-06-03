@@ -140,16 +140,20 @@ static int create_aem_read_descriptor_response(unsigned short read_type, unsigne
       descriptor = &desc_audio_cluster_template[0];
       desc_size_bytes = sizeof(desc_audio_cluster_template);
     }
+#if AVB_NUM_SINKS > 0
     else if ((read_type == AEM_STREAM_INPUT_TYPE && read_id < AVB_NUM_SINKS))
     {
       descriptor = &desc_stream_input_0[0];
       desc_size_bytes = sizeof(desc_stream_input_0);
     }
+#endif
+#if AVB_NUM_SOURCES > 0
     else if ((read_type == AEM_STREAM_OUTPUT_TYPE && read_id < AVB_NUM_SOURCES))
     {
       descriptor = &desc_stream_output_0[0];
       desc_size_bytes = sizeof(desc_stream_output_0);
     }
+#endif
 
     if (descriptor != NULL)
     {

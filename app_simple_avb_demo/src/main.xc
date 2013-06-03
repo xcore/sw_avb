@@ -323,8 +323,8 @@ void gpio_task(chanend c_gpio_ctl)
 void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl)
 {
   timer tmr;
-  int channels_per_stream = AVB_NUM_MEDIA_INPUTS/AVB_NUM_SOURCES;
 #if AVB_DEMO_ENABLE_TALKER
+  int channels_per_stream = AVB_NUM_MEDIA_INPUTS/AVB_NUM_SOURCES;
   int map[AVB_NUM_MEDIA_INPUTS/AVB_NUM_SOURCES];
 #endif
   unsigned periodic_timeout;
@@ -387,18 +387,18 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl)
 #if AVB_DEMO_ENABLE_LISTENER
             if (AVB_NUM_MEDIA_OUTPUTS > 2)
             {
-              int map[AVB_NUM_MEDIA_OUTPUTS/AVB_NUM_SOURCES];
+              int map[AVB_NUM_MEDIA_OUTPUTS/AVB_NUM_SINKS];
               int len;
-              enum avb_sink_state_t cur_state[AVB_NUM_SOURCES];
+              enum avb_sink_state_t cur_state[AVB_NUM_SINKS];
 
-              for (int i=0; i < AVB_NUM_SOURCES; i++)
+              for (int i=0; i < AVB_NUM_SINKS; i++)
               {
                 get_avb_sink_state(i, cur_state[i]);
                 if (cur_state[i] != AVB_SINK_STATE_DISABLED)
                   set_avb_sink_state(i, AVB_SINK_STATE_DISABLED);
               }
 
-              for (int i=0; i < AVB_NUM_SOURCES; i++)
+              for (int i=0; i < AVB_NUM_SINKS; i++)
               {
                 get_avb_sink_map(i, map, len);
                 for (int j=0;j<len;j++)
@@ -416,7 +416,7 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl)
                 set_avb_sink_map(i, map, len);
               }
 
-              for (int i=0; i < AVB_NUM_SOURCES; i++)
+              for (int i=0; i < AVB_NUM_SINKS; i++)
               {
                 if (cur_state[i] != AVB_SINK_STATE_DISABLED)
                   set_avb_sink_state(i, AVB_SINK_STATE_POTENTIAL);

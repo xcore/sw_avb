@@ -1,6 +1,9 @@
 #ifndef __avb_stream_h__
 #define __avb_stream_h__
 
+#include "avb_1722_listener.h"
+#include "avb_1722_talker.h"
+
 struct mrp_attribute_state;
 
 typedef struct avb_stream_info_t

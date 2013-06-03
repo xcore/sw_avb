@@ -32,6 +32,8 @@
 #define AVB_NUM_MEDIA_INPUTS AVB_DEMO_NUM_CHANNELS
 /** Enable the 1722.1 Talker functionality */
 #define AVB_1722_1_TALKER_ENABLED 1
+/** The maximum number of channels permitted per 1722 Talker stream */
+#define AVB_MAX_CHANNELS_PER_TALKER_STREAM AVB_DEMO_NUM_CHANNELS/AVB_NUM_SOURCES
 
 #else
 
@@ -54,6 +56,8 @@
 #define AVB_NUM_MEDIA_OUTPUTS AVB_DEMO_NUM_CHANNELS
 /** Enable the 1722.1 Listener functionality */
 #define AVB_1722_1_LISTENER_ENABLED 1
+/** The maximum number of channels permitted per 1722 Listener stream */
+#define AVB_MAX_CHANNELS_PER_LISTENER_STREAM AVB_DEMO_NUM_CHANNELS
 
 #else
 
@@ -64,10 +68,6 @@
 
 #endif
 
-/** The maximum number of channels permitted per 1722 Talker stream */
-#define AVB_MAX_CHANNELS_PER_TALKER_STREAM AVB_DEMO_NUM_CHANNELS/AVB_NUM_SOURCES
-/** The maximum number of channels permitted per 1722 Listener stream */
-#define AVB_MAX_CHANNELS_PER_LISTENER_STREAM AVB_DEMO_NUM_CHANNELS
 
 /** Enable combination of the media clock server and PTP server in a single core */
 #define COMBINE_MEDIA_CLOCK_AND_PTP 1
