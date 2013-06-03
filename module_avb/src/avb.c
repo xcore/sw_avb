@@ -181,7 +181,9 @@ void avb_init(chanend media_ctl[],
   register_media(media_ctl);
   init_media_clock_server(media_clock_ctl);
 
+#if AVB_NUM_SOURCES > 0
   avb_1722_maap_init(mac_addr);
+#endif
 
 #if AVB_ENABLE_1722_1
   avb_1722_1_init(mac_addr);
@@ -220,6 +222,7 @@ void avb_periodic(unsigned int time_now)
 #ifdef AVB_ENABLE_1722_1
 	avb_1722_1_periodic(c_mac_tx, c_ptp);
 #endif
+#if AVB_NUM_SOURCES > 0
 	avb_1722_maap_periodic(c_mac_tx);
 
   if ((first_time == 1) && (time_now != 1)){
@@ -232,6 +235,7 @@ void avb_periodic(unsigned int time_now)
     avb_1722_maap_request_addresses(AVB_NUM_SOURCES, NULL);
     maap_started = 1;
   }
+#endif
 }
 
 void avb_start(void)
