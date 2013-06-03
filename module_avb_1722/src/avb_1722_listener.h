@@ -22,8 +22,12 @@
 #define AVB_MAX_CHANNELS_PER_LISTENER_STREAM 8
 #endif
 
+#if MAX_INCOMING_AVB_STREAMS > 8
+#error "More than 8 streams not supported in this firmware configuration"
+#endif
+
 #ifndef MAX_AVB_STREAMS_PER_LISTENER
-#define MAX_AVB_STREAMS_PER_LISTENER 4
+#define MAX_AVB_STREAMS_PER_LISTENER MAX_INCOMING_AVB_STREAMS
 #endif
 
 
@@ -60,7 +64,7 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
 #endif
 
 typedef struct avb_1722_listener_state_s {
-  avb_1722_stream_info_t listener_streams[MAX_AVB_STREAMS_PER_LISTENER];
+  avb_1722_stream_info_t listener_streams[MAX_INCOMING_AVB_STREAMS];
   int notified_buf_ctl;
   int router_link;
 } avb_1722_listener_state_t;

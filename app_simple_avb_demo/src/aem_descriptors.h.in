@@ -381,14 +381,14 @@ unsigned char desc_stream_input_0[] =
 {
   U16(AEM_STREAM_INPUT_TYPE),                 /* 0-1 descriptor_type */
   U16(0),                                     /* 2-3 descriptor_id */
-  "Input Stream 0",                           /* 4-67 object_name */
+  "Stream Input 0",                           /* 4-67 object_name */
   U16(AEM_NO_STRING),                         /* 68-69 localized_description */
   U16(0),                                     /* 70-71 clock_domain_index */
   U16(AEM_STREAM_FLAGS_CLASS_A),              /* stream_flags */
-  0x00, 0xa0, 0x02, AVB_NUM_MEDIA_OUTPUTS,    /* current_format */
+  0x00, 0xa0, 0x02, AVB_NUM_MEDIA_OUTPUTS/AVB_NUM_SINKS,    /* current_format */
   0x40, // b[0], nb[1], reserved[2:]
   0, // label_iec_60958_cnt
-  AVB_NUM_MEDIA_OUTPUTS, // label_mbla_cnt
+  AVB_NUM_MEDIA_OUTPUTS/AVB_NUM_SINKS, // label_mbla_cnt
   0, // label_midi_cnt[0:3], label_smptecnt[4:]
   U16(132),                                   /* formats_offset */
   U16(1),                                     /* number_of_formats */
@@ -403,14 +403,11 @@ unsigned char desc_stream_input_0[] =
   U16(0),                                     /* avb_interface_id */
   U32(0),                                     /* buffer_length */
   /* 130-> formats */
-  0x00, 0xa0, 0x02, AVB_NUM_MEDIA_OUTPUTS,
+  0x00, 0xa0, 0x02, AVB_NUM_MEDIA_OUTPUTS/AVB_NUM_SINKS,
   0x40, // b[0], nb[1], reserved[2:]
   0, // label_iec_60958_cnt
-  AVB_NUM_MEDIA_OUTPUTS, // label_mbla_cnt
+  AVB_NUM_MEDIA_OUTPUTS/AVB_NUM_SINKS, // label_mbla_cnt
   0 // label_midi_cnt[0:3], label_smptecnt[4:]
-  // U64(0x00a0020240000200) // 48K, 2 chan
-  // U64(0x00a0040240000200), // 96K, 2 chan
-  // U64(0x00a0060240000200) // 192K, 2 chan
 };
 #endif
 
@@ -420,14 +417,14 @@ unsigned char desc_stream_output_0[] =
 {
   U16(AEM_STREAM_OUTPUT_TYPE),                /* 0-1 descriptor_type */
   U16(0),                                     /* 2-3 descriptor_id */
-  "Output Stream 0",                          /* 4-67 object_name */
+  "Stream Output 0",                          /* 4-67 object_name */
   U16(AEM_NO_STRING),                         /* 68-69 localized_description */
   U16(0),                                     /* 70-71 clock_domain_index */
   U16(AEM_STREAM_FLAGS_CLASS_A),              /* stream_flags */
-  0x00, 0xa0, 0x02, AVB_NUM_MEDIA_INPUTS,     /* current_format */                           /* current_format */
+  0x00, 0xa0, 0x02, AVB_NUM_MEDIA_INPUTS/AVB_NUM_SOURCES,     /* current_format */                           /* current_format */
   0x40, // b[0], nb[1], reserved[2:]
   0, // label_iec_60958_cnt
-  AVB_NUM_MEDIA_INPUTS, // label_mbla_cnt
+  AVB_NUM_MEDIA_INPUTS/AVB_NUM_SOURCES, // label_mbla_cnt
   0, // label_midi_cnt[0:3], label_smptecnt[4:]
   U16(132),                                   /* formats_offset */
   U16(1),                                     /* number_of_formats */
@@ -442,14 +439,11 @@ unsigned char desc_stream_output_0[] =
   U16(0),                                     /* avb_interface_id */
   U32(0),                                     /* buffer_length */
   /* 130-> formats */
-  0x00, 0xa0, 0x02, AVB_NUM_MEDIA_INPUTS,
+  0x00, 0xa0, 0x02, AVB_NUM_MEDIA_INPUTS/AVB_NUM_SOURCES,
   0x40, // b[0], nb[1], reserved[2:]
   0, // label_iec_60958_cnt
-  AVB_NUM_MEDIA_INPUTS, // label_mbla_cnt
+  AVB_NUM_MEDIA_INPUTS/AVB_NUM_SOURCES, // label_mbla_cnt
   0 // label_midi_cnt[0:3], label_smptecnt[4:]
-  // U64(0x00a0020240000200) // 48K, 2 chan
-  // U64(0x00a0040240000200), // 96K, 2 chan
-  // U64(0x00a0060240000200) // 192K, 2 chan
 };
 #endif
 

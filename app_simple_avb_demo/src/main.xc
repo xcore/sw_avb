@@ -323,8 +323,9 @@ void gpio_task(chanend c_gpio_ctl)
 void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl)
 {
   timer tmr;
+  int channels_per_stream = AVB_NUM_MEDIA_INPUTS/AVB_NUM_SOURCES;
 #if AVB_DEMO_ENABLE_TALKER
-  int map[AVB_NUM_MEDIA_INPUTS];
+  int map[AVB_NUM_MEDIA_INPUTS/AVB_NUM_SOURCES];
 #endif
   unsigned periodic_timeout;
   unsigned sample_rate = 48000;
@@ -337,12 +338,15 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl)
   set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_ENABLED);
 
 #if AVB_DEMO_ENABLE_TALKER
-  set_avb_source_channels(0, AVB_NUM_MEDIA_INPUTS);
-  for (int i = 0; i < AVB_NUM_MEDIA_INPUTS; i++)
-    map[i] = i;
-  set_avb_source_map(0, map, AVB_NUM_MEDIA_INPUTS);
-  set_avb_source_format(0, AVB_SOURCE_FORMAT_MBLA_24BIT, sample_rate);
-  set_avb_source_sync(0, 0); // use the media_clock defined above
+  for (int j=0; j < AVB_NUM_SOURCES; j++)
+  {
+    set_avb_source_channels(j, channels_per_stream);
+    for (int i = 0; i < channels_per_stream; i++)
+      map[i] = j ? j*(channels_per_stream)+i  : j+i;
+    set_avb_source_map(j, map, channels_per_stream);
+    set_avb_source_format(j, AVB_SOURCE_FORMAT_MBLA_24BIT, sample_rate);
+    set_avb_source_sync(j, 0); // use the media_clock defined above
+  }
 #endif
 
   set_avb_sink_format(0, AVB_SOURCE_FORMAT_MBLA_24BIT, sample_rate);
@@ -383,25 +387,40 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl)
 #if AVB_DEMO_ENABLE_LISTENER
             if (AVB_NUM_MEDIA_OUTPUTS > 2)
             {
-              enum avb_sink_state_t cur_state;
-              int channel;
-              int map[AVB_NUM_MEDIA_OUTPUTS];
+              int map[AVB_NUM_MEDIA_OUTPUTS/AVB_NUM_SOURCES];
+              int len;
+              enum avb_sink_state_t cur_state[AVB_NUM_SOURCES];
 
-              channel = selected_chan*2;
-              get_avb_sink_state(0, cur_state);
-              set_avb_sink_state(0, AVB_SINK_STATE_DISABLED);
-              for (int j=0;j<AVB_NUM_MEDIA_OUTPUTS;j++)
+              for (int i=0; i < AVB_NUM_SOURCES; i++)
               {
-                map[j] = channel;
-                channel++;
-                if (channel > AVB_NUM_MEDIA_OUTPUTS-1)
-                {
-                  channel = 0;
-                }
+                get_avb_sink_state(i, cur_state[i]);
+                if (cur_state[i] != AVB_SINK_STATE_DISABLED)
+                  set_avb_sink_state(i, AVB_SINK_STATE_DISABLED);
               }
-              set_avb_sink_map(0, map, AVB_NUM_MEDIA_OUTPUTS);
-              if (cur_state != AVB_SINK_STATE_DISABLED)
-                set_avb_sink_state(0, AVB_SINK_STATE_POTENTIAL);
+
+              for (int i=0; i < AVB_NUM_SOURCES; i++)
+              {
+                get_avb_sink_map(i, map, len);
+                for (int j=0;j<len;j++)
+                {
+                  if (map[j] != -1)
+                  {
+                    map[j] += 2;
+
+                    if (map[j] > AVB_NUM_MEDIA_OUTPUTS-1)
+                    {
+                      map[j] = map[j]%AVB_NUM_MEDIA_OUTPUTS;
+                    }
+                  }
+                }
+                set_avb_sink_map(i, map, len);
+              }
+
+              for (int i=0; i < AVB_NUM_SOURCES; i++)
+              {
+                if (cur_state[i] != AVB_SINK_STATE_DISABLED)
+                  set_avb_sink_state(i, AVB_SINK_STATE_POTENTIAL);
+              }
             }
 #endif
             break;
