@@ -439,9 +439,9 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl)
       case tmr when timerafter(periodic_timeout) :> unsigned int time_now:
       {
         avb_periodic(time_now);
-
+#if AVB_ENABLE_1722_1
         simple_demo_controller(change_stream, toggle_remote, c_tx);
-
+#endif
         periodic_timeout += PERIODIC_POLL_TIME;
         break;
       }

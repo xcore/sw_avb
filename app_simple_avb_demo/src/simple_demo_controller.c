@@ -11,7 +11,6 @@
 #include "avb_1722_1_common.h"
 #include "avb_1722_1_acmp.h"
 #include "avb_1722_1_adp.h"
-#endif
 
 extern avb_1722_1_entity_record entities[AVB_1722_1_MAX_ENTITIES];
 static int controller_state = 0;
@@ -145,3 +144,4 @@ void avb_talker_on_source_address_reserved(int source_num, unsigned char mac_add
       avb_1722_1_acmp_talker_init();
 }
 
+#endif
