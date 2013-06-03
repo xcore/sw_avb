@@ -1,12 +1,19 @@
 #include <xs1.h>
 #include <xclib.h>
 #include "print.h"
+#include "simple_printf.h"
 #include "i2c.h"
 #include "media_clock_server.h"
 #include <stdlib.h>
 
+#if PLL_AUX_OUTPUT_IS_MCLK
+#define PLL_AUX_OUT_SRC0 0b10 // CLK_OUT
+#else
+#define PLL_AUX_OUT_SRC0 0b11 // PLL Lock Status Indicator
+#endif
+
 static unsigned char regaddr[9] = {0x09,0x08,0x07,0x06,0x17,0x16,0x05,0x03,0x1E};
-static unsigned char regdata[9] = {0x00,0x00,0x00,0x00,0x00,0x08,0x01,0x01,0x00};
+static unsigned char regdata[9] = {0x00,0x00,0x00,0x00,0x00,0x08,0x01,(PLL_AUX_OUT_SRC0 << 1) | 0x01,0x00};
 
 // Set up the multiplier in the PLL clock generator
 void audio_clock_CS2100CP_init(
@@ -17,7 +24,13 @@ void audio_clock_CS2100CP_init(
                           #endif
                               ,unsigned mclks_per_wordclk)
 {
-  int deviceAddr = 0x9C;
+  int deviceAddr = 0x4E;
+#if I2C_COMBINE_SCL_SDA
+  // Unfortunately the single port and simple I2C APIs do not currently match
+  // with regards the device address
+  deviceAddr <<= 1;
+#endif
+
   unsigned char data[1];
   unsigned int mult[1];
 
