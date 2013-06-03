@@ -10,9 +10,10 @@
 
 #define AVB_XA_SK_AUDIO_SLICE   1
 
-#define AVB_DEMO_NUM_CHANNELS 4
+#define AVB_DEMO_NUM_CHANNELS   4
 
 #define PLL_TYPE_CS2100         1
+#define PLL_AUX_OUTPUT_IS_MCLK  1
 
 // CODEC and PLL control ports
 #define I2C_COMBINE_SCL_SDA     1
