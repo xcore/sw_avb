@@ -63,8 +63,8 @@ on tile[AVB_I2C_TILE]: port r_i2c = PORT_I2C;
 on tile[AVB_I2C_TILE]: struct r_i2c r_i2c = { PORT_I2C_SCL, PORT_I2C_SDA };
 #endif
 
-on tile[0]: out buffered port:32 p_fs[1] = { PORT_SYNC_OUT };
-on tile[0]: i2s_ports_t i2s_ports =
+on tile[AVB_AUDIO_TILE]: out buffered port:32 p_fs[1] = { PORT_SYNC_OUT };
+on tile[AVB_AUDIO_TILE]: i2s_ports_t i2s_ports =
 {
   XS1_CLKBLK_3,
   XS1_CLKBLK_4,
@@ -73,12 +73,12 @@ on tile[0]: i2s_ports_t i2s_ports =
   PORT_LRCLK
 };
 
-on tile[0]: out buffered port:32 p_aud_dout[AVB_DEMO_NUM_CHANNELS/2] = PORT_SDATA_OUT;
+on tile[AVB_AUDIO_TILE]: out buffered port:32 p_aud_dout[AVB_DEMO_NUM_CHANNELS/2] = PORT_SDATA_OUT;
 
-on tile[0]: in buffered port:32 p_aud_din[AVB_DEMO_NUM_CHANNELS/2] = PORT_SDATA_IN;
+on tile[AVB_AUDIO_TILE]: in buffered port:32 p_aud_din[AVB_DEMO_NUM_CHANNELS/2] = PORT_SDATA_IN;
 
 #if AVB_XA_SK_AUDIO_SLICE
-on tile[0]: out port p_audio_shared = PORT_AUDIO_SHARED;
+on tile[AVB_AUDIO_TILE]: out port p_audio_shared = PORT_AUDIO_SHARED;
 #endif
 
 #if AVB_DEMO_ENABLE_LISTENER
@@ -90,12 +90,14 @@ media_input_fifo_data_t ififo_data[AVB_NUM_MEDIA_INPUTS];
 media_input_fifo_t ififos[AVB_NUM_MEDIA_INPUTS];
 #endif
 
+#if ENABLE_XSCOPE
 void xscope_user_init(void)
 {
   xscope_register_no_probes();
   // Enable XScope printing
   xscope_config_io(XSCOPE_IO_BASIC);
 }
+#endif
 
 void audio_hardware_setup(void)
 {
@@ -138,11 +140,11 @@ int main(void)
   par
   {
     // AVB - Ethernet
-    on tile[1]: avb_ethernet_server(avb_ethernet_ports,
+    on ETHERNET_DEFAULT_TILE: avb_ethernet_server(avb_ethernet_ports,
                                         c_mac_rx, 2 + AVB_DEMO_ENABLE_LISTENER,
                                         c_mac_tx, 2 + AVB_DEMO_ENABLE_TALKER);
 
-    on tile[0]: media_clock_server(c_media_clock_ctl,
+    on tile[AVB_AUDIO_TILE]: media_clock_server(c_media_clock_ctl,
                                    null,
                                    #if AVB_DEMO_ENABLE_LISTENER
                                    c_buf_ctl,
@@ -159,7 +161,7 @@ int main(void)
 
 
     // AVB - Audio
-    on tile[0]:
+    on tile[AVB_AUDIO_TILE]:
     {
 #if AVB_DEMO_ENABLE_TALKER
       media_input_fifo_data_t ififo_data[AVB_NUM_MEDIA_INPUTS];
@@ -171,7 +173,7 @@ int main(void)
       media_output_fifo_t ofifos[AVB_NUM_MEDIA_OUTPUTS];
 #endif
 
-#if (AVB_I2C_TILE == 0)
+#if (AVB_I2C_TILE == AVB_AUDIO_TILE)
       audio_hardware_setup();
 #endif
 
@@ -214,27 +216,27 @@ int main(void)
 
 #if AVB_DEMO_ENABLE_TALKER
     // AVB Talker - must be on the same tile as the audio interface
-    on tile[0]: avb_1722_talker(c_ptp[1],
-                                c_mac_tx[2],
-                                c_talker_ctl[0],
-                                AVB_NUM_SOURCES);
+    on tile[AVB_AUDIO_TILE]: avb_1722_talker(c_ptp[1],
+                                            c_mac_tx[2],
+                                            c_talker_ctl[0],
+                                            AVB_NUM_SOURCES);
 #endif
 
 #if AVB_DEMO_ENABLE_LISTENER
     // AVB Listener
-    on tile[0]: avb_1722_listener(c_mac_rx[2],
-                                  c_buf_ctl[0],
-                                  null,
-                                  c_listener_ctl[0],
-                                  AVB_NUM_SINKS);
+    on tile[AVB_AUDIO_TILE]: avb_1722_listener(c_mac_rx[2],
+                                              c_buf_ctl[0],
+                                              null,
+                                              c_listener_ctl[0],
+                                              AVB_NUM_SINKS);
 #endif
 
     on tile[AVB_GPIO_TILE]: gpio_task(c_gpio_ctl);
 
     // Application
-    on tile[1]:
+    on tile[AVB_CONTROL_TILE]:
     {
-#if (AVB_I2C_TILE == 1)
+#if ((AVB_I2C_TILE == AVB_CONTROL_TILE) && (AVB_I2C_TILE != AVB_AUDIO_TILE))
       audio_hardware_setup();
 #endif
       // First initialize avb higher level protocols

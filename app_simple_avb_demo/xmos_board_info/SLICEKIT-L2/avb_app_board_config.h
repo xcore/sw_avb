@@ -10,7 +10,10 @@
 
 #define AVB_XA_SK_AUDIO_SLICE   1
 
+#define AVB_DEMO_NUM_CHANNELS   4
+
 #define PLL_TYPE_CS2100         1
+#define PLL_AUX_OUTPUT_IS_MCLK  1
 
 // CODEC and PLL control ports
 #define I2C_COMBINE_SCL_SDA     1
@@ -18,20 +21,22 @@
 #define AVB_GPIO_ENABLED        0
 #define AVB_I2C_TILE            0
 #define AVB_GPIO_TILE           0
+#define AVB_AUDIO_TILE          0
+#define AVB_CONTROL_TILE        1
 
 #define PORT_I2C                on tile[AVB_I2C_TILE]:XS1_PORT_4F
 
 // PLL frequency control
-#define PORT_SYNC_OUT           on tile[0]:XS1_PORT_1P
+#define PORT_SYNC_OUT           on tile[AVB_AUDIO_TILE]:XS1_PORT_1P
 
 // I2S ports
-#define PORT_MCLK               on tile[0]:XS1_PORT_1E
-#define PORT_SCLK               on tile[0]:XS1_PORT_1A
-#define PORT_LRCLK              on tile[0]:XS1_PORT_1I
+#define PORT_MCLK               on tile[AVB_AUDIO_TILE]:XS1_PORT_1E
+#define PORT_SCLK               on tile[AVB_AUDIO_TILE]:XS1_PORT_1A
+#define PORT_LRCLK              on tile[AVB_AUDIO_TILE]:XS1_PORT_1I
 
-#define PORT_SDATA_OUT          {on tile[0]:XS1_PORT_1D,on tile[0]:XS1_PORT_1H}
+#define PORT_SDATA_OUT          {on tile[AVB_AUDIO_TILE]:XS1_PORT_1D,on tile[AVB_AUDIO_TILE]:XS1_PORT_1H}
 
-#define PORT_SDATA_IN           {on tile[0]:XS1_PORT_1K,on tile[0]:XS1_PORT_1L}
+#define PORT_SDATA_IN           {on tile[AVB_AUDIO_TILE]:XS1_PORT_1K,on tile[AVB_AUDIO_TILE]:XS1_PORT_1L}
 
 #define PORT_BUTTONS            on tile[AVB_GPIO_TILE]:XS1_PORT_4C
 
@@ -39,4 +44,4 @@
 
 #define PORT_LEDS               on tile[AVB_GPIO_TILE]:XS1_PORT_4B
 
-#define PORT_AUDIO_SHARED       on tile[0]: XS1_PORT_4E
+#define PORT_AUDIO_SHARED       on tile[AVB_AUDIO_TILE]: XS1_PORT_4E

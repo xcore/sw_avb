@@ -21,9 +21,9 @@ XCC_FLAGS_avb_1722_1_aecp.c = $(XCC_FLAGS)
 
 # -fno-inline-functions -fno-unroll-loops
 
-$(GEN_DIR)/aem_descriptors.generated: $(call UNMANGLE,$(CURRENT_MODULE_DIR)/src/generate.py) $(call UNMANGLE, src/aem_descriptors.h.in) $(call UNMANGLE,src/aem_entity_strings.h.in)  | $(GEN_DIR)
+$(GEN_DIR)/aem_descriptors.generated: $(call UNMANGLE,$(CURRENT_MODULE_DIR)/src/generate.py) $(call UNMANGLE, src/aem_descriptors.h.in) $(call UNMANGLE,xmos_board_info/$(TARGET)/aem_entity_strings.h.in)  | $(GEN_DIR)
 	@echo "Generating AEM header files"
 	@echo "generated" > $(GEN_DIR)/aem_descriptors.generated
-	@xta --console-basic source "$(call UNMANGLE_NO_ESCAPE,$(CURRENT_MODULE_DIR)/src/generate.py)" "$(call UNMANGLE_NO_ESCAPE, src/)" $(GEN_DIR) -exit
+	@xta --console-basic source "$(call UNMANGLE_NO_ESCAPE,$(CURRENT_MODULE_DIR)/src/generate.py)" "$(call UNMANGLE_NO_ESCAPE, src/)" "$(call UNMANGLE_NO_ESCAPE, xmos_board_info/$(TARGET)/)" $(GEN_DIR) -exit
 $(GEN_DIR)/aem_descriptors.h: $(GEN_DIR)/aem_descriptors.generated
 $(GEN_DIR)/aem_entity_strings.h: $(GEN_DIR)/aem_descriptors.generated

@@ -45,14 +45,15 @@ def do_replace(read_file, write_file, replace_defines):
 
 
 def main():
-    srcpath = sys.argv[1]
-    dstpath = sys.argv[2]
-    read_file = open(os.path.join(srcpath, 'aem_descriptors.h.in'), 'r')
+    desc_srcpath = sys.argv[1]
+    strings_srcpath = sys.argv[2]
+    dstpath = sys.argv[3]
+    read_file = open(os.path.join(desc_srcpath, 'aem_descriptors.h.in'), 'r')
     write_file = open(os.path.join(dstpath, 'aem_descriptors.h'), 'w')
 
     do_replace(read_file, write_file, 0)
 
-    read_file = open(os.path.join(srcpath, 'aem_entity_strings.h.in'), 'r')
+    read_file = open(os.path.join(strings_srcpath, 'aem_entity_strings.h.in'), 'r')
     write_file = open(os.path.join(dstpath, 'aem_entity_strings.h'), 'w')
 
     do_replace(read_file, write_file, 1)
