@@ -2,6 +2,8 @@
 // All the port defines for this board are set in the target description
 // XN file so there is not much to do here
 
+#define ENABLE_XSCOPE           1
+
 #define USING_XMOS_DEV_BOARD    1
 
 // These value are got from the ethernet board support module

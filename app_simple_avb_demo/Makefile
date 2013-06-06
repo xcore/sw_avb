@@ -43,7 +43,6 @@ endif
 
 ifeq ($(TARGET),$(filter $(TARGET),XR-AVB-LC-BRD SLICEKIT-L2))
     XCC_FLAGS += -fxscope
-    XCC_FLAGS += -DENABLE_XSCOPE=1
 endif
 
 ifeq ($(TARGET),SLICEKIT-L2)
