@@ -26,14 +26,13 @@ void audio_clock_CS2300CP_init(
                               ,unsigned mclks_per_wordclk)
 {
   int deviceAddr = 0x4E;
+  unsigned char data[1];
+  unsigned int mult[1];
 #if I2C_COMBINE_SCL_SDA
   // Unfortunately the single port and simple I2C APIs do not currently match
   // with regards the device address
   deviceAddr <<= 1;
 #endif
-
-  unsigned char data[1];
-  unsigned int mult[1];
 
   // this is the muiltiplier in the PLL, which takes the PLL reference clock and
   // multiplies it up to the MCLK frequency.
