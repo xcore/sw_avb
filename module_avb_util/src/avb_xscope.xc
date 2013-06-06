@@ -1,4 +1,5 @@
 #include <xs1.h>
+#include "avb_conf.h"
 #include "avb_xscope.h"
 
 #if ENABLE_XSCOPE
