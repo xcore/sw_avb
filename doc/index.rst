@@ -1,5 +1,5 @@
-XMOS AVB Documentation
-======================
+XMOS AVB Design Guide
+=====================
 
 
 .. toctree::
