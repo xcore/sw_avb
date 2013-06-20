@@ -36,6 +36,9 @@
 
 #define MRP_FULL_PARTICIPANT 1
 
+#define MRP_DEBUG_ATTR_EGRESS 0
+#define MRP_DEBUG_ATTR_INGRESS 0
+
 
 typedef enum {
   MRP_UNUSED,
@@ -164,6 +167,8 @@ typedef struct mrp_attribute_state {
 
 #define MRP_PERIODIC_TIMER_PERIOD_CENTISECONDS 100
 #define MRP_PERIODIC_TIMER_MULTIPLIER 10
+
+void mrp_debug_dump_attrs(void);
 
 /** Function: mrp_init
 

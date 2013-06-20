@@ -710,6 +710,28 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
     }
 }
 
+void mrp_debug_dump_attrs(void)
+{
+
+  printstrln("port_num | type | here | propagate | stream_id");
+  printstrln("---------|------|------|-----------|----------");
+  for (int i=0;i<MRP_MAX_ATTRS;i++) {
+
+    if (attrs[i].applicant_state != MRP_UNUSED) {
+      avb_sink_info_t *sink_info = (avb_sink_info_t *) attrs[i].attribute_info;
+      int stream_id[2] = {0, 0};
+
+      if (sink_info != NULL) {
+        stream_id[0] = sink_info->reservation.stream_id[0];
+        stream_id[1] = sink_info->reservation.stream_id[1];
+      }
+
+      simple_printf("%d        | %d    | %d    | %d         | %x:%x\n",
+        attrs[i].port_num, attrs[i].attribute_type, attrs[i].here, attrs[i].propagate, stream_id[0], stream_id[1]);
+
+    }
+  }
+}
 
 
 void mrp_attribute_init(mrp_attribute_state *st,
@@ -1306,8 +1328,11 @@ void avb_mrp_process_packet(unsigned char buf[], int etype, int len, unsigned in
         int four_packed_event = has_fourpacked_events(attr_type) ?
           decode_fourpacked(*(first_value + first_value_len + threepacked_len + i/4),i%4) : 0;
 
-        if (attr_type == MSRP_LISTENER) simple_printf("Port %d in: MSRP_LISTENER\n", port_num);
-        if (attr_type == MSRP_TALKER_ADVERTISE) simple_printf("Port %d in: MSRP_TALKER_ADVERTISE\n", port_num);
+        if (MRP_DEBUG_ATTR_INGRESS)
+        {
+          if (attr_type == MSRP_LISTENER) simple_printf("Port %d in: MSRP_LISTENER\n", port_num);
+          if (attr_type == MSRP_TALKER_ADVERTISE) simple_printf("Port %d in: MSRP_TALKER_ADVERTISE\n", port_num);
+        }
 
         // This allows the application state machines to respond to the message
         for (int j=0;j<MRP_MAX_ATTRS;j++)

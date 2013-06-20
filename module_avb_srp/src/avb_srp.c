@@ -165,6 +165,8 @@ static void avb_srp_map_join(mrp_attribute_state *attr, int new, int listener)
   if (listener) printstrln("Listener MAD_Join.indication");
   else printstrln("Talker MAD_Join.indication");
   int matched = mrp_match_attribute_by_stream_id(attr);
+
+  mrp_debug_dump_attrs();
   // Attribute propagation:
   if (!listener)
   {
@@ -493,7 +495,10 @@ static int encode_listener_message(char *buf,
       memcpy(&first_value->StreamId[4], &streamid, 4);
 
       int port_to_transmit = st->propagate ? !st->port_num : st->port_num;
-      simple_printf("Port %d out: MSRP_LISTENER, stream %x:%x\n", port_to_transmit, streamId[0], streamId[1]);
+      if (MRP_DEBUG_ATTR_EGRESS)
+      {
+        simple_printf("Port %d out: MSRP_LISTENER, stream %x:%x\n", port_to_transmit, streamId[0], streamId[1]);
+      }
 
     }
     
@@ -664,7 +669,10 @@ static int encode_talker_message(char *buf,
       memcpy(&first_value->StreamId[4], &streamid, 4);
 
       int port_to_transmit = st->propagate ? !st->port_num : st->port_num;  
-      simple_printf("Port %d out: MSRP_TALKER_ADVERTISE, stream %x:%x\n", port_to_transmit, attribute_info->stream_id[0], attribute_info->stream_id[1]);
+      if (MRP_DEBUG_ATTR_EGRESS)
+      {
+        simple_printf("Port %d out: MSRP_TALKER_ADVERTISE, stream %x:%x\n", port_to_transmit, attribute_info->stream_id[0], attribute_info->stream_id[1]);
+      }
 
       hton_16(first_value->VlanID, attribute_info->vlan_id);
 
