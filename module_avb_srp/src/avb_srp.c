@@ -179,7 +179,7 @@ static void avb_srp_map_join(mrp_attribute_state *attr, int new, int listener)
     avb_1722_add_stream_mapping(avb_control_get_mac_tx(),
                               attribute_info->stream_id,
                               -1,
-                              0,
+                              -1,
                               1);
     attr->propagate = 1;
   }
@@ -258,6 +258,7 @@ int avb_srp_match_talker_advertise(mrp_attribute_state *attr,
     first_value->StreamId[7]);
   simple_printf("RESULT: %d\n",(my_stream_id == stream_id) );
   */
+  
 
   return (my_stream_id == stream_id);
 }

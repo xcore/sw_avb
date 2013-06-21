@@ -59,7 +59,7 @@ int avb_1722_add_stream_mapping(chanend c_tx,
   send_avb_1722_router_cmd(c_tx, 
                            key0, 
                            key1, 
-                           link_num >= 0 ? avb_1722_links[link_num] : 0,
+                           link_num != -1 ? avb_1722_links[link_num] : -1,
                            avb_hash,
                            forward);
 

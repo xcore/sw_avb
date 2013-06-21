@@ -14,6 +14,7 @@
 #include <string.h>
 #include <print.h>
 #include "simple_printf.h"
+#include "avb_mrp_debug_strings.h"
 
 /** \file avb_mrp.c
  *  \brief the core of the MRP protocols
@@ -713,21 +714,26 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
 void mrp_debug_dump_attrs(void)
 {
 
-  printstrln("port_num | type | here | propagate | stream_id");
-  printstrln("---------|------|------|-----------|----------");
+  printstrln("port_num | type                   | here | propagate | stream_id");
+  printstrln("---------+------------------------+------+-----------+----------");
   for (int i=0;i<MRP_MAX_ATTRS;i++) {
 
     if (attrs[i].applicant_state != MRP_UNUSED) {
       avb_sink_info_t *sink_info = (avb_sink_info_t *) attrs[i].attribute_info;
       int stream_id[2] = {0, 0};
+      char attr_string[24];
 
       if (sink_info != NULL) {
         stream_id[0] = sink_info->reservation.stream_id[0];
         stream_id[1] = sink_info->reservation.stream_id[1];
       }
 
-      simple_printf("%d        | %d    | %d    | %d         | %x:%x\n",
-        attrs[i].port_num, attrs[i].attribute_type, attrs[i].here, attrs[i].propagate, stream_id[0], stream_id[1]);
+      memset(attr_string, 0x20, 24);
+      attr_string[23] = '\0';
+      strncpy(attr_string, debug_attribute_type[attrs[i].attribute_type],strlen(debug_attribute_type[attrs[i].attribute_type]));
+
+      simple_printf("%d        | %s| %d    | %d         | %x:%x\n",
+        attrs[i].port_num, attr_string, attrs[i].here, attrs[i].propagate, stream_id[0], stream_id[1]);
 
     }
   }
@@ -1184,9 +1190,6 @@ int mrp_match_attribute_by_stream_id(mrp_attribute_state *attr)
 
       simple_printf("Compare %x:%x to %x:%x\n", sink_info->reservation.stream_id[0], sink_info->reservation.stream_id[1],
         source_info->reservation.stream_id[0], source_info->reservation.stream_id[1]);
-
-      // Don't match the local attributes
-      // if (attr->here && attrs[j].here) continue;
 
       if (attr->port_num == attrs[j].port_num) continue;
 

@@ -50,9 +50,12 @@ int avb_1722_router_table_lookup_simple(int key0,
                                         int *forward) 
 {
 
-  if (key0==0 && key1==0)
+  if (key0==0 && key1==0) {
     return 0;
+  }
+
   hwlock_acquire(table_lock);      
+  
   for(int i=0;i<AVB_MAX_NUM_SINK_AND_FORWARD_STREAMS;i++) {
     __asm__(".xtaloop " STRINGIFY(AVB_MAX_NUM_SINK_AND_FORWARD_STREAMS) "\n");
     if (key0 == router_table[i].id[0] &&
@@ -103,7 +106,7 @@ void avb_1722_router_table_add_entry_simple(int key0,
       }
 
       router_table[i].avb_hash = avb_hash;
-      simple_printf("Updated table entry %x, hash: %x, link: %d, forward: %d\n", router_table[i].id[1], router_table[i].avb_hash, router_table[i].link, forward);
+      simple_printf("Updated table entry %x:%x, hash: %x, link: %d, forward: %d\n", router_table[i].id[0], router_table[i].id[1], router_table[i].avb_hash, router_table[i].link, forward);
       hwlock_release(table_lock);
       return;
     }
@@ -113,7 +116,7 @@ void avb_1722_router_table_add_entry_simple(int key0,
   for(int i=0;i<AVB_MAX_NUM_SINK_AND_FORWARD_STREAMS;i++) {
     if (router_table[i].id[0] == 0) {
       if (forward) avb_hash |= 0x80000000;
-      simple_printf("Added table entry %x, hash: %x, link: %d, forward: %d\n", key1, avb_hash, link, forward);
+      simple_printf("Added table entry %x:%x, hash: %x, link: %d, forward: %d\n", key0, key1, avb_hash, link, forward);
       router_table[i].link = link;
       router_table[i].avb_hash = avb_hash;
       router_table[i].id[0] = key0;

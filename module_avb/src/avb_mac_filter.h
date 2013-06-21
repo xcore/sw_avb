@@ -82,7 +82,14 @@ inline int mac_custom_filter(unsigned int buf[], unsigned int mac[2], int &user_
                                          forward);
 
           if (lookup) {
-            result = ROUTER_LINK(link);
+            if (link != -1)
+            {
+              result = ROUTER_LINK(link);
+            }
+            else
+            {
+              result = 0;
+            }
             user_data = hash;
 #if NUM_ETHERNET_MASTER_PORTS == 2
             if (forward)

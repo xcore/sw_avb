@@ -12,6 +12,7 @@
 #include <xs1.h>
  #include <xscope.h>
 #include "avb_conf.h"
+#include "simple_printf.h"
 
 #if defined(AVB_1722_FORMAT_SAF) || defined(AVB_1722_FORMAT_61883_6)
 
