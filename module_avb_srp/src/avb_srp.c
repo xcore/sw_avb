@@ -95,10 +95,13 @@ int avb_add_new_stream_entry(srp_talker_first_value *fv,
     if (new_wrPtr==AVB_STREAM_LIST_SIZE)
       new_wrPtr = 0;
     if (new_wrPtr==rdPtr) {
+      __builtin_trap();
+      /*
       // fifo is full, drop oldest
       rdPtr++;
       if (rdPtr==AVB_STREAM_LIST_SIZE)
         rdPtr = 0;
+      */
     }
 
     matched_stream_idx = wrPtr;
@@ -174,13 +177,7 @@ static void avb_srp_map_join(mrp_attribute_state *attr, int new, int listener)
   }
   if (matched)
   {
-    printstrln("#######################################");
-    printstrln("adding streaming mapping + setting prop");
-    avb_1722_add_stream_mapping(avb_control_get_mac_tx(),
-                              attribute_info->stream_id,
-                              -1,
-                              -1,
-                              1);
+    avb_1722_enable_stream_forwarding(avb_control_get_mac_tx(), attribute_info->stream_id);
     attr->propagate = 1;
   }
   
@@ -193,16 +190,24 @@ void avb_srp_map_leave(mrp_attribute_state *attr)
 
   if (attr->attribute_type == MSRP_LISTENER)
   {
+    avb_srp_info_t *attribute_info = attr->attribute_info;
+
+    avb_1722_remove_stream_mapping(avb_control_get_mac_tx(), attribute_info->stream_id);
+
+    mrp_debug_dump_attrs();
+
     if (mrp_match_multiple_attrs_by_stream_and_type(attr))
     {
       printstrln("MULTIPLE LISTENER ATTRS WITH SAME STREAM ID!!");
       // If we have multiple Listener attrs and they are not all leaves, we do not generate a leave
+
     }
     else
     {
       // FIXME: This will only generate a leave on port 0 because we register the attribute there
       // Instead, it should be the port that the Talker advertise matches
       mrp_mad_leave(attr);
+      avb_1722_disable_stream_forwarding(avb_control_get_mac_tx(), attribute_info->stream_id);
     }
   }
 }
@@ -222,7 +227,7 @@ int avb_srp_match_talker_failed(mrp_attribute_state *attr,
                                 char *msg,
                                 int i)
 {
-  return 0;
+  return avb_srp_match_talker_advertise(attr, msg, i);
 }
 
 int avb_srp_match_talker_advertise(mrp_attribute_state *attr,
@@ -339,19 +344,20 @@ void avb_srp_listener_leave_ind(mrp_attribute_state *attr, int four_packed_event
 {
   enum avb_source_state_t state;
 	unsigned stream = avb_get_source_stream_index_from_pointer(attr->attribute_info);
-	if (stream == -1u)
-  {
-    avb_srp_map_leave(attr);
-    return;
-  }
 
-	get_avb_source_state(stream, &state);
-	if (state == AVB_SOURCE_STATE_ENABLED) {
-#if SRP_AUTO_TALKER_STREAM_CONTROL
-		set_avb_source_state(stream, AVB_SOURCE_STATE_POTENTIAL);
-#else
-#endif
-	}
+  avb_srp_map_leave(attr);
+
+  if (stream != -1u)
+  {
+
+  	get_avb_source_state(stream, &state);
+  	if (state == AVB_SOURCE_STATE_ENABLED) {
+  #if SRP_AUTO_TALKER_STREAM_CONTROL
+  		set_avb_source_state(stream, AVB_SOURCE_STATE_POTENTIAL);
+  #else
+  #endif
+	 }
+  }
 }
 
 

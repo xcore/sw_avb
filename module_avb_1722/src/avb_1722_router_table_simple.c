@@ -18,6 +18,7 @@ typedef struct avb_1722_router_table_entry_t
   int id[2];
   int link;
   int avb_hash;
+  int forward;
 } avb_1722_router_table_entry_t;
 
 static avb_1722_router_table_entry_t router_table[AVB_MAX_NUM_SINK_AND_FORWARD_STREAMS];
@@ -60,15 +61,9 @@ int avb_1722_router_table_lookup_simple(int key0,
     __asm__(".xtaloop " STRINGIFY(AVB_MAX_NUM_SINK_AND_FORWARD_STREAMS) "\n");
     if (key0 == router_table[i].id[0] &&
         key1 == router_table[i].id[1]) {
-      if ((router_table[i].avb_hash & 0x80000000) == 0x80000000) {
-        *forward = 1;
-        *avb_hash = router_table[i].avb_hash & ~(0x80000000);
-      }
-      else
-      {
-        *avb_hash = router_table[i].avb_hash;
-        *forward = 0;
-      }
+
+      *avb_hash = router_table[i].avb_hash;
+      *forward = router_table[i].forward;
       *link = router_table[i].link;
       hwlock_release(table_lock);
       return 1;
@@ -79,34 +74,16 @@ int avb_1722_router_table_lookup_simple(int key0,
   return 0;
 }
 
-
-
-void avb_1722_router_table_add_entry_simple(int key0,
-                                            int key1,
-                                            int link,
-                                            int avb_hash,
-                                            int forward)
+void avb_1722_router_table_add_or_update_forwarding_simple(int key0, int key1, int forward)
 {
   hwlock_acquire(table_lock);
 
   for(int i=0;i<AVB_MAX_NUM_SINK_AND_FORWARD_STREAMS;i++) {
     if (key0 == router_table[i].id[0] &&
         key1 == router_table[i].id[1]) {
-      // Found an existing entry with this stream ID, update it
-      if (router_table[i].avb_hash & 0x80000000) {
-        avb_hash |= 0x80000000;
-      }
       
-      if (!forward) {
-        router_table[i].link = link;
-      }
-      else
-      {
-        avb_hash |= 0x80000000;
-      }
+      router_table[i].forward = forward;
 
-      router_table[i].avb_hash = avb_hash;
-      simple_printf("Updated table entry %x:%x, hash: %x, link: %d, forward: %d\n", router_table[i].id[0], router_table[i].id[1], router_table[i].avb_hash, router_table[i].link, forward);
       hwlock_release(table_lock);
       return;
     }
@@ -115,8 +92,42 @@ void avb_1722_router_table_add_entry_simple(int key0,
   // Add a new entry
   for(int i=0;i<AVB_MAX_NUM_SINK_AND_FORWARD_STREAMS;i++) {
     if (router_table[i].id[0] == 0) {
-      if (forward) avb_hash |= 0x80000000;
-      simple_printf("Added table entry %x:%x, hash: %x, link: %d, forward: %d\n", key0, key1, avb_hash, link, forward);
+      router_table[i].forward = forward;
+      router_table[i].link = -1;
+      router_table[i].avb_hash = -1;
+      router_table[i].id[0] = key0;
+      router_table[i].id[1] = key1;
+      break;
+    }
+  }
+
+  hwlock_release(table_lock);  
+}
+
+void avb_1722_router_table_add_or_update_entry_simple(int key0,
+                                                      int key1,
+                                                      int link,
+                                                      int avb_hash)
+{
+  hwlock_acquire(table_lock);
+
+  for(int i=0;i<AVB_MAX_NUM_SINK_AND_FORWARD_STREAMS;i++) {
+    if (key0 == router_table[i].id[0] &&
+        key1 == router_table[i].id[1]) {
+      // Found an existing entry with this stream ID, update it
+      
+      router_table[i].link = link;
+      router_table[i].avb_hash = avb_hash;
+
+      hwlock_release(table_lock);
+      return;
+    }
+  }
+
+  // Add a new entry
+  for(int i=0;i<AVB_MAX_NUM_SINK_AND_FORWARD_STREAMS;i++) {
+    if (router_table[i].id[0] == 0) {
+      router_table[i].forward = 0;
       router_table[i].link = link;
       router_table[i].avb_hash = avb_hash;
       router_table[i].id[0] = key0;
@@ -127,4 +138,23 @@ void avb_1722_router_table_add_entry_simple(int key0,
   hwlock_release(table_lock);
 
   return;
+}
+
+void avb_1722_router_table_remove_entry_simple(int key0, int key1) {
+  hwlock_acquire(table_lock);
+
+  for(int i=0;i<AVB_MAX_NUM_SINK_AND_FORWARD_STREAMS;i++) {
+    if (key0 == router_table[i].id[0] &&
+        key1 == router_table[i].id[1]) {
+      
+      router_table[i].id[0] = 0;
+      router_table[i].id[1] = 0;
+
+      // FIXME: Zero the whole entry!
+
+      hwlock_release(table_lock);
+      return;
+    }
+  }
+  hwlock_release(table_lock);
 }

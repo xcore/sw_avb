@@ -16,6 +16,20 @@
 #include "simple_printf.h"
 #include "avb_mrp_debug_strings.h"
 
+#define MRP_DEBUG_STATE_CHANGE 1
+
+#define mrp_change_registrar_state(st, event, new) \
+       do { \
+          if (MRP_DEBUG_STATE_CHANGE) debug_print_registrar_state_change((st), (event), (new)); \
+         (st)->registrar_state = (new);        \
+       } while(0)
+
+#define mrp_change_applicant_state(st, event, new) \
+       do { \
+          if (MRP_DEBUG_STATE_CHANGE) debug_print_applicant_state_change((st), (event), (new)); \
+         (st)->applicant_state = (new);        \
+       } while(0)
+
 /** \file avb_mrp.c
  *  \brief the core of the MRP protocols
  */
@@ -68,7 +82,21 @@ static avb_timer leaveall_timer[MRP_NUM_PORTS];
 
 
 
+void debug_print_applicant_state_change(mrp_attribute_state *st, mrp_event event, int new)
+{
+  if ((st)->attribute_type == MSRP_TALKER_ADVERTISE || (st)->attribute_type == MSRP_LISTENER) {
+    simple_printf("%s \t %s: %s -> %s \n", debug_attribute_type[(st)->attribute_type], debug_mrp_event[(event)], debug_mrp_applicant_state[(st)->applicant_state], debug_mrp_applicant_state[new]);
+  }
+    (st)->applicant_state = (new);
+}
 
+void debug_print_registrar_state_change(mrp_attribute_state *st, mrp_event event, int new)
+{
+  if ((st)->attribute_type == MSRP_TALKER_ADVERTISE || (st)->attribute_type == MSRP_LISTENER) {
+    simple_printf("%s \t %s: %s -> %s \n", debug_attribute_type[(st)->attribute_type], debug_mrp_event[(event)], debug_mrp_applicant_state[(st)->applicant_state], debug_mrp_registrar_state[new]);
+  }
+    (st)->registrar_state = (new);
+}
 
 static void configure_send_buffer(unsigned char* addr, short etype) {
   mrp_ethernet_hdr* hdr = (mrp_ethernet_hdr *) &send_buf[0];
@@ -455,12 +483,12 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
   switch (e) 
     {
     case MRP_EVENT_BEGIN:
-      st->registrar_state = MRP_MT;
+      mrp_change_registrar_state(st, e, MRP_MT);
       break;
     case MRP_EVENT_RECEIVE_NEW:
       if (st->registrar_state == MRP_LV) 
         stop_avb_timer(&st->leaveTimer);
-      st->registrar_state = MRP_IN;
+      mrp_change_registrar_state(st, e, MRP_IN);
       st->pending_indications |= PENDING_JOIN_NEW;
       // printstrln("Pending join new");
       st->four_vector_parameter = four_packed_event;
@@ -473,7 +501,7 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
           st->pending_indications |= PENDING_JOIN;
           st->four_vector_parameter = four_packed_event;
       }
-      st->registrar_state = MRP_IN;
+      mrp_change_registrar_state(st, e, MRP_IN);
       break;
     case MRP_EVENT_RECEIVE_LEAVE:
     case MRP_EVENT_RECEIVE_LEAVE_ALL:
@@ -481,7 +509,7 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
     case MRP_EVENT_REDECLARE:
       if (st->registrar_state == MRP_IN) {
         start_avb_timer(&st->leaveTimer, MRP_LEAVETIMER_PERIOD_CENTISECONDS);
-        st->registrar_state = MRP_LV;
+        mrp_change_registrar_state(st, e, MRP_LV);
       }
       break;
     case MRP_EVENT_LEAVETIMER:
@@ -491,7 +519,7 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
         st->pending_indications |= PENDING_LEAVE;
         st->four_vector_parameter = four_packed_event;
       }
-      st->registrar_state = MRP_MT;
+      mrp_change_registrar_state(st, e, MRP_MT);
       break;
     default:
       break;
@@ -502,10 +530,10 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
   switch (e) 
     {
     case MRP_EVENT_BEGIN:
-      st->applicant_state = MRP_VO;
+      mrp_change_applicant_state(st, e, MRP_VO);
       break;
     case MRP_EVENT_NEW:
-      st->applicant_state = MRP_VN;
+      mrp_change_applicant_state(st, e, MRP_VN);
       break;
     case MRP_EVENT_JOIN:
       switch (st->applicant_state) 
@@ -514,16 +542,16 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
 #ifdef MRP_FULL_PARTICIPANT
         case MRP_LO:
 #endif
-          st->applicant_state = MRP_VP;
+          mrp_change_applicant_state(st, e, MRP_VP);
           break;
         case MRP_LA:
-          st->applicant_state = MRP_AA;
+          mrp_change_applicant_state(st, e, MRP_AA);
           break;
         case MRP_AO:
-          st->applicant_state = MRP_AP;
+          mrp_change_applicant_state(st, e, MRP_AP);
           break;
         case MRP_QO:
-          st->applicant_state = MRP_QP;
+          mrp_change_applicant_state(st, e, MRP_QP);
           break;      
         }
       break;
@@ -531,19 +559,19 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
       switch (st->applicant_state) 
         {
         case MRP_QP:
-          st->applicant_state = MRP_QO;
+          mrp_change_applicant_state(st, e, MRP_QO);
           break;
         case MRP_AP:
-          st->applicant_state = MRP_AO;
+          mrp_change_applicant_state(st, e, MRP_AO);
           break;
         case MRP_VP:
-          st->applicant_state = MRP_VO;
+          mrp_change_applicant_state(st, e, MRP_VO);
           break;
         case MRP_VN:
         case MRP_AN:
         case MRP_AA:
         case MRP_QA:
-          st->applicant_state = MRP_LA;
+          mrp_change_applicant_state(st, e, MRP_LA);
           break;
         }
       break;
@@ -551,26 +579,26 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
       switch (st->applicant_state) 
         {
         case MRP_VO:
-          st->applicant_state = MRP_AO;
+          mrp_change_applicant_state(st, e, MRP_AO);
           break;
         case MRP_VP:
-          st->applicant_state = MRP_AP;
+          mrp_change_applicant_state(st, e, MRP_AP);
           break;
         case MRP_AA:
-          st->applicant_state = MRP_QA;
+          mrp_change_applicant_state(st, e, MRP_QA);
           break;
         case MRP_AO:
-          st->applicant_state = MRP_QO;
+          mrp_change_applicant_state(st, e, MRP_QO);
           break;
         case MRP_AP:
-          st->applicant_state = MRP_QP;
+          mrp_change_applicant_state(st, e, MRP_QP);
           break;
         }
     case MRP_EVENT_RECEIVE_IN:
       switch (st->applicant_state)
       {
       case MRP_AA:
-        st->applicant_state = MRP_QA;
+        mrp_change_applicant_state(st, e, MRP_QA);
         break;
       }
     case MRP_EVENT_RECEIVE_JOINMT:
@@ -578,17 +606,17 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
       switch (st->applicant_state) 
         {
         case MRP_QA:
-          st->applicant_state = MRP_AA;
+          mrp_change_applicant_state(st, e, MRP_AA);
           break;
         case MRP_QO:
-          st->applicant_state = MRP_AO;
+          mrp_change_applicant_state(st, e, MRP_AO);
           break;
         case MRP_QP:
-          st->applicant_state = MRP_AP;
+          mrp_change_applicant_state(st, e, MRP_AP);
           break;
 #ifdef MRP_FULL_PARTICIPANT
         case MRP_LO:
-          st->applicant_state = MRP_VO;
+          mrp_change_applicant_state(st, e, MRP_VO);
           break;
 #endif
         }      
@@ -602,19 +630,19 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
         case MRP_AO:
         case MRP_QO:
 #ifdef MRP_FULL_PARTICIPANT
-          st->applicant_state = MRP_LO;
+          mrp_change_applicant_state(st, e, MRP_LO);
 #else
-          st->applicant_state = MRP_VO;
+          mrp_change_applicant_state(st, e, MRP_VO);
 #endif
           break;
         case MRP_AN:
-          st->applicant_state = MRP_VN;
+          mrp_change_applicant_state(st, e, MRP_VN);
           break;
         case MRP_AA:
         case MRP_QA:
         case MRP_AP:
         case MRP_QP:
-          st->applicant_state = MRP_VP;
+          mrp_change_applicant_state(st, e, MRP_VP);
           break;
         }      
       break;
@@ -622,10 +650,10 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
       switch (st->applicant_state) 
         {
         case MRP_QA:
-          st->applicant_state = MRP_AA;
+          mrp_change_applicant_state(st, e, MRP_AA);
           break;
         case MRP_QP:
-          st->applicant_state = MRP_AP;
+          mrp_change_applicant_state(st, e, MRP_AP);
           break;
         }
       break;
@@ -650,21 +678,21 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
       switch (st->applicant_state) 
         {
         case MRP_VP:
-          st->applicant_state = MRP_AA;
+          mrp_change_applicant_state(st, e, MRP_AA);
           break;
         case MRP_VN:
-          st->applicant_state = MRP_AN;
+          mrp_change_applicant_state(st, e, MRP_AN);
           break;
         case MRP_AN:
         case MRP_AA:
         case MRP_AP:
-          st->applicant_state = MRP_QA;
+          mrp_change_applicant_state(st, e, MRP_QA);
           break;
         case MRP_LA:
 #ifdef MRP_FULL_PARTICIPANT
         case MRP_LO:
 #endif
-          st->applicant_state = MRP_VO;
+          mrp_change_applicant_state(st, e, MRP_VO);
           break;          
         }
       break;
@@ -691,16 +719,16 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
         case MRP_LA:
         case MRP_AO:
         case MRP_QO:
-          st->applicant_state = MRP_LO;
+          mrp_change_applicant_state(st, e, MRP_LO);
           break;
         case MRP_VN:
-          st->applicant_state = MRP_AN;
+          mrp_change_applicant_state(st, e, MRP_AN);
           break;
         case MRP_AN:
         case MRP_AA:
         case MRP_AP:
         case MRP_QP:
-          st->applicant_state = MRP_QA;
+          mrp_change_applicant_state(st, e, MRP_QA);
           break;
         }
       }
@@ -1362,6 +1390,8 @@ void avb_mrp_process_packet(unsigned char buf[], int etype, int len, unsigned in
                 mrp_attribute_state *st = mrp_get_attr();
                 mrp_attribute_init(st, attr_type, port_num, 0, stream_data);
                 simple_printf("mrp_attribute_init: %d, %d, STREAM_ID[0]: %x\n", attr_type, port_num, stream_data->stream_id[0]);
+
+                mrp_debug_dump_attrs();
 
                 mrp_in(three_packed_event, four_packed_event, st, port_num);
                 // simple_printf("STATE AFTER IN: %d\n", st->applicant_state); 

@@ -732,8 +732,7 @@ int getset_avb_sink_state(int set,
           avb_1722_add_stream_mapping(c_mac_tx,
                                       sink->reservation.stream_id,
                                       router_link,
-                                      sink->stream.local_id,
-                                      0); // <- forward flag
+                                      sink->stream.local_id);
         }
 
 #ifndef AVB_EXCLUDE_MVRP

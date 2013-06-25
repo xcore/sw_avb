@@ -33,12 +33,12 @@ int avb_1722_router_table_lookup_simple(int key0,
                                         REFERENCE_PARAM(int, avb_hash),
                                         REFERENCE_PARAM(int, forward));
 
-void avb_1722_router_table_add_entry_simple(int key0,
-                                            int key1,
-                                            int link,
-                                            int avb_hash,
-                                            int forward);
+void avb_1722_router_table_add_or_update_entry_simple(int key0,
+                                                      int key1,
+                                                      int link,
+                                                      int avb_hash);
 
+void avb_1722_router_table_add_or_update_forwarding_simple(int key0, int key1, int forward);
 
 
 #if AVB_1722_USE_HASHING_ROUTER_TABLE
@@ -51,7 +51,8 @@ void avb_1722_router_table_add_entry_simple(int key0,
 
 
 #define avb_1722_router_table_lookup avb_1722_router_table_lookup_simple
-#define avb_1722_router_table_add_entry avb_1722_router_table_add_entry_simple
+#define avb_1722_router_table_add_or_update_entry avb_1722_router_table_add_or_update_entry_simple
+#define avb_1722_router_table_add_or_update_forwarding avb_1722_router_table_add_or_update_forwarding_simple
 #define init_avb_1722_router_table init_avb_1722_router_table_simple
  
 
