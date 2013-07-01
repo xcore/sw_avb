@@ -30,6 +30,13 @@
          (st)->applicant_state = (new);        \
        } while(0)
 
+#define mrp_change_event_state(st, event, new) \
+       do { \
+          if (MRP_DEBUG_STATE_CHANGE) debug_print_tx_event((st), (event)); \
+          (new) = (event);       \
+       } while(0)
+
+
 /** \file avb_mrp.c
  *  \brief the core of the MRP protocols
  */
@@ -78,6 +85,7 @@ static int current_etype = 0;
 static avb_timer periodic_timer[MRP_NUM_PORTS];
 static avb_timer joinTimer[MRP_NUM_PORTS];
 static avb_timer leaveall_timer[MRP_NUM_PORTS];
+static int leaveall_active[MRP_NUM_PORTS];
 //!@}
 
 
@@ -85,17 +93,44 @@ static avb_timer leaveall_timer[MRP_NUM_PORTS];
 void debug_print_applicant_state_change(mrp_attribute_state *st, mrp_event event, int new)
 {
   if ((st)->attribute_type == MSRP_TALKER_ADVERTISE || (st)->attribute_type == MSRP_LISTENER) {
-    simple_printf("%s \t %s: %s -> %s \n", debug_attribute_type[(st)->attribute_type], debug_mrp_event[(event)], debug_mrp_applicant_state[(st)->applicant_state], debug_mrp_applicant_state[new]);
+      avb_sink_info_t *sink_info = (avb_sink_info_t *) st->attribute_info;
+      int stream_id[2] = {0, 0};
+
+      if (sink_info != NULL) {
+        stream_id[0] = sink_info->reservation.stream_id[0];
+        stream_id[1] = sink_info->reservation.stream_id[1];
+      }
+
+    simple_printf("%s %x:%d:%d:%d\t %s: %s -> %s \n", debug_attribute_type[(st)->attribute_type], stream_id[1], st->port_num, st->here, st->propagate, debug_mrp_event[(event)], debug_mrp_applicant_state[(st)->applicant_state], debug_mrp_applicant_state[new]);
   }
-    (st)->applicant_state = (new);
 }
 
 void debug_print_registrar_state_change(mrp_attribute_state *st, mrp_event event, int new)
 {
   if ((st)->attribute_type == MSRP_TALKER_ADVERTISE || (st)->attribute_type == MSRP_LISTENER) {
-    simple_printf("%s \t %s: %s -> %s \n", debug_attribute_type[(st)->attribute_type], debug_mrp_event[(event)], debug_mrp_applicant_state[(st)->applicant_state], debug_mrp_registrar_state[new]);
+    avb_sink_info_t *sink_info = (avb_sink_info_t *) st->attribute_info;
+    int stream_id[2] = {0, 0};
+
+    if (sink_info != NULL) {
+      stream_id[0] = sink_info->reservation.stream_id[0];
+      stream_id[1] = sink_info->reservation.stream_id[1];
+    }
+    simple_printf("%s %x:%d:%d:%d\t %s: %s -> %s \n", debug_attribute_type[(st)->attribute_type], stream_id[1], st->port_num, st->here, st->propagate, debug_mrp_event[(event)], debug_mrp_registrar_state[(st)->registrar_state], debug_mrp_registrar_state[new]);
   }
-    (st)->registrar_state = (new);
+}
+
+void debug_print_tx_event(mrp_attribute_state *st, mrp_event event)
+{
+  if ((st)->attribute_type == MSRP_TALKER_ADVERTISE || (st)->attribute_type == MSRP_LISTENER) {
+    avb_sink_info_t *sink_info = (avb_sink_info_t *) st->attribute_info;
+    int stream_id[2] = {0, 0};
+
+    if (sink_info != NULL) {
+      stream_id[0] = sink_info->reservation.stream_id[0];
+      stream_id[1] = sink_info->reservation.stream_id[1];
+    }
+    simple_printf("%s %x:%d:%d:%d\t %s \n", debug_attribute_type[(st)->attribute_type], stream_id[1], st->port_num, st->here, st->propagate, debug_attribute_event[(event)]);
+  }
 }
 
 static void configure_send_buffer(unsigned char* addr, short etype) {
@@ -176,6 +211,7 @@ static void send(chanend c_tx, int ifnum)
 static unsigned int makeTxEvent(mrp_event e, mrp_attribute_state *st, int leave_all)
 {
   int firstEvent = 0;
+
   switch (st->applicant_state) 
     {
     case MRP_VP:
@@ -189,10 +225,10 @@ static unsigned int makeTxEvent(mrp_event e, mrp_attribute_state *st, int leave_
         switch (st->registrar_state) 
           {
           case MRP_IN:
-            firstEvent = MRP_ATTRIBUTE_EVENT_IN;
+            mrp_change_event_state(st, MRP_ATTRIBUTE_EVENT_IN, firstEvent);
             break;
           default:
-            firstEvent = MRP_ATTRIBUTE_EVENT_MT;
+            mrp_change_event_state(st, MRP_ATTRIBUTE_EVENT_MT, firstEvent);
           break;
           }
       }
@@ -201,25 +237,25 @@ static unsigned int makeTxEvent(mrp_event e, mrp_attribute_state *st, int leave_
         switch (st->registrar_state) 
           {
           case MRP_IN:
-            firstEvent = MRP_ATTRIBUTE_EVENT_JOININ;
+            mrp_change_event_state(st, MRP_ATTRIBUTE_EVENT_JOININ, firstEvent);
             break;
           default:
-            firstEvent = MRP_ATTRIBUTE_EVENT_JOINMT;
+            mrp_change_event_state(st, MRP_ATTRIBUTE_EVENT_JOINMT, firstEvent);
             break;
           }
       }
 #else
-      firstEvent = MRP_ATTRIBUTE_EVENT_JOININ;
+      mrp_change_event_state(st, MRP_ATTRIBUTE_EVENT_JOININ, firstEvent);
 #endif      
       break;
     case MRP_VN:
     case MRP_AN:
       //sN
-      firstEvent = MRP_ATTRIBUTE_EVENT_NEW;
+      mrp_change_event_state(st, MRP_ATTRIBUTE_EVENT_NEW, firstEvent);
       break;
     case MRP_LA:
       //sL
-      firstEvent = MRP_ATTRIBUTE_EVENT_LV;
+      mrp_change_event_state(st, MRP_ATTRIBUTE_EVENT_LV, firstEvent);
       break;  
 #ifdef MRP_FULL_PARTICIPANT
     case MRP_LO:
@@ -227,10 +263,10 @@ static unsigned int makeTxEvent(mrp_event e, mrp_attribute_state *st, int leave_
       switch (st->registrar_state) 
         {
         case MRP_IN:
-          firstEvent = MRP_ATTRIBUTE_EVENT_IN;
+          mrp_change_event_state(st, MRP_ATTRIBUTE_EVENT_IN, firstEvent);
           break;
         default:
-          firstEvent = MRP_ATTRIBUTE_EVENT_MT;
+          mrp_change_event_state(st, MRP_ATTRIBUTE_EVENT_MT, firstEvent);
           break;
         }
       break;           
@@ -461,23 +497,39 @@ static void doTx(mrp_attribute_state *st,
     merged = encode_msg(msg, st, vector, port_num);
     
     msg = msg + sizeof(mrp_msg_header) + attribute_length_length(hdr);
-  }   
+  }
+
+  int port_to_transmit = st->port_num;
 
   if (!merged) {
-    int port_to_transmit = st->propagate ? !st->port_num : st->port_num;
     if (port_num == port_to_transmit)
     {
       create_empty_msg(st->attribute_type, 0);
       (void) encode_msg(msg, st, vector, port_num);
     }
+    else {
+      printstrln("no tx!");
+    }
   }
 
-  send(c_tx, st->propagate ? !st->port_num : st->port_num);
+  if (MRP_DEBUG_ATTR_EGRESS)
+  {
+    if ((st)->attribute_type == MSRP_TALKER_ADVERTISE || (st)->attribute_type == MSRP_LISTENER) {
+      avb_sink_info_t *sink_info = (avb_sink_info_t *) st->attribute_info;
+      int stream_id[2] = {0, 0};
+
+      if (sink_info != NULL) {
+        stream_id[0] = sink_info->reservation.stream_id[0];
+        stream_id[1] = sink_info->reservation.stream_id[1];
+      }
+      simple_printf("Port %d out: %s %s, stream %x:%x\n", port_to_transmit, debug_attribute_type[(st)->attribute_type], debug_attribute_event[(vector)], stream_id[0], stream_id[1]);
+    }
+  }
+  send(c_tx, port_to_transmit);
 }
 
 static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_packed_event, unsigned int port_num)
 {
-  // simple_printf("mrp_event: %d\n", e);
 #ifdef MRP_FULL_PARTICIPANT
   // Registrar state machine
   switch (e) 
@@ -486,17 +538,18 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
       mrp_change_registrar_state(st, e, MRP_MT);
       break;
     case MRP_EVENT_RECEIVE_NEW:
-      if (st->registrar_state == MRP_LV) 
+      if (st->registrar_state == MRP_LV) {
         stop_avb_timer(&st->leaveTimer);
+      }
       mrp_change_registrar_state(st, e, MRP_IN);
       st->pending_indications |= PENDING_JOIN_NEW;
-      // printstrln("Pending join new");
       st->four_vector_parameter = four_packed_event;
       break;
     case MRP_EVENT_RECEIVE_JOININ:
     case MRP_EVENT_RECEIVE_JOINMT:
-      if (st->registrar_state == MRP_LV)
+      if (st->registrar_state == MRP_LV) {
         stop_avb_timer(&st->leaveTimer);
+      }
       if (st->registrar_state == MRP_MT) {
           st->pending_indications |= PENDING_JOIN;
           st->four_vector_parameter = four_packed_event;
@@ -507,6 +560,9 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
     case MRP_EVENT_RECEIVE_LEAVE_ALL:
     case MRP_EVENT_TX_LEAVE_ALL:
     case MRP_EVENT_REDECLARE:
+      if (e == MRP_EVENT_RECEIVE_LEAVE_ALL) {
+        start_avb_timer(&leaveall_timer[port_num], MRP_LEAVEALL_TIMER_PERIOD_CENTISECONDS / MRP_LEAVEALL_TIMER_MULTIPLIER);
+      }
       if (st->registrar_state == MRP_IN) {
         start_avb_timer(&st->leaveTimer, MRP_LEAVETIMER_PERIOD_CENTISECONDS);
         mrp_change_registrar_state(st, e, MRP_LV);
@@ -741,7 +797,7 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
 
 void mrp_debug_dump_attrs(void)
 {
-
+  
   printstrln("port_num | type                   | here | propagate | stream_id");
   printstrln("---------+------------------------+------+-----------+----------");
   for (int i=0;i<MRP_MAX_ATTRS;i++) {
@@ -765,6 +821,7 @@ void mrp_debug_dump_attrs(void)
 
     }
   }
+  
 }
 
 
@@ -833,6 +890,7 @@ void mrp_init(char *macaddr)
   #ifdef MRP_FULL_PARTICIPANT
     init_avb_timer(&leaveall_timer[i], MRP_LEAVEALL_TIMER_MULTIPLIER);
     start_avb_timer(&leaveall_timer[i], MRP_LEAVEALL_TIMER_PERIOD_CENTISECONDS / MRP_LEAVEALL_TIMER_MULTIPLIER);
+    leaveall_active[i] = 0;
   #endif
   }
 
@@ -951,14 +1009,15 @@ static void sort_attrs()
 
 static void global_event(mrp_event e, unsigned int port_num) {
   mrp_attribute_state *attr = first_attr;
+
   while (attr != NULL) {
     if (attr->applicant_state != MRP_DISABLED &&
-        attr->applicant_state != MRP_UNUSED &&
-        ((attr->port_num == port_num) || attr->propagate))
-    {
+        attr->applicant_state != MRP_UNUSED && 
+        attr->port_num == port_num) {
+
       if (e != MRP_EVENT_PERIODIC || attr->attribute_type == MVRP_VID_VECTOR)
       {
-        mrp_update_state(e, attr, 0, port_num);
+        mrp_update_state(e, attr, 0, port_num);  
       }
     }
     attr = attr->next;
@@ -968,13 +1027,15 @@ static void global_event(mrp_event e, unsigned int port_num) {
 
 static void attribute_type_event(mrp_attribute_type atype, mrp_event e, unsigned int port_num) {
   mrp_attribute_state *attr = first_attr;
+
   while (attr != NULL) {
     if (attr->applicant_state != MRP_DISABLED && 
         attr->applicant_state != MRP_UNUSED &&
         attr->attribute_type == atype &&
-        ((attr->port_num == port_num) || attr->propagate))  {
-      mrp_update_state(e, attr, 0, port_num);
-    }
+        attr->port_num == port_num) {
+
+          mrp_update_state(e, attr, 0, port_num);
+        }
     attr = attr->next;
   }
 }
@@ -1035,8 +1096,6 @@ static void send_leave_indication(mrp_attribute_state *st, int four_packed_event
   }
 }
 
-static int leave_all[MRP_NUM_PORTS];
-
 void mrp_periodic(void)
 {
   chanend c_tx = avb_control_get_mac_tx();
@@ -1053,19 +1112,20 @@ void mrp_periodic(void)
     if (avb_timer_expired(&leaveall_timer[i]))
     {
       start_avb_timer(&leaveall_timer[i], MRP_LEAVEALL_TIMER_PERIOD_CENTISECONDS / MRP_LEAVEALL_TIMER_MULTIPLIER);
-      leave_all[i] = 1;
+      leaveall_active[i] = 1;
+
       global_event(MRP_EVENT_RECEIVE_LEAVE_ALL, i);
     }
   #endif
 
     if (avb_timer_expired(&joinTimer[i]))
     {
-      mrp_event tx_event = leave_all[i] ? MRP_EVENT_TX_LEAVE_ALL : MRP_EVENT_TX;
+      mrp_event tx_event = leaveall_active[i] ? MRP_EVENT_TX_LEAVE_ALL : MRP_EVENT_TX;
       start_avb_timer(&joinTimer[i], MRP_JOINTIMER_PERIOD_CENTISECONDS);
       sort_attrs();
 
       configure_send_buffer(srp_dest_mac, AVB_SRP_ETHERTYPE);
-      if (leave_all[i])
+      if (leaveall_active[i])
       {
         create_empty_msg(MSRP_TALKER_ADVERTISE, 1);  send(c_tx, i);
         create_empty_msg(MSRP_TALKER_FAILED, 1);  send(c_tx, i);
@@ -1079,7 +1139,7 @@ void mrp_periodic(void)
 
   #ifdef AVB_INCLUDE_MMRP
       configure_send_buffer(mmrp_dest_mac,AVB_MMRP_ETHERTYPE);
-      if (leave_all[i])
+      if (leaveall_active[i])
       {
         create_empty_msg(MMRP_MAC_VECTOR, 1); send(c_tx, i);
       }
@@ -1089,7 +1149,7 @@ void mrp_periodic(void)
 
   #ifndef AVB_EXCLUDE_MVRP
       configure_send_buffer(mvrp_dest_mac, AVB_MVRP_ETHERTYPE);
-      if (leave_all[i])
+      if (leaveall_active[i])
       {
         create_empty_msg(MVRP_VID_VECTOR, 1); send(c_tx, i);
       }
@@ -1097,7 +1157,7 @@ void mrp_periodic(void)
       force_send(c_tx, i);
   #endif
 
-      leave_all[i] = 0;
+      leaveall_active[i] = 0;
     }
 
     for (int j=0;j<MRP_MAX_ATTRS;j++)
@@ -1135,11 +1195,9 @@ void mrp_periodic(void)
 
 static void mrp_in(int three_packed_event, int four_packed_event, mrp_attribute_state *st, unsigned int port_num)
 {
-  // simple_printf("mrp_in event: %d\n", three_packed_event);
   switch (three_packed_event)
     {
     case MRP_ATTRIBUTE_EVENT_NEW:
-      // printstrln("MRP_ATTRIBUTE_EVENT_NEW");
       mrp_update_state(MRP_EVENT_RECEIVE_NEW, st, four_packed_event, port_num);
       break;
     case MRP_ATTRIBUTE_EVENT_JOININ:
@@ -1173,6 +1231,34 @@ int mrp_is_observer(mrp_attribute_state *st)
     }
 }
 
+
+mrp_attribute_state *mrp_match_attr_by_stream_and_type(mrp_attribute_state *attr, int opposite_port)
+{
+  for (int j=0;j<MRP_MAX_ATTRS;j++) {
+    if (attr->applicant_state == MRP_UNUSED) {
+      continue;
+    }
+    if ((opposite_port && (attr->port_num != attrs[j].port_num)) ||
+        (!opposite_port && (attr->port_num == attrs[j].port_num)))
+    {
+      if ((attr->attribute_type == attrs[j].attribute_type))
+      {
+        avb_sink_info_t *sink_info = (avb_sink_info_t *) attr->attribute_info;
+        avb_source_info_t *source_info = (avb_source_info_t *) attrs[j].attribute_info;
+
+        if (sink_info == NULL || source_info == NULL) continue;
+
+        if (sink_info->reservation.stream_id[0] == source_info->reservation.stream_id[0] && 
+            sink_info->reservation.stream_id[1] == source_info->reservation.stream_id[1])
+        {
+            return &attrs[j];
+        }   
+      }
+    }
+  }
+  return 0;
+}
+
 int mrp_match_multiple_attrs_by_stream_and_type(mrp_attribute_state *attr)
 {
   int matches = 0;
@@ -1185,6 +1271,8 @@ int mrp_match_multiple_attrs_by_stream_and_type(mrp_attribute_state *attr)
     {
       avb_sink_info_t *sink_info = (avb_sink_info_t *) attr->attribute_info;
       avb_source_info_t *source_info = (avb_source_info_t *) attrs[j].attribute_info;
+
+      if (attr->port_num != attrs[j].port_num) continue;
 
       if (sink_info == NULL || source_info == NULL) continue;
 
@@ -1202,7 +1290,9 @@ int mrp_match_multiple_attrs_by_stream_and_type(mrp_attribute_state *attr)
   return 0;
 }
 
-int mrp_match_attribute_by_stream_id(mrp_attribute_state *attr)
+
+// FIXME: Rename me
+mrp_attribute_state *mrp_match_attribute_by_stream_id(mrp_attribute_state *attr)
 {
   for (int j=0;j<MRP_MAX_ATTRS;j++) {
     if (attr->applicant_state == MRP_UNUSED) {
@@ -1216,17 +1306,13 @@ int mrp_match_attribute_by_stream_id(mrp_attribute_state *attr)
 
       if (sink_info == NULL || source_info == NULL) continue;
 
-      simple_printf("Compare %x:%x to %x:%x\n", sink_info->reservation.stream_id[0], sink_info->reservation.stream_id[1],
-        source_info->reservation.stream_id[0], source_info->reservation.stream_id[1]);
-
       if (attr->port_num == attrs[j].port_num) continue;
 
 
       if (sink_info->reservation.stream_id[0] == source_info->reservation.stream_id[0] && 
           sink_info->reservation.stream_id[1] == source_info->reservation.stream_id[1])
       {
-        printstrln("MATCHED ATTRIBUTE BY STREAM ID");
-        return 1;
+        return &attrs[j];
       }   
     }
   }
@@ -1322,7 +1408,9 @@ void avb_mrp_process_packet(unsigned char buf[], int etype, int len, unsigned in
 
     unsigned first_value_len = hdr->AttributeLength;
     int attr_type = decode_attr_type(etype, hdr->AttributeType);
-    if (attr_type==-1) return;
+    if (attr_type==-1) {
+      return;
+    }
 
     msg = msg + sizeof(mrp_msg_header);
 
@@ -1342,10 +1430,13 @@ void avb_mrp_process_packet(unsigned char buf[], int etype, int len, unsigned in
       int len = sizeof(mrp_vector_header) + first_value_len + threepacked_len + fourpacked_len;
       
       // Check to see that it isn't asking us to overrun the buffer
-      if (msg + len > end) return;
+      if (msg + len > end) {
+        return;
+      }
 
       if (leave_all)
       {
+        leaveall_active[port_num] = 0;
         attribute_type_event(attr_type, MRP_EVENT_RECEIVE_LEAVE_ALL, port_num);
       }
       
@@ -1390,11 +1481,11 @@ void avb_mrp_process_packet(unsigned char buf[], int etype, int len, unsigned in
                 mrp_attribute_state *st = mrp_get_attr();
                 mrp_attribute_init(st, attr_type, port_num, 0, stream_data);
                 simple_printf("mrp_attribute_init: %d, %d, STREAM_ID[0]: %x\n", attr_type, port_num, stream_data->stream_id[0]);
+                mrp_mad_begin(st);
 
                 mrp_debug_dump_attrs();
 
                 mrp_in(three_packed_event, four_packed_event, st, port_num);
-                // simple_printf("STATE AFTER IN: %d\n", st->applicant_state); 
               }
               else
               {

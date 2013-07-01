@@ -55,4 +55,13 @@ char *debug_attribute_type[] = {
   "MRP_NUM_ATTRIBUTE_TYPES"
 };
 
+char *debug_attribute_event[] = {
+  "MRP_ATTRIBUTE_EVENT_NEW",
+  "MRP_ATTRIBUTE_EVENT_JOININ",
+  "MRP_ATTRIBUTE_EVENT_IN",
+  "MRP_ATTRIBUTE_EVENT_JOINMT",
+  "MRP_ATTRIBUTE_EVENT_MT",
+  "MRP_ATTRIBUTE_EVENT_LV"
+};
+
 #endif

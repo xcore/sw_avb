@@ -79,10 +79,10 @@ static void register_talkers(chanend talker_ctl[])
       source->reservation.vlan_id = AVB_DEFAULT_VLAN;
       source->stream.srp_talker_attr = mrp_get_attr();
       source->stream.srp_talker_failed_attr = mrp_get_attr();
-      source->stream.srp_listener_attr = mrp_get_attr();
+      // source->stream.srp_listener_attr = mrp_get_attr();
       mrp_attribute_init(source->stream.srp_talker_attr, MSRP_TALKER_ADVERTISE, 0, 1, source);
-      mrp_attribute_init(source->stream.srp_talker_failed_attr, MSRP_TALKER_FAILED, 0, 1, source);
-      mrp_attribute_init(source->stream.srp_listener_attr, MSRP_LISTENER, 0, 1, source);
+      // mrp_attribute_init(source->stream.srp_talker_failed_attr, MSRP_TALKER_FAILED, 0, 1, source);
+      // mrp_attribute_init(source->stream.srp_listener_attr, MSRP_LISTENER, 0, 1, source);
       max_talker_stream_id++;
     }
   }
@@ -105,11 +105,11 @@ static void register_listeners(chanend listener_ctl[])
       sink->stream.local_id = j;
       sink->stream.flags = 0;
       sink->reservation.vlan_id = AVB_DEFAULT_VLAN;
-      sink->stream.srp_talker_attr = mrp_get_attr();
-      sink->stream.srp_talker_failed_attr = mrp_get_attr();
+      // sink->stream.srp_talker_attr = mrp_get_attr();
+      // sink->stream.srp_talker_failed_attr = mrp_get_attr();
       sink->stream.srp_listener_attr = mrp_get_attr();
-      mrp_attribute_init(sink->stream.srp_talker_attr, MSRP_TALKER_ADVERTISE, 0, 1, sink);
-      mrp_attribute_init(sink->stream.srp_talker_failed_attr, MSRP_TALKER_FAILED, 0, 1, sink);
+      // mrp_attribute_init(sink->stream.srp_talker_attr, MSRP_TALKER_ADVERTISE, 0, 1, sink);
+      // mrp_attribute_init(sink->stream.srp_talker_failed_attr, MSRP_TALKER_FAILED, 0, 1, sink);
       mrp_attribute_init(sink->stream.srp_listener_attr, MSRP_LISTENER, 0, 1, sink);
       max_listener_stream_id++;
     }
@@ -447,10 +447,25 @@ int getset_avb_source_state(int set,
             avb_join_vlan(source->reservation.vlan_id);
 #endif
 
-          mrp_mad_begin(source->stream.srp_talker_attr);
-          mrp_mad_begin(source->stream.srp_talker_failed_attr);
-          mrp_mad_begin(source->stream.srp_listener_attr);
-          mrp_mad_join(source->stream.srp_talker_attr, 1);
+          mrp_attribute_state *matched_stream_id_other_port = mrp_match_attr_by_stream_and_type(source->stream.srp_talker_attr, 1);
+          mrp_attribute_state *matched_stream_id_this_port = mrp_match_attr_by_stream_and_type(source->stream.srp_talker_attr, 0);
+
+          if (matched_stream_id_other_port && matched_stream_id_other_port->propagate) {
+            mrp_mad_join(matched_stream_id_other_port, 1);
+          }
+          else if (matched_stream_id_this_port && matched_stream_id_this_port->propagate) {
+            mrp_mad_join(matched_stream_id_this_port, 1);
+          }
+          else {
+            mrp_mad_begin(source->stream.srp_talker_attr);
+            mrp_mad_join(source->stream.srp_talker_attr, 1);
+          }
+
+          // mrp_mad_begin(source->stream.srp_talker_attr);
+          // mrp_mad_begin(source->stream.srp_talker_failed_attr);
+          // mrp_mad_begin(source->stream.srp_listener_attr);
+
+          // mrp_mad_join(source->stream.srp_talker_attr, 1);
 
           if (!isnull(media_clock_svr)) {
         	  media_clock_register(media_clock_svr, clk_ctl, source->stream.sync);
@@ -509,7 +524,18 @@ int getset_avb_source_state(int set,
 #endif
 
           // And remove the group
-          mrp_mad_leave(source->stream.srp_talker_attr);
+          mrp_attribute_state *matched_stream_id_other_port = mrp_match_attr_by_stream_and_type(source->stream.srp_talker_attr, 1);
+          mrp_attribute_state *matched_stream_id_this_port = mrp_match_attr_by_stream_and_type(source->stream.srp_talker_attr, 0);
+
+          if (matched_stream_id_other_port && matched_stream_id_other_port->propagate) {
+            mrp_mad_leave(matched_stream_id_other_port);
+          }
+          else if (matched_stream_id_this_port && matched_stream_id_this_port->propagate) {
+            mrp_mad_leave(matched_stream_id_this_port);
+          }
+          else {
+            mrp_mad_leave(source->stream.srp_talker_attr);
+          }
       }
       avb_set_talker_bandwidth();
       source->stream.state = *state;
@@ -745,10 +771,24 @@ int getset_avb_sink_state(int set,
           avb_join_multicast_group(sink->addr);
 #endif
 
-        mrp_mad_begin(sink->stream.srp_talker_attr);
-        mrp_mad_begin(sink->stream.srp_talker_failed_attr);
-        mrp_mad_begin(sink->stream.srp_listener_attr);
-        mrp_mad_join(sink->stream.srp_listener_attr, 1);
+          mrp_attribute_state *matched_stream_id_other_port = mrp_match_attr_by_stream_and_type(sink->stream.srp_listener_attr, 1);
+          mrp_attribute_state *matched_stream_id_this_port = mrp_match_attr_by_stream_and_type(sink->stream.srp_listener_attr, 0);
+
+          if (matched_stream_id_other_port && matched_stream_id_other_port->propagate) {
+            mrp_mad_join(matched_stream_id_other_port, 1);
+          }
+          else if (matched_stream_id_this_port && matched_stream_id_this_port->propagate) {
+            mrp_mad_join(matched_stream_id_this_port, 1);
+          }
+          else {
+            mrp_mad_begin(sink->stream.srp_listener_attr);
+            mrp_mad_join(sink->stream.srp_listener_attr, 1);
+          }
+
+        // mrp_mad_begin(sink->stream.srp_talker_attr);
+        // mrp_mad_begin(sink->stream.srp_talker_failed_attr);
+        // mrp_mad_begin(sink->stream.srp_listener_attr);
+        // mrp_mad_join(sink->stream.srp_listener_attr, 1);
       }
       else if (sink->stream.state != AVB_SINK_STATE_DISABLED &&
               *state == AVB_SINK_STATE_DISABLED) {
@@ -758,7 +798,20 @@ int getset_avb_sink_state(int set,
 		  xc_abi_outuint(c, sink->stream.local_id);
 		  (void) xc_abi_inuint(c);
 
-    	  avb_srp_map_leave(sink->stream.srp_listener_attr);
+      mrp_attribute_state *matched_stream_id_other_port = mrp_match_attr_by_stream_and_type(sink->stream.srp_listener_attr, 1);
+      mrp_attribute_state *matched_stream_id_this_port = mrp_match_attr_by_stream_and_type(sink->stream.srp_listener_attr, 0);
+
+      if (matched_stream_id_other_port && matched_stream_id_other_port->propagate && !matched_stream_id_other_port->here) {
+        mrp_mad_leave(matched_stream_id_other_port);
+      }
+      else if (matched_stream_id_this_port && matched_stream_id_this_port->propagate && !matched_stream_id_this_port->here) {
+        mrp_mad_leave(matched_stream_id_this_port);
+      }
+      else {
+        mrp_mad_leave(sink->stream.srp_listener_attr);
+      }
+
+      avb_1722_remove_stream_mapping(c_mac_tx, sink->reservation.stream_id);
 
 #ifdef AVB_INCLUDE_MMRP
         if (sink->addr[0] & 1)

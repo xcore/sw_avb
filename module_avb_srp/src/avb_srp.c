@@ -95,7 +95,7 @@ int avb_add_new_stream_entry(srp_talker_first_value *fv,
     if (new_wrPtr==AVB_STREAM_LIST_SIZE)
       new_wrPtr = 0;
     if (new_wrPtr==rdPtr) {
-      __builtin_trap();
+      __builtin_trap(); // Trap on stream list full
       /*
       // fifo is full, drop oldest
       rdPtr++;
@@ -104,7 +104,7 @@ int avb_add_new_stream_entry(srp_talker_first_value *fv,
       */
     }
 
-    matched_stream_idx = wrPtr;
+    matched_stream_idx = new_wrPtr;
   }
   
   stream_list[matched_stream_idx].reservation.stream_id[0] = stream_id[0];
@@ -150,53 +150,82 @@ int avb_add_new_stream_entry(srp_talker_first_value *fv,
                 stream_list[matched_stream_idx].reservation.dest_mac_addr[3], stream_list[matched_stream_idx].reservation.dest_mac_addr[4], stream_list[matched_stream_idx].reservation.dest_mac_addr[5],
                 stream_list[matched_stream_idx].reservation.tspec_max_frame_size,
                 stream_list[matched_stream_idx].reservation.tspec_max_interval
-                );
+                );                                
 
   *stream = &stream_list[matched_stream_idx].reservation;
     
-  if (matched_stream_idx < 0)
-  {
-    wrPtr = new_wrPtr;
-  }
+  wrPtr = new_wrPtr;
   
   return 1;
 }
 
+
+// TODO: Remove listener bool param and just use the attribute type from the state structure
 static void avb_srp_map_join(mrp_attribute_state *attr, int new, int listener)
 {
   avb_srp_info_t *attribute_info = attr->attribute_info;
   if (listener) printstrln("Listener MAD_Join.indication");
   else printstrln("Talker MAD_Join.indication");
-  int matched = mrp_match_attribute_by_stream_id(attr);
+  mrp_attribute_state *matched_talker_listener = mrp_match_attribute_by_stream_id(attr);
+  mrp_attribute_state *matched_stream_id_other_port = mrp_match_attr_by_stream_and_type(attr, 1);
 
-  mrp_debug_dump_attrs();
+  simple_printf("matched_talker_listener: %d, matched_stream_id_other_port: %d\n", matched_talker_listener, matched_stream_id_other_port);
+
   // Attribute propagation:
-  if (!listener)
+  if (!matched_stream_id_other_port && !listener && new)
   {
-    attr->propagate = 1; // Propagate to other port
+    mrp_attribute_state *st = mrp_get_attr();
+    avb_srp_info_t *stream_data = attr->attribute_info;
+    mrp_attribute_init(st, attr->attribute_type, !attr->port_num, 0, stream_data);
+    simple_printf("JOIN mrp_attribute_init: %d, %d, STREAM_ID[0]: %x\n", attr->attribute_type, !attr->port_num, stream_data->stream_id[0]);
+    mrp_mad_begin(st);
+    mrp_mad_join(st, 1);
+    st->propagate = 1; // Propagate to other port
   }
-  if (matched)
+  else if (!matched_stream_id_other_port && matched_talker_listener && !matched_talker_listener->propagate && new)
   {
+    mrp_attribute_state *st = mrp_get_attr();
+    avb_srp_info_t *stream_data = attr->attribute_info;
+    mrp_attribute_init(st, attr->attribute_type, !attr->port_num, 0, stream_data);
+    simple_printf("JOIN mrp_attribute_init: %d, %d, STREAM_ID[0]: %x\n", attr->attribute_type, !attr->port_num, stream_data->stream_id[0]);
+    mrp_mad_begin(st);
+    mrp_mad_join(st, 1);
+    st->propagate = 1;
+  }
+
+  if (listener && matched_talker_listener && !matched_talker_listener->propagate) {
     avb_1722_enable_stream_forwarding(avb_control_get_mac_tx(), attribute_info->stream_id);
-    attr->propagate = 1;
+    if (matched_stream_id_other_port) {
+      mrp_mad_join(matched_stream_id_other_port, 1);
+      matched_stream_id_other_port->propagate = 1; // Propagate to other port
+    }
   }
+
+  if (!listener && matched_stream_id_other_port) {
+    mrp_mad_join(matched_stream_id_other_port, 1);
+    matched_stream_id_other_port->propagate = 1; // Propagate to other port
+  }
+
+    mrp_debug_dump_attrs();
   
-  mrp_mad_join(attr, new);
 }
 
 void avb_srp_map_leave(mrp_attribute_state *attr)
 {
   printstrln("MAD_Leave.indication");
+  mrp_attribute_state *matched_talker_listener = mrp_match_attribute_by_stream_id(attr); // What if this matches multiple Listener attrs?
+  mrp_attribute_state *matched_stream_id_other_port = mrp_match_attr_by_stream_and_type(attr, 1);
 
   if (attr->attribute_type == MSRP_LISTENER)
   {
     avb_srp_info_t *attribute_info = attr->attribute_info;
 
-    avb_1722_remove_stream_mapping(avb_control_get_mac_tx(), attribute_info->stream_id);
-
     mrp_debug_dump_attrs();
 
-    if (mrp_match_multiple_attrs_by_stream_and_type(attr))
+    if (!matched_stream_id_other_port) {
+      mrp_mad_leave(attr);
+    }
+    else if (mrp_match_multiple_attrs_by_stream_and_type(attr))
     {
       printstrln("MULTIPLE LISTENER ATTRS WITH SAME STREAM ID!!");
       // If we have multiple Listener attrs and they are not all leaves, we do not generate a leave
@@ -204,9 +233,7 @@ void avb_srp_map_leave(mrp_attribute_state *attr)
     }
     else
     {
-      // FIXME: This will only generate a leave on port 0 because we register the attribute there
-      // Instead, it should be the port that the Talker advertise matches
-      mrp_mad_leave(attr);
+      mrp_mad_leave(matched_stream_id_other_port);
       avb_1722_disable_stream_forwarding(avb_control_get_mac_tx(), attribute_info->stream_id);
     }
   }
@@ -237,6 +264,8 @@ int avb_srp_match_talker_advertise(mrp_attribute_state *attr,
   avb_source_info_t *source_info = (avb_source_info_t *) attr->attribute_info;
   unsigned long long stream_id=0, my_stream_id=0;
   srp_talker_first_value *first_value = (srp_talker_first_value *) fv;
+
+  if (source_info == NULL) return 0;
 
   my_stream_id = source_info->reservation.stream_id[0];
   my_stream_id = (my_stream_id << 32) + source_info->reservation.stream_id[1];
@@ -276,6 +305,8 @@ int avb_srp_match_listener(mrp_attribute_state *attr,
   avb_sink_info_t *sink_info = (avb_sink_info_t *) attr->attribute_info;
   unsigned long long stream_id=0, my_stream_id=0;
   srp_listener_first_value *first_value = (srp_listener_first_value *) fv;
+
+  if (sink_info == NULL) return 0;
 
   /*
   if (four_packed_event != AVB_SRP_FOUR_PACKED_EVENT_READY)
@@ -322,22 +353,21 @@ void avb_srp_listener_join_ind(mrp_attribute_state *attr, int new, int four_pack
   enum avb_source_state_t state;
 	unsigned stream = avb_get_source_stream_index_from_pointer(attr->attribute_info);
 
-	if (stream == -1u && new)
-  {
-    avb_srp_map_join(attr, new, 1);
-    return;
-  }
+  avb_srp_map_join(attr, new, 1);
 
-	get_avb_source_state(stream, &state);
-	if (state == AVB_SOURCE_STATE_POTENTIAL) {
-		if (four_packed_event == AVB_SRP_FOUR_PACKED_EVENT_READY ||
-			four_packed_event == AVB_SRP_FOUR_PACKED_EVENT_READY_FAILED) {
-#if SRP_AUTO_TALKER_STREAM_CONTROL
-			set_avb_source_state(stream, AVB_SOURCE_STATE_ENABLED);
-#else
-#endif
-		}
-	}
+  if (stream != -1u) {
+
+  	get_avb_source_state(stream, &state);
+  	if (state == AVB_SOURCE_STATE_POTENTIAL) {
+  		if (four_packed_event == AVB_SRP_FOUR_PACKED_EVENT_READY ||
+  			four_packed_event == AVB_SRP_FOUR_PACKED_EVENT_READY_FAILED) {
+  #if SRP_AUTO_TALKER_STREAM_CONTROL
+  			set_avb_source_state(stream, AVB_SOURCE_STATE_ENABLED);
+  #else
+  #endif
+  		}
+  	}
+  }
 }
 
 void avb_srp_listener_leave_ind(mrp_attribute_state *attr, int four_packed_event)
@@ -379,8 +409,6 @@ int avb_srp_process_attribute(int mrp_attribute_type, char *fv, int num, avb_srp
 
   pdu_streamId[0] = streamId >> 32;
   pdu_streamId[1] = (unsigned) streamId;
-
-  // simple_printf("matching %x:%x\n", pdu_streamId[0], pdu_streamId[1]);
 
   switch (mrp_attribute_type)
   {
@@ -501,7 +529,7 @@ static int encode_listener_message(char *buf,
       streamid = byterev(streamId[1]);
       memcpy(&first_value->StreamId[4], &streamid, 4);
 
-      int port_to_transmit = st->propagate ? !st->port_num : st->port_num;
+      int port_to_transmit = st->port_num;
       if (MRP_DEBUG_ATTR_EGRESS)
       {
         simple_printf("Port %d out: MSRP_LISTENER, stream %x:%x\n", port_to_transmit, streamId[0], streamId[1]);
@@ -675,7 +703,7 @@ static int encode_talker_message(char *buf,
       streamid = byterev(attribute_info->stream_id[1]);
       memcpy(&first_value->StreamId[4], &streamid, 4);
 
-      int port_to_transmit = st->propagate ? !st->port_num : st->port_num;  
+      int port_to_transmit = st->port_num;  
       if (MRP_DEBUG_ATTR_EGRESS)
       {
         simple_printf("Port %d out: MSRP_TALKER_ADVERTISE, stream %x:%x\n", port_to_transmit, attribute_info->stream_id[0], attribute_info->stream_id[1]);
@@ -739,7 +767,6 @@ int avb_srp_encode_message(char *buf,
     return encode_listener_message(buf, st, vector);
     break;
   case MSRP_DOMAIN_VECTOR:
-    // simple_printf("%d:DM\n", port_to_transmit);
     return encode_domain_message(buf, st, vector);
     break;
 
