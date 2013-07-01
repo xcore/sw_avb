@@ -16,7 +16,7 @@
 #include "simple_printf.h"
 #include "avb_mrp_debug_strings.h"
 
-#define MRP_DEBUG_STATE_CHANGE 1
+#define MRP_DEBUG_STATE_CHANGE 0
 
 #define mrp_change_registrar_state(st, event, new) \
        do { \

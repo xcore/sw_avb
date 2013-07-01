@@ -528,13 +528,13 @@ int getset_avb_source_state(int set,
           mrp_attribute_state *matched_stream_id_this_port = mrp_match_attr_by_stream_and_type(source->stream.srp_talker_attr, 0);
 
           if (matched_stream_id_other_port && matched_stream_id_other_port->propagate) {
-            mrp_mad_leave(matched_stream_id_other_port);
+            avb_srp_map_leave(matched_stream_id_other_port);
           }
           else if (matched_stream_id_this_port && matched_stream_id_this_port->propagate) {
-            mrp_mad_leave(matched_stream_id_this_port);
+            avb_srp_map_leave(matched_stream_id_this_port);
           }
           else {
-            mrp_mad_leave(source->stream.srp_talker_attr);
+            avb_srp_map_leave(source->stream.srp_talker_attr);
           }
       }
       avb_set_talker_bandwidth();
@@ -802,13 +802,13 @@ int getset_avb_sink_state(int set,
       mrp_attribute_state *matched_stream_id_this_port = mrp_match_attr_by_stream_and_type(sink->stream.srp_listener_attr, 0);
 
       if (matched_stream_id_other_port && matched_stream_id_other_port->propagate && !matched_stream_id_other_port->here) {
-        mrp_mad_leave(matched_stream_id_other_port);
+        avb_srp_map_leave(matched_stream_id_other_port);
       }
       else if (matched_stream_id_this_port && matched_stream_id_this_port->propagate && !matched_stream_id_this_port->here) {
-        mrp_mad_leave(matched_stream_id_this_port);
+        avb_srp_map_leave(matched_stream_id_this_port);
       }
       else {
-        mrp_mad_leave(sink->stream.srp_listener_attr);
+        avb_srp_map_leave(sink->stream.srp_listener_attr);
       }
 
       avb_1722_remove_stream_mapping(c_mac_tx, sink->reservation.stream_id);

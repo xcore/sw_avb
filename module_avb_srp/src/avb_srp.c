@@ -231,7 +231,7 @@ void avb_srp_map_leave(mrp_attribute_state *attr)
       // If we have multiple Listener attrs and they are not all leaves, we do not generate a leave
 
     }
-    else
+    else if (!matched_talker_listener)
     {
       mrp_mad_leave(matched_stream_id_other_port);
       avb_1722_disable_stream_forwarding(avb_control_get_mac_tx(), attribute_info->stream_id);
