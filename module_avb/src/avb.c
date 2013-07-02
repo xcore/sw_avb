@@ -412,6 +412,21 @@ static void avb_match_and_join_leave(mrp_attribute_state *attr, int join) {
   }
 }
 
+int set_avb_source_port(int source_num,
+                        int port) {
+  if (source_num < AVB_NUM_SOURCES) {
+    avb_source_info_t *source = &sources[source_num];
+    chanend c = source->talker_ctl;
+    xc_abi_outuint(c, AVB1722_SET_PORT);
+    xc_abi_outuint(c, source->stream.local_id);
+    xc_abi_outuint(c, port);
+    (void) xc_abi_inuint(c); //ACK
+    return 1;
+  }
+  else
+    return 0;
+}
+
 int getset_avb_source_state(int set,
                             int source_num,
                             enum avb_source_state_t *state)

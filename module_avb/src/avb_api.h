@@ -160,6 +160,8 @@ int get_avb_source_id(int source_num,unsigned int a0[2]);
 
 int getset_avb_source_vlan(int set, int source_num,REFERENCE_PARAM(int, a0));
 
+int set_avb_source_port(int source_num, int port_num);
+
 /** Set the destination vlan of an AVB source.
  *
  *  Sets the vlan that the source will transmit on. This defaults

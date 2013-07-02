@@ -40,6 +40,8 @@
 #define AVB1722_DEFAULT_FDF                    (2)
 #define AVB1722_DEFAULT_SYT                    (0xFFFF)
 
+#define AVB1722_PORT_UNINITIALIZED             (0xDEAD)
+
 #define AVB_DEFAULT_VLAN                   (2)
 
 // 61883-6 CIP header
@@ -117,6 +119,7 @@ typedef struct
 #define AVB1722_SET_VLAN                      (0x8522441B)
 #define AVB1722_TALKER_GO                     (0x8AAA0001)
 #define AVB1722_TALKER_STOP                   (0x8AAA0002)
+#define AVB1722_SET_PORT                      (0x8AAA0101)
 
 #define AVB1722_ACK                           (0x80000200)
 #define AVB1722_NACK                          (0x80000300)

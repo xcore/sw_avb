@@ -363,6 +363,10 @@ void avb_srp_listener_join_ind(mrp_attribute_state *attr, int new, int four_pack
   if (stream != -1u) {
 
   	get_avb_source_state(stream, &state);
+
+    // FIXME: Handle case where we have Listeners on both ports
+    set_avb_source_port(stream, attr->port_num);
+
   	if (state == AVB_SOURCE_STATE_POTENTIAL) {
   		if (four_packed_event == AVB_SRP_FOUR_PACKED_EVENT_READY ||
   			four_packed_event == AVB_SRP_FOUR_PACKED_EVENT_READY_FAILED) {

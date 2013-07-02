@@ -18,6 +18,7 @@
 #include "avb_srp.h"
 #include "avb_unit.h"
 #include "avb_conf.h"
+#include "simple_printf.h"
 
 #if AVB_NUM_SOURCES != 0
 
@@ -81,6 +82,7 @@ static void configure_stream(chanend avb1722_tx_config,
   stream.active = 1;
   stream.transmit_ok = 1;
   stream.sequence_number = 0;
+  stream.txport = AVB1722_PORT_UNINITIALIZED;
 }
 
 #pragma unsafe arrays
@@ -190,10 +192,19 @@ void avb_1722_talker_handle_cmd(chanend c_talker_ctl,
         c_talker_ctl <: AVB1722_ACK;
       }
       break;
-
+    case AVB1722_SET_PORT:
+    {
+      int stream_num;
+      c_talker_ctl :> stream_num;
+      c_talker_ctl :> st.talker_streams[stream_num].txport;
+      c_talker_ctl <: AVB1722_ACK;
+      simple_printf("Setting stream %d 1722 TX port to %d\n", stream_num, st.talker_streams[stream_num].txport);
+      break;
+    }
     case AVB1722_SET_VLAN:
       c_talker_ctl :> st.vlan;
       avb1722_set_buffer_vlan(st.vlan,(st.TxBuf,unsigned char[]));
+      // FIXME: Should this command ACK?
       break;
     default:
       c_talker_ctl <: AVB1722_NACK;
@@ -223,7 +234,7 @@ void avb_1722_talker_send_packets(chanend c_mac_tx,
       ethernet_send_frame_offset2(c_mac_tx,
                                   st.TxBuf,
                                   packet_size,
-                                  -1);
+                                  st.talker_streams[st.cur_avb_stream].txport);
       st.talker_streams[st.cur_avb_stream].last_transmit_time = t;
     }
   }
