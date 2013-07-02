@@ -164,8 +164,8 @@ int avb_add_new_stream_entry(srp_talker_first_value *fv,
 static void avb_srp_map_join(mrp_attribute_state *attr, int new, int listener)
 {
   avb_srp_info_t *attribute_info = attr->attribute_info;
-  if (listener) printstrln("Listener MAD_Join.indication");
-  else printstrln("Talker MAD_Join.indication");
+  if (listener) printstrln("Listener MAP_Join.indication");
+  else printstrln("Talker MAP_Join.indication");
   mrp_attribute_state *matched_talker_listener = mrp_match_attribute_by_stream_id(attr);
   mrp_attribute_state *matched_stream_id_other_port = mrp_match_attr_by_stream_and_type(attr, 1);
 
@@ -180,9 +180,13 @@ static void avb_srp_map_join(mrp_attribute_state *attr, int new, int listener)
     simple_printf("JOIN mrp_attribute_init: %d, %d, STREAM_ID[0]: %x\n", attr->attribute_type, !attr->port_num, stream_data->stream_id[0]);
     mrp_mad_begin(st);
     mrp_mad_join(st, 1);
-    st->propagate = 1; // Propagate to other port
+    st->propagated = 1; // Propagated to other port
   }
-  else if (!matched_stream_id_other_port && matched_talker_listener && !matched_talker_listener->propagate && new)
+  else if (!matched_stream_id_other_port &&
+            matched_talker_listener &&
+            !matched_talker_listener->propagated &&
+            !matched_talker_listener->here &&
+            new)
   {
     mrp_attribute_state *st = mrp_get_attr();
     avb_srp_info_t *stream_data = attr->attribute_info;
@@ -190,20 +194,20 @@ static void avb_srp_map_join(mrp_attribute_state *attr, int new, int listener)
     simple_printf("JOIN mrp_attribute_init: %d, %d, STREAM_ID[0]: %x\n", attr->attribute_type, !attr->port_num, stream_data->stream_id[0]);
     mrp_mad_begin(st);
     mrp_mad_join(st, 1);
-    st->propagate = 1;
+    st->propagated = 1;
   }
 
-  if (listener && matched_talker_listener && !matched_talker_listener->propagate) {
+  if (listener && matched_talker_listener && !matched_talker_listener->propagated) {
     avb_1722_enable_stream_forwarding(avb_control_get_mac_tx(), attribute_info->stream_id);
     if (matched_stream_id_other_port) {
       mrp_mad_join(matched_stream_id_other_port, 1);
-      matched_stream_id_other_port->propagate = 1; // Propagate to other port
+      matched_stream_id_other_port->propagated = 1; // Propagate to other port
     }
   }
 
   if (!listener && matched_stream_id_other_port) {
     mrp_mad_join(matched_stream_id_other_port, 1);
-    matched_stream_id_other_port->propagate = 1; // Propagate to other port
+    matched_stream_id_other_port->propagated = 1; // Propagate to other port
   }
 
     mrp_debug_dump_attrs();
@@ -351,7 +355,8 @@ int avb_srp_match_domain(mrp_attribute_state *attr,char *fv,int i)
 void avb_srp_listener_join_ind(mrp_attribute_state *attr, int new, int four_packed_event)
 {
   enum avb_source_state_t state;
-	unsigned stream = avb_get_source_stream_index_from_pointer(attr->attribute_info);
+  avb_sink_info_t *sink_info = (avb_sink_info_t *) attr->attribute_info;
+	unsigned stream = avb_get_source_stream_index_from_stream_id(sink_info->reservation.stream_id);
 
   avb_srp_map_join(attr, new, 1);
 
@@ -373,7 +378,8 @@ void avb_srp_listener_join_ind(mrp_attribute_state *attr, int new, int four_pack
 void avb_srp_listener_leave_ind(mrp_attribute_state *attr, int four_packed_event)
 {
   enum avb_source_state_t state;
-	unsigned stream = avb_get_source_stream_index_from_pointer(attr->attribute_info);
+  avb_sink_info_t *sink_info = (avb_sink_info_t *) attr->attribute_info;
+  unsigned stream = avb_get_source_stream_index_from_stream_id(sink_info->reservation.stream_id);
 
   avb_srp_map_leave(attr);
 

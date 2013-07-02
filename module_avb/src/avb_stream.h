@@ -6,9 +6,11 @@ struct mrp_attribute_state;
 typedef struct avb_stream_info_t
 {
 	int state;
-	struct mrp_attribute_state* srp_talker_attr;
+	struct mrp_attribute_state* srp_talker_attr0;
+	struct mrp_attribute_state* srp_talker_attr1;
 	struct mrp_attribute_state* srp_talker_failed_attr;
-	struct mrp_attribute_state* srp_listener_attr;
+	struct mrp_attribute_state* srp_listener_attr0;
+	struct mrp_attribute_state* srp_listener_attr1;
 	char tile_id;
 	char local_id;
 	char num_channels;

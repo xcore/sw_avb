@@ -161,6 +161,9 @@ unsigned avb_get_source_stream_index_from_pointer(void* ptr);
  */
 unsigned avb_get_sink_stream_index_from_pointer(void* ptr);
 
+unsigned avb_get_source_stream_index_from_stream_id(unsigned int stream_id[2]);
+unsigned avb_get_sink_stream_index_from_stream_id(unsigned int stream_id[2]);
+
 #endif
 
 #endif // _avb_h_

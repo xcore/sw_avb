@@ -101,7 +101,7 @@ void debug_print_applicant_state_change(mrp_attribute_state *st, mrp_event event
         stream_id[1] = sink_info->reservation.stream_id[1];
       }
 
-    simple_printf("%s %x:%d:%d:%d\t %s: %s -> %s \n", debug_attribute_type[(st)->attribute_type], stream_id[1], st->port_num, st->here, st->propagate, debug_mrp_event[(event)], debug_mrp_applicant_state[(st)->applicant_state], debug_mrp_applicant_state[new]);
+    simple_printf("%s %x:%d:%d:%d\t %s: %s -> %s \n", debug_attribute_type[(st)->attribute_type], stream_id[1], st->port_num, st->here, st->propagated, debug_mrp_event[(event)], debug_mrp_applicant_state[(st)->applicant_state], debug_mrp_applicant_state[new]);
   }
 }
 
@@ -115,7 +115,7 @@ void debug_print_registrar_state_change(mrp_attribute_state *st, mrp_event event
       stream_id[0] = sink_info->reservation.stream_id[0];
       stream_id[1] = sink_info->reservation.stream_id[1];
     }
-    simple_printf("%s %x:%d:%d:%d\t %s: %s -> %s \n", debug_attribute_type[(st)->attribute_type], stream_id[1], st->port_num, st->here, st->propagate, debug_mrp_event[(event)], debug_mrp_registrar_state[(st)->registrar_state], debug_mrp_registrar_state[new]);
+    simple_printf("%s %x:%d:%d:%d\t %s: %s -> %s \n", debug_attribute_type[(st)->attribute_type], stream_id[1], st->port_num, st->here, st->propagated, debug_mrp_event[(event)], debug_mrp_registrar_state[(st)->registrar_state], debug_mrp_registrar_state[new]);
   }
 }
 
@@ -129,7 +129,7 @@ void debug_print_tx_event(mrp_attribute_state *st, mrp_event event)
       stream_id[0] = sink_info->reservation.stream_id[0];
       stream_id[1] = sink_info->reservation.stream_id[1];
     }
-    simple_printf("%s %x:%d:%d:%d\t %s \n", debug_attribute_type[(st)->attribute_type], stream_id[1], st->port_num, st->here, st->propagate, debug_attribute_event[(event)]);
+    simple_printf("%s %x:%d:%d:%d\t %s \n", debug_attribute_type[(st)->attribute_type], stream_id[1], st->port_num, st->here, st->propagated, debug_attribute_event[(event)]);
   }
 }
 
@@ -447,16 +447,7 @@ static void create_empty_msg(mrp_attribute_type attr, int leave_all) {
 
 
 static int encode_msg(char *msg, mrp_attribute_state* st, int vector, unsigned int port_num)
-{
-  /*
-  simple_printf("st->port_num: %d\n port_num: %d\n st->propagate: %d\n", st->port_num, port_num, st->propagate);
-  if (st->attribute_type == MSRP_LISTENER)
-  {
-    printstrln("LR!!");
-  }
-  printintln(port_to_transmit);
-  */
-  
+{ 
   switch (st->attribute_type) 
   {
     case MSRP_TALKER_ADVERTISE: 
@@ -798,8 +789,8 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
 void mrp_debug_dump_attrs(void)
 {
   
-  printstrln("port_num | type                   | here | propagate | stream_id");
-  printstrln("---------+------------------------+------+-----------+----------");
+  printstrln("port_num | type                   | here | propagated | stream_id");
+  printstrln("---------+------------------------+------+------------+----------");
   for (int i=0;i<MRP_MAX_ATTRS;i++) {
 
     if (attrs[i].applicant_state != MRP_UNUSED) {
@@ -816,8 +807,8 @@ void mrp_debug_dump_attrs(void)
       attr_string[23] = '\0';
       strncpy(attr_string, debug_attribute_type[attrs[i].attribute_type],strlen(debug_attribute_type[attrs[i].attribute_type]));
 
-      simple_printf("%d        | %s| %d    | %d         | %x:%x\n",
-        attrs[i].port_num, attr_string, attrs[i].here, attrs[i].propagate, stream_id[0], stream_id[1]);
+      simple_printf("%d        | %s| %d    | %d          | %x:%x\n",
+        attrs[i].port_num, attr_string, attrs[i].here, attrs[i].propagated, stream_id[0], stream_id[1]);
 
     }
   }
@@ -834,7 +825,7 @@ void mrp_attribute_init(mrp_attribute_state *st,
   st->attribute_type = t;
   st->attribute_info = info;
   st->port_num = port_num;
-  st->propagate = 0;
+  st->propagated = 0;
   st->here = here;
   return;
 }
@@ -850,6 +841,9 @@ void mrp_mad_begin(mrp_attribute_state *st)
 
 void mrp_mad_join(mrp_attribute_state *st, int new)
 {
+  if (st->attribute_type == MSRP_LISTENER) printstrln("Listener MAD_Join");
+  else if (st->attribute_type == MSRP_TALKER_ADVERTISE) printstrln("Talker MAD_Join");
+
   if (new) {
     mrp_update_state(MRP_EVENT_NEW, st, 0, st->port_num);
   } else {

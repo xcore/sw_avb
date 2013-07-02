@@ -628,6 +628,7 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
 
         break;
       }
+      #if 0
       case AECP_AEM_CMD_GET_AVB_INFO:
       {
         // Command and response share descriptor_type and descriptor_index
@@ -678,6 +679,7 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
         cd_len = sizeof(avb_1722_1_aem_startstop_streaming_t);
         break;
       }
+      #endif
       // TODO: ENTITY_AVAILABLE
       default:
       {

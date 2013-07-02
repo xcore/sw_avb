@@ -77,10 +77,12 @@ static void register_talkers(chanend talker_ctl[])
       source->reservation.stream_id[1] = (mac_addr[4] << 24) | (mac_addr[5] << 16) | ((source->stream.local_id & 0xffff)<<0);
       source->presentation = AVB_DEFAULT_PRESENTATION_TIME_DELAY_NS;
       source->reservation.vlan_id = AVB_DEFAULT_VLAN;
-      source->stream.srp_talker_attr = mrp_get_attr();
+      source->stream.srp_talker_attr0 = mrp_get_attr();
+      source->stream.srp_talker_attr1 = mrp_get_attr();
       source->stream.srp_talker_failed_attr = mrp_get_attr();
       // source->stream.srp_listener_attr = mrp_get_attr();
-      mrp_attribute_init(source->stream.srp_talker_attr, MSRP_TALKER_ADVERTISE, 0, 1, source);
+      mrp_attribute_init(source->stream.srp_talker_attr0, MSRP_TALKER_ADVERTISE, 0, 1, source);
+      mrp_attribute_init(source->stream.srp_talker_attr1, MSRP_TALKER_ADVERTISE, 1, 1, source);
       // mrp_attribute_init(source->stream.srp_talker_failed_attr, MSRP_TALKER_FAILED, 0, 1, source);
       // mrp_attribute_init(source->stream.srp_listener_attr, MSRP_LISTENER, 0, 1, source);
       max_talker_stream_id++;
@@ -107,10 +109,12 @@ static void register_listeners(chanend listener_ctl[])
       sink->reservation.vlan_id = AVB_DEFAULT_VLAN;
       // sink->stream.srp_talker_attr = mrp_get_attr();
       // sink->stream.srp_talker_failed_attr = mrp_get_attr();
-      sink->stream.srp_listener_attr = mrp_get_attr();
+      sink->stream.srp_listener_attr0 = mrp_get_attr();
+      sink->stream.srp_listener_attr1 = mrp_get_attr();
       // mrp_attribute_init(sink->stream.srp_talker_attr, MSRP_TALKER_ADVERTISE, 0, 1, sink);
       // mrp_attribute_init(sink->stream.srp_talker_failed_attr, MSRP_TALKER_FAILED, 0, 1, sink);
-      mrp_attribute_init(sink->stream.srp_listener_attr, MSRP_LISTENER, 0, 1, sink);
+      mrp_attribute_init(sink->stream.srp_listener_attr0, MSRP_LISTENER, 0, 1, sink);
+      mrp_attribute_init(sink->stream.srp_listener_attr1, MSRP_LISTENER, 1, 1, sink);
       max_listener_stream_id++;
     }
     xc_abi_outuint(listener_ctl[i], max_link_id);
@@ -385,6 +389,29 @@ int getset_avb_source_vlan(int set,
     return 0;
 }
 
+static void avb_match_and_join_leave(mrp_attribute_state *attr, int join) {
+  mrp_attribute_state *matched_stream_id_other_port = mrp_match_attr_by_stream_and_type(attr, 1);
+  mrp_attribute_state *matched_stream_id_this_port = mrp_match_attr_by_stream_and_type(attr, 0);
+
+  if (matched_stream_id_other_port && matched_stream_id_other_port->propagated) {
+    if (join) mrp_mad_join(matched_stream_id_other_port, 1);
+    else avb_srp_map_leave(matched_stream_id_other_port);
+  }
+  else if (matched_stream_id_this_port && matched_stream_id_this_port->propagated) {
+    if (join) mrp_mad_join(matched_stream_id_this_port, 1);
+    else avb_srp_map_leave(matched_stream_id_this_port);
+  }
+  else {
+    if (join) {
+      mrp_mad_begin(attr);
+      mrp_mad_join(attr, 1);
+    }
+    else {
+      avb_srp_map_leave(attr);
+    }
+  }
+}
+
 int getset_avb_source_state(int set,
                             int source_num,
                             enum avb_source_state_t *state)
@@ -446,26 +473,8 @@ int getset_avb_source_state(int set,
           if (source->reservation.vlan_id)
             avb_join_vlan(source->reservation.vlan_id);
 #endif
-
-          mrp_attribute_state *matched_stream_id_other_port = mrp_match_attr_by_stream_and_type(source->stream.srp_talker_attr, 1);
-          mrp_attribute_state *matched_stream_id_this_port = mrp_match_attr_by_stream_and_type(source->stream.srp_talker_attr, 0);
-
-          if (matched_stream_id_other_port && matched_stream_id_other_port->propagate) {
-            mrp_mad_join(matched_stream_id_other_port, 1);
-          }
-          else if (matched_stream_id_this_port && matched_stream_id_this_port->propagate) {
-            mrp_mad_join(matched_stream_id_this_port, 1);
-          }
-          else {
-            mrp_mad_begin(source->stream.srp_talker_attr);
-            mrp_mad_join(source->stream.srp_talker_attr, 1);
-          }
-
-          // mrp_mad_begin(source->stream.srp_talker_attr);
-          // mrp_mad_begin(source->stream.srp_talker_failed_attr);
-          // mrp_mad_begin(source->stream.srp_listener_attr);
-
-          // mrp_mad_join(source->stream.srp_talker_attr, 1);
+          avb_match_and_join_leave(source->stream.srp_talker_attr0, 1);
+          avb_match_and_join_leave(source->stream.srp_talker_attr1, 1);
 
           if (!isnull(media_clock_svr)) {
         	  media_clock_register(media_clock_svr, clk_ctl, source->stream.sync);
@@ -524,18 +533,8 @@ int getset_avb_source_state(int set,
 #endif
 
           // And remove the group
-          mrp_attribute_state *matched_stream_id_other_port = mrp_match_attr_by_stream_and_type(source->stream.srp_talker_attr, 1);
-          mrp_attribute_state *matched_stream_id_this_port = mrp_match_attr_by_stream_and_type(source->stream.srp_talker_attr, 0);
-
-          if (matched_stream_id_other_port && matched_stream_id_other_port->propagate) {
-            avb_srp_map_leave(matched_stream_id_other_port);
-          }
-          else if (matched_stream_id_this_port && matched_stream_id_this_port->propagate) {
-            avb_srp_map_leave(matched_stream_id_this_port);
-          }
-          else {
-            avb_srp_map_leave(source->stream.srp_talker_attr);
-          }
+          avb_match_and_join_leave(source->stream.srp_talker_attr0, 0);
+          avb_match_and_join_leave(source->stream.srp_talker_attr1, 0);
       }
       avb_set_talker_bandwidth();
       source->stream.state = *state;
@@ -771,24 +770,9 @@ int getset_avb_sink_state(int set,
           avb_join_multicast_group(sink->addr);
 #endif
 
-          mrp_attribute_state *matched_stream_id_other_port = mrp_match_attr_by_stream_and_type(sink->stream.srp_listener_attr, 1);
-          mrp_attribute_state *matched_stream_id_this_port = mrp_match_attr_by_stream_and_type(sink->stream.srp_listener_attr, 0);
+          avb_match_and_join_leave(sink->stream.srp_listener_attr0, 1);
+          avb_match_and_join_leave(sink->stream.srp_listener_attr1, 1);
 
-          if (matched_stream_id_other_port && matched_stream_id_other_port->propagate) {
-            mrp_mad_join(matched_stream_id_other_port, 1);
-          }
-          else if (matched_stream_id_this_port && matched_stream_id_this_port->propagate) {
-            mrp_mad_join(matched_stream_id_this_port, 1);
-          }
-          else {
-            mrp_mad_begin(sink->stream.srp_listener_attr);
-            mrp_mad_join(sink->stream.srp_listener_attr, 1);
-          }
-
-        // mrp_mad_begin(sink->stream.srp_talker_attr);
-        // mrp_mad_begin(sink->stream.srp_talker_failed_attr);
-        // mrp_mad_begin(sink->stream.srp_listener_attr);
-        // mrp_mad_join(sink->stream.srp_listener_attr, 1);
       }
       else if (sink->stream.state != AVB_SINK_STATE_DISABLED &&
               *state == AVB_SINK_STATE_DISABLED) {
@@ -798,18 +782,8 @@ int getset_avb_sink_state(int set,
 		  xc_abi_outuint(c, sink->stream.local_id);
 		  (void) xc_abi_inuint(c);
 
-      mrp_attribute_state *matched_stream_id_other_port = mrp_match_attr_by_stream_and_type(sink->stream.srp_listener_attr, 1);
-      mrp_attribute_state *matched_stream_id_this_port = mrp_match_attr_by_stream_and_type(sink->stream.srp_listener_attr, 0);
-
-      if (matched_stream_id_other_port && matched_stream_id_other_port->propagate && !matched_stream_id_other_port->here) {
-        avb_srp_map_leave(matched_stream_id_other_port);
-      }
-      else if (matched_stream_id_this_port && matched_stream_id_this_port->propagate && !matched_stream_id_this_port->here) {
-        avb_srp_map_leave(matched_stream_id_this_port);
-      }
-      else {
-        avb_srp_map_leave(sink->stream.srp_listener_attr);
-      }
+      avb_match_and_join_leave(sink->stream.srp_listener_attr0, 0);
+      avb_match_and_join_leave(sink->stream.srp_listener_attr1, 0);
 
       avb_1722_remove_stream_mapping(c_mac_tx, sink->reservation.stream_id);
 
@@ -1048,6 +1022,28 @@ int get_avb_ptp_port_pdelay(int port, unsigned *pdelay)
   {
     return 0;
   }
+}
+
+unsigned avb_get_source_stream_index_from_stream_id(unsigned int stream_id[2])
+{
+  for (unsigned i=0; i<AVB_NUM_SOURCES; ++i) {
+    if (stream_id[0] == sources[i].reservation.stream_id[0] &&
+        stream_id[1] == sources[i].reservation.stream_id[1]) {
+      return i;
+    }
+  }
+  return -1u;  
+}
+
+unsigned avb_get_sink_stream_index_from_stream_id(unsigned int stream_id[2])
+{
+  for (unsigned i=0; i<AVB_NUM_SINKS; ++i) {
+    if (stream_id[0] == sinks[i].reservation.stream_id[0] &&
+        stream_id[1] == sinks[i].reservation.stream_id[1]) {
+      return i;
+    }
+  }
+  return -1u;  
 }
 
 unsigned avb_get_source_stream_index_from_pointer(void* ptr)

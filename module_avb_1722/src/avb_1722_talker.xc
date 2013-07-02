@@ -223,7 +223,7 @@ void avb_1722_talker_send_packets(chanend c_mac_tx,
       ethernet_send_frame_offset2(c_mac_tx,
                                   st.TxBuf,
                                   packet_size,
-                                  0);
+                                  -1);
       st.talker_streams[st.cur_avb_stream].last_transmit_time = t;
     }
   }
