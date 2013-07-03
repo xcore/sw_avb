@@ -198,10 +198,14 @@ static void avb_srp_map_join(mrp_attribute_state *attr, int new, int listener)
   }
 
   if (listener && matched_talker_listener && !matched_talker_listener->propagated) {
-    avb_1722_enable_stream_forwarding(avb_control_get_mac_tx(), attribute_info->stream_id);
-    if (matched_stream_id_other_port) {
-      mrp_mad_join(matched_stream_id_other_port, 1);
-      matched_stream_id_other_port->propagated = 1; // Propagate to other port
+    if (!matched_talker_listener->here) { // Handle case where the Talker is not this endpoint
+      if (matched_stream_id_other_port) {
+        if (!matched_talker_listener->here) {
+          avb_1722_enable_stream_forwarding(avb_control_get_mac_tx(), attribute_info->stream_id);
+          matched_stream_id_other_port->propagated = 1; // Propagate to other port
+        }
+        mrp_mad_join(matched_stream_id_other_port, 1);
+      }
     }
   }
 
@@ -216,7 +220,7 @@ static void avb_srp_map_join(mrp_attribute_state *attr, int new, int listener)
 
 void avb_srp_map_leave(mrp_attribute_state *attr)
 {
-  printstrln("MAD_Leave.indication");
+  printstrln("MAP_Leave.indication");
   mrp_attribute_state *matched_talker_listener = mrp_match_attribute_by_stream_id(attr); // What if this matches multiple Listener attrs?
   mrp_attribute_state *matched_stream_id_other_port = mrp_match_attr_by_stream_and_type(attr, 1);
 
@@ -229,7 +233,7 @@ void avb_srp_map_leave(mrp_attribute_state *attr)
     if (!matched_stream_id_other_port) {
       mrp_mad_leave(attr);
     }
-    else if (mrp_match_multiple_attrs_by_stream_and_type(attr))
+    else if (mrp_match_multiple_attrs_by_stream_and_type(attr, 0))
     {
       printstrln("MULTIPLE LISTENER ATTRS WITH SAME STREAM ID!!");
       // If we have multiple Listener attrs and they are not all leaves, we do not generate a leave
@@ -364,8 +368,12 @@ void avb_srp_listener_join_ind(mrp_attribute_state *attr, int new, int four_pack
 
   	get_avb_source_state(stream, &state);
 
-    // FIXME: Handle case where we have Listeners on both ports
-    set_avb_source_port(stream, attr->port_num);
+    if (mrp_match_attr_by_stream_and_type(attr, 1)) {
+      set_avb_source_port(stream, -1);
+    }
+    else {
+      set_avb_source_port(stream, attr->port_num);
+    }
 
   	if (state == AVB_SOURCE_STATE_POTENTIAL) {
   		if (four_packed_event == AVB_SRP_FOUR_PACKED_EVENT_READY ||
@@ -391,7 +399,10 @@ void avb_srp_listener_leave_ind(mrp_attribute_state *attr, int four_packed_event
   {
 
   	get_avb_source_state(stream, &state);
-  	if (state == AVB_SOURCE_STATE_ENABLED) {
+
+    set_avb_source_port(stream, !attr->port_num);
+
+  	if (state == AVB_SOURCE_STATE_ENABLED && !mrp_match_attr_by_stream_and_type(attr, 1)) {
   #if SRP_AUTO_TALKER_STREAM_CONTROL
   		set_avb_source_state(stream, AVB_SOURCE_STATE_POTENTIAL);
   #else

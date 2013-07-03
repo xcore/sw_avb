@@ -853,6 +853,8 @@ void mrp_mad_join(mrp_attribute_state *st, int new)
 
 void mrp_mad_leave(mrp_attribute_state *st)
 {
+  if (st->attribute_type == MSRP_LISTENER) printstrln("Listener MAD_Leave");
+  else if (st->attribute_type == MSRP_TALKER_ADVERTISE) printstrln("Talker MAD_Leave");
   mrp_update_state(MRP_EVENT_LV, st, 0, st->port_num);
 }
 
@@ -1253,7 +1255,7 @@ mrp_attribute_state *mrp_match_attr_by_stream_and_type(mrp_attribute_state *attr
   return 0;
 }
 
-int mrp_match_multiple_attrs_by_stream_and_type(mrp_attribute_state *attr)
+int mrp_match_multiple_attrs_by_stream_and_type(mrp_attribute_state *attr, int opposite_port)
 {
   int matches = 0;
 
@@ -1266,19 +1268,21 @@ int mrp_match_multiple_attrs_by_stream_and_type(mrp_attribute_state *attr)
       avb_sink_info_t *sink_info = (avb_sink_info_t *) attr->attribute_info;
       avb_source_info_t *source_info = (avb_source_info_t *) attrs[j].attribute_info;
 
-      if (attr->port_num != attrs[j].port_num) continue;
+      if ((opposite_port && (attr->port_num != attrs[j].port_num)) ||
+          (!opposite_port && (attr->port_num == attrs[j].port_num))) {
 
-      if (sink_info == NULL || source_info == NULL) continue;
+        if (sink_info == NULL || source_info == NULL) continue;
 
-      if (sink_info->reservation.stream_id[0] == source_info->reservation.stream_id[0] && 
-          sink_info->reservation.stream_id[1] == source_info->reservation.stream_id[1])
-      {
-        matches++;
-        if (matches == 2)
+        if (sink_info->reservation.stream_id[0] == source_info->reservation.stream_id[0] && 
+            sink_info->reservation.stream_id[1] == source_info->reservation.stream_id[1])
         {
-          return 1;
-        }
-      }   
+          matches++;
+          if (matches == 2)
+          {
+            return 1;
+          }
+        }  
+      } 
     }
   }
   return 0;

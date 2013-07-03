@@ -244,7 +244,7 @@ void mrp_mad_leave(mrp_attribute_state *st);
 void mrp_periodic(void);
 
 mrp_attribute_state *mrp_match_attr_by_stream_and_type(mrp_attribute_state *attr, int opposite_port);
-int mrp_match_multiple_attrs_by_stream_and_type(mrp_attribute_state *attr);
+int mrp_match_multiple_attrs_by_stream_and_type(mrp_attribute_state *attr, int opposite_port);
 mrp_attribute_state *mrp_match_attribute_by_stream_id(mrp_attribute_state *attr);
 
 int mrp_is_observer(mrp_attribute_state *st);

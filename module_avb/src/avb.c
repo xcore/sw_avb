@@ -407,7 +407,7 @@ static void avb_match_and_join_leave(mrp_attribute_state *attr, int join) {
       mrp_mad_join(attr, 1);
     }
     else {
-      avb_srp_map_leave(attr);
+      mrp_mad_leave(attr);
     }
   }
 }
