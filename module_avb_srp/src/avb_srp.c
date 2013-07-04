@@ -169,8 +169,8 @@ static void avb_srp_map_join(mrp_attribute_state *attr, int new, int listener)
   mrp_attribute_state *matched_talker_listener = mrp_match_attribute_by_stream_id(attr);
   mrp_attribute_state *matched_stream_id_other_port = mrp_match_attr_by_stream_and_type(attr, 1);
 
-  simple_printf("matched_talker_listener: %d, matched_stream_id_other_port: %d\n", matched_talker_listener, matched_stream_id_other_port);
-
+  simple_printf("matched_talker_listener: %d(here:%d, prop:%d, new:%d), matched_stream_id_other_port: %d\n", matched_talker_listener,
+   matched_talker_listener ? matched_talker_listener->propagated : 0, matched_talker_listener ? matched_talker_listener->here : 0, new, matched_stream_id_other_port);
   // Attribute propagation:
   if (!matched_stream_id_other_port && !listener && new)
   {
@@ -199,12 +199,14 @@ static void avb_srp_map_join(mrp_attribute_state *attr, int new, int listener)
 
   if (listener && matched_talker_listener && !matched_talker_listener->propagated) {
     if (!matched_talker_listener->here) { // Handle case where the Talker is not this endpoint
-      if (matched_stream_id_other_port) {
-        if (!matched_talker_listener->here) {
-          avb_1722_enable_stream_forwarding(avb_control_get_mac_tx(), attribute_info->stream_id);
-          matched_stream_id_other_port->propagated = 1; // Propagate to other port
-        }
+
+      if (!matched_talker_listener->here) {
+        avb_1722_enable_stream_forwarding(avb_control_get_mac_tx(), attribute_info->stream_id);
+      }
+      if (matched_stream_id_other_port)
+      {
         mrp_mad_join(matched_stream_id_other_port, 1);
+        matched_stream_id_other_port->propagated = 1; // Propagate to other port
       }
     }
   }
