@@ -596,9 +596,11 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
           break;
         case MRP_AO:
           mrp_change_applicant_state(st, e, MRP_AP);
+          if (!st->here) mrp_change_applicant_state(st, e, MRP_UNUSED);
           break;
         case MRP_QO:
           mrp_change_applicant_state(st, e, MRP_QP);
+          if (!st->here) mrp_change_applicant_state(st, e, MRP_UNUSED);
           break;      
         }
       break;
@@ -627,6 +629,7 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
         {
         case MRP_VO:
           mrp_change_applicant_state(st, e, MRP_AO);
+          if (!st->here) mrp_change_applicant_state(st, e, MRP_UNUSED);
           break;
         case MRP_VP:
           mrp_change_applicant_state(st, e, MRP_AP);
@@ -636,6 +639,7 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
           break;
         case MRP_AO:
           mrp_change_applicant_state(st, e, MRP_QO);
+          if (!st->here) mrp_change_applicant_state(st, e, MRP_UNUSED);
           break;
         case MRP_AP:
           mrp_change_applicant_state(st, e, MRP_QP);
@@ -657,6 +661,7 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
           break;
         case MRP_QO:
           mrp_change_applicant_state(st, e, MRP_AO);
+          if (!st->here) mrp_change_applicant_state(st, e, MRP_UNUSED);
           break;
         case MRP_QP:
           mrp_change_applicant_state(st, e, MRP_AP);
@@ -678,6 +683,7 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
         case MRP_QO:
 #ifdef MRP_FULL_PARTICIPANT
           mrp_change_applicant_state(st, e, MRP_LO);
+          // if (!st->here) mrp_change_applicant_state(st, e, MRP_UNUSED);
 #else
           mrp_change_applicant_state(st, e, MRP_VO);
 #endif
@@ -767,6 +773,7 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
         case MRP_AO:
         case MRP_QO:
           mrp_change_applicant_state(st, e, MRP_LO);
+          if (st->applicant_state != MRP_LA && !st->here) mrp_change_applicant_state(st, e, MRP_UNUSED);
           break;
         case MRP_VN:
           mrp_change_applicant_state(st, e, MRP_AN);
@@ -793,7 +800,7 @@ void mrp_debug_dump_attrs(void)
   printstrln("---------+------------------------+------+------------+----------");
   for (int i=0;i<MRP_MAX_ATTRS;i++) {
 
-    if (attrs[i].applicant_state != MRP_UNUSED) {
+    if (attrs[i].applicant_state != MRP_UNUSED && attrs[i].applicant_state != MRP_DISABLED) {
       avb_sink_info_t *sink_info = (avb_sink_info_t *) attrs[i].attribute_info;
       int stream_id[2] = {0, 0};
       char attr_string[24];
@@ -1290,28 +1297,30 @@ int mrp_match_multiple_attrs_by_stream_and_type(mrp_attribute_state *attr, int o
 
 
 // FIXME: Rename me
-mrp_attribute_state *mrp_match_attribute_by_stream_id(mrp_attribute_state *attr)
+mrp_attribute_state *mrp_match_attribute_by_stream_id(mrp_attribute_state *attr, int opposite_port)
 {
   for (int j=0;j<MRP_MAX_ATTRS;j++) {
     if (attr->applicant_state == MRP_UNUSED) {
       continue;
     }
-    if ((attr->attribute_type == MSRP_TALKER_ADVERTISE && attrs[j].attribute_type == MSRP_LISTENER) || 
-        (attr->attribute_type == MSRP_LISTENER && attrs[j].attribute_type == MSRP_TALKER_ADVERTISE))
+    if ((opposite_port && (attr->port_num != attrs[j].port_num)) ||
+        (!opposite_port && (attr->port_num == attrs[j].port_num)))
     {
-      avb_sink_info_t *sink_info = (avb_sink_info_t *) attr->attribute_info;
-      avb_source_info_t *source_info = (avb_source_info_t *) attrs[j].attribute_info;
-
-      if (sink_info == NULL || source_info == NULL) continue;
-
-      if (attr->port_num == attrs[j].port_num) continue;
-
-
-      if (sink_info->reservation.stream_id[0] == source_info->reservation.stream_id[0] && 
-          sink_info->reservation.stream_id[1] == source_info->reservation.stream_id[1])
+      if ((attr->attribute_type == MSRP_TALKER_ADVERTISE && attrs[j].attribute_type == MSRP_LISTENER) || 
+          (attr->attribute_type == MSRP_LISTENER && attrs[j].attribute_type == MSRP_TALKER_ADVERTISE))
       {
-        return &attrs[j];
-      }   
+        avb_sink_info_t *sink_info = (avb_sink_info_t *) attr->attribute_info;
+        avb_source_info_t *source_info = (avb_source_info_t *) attrs[j].attribute_info;
+
+        if (sink_info == NULL || source_info == NULL) continue;
+
+
+        if (sink_info->reservation.stream_id[0] == source_info->reservation.stream_id[0] && 
+            sink_info->reservation.stream_id[1] == source_info->reservation.stream_id[1])
+        {
+          return &attrs[j];
+        }   
+      }
     }
   }
   return 0;
@@ -1474,7 +1483,7 @@ void avb_mrp_process_packet(unsigned char buf[], int etype, int len, unsigned in
               avb_srp_info_t *stream_data;
               avb_srp_process_attribute(attr_type, first_value, i, &stream_data);
               // if (avb_srp_process_attribute(attr_type, first_value, i, &stream_data))
-              if (1)
+              if (three_packed_event != MRP_ATTRIBUTE_EVENT_MT)
               {
                 mrp_attribute_state *st = mrp_get_attr();
                 mrp_attribute_init(st, attr_type, port_num, 0, stream_data);
