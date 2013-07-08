@@ -37,7 +37,6 @@ int avb_srp_match_listener_to_talker_stream_id(unsigned stream_id[2], avb_srp_in
 {
   for(int i=0;i<AVB_STREAM_LIST_SIZE;i++)
   {
-    // simple_printf("compare %x:%x to %x:%x\n", stream_id[0], stream_id[1], stream_list[i].stream_id[0], stream_list[i].stream_id[1]);
     if (((is_listener && stream_list[i].talker_present == 1) || 
         (!is_listener && stream_list[i].listener_present == 1)) &&
         stream_id[0] == stream_list[i].reservation.stream_id[0] &&
@@ -46,11 +45,6 @@ int avb_srp_match_listener_to_talker_stream_id(unsigned stream_id[2], avb_srp_in
       {
         *stream = &stream_list[i].reservation;
       }
-      else
-      {
-        // printstrln("null stream");
-      }
-      // printstrln("match");
       return 1;
     }
   }
@@ -392,9 +386,7 @@ int avb_srp_process_attribute(int mrp_attribute_type, char *fv, int num, avb_srp
   // case it is a failed message
   srp_talker_first_value *packet = (srp_talker_first_value *) fv;
   unsigned int *pdu_streamId = &failed_streamId[0];
-  int registered = 0;
 
-  unsigned int lstreamId[2];
   unsigned long long streamId;
 
   for (int i=0;i<8;i++)
@@ -422,30 +414,26 @@ int avb_srp_process_attribute(int mrp_attribute_type, char *fv, int num, avb_srp
     }
   }
 
+  return -1;
+
 }
 
 void avb_srp_talker_join_ind(mrp_attribute_state *attr, int new)
 {
   avb_sink_info_t *sink_info = (avb_sink_info_t *) attr->attribute_info;
   unsigned stream = avb_get_sink_stream_index_from_stream_id(sink_info->reservation.stream_id);
-  mrp_attribute_state *matched_talker_listener_this_port = mrp_match_attribute_by_stream_id(attr, 0); 
+  mrp_attribute_state *matched_listener_this_port = mrp_match_attribute_by_stream_id(attr, 0); 
 
-  if (stream != -1u && matched_talker_listener_this_port)
+  /* This covers the case where the Listener joins before the Talker attribute. When we receive the Talker join new, 
+   * we also trigger join for the Listener attribute on the same port if it already exists. */
+  if (stream != -1u && matched_listener_this_port)
   {
-    mrp_mad_join(matched_talker_listener_this_port, 1);
+    mrp_mad_join(matched_listener_this_port, 1);
   }
 
-	// if (stream != -1u)
+  if (new)
   {
-		// This could be used to report talker advertising instead of the snooping scheme above
-	}
-  // else
-  {
-    if (new)
-    {
-      // printstr("Talker ");
-      avb_srp_map_join(attr, new, 0);
-    }
+    avb_srp_map_join(attr, new, 0);
   }
 }
 

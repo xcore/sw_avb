@@ -1371,24 +1371,6 @@ static int match_attribute_of_same_type(mrp_attribute_type attr_type,
   return 0;
 }
 
-static void process(mrp_attribute_type attr_type, 
-                   char *msg, 
-                   int i, 
-                   int three_packed_event,
-                   int four_packed_event)
-{
-  switch (attr_type) {
-  case MSRP_TALKER_ADVERTISE:   
-  case MSRP_TALKER_FAILED:
-    avb_srp_process_talker(attr_type, msg, i);
-    return;
-  default:
-  return;
-  }
-  return;
-
-}
-
 
 static int decode_threepacked(int vector, int i)
 {
@@ -1480,11 +1462,10 @@ void avb_mrp_process_packet(unsigned char buf[], int etype, int len, unsigned in
                 attr_type == MSRP_TALKER_FAILED ||
                 attr_type == MSRP_LISTENER)
             {
-              avb_srp_info_t *stream_data;
-              avb_srp_process_attribute(attr_type, first_value, i, &stream_data);
-              // if (avb_srp_process_attribute(attr_type, first_value, i, &stream_data))
               if (three_packed_event != MRP_ATTRIBUTE_EVENT_MT)
               {
+                avb_srp_info_t *stream_data;
+                avb_srp_process_attribute(attr_type, first_value, i, &stream_data);
                 mrp_attribute_state *st = mrp_get_attr();
                 mrp_attribute_init(st, attr_type, port_num, 0, stream_data);
                 simple_printf("mrp_attribute_init: %d, %d, STREAM_ID[0]: %x\n", attr_type, port_num, stream_data->stream_id[0]);
@@ -1494,15 +1475,8 @@ void avb_mrp_process_packet(unsigned char buf[], int etype, int len, unsigned in
 
                 mrp_in(three_packed_event, four_packed_event, st, port_num);
               }
-              else
-              {
-                simple_printf("Attr didn't match: %d\n", attr_type);
-              }
             }
         }
-
-        // This allows various modules to snoop on the individual message
-        // process(attr_type, first_value, i, three_packed_event, four_packed_event);
 
       }
       msg = msg + len;
