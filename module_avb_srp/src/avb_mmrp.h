@@ -1,7 +1,7 @@
 #ifndef __AVB_MMRP_H__
 #define __AVB_MMRP_H__
 #include "avb_conf.h"
-#include "avb_control_types.h"
+#include "avb_mrp.h"
 
 /** \file avb_mmrp.h
  *

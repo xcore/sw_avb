@@ -1,6 +1,7 @@
 #ifndef __AVB_1722_MAAP_H_
 #define __AVB_1722_MAAP_H_
 #include <xccompat.h>
+#include "xc2compat.h"
 #include "avb_control_types.h"
 
 #define MAX_AVB_1722_MAAP_PDU_SIZE (64)
@@ -28,7 +29,7 @@ void avb_1722_maap_request_addresses(int num_addresses, char start_address[]);
 
 void avb_1722_maap_init(unsigned char macaddr[6]);
 
-void avb_1722_maap_process_packet(unsigned char buf[], unsigned char src_addr[6], int nbytes, chanend c_tx);
+void avb_1722_maap_process_packet(unsigned char *unsafe buf, unsigned char src_addr[6], int nbytes, chanend c_tx);
 
 /** Relinquish the reserved MAAP address range
  *

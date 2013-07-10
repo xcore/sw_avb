@@ -6,7 +6,6 @@
 #include <xccompat.h>
 #include "avb_1722_router.h"
 #include "avb_1722_router_table.h"
-#include "avb_srp.h"
 #include "print.h"
 #include "simple_printf.h"
 #include "ethernet_tx_client.h"

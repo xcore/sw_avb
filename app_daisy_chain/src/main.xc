@@ -17,13 +17,13 @@
 #include "simple_demo_controller.h"
 #include "avb_1722_1_adp.h"
 #include "app_config.h"
+#include "avb_ethernet.h"
+#include "avb_1722.h"
+#include "gptp.h"
+#include "media_clock_server.h"
 
 // This is the number of master clocks in a word clock
 #define MASTER_TO_WORDCLOCK_RATIO 512
-
-// Set the period inbetween periodic processing to 50us based
-// on the Xcore 100Mhz timer.
-#define PERIODIC_POLL_TIME 5000
 
 // Timeout for debouncing buttons
 #define BUTTON_TIMEOUT_PERIOD (20000000)
@@ -97,7 +97,7 @@ media_input_fifo_data_t ififo_data[AVB_NUM_MEDIA_INPUTS];
 media_input_fifo_t ififos[AVB_NUM_MEDIA_INPUTS];
 #endif
 
-void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl);
+[[combinable]] void demo_task(client interface avb_interface avb, chanend c_gpio_ctl);
 void gpio_task(chanend c_gpio_ctl);
 
 void xscope_user_init(void)
@@ -144,6 +144,8 @@ int main(void)
   chan c_media_clock_ctl;
 
   chan c_gpio_ctl;
+
+  interface avb_interface avb;
 
   par
   {
@@ -257,22 +259,24 @@ int main(void)
 #if (AVB_I2C_TILE == 1)
       audio_hardware_setup();
 #endif
-      // First initialize avb higher level protocols
-      avb_init(c_media_ctl,
-               #if AVB_DEMO_ENABLE_LISTENER
-               c_listener_ctl,
-               #else
-               null,
-               #endif
-               #if AVB_DEMO_ENABLE_TALKER
-               c_talker_ctl,
-               #else
-               null,
-               #endif
-               c_media_clock_ctl,
-               c_mac_rx[1], c_mac_tx[1], c_ptp[0]);
+      [[combine]] par {
+        avb_manager(avb,
+                   c_media_ctl,
+                   #if AVB_DEMO_ENABLE_LISTENER
+                   c_listener_ctl,
+                   #else
+                   null,
+                   #endif
+                   #if AVB_DEMO_ENABLE_TALKER
+                   c_talker_ctl,
+                   #else
+                   null,
+                   #endif
+                   c_media_clock_ctl,
+                   c_mac_rx[1], c_mac_tx[1], c_ptp[0]);
+        demo_task(avb, c_gpio_ctl);
+      }
 
-      demo(c_mac_rx[1], c_mac_tx[1], c_gpio_ctl);
     }
 
     on tile[0]: ptp_output_test_clock(c_ptp[1 + AVB_DEMO_ENABLE_TALKER], ptp_sync_port, 100000000);
@@ -340,56 +344,42 @@ void gpio_task(chanend c_gpio_ctl)
 
 }
 
+
 /** The main application control task **/
-void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl)
+[[combinable]]
+void demo_task(client interface avb_interface avb, chanend c_gpio_ctl)
 {
-  timer tmr;
 #if AVB_DEMO_ENABLE_TALKER
   int map[AVB_NUM_MEDIA_INPUTS];
 #endif
-  unsigned periodic_timeout;
   unsigned sample_rate = 48000;
   int change_stream = 1;
   int toggle_remote = 0;
 
   // Initialize the media clock
-  set_device_media_clock_type(0, DEVICE_MEDIA_CLOCK_INPUT_STREAM_DERIVED);
-  set_device_media_clock_rate(0, sample_rate);
-  set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_ENABLED);
+  avb.set_device_media_clock_type(0, DEVICE_MEDIA_CLOCK_INPUT_STREAM_DERIVED);
+  avb.set_device_media_clock_rate(0, sample_rate);
+  avb.set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_ENABLED);
 
 #if AVB_DEMO_ENABLE_TALKER
-  set_avb_source_channels(0, AVB_NUM_MEDIA_INPUTS);
+  avb.set_source_channels(0, AVB_NUM_MEDIA_INPUTS);
   for (int i = 0; i < AVB_NUM_MEDIA_INPUTS; i++)
     map[i] = i;
-  set_avb_source_map(0, map, AVB_NUM_MEDIA_INPUTS);
-  set_avb_source_format(0, AVB_SOURCE_FORMAT_MBLA_24BIT, sample_rate);
-  set_avb_source_sync(0, 0); // use the media_clock defined above
+  avb.set_source_map(0, map, AVB_NUM_MEDIA_INPUTS);
+  avb.set_source_format(0, AVB_SOURCE_FORMAT_MBLA_24BIT, sample_rate);
+  avb.set_source_sync(0, 0); // use the media_clock defined above
 #endif
 
-  set_avb_sink_format(0, AVB_SOURCE_FORMAT_MBLA_24BIT, sample_rate);
+  avb.set_sink_format(0, AVB_SOURCE_FORMAT_MBLA_24BIT, sample_rate);
 
-  tmr :> periodic_timeout;
   while (1)
   {
-    unsigned int nbytes;
-    unsigned int buf[(MAX_AVB_CONTROL_PACKET_SIZE+1)>>2];
-    unsigned int port_num;
-
     select
     {
-      // Receive any incoming AVB packets (802.1Qat, 1722_MAAP)
-      case avb_get_control_packet(c_rx, buf, nbytes, port_num):
-      {
-        // Test for a control packet and process it
-        avb_process_control_packet(buf, nbytes, c_tx, port_num);
-
-        // add any special control packet handling here
-        break;
-      }
-
       // Receive any events from user button presses from the GPIO task
       case c_gpio_ctl :> int cmd:
       {
+#if 0
         switch (cmd)
         {
           case STREAM_SEL:
@@ -409,7 +399,7 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl)
               int map[AVB_NUM_MEDIA_OUTPUTS];
 
               channel = selected_chan*2;
-              get_avb_sink_state(0, cur_state);
+              get_avb_sink_state(0, &cur_state);
               set_avb_sink_state(0, AVB_SINK_STATE_DISABLED);
               for (int j=0;j<AVB_NUM_MEDIA_OUTPUTS;j++)
               {
@@ -434,20 +424,9 @@ void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl)
           }
           break;
         }
+#endif
         break;
       }
-
-      // Periodic processing
-      case tmr when timerafter(periodic_timeout) :> unsigned int time_now:
-      {
-        avb_periodic(time_now);
-
-        simple_demo_controller(change_stream, toggle_remote, c_tx);
-
-        periodic_timeout += PERIODIC_POLL_TIME;
-        break;
-      }
-
     } // end select
   } // end while
 }

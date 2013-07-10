@@ -1,7 +1,6 @@
 #include <xs1.h>
 #include "avb_mrp.h"
 #include "avb_srp.h"
-#include "avb_stream.h"
 #include "avb_mmrp.h"
 #include "avb_mvrp.h"
 #include "avb_mrp_pdu.h"
@@ -822,7 +821,6 @@ void mrp_debug_dump_attrs(void)
   
 }
 
-
 void mrp_attribute_init(mrp_attribute_state *st,
                         mrp_attribute_type t,
                         unsigned int port_num,
@@ -835,6 +833,32 @@ void mrp_attribute_init(mrp_attribute_state *st,
   st->propagated = 0;
   st->here = here;
   return;
+}
+
+void mrp_attribute_init_source_info(mrp_attribute_state *st,
+                        mrp_attribute_type t,
+                        unsigned int port_num,
+                        unsigned int here,
+                        avb_source_info_t *source)
+{
+  mrp_attribute_init(st, t, port_num, here, source);
+}
+
+void mrp_attribute_init_sink_info(mrp_attribute_state *st,
+                        mrp_attribute_type t,
+                        unsigned int port_num,
+                        unsigned int here,
+                        avb_sink_info_t *sink)
+{
+  mrp_attribute_init(st, t, port_num, here, sink);
+}
+
+void mrp_attribute_init_null(mrp_attribute_state *st,
+                        mrp_attribute_type t,
+                        unsigned int port_num,
+                        unsigned int here)
+{
+  mrp_attribute_init(st, t, port_num, here, NULL);
 }
 
 
@@ -1386,7 +1410,7 @@ static int decode_fourpacked(int vector, int i)
   return (vector % 4);
 }          
 
-void avb_mrp_process_packet(unsigned char buf[], int etype, int len, unsigned int port_num)
+void avb_mrp_process_packet(unsigned char *buf, int etype, int len, unsigned int port_num)
 {
   char *end = (char *) &buf[0] + len;
   char *msg = (char *) &buf[0] + sizeof(mrp_header);

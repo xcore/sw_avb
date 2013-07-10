@@ -63,7 +63,7 @@ void media_clock_set_source(chanend media_clock_svr, int media_clock_num,
  *  \param a pointer to an integer where the clock source is placed
  */
 void media_clock_get_source(chanend media_clock_svr, int media_clock_num, 
-                         REFERENCE_PARAM(int,a));
+                         int *a);
 
 
 /**
@@ -91,6 +91,6 @@ int  media_clock_get_state(chanend media_clock_svr, int media_clock_num);
  *  \param clk_ctl
  *  \param clk_num
  */
-void media_clock_register(chanend media_clock_svr, int clk_ctl, int clk_num);
+unsafe void media_clock_register(chanend media_clock_svr, chanend *unsafe clk_ctl, int clk_num);
 
 #endif 

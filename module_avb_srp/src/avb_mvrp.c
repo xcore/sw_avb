@@ -1,5 +1,5 @@
-#include "avb.h"
 #include "avb_mvrp.h"
+#include "avb.h"
 #include "avb_mrp.h"
 #include "avb_mrp_pdu.h"
 #include "avb_mvrp_pdu.h"

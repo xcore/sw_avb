@@ -64,7 +64,7 @@ inline int mac_custom_filter(unsigned int buf[], unsigned int mac[2], int &user_
         else {
           // route the 1722 streams
           unsigned id0, id1;
-          int link, hash, forward;
+          int link, hash, f0rward;
           int lookup;
           if (qhdr) {
             id0 = (buf[7] << 16 | buf[5]>>16);
@@ -79,7 +79,7 @@ inline int mac_custom_filter(unsigned int buf[], unsigned int mac[2], int &user_
                                          id1,
                                          link,
                                          hash,
-                                         forward);
+                                         f0rward);
 
           if (lookup) {
             if (link != -1)
@@ -92,7 +92,7 @@ inline int mac_custom_filter(unsigned int buf[], unsigned int mac[2], int &user_
             }
             user_data = hash;
 #if NUM_ETHERNET_MASTER_PORTS == 2
-            if (forward)
+            if (f0rward)
             {
               result |= MII_FILTER_FORWARD_TO_OTHER_PORTS;
             }

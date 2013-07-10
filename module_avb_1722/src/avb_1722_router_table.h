@@ -31,14 +31,14 @@ int avb_1722_router_table_lookup_simple(int key0,
                                         int key1, 
                                         REFERENCE_PARAM(int, link), 
                                         REFERENCE_PARAM(int, avb_hash),
-                                        REFERENCE_PARAM(int, forward));
+                                        REFERENCE_PARAM(int, f0rward));
 
 void avb_1722_router_table_add_or_update_entry_simple(int key0,
                                                       int key1,
                                                       int link,
                                                       int avb_hash);
 
-void avb_1722_router_table_add_or_update_forwarding_simple(int key0, int key1, int forward);
+void avb_1722_router_table_add_or_update_forwarding_simple(int key0, int key1, int f0rward);
 
 
 #if AVB_1722_USE_HASHING_ROUTER_TABLE

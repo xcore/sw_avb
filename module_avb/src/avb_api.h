@@ -1,16 +1,10 @@
-#ifndef _avb_api_h_
-#define _avb_api_h_
-#include <xccompat.h>
+#ifndef _api_h_
+#define _api_h_
+// #include <xccompat.h>
 #include "avb_control_types.h"
 
 #ifdef __XC__
-#define REFERENCE_TO
-#else
-#define REFERENCE_TO &
-#endif
-
-int getset_avb_source_presentation(int set, int source_num,REFERENCE_PARAM(int, a0));
-
+interface avb_interface {
 /** Set the presentation time offset of an AVB source.
  *
  *  Sets the presentation time offset of a source i.e. the
@@ -25,17 +19,13 @@ int getset_avb_source_presentation(int set, int source_num,REFERENCE_PARAM(int, 
  *
  *
  **/
-inline int set_avb_source_presentation(int source_num,int presentation)
-{return getset_avb_source_presentation(1, source_num,REFERENCE_TO presentation);}
+  int set_source_presentation(int source_num, int presentation);
 
 /** Get the presentation time offset of an AVB source.
  *  \param source_num       the local source number to set
  *  \param presentation     the presentation offset in ms
  */
-inline int get_avb_source_presentation(int source_num,REFERENCE_PARAM(int, presentation))
- {return getset_avb_source_presentation(0, source_num,presentation);}
-
-int getset_avb_source_map(int set, int source_num,int a0[], REFERENCE_PARAM(int, a0_len));
+  int get_source_presentation(int source_num, int *presentation);
 
 /** Set the channel map of an avb source.
  *
@@ -52,8 +42,7 @@ int getset_avb_source_map(int set, int source_num,int a0[], REFERENCE_PARAM(int,
  *             in the stream
  *
  **/
-inline int set_avb_source_map(int source_num,int map[], int len)
-{return getset_avb_source_map(1, source_num,map, REFERENCE_TO len);}
+  int set_source_map(int source_num, int map[len], int len);
 
 /** Get the channel map of an avb source.
  *  \param source_num the local source number to set
@@ -62,10 +51,7 @@ inline int set_avb_source_map(int source_num,int map[], int len)
  *  \param len the length of the map; should be equal to the number of channels
  *             in the stream
  */
-inline int get_avb_source_map(int source_num,int map[], REFERENCE_PARAM(int, len))
- {return getset_avb_source_map(0, source_num,map, len);}
-
-int getset_avb_source_dest(int set, int source_num,unsigned char a0[], REFERENCE_PARAM(int, a0_len));
+  int get_source_map(int source_num, int map[], int *len);
 
 /** Set the destination address of an avb source.
  *
@@ -78,18 +64,14 @@ int getset_avb_source_dest(int set, int source_num,unsigned char a0[], REFERENCE
  *  \param len          the length of the address, should always be equal to 6
  *
  **/
-inline int set_avb_source_dest(int source_num,unsigned char addr[], int len)
-{return getset_avb_source_dest(1, source_num,addr, REFERENCE_TO len);}
+  int set_source_dest(int source_num, unsigned char addr[], int len);
 
 /** Get the destination address of an avb source.
  *  \param source_num   the local source number
  *  \param addr         the destination address as an array of 6 bytes
  *  \param len          the length of the address, should always be equal to 6
  */
-inline int get_avb_source_dest(int source_num,unsigned char addr[], REFERENCE_PARAM(int, len))
- {return getset_avb_source_dest(0, source_num,addr, len);}
-
-int getset_avb_source_format(int set, int source_num,REFERENCE_PARAM(enum avb_stream_format_t, a0),REFERENCE_PARAM(int, a1));
+  int get_source_dest(int source_num, unsigned char addr[], int *len);
 
 /** Set the format of an AVB source.
  *
@@ -104,18 +86,14 @@ int getset_avb_source_format(int set, int source_num,REFERENCE_PARAM(enum avb_st
  *  \param format     the format of the stream
  *  \param rate       the sample rate of the stream in Hz
  */
-inline int set_avb_source_format(int source_num,enum avb_stream_format_t format,int rate)
-{return getset_avb_source_format(1, source_num,REFERENCE_TO format,REFERENCE_TO rate);}
+  int set_source_format(int source_num, enum avb_stream_format_t format, int rate);
 
 /** Get the format of an AVB source.
  *  \param source_num the local source number
  *  \param format     the format of the stream
  *  \param rate       the sample rate of the stream in Hz
  */
-inline int get_avb_source_format(int source_num,REFERENCE_PARAM(enum avb_stream_format_t, format),REFERENCE_PARAM(int, rate))
- {return getset_avb_source_format(0, source_num,format,rate);}
-
-int getset_avb_source_channels(int set, int source_num,REFERENCE_PARAM(int, a0));
+  int get_source_format(int source_num, enum avb_stream_format_t *format, int *rate);
 
 /** Set the channel count of an AVB source.
  *
@@ -127,17 +105,13 @@ int getset_avb_source_channels(int set, int source_num,REFERENCE_PARAM(int, a0))
  *  \param source_num   the local source number
  *  \param channels     the number of channels
  */
-inline int set_avb_source_channels(int source_num,int channels)
-{return getset_avb_source_channels(1, source_num,REFERENCE_TO channels);}
+  int set_source_channels(int source_num, int channels);
 
 /** Get the channel count of an AVB source.
  *  \param source_num   the local source number
  *  \param channels     the number of channels
  */
-inline int get_avb_source_channels(int source_num,REFERENCE_PARAM(int, channels))
- {return getset_avb_source_channels(0, source_num,channels);}
-
-int getset_avb_source_sync(int set, int source_num,REFERENCE_PARAM(int, a0));
+  int get_source_channels(int source_num, int *channels);
 
 /** Set the media clock of an AVB source.
  *
@@ -146,21 +120,15 @@ int getset_avb_source_sync(int set, int source_num,REFERENCE_PARAM(int, a0));
  *  \param source_num   the local source number
  *  \param sync         the media clock number
  */
-inline int set_avb_source_sync(int source_num,int sync)
-{return getset_avb_source_sync(1, source_num,REFERENCE_TO sync);}
+  int set_source_sync(int source_num, int sync);
 
 /** Get the media clock of an AVB source.
  *  \param source_num   the local source number
  *  \param sync         the media clock number
  */
-inline int get_avb_source_sync(int source_num,REFERENCE_PARAM(int, sync))
- {return getset_avb_source_sync(0, source_num,sync);}
+  int get_source_sync(int source_num, int *sync);
 
-int get_avb_source_id(int source_num,unsigned int a0[2]);
-
-int getset_avb_source_vlan(int set, int source_num,REFERENCE_PARAM(int, a0));
-
-int set_avb_source_port(int source_num, int port_num);
+  int set_source_port(int source_num, int port_num);
 
 /** Set the destination vlan of an AVB source.
  *
@@ -173,17 +141,13 @@ int set_avb_source_port(int source_num, int port_num);
  *  \param source_num the local source number
  *  \param vlan       the destination vlan id, The media clock number
  */
-inline int set_avb_source_vlan(int source_num,int vlan)
-{return getset_avb_source_vlan(1, source_num,REFERENCE_TO vlan);}
+  int set_source_vlan(int source_num, int vlan);
 
 /** Get the destination vlan of an AVB source.
  *  \param source_num the local source number
  *  \param vlan       the destination vlan id, The media clock number
  */
-inline int get_avb_source_vlan(int source_num,REFERENCE_PARAM(int, vlan))
- {return getset_avb_source_vlan(0, source_num,vlan);}
-
-int getset_avb_source_state(int set, int source_num,REFERENCE_PARAM(enum avb_source_state_t, a0));
+  int get_source_vlan(int source_num, int *vlan);
 
 /** Set the current state of an AVB source.
  *
@@ -195,26 +159,24 @@ int getset_avb_source_state(int set, int source_num,REFERENCE_PARAM(enum avb_sou
  *  \param source_num the local source number
  *  \param state      the state of the source
  */
-inline int set_avb_source_state(int source_num,enum avb_source_state_t state)
-{return getset_avb_source_state(1, source_num,REFERENCE_TO state);}
+  int set_source_state(int source_num, enum avb_source_state_t state);
 
 /** Get the current state of an AVB source.
  *  \param source_num the local source number
  *  \param state      the state of the source
  */
-inline int get_avb_source_state(int source_num,REFERENCE_PARAM(enum avb_source_state_t, state))
- {return getset_avb_source_state(0, source_num,state);}
+  int get_source_state(int source_num, enum avb_source_state_t *state);
 
-int get_avb_sources(REFERENCE_PARAM(int, a0));
-int get_avb_sinks(REFERENCE_PARAM(int, a0));
-int get_avb_ptp_gm(unsigned char a0[]);
-int get_avb_ptp_ports(REFERENCE_PARAM(int, a0));
-int get_avb_ptp_rateratio(REFERENCE_PARAM(int, a0));
-int get_avb_ptp_port_pdelay(int h0,REFERENCE_PARAM(unsigned, a0));
+  int get_source_id(int source_num, unsigned int id[2]);
 
-int getset_avb_sink_format(int set, int h0,REFERENCE_PARAM(enum avb_stream_format_t, a0),REFERENCE_PARAM(int, a1));
+#if 0 
+  int get_ptp_gm(unsigned char id[8]);
+  int get_ptp_ports(int *a0);
+  int get_ptp_rateratio(int *ratio);
+  int get_ptp_port_pdelay(int port, unsigned *delay);
+#endif
 
-/** Set the format of an AVB sink.
+  /** Set the format of an AVB sink.
  *
  *  The AVB sink format covers the encoding and sample rate of the sink.
  *  Currently the format is limited to a single encoding MBLA 24 bit signed
@@ -227,19 +189,14 @@ int getset_avb_sink_format(int set, int h0,REFERENCE_PARAM(enum avb_stream_forma
  *  \param format       the format of the stream
  *  \param rate         the sample rate of the stream in Hz
  */
-inline int set_avb_sink_format(int sink_num,enum avb_stream_format_t format,int rate)
-{return getset_avb_sink_format(1, sink_num,REFERENCE_TO format,REFERENCE_TO rate);}
+ int set_sink_format(int sink_num, enum avb_stream_format_t format, int rate);
 
-
-/** Get the format of an AVB sink.
+ /** Get the format of an AVB sink.
  *  \param sink_num the local sink number
  *  \param format     the format of the stream
  *  \param rate       the sample rate of the stream in Hz
  */
-inline int get_avb_sink_format(int sink_num,REFERENCE_PARAM(enum avb_stream_format_t, format),REFERENCE_PARAM(int, rate))
- {return getset_avb_sink_format(0, sink_num,format,rate);}
-
-int getset_avb_sink_channels(int set, int h0,REFERENCE_PARAM(int, a0));
+  int get_sink_format(int sink_num, enum avb_stream_format_t *format, int *rate);
 
 /** Set the channel count of an AVB sink.
  *
@@ -251,17 +208,13 @@ int getset_avb_sink_channels(int set, int h0,REFERENCE_PARAM(int, a0));
  *  \param sink_num     the local sink number
  *  \param channels     the number of channels
  */
-inline int set_avb_sink_channels(int sink_num,int channels)
-{return getset_avb_sink_channels(1, sink_num,REFERENCE_TO channels);}
+  int set_sink_channels(int sink_num, int channels);
 
 /** Get the channel count of an AVB sink.
  *  \param sink_num     the local sink number
  *  \param channels     the number of channels
  */
-inline int get_avb_sink_channels(int sink_num,REFERENCE_PARAM(int, channels))
- {return getset_avb_sink_channels(0, sink_num,channels);}
-
-int getset_avb_sink_sync(int set, int sink_num,REFERENCE_PARAM(int, sync));
+  int get_sink_channels(int sink_num, int *channels);
 
 /** Set the media clock of an AVB sink.
  *
@@ -270,17 +223,14 @@ int getset_avb_sink_sync(int set, int sink_num,REFERENCE_PARAM(int, sync));
  *  \param sink_num   the local sink number
  *  \param sync         the media clock number
  */
-inline int set_avb_sink_sync(int sink_num,int sync)
-{return getset_avb_sink_sync(1, sink_num,REFERENCE_TO sync);}
+  int set_sink_sync(int sink_num, int sync);
 
 /** Get the media clock of an AVB sink.
  *  \param sink_num   the local sink number
  *  \param sync         the media clock number
  */
-inline int get_avb_sink_sync(int sink_num,REFERENCE_PARAM(int, sync))
- {return getset_avb_sink_sync(0, sink_num,sync);}
+  int get_sink_sync(int sink_num, int *sync);
 
-int getset_avb_sink_vlan(int set, int h0,REFERENCE_PARAM(int, a0));
 
 /** Set the virtual lan id of an AVB sink.
  *
@@ -293,17 +243,13 @@ int getset_avb_sink_vlan(int set, int h0,REFERENCE_PARAM(int, a0));
  * \param vlan     the vlan id of the sink
  *
  */
-inline int set_avb_sink_vlan(int sink_num,int vlan)
-{return getset_avb_sink_vlan(1, sink_num,REFERENCE_TO vlan);}
+  int set_sink_vlan(int sink_num, int vlan);
 
 /** Get the virtual lan id of an AVB sink.
  * \param sink_num the number of the sink
  * \param vlan     the vlan id of the sink
  */
-inline int get_avb_sink_vlan(int sink_num,REFERENCE_PARAM(int, vlan))
- {return getset_avb_sink_vlan(0, sink_num,vlan);}
-
-int getset_avb_sink_state(int set, int sink_num,REFERENCE_PARAM(enum avb_sink_state_t, state));
+  int get_sink_vlan(int sink_num, int *vlan);
 
 /** Set the state of an AVB sink.
  *
@@ -316,17 +262,13 @@ int getset_avb_sink_state(int set, int sink_num,REFERENCE_PARAM(enum avb_sink_st
  * \param state the state of the sink
  *
  */
-inline int set_avb_sink_state(int sink_num,enum avb_sink_state_t state)
-{return getset_avb_sink_state(1, sink_num,REFERENCE_TO state);}
+  int set_sink_state(int sink_num, enum avb_sink_state_t state);
 
 /** Get the state of an AVB sink.
  * \param sink_num the number of the sink
  * \param state the state of the sink
  */
-inline int get_avb_sink_state(int sink_num,REFERENCE_PARAM(enum avb_sink_state_t, state))
- {return getset_avb_sink_state(0, sink_num,state);}
-
-int getset_avb_sink_map(int set, int sink_num,int map[], REFERENCE_PARAM(int, len));
+  int get_sink_state(int sink_num, enum avb_sink_state_t *state);
 
 /** Set the map of an AVB sink.
  *
@@ -341,8 +283,7 @@ int getset_avb_sink_map(int set, int sink_num,int map[], REFERENCE_PARAM(int, le
  * \param len        the length of the map; should equal to the number
  *                   of channels in the stream
  */
-inline int set_avb_sink_map(int sink_num,int map[], int len)
-{return getset_avb_sink_map(1, sink_num,map, REFERENCE_TO len);}
+  int set_sink_map(int sink_num, int map[len], int len);
 
 /** Get the map of an AVB sink.
  * \param sink_num   the number of the sink
@@ -351,10 +292,7 @@ inline int set_avb_sink_map(int sink_num,int map[], int len)
  * \param len        the length of the map; should equal to the number
  *                   of channels in the stream
  */
-inline int get_avb_sink_map(int sink_num,int map[], REFERENCE_PARAM(int, len))
- {return getset_avb_sink_map(0, sink_num,map, len);}
-
-int getset_avb_sink_id(int set, int sink_num,unsigned int stream_id[2]);
+  int get_sink_map(int sink_num, int map[], int *len);
 
 /** Set the stream id that an AVB sink listens to.
  *
@@ -367,17 +305,13 @@ int getset_avb_sink_id(int set, int sink_num,unsigned int stream_id[2]);
  * \param stream_id     int array containing the 64-bit of the stream
  *
  */
-inline int set_avb_sink_id(int sink_num,unsigned int stream_id[2])
-{return getset_avb_sink_id(1, sink_num,stream_id);}
+  int set_sink_id(int sink_num, unsigned int stream_id[2]);
 
 /** Get the stream id that an AVB sink listens to.
  * \param sink_num      the number of the sink
  * \param stream_id     int array containing the 64-bit of the stream
  */
-inline int get_avb_sink_id(int sink_num,unsigned int stream_id[2])
- {return getset_avb_sink_id(0, sink_num,stream_id);}
-
-int getset_avb_sink_addr(int set, int sink_num,unsigned char addr[], REFERENCE_PARAM(int, len));
+  int get_sink_id(int sink_num, unsigned int stream_id[2]);
 
 /** Set the incoming destination mac address of an avb sink.
  *
@@ -393,21 +327,14 @@ int getset_avb_sink_addr(int set, int sink_num,unsigned char addr[], REFERENCE_P
  *  \param len          The length of the address, should always be equal to 6.
  *
  **/
-inline int set_avb_sink_addr(int sink_num,unsigned char addr[], int len)
-{return getset_avb_sink_addr(1, sink_num,addr, REFERENCE_TO len);}
+  int set_sink_addr(int sink_num, unsigned char addr[len], int len);
 
 /** Get the incoming destination mac address of an avb sink.
  *  \param sink_num     The local sink number
  *  \param addr         The mac address as an array of 6 bytes.
  *  \param len          The length of the address, should always be equal to 6.
  */
-inline int get_avb_sink_addr(int sink_num,unsigned char addr[], REFERENCE_PARAM(int, len))
- {return getset_avb_sink_addr(0, sink_num,addr, len);}
-
-int get_media_outs(REFERENCE_PARAM(int, a0));
-int get_media_ins(REFERENCE_PARAM(int, a0));
-
-int getset_device_media_clock_source(int set, int clock_num,REFERENCE_PARAM(int, source));
+  int get_sink_addr(int sink_num, unsigned char addr[], int *len);
 
 /** Set the source of a media clock.
  *
@@ -418,17 +345,13 @@ int getset_device_media_clock_source(int set, int clock_num,REFERENCE_PARAM(int,
  *  \param source the output FIFO number to base the clock on
  *
  **/
-inline int set_device_media_clock_source(int clock_num,int source)
-{return getset_device_media_clock_source(1, clock_num,REFERENCE_TO source);}
+  int set_device_media_clock_source(int clock_num, int source);
 
 /** Get the source of a media clock.
  *  \param clock_num the number of the media clock
  *  \param source the output FIFO number to base the clock on
  */
-inline int get_device_media_clock_source(int clock_num,REFERENCE_PARAM(int, source))
- {return getset_device_media_clock_source(0, clock_num,source);}
-
-int getset_device_media_clock_rate(int set, int clock_num,REFERENCE_PARAM(int, rate));
+  int get_device_media_clock_source(int clock_num, int *source);
 
 /** Set the rate of a media clock.
  *
@@ -438,17 +361,13 @@ int getset_device_media_clock_rate(int set, int clock_num,REFERENCE_PARAM(int, r
  *  \param rate the rate of the clock in Hz
  *
  **/
-inline int set_device_media_clock_rate(int clock_num,int rate)
-{return getset_device_media_clock_rate(1, clock_num,REFERENCE_TO rate);}
+  int set_device_media_clock_rate(int clock_num, int rate);
 
 /** Get the rate of a media clock.
  *  \param clock_num the number of the media clock
  *  \param rate the rate of the clock in Hz
  */
-inline int get_device_media_clock_rate(int clock_num,REFERENCE_PARAM(int, rate))
- {return getset_device_media_clock_rate(0, clock_num,rate);}
-
-int getset_device_media_clock_type(int set, int clock_num,REFERENCE_PARAM(enum device_media_clock_type_t, clock_type));
+  int get_device_media_clock_rate(int clock_num, int *rate);
 
 /** Set the type of a media clock.
  *
@@ -456,18 +375,14 @@ int getset_device_media_clock_type(int set, int clock_num,REFERENCE_PARAM(enum d
  *  \param clock_type the type of the clock 
  * 
  **/
-inline int set_device_media_clock_type(int clock_num,enum device_media_clock_type_t clock_type)
-{return getset_device_media_clock_type(1, clock_num,REFERENCE_TO clock_type);}
+  int set_device_media_clock_type(int clock_num, enum device_media_clock_type_t clock_type);
 
 /** Get the type of a media clock.
  *
  *  \param clock_num the number of the media clock
  *  \param clock_type the type of the clock
  */
-inline int get_device_media_clock_type(int clock_num,REFERENCE_PARAM(enum device_media_clock_type_t, clock_type))
- {return getset_device_media_clock_type(0, clock_num,clock_type);}
-
-int getset_device_media_clock_state(int set, int clock_num,REFERENCE_PARAM(enum device_media_clock_state_t, a0));
+  int get_device_media_clock_type(int clock_num, enum device_media_clock_type_t *clock_type);
 
 /** Set the state of a media clock.
  *
@@ -476,15 +391,14 @@ int getset_device_media_clock_state(int set, int clock_num,REFERENCE_PARAM(enum 
  *  \param clock_num the number of the media clock
  *  \param state the state of the clock
  **/
-inline int set_device_media_clock_state(int clock_num,enum device_media_clock_state_t state)
-{return getset_device_media_clock_state(1, clock_num,REFERENCE_TO state);}
+  int set_device_media_clock_state(int clock_num, enum device_media_clock_state_t state);
 
 /** Get the state of a media clock.
  *  \param clock_num the number of the media clock
  *  \param state the state of the clock
  */
-inline int get_device_media_clock_state(int clock_num,REFERENCE_PARAM(enum device_media_clock_state_t, state))
- {return getset_device_media_clock_state(0, clock_num,state);}
+  int get_device_media_clock_state(int clock_num, enum device_media_clock_state_t *state);
+};
+#endif
 
-
-#endif // _avb_api_h_
+#endif // _api_h_

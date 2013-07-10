@@ -1,16 +1,12 @@
-
 #ifndef _avb_mrp_h_
 #define _avb_mrp_h_
-#include "avb_control_types.h"
-#ifdef __avb_conf_h_exist__
+
 #include "avb_conf.h"
-#endif
+#include "xc2compat.h"
 
-#ifdef __mrp_conf_h_exist__
-#include "mrp_conf.h"
-#endif
+#include "avb_mrp_types.h"
+#include "avb_stream.h"
 
-#include "misc_timer.h"
 
 /** \file avb_mrp.h
  *
@@ -39,70 +35,8 @@
 #endif
 #endif
 
-#define MRP_FULL_PARTICIPANT 1
-
 #define MRP_DEBUG_ATTR_EGRESS 0
 #define MRP_DEBUG_ATTR_INGRESS 0
-
-
-typedef enum {
-  MRP_UNUSED,
-  MRP_DISABLED,  
-  MRP_VO, // Very anxious Observer
-  MRP_VP, // Very anxious Passive
-  MRP_VN, // Very anxious New
-  MRP_AN, // Anxious New
-  MRP_AA, // Anxious Active
-  MRP_QA, // Quiet Active
-  MRP_LA, // Leaving Active
-  MRP_AO, // Anxious Observer
-  MRP_QO, // Quiet Observer
-  MRP_AP, // Anxious Passive
-  MRP_QP, // Quiet Passive
-#ifdef MRP_FULL_PARTICIPANT
-  MRP_LO, // Leaving Observer
-#endif
-} mrp_applicant_state;
-
-typedef enum {
-  MRP_IN,
-  MRP_LV,
-  MRP_MT
-} mrp_registrar_state;
-
-typedef enum {
-  MRP_EVENT_BEGIN,
-  MRP_EVENT_NEW,
-  MRP_EVENT_FLUSH,
-  MRP_EVENT_JOIN,
-  MRP_EVENT_LV,
-  MRP_EVENT_RECEIVE_NEW,
-  MRP_EVENT_RECEIVE_JOININ,
-  MRP_EVENT_RECEIVE_IN,
-  MRP_EVENT_RECEIVE_JOINMT,
-  MRP_EVENT_RECEIVE_MT,
-  MRP_EVENT_RECEIVE_LEAVE,
-  MRP_EVENT_RECEIVE_LEAVE_ALL,
-  MRP_EVENT_REDECLARE,
-  MRP_EVENT_PERIODIC,
-  MRP_EVENT_TX,
-#ifdef MRP_FULL_PARTICIPANT
-  MRP_EVENT_TX_LEAVE_ALL,
-  MRP_EVENT_TX_LEAVE_ALL_FULL,
-  MRP_EVENT_LEAVETIMER
-#endif
-} mrp_event;
-
-
-typedef enum {
-  MSRP_TALKER_ADVERTISE,
-  MSRP_TALKER_FAILED,
-  MSRP_LISTENER,
-  MSRP_DOMAIN_VECTOR,
-  MMRP_MAC_VECTOR,
-  MVRP_VID_VECTOR,
-  MRP_NUM_ATTRIBUTE_TYPES
-} mrp_attribute_type;
 
 #define FIRST_VALUE_LENGTHS \
   { sizeof(srp_talker_first_value),             \
@@ -113,55 +47,10 @@ typedef enum {
     sizeof(mvrp_vid_vector_first_value)\
   }
 
-
-
-
-
-
-typedef enum {
-  MRP_ATTRIBUTE_EVENT_NEW = 0,
-  MRP_ATTRIBUTE_EVENT_JOININ = 1,
-  MRP_ATTRIBUTE_EVENT_IN = 2,
-  MRP_ATTRIBUTE_EVENT_JOINMT = 3,
-  MRP_ATTRIBUTE_EVENT_MT = 4,
-  MRP_ATTRIBUTE_EVENT_LV = 5
-} mrp_attribute_event;
-
-
-#ifndef __XC__
-
 #define PENDING_JOIN_NEW 0x01
 #define PENDING_JOIN     0x02
 #define PENDING_LEAVE    0x04
 
-
-typedef struct mrp_attribute_state {
-  unsigned int port_num;
-  unsigned char attribute_type;
-  unsigned char applicant_state;
-
-#ifdef MRP_FULL_PARTICIPANT
-  unsigned char registrar_state;
-  avb_timer leaveTimer;
-#endif
-
-  //! used to note indications that have been detected by the state machine but not
-  //! indicated to the application yet
-  short pending_indications;
-
-  //! if there is a pending indication and it had an associated four vector parameter
-  //! then the parameter is stored here
-  short four_vector_parameter;
-
-  //! While sorting the attributes, this contains a linked list of sorted attributes
-  struct mrp_attribute_state *next;
-
-  char here;
-  char propagated;
-
-  //! Generic pointer to allow random data to be stored alongside the attribute
-  void *attribute_info;
-} mrp_attribute_state;
 
 #define MRP_JOINTIMER_PERIOD_CENTISECONDS 20
 
@@ -195,13 +84,29 @@ void mrp_init(char macaddr[]);
 
    \note: see also mrp_update_state
 */
-void mrp_attribute_init(mrp_attribute_state *st,
+void mrp_attribute_init(mrp_attribute_state *unsafe st,
                         mrp_attribute_type t,
                         unsigned int port_num,
                         unsigned int here,
-                        void *info);
+                        void *unsafe info);
 
 
+void mrp_attribute_init_source_info(mrp_attribute_state *unsafe st,
+                        mrp_attribute_type t,
+                        unsigned int port_num,
+                        unsigned int here,
+                        avb_source_info_t *unsafe source);
+
+void mrp_attribute_init_sink_info(mrp_attribute_state *unsafe st,
+                        mrp_attribute_type t,
+                        unsigned int port_num,
+                        unsigned int here,
+                        avb_sink_info_t *unsafe sink);
+
+void mrp_attribute_init_null(mrp_attribute_state *unsafe st,
+                        mrp_attribute_type t,
+                        unsigned int port_num,
+                        unsigned int here);
 
 /** Function: mrp_mad_begin
 
@@ -212,7 +117,7 @@ void mrp_attribute_init(mrp_attribute_state *st,
    \param st the attribute
    
 */
-void mrp_mad_begin(mrp_attribute_state *st);
+void mrp_mad_begin(mrp_attribute_state *unsafe st);
 
 
 /** Function: mrp_mad_join
@@ -225,7 +130,7 @@ void mrp_mad_begin(mrp_attribute_state *st);
    \param new whether the attribute is a new one or not
 
 */
-void mrp_mad_join(mrp_attribute_state *st, int new);
+void mrp_mad_join(mrp_attribute_state *unsafe st, int new);
 
 /** Function: mrp_mad_leave
 
@@ -235,7 +140,7 @@ void mrp_mad_join(mrp_attribute_state *st, int new);
    \param st The attribute to leave
    
 */
-void mrp_mad_leave(mrp_attribute_state *st);
+void mrp_mad_leave(mrp_attribute_state *unsafe st);
 
 /** Function: mrp_periodic
 
@@ -248,25 +153,24 @@ void mrp_mad_leave(mrp_attribute_state *st);
  */
 void mrp_periodic(void);
 
-mrp_attribute_state *mrp_match_attr_by_stream_and_type(mrp_attribute_state *attr, int opposite_port);
-int mrp_match_multiple_attrs_by_stream_and_type(mrp_attribute_state *attr, int opposite_port);
-mrp_attribute_state *mrp_match_attribute_by_stream_id(mrp_attribute_state *attr, int opposite_port);
+mrp_attribute_state *unsafe mrp_match_attr_by_stream_and_type(mrp_attribute_state *unsafe attr, int opposite_port);
+int mrp_match_multiple_attrs_by_stream_and_type(mrp_attribute_state *unsafe attr, int opposite_port);
+mrp_attribute_state *unsafe mrp_match_attribute_by_stream_id(mrp_attribute_state *unsafe attr, int opposite_port);
 
-int mrp_is_observer(mrp_attribute_state *st);
+int mrp_is_observer(mrp_attribute_state *unsafe st);
 
 
-void mrp_encode_three_packed_event(char *buf,
+void mrp_encode_three_packed_event(char *unsafe buf,
                                    int event,
                                    mrp_attribute_type attr);
 
-void mrp_encode_four_packed_event(char *buf,
+void mrp_encode_four_packed_event(char *unsafe buf,
                                   int event,
                                   mrp_attribute_type attr);
 
-mrp_attribute_state *mrp_get_attr(void);
-#endif
+mrp_attribute_state *unsafe mrp_get_attr(void);
 
-void avb_mrp_process_packet(unsigned char buf[], int etype, int len, unsigned int port_num);
+void avb_mrp_process_packet(unsigned char *unsafe buf, int etype, int len, unsigned int port_num);
 
 void avb_mrp_set_legacy_mode(int mode);
 

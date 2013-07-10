@@ -6,6 +6,7 @@
 #ifndef _avb_1722_1_h_
 #define _avb_1722_1_h_
 
+#include "xc2compat.h"
 #include "avb_control_types.h"
 
 /** Initialisation of 1722.1 state machines
@@ -29,7 +30,7 @@ void avb_1722_1_periodic(chanend c_tx, chanend c_ptp);
  *  \param  len         the number of bytes in the buf array
 *   \param  c_tx        a transmit chanend to the Ethernet server
  */
-void avb_1722_1_process_packet(unsigned char buf[], unsigned char src_addr[6], int len, chanend c_tx);
+void avb_1722_1_process_packet(unsigned char *unsafe buf, unsigned char src_addr[6], int len, chanend c_tx);
 
 #endif
 

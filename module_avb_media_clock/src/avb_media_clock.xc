@@ -1,7 +1,7 @@
 #include "avb_media_clock.h"
 #include "avb_media_clock_def.h"
 
-void media_clock_register(chanend media_clock_svr, int clk_ctl, int clk_num)
+unsafe void media_clock_register(chanend media_clock_svr, chanend *unsafe clk_ctl, int clk_num)
 {
   media_clock_svr <: MEDIA_CLOCK_REGISTER;
   master {
@@ -65,12 +65,14 @@ void media_clock_set_source(chanend media_clock_svr, int media_clock_num,
 
 
 void media_clock_get_source(chanend media_clock_svr, int media_clock_num, 
-                         int &x)
+                         int *x)
 {
   media_clock_svr <: MEDIA_CLOCK_GET_SOURCE;
   master {
     media_clock_svr <: media_clock_num;
-    media_clock_svr :> x;
+    int source;
+    media_clock_svr :> source;
+    *x = source;
   }
 }
 

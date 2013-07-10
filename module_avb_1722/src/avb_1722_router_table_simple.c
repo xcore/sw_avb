@@ -18,7 +18,7 @@ typedef struct avb_1722_router_table_entry_t
   int id[2];
   int link;
   int avb_hash;
-  int forward;
+  int f0rward;
 } avb_1722_router_table_entry_t;
 
 static avb_1722_router_table_entry_t router_table[AVB_MAX_NUM_SINK_AND_FORWARD_STREAMS];
@@ -48,7 +48,7 @@ int avb_1722_router_table_lookup_simple(int key0,
                                         int key1, 
                                         int *link, 
                                         int *avb_hash,
-                                        int *forward) 
+                                        int *f0rward) 
 {
 
   if (key0==0 && key1==0) {
@@ -63,7 +63,7 @@ int avb_1722_router_table_lookup_simple(int key0,
         key1 == router_table[i].id[1]) {
 
       *avb_hash = router_table[i].avb_hash;
-      *forward = router_table[i].forward;
+      *f0rward = router_table[i].f0rward;
       *link = router_table[i].link;
       hwlock_release(table_lock);
       return 1;
@@ -74,7 +74,7 @@ int avb_1722_router_table_lookup_simple(int key0,
   return 0;
 }
 
-void avb_1722_router_table_add_or_update_forwarding_simple(int key0, int key1, int forward)
+void avb_1722_router_table_add_or_update_forwarding_simple(int key0, int key1, int f0rward)
 {
   hwlock_acquire(table_lock);
 
@@ -82,7 +82,7 @@ void avb_1722_router_table_add_or_update_forwarding_simple(int key0, int key1, i
     if (key0 == router_table[i].id[0] &&
         key1 == router_table[i].id[1]) {
       
-      router_table[i].forward = forward;
+      router_table[i].f0rward = f0rward;
 
       hwlock_release(table_lock);
       return;
@@ -92,7 +92,7 @@ void avb_1722_router_table_add_or_update_forwarding_simple(int key0, int key1, i
   // Add a new entry
   for(int i=0;i<AVB_MAX_NUM_SINK_AND_FORWARD_STREAMS;i++) {
     if (router_table[i].id[0] == 0) {
-      router_table[i].forward = forward;
+      router_table[i].f0rward = f0rward;
       router_table[i].link = -1;
       router_table[i].avb_hash = -1;
       router_table[i].id[0] = key0;
@@ -127,7 +127,7 @@ void avb_1722_router_table_add_or_update_entry_simple(int key0,
   // Add a new entry
   for(int i=0;i<AVB_MAX_NUM_SINK_AND_FORWARD_STREAMS;i++) {
     if (router_table[i].id[0] == 0) {
-      router_table[i].forward = 0;
+      router_table[i].f0rward = 0;
       router_table[i].link = link;
       router_table[i].avb_hash = avb_hash;
       router_table[i].id[0] = key0;

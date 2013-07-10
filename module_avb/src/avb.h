@@ -1,19 +1,10 @@
 #ifndef _avb_h_
 #define _avb_h_
 
-#include "avb_ethernet.h"
-#include "ethernet_rx_client.h"
-#include "ethernet_tx_client.h"
-#include "avb_1722.h"
-#include "avb_1722_router.h"
-#include "avb_1722_maap.h"
-#include "avb_srp.h"
-#include "gptp.h"
-#include "media_clock_server.h"
-#include "media_clock_client.h"
-#include "avb_control_types.h"
+#include <xccompat.h>
+#include "xc2compat.h"
 #include "avb_api.h"
-#include "avb_unit.h"
+
 
 #ifndef MAX_AVB_CONTROL_PACKET_SIZE
 #define MAX_AVB_CONTROL_PACKET_SIZE (1518)
@@ -53,10 +44,10 @@
  *
  **/
 #ifdef __XC__
-void avb_init(chanend media_ctl[],
-              chanend ?listener_ctl[],
-              chanend ?talker_ctl[],
-              chanend ?media_clock_ctl,
+unsafe void avb_init(chanend c_media_ctl[],
+              chanend ?c_listener_ctl[],
+              chanend ?c_talker_ctl[],
+              chanend ?c_media_clock_ctl,
               chanend c_mac_rx,
               chanend c_mac_tx,
               chanend c_ptp);
@@ -86,7 +77,19 @@ void avb_start(void);
  *  from the main control thread at least once each ms.
  * 
  **/
-void avb_periodic(unsigned int time_now);
+#ifdef __XC__
+void avb_periodic(chanend c_mac_tx, unsigned int time_now);
+
+[[combinable]]
+void avb_manager(server interface avb_interface avb,
+                 chanend c_media_ctl[],
+                 chanend ?c_listener_ctl[],
+                 chanend ?c_talker_ctl[],
+                 chanend ?c_media_clock_ctl,
+                 chanend c_mac_rx,
+                 chanend c_mac_tx,
+                 chanend c_ptp);
+#endif
 
 /** Receives an 802.1Qat SRP packet or an IEEE P1722 MAAP packet.
  *
@@ -126,6 +129,7 @@ void avb_get_control_packet(chanend c_rx,
  **/
 void avb_process_control_packet(unsigned int buf[], int len,
                                chanend c_tx,
+                               NULLABLE_RESOURCE(chanend, media_clock_ctl),
                                unsigned int port_num);
 
 
@@ -146,24 +150,5 @@ void avb_process_control_packet(unsigned int buf[], int len,
  */
 void set_avb_source_volumes(int sink_num, int volumes[], int count);
 
-
-#ifndef __XC__
-
-/** Utility function to get the index of a source stream based on its
- * pointer.  This is used by SRP, which stores a pointer to the stream
- * structure rather than an index.
- */
-unsigned avb_get_source_stream_index_from_pointer(void* ptr);
-
-/** Utility function to get the index of a sink stream based on its
- * pointer.  This is used by SRP, which stores a pointer to the stream
- * structure rather than an index.
- */
-unsigned avb_get_sink_stream_index_from_pointer(void* ptr);
-
-unsigned avb_get_source_stream_index_from_stream_id(unsigned int stream_id[2]);
-unsigned avb_get_sink_stream_index_from_stream_id(unsigned int stream_id[2]);
-
-#endif
 
 #endif // _avb_h_

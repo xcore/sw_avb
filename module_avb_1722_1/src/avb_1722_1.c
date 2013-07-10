@@ -52,7 +52,7 @@ void avb_1722_1_init(unsigned char macaddr[6])
 
 }
 
-void avb_1722_1_process_packet(unsigned char buf[], unsigned char src_addr[6], int len, chanend c_tx)
+void avb_1722_1_process_packet(unsigned char *buf, unsigned char src_addr[6], int len, chanend c_tx)
 {
     struct avb_1722_1_packet_header_t *pkt = (struct avb_1722_1_packet_header_t *) &buf[0];
     unsigned subtype = GET_1722_1_SUBTYPE(pkt);

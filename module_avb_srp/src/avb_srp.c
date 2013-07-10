@@ -33,6 +33,49 @@ static avb_stream_entry stream_list[AVB_STREAM_LIST_SIZE];
 static int rdPtr=0;
 static int wrPtr = 0;
 
+void avb_match_and_join_leave(mrp_attribute_state *attr, int join) {
+  mrp_attribute_state *matched_stream_id_other_port = mrp_match_attr_by_stream_and_type(attr, 1);
+  mrp_attribute_state *matched_stream_id_this_port = mrp_match_attr_by_stream_and_type(attr, 0);
+  mrp_attribute_state *matched_talker_listener_other = mrp_match_attribute_by_stream_id(attr, 1);
+  mrp_attribute_state *matched_talker_listener_this = mrp_match_attribute_by_stream_id(attr, 0);
+
+  mrp_debug_dump_attrs();
+
+  if (matched_stream_id_other_port && matched_stream_id_other_port->propagated) {
+    if (join) mrp_mad_join(matched_stream_id_other_port, 1);
+    else avb_srp_map_leave(matched_stream_id_other_port);
+  }
+  else if (matched_stream_id_this_port && matched_stream_id_this_port->propagated) {
+    if (join) mrp_mad_join(matched_stream_id_this_port, 1);
+    else avb_srp_map_leave(matched_stream_id_this_port);
+  }
+  else {
+    if (attr->attribute_type == MSRP_TALKER_ADVERTISE || (attr->attribute_type == MSRP_LISTENER && matched_talker_listener_other && !matched_talker_listener_other->propagated)) {
+      if (join) {
+        mrp_mad_begin(attr);
+        mrp_mad_join(attr, 1);
+      }
+      else {
+        mrp_mad_leave(attr);
+      }
+    }
+    else if (attr->attribute_type == MSRP_LISTENER) {
+      if (join) {
+        if (matched_talker_listener_this) { // Match Talker attribute on this port
+          mrp_mad_begin(attr);
+          mrp_mad_join(attr, 1);
+        }
+        else { // Didn't match but need to mark as begun so that the Talker indication can match the Listener and MAD join it
+          mrp_mad_begin(attr);
+        }
+      }
+      else {
+        mrp_mad_leave(attr);
+      }
+    }
+  }
+}
+
 int avb_srp_match_listener_to_talker_stream_id(unsigned stream_id[2], avb_srp_info_t **stream, int is_listener)
 {
   for(int i=0;i<AVB_STREAM_LIST_SIZE;i++)

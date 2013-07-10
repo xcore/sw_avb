@@ -1,11 +1,13 @@
 #ifndef _avb_srp_h_
 #define _avb_srp_h_
 #include <xccompat.h>
+#include "xc2compat.h"
 #include "avb_srp_pdu.h"
 #include "avb_stream_detect.h"
 #include "avb_1722_talker.h"
 #include "avb_mrp.h"
 #include "avb_control_types.h"
+#include "avb_stream.h"
 
 #define AVB_SRP_ETHERTYPE (0x22ea) 
 
@@ -14,17 +16,8 @@
 
 #define MAX_AVB_SRP_PDU_SIZE (64)
 
+void avb_match_and_join_leave(mrp_attribute_state *unsafe attr, int join);
 
-#ifndef __XC__
-typedef struct avb_srp_info_t {
-  unsigned stream_id[2];
-  unsigned char dest_mac_addr[6];
-  short vlan_id;
-  short tspec_max_frame_size;
-  short tspec_max_interval;
-  unsigned char tspec;
-  unsigned accumulated_latency;
-} avb_srp_info_t;
 
 int avb_srp_match_stream_id(unsigned streamId[2], avb_srp_info_t **stream);
 
@@ -98,8 +91,6 @@ void avb_srp_talker_leave_ind(mrp_attribute_state *attr);
 void avb_srp_domain_join_ind(mrp_attribute_state *attr, int new);
 void avb_srp_domain_leave_ind(mrp_attribute_state *attr);
 //!@}
-
-#endif
 
 
 

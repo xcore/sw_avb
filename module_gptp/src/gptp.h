@@ -106,7 +106,7 @@ ptp_port_role_t ptp_get_state(chanend ptp_server);
  *  \param info       structure to be filled with time information
  *
  **/
-void ptp_get_propagation_delay(chanend ptp_server, REFERENCE_PARAM(unsigned, pdelay));
+void ptp_get_propagation_delay(chanend ptp_server, unsigned *pdelay);
 
 /** Retrieve port progatation delay from the ptp server 
  *
