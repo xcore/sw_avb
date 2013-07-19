@@ -1,6 +1,7 @@
 #include <xs1.h>
 #include "avb.h"
 #include <print.h>
+#include "ethernet_rx_client.h"
 
 void avb_get_control_packet(chanend c_rx, 
                             unsigned int buf[],

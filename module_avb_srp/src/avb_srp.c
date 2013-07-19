@@ -13,6 +13,7 @@
 #include "avb_internal.h"
 #include "stdlib.h"
 #include "simple_printf.h"
+#include "avb_1722_router.h"
 
 #define AVB_1722_PLUS_SIP_HEADER_SIZE (32)
 
