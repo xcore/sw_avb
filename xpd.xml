@@ -23,7 +23,7 @@
             <keyword>api</keyword>
             <keyword>control</keyword>
         </component>
-        <component description = "IEEE 1722 implement for talkers and listeners" type = "demoCode" scope = "Example" path = "module_avb_1722" local = "false" id = "module_avb_1722" name = "module_avb_1722">
+        <component description = "IEEE 1722 implementation for talkers and listeners" type = "demoCode" scope = "Example" path = "module_avb_1722" local = "false" id = "module_avb_1722" name = "module_avb_1722">
             <keyword>avb</keyword>
             <keyword>1722</keyword>
             <keyword>talker</keyword>
@@ -85,6 +85,11 @@
         <githash>84c4a06e1d75e12fc0e607a4d60b434e69ed1a71</githash>
         <uri>https://github.com/xcore/sc_util.git</uri>
     </dependency>
+    <dependency repo = "sc_slicekit_support">
+        <githash>7920fc4235a96585274d73d25d275ea63b4cd285</githash>
+        <uri>https://github.com/xcore/sc_slicekit_support.git</uri>
+        <version>1.0.3rc0</version>
+    </dependency>
     <description>AVB software stack</description>
     <docdir>doc</docdir>
     <exclude_dir>tests</exclude_dir>
@@ -108,10 +113,14 @@
     <release parenthash = "064230b2a87dc208ff834a6f91dda3b32e7d47bc" version = "5.2.0beta2" githash = "5e3955c33cfa63e0e496d570a1f729404aaa603d"></release>
     <release parenthash = "eb7d1a3eac58c403335204f2d4b46b4c98d4e994" version = "5.2.0beta3" githash = "34bdd1baeacc7e84cc011dc6977f3bca0790361f"></release>
     <release parenthash = "b7040a72c734549bf9fd423c20d1d42059da8ba1" version = "5.2.0beta4" githash = "2a303380429736a2c254c7523d50219ca898d3fa"></release>
-    <release parenthash = "ced4ad2747e2860c1f349a2556fc3a8d2640600e" version = "5.2.0beta5"></release>
+    <release parenthash = "ced4ad2747e2860c1f349a2556fc3a8d2640600e" version = "5.2.0beta5" githash = "dfece20955a0f7aaaced49f386a6517af7b260b4"></release>
     <subpartnumber>XR-000008-SW</subpartnumber>
     <vendor>XMOS</vendor>
+    <version_defines></version_defines>
     <xcore_repo>sw_avb.git</xcore_repo>
     <xpd_version>1.0</xpd_version>
     <scope>reference design</scope>
+    <version_defines>
+        <version_define type = "str" name = "AVB_1722_1_FIRMWARE_VERSION_STRING" format = "%VERSION%"></version_define>
+    </version_defines>
 </xpd>
