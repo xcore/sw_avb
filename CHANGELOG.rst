@@ -1,12 +1,15 @@
 sw_avb Change Log
 =================
 
-5.2.0
+5.2.1
 -----
   * Updates to sc_ethernet to meet timing under xTIMEcomposer v13beta1
   * Added support for DSP4YOU AVB module
   * Added performance improvements to Talker to support > 2 streams in a single logical core
   * Improved robustness of basic 1722.1 controller functionality
+
+5.2.0
+-----
   * Numerous updates to support xTIMEcomposer v12 tools, including updated sc_ethernet
   * 1722.1 Draft 21 support for ADP, ACMP and a subset of AECP including an AEM descriptor set
   * Old TCP/IP based Attero Tech application replaced with a 1722.1 demo
