@@ -16,12 +16,14 @@
  */
 void avb_1722_1_init(unsigned char macaddr[6]);
 
+#ifdef __XC__
 /** This function performs periodic processing for 1722.1 state machines. It must be called frequently.
  *
  *  \param  c_tx        a transmit chanend to the Ethernet server
  *  \param  c_ptp       a chanend to the PTP server
  */
-void avb_1722_1_periodic(chanend c_tx, chanend c_ptp);
+void avb_1722_1_periodic(chanend c_tx, chanend c_ptp, client interface avb_interface avb);
+#endif
 
 /** Process a received 1722.1 packet
  *

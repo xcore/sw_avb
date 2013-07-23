@@ -2,11 +2,12 @@
 #define AVB_1722_1_APP_HOOKS_H_
 
 #include <xccompat.h>
+#include "avb_api.h"
 #include "avb_1722_1_common.h"
 #include "avb_1722_1_adp.h"
 #include "avb_1722_1_acmp_pdu.h"
 
-
+#ifdef __XC__
 /** A new AVDECC entity has advertised itself as available. It may be an entity starting up or 
  *  a previously seen entity that had timed out.
  *
@@ -21,7 +22,7 @@ void avb_entity_on_new_entity_available(const_guid_ref_t my_guid, REFERENCE_PARA
  * \param source_num        The local id of the Talker stream source
  * \param listener_guid     The GUID of the Listener entity that is connecting
  **/
-void avb_talker_on_listener_connect(int source_num, const_guid_ref_t listener_guid);
+void avb_talker_on_listener_connect(client interface avb_interface avb, int source_num, const_guid_ref_t listener_guid);
 
 /** A Controller has indicated that a Listener is disconnecting from this Talker stream source 
  *
@@ -32,7 +33,7 @@ void avb_talker_on_listener_connect(int source_num, const_guid_ref_t listener_gu
                             disconnect TX stream commands it has received. This number may not be accurate since an AVDECC Entity may
                             not have sent a disconnect command if the cable was disconnected or the AVDECC Entity abruptly powered down.
  **/
-void avb_talker_on_listener_disconnect(int source_num, const_guid_ref_t listener_guid, int connection_count);
+void avb_talker_on_listener_disconnect(client interface avb_interface avb, int source_num, const_guid_ref_t listener_guid, int connection_count);
 
 /** A Controller has indicated that a Listener has returned an error code for a connection attempt.
  *
@@ -42,7 +43,7 @@ void avb_talker_on_listener_disconnect(int source_num, const_guid_ref_t listener
  * \param status            The status returned by the Listener
  * \param c_tx              A transmit channel end to the Ethernet server
  **/
-void avb_talker_on_listener_connect_failed(const_guid_ref_t my_guid, int source_num,
+void avb_talker_on_listener_connect_failed(client interface avb_interface avb, const_guid_ref_t my_guid, int source_num,
         const_guid_ref_t listener_guid, avb_1722_1_acmp_status_t status, chanend c_tx);
 
 /** A Controller has indicated to connect this Listener sink to a Talker stream
@@ -53,7 +54,7 @@ void avb_talker_on_listener_connect_failed(const_guid_ref_t my_guid, int source_
  * \param stream_id         The 64 bit Stream ID of the Talker stream
  * \param my_guid           The GUID of this entity
  **/
-avb_1722_1_acmp_status_t avb_listener_on_talker_connect(int sink_num, const_guid_ref_t talker_guid, unsigned char dest_addr[6], unsigned int stream_id[2], const_guid_ref_t my_guid);
+avb_1722_1_acmp_status_t avb_listener_on_talker_connect(client interface avb_interface avb, int sink_num, const_guid_ref_t talker_guid, unsigned char dest_addr[6], unsigned int stream_id[2], const_guid_ref_t my_guid);
 
 /** A Controller has indicated to disconnect this Listener sink from a Talker stream
  *
@@ -63,7 +64,9 @@ avb_1722_1_acmp_status_t avb_listener_on_talker_connect(int sink_num, const_guid
  * \param stream_id         The 64 bit Stream ID of the Talker stream
  * \param my_guid           The GUID of this entity
  **/
-void avb_listener_on_talker_disconnect(int sink_num, const_guid_ref_t talker_guid, unsigned char dest_addr[6], unsigned int stream_id[2], const_guid_ref_t my_guid);
+void avb_listener_on_talker_disconnect(client interface avb_interface avb, int sink_num, const_guid_ref_t talker_guid, unsigned char dest_addr[6], unsigned int stream_id[2], const_guid_ref_t my_guid);
+
+#endif
 
 #endif
 

@@ -57,12 +57,14 @@ void avb_1722_maap_periodic(chanend c_tx);
  */
 void avb_1722_maap_rerequest_addresses();
 
-
+#ifdef __XC__
 /** MAAP has indicated that a multicast address has been successfully reserved for this Talker stream
  *
  * \param source_num    The local source ID of the Talker 
  * \param mac_addr      The destination MAC address reserved for this Talker
  */
-void avb_talker_on_source_address_reserved(int source_num, unsigned char mac_addr[6]);
+void avb_talker_on_source_address_reserved(client interface avb_interface avb, int source_num, unsigned char mac_addr[6]);
+
+#endif
 
 #endif

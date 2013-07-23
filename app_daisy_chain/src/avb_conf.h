@@ -105,7 +105,7 @@
 /******** 1722.1 PARAMETERS *****************************************************************/
 
 /** Enable 1722.1 AVDECC on the entity */
-#define AVB_ENABLE_1722_1 0
+#define AVB_ENABLE_1722_1 1
 
 /** Enable 1722.1 Controller functionality on the entity. */
 #define AVB_1722_1_CONTROLLER_ENABLED 0

@@ -182,10 +182,6 @@ unsafe void avb_init(chanend c_media_ctl[],
 
   avb_1722_maap_init(mac_addr);
 
-#if AVB_ENABLE_1722_1
-  avb_1722_1_init(mac_addr);
-#endif
-
   for(int i=0; i < MRP_NUM_PORTS; i++)
   {
     domain_attr[i] = mrp_get_attr();
@@ -235,9 +231,6 @@ void avb_periodic(chanend c_mac_tx, unsigned int time_now)
   static int maap_started = 0;
 
 	mrp_periodic();
-#if AVB_ENABLE_1722_1
-	avb_1722_1_periodic(c_mac_tx, c_ptp);
-#endif
 	avb_1722_maap_periodic(c_mac_tx);
 
   if ((first_time == 1) && (time_now != 1)){
@@ -254,12 +247,6 @@ void avb_periodic(chanend c_mac_tx, unsigned int time_now)
 
 void avb_start(void)
 {
-#if AVB_ENABLE_1722_1
-  avb_1722_1_adp_init();
-  avb_1722_1_adp_depart_then_announce();
-  avb_1722_1_adp_discover_all();
-#endif
-
   for (int i=0; i < MRP_NUM_PORTS; i++)
   {
     mrp_mad_begin(domain_attr[i]);
@@ -952,6 +939,44 @@ void set_avb_source_volumes(int sink_num, int volumes[], int count)
 #endif
 
 
+void avb_process_1722_1_packet(unsigned int buf0[], int nbytes, chanend c_tx) {
+
+  if (nbytes == STATUS_PACKET_LEN) {
+    if (((unsigned char *)buf0)[0]) { // Link up
+      avb_1722_1_adp_init();
+      avb_1722_1_adp_depart_then_announce();
+      avb_1722_1_adp_discover_all();
+    }
+  }
+  else {
+    struct ethernet_hdr_t *ethernet_hdr = (ethernet_hdr_t *) &buf0[0];
+
+    int etype, eth_hdr_size;
+    int has_qtag = ethernet_hdr->ethertype[1]==0x18;
+    eth_hdr_size = has_qtag ? 18 : 14;
+
+    if (has_qtag) {
+      struct tagged_ethernet_hdr_t *tagged_ethernet_hdr = (tagged_ethernet_hdr_t *) &buf0[0];
+      etype = (int)(tagged_ethernet_hdr->ethertype[0] << 8) + (int)(tagged_ethernet_hdr->ethertype[1]);
+    }
+    else {
+      etype = (int)(ethernet_hdr->ethertype[0] << 8) + (int)(ethernet_hdr->ethertype[1]);
+    }
+    int len = nbytes - eth_hdr_size;
+
+    unsigned char *buf = (unsigned char *) buf0;
+
+    unsafe {
+
+      switch (etype) {
+        case AVB_1722_ETHERTYPE:
+          avb_1722_1_process_packet((unsigned char *unsafe)&buf[eth_hdr_size], ethernet_hdr->src_addr, len, c_tx);
+          break;
+      }
+    }
+  }  
+}
+
 void avb_process_control_packet(unsigned int buf0[], int nbytes, chanend c_tx, chanend ?c_media_clock_ctl, unsigned int port_num)
 {
   if (nbytes == STATUS_PACKET_LEN) {
@@ -999,9 +1024,6 @@ void avb_process_control_packet(unsigned int buf0[], int nbytes, chanend c_tx, c
         case AVB_1722_ETHERTYPE:
           // We know that the cd field is true because the MAC filter only forwards
           // 1722 control to this thread
-        #if AVB_ENABLE_1722_1
-          avb_1722_1_process_packet((unsigned char *unsafe)&buf[eth_hdr_size], ethernet_hdr->src_addr, len, c_tx);
-        #endif
           avb_1722_maap_process_packet((unsigned char *unsafe)&buf[eth_hdr_size], ethernet_hdr->src_addr, len, c_tx);
           break;
       }

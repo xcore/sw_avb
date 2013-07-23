@@ -1,6 +1,8 @@
 #ifndef AVB_1722_1_ACMP_H_
 #define AVB_1722_1_ACMP_H_
 
+#include "avb_api.h"
+#include "xc2compat.h"
 #include "avb_1722_1_acmp_pdu.h"
 #include "avb_control_types.h"
 
@@ -11,10 +13,12 @@ void avb_1722_1_acmp_controller_deinit();
 void avb_1722_1_acmp_talker_init();
 void avb_1722_1_acmp_listener_init();
 
-void process_avb_1722_1_acmp_packet(REFERENCE_PARAM(avb_1722_1_acmp_packet_t, pkt), chanend c_tx);
-void avb_1722_1_acmp_controller_periodic(chanend c_tx);
-void avb_1722_1_acmp_talker_periodic(chanend c_tx);
-void avb_1722_1_acmp_listener_periodic(chanend c_tx);
+void process_avb_1722_1_acmp_packet(avb_1722_1_acmp_packet_t* pkt, chanend c_tx);
+#ifdef __XC__
+void avb_1722_1_acmp_controller_periodic(chanend c_tx, client interface avb_interface avb);
+void avb_1722_1_acmp_talker_periodic(chanend c_tx, client interface avb_interface avb);
+void avb_1722_1_acmp_listener_periodic(chanend c_tx, client interface avb_interface avb);
+#endif
 
 /** Setup a new stream connection between a Talker and Listener entity.
  *
@@ -105,5 +109,38 @@ void avb_1722_1_talker_set_mac_address(unsigned talker_unique_id, unsigned char 
  */
 void avb_1722_1_talker_set_stream_id(unsigned talker_unique_id, unsigned streamId[2]);
 
+void acmp_progress_inflight_timer(int entity_type);
+
+avb_1722_1_acmp_inflight_command *unsafe acmp_remove_inflight(int entity_type);
+
+int acmp_check_inflight_command_timeouts(int entity_type);
+
+void acmp_send_response(int message_type, avb_1722_1_acmp_cmd_resp *response, int status, chanend c_tx);
+
+void acmp_set_talker_response(void);
+
+unsigned acmp_listener_valid_listener_unique(void);
+
+void acmp_add_listener_stream_info(void);
+
+avb_1722_1_acmp_status_t acmp_listener_get_state(void);
+
+avb_1722_1_acmp_status_t acmp_talker_get_state(void);
+
+avb_1722_1_acmp_status_t acmp_talker_get_connection(void);
+
+void acmp_add_talker_stream_info(void);
+
+void acmp_remove_talker_stream_info(void);
+
+unsigned acmp_talker_valid_talker_unique(void);
+
+void acmp_send_command(int entity_type, int message_type, avb_1722_1_acmp_cmd_resp *command, int retry, int inflight_idx, chanend c_tx);
+
+void avb_1722_1_create_acmp_packet(avb_1722_1_acmp_cmd_resp *cr, int message_type, int status);
+
+void acmp_set_inflight_retry(int entity_type, unsigned int message_type, int inflight_idx);
+
+void acmp_add_inflight(int entity_type, unsigned int message_type, unsigned short original_sequence_id);
 
 #endif /* AVB_17221_ACMP_H_ */

@@ -72,19 +72,3 @@ void avb_1722_1_process_packet(unsigned char *buf, unsigned char src_addr[6], in
         return;
     }
 }
-
-void avb_1722_1_periodic(chanend c_tx, chanend c_ptp)
-{
-	avb_1722_1_adp_advertising_periodic(c_tx, c_ptp);
-    avb_1722_1_adp_discovery_periodic(c_tx);
-#if (AVB_1722_1_CONTROLLER_ENABLED)
-	avb_1722_1_acmp_controller_periodic(c_tx);
-#endif
-#if (AVB_1722_1_TALKER_ENABLED)
-	avb_1722_1_acmp_talker_periodic(c_tx);
-#endif
-#if (AVB_1722_1_LISTENER_ENABLED)
-	avb_1722_1_acmp_listener_periodic(c_tx);
-#endif
-}
-
