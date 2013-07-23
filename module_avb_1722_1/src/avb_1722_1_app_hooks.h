@@ -15,7 +15,7 @@
  * \param entity    The information advertised by the remote entity
  * \param c_tx      A transmit channel end to the Ethernet server
  **/
-void avb_entity_on_new_entity_available(const_guid_ref_t my_guid, REFERENCE_PARAM(avb_1722_1_entity_record, entity), chanend c_tx);
+void avb_entity_on_new_entity_available(client interface avb_interface avb, const_guid_ref_t my_guid, avb_1722_1_entity_record *entity, chanend c_tx);
 
 /** A Controller has indicated that a Listener is connecting to this Talker stream source 
  *

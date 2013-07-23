@@ -11,6 +11,7 @@
 #include "avb_1722_1_adp.h"
 #include "avb_1722_1_app_hooks.h"
 
+#if 0
 /*** ADP ***/
 void __attribute__((weak)) avb_entity_on_new_entity_available(client interface avb_interface avb, const_guid_ref_t my_guid, avb_1722_1_entity_record *entity, chanend c_tx)
 {
@@ -83,9 +84,10 @@ void __attribute__((weak)) avb_listener_on_talker_disconnect(client interface av
 }
 
 /* The controller has indicated that a listener has returned an error on connection attempt */
-void __attribute__((weak)) avb_talker_on_listener_connect_failed(const_guid_ref_t my_guid, int source_num,
+void __attribute__((weak)) avb_talker_on_listener_connect_failed(client interface avb_interface avb, const_guid_ref_t my_guid, int source_num,
         const_guid_ref_t listener_guid, avb_1722_1_acmp_status_t status, chanend c_tx)
 {
     // Do nothing
 }
 
+#endif

@@ -7,7 +7,7 @@
 #include "avb_1722_1_protocol.h"
 
 void print_guid_ln(const_guid_ref_t g);
-void print_mac_ln(unsigned char *c);
+void print_mac_ln(unsigned char c[6]);
 unsigned compare_guid(unsigned char *a, guid_t *b);
 
 int qlog2(unsigned n);

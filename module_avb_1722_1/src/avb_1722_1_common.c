@@ -17,7 +17,7 @@ void print_guid_ln(const_guid_ref_t g)
     }
 }
 
-void print_mac_ln(unsigned char *c)
+void print_mac_ln(unsigned char c[6])
 {
     for (int i=0; i<6; i++)
     {

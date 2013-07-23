@@ -21,33 +21,9 @@
 #define TRUE 1
 #define FALSE 0
 
-enum {  ACMP_CONTROLLER_IDLE,
-        ACMP_CONTROLLER_WAITING,
-        ACMP_CONTROLLER_TIMEOUT,
-        ACMP_CONTROLLER_CONNECT_RX_RESPONSE,
-        ACMP_CONTROLLER_DISCONNECT_RX_RESPONSE,
-        ACMP_CONTROLLER_GET_TX_STATE_RESPONSE,
-        ACMP_CONTROLLER_GET_RX_STATE_RESPONSE,
-        ACMP_CONTROLLER_GET_TX_CONNECTION_RESPONSE
-} acmp_controller_state = ACMP_CONTROLLER_IDLE;
-
-enum {  ACMP_TALKER_IDLE,
-        ACMP_TALKER_WAITING,
-        ACMP_TALKER_CONNECT,
-        ACMP_TALKER_DISCONNECT,
-        ACMP_TALKER_GET_STATE,
-        ACMP_TALKER_GET_CONNECTION
-} acmp_talker_state = ACMP_TALKER_IDLE;
-
-enum {  ACMP_LISTENER_IDLE,
-        ACMP_LISTENER_WAITING,
-        ACMP_LISTENER_CONNECT_RX_COMMAND,
-        ACMP_LISTENER_DISCONNECT_RX_COMMAND,
-        ACMP_LISTENER_CONNECT_TX_RESPONSE,
-        ACMP_LISTENER_DISCONNECT_TX_RESPONSE,
-        ACMP_LISTENER_GET_STATE,
-        ACMP_LISTENER_RX_TIMEOUT
-} acmp_listener_state = ACMP_LISTENER_IDLE;
+enum acmp_controller_state_t acmp_controller_state = ACMP_CONTROLLER_IDLE;
+enum acmp_talker_state_t acmp_talker_state = ACMP_TALKER_IDLE;
+enum acmp_listener_state_t acmp_listener_state = ACMP_LISTENER_IDLE;
 
 extern unsigned int avb_1722_1_buf[];
 extern guid_t my_guid;
@@ -312,16 +288,6 @@ void acmp_set_talker_response(void)
 }
 
 
-static void acmp_controller_connect_disconnect(int message_type, const_guid_ref_t talker_guid, const_guid_ref_t listener_guid, int talker_id, int listener_id, chanend c_tx)
-{
-    acmp_controller_cmd_resp.controller_guid = my_guid;
-    acmp_controller_cmd_resp.talker_guid.l = talker_guid->l;
-    acmp_controller_cmd_resp.listener_guid.l = listener_guid->l;
-    acmp_controller_cmd_resp.talker_unique_id = talker_id;
-    acmp_controller_cmd_resp.listener_unique_id = listener_id;
-
-    acmp_send_command(CONTROLLER, message_type, &acmp_controller_cmd_resp, FALSE, -1, c_tx);
-}
 
 void avb_1722_1_controller_connect(const_guid_ref_t talker_guid, const_guid_ref_t listener_guid, int talker_id, int listener_id, chanend c_tx)
 {
