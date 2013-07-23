@@ -42,7 +42,7 @@ interface avb_interface {
  *             in the stream
  *
  **/
-  int set_source_map(int source_num, int map[len], int len);
+  int set_source_map(int source_num, int map[len], unsigned len);
 
 /** Get the channel map of an avb source.
  *  \param source_num the local source number to set
@@ -283,7 +283,7 @@ interface avb_interface {
  * \param len        the length of the map; should equal to the number
  *                   of channels in the stream
  */
-  int set_sink_map(int sink_num, int map[len], int len);
+  int set_sink_map(int sink_num, int map[len], unsigned len);
 
 /** Get the map of an AVB sink.
  * \param sink_num   the number of the sink
@@ -327,7 +327,7 @@ interface avb_interface {
  *  \param len          The length of the address, should always be equal to 6.
  *
  **/
-  int set_sink_addr(int sink_num, unsigned char addr[len], int len);
+  int set_sink_addr(int sink_num, unsigned char addr[len], unsigned len);
 
 /** Get the incoming destination mac address of an avb sink.
  *  \param sink_num     The local sink number

@@ -21,6 +21,7 @@
 #include "avb_1722.h"
 #include "gptp.h"
 #include "media_clock_server.h"
+#include "avb_1722_1.h"
 
 // This is the number of master clocks in a word clock
 #define MASTER_TO_WORDCLOCK_RATIO 512
@@ -123,11 +124,11 @@ void audio_hardware_setup(void)
 int main(void)
 {
   // Ethernet channels
-  chan c_mac_tx[2 + AVB_DEMO_ENABLE_TALKER];
-  chan c_mac_rx[2 + AVB_DEMO_ENABLE_LISTENER];
+  chan c_mac_tx[3 + AVB_DEMO_ENABLE_TALKER];
+  chan c_mac_rx[3 + AVB_DEMO_ENABLE_LISTENER];
 
   // PTP channels
-  chan c_ptp[2 + AVB_DEMO_ENABLE_TALKER];
+  chan c_ptp[3 + AVB_DEMO_ENABLE_TALKER];
 
   // AVB unit control
 #if AVB_DEMO_ENABLE_TALKER
@@ -145,7 +146,7 @@ int main(void)
 
   chan c_gpio_ctl;
 
-  interface avb_interface avb;
+  interface avb_interface avb[2];
 
   par
   {
@@ -274,10 +275,12 @@ int main(void)
                    #endif
                    c_media_clock_ctl,
                    c_mac_rx[1], c_mac_tx[1], c_ptp[0]);
-        demo_task(avb, c_gpio_ctl);
+        demo_task(avb[0], c_gpio_ctl);
       }
 
     }
+
+    on tile[0]: avb_1722_1_task(avb[1], c_mac_rx[3], c_mac_tx[3], c_ptp[3]);
 
     on tile[0]: ptp_output_test_clock(c_ptp[1 + AVB_DEMO_ENABLE_TALKER], ptp_sync_port, 100000000);
 

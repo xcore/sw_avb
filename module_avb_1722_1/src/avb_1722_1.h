@@ -23,6 +23,12 @@ void avb_1722_1_init(unsigned char macaddr[6]);
  *  \param  c_ptp       a chanend to the PTP server
  */
 void avb_1722_1_periodic(chanend c_tx, chanend c_ptp, client interface avb_interface avb);
+
+[[combinable]]
+void avb_1722_1_task(client interface avb_interface avb,
+                     chanend c_mac_rx,
+                     chanend c_mac_tx,
+                     chanend c_ptp);
 #endif
 
 /** Process a received 1722.1 packet

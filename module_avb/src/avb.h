@@ -81,7 +81,7 @@ void avb_start(void);
 void avb_periodic(chanend c_mac_tx, unsigned int time_now);
 
 [[combinable]]
-void avb_manager(server interface avb_interface avb,
+void avb_manager(server interface avb_interface avb[2],
                  chanend c_media_ctl[],
                  chanend ?c_listener_ctl[],
                  chanend ?c_talker_ctl[],
