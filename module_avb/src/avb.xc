@@ -538,11 +538,11 @@ void avb_manager(server interface avb_interface avb,
         periodic_timeout += PERIODIC_POLL_TIME;
         break;
       }
-      case avb.get_source_format(int source_num, enum avb_stream_format_t *format, int *rate) -> int return_val: {
+      case avb.get_source_format(int source_num, enum avb_stream_format_t &format, int &rate) -> int return_val: {
         if (source_num < AVB_NUM_SOURCES) {
           avb_source_info_t *source = &sources[source_num];
-          *format = source->stream.format;
-          *rate = source->stream.rate;
+          format = source->stream.format;
+          rate = source->stream.rate;
           return_val = 1;
         }
         else return_val = 0;
@@ -558,10 +558,10 @@ void avb_manager(server interface avb_interface avb,
         else return_val = 0;
         break;
       }
-      case avb.get_source_channels(int source_num, int *channels) -> int return_val: {
+      case avb.get_source_channels(int source_num, int &channels) -> int return_val: {
         if (source_num < AVB_NUM_SOURCES) {
           avb_source_info_t *source = &sources[source_num];
-          *channels = source->stream.num_channels;
+          channels = source->stream.num_channels;
           return_val = 1;
         }
         else return_val = 0;
@@ -576,10 +576,10 @@ void avb_manager(server interface avb_interface avb,
         else return_val = 0;
         break;
       }
-      case avb.get_source_sync(int source_num, int *sync) -> int return_val: {
+      case avb.get_source_sync(int source_num, int &sync) -> int return_val: {
         if (source_num < AVB_NUM_SOURCES) {
           avb_source_info_t *source = &sources[source_num];
-          *sync = source->stream.sync;
+          sync = source->stream.sync;
           return_val = 1;
         }
         else return_val = 0;
@@ -594,10 +594,10 @@ void avb_manager(server interface avb_interface avb,
         else return_val = 0;
         break;
       }
-      case avb.get_source_presentation(int source_num, int *presentation) -> int return_val: {
+      case avb.get_source_presentation(int source_num, int &presentation) -> int return_val: {
         if (source_num < AVB_NUM_SOURCES) {
           avb_source_info_t *source = &sources[source_num];
-          *presentation = source->presentation;
+          presentation = source->presentation;
           return_val = 1;
         }
         else return_val = 0;
@@ -612,10 +612,10 @@ void avb_manager(server interface avb_interface avb,
         else return_val = 0;
         break;
       }
-      case avb.get_source_vlan(int source_num, int *vlan) -> int return_val: {
+      case avb.get_source_vlan(int source_num, int &vlan) -> int return_val: {
         if (source_num < AVB_NUM_SOURCES) {
           avb_source_info_t *source = &sources[source_num];
-          *vlan = source->reservation.vlan_id;
+          vlan = source->reservation.vlan_id;
           return_val = 1;
         }
         else return_val = 0;
@@ -630,10 +630,10 @@ void avb_manager(server interface avb_interface avb,
         else return_val = 0;
         break;      
       }
-      case avb.get_source_state(int source_num, enum avb_source_state_t *state) -> int return_val: {
+      case avb.get_source_state(int source_num, enum avb_source_state_t &state) -> int return_val: {
         if (source_num < AVB_NUM_SOURCES) {
           avb_source_info_t *source = &sources[source_num];
-          *state = source->stream.state;
+          state = source->stream.state;
           return_val = 1;
         }
         else return_val = 0;
@@ -649,11 +649,11 @@ void avb_manager(server interface avb_interface avb,
         else return_val = 0;
         break;
       }
-      case avb.get_source_map(int source_num, int map[], int *len) -> int return_val: {
+      case avb.get_source_map(int source_num, int map[], int &len) -> int return_val: {
         if (source_num < AVB_NUM_SOURCES) {
           avb_source_info_t *source = &sources[source_num];
-          *len = source[source_num].stream.num_channels;
-          memcpy(map, source->map, *len<<2);
+          len = source[source_num].stream.num_channels;
+          memcpy(map, source->map, len<<2);
           return_val = 1;
         }
         else return_val = 0;
@@ -669,10 +669,10 @@ void avb_manager(server interface avb_interface avb,
         else return_val = 0;
         break;
       }
-      case avb.get_source_dest(int source_num, unsigned char addr[], int *len) -> int return_val: {
+      case avb.get_source_dest(int source_num, unsigned char addr[], int &len) -> int return_val: {
         if (source_num < AVB_NUM_SOURCES) {
           avb_source_info_t *source = &sources[source_num];
-          *len = 6;
+          len = 6;
           memcpy(addr, source->reservation.dest_mac_addr, 6);
           return_val = 1;
         }
@@ -716,11 +716,11 @@ void avb_manager(server interface avb_interface avb,
         else return_val = 0;
         break;
       }
-      case avb.get_sink_format(int sink_num, enum avb_stream_format_t *format, int *rate) -> int return_val: {
+      case avb.get_sink_format(int sink_num, enum avb_stream_format_t &format, int &rate) -> int return_val: {
         if (sink_num < AVB_NUM_SINKS) {
           avb_sink_info_t *sink = &sinks[sink_num];
-          *format = sink->stream.format;
-          *rate = sink->stream.rate;
+          format = sink->stream.format;
+          rate = sink->stream.rate;
           return_val = 1;
         }
         else return_val = 0;
@@ -736,10 +736,10 @@ void avb_manager(server interface avb_interface avb,
         else return_val = 0;
         break;
       }
-      case avb.get_sink_channels(int sink_num, int *channels) -> int return_val: {
+      case avb.get_sink_channels(int sink_num, int &channels) -> int return_val: {
         if (sink_num < AVB_NUM_SINKS) {
           avb_sink_info_t *sink = &sinks[sink_num];
-          *channels = sink->stream.num_channels;
+          channels = sink->stream.num_channels;
           return_val = 1;
         }
         else return_val = 0;
@@ -754,10 +754,10 @@ void avb_manager(server interface avb_interface avb,
         else return_val = 0;
         break;      
       }
-      case avb.get_sink_sync(int sink_num, int *sync) -> int return_val: {
+      case avb.get_sink_sync(int sink_num, int &sync) -> int return_val: {
         if (sink_num < AVB_NUM_SINKS) {
           avb_sink_info_t *sink = &sinks[sink_num];
-          *sync = sink->stream.sync;
+          sync = sink->stream.sync;
           return_val = 1;
         }
         else return_val = 0;
@@ -772,10 +772,10 @@ void avb_manager(server interface avb_interface avb,
         else return_val = 0;
         break;      
       }      
-      case avb.get_sink_vlan(int sink_num, int *vlan) -> int return_val: {
+      case avb.get_sink_vlan(int sink_num, int &vlan) -> int return_val: {
         if (sink_num < AVB_NUM_SINKS) {
           avb_sink_info_t *sink = &sinks[sink_num];
-          *vlan = sink->reservation.vlan_id;
+          vlan = sink->reservation.vlan_id;
           return_val = 1;
         }
         else return_val = 0;
@@ -790,10 +790,10 @@ void avb_manager(server interface avb_interface avb,
         else return_val = 0;
         break;       
       }
-      case avb.get_sink_addr(int sink_num, unsigned char addr[], int *len) -> int return_val: {
+      case avb.get_sink_addr(int sink_num, unsigned char addr[], int &len) -> int return_val: {
         if (sink_num < AVB_NUM_SINKS) {
           avb_sink_info_t *sink = &sinks[sink_num];
-          *len = 6;
+          len = 6;
           memcpy(addr, sink->reservation.dest_mac_addr, 6);
           return_val = 1;
         }
@@ -809,10 +809,10 @@ void avb_manager(server interface avb_interface avb,
         else return_val = 0;
         break;  
       }
-      case avb.get_sink_state(int sink_num, enum avb_sink_state_t *state) -> int return_val: {
+      case avb.get_sink_state(int sink_num, enum avb_sink_state_t &state) -> int return_val: {
         if (sink_num < AVB_NUM_SINKS) {
           avb_sink_info_t *sink = &sinks[sink_num];
-          *state = sink->stream.state; 
+          state = sink->stream.state; 
           return_val = 1;
         }
         else return_val = 0;
@@ -828,11 +828,11 @@ void avb_manager(server interface avb_interface avb,
         else return_val = 0;
         break;
       }
-      case avb.get_sink_map(int sink_num, int map[], int *len) -> int return_val: {
+      case avb.get_sink_map(int sink_num, int map[], int &len) -> int return_val: {
         if (sink_num < AVB_NUM_SINKS) {
           avb_sink_info_t *sink = &sinks[sink_num];
-          *len = sinks->stream.num_channels;
-          memcpy(map, sink->map, *len<<2);
+          len = sinks->stream.num_channels;
+          memcpy(map, sink->map, len<<2);
           return_val = 1;
         }
         else return_val = 0;
@@ -848,9 +848,9 @@ void avb_manager(server interface avb_interface avb,
         else return_val = 0;
         break;  
       }
-      case avb.get_device_media_clock_rate(int clock_num, int *rate) -> int return_val: {
+      case avb.get_device_media_clock_rate(int clock_num, int &rate) -> int return_val: {
         if (clock_num < AVB_NUM_MEDIA_CLOCKS && !isnull(c_media_clock_ctl)) {
-          *rate = media_clock_get_rate(c_media_clock_ctl, clock_num);
+          rate = media_clock_get_rate(c_media_clock_ctl, clock_num);
           return_val = 1;
         }
         else return_val = 0;
@@ -864,9 +864,9 @@ void avb_manager(server interface avb_interface avb,
         else return_val = 0;
         break;          
       }
-      case avb.get_device_media_clock_state(int clock_num, enum device_media_clock_state_t *state) -> int return_val: {
+      case avb.get_device_media_clock_state(int clock_num, enum device_media_clock_state_t &state) -> int return_val: {
         if (clock_num < AVB_NUM_MEDIA_CLOCKS && !isnull(c_media_clock_ctl)) {
-          *state = media_clock_get_state(c_media_clock_ctl, clock_num);
+          state = media_clock_get_state(c_media_clock_ctl, clock_num);
           return_val = 1;
         }
         else return_val = 0;
@@ -880,9 +880,11 @@ void avb_manager(server interface avb_interface avb,
         else return_val = 0;
         break;  
       }
-      case avb.get_device_media_clock_source(int clock_num, int *source) -> int return_val: {
+      case avb.get_device_media_clock_source(int clock_num, int &source) -> int return_val: {
         if (clock_num < AVB_NUM_MEDIA_CLOCKS && !isnull(c_media_clock_ctl)) {
-          media_clock_get_source(c_media_clock_ctl, clock_num, source);
+          int source0 = source;
+          media_clock_get_source(c_media_clock_ctl, clock_num, source0);
+          source = source0;
           return_val = 1;
         }
         else return_val = 0;
@@ -896,9 +898,9 @@ void avb_manager(server interface avb_interface avb,
         else return_val = 0;
         break;          
       }
-      case avb.get_device_media_clock_type(int clock_num, enum device_media_clock_type_t *clock_type) -> int return_val: {
+      case avb.get_device_media_clock_type(int clock_num, enum device_media_clock_type_t &clock_type) -> int return_val: {
         if (clock_num < AVB_NUM_MEDIA_CLOCKS && !isnull(c_media_clock_ctl)) {
-          *clock_type = media_clock_get_type(c_media_clock_ctl, clock_num);
+          clock_type = media_clock_get_type(c_media_clock_ctl, clock_num);
           return_val = 1;
         }
         else return_val = 0;
@@ -949,22 +951,6 @@ void set_avb_source_volumes(int sink_num, int volumes[], int count)
 }
 #endif
 
-void avb_get_packet_overview(unsigned int buf[], int &etype, int &eth_hdr_size, unsigned char src_addr[6]) {
-  struct ethernet_hdr_t *ethernet_hdr = (ethernet_hdr_t *) &buf[0];
-
-  int has_qtag = ethernet_hdr->ethertype[1]==0x18;
-  eth_hdr_size = has_qtag ? 18 : 14;
-
-  if (has_qtag) {
-    struct tagged_ethernet_hdr_t *tagged_ethernet_hdr = (tagged_ethernet_hdr_t *) &buf[0];
-    etype = (int)(tagged_ethernet_hdr->ethertype[0] << 8) + (int)(tagged_ethernet_hdr->ethertype[1]);
-  }
-  else {
-    etype = (int)(ethernet_hdr->ethertype[0] << 8) + (int)(ethernet_hdr->ethertype[1]);
-  }
-
-  src_addr = ethernet_hdr->src_addr;
-}
 
 void avb_process_control_packet(unsigned int buf0[], int nbytes, chanend c_tx, chanend ?c_media_clock_ctl, unsigned int port_num)
 {
@@ -983,29 +969,42 @@ void avb_process_control_packet(unsigned int buf0[], int nbytes, chanend c_tx, c
     }
   }
   else {
+    struct ethernet_hdr_t *ethernet_hdr = (ethernet_hdr_t *) &buf0[0];
+
     int etype, eth_hdr_size;
-    unsigned char src_addr[6];
-    avb_get_packet_overview(buf0, etype, eth_hdr_size, src_addr);
+    int has_qtag = ethernet_hdr->ethertype[1]==0x18;
+    eth_hdr_size = has_qtag ? 18 : 14;
+
+    if (has_qtag) {
+      struct tagged_ethernet_hdr_t *tagged_ethernet_hdr = (tagged_ethernet_hdr_t *) &buf0[0];
+      etype = (int)(tagged_ethernet_hdr->ethertype[0] << 8) + (int)(tagged_ethernet_hdr->ethertype[1]);
+    }
+    else {
+      etype = (int)(ethernet_hdr->ethertype[0] << 8) + (int)(ethernet_hdr->ethertype[1]);
+    }
     int len = nbytes - eth_hdr_size;
 
     unsigned char *buf = (unsigned char *) buf0;
 
-    switch (etype) {
-      /* fallthrough intended */
-      case AVB_SRP_ETHERTYPE:
-      // TODO: #define around MMRP, disabled by default
-      case AVB_MMRP_ETHERTYPE:
-      case AVB_MVRP_ETHERTYPE:
-        avb_mrp_process_packet(&buf[eth_hdr_size], etype, len, port_num);
-        break;
-      case AVB_1722_ETHERTYPE:
-        // We know that the cd field is true because the MAC filter only forwards
-        // 1722 control to this thread
-      #if AVB_ENABLE_1722_1
-        avb_1722_1_process_packet(&buf[eth_hdr_size], src_addr, len, c_tx);
-      #endif
-        avb_1722_maap_process_packet(&buf[eth_hdr_size], src_addr, len, c_tx);
-        break;
+    unsafe {
+
+      switch (etype) {
+        /* fallthrough intended */
+        case AVB_SRP_ETHERTYPE:
+        // TODO: #define around MMRP, disabled by default
+        case AVB_MMRP_ETHERTYPE:
+        case AVB_MVRP_ETHERTYPE:
+          avb_mrp_process_packet((unsigned char *unsafe)&buf[eth_hdr_size], etype, len, port_num);
+          break;
+        case AVB_1722_ETHERTYPE:
+          // We know that the cd field is true because the MAC filter only forwards
+          // 1722 control to this thread
+        #if AVB_ENABLE_1722_1
+          avb_1722_1_process_packet((unsigned char *unsafe)&buf[eth_hdr_size], ethernet_hdr->src_addr, len, c_tx);
+        #endif
+          avb_1722_maap_process_packet((unsigned char *unsafe)&buf[eth_hdr_size], ethernet_hdr->src_addr, len, c_tx);
+          break;
+      }
     }
   }
 

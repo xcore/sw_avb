@@ -25,7 +25,7 @@ interface avb_interface {
  *  \param source_num       the local source number to set
  *  \param presentation     the presentation offset in ms
  */
-  int get_source_presentation(int source_num, int *presentation);
+  int get_source_presentation(int source_num, int &presentation);
 
 /** Set the channel map of an avb source.
  *
@@ -51,7 +51,7 @@ interface avb_interface {
  *  \param len the length of the map; should be equal to the number of channels
  *             in the stream
  */
-  int get_source_map(int source_num, int map[], int *len);
+  int get_source_map(int source_num, int map[], int &len);
 
 /** Set the destination address of an avb source.
  *
@@ -71,7 +71,7 @@ interface avb_interface {
  *  \param addr         the destination address as an array of 6 bytes
  *  \param len          the length of the address, should always be equal to 6
  */
-  int get_source_dest(int source_num, unsigned char addr[], int *len);
+  int get_source_dest(int source_num, unsigned char addr[], int &len);
 
 /** Set the format of an AVB source.
  *
@@ -93,7 +93,7 @@ interface avb_interface {
  *  \param format     the format of the stream
  *  \param rate       the sample rate of the stream in Hz
  */
-  int get_source_format(int source_num, enum avb_stream_format_t *format, int *rate);
+  int get_source_format(int source_num, enum avb_stream_format_t &format, int &rate);
 
 /** Set the channel count of an AVB source.
  *
@@ -111,7 +111,7 @@ interface avb_interface {
  *  \param source_num   the local source number
  *  \param channels     the number of channels
  */
-  int get_source_channels(int source_num, int *channels);
+  int get_source_channels(int source_num, int &channels);
 
 /** Set the media clock of an AVB source.
  *
@@ -126,7 +126,7 @@ interface avb_interface {
  *  \param source_num   the local source number
  *  \param sync         the media clock number
  */
-  int get_source_sync(int source_num, int *sync);
+  int get_source_sync(int source_num, int &sync);
 
   int set_source_port(int source_num, int port_num);
 
@@ -147,7 +147,7 @@ interface avb_interface {
  *  \param source_num the local source number
  *  \param vlan       the destination vlan id, The media clock number
  */
-  int get_source_vlan(int source_num, int *vlan);
+  int get_source_vlan(int source_num, int &vlan);
 
 /** Set the current state of an AVB source.
  *
@@ -165,7 +165,7 @@ interface avb_interface {
  *  \param source_num the local source number
  *  \param state      the state of the source
  */
-  int get_source_state(int source_num, enum avb_source_state_t *state);
+  int get_source_state(int source_num, enum avb_source_state_t &state);
 
   int get_source_id(int source_num, unsigned int id[2]);
 
@@ -196,7 +196,7 @@ interface avb_interface {
  *  \param format     the format of the stream
  *  \param rate       the sample rate of the stream in Hz
  */
-  int get_sink_format(int sink_num, enum avb_stream_format_t *format, int *rate);
+  int get_sink_format(int sink_num, enum avb_stream_format_t &format, int &rate);
 
 /** Set the channel count of an AVB sink.
  *
@@ -214,7 +214,7 @@ interface avb_interface {
  *  \param sink_num     the local sink number
  *  \param channels     the number of channels
  */
-  int get_sink_channels(int sink_num, int *channels);
+  int get_sink_channels(int sink_num, int &channels);
 
 /** Set the media clock of an AVB sink.
  *
@@ -229,7 +229,7 @@ interface avb_interface {
  *  \param sink_num   the local sink number
  *  \param sync         the media clock number
  */
-  int get_sink_sync(int sink_num, int *sync);
+  int get_sink_sync(int sink_num, int &sync);
 
 
 /** Set the virtual lan id of an AVB sink.
@@ -249,7 +249,7 @@ interface avb_interface {
  * \param sink_num the number of the sink
  * \param vlan     the vlan id of the sink
  */
-  int get_sink_vlan(int sink_num, int *vlan);
+  int get_sink_vlan(int sink_num, int &vlan);
 
 /** Set the state of an AVB sink.
  *
@@ -268,7 +268,7 @@ interface avb_interface {
  * \param sink_num the number of the sink
  * \param state the state of the sink
  */
-  int get_sink_state(int sink_num, enum avb_sink_state_t *state);
+  int get_sink_state(int sink_num, enum avb_sink_state_t &state);
 
 /** Set the map of an AVB sink.
  *
@@ -292,7 +292,7 @@ interface avb_interface {
  * \param len        the length of the map; should equal to the number
  *                   of channels in the stream
  */
-  int get_sink_map(int sink_num, int map[], int *len);
+  int get_sink_map(int sink_num, int map[], int &len);
 
 /** Set the stream id that an AVB sink listens to.
  *
@@ -334,7 +334,7 @@ interface avb_interface {
  *  \param addr         The mac address as an array of 6 bytes.
  *  \param len          The length of the address, should always be equal to 6.
  */
-  int get_sink_addr(int sink_num, unsigned char addr[], int *len);
+  int get_sink_addr(int sink_num, unsigned char addr[], int &len);
 
 /** Set the source of a media clock.
  *
@@ -351,7 +351,7 @@ interface avb_interface {
  *  \param clock_num the number of the media clock
  *  \param source the output FIFO number to base the clock on
  */
-  int get_device_media_clock_source(int clock_num, int *source);
+  int get_device_media_clock_source(int clock_num, int &source);
 
 /** Set the rate of a media clock.
  *
@@ -367,7 +367,7 @@ interface avb_interface {
  *  \param clock_num the number of the media clock
  *  \param rate the rate of the clock in Hz
  */
-  int get_device_media_clock_rate(int clock_num, int *rate);
+  int get_device_media_clock_rate(int clock_num, int &rate);
 
 /** Set the type of a media clock.
  *
@@ -382,7 +382,7 @@ interface avb_interface {
  *  \param clock_num the number of the media clock
  *  \param clock_type the type of the clock
  */
-  int get_device_media_clock_type(int clock_num, enum device_media_clock_type_t *clock_type);
+  int get_device_media_clock_type(int clock_num, enum device_media_clock_type_t &clock_type);
 
 /** Set the state of a media clock.
  *
@@ -397,7 +397,7 @@ interface avb_interface {
  *  \param clock_num the number of the media clock
  *  \param state the state of the clock
  */
-  int get_device_media_clock_state(int clock_num, enum device_media_clock_state_t *state);
+  int get_device_media_clock_state(int clock_num, enum device_media_clock_state_t &state);
 };
 #endif
 

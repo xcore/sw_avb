@@ -65,14 +65,14 @@ void media_clock_set_source(chanend media_clock_svr, int media_clock_num,
 
 
 void media_clock_get_source(chanend media_clock_svr, int media_clock_num, 
-                         int *x)
+                         int &x)
 {
   media_clock_svr <: MEDIA_CLOCK_GET_SOURCE;
   master {
     media_clock_svr <: media_clock_num;
     int source;
     media_clock_svr :> source;
-    *x = source;
+    x = source;
   }
 }
 

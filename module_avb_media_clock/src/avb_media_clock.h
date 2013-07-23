@@ -63,7 +63,7 @@ void media_clock_set_source(chanend media_clock_svr, int media_clock_num,
  *  \param a pointer to an integer where the clock source is placed
  */
 void media_clock_get_source(chanend media_clock_svr, int media_clock_num, 
-                         int *a);
+                         int &a);
 
 
 /**
