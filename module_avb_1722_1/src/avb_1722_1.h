@@ -8,6 +8,15 @@
 
 #include "xc2compat.h"
 #include "avb_control_types.h"
+#include "avb_1722_1_adp_pdu.h"
+#include "avb_1722_1_acmp_pdu.h"
+#include "avb_1722_1_aecp_pdu.h"
+
+typedef union {
+    avb_1722_1_adp_packet_t adp;
+    avb_1722_1_acmp_packet_t acmp;
+    avb_1722_1_aecp_packet_t aecp;
+} avb_1722_1_packet_t;
 
 /** Initialisation of 1722.1 state machines
  *

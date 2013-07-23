@@ -8,12 +8,6 @@
 #include "avb_1722_1_acmp.h"
 #include "avb_1722_1_aecp.h"
 
-typedef union {
-    avb_1722_1_adp_packet_t adp;
-    avb_1722_1_acmp_packet_t acmp;
-    avb_1722_1_aecp_packet_t aecp;
-} avb_1722_1_packet_t;
-
 unsigned char my_mac_addr[6];
 
 // Buffer for constructing 1722.1 transmit packets

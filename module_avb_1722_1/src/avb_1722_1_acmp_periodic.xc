@@ -13,6 +13,7 @@
 #include <assert.h>
 #endif
 #include "avb_1722_1_app_hooks.h"
+#include "avb_1722_1.h"
 
 /* Inflight command defines */
 #define CONTROLLER  0
