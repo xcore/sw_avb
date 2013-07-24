@@ -29,7 +29,7 @@ void print_mac_ln(unsigned char c[6])
     }
 }
 
-unsigned compare_guid(unsigned char *a, guid_t *b)
+unsigned compare_guid(unsigned char a[6], const_guid_ref_t b)
 {
     for (int i=0; i < 8; i++)
     {
@@ -51,7 +51,7 @@ int qlog2(unsigned n)
     return l;
 }
 
-void avb_1722_1_create_1722_1_header(   const unsigned char* dest_addr,
+void avb_1722_1_create_1722_1_header(   unsigned char* dest_addr,
                                         int subtype,
                                         int message_type,
                                         unsigned char valid_time_status,

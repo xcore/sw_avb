@@ -7,6 +7,7 @@
 #include <print.h>
 #include "simple_printf.h"
 #include "xccompat.h"
+#include "avb_1722_1.h"
 
 #if AVB_1722_1_USE_AVC
 #include "avc_commands.h"
@@ -16,7 +17,7 @@
 #include "aem_descriptors.h"
 #endif
 
-extern unsigned int avb_1722_1_buf[];
+extern unsigned int avb_1722_1_buf[AVB_1722_1_PACKET_SIZE_WORDS];
 extern guid_t my_guid;
 extern unsigned char my_mac_addr[6];
 

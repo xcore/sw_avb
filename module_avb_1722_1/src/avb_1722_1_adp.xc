@@ -9,6 +9,9 @@
 #include <print.h>
 #include "simple_printf.h"
 #include "avb_1722_1_app_hooks.h"
+#include "avb_1722_1.h"
+
+extern void memset(void *unsafe, int, size_t);
 
 /* Enumerations for state variables */
 static enum { ADP_ADVERTISE_IDLE,
@@ -26,12 +29,12 @@ static enum { ADP_DISCOVERY_IDLE,
        ADP_DISCOVERY_REMOVED
 } adp_discovery_state = ADP_DISCOVERY_IDLE;
 
-extern unsigned int avb_1722_1_buf[];
+extern unsigned int avb_1722_1_buf[AVB_1722_1_PACKET_SIZE_WORDS];
 extern guid_t my_guid;
 // The GUID whose information we are currently trying to discover
 static guid_t discover_guid;
 
-static const unsigned char avb_1722_1_adp_dest_addr[6] = AVB_1722_1_ADP_DEST_MAC;
+static unsigned char avb_1722_1_adp_dest_addr[6] = AVB_1722_1_ADP_DEST_MAC;
 
 // The ADP available index counter
 static unsigned long avb_1722_1_available_index = 0;
@@ -56,14 +59,14 @@ static int adp_latest_entity_added_index = -1;
 void avb_1722_1_adp_init()
 {
     avb_1722_1_entity_database_flush();
-    init_avb_timer(&adp_advertise_timer, 1);
-    init_avb_timer(&adp_readvertise_timer, 100);
-    init_avb_timer(&adp_discovery_timer, 200);
-    init_avb_timer(&ptp_monitor_timer, 100);
+    init_avb_timer(adp_advertise_timer, 1);
+    init_avb_timer(adp_readvertise_timer, 100);
+    init_avb_timer(adp_discovery_timer, 200);
+    init_avb_timer(ptp_monitor_timer, 100);
 
     adp_advertise_state = ADP_ADVERTISE_IDLE;
     adp_discovery_state = ADP_DISCOVERY_WAITING;
-    start_avb_timer(&adp_discovery_timer, 1);
+    start_avb_timer(adp_discovery_timer, 1);
 }
 
 void avb_1722_1_adp_announce()
@@ -93,12 +96,12 @@ void avb_1722_1_adp_depart_then_announce()
     }    
 }
 
-void avb_1722_1_adp_discover(guid_t *guid)
+void avb_1722_1_adp_discover(const_guid_ref_t guid)
 {
     if (adp_discovery_state == ADP_DISCOVERY_WAITING)
     {
         adp_discovery_state = ADP_DISCOVERY_DISCOVER;
-        discover_guid.l = guid->l;
+        discover_guid.l = guid.l;
     } 
 }
 
@@ -106,7 +109,7 @@ void avb_1722_1_adp_discover_all()
 {
     guid_t guid;
     guid.l = 0;
-    avb_1722_1_adp_discover(&guid);
+    avb_1722_1_adp_discover(guid);
 }
 
 void avb_1722_1_adp_change_ptp_grandmaster(unsigned char grandmaster[8])
@@ -123,20 +126,20 @@ int avb_1722_1_entity_database_find(const_guid_ref_t guid)
 {
     for (int i=0; i < AVB_1722_1_MAX_ENTITIES; ++i)
     {
-        if (entities[i].guid.l == guid->l)
+        if (entities[i].guid.l == guid.l)
             return i;
     }
     return AVB_1722_1_MAX_ENTITIES;
 }
 
-static int avb_1722_1_entity_database_add(avb_1722_1_adp_packet_t* pkt)
+static int avb_1722_1_entity_database_add(avb_1722_1_adp_packet_t &pkt)
 {
     guid_t guid;
     int found_slot_index = -1;
     int i;
     int entity_update = 0;
 
-    get_64(guid.c, pkt->entity_guid);
+    get_64(guid.c, pkt.entity_guid);
 
     for (i=0; i < AVB_1722_1_MAX_ENTITIES; ++i)
     {
@@ -156,18 +159,18 @@ static int avb_1722_1_entity_database_add(avb_1722_1_adp_packet_t* pkt)
     if (found_slot_index != -1)
     {
         entities[found_slot_index].guid.l = guid.l;
-        entities[found_slot_index].vendor_id = ntoh_32(pkt->vendor_id);
-        entities[found_slot_index].entity_model_id = ntoh_32(pkt->entity_model_id);
-        entities[found_slot_index].capabilities = ntoh_32(pkt->entity_capabilities);
-        entities[found_slot_index].talker_stream_sources = ntoh_16(pkt->talker_stream_sources);
-        entities[found_slot_index].talker_capabilities = ntoh_16(pkt->talker_capabilities);
-        entities[found_slot_index].listener_stream_sinks = ntoh_16(pkt->listener_stream_sinks);
-        entities[found_slot_index].listener_capabilities = ntoh_16(pkt->listener_capabilities);
-        entities[found_slot_index].controller_capabilities = ntoh_32(pkt->controller_capabilities);
-        entities[found_slot_index].available_index = ntoh_32(pkt->available_index);
-        get_64(entities[found_slot_index].as_grandmaster_id.c, pkt->as_grandmaster_id);
-        entities[found_slot_index].association_id = ntoh_32(pkt->association_id);
-        entities[found_slot_index].timeout = GET_1722_1_VALID_TIME(&pkt->header) + adp_two_second_counter;
+        entities[found_slot_index].vendor_id = ntoh_32(pkt.vendor_id);
+        entities[found_slot_index].entity_model_id = ntoh_32(pkt.entity_model_id);
+        entities[found_slot_index].capabilities = ntoh_32(pkt.entity_capabilities);
+        entities[found_slot_index].talker_stream_sources = ntoh_16(pkt.talker_stream_sources);
+        entities[found_slot_index].talker_capabilities = ntoh_16(pkt.talker_capabilities);
+        entities[found_slot_index].listener_stream_sinks = ntoh_16(pkt.listener_stream_sinks);
+        entities[found_slot_index].listener_capabilities = ntoh_16(pkt.listener_capabilities);
+        entities[found_slot_index].controller_capabilities = ntoh_32(pkt.controller_capabilities);
+        entities[found_slot_index].available_index = ntoh_32(pkt.available_index);
+        get_64(entities[found_slot_index].as_grandmaster_id.c, pkt.as_grandmaster_id);
+        entities[found_slot_index].association_id = ntoh_32(pkt.association_id);
+        entities[found_slot_index].timeout = GET_1722_1_VALID_TIME(&pkt.header) + adp_two_second_counter;
 
         if (entity_update)
         {
@@ -195,18 +198,18 @@ void avb_1722_1_entity_database_flush(void)
     }
 }
 
-static void avb_1722_1_entity_database_remove(avb_1722_1_adp_packet_t* pkt)
+static void avb_1722_1_entity_database_remove(avb_1722_1_adp_packet_t &pkt)
 {
     guid_t guid;
     int i;
-    get_64(guid.c, pkt->entity_guid);
+    get_64(guid.c, pkt.entity_guid);
 
-    i = avb_1722_1_entity_database_find(&guid);
+    i = avb_1722_1_entity_database_find(guid);
 
     if (i != AVB_1722_1_MAX_ENTITIES)
     {
 #ifdef AVB_1722_1_ADP_DEBUG_ENTITY_REMOVAL
-        printstr("ADP: Removing entity who advertised departing -> GUID "); print_guid_ln(&entities[i].guid);
+        printstr("ADP: Removing entity who advertised departing -> GUID "); print_guid_ln(entities[i].guid);
 #endif
         entities[i].guid.l = 0;
     }
@@ -223,7 +226,7 @@ static unsigned avb_1722_1_entity_database_check_timeout()
         if (entities[i].timeout < adp_two_second_counter)
         {
 #ifdef AVB_1722_1_ADP_DEBUG_ENTITY_REMOVAL
-            printstr("ADP: Removing entity who timed out -> GUID "); print_guid_ln(&entities[i].guid);
+            printstr("ADP: Removing entity who timed out -> GUID "); print_guid_ln(entities[i].guid);
 #endif
             entities[i].guid.l=0;
             return 1;
@@ -232,16 +235,16 @@ static unsigned avb_1722_1_entity_database_check_timeout()
     return 0;
 }
 
-void process_avb_1722_1_adp_packet(avb_1722_1_adp_packet_t* pkt, chanend c_tx)
+void process_avb_1722_1_adp_packet(avb_1722_1_adp_packet_t &pkt, chanend c_tx)
 {
-    unsigned message_type = GET_1722_1_MSG_TYPE(((avb_1722_1_packet_header_t*)pkt));
+    unsigned message_type = GET_1722_1_MSG_TYPE(((avb_1722_1_packet_header_t*)&pkt));
     guid_t zero_guid = { 0 };
 
     switch (message_type)
     {
         case ENTITY_DISCOVER:
         {
-            if ( compare_guid(pkt->entity_guid, &my_guid) || compare_guid(pkt->entity_guid, &zero_guid) )
+            if ( compare_guid(pkt.entity_guid, my_guid) || compare_guid(pkt.entity_guid, zero_guid) )
             {
                 if (adp_advertise_state == ADP_ADVERTISE_WAITING)
                     adp_advertise_state = ADP_ADVERTISE_ADVERTISE_1;
@@ -273,10 +276,11 @@ static void avb_1722_1_create_adp_packet(int message_type, guid_t guid)
     ethernet_hdr_t *hdr = (ethernet_hdr_t*) &avb_1722_1_buf[0];
     avb_1722_1_adp_packet_t *pkt = (avb_1722_1_adp_packet_t*) (hdr + AVB_1722_1_PACKET_BODY_POINTER_OFFSET);
 
-    memset(pkt, 0, sizeof(avb_1722_1_adp_packet_t));
-
-    avb_1722_1_create_1722_1_header(avb_1722_1_adp_dest_addr, DEFAULT_1722_1_ADP_SUBTYPE, message_type,
-          (message_type==ENTITY_AVAILABLE)?AVB_1722_1_ADP_VALID_TIME:0, AVB_1722_1_ADP_CD_LENGTH, hdr);
+    unsafe {
+        memset((avb_1722_1_adp_packet_t *unsafe)pkt, 0, sizeof(avb_1722_1_adp_packet_t));
+        avb_1722_1_create_1722_1_header((unsigned char *unsafe)avb_1722_1_adp_dest_addr, DEFAULT_1722_1_ADP_SUBTYPE, message_type,
+          (message_type==ENTITY_AVAILABLE)?AVB_1722_1_ADP_VALID_TIME:0, AVB_1722_1_ADP_CD_LENGTH, (ethernet_hdr_t *unsafe)hdr);
+    }
 
     set_64(pkt->entity_guid, guid.c);
 
@@ -296,7 +300,7 @@ static void avb_1722_1_create_adp_packet(int message_type, guid_t guid)
     }
 }
 
-void avb_1722_1_adp_discovery_periodic(chanend c_tx)
+void avb_1722_1_adp_discovery_periodic(chanend c_tx, client interface avb_interface avb_api)
 {
     switch (adp_discovery_state)
     {
@@ -306,11 +310,11 @@ void avb_1722_1_adp_discovery_periodic(chanend c_tx)
         case ADP_DISCOVERY_WAITING:
         {
             unsigned lost=0;
-            if (avb_timer_expired(&adp_discovery_timer))
+            if (avb_timer_expired(adp_discovery_timer))
             {
                 adp_two_second_counter++;
                 lost = avb_1722_1_entity_database_check_timeout();
-                start_avb_timer(&adp_discovery_timer, 1);
+                start_avb_timer(adp_discovery_timer, 1);
             }
             if (lost > 0)
             {
@@ -327,7 +331,7 @@ void avb_1722_1_adp_discovery_periodic(chanend c_tx)
         }
         case ADP_DISCOVERY_ADDED:
         {
-            avb_entity_on_new_entity_available(&my_guid, &entities[adp_latest_entity_added_index], c_tx);
+            avb_entity_on_new_entity_available(avb_api, my_guid, &entities[adp_latest_entity_added_index], c_tx);
             adp_discovery_state = ADP_DISCOVERY_WAITING;
             break;
         }
@@ -350,7 +354,7 @@ void avb_1722_1_adp_advertising_periodic(chanend c_tx, chanend ptp)
             break;
 
         case ADP_ADVERTISE_WAITING:
-            if (avb_timer_expired(&adp_readvertise_timer))
+            if (avb_timer_expired(adp_readvertise_timer))
             {
                 adp_advertise_state = ADP_ADVERTISE_ADVERTISE_1;
             }
@@ -358,7 +362,7 @@ void avb_1722_1_adp_advertising_periodic(chanend c_tx, chanend ptp)
 
         case ADP_ADVERTISE_ADVERTISE_0:
             avb_1722_1_adp_change_ptp_grandmaster(ptp_current.c);
-            start_avb_timer(&ptp_monitor_timer, 1); //Every second
+            start_avb_timer(ptp_monitor_timer, 1); //Every second
             adp_advertise_state = ADP_ADVERTISE_ADVERTISE_1;
             // Fall through and send immediately
 
@@ -366,7 +370,7 @@ void avb_1722_1_adp_advertising_periodic(chanend c_tx, chanend ptp)
             avb_1722_1_create_adp_packet(ENTITY_AVAILABLE, my_guid);
             mac_tx(c_tx, avb_1722_1_buf, AVB_1722_1_ADP_PACKET_SIZE, -1);
 
-            start_avb_timer(&adp_readvertise_timer, AVB_1722_1_ADP_REPEAT_TIME);
+            start_avb_timer(adp_readvertise_timer, AVB_1722_1_ADP_REPEAT_TIME);
             adp_advertise_state = ADP_ADVERTISE_WAITING;
             avb_1722_1_available_index++;
             break;
@@ -387,7 +391,7 @@ void avb_1722_1_adp_advertising_periodic(chanend c_tx, chanend ptp)
 
     if (ADP_ADVERTISE_IDLE != adp_advertise_state)
     {
-        if (avb_timer_expired(&ptp_monitor_timer))
+        if (avb_timer_expired(ptp_monitor_timer))
         {
             ptp_get_current_grandmaster(ptp, ptp_current.c);
             if (as_grandmaster_id.l != ptp_current.l)
@@ -395,7 +399,7 @@ void avb_1722_1_adp_advertising_periodic(chanend c_tx, chanend ptp)
                 avb_1722_1_adp_change_ptp_grandmaster(ptp_current.c);
                 adp_advertise_state = ADP_ADVERTISE_ADVERTISE_1;
             }
-            start_avb_timer(&ptp_monitor_timer, 1); //Every second
+            start_avb_timer(ptp_monitor_timer, 1); //Every second
         }
     }
 }

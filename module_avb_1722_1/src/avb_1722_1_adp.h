@@ -1,6 +1,7 @@
 #ifndef AVB_1722_1_ADP_H_
 #define AVB_1722_1_ADP_H_
 
+#include "avb_api.h"
 #include "avb_1722_1_adp_pdu.h"
 #include "avb_control_types.h"
 
@@ -10,7 +11,9 @@ void avb_1722_1_adp_init();
 
 void process_avb_1722_1_adp_packet(REFERENCE_PARAM(avb_1722_1_adp_packet_t, pkt), chanend c_tx);
 void avb_1722_1_adp_advertising_periodic(chanend c_tx, chanend ptp);
-void avb_1722_1_adp_discovery_periodic(chanend c_tx);
+#ifdef __XC__
+void avb_1722_1_adp_discovery_periodic(chanend c_tx, client interface avb_interface avb);
+#endif
 int avb_1722_1_get_latest_new_entity_idx();
 
 /**
@@ -36,7 +39,7 @@ void avb_1722_1_adp_depart_then_announce(void);
  * 
  * \param   guid    The GUID of the entity to discover
  */
-void avb_1722_1_adp_discover(REFERENCE_PARAM(guid_t, guid));
+void avb_1722_1_adp_discover(const_guid_ref_t guid);
 
 /**
  *

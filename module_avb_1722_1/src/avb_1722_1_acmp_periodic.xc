@@ -50,7 +50,7 @@ extern avb_1722_1_acmp_cmd_resp acmp_listener_rcvd_cmd_resp;
 extern short sequence_id[2];
 
 extern void acmp_zero_listener_stream_info(int unique_id);
-extern unsigned int avb_1722_1_buf[(sizeof(avb_1722_1_packet_t)+sizeof(ethernet_hdr_t)+3)/4];
+extern unsigned int avb_1722_1_buf[AVB_1722_1_PACKET_SIZE_WORDS];
 
 
 void acmp_send_command(int entity_type, int message_type, avb_1722_1_acmp_cmd_resp *command, int retry, int inflight_idx, chanend c_tx)

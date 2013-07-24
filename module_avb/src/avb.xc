@@ -180,8 +180,6 @@ unsafe void avb_init(chanend c_media_ctl[],
   register_media(c_media_ctl);
   init_media_clock_server(c_media_clock_ctl);
 
-  avb_1722_maap_init(mac_addr);
-
   for(int i=0; i < MRP_NUM_PORTS; i++)
   {
     domain_attr[i] = mrp_get_attr();
@@ -227,22 +225,7 @@ void avb_init_srp_only(chanend c_mac_rx0,
 
 void avb_periodic(chanend c_mac_tx, unsigned int time_now)
 {
-  static unsigned int first_time = 1;
-  static int maap_started = 0;
-
 	mrp_periodic();
-	avb_1722_maap_periodic(c_mac_tx);
-
-  if ((first_time == 1) && (time_now != 1)){
-    first_time = time_now;
-  }
-
-  if ((first_time != 1) && !maap_started && timeafter(time_now, first_time+(RECV_ANNOUNCE_TIMEOUT+ANNOUNCE_PERIOD)))
-  {
-    // Request a multicast addresses for stream transmission
-    avb_1722_maap_request_addresses(AVB_NUM_SOURCES, null);
-    maap_started = 1;
-  }
 }
 
 void avb_start(void)
@@ -520,7 +503,7 @@ void avb_manager(server interface avb_interface avb[2],
       // Periodic processing
       case tmr when timerafter(periodic_timeout) :> unsigned int time_now:
       {
-        avb_periodic(c_mac_tx, time_now);
+        mrp_periodic();
 
         periodic_timeout += PERIODIC_POLL_TIME;
         break;
@@ -939,7 +922,7 @@ void set_avb_source_volumes(int sink_num, int volumes[], int count)
 #endif
 
 
-void avb_process_1722_1_packet(unsigned int buf0[], int nbytes, chanend c_tx) {
+void avb_process_1722_control_packet(unsigned int buf0[], int nbytes, chanend c_tx) {
 
   if (nbytes == STATUS_PACKET_LEN) {
     if (((unsigned char *)buf0)[0]) { // Link up
@@ -971,6 +954,7 @@ void avb_process_1722_1_packet(unsigned int buf0[], int nbytes, chanend c_tx) {
       switch (etype) {
         case AVB_1722_ETHERTYPE:
           avb_1722_1_process_packet((unsigned char *unsafe)&buf[eth_hdr_size], ethernet_hdr->src_addr, len, c_tx);
+          avb_1722_maap_process_packet(&buf[eth_hdr_size], ethernet_hdr->src_addr, len, c_tx);
           break;
       }
     }
@@ -1020,11 +1004,6 @@ void avb_process_control_packet(unsigned int buf0[], int nbytes, chanend c_tx, c
         case AVB_MMRP_ETHERTYPE:
         case AVB_MVRP_ETHERTYPE:
           avb_mrp_process_packet((unsigned char *unsafe)&buf[eth_hdr_size], etype, len, port_num);
-          break;
-        case AVB_1722_ETHERTYPE:
-          // We know that the cd field is true because the MAC filter only forwards
-          // 1722 control to this thread
-          avb_1722_maap_process_packet((unsigned char *unsafe)&buf[eth_hdr_size], ethernet_hdr->src_addr, len, c_tx);
           break;
       }
     }

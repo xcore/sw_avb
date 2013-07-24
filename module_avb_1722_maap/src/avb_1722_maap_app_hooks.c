@@ -8,6 +8,7 @@
 #include "avb_1722_maap_protocol.h"
 #include "avb_control_types.h"
 
+#if 0
 void __attribute__((weak)) avb_talker_on_source_address_reserved(int source_num, unsigned char mac_addr[6])
 {
   enum avb_source_state_t state;
@@ -29,3 +30,4 @@ void __attribute__((weak)) avb_talker_on_source_address_reserved(int source_num,
   }
   set_avb_source_state(source_num, AVB_SOURCE_STATE_POTENTIAL);
 }
+#endif

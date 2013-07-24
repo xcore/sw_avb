@@ -13,6 +13,7 @@
 #include <assert.h>
 #endif
 #include "avb_1722_1_app_hooks.h"
+#include "avb_1722_1.h"
 
 /* Inflight command defines */
 #define CONTROLLER  0
@@ -25,7 +26,7 @@ enum acmp_controller_state_t acmp_controller_state = ACMP_CONTROLLER_IDLE;
 enum acmp_talker_state_t acmp_talker_state = ACMP_TALKER_IDLE;
 enum acmp_listener_state_t acmp_listener_state = ACMP_LISTENER_IDLE;
 
-extern unsigned int avb_1722_1_buf[];
+extern unsigned int avb_1722_1_buf[AVB_1722_1_PACKET_SIZE_WORDS];
 extern guid_t my_guid;
 
 static const unsigned char avb_1722_1_acmp_dest_addr[6] = AVB_1722_1_ACMP_DEST_MAC;
@@ -34,28 +35,28 @@ static const unsigned char avb_1722_1_acmp_dest_addr[6] = AVB_1722_1_ACMP_DEST_M
 static const unsigned int avb_1722_1_acmp_inflight_timeouts[] = {20, 2, 2, 45, 5, 2, 2};
 
 // Stream info lists
-static avb_1722_1_acmp_listener_stream_info acmp_listener_streams[AVB_1722_1_MAX_LISTENERS];
-static avb_1722_1_acmp_talker_stream_info acmp_talker_streams[AVB_1722_1_MAX_TALKERS];
+avb_1722_1_acmp_listener_stream_info acmp_listener_streams[AVB_1722_1_MAX_LISTENERS];
+avb_1722_1_acmp_talker_stream_info acmp_talker_streams[AVB_1722_1_MAX_TALKERS];
 
 // Inflight command lists
-static avb_1722_1_acmp_inflight_command acmp_controller_inflight_commands[AVB_1722_1_MAX_INFLIGHT_COMMANDS];
-static avb_1722_1_acmp_inflight_command acmp_listener_inflight_commands[AVB_1722_1_MAX_INFLIGHT_COMMANDS];
+avb_1722_1_acmp_inflight_command acmp_controller_inflight_commands[AVB_1722_1_MAX_INFLIGHT_COMMANDS];
+avb_1722_1_acmp_inflight_command acmp_listener_inflight_commands[AVB_1722_1_MAX_INFLIGHT_COMMANDS];
 
 static unsigned acmp_centisecond_counter[2];
 static avb_timer acmp_inflight_timer[2];
 
 // Controller command
-static avb_1722_1_acmp_cmd_resp acmp_controller_cmd_resp;
+avb_1722_1_acmp_cmd_resp acmp_controller_cmd_resp;
 
 // Talker's rcvdCmdResp
-static avb_1722_1_acmp_cmd_resp acmp_talker_rcvd_cmd_resp;
+avb_1722_1_acmp_cmd_resp acmp_talker_rcvd_cmd_resp;
 
 // Listener's rcvdCmdResp
-static avb_1722_1_acmp_cmd_resp acmp_listener_rcvd_cmd_resp;
+avb_1722_1_acmp_cmd_resp acmp_listener_rcvd_cmd_resp;
 
-static short sequence_id[2];
+short sequence_id[2];
 
-static void acmp_zero_listener_stream_info(int unique_id);
+void acmp_zero_listener_stream_info(int unique_id);
 
 /**
  * Initialises ACMP state machines, data structures and timers.
@@ -361,7 +362,7 @@ unsigned acmp_listener_valid_listener_unique(void)
 /**
  * Sets all fields in the listener stream info entry with unique_id to zero
  */
-static void acmp_zero_listener_stream_info(int unique_id)
+void acmp_zero_listener_stream_info(int unique_id)
 {
     memset(&acmp_listener_streams[unique_id], 0, sizeof(avb_1722_1_acmp_listener_stream_info));
 }

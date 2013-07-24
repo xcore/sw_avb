@@ -8,13 +8,14 @@
 #include "avb_1722_1_adp.h"
 #include "avb_1722_1_acmp.h"
 #include "avb_1722_1_aecp.h"
+#include "avb_1722_maap.h"
 
 #define PERIODIC_POLL_TIME 5000
 
 void avb_1722_1_periodic(chanend c_tx, chanend c_ptp, client interface avb_interface avb)
 {
     avb_1722_1_adp_advertising_periodic(c_tx, c_ptp);
-    avb_1722_1_adp_discovery_periodic(c_tx);
+    avb_1722_1_adp_discovery_periodic(c_tx, avb);
 #if (AVB_1722_1_CONTROLLER_ENABLED)
     avb_1722_1_acmp_controller_periodic(c_tx, avb);
 #endif
@@ -26,6 +27,7 @@ void avb_1722_1_periodic(chanend c_tx, chanend c_ptp, client interface avb_inter
 #endif
 }
 
+// TODO: Move/rename this task?
 [[combinable]]
 void avb_1722_1_task(client interface avb_interface avb,
                      chanend c_mac_rx,
@@ -40,6 +42,9 @@ void avb_1722_1_task(client interface avb_interface avb,
 
   mac_get_macaddr(c_mac_tx, mac_addr);
   avb_1722_1_init(mac_addr);
+  avb_1722_maap_init(mac_addr);
+
+  avb_1722_maap_request_addresses(AVB_NUM_SOURCES, null);
 
   tmr :> periodic_timeout;
 
@@ -48,13 +53,14 @@ void avb_1722_1_task(client interface avb_interface avb,
       // Receive and process any incoming AVB packets (802.1Qat, 1722_MAAP)
       case avb_get_control_packet(c_mac_rx, buf, nbytes, port_num):
       {
-        avb_process_1722_1_packet(buf, nbytes, c_mac_tx);
+        avb_process_1722_control_packet(buf, nbytes, c_mac_tx);
         break;
       }
       // Periodic processing
       case tmr when timerafter(periodic_timeout) :> unsigned int time_now:
       {
         avb_1722_1_periodic(c_mac_tx, c_ptp, avb);
+        avb_1722_maap_periodic(c_mac_tx, avb);
 
         periodic_timeout += PERIODIC_POLL_TIME;
         break;

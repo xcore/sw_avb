@@ -32,10 +32,7 @@ static unsigned char maap_dest_addr[6] = MAAP_PROTOCOL_DEST_ADDR;
 
 static random_generator_t random_gen;
 
-static maap_address_range maap_addr =
-{
-  .base = MAAP_ALLOCATION_POOL_BASE_ADDR
-};
+static maap_address_range maap_addr;
 
 static avb_timer maap_timer;
 static int timeout_val;
@@ -43,12 +40,12 @@ static int timeout_val;
 static unsigned int maap_buf[(MAX_AVB_1722_MAAP_PDU_SIZE+1)/4];
 
 static int create_maap_packet(int message_type,
-                              unsigned char src_addr[6],
-                              maap_address_range *addr,
+                              unsigned char ?src_addr[6],
+                              maap_address_range &addr,
                               char *buf,
-                              unsigned char *request_addr,
+                              unsigned char ?request_addr[6],
                               int request_count,
-                              unsigned char *conflict_addr,
+                              unsigned char ?conflict_addr[6],
                               int conflict_count)
 { 
   struct ethernet_hdr_t *hdr = (ethernet_hdr_t*) &buf[0];
@@ -92,11 +89,11 @@ static int create_maap_packet(int message_type,
     for (int i=0; i < 6; i++)
     {
       hdr->dest_addr[i] = maap_dest_addr[i];
-      pkt->request_start_address[i] = addr->base[i];
+      pkt->request_start_address[i] = addr.base[i];
       pkt->conflict_start_address[i] = 0;
     }
     
-    SET_MAAP_REQUESTED_COUNT(pkt, addr->range);
+    SET_MAAP_REQUESTED_COUNT(pkt, addr.range);
     SET_MAAP_CONFLICT_COUNT(pkt, 0);
   }
   return (64);
@@ -105,18 +102,20 @@ static int create_maap_packet(int message_type,
 void avb_1722_maap_init(unsigned char macaddr[6]) 
 {
   maap_addr.state = MAAP_DISABLED;
+  unsigned char base_addr[6] = MAAP_ALLOCATION_POOL_BASE_ADDR;
+  memcpy(maap_addr.base, base_addr, sizeof(base_addr));
 
   memcpy(my_mac_addr, macaddr, 6);
 
   random_gen = random_create_generator_from_hw_seed();
 
-  init_avb_timer(&maap_timer, 1);
+  init_avb_timer(maap_timer, 1);
 }
 
 // If used, start_address[] must be within the official IEEE MAAP pool
-void avb_1722_maap_request_addresses(int num_addr, char start_address[]) 
+void avb_1722_maap_request_addresses(int num_addr, char ?start_address[]) 
 {
-  if (start_address)
+  if (!isnull(start_address))
   {
     for (int i=0; i < 6; i++)
     {
@@ -127,7 +126,7 @@ void avb_1722_maap_request_addresses(int num_addr, char start_address[])
   {
     int range_offset;
     // Set the base address randomly in the allocated maap address range
-    range_offset = random_get_random_number(&random_gen) % (MAAP_ALLOCATION_POOL_SIZE - maap_addr.range);
+    range_offset = random_get_random_number(random_gen) % (MAAP_ALLOCATION_POOL_SIZE - maap_addr.range);
     
     maap_addr.base[4] = (range_offset >> 8) & 0xFF;
     maap_addr.base[5] = range_offset & 0xFF;
@@ -147,14 +146,14 @@ void avb_1722_maap_request_addresses(int num_addr, char start_address[])
   printstr("MAAP: Set probe interval ");
   printintln(timeout_val*10);
 #endif
-  start_avb_timer(&maap_timer, timeout_val);
+  start_avb_timer(maap_timer, timeout_val);
 }
 
 void avb_1722_maap_rerequest_addresses() 
 {
   if (maap_addr.state != MAAP_DISABLED)
   {
-    avb_1722_maap_request_addresses(-1, NULL);
+    avb_1722_maap_request_addresses(-1, null);
   }
 }
 
@@ -168,7 +167,7 @@ void avb_1722_maap_get_base_address(unsigned char addr[6])
   // TODO
 }
 
-void avb_1722_maap_periodic(chanend c_tx)
+void avb_1722_maap_periodic(chanend c_tx, client interface avb_interface avb)
 {
   int nbytes;
 
@@ -177,17 +176,17 @@ void avb_1722_maap_periodic(chanend c_tx)
   case MAAP_DISABLED:
     break;
   case MAAP_PROBING:
-    if (maap_addr.immediately || avb_timer_expired(&maap_timer))
+    if (maap_addr.immediately || avb_timer_expired(maap_timer))
     {
       unsigned char mac_addr[6];
       maap_addr.immediately = 0;
 
       nbytes = create_maap_packet(MAAP_PROBE,
-                                  NULL,
-                                  &maap_addr,
+                                  null,
+                                  maap_addr,
                                   (char *) &maap_buf[0],
-                                  NULL, 0,
-                                  NULL, 0);
+                                  null, 0,
+                                  null, 0);
       mac_tx(c_tx, maap_buf, nbytes, -1);
       maap_addr.probe_count--;
 
@@ -201,8 +200,8 @@ void avb_1722_maap_periodic(chanend c_tx)
         printintln(timeout_val*10);
       #endif
 
-        init_avb_timer(&maap_timer, MAAP_ANNOUNCE_INTERVAL_MULTIPLIER);
-        start_avb_timer(&maap_timer, timeout_val);
+        init_avb_timer(maap_timer, MAAP_ANNOUNCE_INTERVAL_MULTIPLIER);
+        start_avb_timer(maap_timer, timeout_val);
 
         for (int i=0; i < 4; i++)
         {
@@ -218,31 +217,31 @@ void avb_1722_maap_periodic(chanend c_tx)
           mac_addr[4] = (lower_two_bytes >> 8) & 0xFF;
           mac_addr[5] = lower_two_bytes & 0xFF;
           /* User application hook */
-          avb_talker_on_source_address_reserved(i, mac_addr);
+          avb_talker_on_source_address_reserved(avb, i, mac_addr);
         }
       }
       else
       {
         // reset timeout
-        start_avb_timer(&maap_timer, timeout_val);
+        start_avb_timer(maap_timer, timeout_val);
       }
     }
     break;
   case MAAP_RESERVED:
-    if (maap_addr.immediately || avb_timer_expired(&maap_timer))
+    if (maap_addr.immediately || avb_timer_expired(maap_timer))
     {
       nbytes = create_maap_packet(MAAP_ANNOUNCE,
-                                  NULL,
-                                  &maap_addr,
+                                  null,
+                                  maap_addr,
                                   (char *) &maap_buf[0],
-                                  NULL, 0,
-                                  NULL, 0);
+                                  null, 0,
+                                  null, 0);
       mac_tx(c_tx, maap_buf, nbytes, -1);
 
       if (!maap_addr.immediately)
       {
         // reset timeout
-        start_avb_timer(&maap_timer, timeout_val);
+        start_avb_timer(maap_timer, timeout_val);
       }
       else
       {
@@ -262,7 +261,7 @@ static int maap_compare_mac(unsigned char src_addr[6])
   return 0;
 }
 
-static int maap_conflict(unsigned char remote_addr[6], int remote_count, unsigned char conflicted_addr[6], int *conflicted_count)
+static int maap_conflict(unsigned char remote_addr[6], int remote_count, unsigned char ?conflicted_addr[6], int &?conflicted_count)
 {
   int my_addr_lo;
   int my_addr_hi;
@@ -295,12 +294,12 @@ static int maap_conflict(unsigned char remote_addr[6], int remote_count, unsigne
   {
     first_conflict_addr = my_addr_lo;
 
-    if (conflicted_count != NULL)
+    if (!isnull(conflicted_count))
     {
       if (my_addr_hi < conflict_hi)
-        *conflicted_count = my_addr_hi - first_conflict_addr;
+        conflicted_count = my_addr_hi - first_conflict_addr;
       else
-        *conflicted_count = conflict_hi - first_conflict_addr;
+        conflicted_count = conflict_hi - first_conflict_addr;
     }
     else
     {
@@ -311,12 +310,12 @@ static int maap_conflict(unsigned char remote_addr[6], int remote_count, unsigne
   {
     first_conflict_addr = my_addr_lo + (conflict_lo - my_addr_lo);
 
-    if (conflicted_count != NULL)
+    if (!isnull(conflicted_count))
     {
       if (conflict_hi <= my_addr_hi)
-        *conflicted_count = remote_count;
+        conflicted_count = remote_count;
       else
-        *conflicted_count = my_addr_hi - first_conflict_addr;
+        conflicted_count = my_addr_hi - first_conflict_addr;
     }
     else
     {
@@ -374,7 +373,7 @@ void avb_1722_maap_process_packet(unsigned char *buf, unsigned char src_addr[6],
   #if AVB_DEBUG_MAAP
     printstrln("MAAP: Rx probe");
   #endif
-    if (maap_conflict(test_addr, test_count, conflict_addr, &conflict_count))
+    if (maap_conflict(test_addr, test_count, conflict_addr, conflict_count))
     {
     #if AVB_DEBUG_MAAP
       printstrln("MAAP: Conflict");
@@ -383,14 +382,14 @@ void avb_1722_maap_process_packet(unsigned char *buf, unsigned char src_addr[6],
       {
         if (maap_compare_mac(src_addr)) return;
         // Generate new addresses using the same range count as before:
-        avb_1722_maap_request_addresses(-1, NULL); 
+        avb_1722_maap_request_addresses(-1, null); 
       }
       else
       {
         int len;
         len = create_maap_packet( MAAP_DEFEND,
                                   src_addr,
-                                  &maap_addr,
+                                  maap_addr,
                                   (char*) &maap_buf[0],
                                   test_addr,
                                   test_count,
@@ -403,6 +402,7 @@ void avb_1722_maap_process_packet(unsigned char *buf, unsigned char src_addr[6],
       }
     }
     break;
+#pragma fallthrough
   case MAAP_DEFEND:
   #if AVB_DEBUG_MAAP
     printstrln("MAAP: Rx defend");
@@ -411,7 +411,7 @@ void avb_1722_maap_process_packet(unsigned char *buf, unsigned char src_addr[6],
     test_count = GET_MAAP_CONFLICT_COUNT(maap_pkt);
     /* Fallthrough intentional */
   case MAAP_ANNOUNCE:
-    if (maap_conflict(test_addr, test_count, NULL, NULL))
+    if (maap_conflict(test_addr, test_count, null, null))
     {
       if (maap_addr.state == MAAP_RESERVED)
       {
@@ -419,11 +419,10 @@ void avb_1722_maap_process_packet(unsigned char *buf, unsigned char src_addr[6],
       }
 
       // Restart the state machine using the same range count as before:
-      avb_1722_maap_request_addresses(-1, NULL);
+      avb_1722_maap_request_addresses(-1, null);
 
       return;
     }
     break;
   }
 }
-

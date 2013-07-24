@@ -18,6 +18,8 @@ typedef union {
     avb_1722_1_aecp_packet_t aecp;
 } avb_1722_1_packet_t;
 
+#define AVB_1722_1_PACKET_SIZE_WORDS ((sizeof(avb_1722_1_packet_t)+sizeof(ethernet_hdr_t)+3)/4)
+
 /** Initialisation of 1722.1 state machines
  *
  *  \param  macaddr     the Ethernet MAC address (6 bytes) of the endpoint,

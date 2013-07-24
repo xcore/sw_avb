@@ -113,7 +113,7 @@ void avb_get_control_packet(chanend c_rx,
 
 
 
-void avb_process_1722_1_packet(unsigned int buf0[], int nbytes, chanend c_tx);
+void avb_process_1722_control_packet(unsigned int buf0[], int nbytes, chanend c_tx);
 
 /** Process an AVB control packet.
 

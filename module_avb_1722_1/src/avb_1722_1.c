@@ -11,7 +11,7 @@
 unsigned char my_mac_addr[6];
 
 // Buffer for constructing 1722.1 transmit packets
-unsigned int avb_1722_1_buf[(sizeof(avb_1722_1_packet_t)+sizeof(ethernet_hdr_t)+3)/4];
+unsigned int avb_1722_1_buf[AVB_1722_1_PACKET_SIZE_WORDS];
 
 // The GUID of this device
 guid_t my_guid;
