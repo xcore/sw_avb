@@ -1067,7 +1067,7 @@ static void attribute_type_event(mrp_attribute_type atype, mrp_event e, unsigned
   }
 }
 
-static void send_join_indication(mrp_attribute_state *st, int new, int four_packed_event)
+static void send_join_indication(CLIENT_INTERFACE(avb_interface, avb), mrp_attribute_state *st, int new, int four_packed_event)
 {
   switch (st->attribute_type)
   {
@@ -1077,7 +1077,7 @@ static void send_join_indication(mrp_attribute_state *st, int new, int four_pack
   case MSRP_TALKER_FAILED:
     break;
   case MSRP_LISTENER:
-    avb_srp_listener_join_ind(st, new, four_packed_event);
+    avb_srp_listener_join_ind(avb, st, new, four_packed_event);
     break;
   case MSRP_DOMAIN_VECTOR:
     avb_srp_domain_join_ind(st, new);
@@ -1095,7 +1095,7 @@ static void send_join_indication(mrp_attribute_state *st, int new, int four_pack
   }
 }
 
-static void send_leave_indication(mrp_attribute_state *st, int four_packed_event)
+static void send_leave_indication(CLIENT_INTERFACE(avb_interface, avb), mrp_attribute_state *st, int four_packed_event)
 {
   switch (st->attribute_type)
   {
@@ -1105,7 +1105,7 @@ static void send_leave_indication(mrp_attribute_state *st, int four_packed_event
   case MSRP_TALKER_FAILED:
     break;
   case MSRP_LISTENER:
-    avb_srp_listener_leave_ind(st, four_packed_event);
+    avb_srp_listener_leave_ind(avb, st, four_packed_event);
     break;
   case MSRP_DOMAIN_VECTOR:
     avb_srp_domain_leave_ind(st);
@@ -1123,7 +1123,7 @@ static void send_leave_indication(mrp_attribute_state *st, int four_packed_event
   }
 }
 
-void mrp_periodic(void)
+void mrp_periodic(CLIENT_INTERFACE(avb_interface, avb))
 {
   chanend c_tx = avb_control_get_mac_tx();
 
@@ -1195,15 +1195,15 @@ void mrp_periodic(void)
 
         if ((attrs[j].pending_indications & PENDING_JOIN_NEW) != 0)
         {
-          send_join_indication(&attrs[j], 1, attrs[j].four_vector_parameter);
+          send_join_indication(avb, &attrs[j], 1, attrs[j].four_vector_parameter);
         }
         if ((attrs[j].pending_indications & PENDING_JOIN) != 0)
         {
-          send_join_indication(&attrs[j], 0, attrs[j].four_vector_parameter);
+          send_join_indication(avb, &attrs[j], 0, attrs[j].four_vector_parameter);
         }
         if ((attrs[j].pending_indications & PENDING_LEAVE) != 0)
         {
-          send_leave_indication(&attrs[j], attrs[j].four_vector_parameter);
+          send_leave_indication(avb, &attrs[j], attrs[j].four_vector_parameter);
         }
         attrs[j].pending_indications = 0;
         attrs[j].four_vector_parameter = 0;

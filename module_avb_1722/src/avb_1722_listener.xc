@@ -36,7 +36,7 @@
 #endif
 
 
-static void configure_stream(chanend c,
+static transaction configure_stream(chanend c,
                              avb_1722_stream_info_t &s)
 {
 	int media_clock;
@@ -162,10 +162,12 @@ void avb_1722_listener_handle_cmd(chanend c_listener_ctl,
     case AVB1722_CONFIGURE_LISTENER_STREAM:
       {
         int stream_num;
-        c_listener_ctl :> stream_num;
-        configure_stream(c_listener_ctl,
-                         st.listener_streams[stream_num]);
-        c_listener_ctl <: AVB1722_ACK;
+        slave {
+          c_listener_ctl :> stream_num;
+          configure_stream(c_listener_ctl,
+                           st.listener_streams[stream_num]);
+          c_listener_ctl <: AVB1722_ACK;
+        }
         break;
       }
     case AVB1722_ADJUST_LISTENER_STREAM:

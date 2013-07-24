@@ -1,6 +1,7 @@
 #ifndef _avb_mrp_h_
 #define _avb_mrp_h_
 
+#include "avb_api.h"
 #include "avb_conf.h"
 #include "xc2compat.h"
 
@@ -151,7 +152,7 @@ void mrp_mad_leave(mrp_attribute_state *unsafe st);
    
        mrp_init
  */
-void mrp_periodic(void);
+void mrp_periodic(CLIENT_INTERFACE(avb_interface, avb));
 
 mrp_attribute_state *unsafe mrp_match_attr_by_stream_and_type(mrp_attribute_state *unsafe attr, int opposite_port);
 int mrp_match_multiple_attrs_by_stream_and_type(mrp_attribute_state *unsafe attr, int opposite_port);

@@ -8,6 +8,7 @@
 #include "avb_mrp.h"
 #include "avb_control_types.h"
 #include "avb_stream.h"
+#include "avb_api.h"
 
 #define AVB_SRP_ETHERTYPE (0x22ea) 
 
@@ -82,8 +83,8 @@ void avb_srp_map_leave(mrp_attribute_state *attr);
 
 //!@{
 //! \name Indications from the MRP state machine
-void avb_srp_listener_join_ind(mrp_attribute_state *attr, int new, int four_packed_event);
-void avb_srp_listener_leave_ind(mrp_attribute_state *attr, int four_packed_event);
+void avb_srp_listener_join_ind(CLIENT_INTERFACE(avb_interface, avb), mrp_attribute_state *attr, int new, int four_packed_event);
+void avb_srp_listener_leave_ind(CLIENT_INTERFACE(avb_interface, avb), mrp_attribute_state *attr, int four_packed_event);
 
 void avb_srp_talker_join_ind(mrp_attribute_state *attr, int new);
 void avb_srp_talker_leave_ind(mrp_attribute_state *attr);
@@ -92,6 +93,15 @@ void avb_srp_domain_join_ind(mrp_attribute_state *attr, int new);
 void avb_srp_domain_leave_ind(mrp_attribute_state *attr);
 //!@}
 
+void srp_domain_init(void);
+void srp_domain_join(void);
+
+#ifdef __XC__
+[[combinable]]
+void avb_srp_task(client interface avb_interface avb,
+                     chanend c_mac_rx,
+                     chanend c_mac_tx);
+#endif
 
 
 #endif // _avb_srp_h_

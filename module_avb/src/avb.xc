@@ -18,6 +18,7 @@
 #include "avb_1722_maap.h"
 #include "nettypes.h"
 #include "avb_1722_router.h"
+#include "avb_api.h"
 
 #if AVB_ENABLE_1722_1
 #include "avb_1722_1.h"
@@ -50,8 +51,6 @@ static media_info_t inputs[AVB_NUM_MEDIA_INPUTS];
 static media_info_t outputs[AVB_NUM_MEDIA_OUTPUTS];
 
 static unsigned char mac_addr[6];
-
-static mrp_attribute_state *unsafe domain_attr[MRP_NUM_PORTS];
 
 static unsafe void register_talkers(chanend talker_ctl[])
 {
@@ -168,36 +167,12 @@ unsafe void avb_init(chanend c_media_ctl[],
               chanend ?c_listener_ctl[],
               chanend ?c_talker_ctl[],
               chanend ?c_media_clock_ctl,
-              chanend c_mac_rx,
-              chanend c_mac_tx,
               chanend c_ptp)
 {
-  mac_get_macaddr(c_mac_tx, mac_addr);
-
-  mrp_init((char *)mac_addr);
   register_talkers(c_talker_ctl);
   register_listeners(c_listener_ctl);
   register_media(c_media_ctl);
   init_media_clock_server(c_media_clock_ctl);
-
-  for(int i=0; i < MRP_NUM_PORTS; i++)
-  {
-    domain_attr[i] = mrp_get_attr();
-    mrp_attribute_init_null(domain_attr[i], MSRP_DOMAIN_VECTOR, i, 1);
-  }
-
-#ifdef AVB_INCLUDE_MMRP
-  avb_mmrp_init();
-#endif
-
-#ifndef AVB_EXCLUDE_MVRP
-  avb_mvrp_init();
-#endif
-
-  c_mac_rx <: ETHERNET_TX_INIT_AVB_ROUTER;
-
-  mac_set_custom_filter(c_mac_rx, MAC_FILTER_AVB_CONTROL);
-  mac_request_status_packets(c_mac_rx);
 }
 
 #if 0
@@ -222,20 +197,6 @@ void avb_init_srp_only(chanend c_mac_rx0,
 #endif
 
 #define timeafter(A, B) ((int)((B) - (A)) < 0)
-
-void avb_periodic(chanend c_mac_tx, unsigned int time_now)
-{
-	mrp_periodic();
-}
-
-void avb_start(void)
-{
-  for (int i=0; i < MRP_NUM_PORTS; i++)
-  {
-    mrp_mad_begin(domain_attr[i]);
-    mrp_mad_join(domain_attr[i], 1);
-  }
-}
 
 static void avb_set_talker_bandwidth(chanend c_mac_tx)
 {
@@ -264,22 +225,24 @@ static void set_sink_state0(int sink_num, enum avb_sink_state_t state, chanend c
       chanend *unsafe clk_ctl = outputs[sink->map[0]].clk_ctl;
       simple_printf("Listener sink #%d chan map:\n", sink_num);
       *c <: AVB1722_CONFIGURE_LISTENER_STREAM;
-      *c <: sink->stream.local_id;
-      *c <: sink->stream.sync;
-      *c <: sink->stream.rate;
-      *c <: sink->stream.num_channels;
+      master {
+        *c <: sink->stream.local_id;
+        *c <: sink->stream.sync;
+        *c <: sink->stream.rate;
+        *c <: sink->stream.num_channels;
 
-      for (int i=0;i<sink->stream.num_channels;i++) {
-        if (sink->map[i] == AVB_CHANNEL_UNMAPPED) {
-          *c <: 0;
-          simple_printf("  %d unmapped\n", i);
+        for (int i=0;i<sink->stream.num_channels;i++) {
+          if (sink->map[i] == AVB_CHANNEL_UNMAPPED) {
+            *c <: 0;
+            simple_printf("  %d unmapped\n", i);
+          }
+          else {
+            *c <: outputs[sink->map[i]].fifo;
+            simple_printf("  %d -> %x\n", i, sink->map[i]);
+          }
         }
-        else {
-          *c <: outputs[sink->map[i]].fifo;
-          simple_printf("  %d -> %x\n", i, sink->map[i]);
-        }
+        *c :> int _;
       }
-      *c :> int _;
 
       if (!isnull(c_media_clock_ctl)) {
         media_clock_register(c_media_clock_ctl, clk_ctl, sink->stream.sync);
@@ -338,7 +301,7 @@ static void set_sink_state0(int sink_num, enum avb_sink_state_t state, chanend c
   }
 }
 
-static void set_source_state0(int source_num, enum avb_source_state_t state, chanend c_mac_tx, chanend ?c_media_clock_ctl) {
+static void local_set_source_state(int source_num, enum avb_source_state_t state, chanend c_mac_tx, chanend ?c_media_clock_ctl) {
   unsafe {
     char stream_string[] = "Talker stream ";
     avb_source_info_t *source = &sources[source_num];
@@ -373,28 +336,30 @@ static void set_source_state0(int source_num, enum avb_source_state_t state, cha
         }
 
         *c <: AVB1722_CONFIGURE_TALKER_STREAM;
-        *c <: source->stream.local_id;
-        *c <: source->stream.format;
+        master {
+          *c <: source->stream.local_id;
+          *c <: source->stream.format;
 
-        for (int i=0; i < 6;i++) {
-          *c <: source->reservation.dest_mac_addr[i];
+          for (int i=0; i < 6;i++) {
+            *c <: source->reservation.dest_mac_addr[i];
+          }
+
+          *c <: source_num;
+          *c <: source->stream.num_channels;
+          *c <: fifo_mask;
+
+          for (int i=0;i<source->stream.num_channels;i++) {
+            *c <: inputs[source->map[i]].fifo;
+          }
+          *c <: source->stream.rate;
+
+          if (source->presentation)
+            *c <: source->presentation;
+          else
+            *c <: AVB_DEFAULT_PRESENTATION_TIME_DELAY_NS;
+
+          *c :> int _;
         }
-
-        *c <: source_num;
-        *c <: source->stream.num_channels;
-        *c <: fifo_mask;
-
-        for (int i=0;i<source->stream.num_channels;i++) {
-          *c <: inputs[source->map[i]].fifo;
-        }
-        *c <: source->stream.rate;
-
-        if (source->presentation)
-          *c <: source->presentation;
-        else
-          *c <: AVB_DEFAULT_PRESENTATION_TIME_DELAY_NS;
-
-        *c :> int _;
 
     #ifndef AVB_EXCLUDE_MVRP
         if (source->reservation.vlan_id) {
@@ -467,6 +432,14 @@ static void set_source_state0(int source_num, enum avb_source_state_t state, cha
   }
 }
 
+// Wrappers for interface calls from C
+int avb_get_source_state(client interface avb_interface avb, int source_num, enum avb_source_state_t &state) {
+  return avb.get_source_state(source_num, state);
+}
+
+int avb_set_source_state(client interface avb_interface avb, int source_num, enum avb_source_state_t state) {
+  return avb.set_source_state(source_num, state);
+}
 
 // Set the period inbetween periodic processing to 50us based
 // on the Xcore 100Mhz timer.
@@ -477,37 +450,16 @@ void avb_manager(server interface avb_interface avb[2],
                  chanend c_media_ctl[],
                  chanend ?c_listener_ctl[],
                  chanend ?c_talker_ctl[],
-                 chanend ?c_media_clock_ctl,
-                 chanend c_mac_rx,
                  chanend c_mac_tx,
+                 chanend ?c_media_clock_ctl,
                  chanend c_ptp) {
-  unsigned periodic_timeout;
-  timer tmr;
-  unsigned int nbytes;
-  unsigned int buf[(MAX_AVB_CONTROL_PACKET_SIZE+1)>>2];
-  unsigned int port_num;
 
   unsafe {
-    avb_init(c_media_ctl, c_listener_ctl, c_talker_ctl, c_media_clock_ctl, c_mac_rx, c_mac_tx, c_ptp);
+    avb_init(c_media_ctl, c_listener_ctl, c_talker_ctl, c_media_clock_ctl, c_ptp);
   }
-  tmr :> periodic_timeout;
 
   while (1) {
     select {
-      // Receive and process any incoming AVB packets (802.1Qat, 1722_MAAP)
-      case avb_get_control_packet(c_mac_rx, buf, nbytes, port_num):
-      {
-        avb_process_control_packet(buf, nbytes, c_mac_tx, c_media_clock_ctl, port_num);
-        break;
-      }
-      // Periodic processing
-      case tmr when timerafter(periodic_timeout) :> unsigned int time_now:
-      {
-        mrp_periodic();
-
-        periodic_timeout += PERIODIC_POLL_TIME;
-        break;
-      }
       case avb[int i].get_source_format(int source_num, enum avb_stream_format_t &format, int &rate) -> int return_val: {
         if (source_num < AVB_NUM_SOURCES) {
           avb_source_info_t *source = &sources[source_num];
@@ -612,7 +564,7 @@ void avb_manager(server interface avb_interface avb[2],
       case avb[int i].set_source_state(int source_num, enum avb_source_state_t state) -> int return_val: {
         if (source_num < AVB_NUM_SOURCES) {
           unsafe {
-            set_source_state0(source_num, state, c_mac_tx, c_media_clock_ctl);
+            local_set_source_state(source_num, state, c_mac_tx, c_media_clock_ctl);
           }
           return_val = 1;
         }
@@ -961,19 +913,19 @@ void avb_process_1722_control_packet(unsigned int buf0[], int nbytes, chanend c_
   }  
 }
 
-void avb_process_control_packet(unsigned int buf0[], int nbytes, chanend c_tx, chanend ?c_media_clock_ctl, unsigned int port_num)
+void avb_process_control_packet(client interface avb_interface avb, unsigned int buf0[], int nbytes, chanend c_tx, unsigned int port_num)
 {
   if (nbytes == STATUS_PACKET_LEN) {
     if (((unsigned char *)buf0)[0]) { // Link up
-      avb_start();
+      srp_domain_join();
     }
     else { // Link down
       for (int i=0; i < AVB_NUM_SOURCES; i++) {
-        set_source_state0(i, AVB_SOURCE_STATE_DISABLED, c_tx, c_media_clock_ctl);
+        avb.set_source_state(i, AVB_SOURCE_STATE_DISABLED);
       }
 
       for (int i=0; i < AVB_NUM_SINKS; i++) {
-        set_sink_state0(i, AVB_SOURCE_STATE_DISABLED, c_tx, c_media_clock_ctl);
+        avb.set_sink_state(i, AVB_SOURCE_STATE_DISABLED);
       }      
     }
   }

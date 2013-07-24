@@ -1,6 +1,7 @@
 #ifndef _api_h_
 #define _api_h_
-// #include <xccompat.h>
+#include <xccompat.h>
+#include "xc2compat.h"
 #include "avb_control_types.h"
 
 #ifdef __XC__
@@ -400,5 +401,8 @@ interface avb_interface {
   int get_device_media_clock_state(int clock_num, enum device_media_clock_state_t &state);
 };
 #endif
+
+int avb_get_source_state(CLIENT_INTERFACE(avb_interface, avb), int source_num, REFERENCE_PARAM(enum avb_source_state_t, state));
+int avb_set_source_state(CLIENT_INTERFACE(avb_interface, avb), int source_num, enum avb_source_state_t state);
 
 #endif // _api_h_

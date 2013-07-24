@@ -22,6 +22,7 @@
 #include "gptp.h"
 #include "media_clock_server.h"
 #include "avb_1722_1.h"
+#include "avb_srp.h"
 
 // This is the number of master clocks in a word clock
 #define MASTER_TO_WORDCLOCK_RATIO 512
@@ -124,7 +125,7 @@ void audio_hardware_setup(void)
 int main(void)
 {
   // Ethernet channels
-  chan c_mac_tx[3 + AVB_DEMO_ENABLE_TALKER];
+  chan c_mac_tx[4 + AVB_DEMO_ENABLE_TALKER];
   chan c_mac_rx[3 + AVB_DEMO_ENABLE_LISTENER];
 
   // PTP channels
@@ -146,7 +147,7 @@ int main(void)
 
   chan c_gpio_ctl;
 
-  interface avb_interface avb[2];
+  interface avb_interface avb[3];
 
   par
   {
@@ -161,8 +162,8 @@ int main(void)
                                     smi1,
                                     null,
                                     mac_address,
-                                    c_mac_rx, 2 + AVB_DEMO_ENABLE_LISTENER,
-                                    c_mac_tx, 2 + AVB_DEMO_ENABLE_TALKER);
+                                    c_mac_rx, 3 + AVB_DEMO_ENABLE_LISTENER,
+                                    c_mac_tx, 4 + AVB_DEMO_ENABLE_TALKER);
     }
 
     on tile[0]: media_clock_server(c_media_clock_ctl,
@@ -177,7 +178,7 @@ int main(void)
                                    c_mac_rx[0],
                                    c_mac_tx[0],
                                    c_ptp,
-                                   2 + AVB_DEMO_ENABLE_TALKER,
+                                   4 + AVB_DEMO_ENABLE_TALKER,
                                    PTP_GRANDMASTER_CAPABLE);
 
 
@@ -273,9 +274,10 @@ int main(void)
                    #else
                    null,
                    #endif
-                   c_media_clock_ctl,
-                   c_mac_rx[1], c_mac_tx[1], c_ptp[0]);
+                   c_mac_tx[4],
+                   c_media_clock_ctl, c_ptp[0]);
         demo_task(avb[0], c_gpio_ctl);
+        avb_srp_task(avb[2], c_mac_rx[1], c_mac_tx[1]);
       }
 
     }

@@ -14,6 +14,7 @@
 #include "stdlib.h"
 #include "simple_printf.h"
 #include "avb_1722_router.h"
+#include "avb_api.h"
 
 #define AVB_1722_PLUS_SIP_HEADER_SIZE (32)
 
@@ -33,6 +34,25 @@ typedef struct avb_stream_entry
 static avb_stream_entry stream_list[AVB_STREAM_LIST_SIZE];
 static int rdPtr=0;
 static int wrPtr = 0;
+
+static mrp_attribute_state *domain_attr[MRP_NUM_PORTS];
+
+void srp_domain_init(void) {
+  for(int i=0; i < MRP_NUM_PORTS; i++)
+  {
+    domain_attr[i] = mrp_get_attr();
+    mrp_attribute_init(domain_attr[i], MSRP_DOMAIN_VECTOR, i, 1, NULL);
+  }
+}
+
+void srp_domain_join(void)
+{
+  for (int i=0; i < MRP_NUM_PORTS; i++)
+  {
+      mrp_mad_begin(domain_attr[i]);
+      mrp_mad_join(domain_attr[i], 1);
+  }
+}
 
 void avb_match_and_join_leave(mrp_attribute_state *attr, int join) {
   mrp_attribute_state *matched_stream_id_other_port = mrp_match_attr_by_stream_and_type(attr, 1);
@@ -368,7 +388,7 @@ int avb_srp_match_domain(mrp_attribute_state *attr,char *fv,int i)
 	return 0;
 }
 
-void avb_srp_listener_join_ind(mrp_attribute_state *attr, int new, int four_packed_event)
+void avb_srp_listener_join_ind(CLIENT_INTERFACE(avb_interface, avb), mrp_attribute_state *attr, int new, int four_packed_event)
 {
   enum avb_source_state_t state;
   avb_sink_info_t *sink_info = (avb_sink_info_t *) attr->attribute_info;
@@ -378,7 +398,7 @@ void avb_srp_listener_join_ind(mrp_attribute_state *attr, int new, int four_pack
 
   if (stream != -1u) {
 
-  	get_avb_source_state(stream, &state);
+  	avb_get_source_state(avb, stream, &state);
 
     if (mrp_match_attr_by_stream_and_type(attr, 1)) {
       set_avb_source_port(stream, -1);
@@ -391,7 +411,7 @@ void avb_srp_listener_join_ind(mrp_attribute_state *attr, int new, int four_pack
   		if (four_packed_event == AVB_SRP_FOUR_PACKED_EVENT_READY ||
   			four_packed_event == AVB_SRP_FOUR_PACKED_EVENT_READY_FAILED) {
   #if SRP_AUTO_TALKER_STREAM_CONTROL
-  			set_avb_source_state(stream, AVB_SOURCE_STATE_ENABLED);
+  			avb_set_source_state(avb, stream, AVB_SOURCE_STATE_ENABLED);
   #else
   #endif
   		}
@@ -399,7 +419,7 @@ void avb_srp_listener_join_ind(mrp_attribute_state *attr, int new, int four_pack
   }
 }
 
-void avb_srp_listener_leave_ind(mrp_attribute_state *attr, int four_packed_event)
+void avb_srp_listener_leave_ind(CLIENT_INTERFACE(avb_interface, avb), mrp_attribute_state *attr, int four_packed_event)
 {
   enum avb_source_state_t state;
   avb_sink_info_t *sink_info = (avb_sink_info_t *) attr->attribute_info;
@@ -410,13 +430,13 @@ void avb_srp_listener_leave_ind(mrp_attribute_state *attr, int four_packed_event
   if (stream != -1u)
   {
 
-  	get_avb_source_state(stream, &state);
+  	avb_get_source_state(avb, stream, &state);
 
     set_avb_source_port(stream, !attr->port_num);
 
   	if (state == AVB_SOURCE_STATE_ENABLED && !mrp_match_attr_by_stream_and_type(attr, 1)) {
   #if SRP_AUTO_TALKER_STREAM_CONTROL
-  		set_avb_source_state(stream, AVB_SOURCE_STATE_POTENTIAL);
+  		avb_set_source_state(avb, stream, AVB_SOURCE_STATE_POTENTIAL);
   #else
   #endif
 	 }

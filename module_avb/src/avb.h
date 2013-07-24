@@ -48,16 +48,12 @@ unsafe void avb_init(chanend c_media_ctl[],
               chanend ?c_listener_ctl[],
               chanend ?c_talker_ctl[],
               chanend ?c_media_clock_ctl,
-              chanend c_mac_rx,
-              chanend c_mac_tx,
               chanend c_ptp);
 #else
 void avb_init(chanend media_ctl[],
               chanend listener_ctl[],
               chanend talker_ctl[],
               chanend media_clock_ctl,
-              chanend c_mac_rx,
-              chanend c_mac_tx,
               chanend c_ptp);
 #endif
 
@@ -85,9 +81,8 @@ void avb_manager(server interface avb_interface avb[2],
                  chanend c_media_ctl[],
                  chanend ?c_listener_ctl[],
                  chanend ?c_talker_ctl[],
-                 chanend ?c_media_clock_ctl,
-                 chanend c_mac_rx,
                  chanend c_mac_tx,
+                 chanend ?c_media_clock_ctl,
                  chanend c_ptp);
 #endif
 
@@ -129,11 +124,12 @@ void avb_process_1722_control_packet(unsigned int buf0[], int nbytes, chanend c_
    \param port_num the id of the Ethernet interface the packet was received
           
  **/
-void avb_process_control_packet(unsigned int buf[], int len,
+#ifdef __XC__
+void avb_process_control_packet(client interface avb_interface avb,
+                               unsigned int buf[], int len,
                                chanend c_tx,
-                               NULLABLE_RESOURCE(chanend, media_clock_ctl),
                                unsigned int port_num);
-
+#endif
 
 /**
  *   \brief Set the volume multipliers for the audio channels
@@ -152,5 +148,7 @@ void avb_process_control_packet(unsigned int buf[], int len,
  */
 void set_avb_source_volumes(int sink_num, int volumes[], int count);
 
+int set_avb_source_port(int source_num,
+                        int srcport);
 
 #endif // _avb_h_
