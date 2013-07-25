@@ -962,18 +962,6 @@ void avb_process_control_packet(client interface avb_interface avb, unsigned int
 
 }
 
-
-unsigned avb_control_get_mac_tx(void)
-{
-  return 1;
-}
-
-unsigned avb_control_get_c_ptp(void)
-{
-  return 1;
-}
-
-
 int get_avb_ptp_gm(unsigned char a0[])
 {
   // ptp_get_current_grandmaster(*c_ptp, a0);

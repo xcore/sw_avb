@@ -175,4 +175,6 @@ void avb_mrp_process_packet(unsigned char *unsafe buf, int etype, int len, unsig
 
 void avb_mrp_set_legacy_mode(int mode);
 
+void mrp_store_mac_tx_chanend(chanend c_mac_tx0);
+
 #endif  //_avb_mrp_h_

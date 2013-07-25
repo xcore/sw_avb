@@ -103,5 +103,7 @@ void avb_srp_task(client interface avb_interface avb,
                      chanend c_mac_tx);
 #endif
 
+void srp_store_mac_tx_chanend(chanend c_mac_tx0);
+
 
 #endif // _avb_srp_h_

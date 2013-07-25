@@ -87,6 +87,11 @@ static avb_timer leaveall_timer[MRP_NUM_PORTS];
 static int leaveall_active[MRP_NUM_PORTS];
 //!@}
 
+static chanend c_mac_tx;
+
+void mrp_store_mac_tx_chanend(chanend c_mac_tx0) {
+  c_mac_tx = c_mac_tx0;
+}
 
 
 void debug_print_applicant_state_change(mrp_attribute_state *st, mrp_event event, int new)
@@ -474,7 +479,6 @@ static void doTx(mrp_attribute_state *st,
                  int vector,
                  unsigned int port_num)
 {
-  chanend c_tx = avb_control_get_mac_tx();
   int merged = 0;
   char *msg = &send_buf[0]+sizeof(mrp_ethernet_hdr)+sizeof(mrp_header);
   char *end = send_ptr;
@@ -515,7 +519,7 @@ static void doTx(mrp_attribute_state *st,
       simple_printf("Port %d out: %s %s, stream %x:%x\n", port_to_transmit, debug_attribute_type[(st)->attribute_type], debug_attribute_event[(vector)], stream_id[0], stream_id[1]);
     }
   }
-  send(c_tx, port_to_transmit);
+  send(c_mac_tx, port_to_transmit);
 }
 
 static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_packed_event, unsigned int port_num)
@@ -1125,7 +1129,6 @@ static void send_leave_indication(CLIENT_INTERFACE(avb_interface, avb), mrp_attr
 
 void mrp_periodic(CLIENT_INTERFACE(avb_interface, avb))
 {
-  chanend c_tx = avb_control_get_mac_tx();
 
   for (int i=0; i < MRP_NUM_PORTS; i++)
   {
@@ -1154,34 +1157,34 @@ void mrp_periodic(CLIENT_INTERFACE(avb_interface, avb))
       configure_send_buffer(srp_dest_mac, AVB_SRP_ETHERTYPE);
       if (leaveall_active[i])
       {
-        create_empty_msg(MSRP_TALKER_ADVERTISE, 1);  send(c_tx, i);
-        create_empty_msg(MSRP_TALKER_FAILED, 1);  send(c_tx, i);
-        create_empty_msg(MSRP_LISTENER, 1);  send(c_tx, i);
-        create_empty_msg(MSRP_DOMAIN_VECTOR, 1);  send(c_tx, i);
+        create_empty_msg(MSRP_TALKER_ADVERTISE, 1);  send(c_mac_tx, i);
+        create_empty_msg(MSRP_TALKER_FAILED, 1);  send(c_mac_tx, i);
+        create_empty_msg(MSRP_LISTENER, 1);  send(c_mac_tx, i);
+        create_empty_msg(MSRP_DOMAIN_VECTOR, 1);  send(c_mac_tx, i);
       }
       attribute_type_event(MSRP_TALKER_ADVERTISE, tx_event, i);
       attribute_type_event(MSRP_LISTENER, tx_event, i);
       attribute_type_event(MSRP_DOMAIN_VECTOR, tx_event, i);
-      force_send(c_tx, i);
+      force_send(c_mac_tx, i);
 
   #ifdef AVB_INCLUDE_MMRP
       configure_send_buffer(mmrp_dest_mac,AVB_MMRP_ETHERTYPE);
       if (leaveall_active[i])
       {
-        create_empty_msg(MMRP_MAC_VECTOR, 1); send(c_tx, i);
+        create_empty_msg(MMRP_MAC_VECTOR, 1); send(c_mac_tx, i);
       }
       attribute_type_event(MMRP_MAC_VECTOR, tx_event, i);
-      force_send(c_tx, i);
+      force_send(c_mac_tx, i);
   #endif
 
   #ifndef AVB_EXCLUDE_MVRP
       configure_send_buffer(mvrp_dest_mac, AVB_MVRP_ETHERTYPE);
       if (leaveall_active[i])
       {
-        create_empty_msg(MVRP_VID_VECTOR, 1); send(c_tx, i);
+        create_empty_msg(MVRP_VID_VECTOR, 1); send(c_mac_tx, i);
       }
       attribute_type_event(MVRP_VID_VECTOR, tx_event, i);
-      force_send(c_tx, i);
+      force_send(c_mac_tx, i);
   #endif
 
       leaveall_active[i] = 0;

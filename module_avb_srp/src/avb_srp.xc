@@ -23,6 +23,9 @@ void avb_srp_task(client interface avb_interface avb,
   unsigned int port_num;
   unsigned char mac_addr[6];
 
+  srp_store_mac_tx_chanend(c_mac_tx);
+  mrp_store_mac_tx_chanend(c_mac_tx);
+
   mac_get_macaddr(c_mac_tx, mac_addr);
   mrp_init(mac_addr);
 

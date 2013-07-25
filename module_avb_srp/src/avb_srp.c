@@ -37,6 +37,12 @@ static int wrPtr = 0;
 
 static mrp_attribute_state *domain_attr[MRP_NUM_PORTS];
 
+static chanend c_mac_tx;
+
+void srp_store_mac_tx_chanend(chanend c_mac_tx0) {
+  c_mac_tx = c_mac_tx0;
+}
+
 void srp_domain_init(void) {
   for(int i=0; i < MRP_NUM_PORTS; i++)
   {
@@ -257,7 +263,7 @@ static void avb_srp_map_join(mrp_attribute_state *attr, int new, int listener)
     if (!matched_talker_listener->here) { // Handle case where the Talker is not this endpoint
 
       if (!matched_talker_listener->here) {
-        avb_1722_enable_stream_forwarding(avb_control_get_mac_tx(), attribute_info->stream_id);
+        avb_1722_enable_stream_forwarding(c_mac_tx, attribute_info->stream_id);
       }
       if (matched_stream_id_other_port)
       {
@@ -301,7 +307,7 @@ void avb_srp_map_leave(mrp_attribute_state *attr)
     else if (!matched_talker_listener)
     {
       mrp_mad_leave(matched_stream_id_other_port);
-      avb_1722_disable_stream_forwarding(avb_control_get_mac_tx(), attribute_info->stream_id);
+      avb_1722_disable_stream_forwarding(c_mac_tx, attribute_info->stream_id);
     }
   }
   else if (attr->attribute_type == MSRP_TALKER_ADVERTISE) 
