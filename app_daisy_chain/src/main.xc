@@ -145,9 +145,33 @@ typedef enum {
   NUM_MAC_RX_CHANS
 } mac_rx_chans;
 
+typedef enum {
+  MAC_TX_TO_MEDIA_CLOCK = 0,
+#if AVB_DEMO_ENABLE_TALKER
+  MAC_TX_TO_TALKER,
+#endif
+  MAC_TX_TO_SRP,
+  MAC_TX_TO_1722_1,
+  MAC_TX_TO_AVB_MANAGER,
+  NUM_MAC_TX_CHANS
+} mac_tx_chans;
 
-#define NUM_MAC_TX_CHANS (4 + (AVB_DEMO_ENABLE_TALKER ? 1 : 0))
-#define NUM_PTP_CHANS (3 + (AVB_DEMO_ENABLE_TALKER ? 1 : 0))
+typedef enum {
+  AVB_MANAGER_TO_SRP = 0,
+  AVB_MANAGER_TO_1722_1,
+  AVB_MANAGER_TO_DEMO,
+  NUM_AVB_MANAGER_CHANS
+} avb_manager_chans;
+
+typedef enum {
+  PTP_TO_AVB_MANAGER = 0,
+#if AVB_DEMO_ENABLE_TALKER
+  PTP_TO_TALKER,
+#endif
+  PTP_TO_1722_1,
+  PTP_TO_TEST_CLOCK,
+  NUM_PTP_CHANS
+} ptp_chans;
 
 int main(void)
 {
@@ -179,7 +203,7 @@ int main(void)
 
   chan c_gpio_ctl;
 
-  interface avb_interface i_avb[3];
+  interface avb_interface i_avb[NUM_AVB_MANAGER_CHANS];
 
   par
   {
@@ -204,7 +228,7 @@ int main(void)
                                    AVB_NUM_LISTENER_UNITS,
                                    p_fs,
                                    c_mac_rx[MAC_RX_TO_MEDIA_CLOCK],
-                                   c_mac_tx[0],
+                                   c_mac_tx[MAC_TX_TO_MEDIA_CLOCK],
                                    c_ptp, NUM_PTP_CHANS,
                                    PTP_GRANDMASTER_CAPABLE);
 
@@ -244,8 +268,8 @@ int main(void)
 
 #if AVB_DEMO_ENABLE_TALKER
     // AVB Talker - must be on the same tile as the audio interface
-    on tile[0]: avb_1722_talker(c_ptp[1],
-                                c_mac_tx[2],
+    on tile[0]: avb_1722_talker(c_ptp[PTP_TO_TALKER],
+                                c_mac_tx[MAC_TX_TO_TALKER],
                                 c_talker_ctl[0],
                                 AVB_NUM_SOURCES);
 #endif
@@ -268,21 +292,28 @@ int main(void)
       audio_hardware_setup();
 #endif
       [[combine]] par {
-        avb_manager(i_avb, 3,
+        avb_manager(i_avb, NUM_AVB_MANAGER_CHANS,
                    c_media_ctl,
                    c_listener_ctl,
                    c_talker_ctl,
-                   c_mac_tx[4],
-                   c_media_clock_ctl, c_ptp[0]);
-        demo_task(i_avb[0], c_gpio_ctl);
-        avb_srp_task(i_avb[1], c_mac_rx[MAC_RX_TO_SRP], c_mac_tx[1]);
+                   c_mac_tx[MAC_TX_TO_AVB_MANAGER],
+                   c_media_clock_ctl,
+                   c_ptp[PTP_TO_AVB_MANAGER]);
+        demo_task(i_avb[AVB_MANAGER_TO_DEMO], c_gpio_ctl);
+        avb_srp_task(i_avb[AVB_MANAGER_TO_SRP],
+                     c_mac_rx[MAC_RX_TO_SRP],
+                     c_mac_tx[MAC_TX_TO_SRP]);
       }
 
     }
 
-    on tile[0]: avb_1722_1_task(i_avb[2], c_mac_rx[MAC_RX_TO_1722_1], c_mac_tx[3], c_ptp[3]);
+    on tile[0]: avb_1722_1_task(i_avb[AVB_MANAGER_TO_1722_1],
+                                c_mac_rx[MAC_RX_TO_1722_1],
+                                c_mac_tx[MAC_TX_TO_1722_1],
+                                c_ptp[PTP_TO_1722_1]);
 
-    on tile[0]: ptp_output_test_clock(c_ptp[1 + (AVB_DEMO_ENABLE_TALKER ? 1 : 0)], ptp_sync_port, 100000000);
+    on tile[0]: ptp_output_test_clock(c_ptp[PTP_TO_TEST_CLOCK],
+                                      ptp_sync_port, 100000000);
 
   }
 
