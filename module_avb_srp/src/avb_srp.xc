@@ -36,9 +36,9 @@ void avb_srp_task(client interface avb_interface avb,
   avb_mvrp_init();
 #endif
 
-  c_mac_rx <: ETHERNET_TX_INIT_AVB_ROUTER;
+  mac_initialize_routing_table(c_mac_tx);
 
-  mac_set_custom_filter(c_mac_rx, MAC_FILTER_AVB_CONTROL);
+  mac_set_custom_filter(c_mac_rx, MAC_FILTER_AVB_SRP);
   mac_request_status_packets(c_mac_rx);
 
   tmr :> periodic_timeout;

@@ -12,6 +12,7 @@
 #define MAC_FILTER_PTP   0x2
 #define MAC_FILTER_ARPIP 0x4
 #define MAC_FILTER_AVB_CONTROL  0x8
+#define MAC_FILTER_AVB_SRP  0x10
 
 #define ROUTER_LINK(n) (1 << (4+n))
 
@@ -39,7 +40,7 @@ inline int mac_custom_filter(unsigned int buf[], unsigned int mac[2], int &user_
     case HTONS(AVB_SRP_ETHERTYPE):
     case HTONS(AVB_MMRP_ETHERTYPE):
     case HTONS(AVB_MVRP_ETHERTYPE):
-      result = MAC_FILTER_AVB_CONTROL;
+      result = MAC_FILTER_AVB_SRP;
       break;
     case (((AVB_1722_ETHERTYPE & 0xff) << 8) | (AVB_1722_ETHERTYPE >> 8)):
       {

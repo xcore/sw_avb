@@ -79,9 +79,17 @@ on tile[0]: i2s_ports_t i2s_ports =
   PORT_LRCLK
 };
 
+#if AVB_DEMO_ENABLE_LISTENER
 on tile[0]: out buffered port:32 p_aud_dout[AVB_DEMO_NUM_CHANNELS/2] = PORT_SDATA_OUT;
+#else
+  #define p_aud_dout null
+#endif
 
+#if AVB_DEMO_ENABLE_TALKER
 on tile[0]: in buffered port:32 p_aud_din[AVB_DEMO_NUM_CHANNELS/2] = PORT_SDATA_IN;
+#else
+  #define p_aud_din null
+#endif
 
 #if AVB_XA_SK_AUDIO_SLICE
 on tile[0]: out port p_audio_shared = PORT_AUDIO_SHARED;
@@ -93,10 +101,15 @@ on tile[0]: port ptp_sync_port = XS1_PORT_1C;
 #if AVB_DEMO_ENABLE_LISTENER
 media_output_fifo_data_t ofifo_data[AVB_NUM_MEDIA_OUTPUTS];
 media_output_fifo_t ofifos[AVB_NUM_MEDIA_OUTPUTS];
+#else
+  #define ofifos null
 #endif
+
 #if AVB_DEMO_ENABLE_TALKER
 media_input_fifo_data_t ififo_data[AVB_NUM_MEDIA_INPUTS];
 media_input_fifo_t ififos[AVB_NUM_MEDIA_INPUTS];
+#else
+  #define ififos null
 #endif
 
 [[combinable]] void demo_task(client interface avb_interface avb, chanend c_gpio_ctl);
@@ -122,23 +135,42 @@ void audio_hardware_setup(void)
 #endif
 }
 
+typedef enum {
+  MAC_RX_TO_MEDIA_CLOCK = 0,
+#if AVB_DEMO_ENABLE_LISTENER
+  MAC_RX_TO_LISTENER,
+#endif
+  MAC_RX_TO_SRP,
+  MAC_RX_TO_1722_1,
+  NUM_MAC_RX_CHANS
+} mac_rx_chans;
+
+
+#define NUM_MAC_TX_CHANS (4 + (AVB_DEMO_ENABLE_TALKER ? 1 : 0))
+#define NUM_PTP_CHANS (3 + (AVB_DEMO_ENABLE_TALKER ? 1 : 0))
+
 int main(void)
 {
   // Ethernet channels
-  chan c_mac_tx[4 + AVB_DEMO_ENABLE_TALKER];
-  chan c_mac_rx[3 + AVB_DEMO_ENABLE_LISTENER];
+  chan c_mac_tx[NUM_MAC_TX_CHANS];
+  chan c_mac_rx[NUM_MAC_RX_CHANS];
 
   // PTP channels
-  chan c_ptp[3 + AVB_DEMO_ENABLE_TALKER];
+  chan c_ptp[NUM_PTP_CHANS];
 
   // AVB unit control
 #if AVB_DEMO_ENABLE_TALKER
   chan c_talker_ctl[AVB_NUM_TALKER_UNITS];
+#else
+  #define c_talker_ctl null
 #endif
 
 #if AVB_DEMO_ENABLE_LISTENER
   chan c_listener_ctl[AVB_NUM_LISTENER_UNITS];
   chan c_buf_ctl[AVB_NUM_LISTENER_UNITS];
+#else
+  #define c_listener_ctl null
+  #define c_buf_ctl null
 #endif
 
   // Media control
@@ -147,7 +179,7 @@ int main(void)
 
   chan c_gpio_ctl;
 
-  interface avb_interface avb[3];
+  interface avb_interface i_avb[3];
 
   par
   {
@@ -162,23 +194,18 @@ int main(void)
                                     smi1,
                                     null,
                                     mac_address,
-                                    c_mac_rx, 3 + AVB_DEMO_ENABLE_LISTENER,
-                                    c_mac_tx, 4 + AVB_DEMO_ENABLE_TALKER);
+                                    c_mac_rx, NUM_MAC_RX_CHANS,
+                                    c_mac_tx, NUM_MAC_TX_CHANS);
     }
 
     on tile[0]: media_clock_server(c_media_clock_ctl,
                                    null,
-                                   #if AVB_DEMO_ENABLE_LISTENER
                                    c_buf_ctl,
-                                   #else
-                                   null,
-                                   #endif
                                    AVB_NUM_LISTENER_UNITS,
                                    p_fs,
-                                   c_mac_rx[0],
+                                   c_mac_rx[MAC_RX_TO_MEDIA_CLOCK],
                                    c_mac_tx[0],
-                                   c_ptp,
-                                   4 + AVB_DEMO_ENABLE_TALKER,
+                                   c_ptp, NUM_PTP_CHANS,
                                    PTP_GRANDMASTER_CAPABLE);
 
 
@@ -206,32 +233,11 @@ int main(void)
       init_media_output_fifos(ofifos, ofifo_data, AVB_NUM_MEDIA_OUTPUTS);
 #endif
       i2s_master(i2s_ports,
-
-                 #if AVB_DEMO_ENABLE_TALKER
                  p_aud_din, AVB_NUM_MEDIA_INPUTS,
-                 #else
-                 null, 0,
-                 #endif
-
-                 #if AVB_DEMO_ENABLE_LISTENER
                  p_aud_dout, AVB_NUM_MEDIA_OUTPUTS,
-                 #else
-                 null, 0,
-                 #endif
-
                  MASTER_TO_WORDCLOCK_RATIO,
-
-                 #if AVB_DEMO_ENABLE_TALKER
                  ififos,
-                 #else
-                 null,
-                 #endif
-
-                 #if AVB_DEMO_ENABLE_LISTENER
                  ofifos,
-                 #else
-                 null,
-                 #endif
                  c_media_ctl[0],
                  0);
     }
@@ -246,7 +252,7 @@ int main(void)
 
 #if AVB_DEMO_ENABLE_LISTENER
     // AVB Listener
-    on tile[0]: avb_1722_listener(c_mac_rx[2],
+    on tile[0]: avb_1722_listener(c_mac_rx[MAC_RX_TO_LISTENER],
                                   c_buf_ctl[0],
                                   null,
                                   c_listener_ctl[0],
@@ -262,29 +268,21 @@ int main(void)
       audio_hardware_setup();
 #endif
       [[combine]] par {
-        avb_manager(avb,
+        avb_manager(i_avb, 3,
                    c_media_ctl,
-                   #if AVB_DEMO_ENABLE_LISTENER
                    c_listener_ctl,
-                   #else
-                   null,
-                   #endif
-                   #if AVB_DEMO_ENABLE_TALKER
                    c_talker_ctl,
-                   #else
-                   null,
-                   #endif
                    c_mac_tx[4],
                    c_media_clock_ctl, c_ptp[0]);
-        demo_task(avb[0], c_gpio_ctl);
-        avb_srp_task(avb[2], c_mac_rx[1], c_mac_tx[1]);
+        demo_task(i_avb[0], c_gpio_ctl);
+        avb_srp_task(i_avb[1], c_mac_rx[MAC_RX_TO_SRP], c_mac_tx[1]);
       }
 
     }
 
-    on tile[0]: avb_1722_1_task(avb[1], c_mac_rx[3], c_mac_tx[3], c_ptp[3]);
+    on tile[0]: avb_1722_1_task(i_avb[2], c_mac_rx[MAC_RX_TO_1722_1], c_mac_tx[3], c_ptp[3]);
 
-    on tile[0]: ptp_output_test_clock(c_ptp[1 + AVB_DEMO_ENABLE_TALKER], ptp_sync_port, 100000000);
+    on tile[0]: ptp_output_test_clock(c_ptp[1 + (AVB_DEMO_ENABLE_TALKER ? 1 : 0)], ptp_sync_port, 100000000);
 
   }
 

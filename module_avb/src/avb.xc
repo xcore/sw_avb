@@ -336,30 +336,28 @@ static void local_set_source_state(int source_num, enum avb_source_state_t state
         }
 
         *c <: AVB1722_CONFIGURE_TALKER_STREAM;
-        master {
-          *c <: source->stream.local_id;
-          *c <: source->stream.format;
+        *c <: source->stream.local_id;
+        *c <: source->stream.format;
 
-          for (int i=0; i < 6;i++) {
-            *c <: source->reservation.dest_mac_addr[i];
-          }
-
-          *c <: source_num;
-          *c <: source->stream.num_channels;
-          *c <: fifo_mask;
-
-          for (int i=0;i<source->stream.num_channels;i++) {
-            *c <: inputs[source->map[i]].fifo;
-          }
-          *c <: source->stream.rate;
-
-          if (source->presentation)
-            *c <: source->presentation;
-          else
-            *c <: AVB_DEFAULT_PRESENTATION_TIME_DELAY_NS;
-
-          *c :> int _;
+        for (int i=0; i < 6;i++) {
+          *c <: source->reservation.dest_mac_addr[i];
         }
+
+        *c <: source_num;
+        *c <: source->stream.num_channels;
+        *c <: fifo_mask;
+
+        for (int i=0;i<source->stream.num_channels;i++) {
+          *c <: inputs[source->map[i]].fifo;
+        }
+        *c <: source->stream.rate;
+
+        if (source->presentation)
+          *c <: source->presentation;
+        else
+          *c <: AVB_DEFAULT_PRESENTATION_TIME_DELAY_NS;
+
+        *c :> int _;
 
     #ifndef AVB_EXCLUDE_MVRP
         if (source->reservation.vlan_id) {
@@ -446,7 +444,8 @@ int avb_set_source_state(client interface avb_interface avb, int source_num, enu
 #define PERIODIC_POLL_TIME 5000
 
 [[combinable]]
-void avb_manager(server interface avb_interface avb[2],
+void avb_manager(server interface avb_interface avb[num_avb_clients],
+                 unsigned num_avb_clients,
                  chanend c_media_ctl[],
                  chanend ?c_listener_ctl[],
                  chanend ?c_talker_ctl[],

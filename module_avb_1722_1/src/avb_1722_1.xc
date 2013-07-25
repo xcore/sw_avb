@@ -9,6 +9,11 @@
 #include "avb_1722_1_acmp.h"
 #include "avb_1722_1_aecp.h"
 #include "avb_1722_maap.h"
+#include "ethernet_tx_client.h"
+#include "ethernet_rx_client.h"
+#include "ethernet_server_def.h"
+#include "avb_mac_filter.h"
+
 
 #define PERIODIC_POLL_TIME 5000
 
@@ -43,6 +48,9 @@ void avb_1722_1_task(client interface avb_interface avb,
   mac_get_macaddr(c_mac_tx, mac_addr);
   avb_1722_1_init(mac_addr);
   avb_1722_maap_init(mac_addr);
+
+  mac_set_custom_filter(c_mac_rx, MAC_FILTER_AVB_CONTROL);
+  mac_request_status_packets(c_mac_rx);
 
   avb_1722_maap_request_addresses(AVB_NUM_SOURCES, null);
 
