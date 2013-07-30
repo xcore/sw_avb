@@ -148,7 +148,6 @@ static void register_media(chanend media_ctl[])
         outputs[output_id].local_id = j;
         outputs[output_id].mapped_to = UNMAPPED;
         media_ctl[i] :> outputs[output_id].fifo;
-        simple_printf("FIFO: %x\n", outputs[output_id].fifo);
         output_id++;
       }
     }
