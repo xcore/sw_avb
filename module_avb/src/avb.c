@@ -488,6 +488,8 @@ int getset_avb_source_state(int set,
           xc_abi_outuint(c, source->stream.local_id);
           (void) xc_abi_inuint(c); //ACK
 
+          printstr(stream_string); simple_printf("#%d off\n", source_num);
+
 #ifndef AVB_EXCLUDE_MVRP
         if (source->stream.vlan) {
           int all_streams_disabled = 1;
