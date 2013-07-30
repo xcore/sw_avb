@@ -19,6 +19,7 @@
 #include "avb_unit.h"
 #include "mac_filter.h"
 #include "avb_conf.h"
+ #include <simple_printf.h>
 
 #define TIMEINFO_UPDATE_INTERVAL 50000000
 
@@ -36,7 +37,7 @@
 #endif
 
 
-static transaction configure_stream(chanend c,
+static void configure_stream(chanend c,
                              avb_1722_stream_info_t &s)
 {
 	int media_clock;
@@ -162,12 +163,10 @@ void avb_1722_listener_handle_cmd(chanend c_listener_ctl,
     case AVB1722_CONFIGURE_LISTENER_STREAM:
       {
         int stream_num;
-        slave {
-          c_listener_ctl :> stream_num;
-          configure_stream(c_listener_ctl,
-                           st.listener_streams[stream_num]);
-          c_listener_ctl <: AVB1722_ACK;
-        }
+        c_listener_ctl :> stream_num;
+        configure_stream(c_listener_ctl,
+                         st.listener_streams[stream_num]);
+        c_listener_ctl <: AVB1722_ACK;
         break;
       }
     case AVB1722_ADJUST_LISTENER_STREAM:
@@ -233,8 +232,9 @@ void avb_1722_listener(chanend c_mac_rx,
       {
 #if !defined(AVB_1722_FORMAT_61883_4)
         // Conditional due to compiler bug 11998.
+        // FIXME: stream_num variable is not the stream num, it is the FIFO!
       case !isnull(c_buf_ctl) => c_buf_ctl :> int stream_num:
-          media_output_fifo_handle_buf_ctl(c_buf_ctl,  stream_num, st.notified_buf_ctl, tmr);
+          media_output_fifo_handle_buf_ctl(c_buf_ctl, stream_num, st.notified_buf_ctl, tmr);
         break;
 #endif
 

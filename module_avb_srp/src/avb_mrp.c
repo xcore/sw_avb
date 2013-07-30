@@ -839,33 +839,6 @@ void mrp_attribute_init(mrp_attribute_state *st,
   return;
 }
 
-void mrp_attribute_init_source_info(mrp_attribute_state *st,
-                        mrp_attribute_type t,
-                        unsigned int port_num,
-                        unsigned int here,
-                        avb_source_info_t *source)
-{
-  mrp_attribute_init(st, t, port_num, here, source);
-}
-
-void mrp_attribute_init_sink_info(mrp_attribute_state *st,
-                        mrp_attribute_type t,
-                        unsigned int port_num,
-                        unsigned int here,
-                        avb_sink_info_t *sink)
-{
-  mrp_attribute_init(st, t, port_num, here, sink);
-}
-
-void mrp_attribute_init_null(mrp_attribute_state *st,
-                        mrp_attribute_type t,
-                        unsigned int port_num,
-                        unsigned int here)
-{
-  mrp_attribute_init(st, t, port_num, here, NULL);
-}
-
-
 void mrp_mad_begin(mrp_attribute_state *st)
 {
 #ifdef MRP_FULL_PARTICIPANT

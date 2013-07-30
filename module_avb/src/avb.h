@@ -48,13 +48,15 @@ unsafe void avb_init(chanend c_media_ctl[],
               chanend ?c_listener_ctl[],
               chanend ?c_talker_ctl[],
               chanend ?c_media_clock_ctl,
-              chanend c_ptp);
+              chanend c_ptp,
+              chanend c_mac_tx);
 #else
 void avb_init(chanend media_ctl[],
               chanend listener_ctl[],
               chanend talker_ctl[],
               chanend media_clock_ctl,
-              chanend c_ptp);
+              chanend c_ptp,
+              chanend c_mac_tx);
 #endif
 
 void avb_init_srp_only(chanend c_mac_rx, chanend c_mac_tx);

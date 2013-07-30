@@ -50,9 +50,7 @@ static avb_sink_info_t sinks[AVB_NUM_SINKS];
 static media_info_t inputs[AVB_NUM_MEDIA_INPUTS];
 static media_info_t outputs[AVB_NUM_MEDIA_OUTPUTS];
 
-static unsigned char mac_addr[6];
-
-static unsafe void register_talkers(chanend talker_ctl[])
+static unsafe void register_talkers(chanend talker_ctl[], unsigned char mac_addr[6])
 {
   for (int i=0;i<AVB_NUM_TALKER_UNITS;i++) {
     int tile_id, num_streams;
@@ -74,8 +72,8 @@ static unsafe void register_talkers(chanend talker_ctl[])
       source->stream.srp_talker_attr1 = mrp_get_attr();
       source->stream.srp_talker_failed_attr = mrp_get_attr();
       // source->stream.srp_listener_attr = mrp_get_attr();
-      mrp_attribute_init_source_info(source->stream.srp_talker_attr0, MSRP_TALKER_ADVERTISE, 0, 1, source);
-      mrp_attribute_init_source_info(source->stream.srp_talker_attr1, MSRP_TALKER_ADVERTISE, 1, 1, source);
+      mrp_attribute_init(source->stream.srp_talker_attr0, MSRP_TALKER_ADVERTISE, 0, 1, source);
+      mrp_attribute_init(source->stream.srp_talker_attr1, MSRP_TALKER_ADVERTISE, 1, 1, source);
       // mrp_attribute_init(source->stream.srp_talker_failed_attr, MSRP_TALKER_FAILED, 0, 1, source);
       // mrp_attribute_init(source->stream.srp_listener_attr, MSRP_LISTENER, 0, 1, source);
       max_talker_stream_id++;
@@ -108,8 +106,8 @@ static unsafe void register_listeners(chanend listener_ctl[])
       sink->stream.srp_listener_attr1 = mrp_get_attr();
       // mrp_attribute_init(sink->stream.srp_talker_attr, MSRP_TALKER_ADVERTISE, 0, 1, sink);
       // mrp_attribute_init(sink->stream.srp_talker_failed_attr, MSRP_TALKER_FAILED, 0, 1, sink);
-      mrp_attribute_init_sink_info(sink->stream.srp_listener_attr0, MSRP_LISTENER, 0, 1, sink);
-      mrp_attribute_init_sink_info(sink->stream.srp_listener_attr1, MSRP_LISTENER, 1, 1, sink);
+      mrp_attribute_init(sink->stream.srp_listener_attr0, MSRP_LISTENER, 0, 1, sink);
+      mrp_attribute_init(sink->stream.srp_listener_attr1, MSRP_LISTENER, 1, 1, sink);
       max_listener_stream_id++;
     }
     listener_ctl[i] <: max_link_id;
@@ -117,39 +115,42 @@ static unsafe void register_listeners(chanend listener_ctl[])
   }
 }
 
-static unsafe void register_media(chanend media_ctl[])
+static void register_media(chanend media_ctl[])
 {
-  int input_id = 0;
-  int output_id = 0;
+  unsafe {
+    int input_id = 0;
+    int output_id = 0;
 
-  for (int i=0;i<AVB_NUM_MEDIA_UNITS;i++) {
-    int core_id;
-    int num_in;
-    int num_out;
-    chanend *unsafe clk_ctl;
-    media_ctl[i] :> core_id;
-    media_ctl[i] :> clk_ctl;
-    media_ctl[i] :> num_in;
+    for (int i=0;i<AVB_NUM_MEDIA_UNITS;i++) {
+      int core_id;
+      int num_in;
+      int num_out;
+      chanend *unsafe clk_ctl;
+      media_ctl[i] :> core_id;
+      media_ctl[i] :> clk_ctl;
+      media_ctl[i] :> num_in;
 
-    for (int j=0;j<num_in;j++) {
-      media_ctl[i] <: input_id;
-      inputs[input_id].core_id = core_id;
-      inputs[input_id].clk_ctl = clk_ctl;
-      inputs[input_id].local_id = j;
-      inputs[input_id].mapped_to = UNMAPPED;
-      media_ctl[i] :> inputs[input_id].fifo;
-      input_id++;
+      for (int j=0;j<num_in;j++) {
+        media_ctl[i] <: input_id;
+        inputs[input_id].core_id = core_id;
+        inputs[input_id].clk_ctl = clk_ctl;
+        inputs[input_id].local_id = j;
+        inputs[input_id].mapped_to = UNMAPPED;
+        media_ctl[i] :> inputs[input_id].fifo;
+        input_id++;
 
-    }
-    media_ctl[i] :> num_out;
-    for (int j=0;j<num_out;j++) {
-      media_ctl[i] <: output_id;
-      outputs[output_id].core_id = core_id;
-      outputs[output_id].clk_ctl = clk_ctl;
-      outputs[output_id].local_id = j;
-      outputs[output_id].mapped_to = UNMAPPED;
-      media_ctl[i] :> outputs[output_id].fifo;
-      output_id++;
+      }
+      media_ctl[i] :> num_out;
+      for (int j=0;j<num_out;j++) {
+        media_ctl[i] <: output_id;
+        outputs[output_id].core_id = core_id;
+        outputs[output_id].clk_ctl = clk_ctl;
+        outputs[output_id].local_id = j;
+        outputs[output_id].mapped_to = UNMAPPED;
+        media_ctl[i] :> outputs[output_id].fifo;
+        simple_printf("FIFO: %x\n", outputs[output_id].fifo);
+        output_id++;
+      }
     }
   }
 }
@@ -167,12 +168,13 @@ unsafe void avb_init(chanend c_media_ctl[],
               chanend ?c_listener_ctl[],
               chanend ?c_talker_ctl[],
               chanend ?c_media_clock_ctl,
-              chanend c_ptp)
+              chanend c_ptp,
+              chanend c_mac_tx)
 {
-  register_talkers(c_talker_ctl);
+  unsigned char mac_addr[6];
+  mac_get_macaddr(c_mac_tx, mac_addr);
+  register_talkers(c_talker_ctl, mac_addr);
   register_listeners(c_listener_ctl);
-  register_media(c_media_ctl);
-  init_media_clock_server(c_media_clock_ctl);
 }
 
 #if 0
@@ -225,24 +227,22 @@ static void set_sink_state0(int sink_num, enum avb_sink_state_t state, chanend c
       chanend *unsafe clk_ctl = outputs[sink->map[0]].clk_ctl;
       simple_printf("Listener sink #%d chan map:\n", sink_num);
       *c <: AVB1722_CONFIGURE_LISTENER_STREAM;
-      master {
-        *c <: sink->stream.local_id;
-        *c <: sink->stream.sync;
-        *c <: sink->stream.rate;
-        *c <: sink->stream.num_channels;
+      *c <: (int)sink->stream.local_id;
+      *c <: (int)sink->stream.sync;
+      *c <: sink->stream.rate;
+      *c <: (int)sink->stream.num_channels;
 
-        for (int i=0;i<sink->stream.num_channels;i++) {
-          if (sink->map[i] == AVB_CHANNEL_UNMAPPED) {
-            *c <: 0;
-            simple_printf("  %d unmapped\n", i);
-          }
-          else {
-            *c <: outputs[sink->map[i]].fifo;
-            simple_printf("  %d -> %x\n", i, sink->map[i]);
-          }
+      for (int i=0;i<sink->stream.num_channels;i++) {
+        if (sink->map[i] == AVB_CHANNEL_UNMAPPED) {
+          *c <: 0;
+          simple_printf("  %d unmapped\n", i);
         }
-        *c :> int _;
+        else {
+          *c <: outputs[sink->map[i]].fifo;
+          simple_printf("  %d -> %x\n", i, sink->map[i]);
+        }
       }
+      *c :> int _;
 
       if (!isnull(c_media_clock_ctl)) {
         media_clock_register(c_media_clock_ctl, clk_ctl, sink->stream.sync);
@@ -277,7 +277,7 @@ static void set_sink_state0(int sink_num, enum avb_sink_state_t state, chanend c
             state == AVB_SINK_STATE_DISABLED) {
 
     *c <: AVB1722_DISABLE_LISTENER_STREAM;
-    *c <: sink->stream.local_id;
+    *c <: (int)sink->stream.local_id;
     *c :> int _;
 
     avb_match_and_join_leave(sink->stream.srp_listener_attr0, 0);
@@ -336,21 +336,21 @@ static void local_set_source_state(int source_num, enum avb_source_state_t state
         }
 
         *c <: AVB1722_CONFIGURE_TALKER_STREAM;
-        *c <: source->stream.local_id;
-        *c <: source->stream.format;
+        *c <: (int)source->stream.local_id;
+        *c <: (int)source->stream.format;
 
         for (int i=0; i < 6;i++) {
-          *c <: source->reservation.dest_mac_addr[i];
+          *c <: (int)source->reservation.dest_mac_addr[i];
         }
 
         *c <: source_num;
-        *c <: source->stream.num_channels;
+        *c <: (int)source->stream.num_channels;
         *c <: fifo_mask;
 
         for (int i=0;i<source->stream.num_channels;i++) {
           *c <: inputs[source->map[i]].fifo;
         }
-        *c <: source->stream.rate;
+        *c <: (int)source->stream.rate;
 
         if (source->presentation)
           *c <: source->presentation;
@@ -374,7 +374,7 @@ static void local_set_source_state(int source_num, enum avb_source_state_t state
     #if defined(AVB_TRANSMIT_BEFORE_RESERVATION)
         {
           *c <: AVB1722_TALKER_GO;
-          *c <: source->stream.local_id;
+          *c <: (int)source->stream.local_id;
           *c :> int _;
 
           printstr(stream_string); simple_printf("#%d on\n", source_num);
@@ -390,7 +390,7 @@ static void local_set_source_state(int source_num, enum avb_source_state_t state
       // stop transmission
 
         *c <: AVB1722_TALKER_STOP;
-        *c <: source->stream.local_id;
+        *c <: (int)source->stream.local_id;
         *c :> int _;
 
         printstr(stream_string); simple_printf("#%d off\n", source_num);
@@ -401,7 +401,7 @@ static void local_set_source_state(int source_num, enum avb_source_state_t state
 
       printstr(stream_string); simple_printf("#%d on\n", source_num);
       *c <: AVB1722_TALKER_GO;
-      *c <: source->stream.local_id;
+      *c <: (int)source->stream.local_id;
       *c :> int _;
     }
     else if (source->stream.state != AVB_SOURCE_STATE_DISABLED &&
@@ -412,7 +412,7 @@ static void local_set_source_state(int source_num, enum avb_source_state_t state
         }
 
         *c <: AVB1722_TALKER_STOP;
-        *c <: source->stream.local_id;
+        *c <: (int)source->stream.local_id;
         *c :> int _;
 
     #ifndef AVB_EXCLUDE_MVRP
@@ -453,12 +453,17 @@ void avb_manager(server interface avb_interface avb[num_avb_clients],
                  chanend ?c_media_clock_ctl,
                  chanend c_ptp) {
 
-  unsafe {
-    avb_init(c_media_ctl, c_listener_ctl, c_talker_ctl, c_media_clock_ctl, c_ptp);
-  }
+  register_media(c_media_ctl);
+  init_media_clock_server(c_media_clock_ctl);
 
   while (1) {
     select {
+      case avb[int i].initialise(void): {
+        unsafe {
+          avb_init(c_media_ctl, c_listener_ctl, c_talker_ctl, c_media_clock_ctl, c_ptp, c_mac_tx);
+        }
+        break;
+      }
       case avb[int i].get_source_format(int source_num, enum avb_stream_format_t &format, int &rate) -> int return_val: {
         if (source_num < AVB_NUM_SOURCES) {
           avb_source_info_t *source = &sources[source_num];
@@ -845,7 +850,7 @@ unsafe int set_avb_source_port(int source_num,
     avb_source_info_t *source = &sources[source_num];
     chanend *unsafe c = source->talker_ctl;
     *c <: AVB1722_SET_PORT;
-    *c <: source->stream.local_id;
+    *c <: (int)source->stream.local_id;
     *c <: srcport;
     *c :> int _;
 

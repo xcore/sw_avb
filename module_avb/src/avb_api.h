@@ -6,6 +6,7 @@
 
 #ifdef __XC__
 interface avb_interface {
+  void initialise(void);
 /** Set the presentation time offset of an AVB source.
  *
  *  Sets the presentation time offset of a source i.e. the
