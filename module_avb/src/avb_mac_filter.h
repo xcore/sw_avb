@@ -8,13 +8,15 @@
 #include "avb_1722_router_table.h"
 #include <print.h>
 
-#define MAC_FILTER_1722  0x1
-#define MAC_FILTER_PTP   0x2
-#define MAC_FILTER_ARPIP 0x4
-#define MAC_FILTER_AVB_CONTROL  0x8
-#define MAC_FILTER_AVB_SRP  0x10
+enum mac_clients {
+  MAC_FILTER_1722=0,
+  MAC_FILTER_PTP,
+  MAC_FILTER_AVB_CONTROL,
+  MAC_FILTER_AVB_SRP,
+  NUM_FILTER_CLIENTS
+};
 
-#define ROUTER_LINK(n) (1 << (4+n))
+#define ROUTER_LINK(n) (1 << (NUM_FILTER_CLIENTS+n))
 
 #define HTONS(x) ((x>>8)|(((x&0xff)<<8)))
 
