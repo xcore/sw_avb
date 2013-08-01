@@ -135,7 +135,7 @@ void audio_hardware_setup(void)
 #endif
 }
 
-typedef enum {
+enum mac_rx_chans {
   MAC_RX_TO_MEDIA_CLOCK = 0,
 #if AVB_DEMO_ENABLE_LISTENER
   MAC_RX_TO_LISTENER,
@@ -143,9 +143,9 @@ typedef enum {
   MAC_RX_TO_SRP,
   MAC_RX_TO_1722_1,
   NUM_MAC_RX_CHANS
-} mac_rx_chans;
+};
 
-typedef enum {
+enum mac_tx_chans {
   MAC_TX_TO_MEDIA_CLOCK = 0,
 #if AVB_DEMO_ENABLE_TALKER
   MAC_TX_TO_TALKER,
@@ -154,16 +154,16 @@ typedef enum {
   MAC_TX_TO_1722_1,
   MAC_TX_TO_AVB_MANAGER,
   NUM_MAC_TX_CHANS
-} mac_tx_chans;
+};
 
-typedef enum {
+enum avb_manager_chans {
   AVB_MANAGER_TO_SRP = 0,
   AVB_MANAGER_TO_1722_1,
   AVB_MANAGER_TO_DEMO,
   NUM_AVB_MANAGER_CHANS
-} avb_manager_chans;
+};
 
-typedef enum {
+enum ptp_chans {
   PTP_TO_AVB_MANAGER = 0,
 #if AVB_DEMO_ENABLE_TALKER
   PTP_TO_TALKER,
@@ -171,7 +171,7 @@ typedef enum {
   PTP_TO_1722_1,
   PTP_TO_TEST_CLOCK,
   NUM_PTP_CHANS
-} ptp_chans;
+};
 
 int main(void)
 {

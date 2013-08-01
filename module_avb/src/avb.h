@@ -149,9 +149,9 @@ void avb_process_control_packet(client interface avb_interface avb,
  *   \param count the number of channels to set
  *
  */
-void set_avb_source_volumes(int sink_num, int volumes[], int count);
+void set_avb_source_volumes(unsigned sink_num, int volumes[], int count);
 
-int set_avb_source_port(int source_num,
+int set_avb_source_port(unsigned source_num,
                         int srcport);
 
 #endif // _avb_h_
