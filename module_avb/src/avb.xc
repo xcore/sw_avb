@@ -225,31 +225,35 @@ static void set_sink_state0(unsigned sink_num, enum avb_sink_state_t state, chan
 
       chanend *unsafe clk_ctl = outputs[sink->map[0]].clk_ctl;
       simple_printf("Listener sink #%d chan map:\n", sink_num);
-      *c <: AVB1722_CONFIGURE_LISTENER_STREAM;
-      *c <: (int)sink->stream.local_id;
-      *c <: (int)sink->stream.sync;
-      *c <: sink->stream.rate;
-      *c <: (int)sink->stream.num_channels;
+      master {
+        *c <: AVB1722_CONFIGURE_LISTENER_STREAM;
+        *c <: (int)sink->stream.local_id;
+        *c <: (int)sink->stream.sync;
+        *c <: sink->stream.rate;
+        *c <: (int)sink->stream.num_channels;
 
-      for (int i=0;i<sink->stream.num_channels;i++) {
-        if (sink->map[i] == AVB_CHANNEL_UNMAPPED) {
-          *c <: 0;
-          simple_printf("  %d unmapped\n", i);
-        }
-        else {
-          *c <: outputs[sink->map[i]].fifo;
-          simple_printf("  %d -> %x\n", i, sink->map[i]);
+        for (int i=0;i<sink->stream.num_channels;i++) {
+          if (sink->map[i] == AVB_CHANNEL_UNMAPPED) {
+            *c <: 0;
+            simple_printf("  %d unmapped\n", i);
+          }
+          else {
+            *c <: outputs[sink->map[i]].fifo;
+            simple_printf("  %d -> %x\n", i, sink->map[i]);
+          }
         }
       }
-      *c :> int _;
 
       if (!isnull(c_media_clock_ctl)) {
         media_clock_register(c_media_clock_ctl, clk_ctl, sink->stream.sync);
       }
 
-      *c <: AVB1722_GET_ROUTER_LINK;
       int router_link;
-      *c :> router_link;
+
+      master {
+        *c <: AVB1722_GET_ROUTER_LINK;
+        *c :> router_link;
+      }
 
       avb_1722_add_stream_mapping(c_mac_tx,
                                   sink->reservation.stream_id,
@@ -275,9 +279,10 @@ static void set_sink_state0(unsigned sink_num, enum avb_sink_state_t state, chan
     else if (sink->stream.state != AVB_SINK_STATE_DISABLED &&
             state == AVB_SINK_STATE_DISABLED) {
 
-    *c <: AVB1722_DISABLE_LISTENER_STREAM;
-    *c <: (int)sink->stream.local_id;
-    *c :> int _;
+    master {
+      *c <: AVB1722_DISABLE_LISTENER_STREAM;
+      *c <: (int)sink->stream.local_id;
+    }
 
     avb_match_and_join_leave(sink->stream.srp_listener_attr0, 0);
     avb_match_and_join_leave(sink->stream.srp_listener_attr1, 0);
@@ -334,29 +339,29 @@ static void local_set_source_state(unsigned source_num, enum avb_source_state_t 
           fifo_mask |= (1 << source->map[i]);
         }
 
-        *c <: AVB1722_CONFIGURE_TALKER_STREAM;
-        *c <: (int)source->stream.local_id;
-        *c <: (int)source->stream.format;
+        master {
+          *c <: AVB1722_CONFIGURE_TALKER_STREAM;
+          *c <: (int)source->stream.local_id;
+          *c <: (int)source->stream.format;
 
-        for (int i=0; i < 6;i++) {
-          *c <: (int)source->reservation.dest_mac_addr[i];
+          for (int i=0; i < 6;i++) {
+            *c <: (int)source->reservation.dest_mac_addr[i];
+          }
+
+          *c <: source_num;
+          *c <: (int)source->stream.num_channels;
+          *c <: fifo_mask;
+
+          for (int i=0;i<source->stream.num_channels;i++) {
+            *c <: inputs[source->map[i]].fifo;
+          }
+          *c <: (int)source->stream.rate;
+
+          if (source->presentation)
+            *c <: source->presentation;
+          else
+            *c <: AVB_DEFAULT_PRESENTATION_TIME_DELAY_NS;
         }
-
-        *c <: source_num;
-        *c <: (int)source->stream.num_channels;
-        *c <: fifo_mask;
-
-        for (int i=0;i<source->stream.num_channels;i++) {
-          *c <: inputs[source->map[i]].fifo;
-        }
-        *c <: (int)source->stream.rate;
-
-        if (source->presentation)
-          *c <: source->presentation;
-        else
-          *c <: AVB_DEFAULT_PRESENTATION_TIME_DELAY_NS;
-
-        *c :> int _;
 
     #ifndef AVB_EXCLUDE_MVRP
         if (source->reservation.vlan_id) {
@@ -371,10 +376,9 @@ static void local_set_source_state(unsigned source_num, enum avb_source_state_t 
         }
 
     #if defined(AVB_TRANSMIT_BEFORE_RESERVATION)
-        {
+        master {
           *c <: AVB1722_TALKER_GO;
           *c <: (int)source->stream.local_id;
-          *c :> int _;
 
           printstr(stream_string); simple_printf("#%d on\n", source_num);
         }
@@ -388,9 +392,10 @@ static void local_set_source_state(unsigned source_num, enum avb_source_state_t 
         state == AVB_SOURCE_STATE_POTENTIAL) {
       // stop transmission
 
-        *c <: AVB1722_TALKER_STOP;
-        *c <: (int)source->stream.local_id;
-        *c :> int _;
+        master {
+          *c <: AVB1722_TALKER_STOP;
+          *c <: (int)source->stream.local_id;
+        }
 
         printstr(stream_string); simple_printf("#%d off\n", source_num);
     }
@@ -399,9 +404,10 @@ static void local_set_source_state(unsigned source_num, enum avb_source_state_t 
       // start transmitting
 
       printstr(stream_string); simple_printf("#%d on\n", source_num);
-      *c <: AVB1722_TALKER_GO;
-      *c <: (int)source->stream.local_id;
-      *c :> int _;
+      master {
+        *c <: AVB1722_TALKER_GO;
+        *c <: (int)source->stream.local_id;
+      }
     }
     else if (source->stream.state != AVB_SOURCE_STATE_DISABLED &&
              state == AVB_SOURCE_STATE_DISABLED) {
@@ -410,9 +416,10 @@ static void local_set_source_state(unsigned source_num, enum avb_source_state_t 
           inputs[source->map[i]].mapped_to = UNMAPPED;
         }
 
-        *c <: AVB1722_TALKER_STOP;
-        *c <: (int)source->stream.local_id;
-        *c :> int _;
+        master {
+          *c <: AVB1722_TALKER_STOP;
+          *c <: (int)source->stream.local_id;
+        }
 
     #ifndef AVB_EXCLUDE_MVRP
       if (source->reservation.vlan_id) {
@@ -848,10 +855,11 @@ unsafe int set_avb_source_port(unsigned source_num,
   if (source_num < AVB_NUM_SOURCES) {
     avb_source_info_t *source = &sources[source_num];
     chanend *unsafe c = source->talker_ctl;
-    *c <: AVB1722_SET_PORT;
-    *c <: (int)source->stream.local_id;
-    *c <: srcport;
-    *c :> int _;
+    master {
+      *c <: AVB1722_SET_PORT;
+      *c <: (int)source->stream.local_id;
+      *c <: srcport;
+    }
 
     return 1;
   }

@@ -37,7 +37,7 @@
 #endif
 
 
-static void configure_stream(chanend c,
+static transaction configure_stream(chanend c,
                              avb_1722_stream_info_t &s)
 {
 	int media_clock;
@@ -62,7 +62,7 @@ static void configure_stream(chanend c,
 	s.dbc = -1;
 }
 
-static void adjust_stream(chanend c,
+static transaction adjust_stream(chanend c,
         avb_1722_stream_info_t &s)
 {
 	int cmd;
@@ -156,43 +156,39 @@ void avb_1722_listener_handle_cmd(chanend c_listener_ctl,
                                   avb_1722_listener_state_t &st)
 {
   int cmd;
-  c_listener_ctl :> cmd;
-  // perform the command.
-  switch (cmd)
-    {
-    case AVB1722_CONFIGURE_LISTENER_STREAM:
+  slave {
+    c_listener_ctl :> cmd;
+    switch (cmd)
       {
-        int stream_num;
-        c_listener_ctl :> stream_num;
-        configure_stream(c_listener_ctl,
-                         st.listener_streams[stream_num]);
-        c_listener_ctl <: AVB1722_ACK;
+      case AVB1722_CONFIGURE_LISTENER_STREAM:
+        {
+          int stream_num;
+          c_listener_ctl :> stream_num;
+          configure_stream(c_listener_ctl,
+                           st.listener_streams[stream_num]);
+          break;
+        }
+      case AVB1722_ADJUST_LISTENER_STREAM:
+        {
+          int stream_num;
+          c_listener_ctl :> stream_num;
+          adjust_stream(c_listener_ctl,
+                        st.listener_streams[stream_num]);
+          break;
+        }
+      case AVB1722_DISABLE_LISTENER_STREAM:
+        {
+          int stream_num;
+          c_listener_ctl :> stream_num;
+          disable_stream(st.listener_streams[stream_num]);
+          break;
+        }
+      case AVB1722_GET_ROUTER_LINK:
+        c_listener_ctl <: st.router_link;
+        break;
+      default:
         break;
       }
-    case AVB1722_ADJUST_LISTENER_STREAM:
-      {
-        int stream_num;
-        c_listener_ctl :> stream_num;
-        adjust_stream(c_listener_ctl,
-                      st.listener_streams[stream_num]);
-        c_listener_ctl <: AVB1722_ACK;
-        break;
-      }
-    case AVB1722_DISABLE_LISTENER_STREAM:
-      {
-        int stream_num;
-        c_listener_ctl :> stream_num;
-        disable_stream(st.listener_streams[stream_num]);
-        c_listener_ctl <: AVB1722_ACK;
-        break;
-      }
-    case AVB1722_GET_ROUTER_LINK:
-      c_listener_ctl <: st.router_link;
-      break;
-    default:
-      // sent NACK out
-      c_listener_ctl <: AVB1722_NACK;
-      break;
     }
 }
 

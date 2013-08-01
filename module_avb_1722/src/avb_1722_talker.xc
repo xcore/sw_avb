@@ -23,7 +23,7 @@
 #if AVB_NUM_SOURCES != 0
 
 #pragma unsafe arrays
-static configure_stream(chanend avb1722_tx_config,
+static transaction configure_stream(chanend avb1722_tx_config,
                avb1722_Talker_StreamConfig_t &stream,
                unsigned char mac_addr[]) {
   unsigned int streamIdExt;
@@ -144,72 +144,67 @@ void avb_1722_talker_handle_cmd(chanend c_talker_ctl,
                                 avb_1722_talker_state_t &st)
 {
   int cmd;
-  c_talker_ctl :> cmd;
-  switch (cmd)
+  slave {
+    c_talker_ctl :> cmd;
+    switch (cmd)
     {
     case AVB1722_CONFIGURE_TALKER_STREAM:
-      {
-        int stream_num;
-        c_talker_ctl :> stream_num;
-        configure_stream(c_talker_ctl,
-                         st.talker_streams[stream_num],
-                         st.mac_addr);
-        if (stream_num > st.max_active_avb_stream)
-          st.max_active_avb_stream = stream_num;
+    {
+      int stream_num;
+      c_talker_ctl :> stream_num;
+      configure_stream(c_talker_ctl,
+                       st.talker_streams[stream_num],
+                       st.mac_addr);
+      if (stream_num > st.max_active_avb_stream)
+        st.max_active_avb_stream = stream_num;
 
-        // Eventually this will have to be changed
-        // to create per-stream headers
-        // for now assume sampling rate etc. the same
-        // on all streams
-        AVB1722_Talker_bufInit((st.TxBuf,unsigned char[]),
-                               st.talker_streams[stream_num],
-                               st.vlan);
+      // Eventually this will have to be changed
+      // to create per-stream headers
+      // for now assume sampling rate etc. the same
+      // on all streams
+      AVB1722_Talker_bufInit((st.TxBuf,unsigned char[]),
+                             st.talker_streams[stream_num],
+                             st.vlan);
 
-        c_talker_ctl <: AVB1722_ACK;
-      }
-      break;
+    }
+    break;
     case AVB1722_DISABLE_TALKER_STREAM:
-      {
-        int stream_num;
-        c_talker_ctl :> stream_num;
-        disable_stream(st.talker_streams[stream_num]);
-        c_talker_ctl <: AVB1722_ACK;
-      }
-      break;
+    {
+      int stream_num;
+      c_talker_ctl :> stream_num;
+      disable_stream(st.talker_streams[stream_num]);
+    }
+    break;
     case AVB1722_TALKER_GO:
-      {
-        int stream_num;
-        c_talker_ctl :> stream_num;
-        start_stream(st.talker_streams[stream_num]);
-        c_talker_ctl <: AVB1722_ACK;
-      }
-      break;
+    {
+      int stream_num;
+      c_talker_ctl :> stream_num;
+      start_stream(st.talker_streams[stream_num]);
+    }
+    break;
     case AVB1722_TALKER_STOP:
-      {
-        int stream_num;
-        c_talker_ctl :> stream_num;
-        stop_stream(st.talker_streams[stream_num]);
-        c_talker_ctl <: AVB1722_ACK;
-      }
-      break;
+    {
+      int stream_num;
+      c_talker_ctl :> stream_num;
+      stop_stream(st.talker_streams[stream_num]);
+    }
+    break;
     case AVB1722_SET_PORT:
     {
       int stream_num;
       c_talker_ctl :> stream_num;
       c_talker_ctl :> st.talker_streams[stream_num].txport;
-      c_talker_ctl <: AVB1722_ACK;
       simple_printf("Setting stream %d 1722 TX port to %d\n", stream_num, st.talker_streams[stream_num].txport);
       break;
     }
     case AVB1722_SET_VLAN:
       c_talker_ctl :> st.vlan;
       avb1722_set_buffer_vlan(st.vlan,(st.TxBuf,unsigned char[]));
-      // FIXME: Should this command ACK?
       break;
     default:
-      c_talker_ctl <: AVB1722_NACK;
       break;
     }
+  }
 }
 
 

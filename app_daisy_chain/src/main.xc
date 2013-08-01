@@ -236,26 +236,21 @@ int main(void)
     // AVB - Audio
     on tile[0]:
     {
+#if (AVB_I2C_TILE == 0)
+      audio_hardware_setup();
+#endif
 #if AVB_DEMO_ENABLE_TALKER
       media_input_fifo_data_t ififo_data[AVB_NUM_MEDIA_INPUTS];
       media_input_fifo_t ififos[AVB_NUM_MEDIA_INPUTS];
+      init_media_input_fifos(ififos, ififo_data, AVB_NUM_MEDIA_INPUTS);
 #endif
 
 #if AVB_DEMO_ENABLE_LISTENER
       media_output_fifo_data_t ofifo_data[AVB_NUM_MEDIA_OUTPUTS];
       media_output_fifo_t ofifos[AVB_NUM_MEDIA_OUTPUTS];
-#endif
-
-#if (AVB_I2C_TILE == 0)
-      audio_hardware_setup();
-#endif
-
-#if AVB_DEMO_ENABLE_TALKER
-      init_media_input_fifos(ififos, ififo_data, AVB_NUM_MEDIA_INPUTS);
-#endif
-#if AVB_DEMO_ENABLE_LISTENER
       init_media_output_fifos(ofifos, ofifo_data, AVB_NUM_MEDIA_OUTPUTS);
 #endif
+
       i2s_master(i2s_ports,
                  p_aud_din, AVB_NUM_MEDIA_INPUTS,
                  p_aud_dout, AVB_NUM_MEDIA_OUTPUTS,
