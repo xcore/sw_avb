@@ -135,4 +135,7 @@ typedef struct
 
 // We add a 2% fudge factor to handle clock difference in the stream transmission shaping
 #define AVB1722_PACKET_PERIOD_TIMER_TICKS (((100000000 / AVB1722_PACKET_RATE)*98)/100)
+
+#define AVB1722_PLUS_SIP_HEADER_SIZE (32)
+
 #endif

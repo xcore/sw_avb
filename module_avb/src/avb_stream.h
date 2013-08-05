@@ -17,37 +17,32 @@ typedef struct avb_srp_info_t {
 
 typedef struct avb_stream_info_t
 {
-	int state;
-	mrp_attribute_state *unsafe srp_talker_attr0;
-	mrp_attribute_state *unsafe srp_talker_attr1;
-	mrp_attribute_state *unsafe srp_talker_failed_attr;
-	mrp_attribute_state *unsafe srp_listener_attr0;
-	mrp_attribute_state *unsafe srp_listener_attr1;
-	char tile_id;
-	char local_id;
-	char num_channels;
-	char format;
-	int rate;
-	char sync;
-	short flags;
+    int state;
+    char tile_id;
+    char local_id;
+    char num_channels;
+    char format;
+    int rate;
+    char sync;
+    short flags;
 } avb_stream_info_t;
 
 typedef struct avb_source_info_t
 {
-	avb_srp_info_t reservation;
-	avb_stream_info_t stream;
-	chanend *unsafe talker_ctl;
-	int presentation;
-	int map[AVB_MAX_CHANNELS_PER_TALKER_STREAM];
+    avb_srp_info_t reservation;
+    avb_stream_info_t stream;
+    chanend *unsafe talker_ctl;
+    int presentation;
+    int map[AVB_MAX_CHANNELS_PER_TALKER_STREAM];
 } avb_source_info_t;
 
 
 typedef struct avb_sink_info_t
 {
-	avb_srp_info_t reservation;
-	avb_stream_info_t stream;
-	chanend *unsafe listener_ctl;
-	int map[AVB_MAX_CHANNELS_PER_LISTENER_STREAM];
+    avb_srp_info_t reservation;
+    avb_stream_info_t stream;
+    chanend *unsafe listener_ctl;
+    int map[AVB_MAX_CHANNELS_PER_LISTENER_STREAM];
 } avb_sink_info_t;
 
 /** Utility function to get the index of a source stream based on its

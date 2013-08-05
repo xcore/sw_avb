@@ -154,6 +154,8 @@ void mrp_mad_leave(mrp_attribute_state *unsafe st);
  */
 void mrp_periodic(CLIENT_INTERFACE(avb_interface, avb));
 
+mrp_attribute_state *unsafe mrp_match_talker_non_prop_attribute(unsigned stream_id[2]);
+
 mrp_attribute_state *unsafe mrp_match_attr_by_stream_and_type(mrp_attribute_state *unsafe attr, int opposite_port);
 int mrp_match_multiple_attrs_by_stream_and_type(mrp_attribute_state *unsafe attr, int opposite_port);
 mrp_attribute_state *unsafe mrp_match_attribute_by_stream_id(mrp_attribute_state *unsafe attr, int opposite_port);

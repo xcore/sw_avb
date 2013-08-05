@@ -799,11 +799,11 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
 void mrp_debug_dump_attrs(void)
 {
   
-  printstrln("port_num | type                   | here | propagated | stream_id");
-  printstrln("---------+------------------------+------+------------+----------");
+  printstrln("port_num | type                   | disabled | here | propagated | stream_id");
+  printstrln("---------+------------------------+----------+------+------------+----------");
   for (int i=0;i<MRP_MAX_ATTRS;i++) {
 
-    if (attrs[i].applicant_state != MRP_UNUSED && attrs[i].applicant_state != MRP_DISABLED) {
+    if (attrs[i].applicant_state != MRP_UNUSED) {
       avb_sink_info_t *sink_info = (avb_sink_info_t *) attrs[i].attribute_info;
       int stream_id[2] = {0, 0};
       char attr_string[24];
@@ -817,8 +817,8 @@ void mrp_debug_dump_attrs(void)
       attr_string[23] = '\0';
       strncpy(attr_string, debug_attribute_type[attrs[i].attribute_type],strlen(debug_attribute_type[attrs[i].attribute_type]));
 
-      simple_printf("%d        | %s| %d    | %d          | %x:%x\n",
-        attrs[i].port_num, attr_string, attrs[i].here, attrs[i].propagated, stream_id[0], stream_id[1]);
+      simple_printf("%d        | %s| %d        | %d    | %d          | %x:%x\n",
+        attrs[i].port_num, attr_string, attrs[i].applicant_state == MRP_DISABLED, attrs[i].here, attrs[i].propagated, stream_id[0], stream_id[1]);
 
     }
   }
@@ -1234,11 +1234,32 @@ int mrp_is_observer(mrp_attribute_state *st)
     }
 }
 
+mrp_attribute_state *mrp_match_talker_non_prop_attribute(unsigned stream_id[2]) {
+  for (int j=0;j<MRP_MAX_ATTRS;j++) {
+    if (attrs[j].applicant_state == MRP_UNUSED) {
+      continue;
+    }
+    if (MSRP_TALKER_ADVERTISE == attrs[j].attribute_type && !attrs[j].propagated)
+    {
+      avb_srp_info_t *reservation = (avb_srp_info_t *) attrs[j].attribute_info;
+
+      if (reservation == NULL) continue;
+
+      if (reservation->stream_id[0] == stream_id[0] && 
+          reservation->stream_id[1] == stream_id[1])
+      {
+          return &attrs[j];
+      }   
+    }
+  }
+  return 0;  
+}
+
 
 mrp_attribute_state *mrp_match_attr_by_stream_and_type(mrp_attribute_state *attr, int opposite_port)
 {
   for (int j=0;j<MRP_MAX_ATTRS;j++) {
-    if (attr->applicant_state == MRP_UNUSED) {
+    if (attrs[j].applicant_state == MRP_UNUSED) {
       continue;
     }
     if ((opposite_port && (attr->port_num != attrs[j].port_num)) ||
@@ -1267,7 +1288,7 @@ int mrp_match_multiple_attrs_by_stream_and_type(mrp_attribute_state *attr, int o
   int matches = 0;
 
   for (int j=0;j<MRP_MAX_ATTRS;j++) {
-    if (attr->applicant_state == MRP_UNUSED) {
+    if (attrs[j].applicant_state == MRP_UNUSED) {
       continue;
     }
     if (attr->attribute_type == attrs[j].attribute_type)
@@ -1300,7 +1321,7 @@ int mrp_match_multiple_attrs_by_stream_and_type(mrp_attribute_state *attr, int o
 mrp_attribute_state *mrp_match_attribute_by_stream_id(mrp_attribute_state *attr, int opposite_port)
 {
   for (int j=0;j<MRP_MAX_ATTRS;j++) {
-    if (attr->applicant_state == MRP_UNUSED) {
+    if (attrs[j].applicant_state == MRP_UNUSED) {
       continue;
     }
     if ((opposite_port && (attr->port_num != attrs[j].port_num)) ||
@@ -1464,11 +1485,7 @@ void avb_mrp_process_packet(unsigned char *buf, int etype, int len, unsigned int
             {
               if (three_packed_event != MRP_ATTRIBUTE_EVENT_MT)
               {
-                avb_srp_info_t *stream_data;
-                avb_srp_process_attribute(attr_type, first_value, i, &stream_data);
-                mrp_attribute_state *st = mrp_get_attr();
-                mrp_attribute_init(st, attr_type, port_num, 0, stream_data);
-                simple_printf("mrp_attribute_init: %d, %d, STREAM_ID[0]: %x\n", attr_type, port_num, stream_data->stream_id[0]);
+                mrp_attribute_state *st = avb_srp_process_new_attribute_from_packet(attr_type, first_value, i, port_num);
                 mrp_mad_begin(st);
 
                 mrp_debug_dump_attrs();

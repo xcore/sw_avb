@@ -204,6 +204,7 @@ int main(void)
   chan c_gpio_ctl;
 
   interface avb_interface i_avb[NUM_AVB_MANAGER_CHANS];
+  interface srp_interface i_srp;
 
   par
   {
@@ -288,6 +289,7 @@ int main(void)
 #endif
       [[combine]] par {
         avb_manager(i_avb, NUM_AVB_MANAGER_CHANS,
+                   i_srp,
                    c_media_ctl,
                    c_listener_ctl,
                    c_talker_ctl,
@@ -296,6 +298,7 @@ int main(void)
                    c_ptp[PTP_TO_AVB_MANAGER]);
         demo_task(i_avb[AVB_MANAGER_TO_DEMO], c_gpio_ctl);
         avb_srp_task(i_avb[AVB_MANAGER_TO_SRP],
+                     i_srp,
                      c_mac_rx[MAC_RX_TO_SRP],
                      c_mac_tx[MAC_TX_TO_SRP]);
       }

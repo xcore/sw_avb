@@ -16,12 +16,8 @@
 #include "avb_1722_router.h"
 #include "avb_api.h"
 
-#define AVB_1722_PLUS_SIP_HEADER_SIZE (32)
-
-static unsigned int failed_streamId[2];
-
-#ifndef AVB_STREAM_LIST_SIZE
-#define AVB_STREAM_LIST_SIZE 6
+#ifndef AVB_STREAM_TABLE_ENTRIES
+#define AVB_STREAM_TABLE_ENTRIES 6
 #endif
 
 typedef struct avb_stream_entry 
@@ -31,9 +27,7 @@ typedef struct avb_stream_entry
   int talker_present;
 } avb_stream_entry;
 
-static avb_stream_entry stream_list[AVB_STREAM_LIST_SIZE];
-static int rdPtr=0;
-static int wrPtr = 0;
+static avb_stream_entry stream_table[AVB_STREAM_TABLE_ENTRIES];
 
 static mrp_attribute_state *domain_attr[MRP_NUM_PORTS];
 
@@ -105,15 +99,15 @@ void avb_match_and_join_leave(mrp_attribute_state *attr, int join) {
 
 int avb_srp_match_listener_to_talker_stream_id(unsigned stream_id[2], avb_srp_info_t **stream, int is_listener)
 {
-  for(int i=0;i<AVB_STREAM_LIST_SIZE;i++)
+  for(int i=0;i<AVB_STREAM_TABLE_ENTRIES;i++)
   {
-    if (((is_listener && stream_list[i].talker_present == 1) || 
-        (!is_listener && stream_list[i].listener_present == 1)) &&
-        stream_id[0] == stream_list[i].reservation.stream_id[0] &&
-        stream_id[1] == stream_list[i].reservation.stream_id[1]) {
+    if (((is_listener && stream_table[i].talker_present == 1) || 
+        (!is_listener && stream_table[i].listener_present == 1)) &&
+        stream_id[0] == stream_table[i].reservation.stream_id[0] &&
+        stream_id[1] == stream_table[i].reservation.stream_id[1]) {
       if (stream != NULL)
       {
-        *stream = &stream_list[i].reservation;
+        *stream = &stream_table[i].reservation;
       }
       return 1;
     }
@@ -122,108 +116,76 @@ int avb_srp_match_listener_to_talker_stream_id(unsigned stream_id[2], avb_srp_in
   return 0;
 }
 
-// FIXME: Rename me?
-int avb_add_new_stream_entry(srp_talker_first_value *fv,
-                            unsigned stream_id[2],
-                             int addr_offset,
-                             avb_srp_info_t **stream,
-                             int talker_attr)
-{
-  if (AVB_STREAM_LIST_SIZE == 0)
-    return 0;
-
-  int matched_stream_idx = -1;
-  int new_wrPtr = wrPtr + 1;
-
-  // FIXME: This kind of search should use a linked list when list is big?
-  for(int i=0;i<AVB_STREAM_LIST_SIZE;i++)
+// Either return an index to update, or a new index if not matched, or -1 if no entries free
+static int srp_match_reservation_entry_by_id(unsigned stream_id[2]) {
+  int empty_index = -1;
+  for(int i=0;i<AVB_STREAM_TABLE_ENTRIES;i++)
   {
-    if (stream_id[0] == stream_list[i].reservation.stream_id[0] &&
-        stream_id[1] == stream_list[i].reservation.stream_id[1]) {
-
-      matched_stream_idx = i;
-      // If it is a talker attribute, we always continue and update the entry because it could have been
-      // created by a listener attribute and hence isn't complete
-      if (!talker_attr)
-      {
-        *stream = &stream_list[i].reservation;
-        return 0;
-      }
+    if (stream_id[0] == stream_table[i].reservation.stream_id[0] &&
+        stream_id[1] == stream_table[i].reservation.stream_id[1]) {
+      return i;
+    }
+    if (stream_table[i].reservation.stream_id[0] == 0 &&
+        stream_table[i].reservation.stream_id[1] == 0) {
+      empty_index = i;
     }
   }
-
-  if (matched_stream_idx < 0)
-  {
-    // FIXME: Should be a linked list instead of FIFO. Can/should we drop entries?
-
-    if (new_wrPtr==AVB_STREAM_LIST_SIZE)
-      new_wrPtr = 0;
-    if (new_wrPtr==rdPtr) {
-      __builtin_trap(); // Trap on stream list full
-      /*
-      // fifo is full, drop oldest
-      rdPtr++;
-      if (rdPtr==AVB_STREAM_LIST_SIZE)
-        rdPtr = 0;
-      */
-    }
-
-    matched_stream_idx = new_wrPtr;
-  }
-  
-  stream_list[matched_stream_idx].reservation.stream_id[0] = stream_id[0];
-  stream_list[matched_stream_idx].reservation.stream_id[1] = stream_id[1];
-
-  if (talker_attr)
-  {
-    unsigned long long x;
-    stream_list[matched_stream_idx].reservation.vlan_id = ntoh_16(fv->VlanID);
-      
-    for(int i=0;i<6;i++) 
-      x = (x<<8) + fv->DestMacAddr[i];
-
-    x += addr_offset;
-
-    int tmp = byterev(x);
-    memcpy(&stream_list[matched_stream_idx].reservation.dest_mac_addr[2], &tmp, 4);
-    tmp = byterev(x>>32)>>16;
-    memcpy(&stream_list[matched_stream_idx].reservation.dest_mac_addr, &tmp, 2);
-
-    stream_list[matched_stream_idx].reservation.tspec_max_frame_size = ntoh_16(fv->TSpecMaxFrameSize);
-    stream_list[matched_stream_idx].reservation.tspec_max_interval = ntoh_16(fv->TSpecMaxIntervalFrames);
-    stream_list[matched_stream_idx].reservation.tspec = fv->TSpec;
-    stream_list[matched_stream_idx].reservation.accumulated_latency = ntoh_32(fv->AccumulatedLatency);
-
-    stream_list[matched_stream_idx].talker_present = 1;
-  }
-  else
-  {
-    stream_list[matched_stream_idx].listener_present = 1;
-    memset(stream_list[matched_stream_idx].reservation.dest_mac_addr, 0, sizeof(avb_srp_info_t)-8);
-  }
-
-  // FIXME: We may add a stream entry based on a Listener attribute, and we don't have any
-  // fields other than the Stream ID
-
-  simple_printf("Added stream:\n ID: %x%x\n \
-                DA: %x:%x:%x:%x:%x:%x\n \
-                max size: %d\n \
-                interval: %d\n",
-                stream_id[0], stream_id[1],
-                stream_list[matched_stream_idx].reservation.dest_mac_addr[0], stream_list[matched_stream_idx].reservation.dest_mac_addr[1], stream_list[matched_stream_idx].reservation.dest_mac_addr[2],
-                stream_list[matched_stream_idx].reservation.dest_mac_addr[3], stream_list[matched_stream_idx].reservation.dest_mac_addr[4], stream_list[matched_stream_idx].reservation.dest_mac_addr[5],
-                stream_list[matched_stream_idx].reservation.tspec_max_frame_size,
-                stream_list[matched_stream_idx].reservation.tspec_max_interval
-                );                                
-
-  *stream = &stream_list[matched_stream_idx].reservation;
-    
-  wrPtr = new_wrPtr;
-  
-  return 1;
+  return empty_index;
 }
 
-static void create_attribute_and_join(mrp_attribute_state *attr) {
+avb_stream_entry *srp_add_reservation_entry_stream_id_only(unsigned int stream_id[2]) {
+  int entry = srp_match_reservation_entry_by_id(stream_id);
+
+  if (entry >= 0) {
+    if (!stream_table[entry].talker_present) memset(&stream_table[entry].reservation, 0, sizeof(avb_srp_info_t));
+    stream_table[entry].reservation.stream_id[0] = stream_id[0];
+    stream_table[entry].reservation.stream_id[1] = stream_id[1];
+    stream_table[entry].listener_present = 1;
+    simple_printf("Added stream:\n ID: %x%x\n DA:", stream_id[0], stream_id[1]);
+  } else {
+    printstrln("Assert: Out of stream entries");
+    __builtin_trap();
+    return NULL;
+  }
+
+  return &stream_table[entry];
+}
+
+avb_stream_entry *srp_add_reservation_entry(avb_srp_info_t *reservation) {
+  int entry = srp_match_reservation_entry_by_id(reservation->stream_id);
+
+  if (entry >= 0) {
+    memcpy(&stream_table[entry].reservation, reservation, sizeof(avb_srp_info_t));
+    simple_printf("Added stream:\n ID: %x%x\n DA:", reservation->stream_id[0], reservation->stream_id[1]);
+    for (int i=0; i < 6; i++) {
+      printhex(stream_table[entry].reservation.dest_mac_addr[i]); printchar(':');
+    }
+    simple_printf("\n max size: %d\n interval: %d\n",
+                stream_table[entry].reservation.tspec_max_frame_size,
+                stream_table[entry].reservation.tspec_max_interval
+                );
+    stream_table[entry].talker_present = 1;
+  } else {
+    printstrln("Assert: Out of stream entries");
+    __builtin_trap();
+    return NULL;
+  }
+
+  return &stream_table[entry];
+}
+
+int srp_remove_reservation_entry(avb_srp_info_t *reservation) {
+  int entry = srp_match_reservation_entry_by_id(reservation->stream_id);
+
+  if (entry >= 0) {
+    memset(&stream_table[entry], 0, sizeof(avb_stream_entry));
+  } else {
+    printstrln("Assert: Tried to remove a reservation that isn't stored");
+    __builtin_trap();
+  }
+}
+
+static void create_propagated_attribute_and_join(mrp_attribute_state *attr) {
   mrp_attribute_state *st = mrp_get_attr();
   avb_srp_info_t *stream_data = attr->attribute_info;
   mrp_attribute_init(st, attr->attribute_type, !attr->port_num, 0, stream_data);
@@ -248,7 +210,7 @@ static void avb_srp_map_join(mrp_attribute_state *attr, int new, int listener)
   // Attribute propagation:
   if (!matched_stream_id_other_port && !listener && new)
   {
-    create_attribute_and_join(attr);
+    create_propagated_attribute_and_join(attr);
   }
   else if (!matched_stream_id_other_port &&
             matched_talker_listener &&
@@ -256,7 +218,7 @@ static void avb_srp_map_join(mrp_attribute_state *attr, int new, int listener)
             !matched_talker_listener->here &&
             new)
   {
-    create_attribute_and_join(attr);
+    create_propagated_attribute_and_join(attr);
   }
 
   if (listener && matched_talker_listener && !matched_talker_listener->propagated) {
@@ -317,17 +279,6 @@ void avb_srp_map_leave(mrp_attribute_state *attr)
       attr->applicant_state = MRP_UNUSED;
     }
   }
-}
-
-static unsigned avb_srp_calculate_max_framesize(avb_source_info_t *source_info)
-{
-#if defined(AVB_1722_FORMAT_61883_6) || defined(AVB_1722_FORMAT_SAF)
-	unsigned samples_per_packet = (source_info->stream.rate + (AVB1722_PACKET_RATE-1))/AVB1722_PACKET_RATE;
-	return AVB_1722_PLUS_SIP_HEADER_SIZE + (source_info->stream.num_channels * samples_per_packet * 4);
-#endif
-#if defined(AVB_1722_FORMAT_61883_4)
-	return AVB_1722_PLUS_SIP_HEADER_SIZE + (192 * MAX_TS_PACKETS_PER_1722);
-#endif
 }
 
 int avb_srp_match_talker_failed(mrp_attribute_state *attr,
@@ -449,13 +400,66 @@ void avb_srp_listener_leave_ind(CLIENT_INTERFACE(avb_interface, avb), mrp_attrib
   }
 }
 
+void avb_srp_create_and_join_talker_advertise_attrs(avb_srp_info_t *reservation) {
+  avb_stream_entry *stream_ptr = srp_add_reservation_entry(reservation);
 
-int avb_srp_process_attribute(int mrp_attribute_type, char *fv, int num, avb_srp_info_t **stream)
+  // FIXME: Can we get duplication of Talker attributes here?
+
+  for (int i=0; i < MRP_NUM_PORTS; i++) {
+    mrp_attribute_state *attr = mrp_get_attr();
+    mrp_attribute_init(attr, MSRP_TALKER_ADVERTISE, i, 1, stream_ptr);
+    mrp_mad_begin(attr);
+    mrp_mad_join(attr, 1);
+  }
+  mrp_debug_dump_attrs();
+}
+
+/* LJN: Listener Join
+*/
+
+void avb_srp_join_listener_attrs(unsigned int stream_id[2]) {
+  // LJ1. Find Talker advertise attribute that has not been propagated
+  mrp_attribute_state *matched_talker_advertise = mrp_match_talker_non_prop_attribute(stream_id);
+
+  if (matched_talker_advertise) { 
+    mrp_attribute_state *matched_listener_same_port = mrp_match_attribute_by_stream_id(matched_talker_advertise, 0);
+
+    // LJ2. If Listener Ready attribute not present on this port, create it
+    if (!matched_listener_same_port) {
+        matched_listener_same_port = mrp_get_attr();
+        mrp_attribute_init(matched_listener_same_port,
+                           MSRP_LISTENER,
+                           matched_talker_advertise->port_num,
+                           1,
+                           matched_talker_advertise->attribute_info);
+        mrp_mad_begin(matched_listener_same_port);
+    }
+
+    // LJ3. Join Listener Ready on the Talker advertise port
+    mrp_mad_join(matched_listener_same_port, 1); 
+  }
+  else { // LJ4: If the Talker advertise hasn't matched, then it probably hasn't arrived yet
+    // LJ5: Create Listener attrs on both ports but leave them disabled
+    avb_stream_entry *stream_ptr = srp_add_reservation_entry_stream_id_only(stream_id);
+    for (int i=0; i < MRP_NUM_PORTS; i++) {
+        mrp_attribute_state *listener_attr = mrp_get_attr();
+        mrp_attribute_init(listener_attr,
+                           MSRP_LISTENER,
+                           i,
+                           1,
+                           stream_ptr);
+    }
+  }
+
+  mrp_debug_dump_attrs();
+}
+
+
+mrp_attribute_state* avb_srp_process_new_attribute_from_packet(int mrp_attribute_type, char *fv, int num, int port_num)
 {
-  // place the streamId in the failed_streamId global in
-  // case it is a failed message
   srp_talker_first_value *packet = (srp_talker_first_value *) fv;
-  unsigned int *pdu_streamId = &failed_streamId[0];
+  unsigned int pdu_streamId[2];
+  avb_stream_entry *stream_ptr = NULL;
 
   unsigned long long streamId;
 
@@ -467,25 +471,51 @@ int avb_srp_process_attribute(int mrp_attribute_type, char *fv, int num, avb_srp
   pdu_streamId[0] = streamId >> 32;
   pdu_streamId[1] = (unsigned) streamId;
 
+  avb_srp_info_t reservation;
+
+  reservation.stream_id[0] = pdu_streamId[0];
+  reservation.stream_id[1] = pdu_streamId[1];
+
+
   switch (mrp_attribute_type)
   {
     case MSRP_TALKER_ADVERTISE:
     case MSRP_TALKER_FAILED:
     {
-      // Returns 1 if not found and added --> add new attribute
-      // Return 0 if found and not added
-      return avb_add_new_stream_entry(packet, pdu_streamId, num, stream, 1);
+      unsigned long long x;
+      reservation.vlan_id = ntoh_16(packet->VlanID);
+        
+      for(int i=0;i<6;i++) 
+        x = (x<<8) + packet->DestMacAddr[i];
+
+      x += num;
+
+      int tmp = byterev(x);
+      memcpy(&reservation.dest_mac_addr[2], &tmp, 4);
+      tmp = byterev(x>>32)>>16;
+      memcpy(&reservation.dest_mac_addr, &tmp, 2);
+
+      reservation.tspec_max_frame_size = ntoh_16(packet->TSpecMaxFrameSize);
+      reservation.tspec_max_interval = ntoh_16(packet->TSpecMaxIntervalFrames);
+      reservation.tspec = packet->TSpec;
+      reservation.accumulated_latency = ntoh_32(packet->AccumulatedLatency);
+      stream_ptr = srp_add_reservation_entry(&reservation);
+      break;
     }
     case MSRP_LISTENER:
     {
-      // Returns 1 if found --> add new attribute
-      // Returns 0 if not found
-      return avb_add_new_stream_entry(packet, pdu_streamId, num, stream, 0); // !avb_srp_match_listener_to_talker_stream_id(pdu_streamId, stream);
+      stream_ptr = srp_add_reservation_entry_stream_id_only(pdu_streamId);
+      break;
     }
+    default:
+      __builtin_trap();
+      break;
   }
 
-  return -1;
+  mrp_attribute_state *st = mrp_get_attr();
+  mrp_attribute_init(st, mrp_attribute_type, port_num, 0, stream_ptr);
 
+  return st;
 }
 
 void avb_srp_talker_join_ind(mrp_attribute_state *attr, int new)
@@ -517,13 +547,6 @@ void avb_srp_talker_leave_ind(mrp_attribute_state *attr)
   {
     avb_srp_map_leave(attr);
   }
-}
-
-
-void avb_srp_get_failed_stream(unsigned int streamId[2]) 
-{
-  streamId[0] = failed_streamId[0];
-  streamId[1] = failed_streamId[1];
 }
 
 static int check_listener_firstvalue_merge(char *buf, 
@@ -706,7 +729,7 @@ static int check_talker_firstvalue_merge(char *buf,
   if (vlan != my_vlan)
     return 0;
   
-  my_framesize = avb_srp_calculate_max_framesize(source_info);
+  my_framesize = source_info->reservation.tspec_max_frame_size;
   framesize = ntoh_16(first_value->TSpecMaxFrameSize);  
 
   if (framesize != my_framesize)
@@ -770,33 +793,13 @@ static int encode_talker_message(char *buf,
       }
 
       hton_16(first_value->VlanID, attribute_info->vlan_id);
+      first_value->TSpec = attribute_info->tspec;
+      hton_16(first_value->TSpecMaxFrameSize, attribute_info->tspec_max_frame_size);
+      hton_16(first_value->TSpecMaxIntervalFrames,
+                 attribute_info->tspec_max_interval);
+      hton_32(first_value->AccumulatedLatency, 
+                 attribute_info->accumulated_latency);
 
-      char here = st->here;
-
-      // TODO: Could improve this by storing these values for the endpoint in the avb_srp_info_t 
-      // fields. We don't need to calculate everytime because the parameters cannot change without
-      // tearing down the stream
-      {
-        short tspec_max_frame_size;
-        short tspec_max_interval;
-        unsigned char tspec;
-        unsigned accumulated_latency;
-
-        tspec_max_frame_size = here ? avb_srp_calculate_max_framesize(source_info) : attribute_info->tspec_max_frame_size;
-        tspec_max_interval = here ? AVB_SRP_MAX_INTERVAL_FRAMES_DEFAULT : attribute_info->tspec_max_interval;
-        tspec = here ? (AVB_SRP_TSPEC_PRIORITY_DEFAULT << 5 |
-          AVB_SRP_TSPEC_RANK_DEFAULT << 4 |
-          AVB_SRP_TSPEC_RESERVED_VALUE) : attribute_info->tspec;
-        accumulated_latency = here ? AVB_SRP_ACCUMULATED_LATENCY_DEFAULT : attribute_info->accumulated_latency;
-
-        first_value->TSpec = tspec;
-        hton_16(first_value->TSpecMaxFrameSize, tspec_max_frame_size);
-        hton_16(first_value->TSpecMaxIntervalFrames,
-                   tspec_max_interval);
-        hton_32(first_value->AccumulatedLatency, 
-                   accumulated_latency);
-
-      }
 
     }
 

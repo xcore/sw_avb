@@ -9,6 +9,7 @@
 #include "avb_control_types.h"
 #include "avb_stream.h"
 #include "avb_api.h"
+#include "avb_srp_interface.h"
 
 #define AVB_SRP_ETHERTYPE (0x22ea) 
 
@@ -28,17 +29,6 @@ int avb_add_detected_stream(srp_talker_first_value *fv,
                              avb_srp_info_t **stream);
 
 
-/** Get the stream id of a failed reservation. 
- *
- *  This should be called after getting ``AVB_SRP_ROUTE_FAILED``
- *  from avb_srp_process_packet().
- *
- *  \param streamId the 64 bit stream id array to fill with the failed stream
- *
- **/
-void avb_srp_get_failed_stream(unsigned int streamId[2]);
-
-
 typedef struct srp_stream_state {
   union {
     mrp_attribute_state talker; 
@@ -47,12 +37,15 @@ typedef struct srp_stream_state {
 } srp_stream_state;
 
 
+void avb_srp_join_listener_attrs(unsigned int stream_id[2]);
 
 /* The following functions are called from avb_mrp.c */
-int avb_srp_process_attribute(int attribute_type,
-                            char *fv, 
-                            int num,
-                            avb_srp_info_t **stream);
+mrp_attribute_state *unsafe avb_srp_process_new_attribute_from_packet(int attribute_type,
+                                  char *fv, 
+                                  int num,
+                                  int port_num);
+
+void avb_srp_create_and_join_talker_advertise_attrs(avb_srp_info_t *unsafe reservation);
 
 int avb_srp_compare_talker_attributes(mrp_attribute_state *a,
                                       mrp_attribute_state *b);
@@ -98,9 +91,10 @@ void srp_domain_join(void);
 
 #ifdef __XC__
 [[combinable]]
-void avb_srp_task(client interface avb_interface avb,
-                     chanend c_mac_rx,
-                     chanend c_mac_tx);
+void avb_srp_task(client interface avb_interface i_avb,
+                  server interface srp_interface i_srp,
+                  chanend c_mac_rx,
+                  chanend c_mac_tx);
 #endif
 
 void srp_store_mac_tx_chanend(chanend c_mac_tx0);

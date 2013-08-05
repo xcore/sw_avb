@@ -4,6 +4,7 @@
 #include <xccompat.h>
 #include "xc2compat.h"
 #include "avb_api.h"
+#include "avb_srp_interface.h"
 
 
 #ifndef MAX_AVB_CONTROL_PACKET_SIZE
@@ -79,8 +80,8 @@ void avb_start(void);
 void avb_periodic(chanend c_mac_tx, unsigned int time_now);
 
 [[combinable]]
-void avb_manager(server interface avb_interface avb[num_avb_clients],
-                 unsigned num_avb_clients,
+void avb_manager(server interface avb_interface i_avb[num_avb_clients], unsigned num_avb_clients,
+                 client interface srp_interface i_srp,
                  chanend c_media_ctl[],
                  chanend ?c_listener_ctl[],
                  chanend ?c_talker_ctl[],
@@ -128,7 +129,7 @@ void avb_process_1722_control_packet(unsigned int buf0[], int nbytes, chanend c_
           
  **/
 #ifdef __XC__
-void avb_process_control_packet(client interface avb_interface avb,
+void avb_process_control_packet(client interface avb_interface i_avb,
                                unsigned int buf[], int len,
                                chanend c_tx,
                                unsigned int port_num);

@@ -19,6 +19,7 @@
 #include "nettypes.h"
 #include "avb_1722_router.h"
 #include "avb_api.h"
+#include "avb_srp_interface.h"
 
 #if AVB_ENABLE_1722_1
 #include "avb_1722_1.h"
@@ -68,14 +69,11 @@ static unsafe void register_talkers(chanend talker_ctl[], unsigned char mac_addr
       source->reservation.stream_id[1] = (mac_addr[4] << 24) | (mac_addr[5] << 16) | ((source->stream.local_id & 0xffff)<<0);
       source->presentation = AVB_DEFAULT_PRESENTATION_TIME_DELAY_NS;
       source->reservation.vlan_id = AVB_DEFAULT_VLAN;
-      source->stream.srp_talker_attr0 = mrp_get_attr();
-      source->stream.srp_talker_attr1 = mrp_get_attr();
-      source->stream.srp_talker_failed_attr = mrp_get_attr();
-      // source->stream.srp_listener_attr = mrp_get_attr();
-      mrp_attribute_init(source->stream.srp_talker_attr0, MSRP_TALKER_ADVERTISE, 0, 1, source);
-      mrp_attribute_init(source->stream.srp_talker_attr1, MSRP_TALKER_ADVERTISE, 1, 1, source);
-      // mrp_attribute_init(source->stream.srp_talker_failed_attr, MSRP_TALKER_FAILED, 0, 1, source);
-      // mrp_attribute_init(source->stream.srp_listener_attr, MSRP_LISTENER, 0, 1, source);
+      source->reservation.tspec = (AVB_SRP_TSPEC_PRIORITY_DEFAULT << 5 |
+          AVB_SRP_TSPEC_RANK_DEFAULT << 4 |
+          AVB_SRP_TSPEC_RESERVED_VALUE);
+      source->reservation.tspec_max_interval = AVB_SRP_MAX_INTERVAL_FRAMES_DEFAULT;
+      source->reservation.accumulated_latency = AVB_SRP_ACCUMULATED_LATENCY_DEFAULT;
       max_talker_stream_id++;
     }
   }
@@ -100,14 +98,6 @@ static unsafe void register_listeners(chanend listener_ctl[])
       sink->stream.local_id = j;
       sink->stream.flags = 0;
       sink->reservation.vlan_id = AVB_DEFAULT_VLAN;
-      // sink->stream.srp_talker_attr = mrp_get_attr();
-      // sink->stream.srp_talker_failed_attr = mrp_get_attr();
-      sink->stream.srp_listener_attr0 = mrp_get_attr();
-      sink->stream.srp_listener_attr1 = mrp_get_attr();
-      // mrp_attribute_init(sink->stream.srp_talker_attr, MSRP_TALKER_ADVERTISE, 0, 1, sink);
-      // mrp_attribute_init(sink->stream.srp_talker_failed_attr, MSRP_TALKER_FAILED, 0, 1, sink);
-      mrp_attribute_init(sink->stream.srp_listener_attr0, MSRP_LISTENER, 0, 1, sink);
-      mrp_attribute_init(sink->stream.srp_listener_attr1, MSRP_LISTENER, 1, 1, sink);
       max_listener_stream_id++;
     }
     listener_ctl[i] <: max_link_id;
@@ -216,7 +206,11 @@ static void avb_set_talker_bandwidth(chanend c_mac_tx)
 #endif
 }
 
-static void set_sink_state0(unsigned sink_num, enum avb_sink_state_t state, chanend c_mac_tx, chanend ?c_media_clock_ctl) {
+static void set_sink_state0(unsigned sink_num,
+                            enum avb_sink_state_t state,
+                            chanend c_mac_tx,
+                            chanend ?c_media_clock_ctl,
+                            client interface srp_interface i_srp) {
   unsafe {
     avb_sink_info_t *sink = &sinks[sink_num];
     chanend *unsafe c = sink->listener_ctl;
@@ -272,22 +266,20 @@ static void set_sink_state0(unsigned sink_num, enum avb_sink_state_t state, chan
       }
   #endif
 
-        avb_match_and_join_leave(sink->stream.srp_listener_attr0, 1);
-        avb_match_and_join_leave(sink->stream.srp_listener_attr1, 1);
+        i_srp.register_attach_request(sink->reservation.stream_id);
 
     }
     else if (sink->stream.state != AVB_SINK_STATE_DISABLED &&
             state == AVB_SINK_STATE_DISABLED) {
 
-    master {
-      *c <: AVB1722_DISABLE_LISTENER_STREAM;
-      *c <: (int)sink->stream.local_id;
-    }
+      master {
+        *c <: AVB1722_DISABLE_LISTENER_STREAM;
+        *c <: (int)sink->stream.local_id;
+      }
 
-    avb_match_and_join_leave(sink->stream.srp_listener_attr0, 0);
-    avb_match_and_join_leave(sink->stream.srp_listener_attr1, 0);
+      i_srp.deregister_attach_request(sink->reservation.stream_id);
 
-    avb_1722_remove_stream_mapping(c_mac_tx, sink->reservation.stream_id);
+      avb_1722_remove_stream_mapping(c_mac_tx, sink->reservation.stream_id);
 
   #ifdef AVB_INCLUDE_MMRP
       if (sink->addr[0] & 1) {
@@ -305,7 +297,22 @@ static void set_sink_state0(unsigned sink_num, enum avb_sink_state_t state, chan
   }
 }
 
-static void local_set_source_state(unsigned source_num, enum avb_source_state_t state, chanend c_mac_tx, chanend ?c_media_clock_ctl) {
+static unsigned avb_srp_calculate_max_framesize(avb_source_info_t *source_info)
+{
+#if defined(AVB_1722_FORMAT_61883_6) || defined(AVB_1722_FORMAT_SAF)
+  unsigned samples_per_packet = (source_info->stream.rate + (AVB1722_PACKET_RATE-1))/AVB1722_PACKET_RATE;
+  return AVB1722_PLUS_SIP_HEADER_SIZE + (source_info->stream.num_channels * samples_per_packet * 4);
+#endif
+#if defined(AVB_1722_FORMAT_61883_4)
+  return AVB1722_PLUS_SIP_HEADER_SIZE + (192 * MAX_TS_PACKETS_PER_1722);
+#endif
+}
+
+static void local_set_source_state(unsigned source_num,
+                                  enum avb_source_state_t state,
+                                  chanend c_mac_tx,
+                                  chanend ?c_media_clock_ctl,
+                                  client interface srp_interface i_srp) {
   unsafe {
     char stream_string[] = "Talker stream ";
     avb_source_info_t *source = &sources[source_num];
@@ -368,8 +375,9 @@ static void local_set_source_state(unsigned source_num, enum avb_source_state_t 
           avb_join_vlan(source->reservation.vlan_id);
         }
     #endif
-        avb_match_and_join_leave(source->stream.srp_talker_attr0, 1);
-        avb_match_and_join_leave(source->stream.srp_talker_attr1, 1);
+
+        source->reservation.tspec_max_frame_size = avb_srp_calculate_max_framesize(source);
+        i_srp.register_stream_request(source->reservation);
 
         if (!isnull(c_media_clock_ctl)) {
           media_clock_register(c_media_clock_ctl, clk_ctl, source->stream.sync);
@@ -427,11 +435,9 @@ static void local_set_source_state(unsigned source_num, enum avb_source_state_t 
       }
     #endif
 
-        // And remove the group
-        avb_match_and_join_leave(source->stream.srp_talker_attr0, 0);
-        avb_match_and_join_leave(source->stream.srp_talker_attr1, 0);
+      i_srp.deregister_stream_request(source->reservation.stream_id);
+        
     }
-    avb_set_talker_bandwidth(c_mac_tx);
     source->stream.state = state;
   }
 }
@@ -450,8 +456,8 @@ int avb_set_source_state(client interface avb_interface avb, unsigned source_num
 #define PERIODIC_POLL_TIME 5000
 
 [[combinable]]
-void avb_manager(server interface avb_interface avb[num_avb_clients],
-                 unsigned num_avb_clients,
+void avb_manager(server interface avb_interface avb[num_avb_clients], unsigned num_avb_clients,
+                 client interface srp_interface i_srp,
                  chanend c_media_ctl[],
                  chanend ?c_listener_ctl[],
                  chanend ?c_talker_ctl[],
@@ -574,7 +580,7 @@ void avb_manager(server interface avb_interface avb[num_avb_clients],
       case avb[int i].set_source_state(unsigned source_num, enum avb_source_state_t state) -> int return_val: {
         if (source_num < AVB_NUM_SOURCES) {
           unsafe {
-            local_set_source_state(source_num, state, c_mac_tx, c_media_clock_ctl);
+            local_set_source_state(source_num, state, c_mac_tx, c_media_clock_ctl, i_srp);
           }
           return_val = 1;
         }
@@ -753,7 +759,7 @@ void avb_manager(server interface avb_interface avb[num_avb_clients],
       case avb[int i].set_sink_state(unsigned sink_num, enum avb_sink_state_t state) -> int return_val: {
         if (sink_num < AVB_NUM_SINKS) {
           unsafe {
-            set_sink_state0(sink_num, state, c_mac_tx, c_media_clock_ctl);
+            set_sink_state0(sink_num, state, c_mac_tx, c_media_clock_ctl, i_srp);
           }
           return_val = 1;
         }
