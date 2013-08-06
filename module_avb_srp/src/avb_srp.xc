@@ -76,7 +76,11 @@ void avb_srp_task(client interface avb_interface i_avb,
       }
       case i_srp.deregister_stream_request(unsigned stream_id[2]):
       {
+         unsigned int local_stream_id[2];
+        local_stream_id[0] = stream_id[0];
+        local_stream_id[1] = stream_id[1];
         printstrln("DEREGISTER STREAM REQUEST");
+        avb_srp_leave_talker_attrs(local_stream_id);
         break;
       }
       case i_srp.register_attach_request(unsigned stream_id[2]):
@@ -90,6 +94,10 @@ void avb_srp_task(client interface avb_interface i_avb,
       }
       case i_srp.deregister_attach_request(unsigned stream_id[2]):
       {
+        unsigned int local_stream_id[2];
+        local_stream_id[0] = stream_id[0];
+        local_stream_id[1] = stream_id[1];
+        avb_srp_leave_listener_attrs(local_stream_id);
         printstrln("DEREGISTER ATTACH REQUEST");
         break;
       }

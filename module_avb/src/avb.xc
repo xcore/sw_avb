@@ -429,6 +429,8 @@ static void local_set_source_state(unsigned source_num,
           *c <: (int)source->stream.local_id;
         }
 
+        printstr(stream_string); simple_printf("#%d off\n", source_num);
+
     #ifndef AVB_EXCLUDE_MVRP
       if (source->reservation.vlan_id) {
         avb_leave_vlan(source->reservation.vlan_id);

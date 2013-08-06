@@ -37,6 +37,10 @@ typedef struct srp_stream_state {
 } srp_stream_state;
 
 
+
+void avb_srp_create_and_join_talker_advertise_attrs(avb_srp_info_t *unsafe reservation);
+void avb_srp_leave_talker_attrs(unsigned int stream_id[2]);
+void avb_srp_leave_listener_attrs(unsigned int stream_id[2]);
 void avb_srp_join_listener_attrs(unsigned int stream_id[2]);
 
 /* The following functions are called from avb_mrp.c */
@@ -44,8 +48,6 @@ mrp_attribute_state *unsafe avb_srp_process_new_attribute_from_packet(int attrib
                                   char *fv, 
                                   int num,
                                   int port_num);
-
-void avb_srp_create_and_join_talker_advertise_attrs(avb_srp_info_t *unsafe reservation);
 
 int avb_srp_compare_talker_attributes(mrp_attribute_state *a,
                                       mrp_attribute_state *b);

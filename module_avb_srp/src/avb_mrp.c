@@ -1234,12 +1234,14 @@ int mrp_is_observer(mrp_attribute_state *st)
     }
 }
 
-mrp_attribute_state *mrp_match_talker_non_prop_attribute(unsigned stream_id[2]) {
+mrp_attribute_state *mrp_match_talker_non_prop_attribute(unsigned stream_id[2], int port_num) {
   for (int j=0;j<MRP_MAX_ATTRS;j++) {
-    if (attrs[j].applicant_state == MRP_UNUSED) {
+    if (attrs[j].applicant_state == MRP_UNUSED || attrs[j].applicant_state == MRP_DISABLED) {
       continue;
     }
-    if (MSRP_TALKER_ADVERTISE == attrs[j].attribute_type && !attrs[j].propagated)
+    if (MSRP_TALKER_ADVERTISE == attrs[j].attribute_type &&
+        !attrs[j].propagated && 
+        (port_num == -1 || attrs[j].port_num == port_num))
     {
       avb_srp_info_t *reservation = (avb_srp_info_t *) attrs[j].attribute_info;
 
@@ -1259,7 +1261,7 @@ mrp_attribute_state *mrp_match_talker_non_prop_attribute(unsigned stream_id[2]) 
 mrp_attribute_state *mrp_match_attr_by_stream_and_type(mrp_attribute_state *attr, int opposite_port)
 {
   for (int j=0;j<MRP_MAX_ATTRS;j++) {
-    if (attrs[j].applicant_state == MRP_UNUSED) {
+    if (attrs[j].applicant_state == MRP_UNUSED || attrs[j].applicant_state == MRP_DISABLED) {
       continue;
     }
     if ((opposite_port && (attr->port_num != attrs[j].port_num)) ||
@@ -1288,7 +1290,7 @@ int mrp_match_multiple_attrs_by_stream_and_type(mrp_attribute_state *attr, int o
   int matches = 0;
 
   for (int j=0;j<MRP_MAX_ATTRS;j++) {
-    if (attrs[j].applicant_state == MRP_UNUSED) {
+    if (attrs[j].applicant_state == MRP_UNUSED || attrs[j].applicant_state == MRP_DISABLED) {
       continue;
     }
     if (attr->attribute_type == attrs[j].attribute_type)
@@ -1318,10 +1320,10 @@ int mrp_match_multiple_attrs_by_stream_and_type(mrp_attribute_state *attr, int o
 
 
 // FIXME: Rename me
-mrp_attribute_state *mrp_match_attribute_by_stream_id(mrp_attribute_state *attr, int opposite_port)
+mrp_attribute_state *mrp_match_attribute_by_stream_id(mrp_attribute_state *attr, int opposite_port, int match_disabled)
 {
   for (int j=0;j<MRP_MAX_ATTRS;j++) {
-    if (attrs[j].applicant_state == MRP_UNUSED) {
+    if (attrs[j].applicant_state == MRP_UNUSED || (!match_disabled && attrs[j].applicant_state == MRP_DISABLED)) {
       continue;
     }
     if ((opposite_port && (attr->port_num != attrs[j].port_num)) ||
