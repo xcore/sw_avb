@@ -41,7 +41,7 @@ void avb_1722_1_task(client interface avb_interface avb,
   unsigned periodic_timeout;
   timer tmr;
   unsigned int nbytes;
-  unsigned int buf[(MAX_AVB_CONTROL_PACKET_SIZE+1)>>2];
+  unsigned int buf[AVB_1722_1_PACKET_SIZE_WORDS];
   unsigned int port_num;
   unsigned char mac_addr[6];
 
