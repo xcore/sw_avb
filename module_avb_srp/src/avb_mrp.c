@@ -798,7 +798,7 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
 
 void mrp_debug_dump_attrs(void)
 {
-  
+#if 1  
   printstrln("port_num | type                   | disabled | here | propagated | stream_id");
   printstrln("---------+------------------------+----------+------+------------+----------");
   for (int i=0;i<MRP_MAX_ATTRS;i++) {
@@ -817,12 +817,12 @@ void mrp_debug_dump_attrs(void)
       attr_string[23] = '\0';
       strncpy(attr_string, debug_attribute_type[attrs[i].attribute_type],strlen(debug_attribute_type[attrs[i].attribute_type]));
 
-      simple_printf("%d        | %s| %d        | %d    | %d          | %x:%x\n",
+      printf("%d        | %s| %d        | %d    | %d          | %x:%x\n",
         attrs[i].port_num, attr_string, attrs[i].applicant_state == MRP_DISABLED, attrs[i].here, attrs[i].propagated, stream_id[0], stream_id[1]);
 
     }
   }
-  
+#endif  
 }
 
 void mrp_attribute_init(mrp_attribute_state *st,

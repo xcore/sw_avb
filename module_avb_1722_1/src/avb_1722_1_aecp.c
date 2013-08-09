@@ -488,6 +488,7 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
         }
         else 
         {
+          #if 0
           if (entity_acquired_status == AEM_ENTITY_NOT_ACQUIRED)
           {
             // Handled below
@@ -560,18 +561,26 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
             status = AECP_AEM_STATUS_SUCCESS;
           }
         }
+        #endif
         
-        // TODO: Release
-        printstr("1722.1 Controller ");
+          // TODO: Release
+          printstr("1722.1 Controller ");
 
-        for (int i=0; i < 8; i++)
-        {
-          cmd->owner_guid[i] = acquired_controller_guid.c[i];
-          printhex(acquired_controller_guid.c[i]);
+          for(int i=0; i < 8; i++)
+          {
+            acquired_controller_guid.c[i] = pkt->controller_guid[i];
+            acquired_controller_mac[i] = src_addr[i];
+          }
+
+          for (int i=0; i < 8; i++)
+          {
+            cmd->owner_guid[i] = acquired_controller_guid.c[i];
+            printhex(acquired_controller_guid.c[i]);
+          }
+          printstrln(" acquired entity");
+
+          cd_len = sizeof(avb_1722_1_aem_acquire_entity_command_t);
         }
-        printstrln(" acquired entity");
-
-        cd_len = sizeof(avb_1722_1_aem_acquire_entity_command_t);
 
         break;
       }
@@ -625,7 +634,7 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
 
         num_tx_bytes = create_aem_read_descriptor_response(desc_read_type, desc_read_id, src_addr, pkt);
 
-        mac_tx(c_tx, avb_1722_1_buf, num_tx_bytes, 0);
+        mac_tx(c_tx, avb_1722_1_buf, num_tx_bytes, -1);
 
         break;
       }
@@ -693,7 +702,7 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
     if (cd_len > 0)
     {
       avb_1722_1_create_aecp_aem_response(src_addr, status, cd_len, pkt);
-      mac_tx(c_tx, avb_1722_1_buf, 64, 0);
+      mac_tx(c_tx, avb_1722_1_buf, 64, -1);
     }
   }
   else // AECP_CMD_AEM_RESPONSE
