@@ -318,7 +318,7 @@ static void update_media_clocks(chanend ?ptp_svr, int clk_time)
   }
 }
 
-#pragma unsafe arrays
+// #pragma unsafe arrays
 void media_clock_server(chanend media_clock_ctl,
                         chanend ?ptp_svr,
                         chanend ?buf_ctl[],

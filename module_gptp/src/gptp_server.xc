@@ -30,7 +30,7 @@ extern unsigned ptp_reference_local_ts;
 extern ptp_timestamp ptp_reference_ptp_ts;
 extern signed int g_ptp_adjust;
 extern signed int g_inv_ptp_adjust;
-extern unsigned ptp_path_delay;
+extern unsigned ptp_path_delay[PTP_NUM_PORTS];
 
 #define do_ptp_server(c_rx, c_tx, client, num_clients, ptp_timer, ptp_timeout)      \
   case ptp_recv_and_process_packet(c_rx, c_tx): \
@@ -152,7 +152,8 @@ void ptp_process_client_request(chanend c, timer ptp_timer)
     case PTP_GET_PDELAY: {
       master
       {
-        c <: ptp_path_delay;
+        // TODO: FIXME
+        c <: ptp_path_delay[0];
       }
       break;
     }

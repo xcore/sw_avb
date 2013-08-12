@@ -37,8 +37,8 @@ signed g_inv_ptp_adjust = 0;
    between the foreign master port and our slave port in nanoseconds (ptp time)
 */
 #define PTP_PATH_DELAY_WEIGHT 32
-static int ptp_path_delay_valid = 0;
-unsigned ptp_path_delay = 0;
+static int ptp_path_delay_valid[PTP_NUM_PORTS];
+unsigned ptp_path_delay[PTP_NUM_PORTS];
 
 ptp_port_info_t ptp_port_info[PTP_NUM_PORTS];
 static unsigned short steps_removed_from_gm;
@@ -59,7 +59,7 @@ static unsigned last_received_announce_time_valid[PTP_NUM_PORTS];
 static unsigned last_received_announce_time[PTP_NUM_PORTS];
 static unsigned last_announce_time[PTP_NUM_PORTS];
 static unsigned last_sync_time[PTP_NUM_PORTS];
-static unsigned last_pdelay_req_time;
+static unsigned last_pdelay_req_time[PTP_NUM_PORTS];
 
 static ptp_timestamp prev_adjust_master_ts;
 static unsigned prev_adjust_local_ts;
@@ -74,8 +74,8 @@ static int sync_count = 0;
 
 static AnnounceMessage best_announce_msg;
 
-static unsigned long long pdelay_epoch_timer;
-static unsigned prev_pdelay_local_ts;
+static unsigned long long pdelay_epoch_timer[PTP_NUM_PORTS];
+static unsigned prev_pdelay_local_ts[PTP_NUM_PORTS];
 
 static int tile_timer_offset;
 
@@ -241,13 +241,14 @@ static void set_new_role(enum ptp_port_role_t new_role,
                          int port_num, 
                          unsigned t) {
 
+  // Reset synotization variables
+  ptp_path_delay_valid[port_num] = 0;
+  last_pdelay_req_time[port_num] = t;
 
   if (new_role == PTP_SLAVE) {
 
     simple_printf("PTP Port %d Role: Slave\n", port_num);
 
-    // Reset synotization variables
-    ptp_path_delay_valid = 0;
     g_ptp_adjust = 0;
     g_inv_ptp_adjust = 0;
     prev_adjust_valid = 0;
@@ -255,7 +256,6 @@ static void set_new_role(enum ptp_port_role_t new_role,
     // to detect
     expect_gm_discontinuity = 1;
     ptp_candidate_gmoffset_valid = 0;
-    last_pdelay_req_time = t;
     sync_lock = 0;
     sync_count = 0;
   }
@@ -387,11 +387,12 @@ static void update_adjust(ptp_timestamp *master_ts,
 }
 
 static void update_reference_timestamps(ptp_timestamp *master_egress_ts,
-                                        unsigned local_ingress_ts)
+                                        unsigned local_ingress_ts,
+                                        unsigned int port_num)
 {
   ptp_timestamp master_ingress_ts;
 
-  ptp_timestamp_offset64(&master_ingress_ts, master_egress_ts, ptp_path_delay);
+  ptp_timestamp_offset64(&master_ingress_ts, master_egress_ts, ptp_path_delay[port_num]);
 
   /* Update the reference timestamps */
   ptp_reference_local_ts = local_ingress_ts;
@@ -421,7 +422,8 @@ static void periodic_update_reference_timestamps(unsigned int local_ts)
 static void update_path_delay(ptp_timestamp *master_ingress_ts,
                               ptp_timestamp *master_egress_ts,
                               unsigned local_egress_ts,
-                              unsigned local_ingress_ts)
+                              unsigned local_ingress_ts,
+                              unsigned port_num)
 {
   long long master_diff;
   long long local_diff;
@@ -456,18 +458,19 @@ static void update_path_delay(ptp_timestamp *master_ingress_ts,
   if (delay < 0)
     delay = 0;
 
-  if (ptp_path_delay_valid) {
+  if (ptp_path_delay_valid[port_num]) {
 
     // TODO - Sanity check
 
     /* Re-average the adjust with a given weighting.
        This method loses a few bits of precision */
-    ptp_path_delay = ((ptp_path_delay * (PTP_PATH_DELAY_WEIGHT - 1)) + (int) delay) / PTP_PATH_DELAY_WEIGHT;
-    //ptp_path_delay = delay;
+    ptp_path_delay[port_num] = ((ptp_path_delay[port_num] * (PTP_PATH_DELAY_WEIGHT - 1)) + (int) delay) / PTP_PATH_DELAY_WEIGHT;
+    // printintln(ptp_path_delay[port_num]);
+    //ptp_path_delay[port_num] = delay;
     }
   else {
-    ptp_path_delay = delay;
-    ptp_path_delay_valid = 1;
+    ptp_path_delay[port_num] = delay;
+    ptp_path_delay_valid[port_num] = 1;
   }
 }
 
@@ -957,9 +960,9 @@ static void send_ptp_sync_msg(chanend c_tx, int port_num)
   return;
 }
 
-static u16_t pdelay_req_seq_id = 0;
-static unsigned pdelay_request_sent = 0;
-static unsigned pdelay_request_sent_ts;
+static u16_t pdelay_req_seq_id[PTP_NUM_PORTS];
+static unsigned pdelay_request_sent[PTP_NUM_PORTS];
+static unsigned pdelay_request_sent_ts[PTP_NUM_PORTS];
 
 static void send_ptp_pdelay_req_msg(chanend c_tx, int port_num)
 {
@@ -990,8 +993,8 @@ static void send_ptp_pdelay_req_msg(chanend c_tx, int port_num)
   for(int i=0;i<8;i++) pComMesgHdr->correctionField.data[i] = 0;
 
   // increment the sequence id.
-  pdelay_req_seq_id += 1;
-  pComMesgHdr->sequenceId = hton16(pdelay_req_seq_id);
+  pdelay_req_seq_id[port_num] += 1;
+  pComMesgHdr->sequenceId = hton16(pdelay_req_seq_id[port_num]);
 
   // control field for backward compatiability
   pComMesgHdr->controlField = PTP_CTL_FIELD_OTHERS;
@@ -1009,10 +1012,10 @@ static void send_ptp_pdelay_req_msg(chanend c_tx, int port_num)
 
   ptp_tx_timed(c_tx, buf0,
                PDELAY_REQ_PACKET_SIZE,
-               &pdelay_request_sent_ts,
+               &pdelay_request_sent_ts[port_num],
                port_num);
 
-  pdelay_request_sent = 1;
+  pdelay_request_sent[port_num] = 1;
 
 #if DEBUG_PRINT
   simple_printf("TX Pdelay req, Port %d\n", port_num);
@@ -1021,21 +1024,21 @@ static void send_ptp_pdelay_req_msg(chanend c_tx, int port_num)
   return;
 }
 
-void local_to_epoch_ts(unsigned local_ts, ptp_timestamp *epoch_ts)
+void local_to_epoch_ts(unsigned local_ts, ptp_timestamp *epoch_ts, unsigned int port_num)
 {
   unsigned long long sec;
   unsigned long long nanosec;
 
-  if (local_ts <= prev_pdelay_local_ts) // We overflowed 32 bits
+  if (local_ts <= prev_pdelay_local_ts[port_num]) // We overflowed 32 bits
   {
-    pdelay_epoch_timer += ((UINT_MAX - prev_pdelay_local_ts) + local_ts);
+    pdelay_epoch_timer[port_num] += ((UINT_MAX - prev_pdelay_local_ts[port_num]) + local_ts);
   }
   else
   {
-    pdelay_epoch_timer += (local_ts - prev_pdelay_local_ts);
+    pdelay_epoch_timer[port_num] += (local_ts - prev_pdelay_local_ts[port_num]);
   }
 
-  nanosec = pdelay_epoch_timer * 10;
+  nanosec = pdelay_epoch_timer[port_num] * 10;
 
   sec = nanosec / NANOSECONDS_PER_SECOND;
   nanosec = nanosec % NANOSECONDS_PER_SECOND;
@@ -1046,7 +1049,7 @@ void local_to_epoch_ts(unsigned local_ts, ptp_timestamp *epoch_ts)
   
   epoch_ts->nanoseconds = nanosec;
 
-  prev_pdelay_local_ts = local_ts;
+  prev_pdelay_local_ts[port_num] = local_ts;
 
 }
 
@@ -1099,7 +1102,7 @@ static void send_ptp_pdelay_resp_msg(chanend c_tx,
   pTxMesgHdr->transportSpecific_messageType = 
     PTP_TRANSPORT_SPECIFIC_HDR | PTP_PDELAY_RESP_MESG;
 
-  local_to_epoch_ts(req_ingress_ts, &epoch_req_ingress_ts);
+  local_to_epoch_ts(req_ingress_ts, &epoch_req_ingress_ts, port_num);
 
   timestamp_to_network(&pTxRespHdr->requestReceiptTimestamp,
                        &epoch_req_ingress_ts);
@@ -1111,7 +1114,7 @@ static void send_ptp_pdelay_resp_msg(chanend c_tx,
 
   /* Now send the follow up */
 
-  local_to_epoch_ts(local_resp_ts, &epoch_resp_ts);
+  local_to_epoch_ts(local_resp_ts, &epoch_resp_ts, port_num);
 
   pTxMesgHdr->transportSpecific_messageType = 
     PTP_TRANSPORT_SPECIFIC_HDR | PTP_PDELAY_RESP_FOLLOW_UP_MESG;
@@ -1128,10 +1131,10 @@ static void send_ptp_pdelay_resp_msg(chanend c_tx,
 }
 
 
-static unsigned received_pdelay = 0;
-static u16_t received_pdelay_id;
-static unsigned pdelay_resp_ingress_ts;
-static ptp_timestamp pdelay_request_receipt_ts;
+static unsigned received_pdelay[PTP_NUM_PORTS];
+static u16_t received_pdelay_id[PTP_NUM_PORTS];
+static unsigned pdelay_resp_ingress_ts[PTP_NUM_PORTS];
+static ptp_timestamp pdelay_request_receipt_ts[PTP_NUM_PORTS];
 
 
 void ptp_recv(chanend c_tx,
@@ -1199,7 +1202,7 @@ void ptp_recv(chanend c_tx,
                                correction>>16);
                 
         update_adjust(&master_egress_ts,received_sync_ts);
-        update_reference_timestamps(&master_egress_ts, received_sync_ts);
+        update_reference_timestamps(&master_egress_ts, received_sync_ts, src_port);
 #if DEBUG_PRINT
         simple_printf("RX Follow Up, Port %d\n", src_port);
 #endif
@@ -1217,43 +1220,45 @@ void ptp_recv(chanend c_tx,
       send_ptp_pdelay_resp_msg(c_tx, (char *) msg, local_ingress_ts, src_port);
       break;
     case PTP_PDELAY_RESP_MESG:
-
-      if (port_id_equal(&master_port_id, &msg->sourcePortIdentity)) {
-        if (pdelay_request_sent && 
-            pdelay_req_seq_id == ntoh16(msg->sequenceId)) {
+      // if (port_id_equal(&master_port_id, &msg->sourcePortIdentity)) { 
+      {
+        if (pdelay_request_sent[src_port] && 
+            pdelay_req_seq_id[src_port] == ntoh16(msg->sequenceId)) {
           PdelayRespMessage *resp_msg = (PdelayRespMessage *) (msg + 1);
-          received_pdelay = 1;
-          received_pdelay_id = ntoh16(msg->sequenceId);        
-          pdelay_resp_ingress_ts = local_ingress_ts;        
-          network_to_ptp_timestamp(&pdelay_request_receipt_ts,
+          received_pdelay[src_port] = 1;
+          received_pdelay_id[src_port] = ntoh16(msg->sequenceId);        
+          pdelay_resp_ingress_ts[src_port] = local_ingress_ts;        
+          network_to_ptp_timestamp(&pdelay_request_receipt_ts[src_port],
                                    &resp_msg->requestReceiptTimestamp);
 #if DEBUG_PRINT
           simple_printf("RX Pdelay resp, Port %d\n", src_port);
 #endif
         }
-        pdelay_request_sent = 0;
+        pdelay_request_sent[src_port] = 0;
       }
       break;
     case PTP_PDELAY_RESP_FOLLOW_UP_MESG:  
-      if (port_id_equal(&master_port_id, &msg->sourcePortIdentity)) {
-        if (received_pdelay && received_pdelay_id == ntoh16(msg->sequenceId)) {
-          ptp_timestamp pdelay_resp_egress_ts;
+      // if (port_id_equal(&master_port_id, &msg->sourcePortIdentity)) { 
+      {
+        if (received_pdelay[src_port] && received_pdelay_id[src_port] == ntoh16(msg->sequenceId)) {
+          ptp_timestamp pdelay_resp_egress_ts[src_port];
           PdelayRespFollowUpMessage *follow_up_msg = 
             (PdelayRespFollowUpMessage *) (msg + 1);
           
-          network_to_ptp_timestamp(&pdelay_resp_egress_ts,
+          network_to_ptp_timestamp(&pdelay_resp_egress_ts[src_port],
                                    &follow_up_msg->responseOriginTimestamp);
           
-          update_path_delay(&pdelay_request_receipt_ts,
-                            &pdelay_resp_egress_ts,
-                            pdelay_request_sent_ts,
-                            pdelay_resp_ingress_ts);
+          update_path_delay(&pdelay_request_receipt_ts[src_port],
+                            &pdelay_resp_egress_ts[src_port],
+                            pdelay_request_sent_ts[src_port],
+                            pdelay_resp_ingress_ts[src_port],
+                            src_port);
 #if DEBUG_PRINT
           simple_printf("RX Pdelay resp follow up, Port %d\n", src_port);
 #endif
           
         }
-        received_pdelay = 0;
+        received_pdelay[src_port] = 0;
       }
       break;
     }     
@@ -1299,10 +1304,10 @@ void ptp_init(chanend c_tx, chanend c_rx, enum ptp_server_type stype)
   {
     set_new_role(PTP_MASTER, i, t);
     last_received_announce_time_valid[i] = 0;
-
+    received_pdelay[i] = 0;
+    pdelay_epoch_timer[i] = t;
+    pdelay_request_sent[i] = 0;
   }
-
-  pdelay_epoch_timer = t;
 }
 
 void ptp_periodic(chanend c_tx, unsigned t)
@@ -1340,10 +1345,9 @@ void ptp_periodic(chanend c_tx, unsigned t)
       last_sync_time[i] = t;
     }
 
-    if ((role == PTP_SLAVE || role == PTP_UNCERTAIN) &&
-        (timeafter(t, last_pdelay_req_time + PDELAY_REQ_PERIOD))) {
+    if (timeafter(t, last_pdelay_req_time[i] + PDELAY_REQ_PERIOD)) {
       send_ptp_pdelay_req_msg(c_tx, i);
-      last_pdelay_req_time = t;
+      last_pdelay_req_time[i] = t;
     }
   }
 
