@@ -162,8 +162,10 @@ static void avb_srp_map_join(mrp_attribute_state *attr, int new, int listener)
   mrp_attribute_state *matched_talker_listener = mrp_match_attribute_by_stream_id(attr, 1, 0);
   mrp_attribute_state *matched_stream_id_opposite_port = mrp_match_attr_by_stream_and_type(attr, 1);
 
+#if 0
   simple_printf("matched_talker_listener: %d(here:%d, prop:%d, new:%d), matched_stream_id_opposite_port: %d\n", matched_talker_listener,
    matched_talker_listener ? matched_talker_listener->propagated : 0, matched_talker_listener ? matched_talker_listener->here : 0, new, matched_stream_id_opposite_port);
+#endif
   // Attribute propagation:
   if (!matched_stream_id_opposite_port && !listener && new)
   {
