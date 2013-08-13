@@ -32,7 +32,7 @@
 // (nTalkers * 3) + (nListeners * 3) + (nDomains=1) + AVB_MAX_NUM_VLAN + AVB_MAX_MMRP_GROUPS
 #define MRP_MAX_ATTRS ((3*(AVB_NUM_SOURCES)) + (3*(AVB_NUM_SINKS)) + 1 + (AVB_MAX_NUM_VLAN))
 #else
-#define MRP_MAX_ATTRS 20
+#define MRP_MAX_ATTRS 30
 #endif
 #endif
 
