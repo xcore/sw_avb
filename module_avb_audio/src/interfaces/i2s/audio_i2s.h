@@ -9,6 +9,7 @@
 #include "avb_conf.h"
 #include "media_fifo.h"
 #include <xclib.h>
+#include <xscope.h>
 #ifdef __XC__
 
 
@@ -23,6 +24,8 @@ typedef struct i2s_ports_t {
 // By enabling this, all channels are filled with an increasing counter
 // value instead of the samples themselves.  Useful to check the channel
 // synchronization using a network monitor
+
+#define AUDIO_IO_LOOPBACK 1
 
 #define SAMPLE_COUNTER_TEST 0
 
@@ -312,6 +315,9 @@ inline void i2s_master_upto_4(const clock mclk,
   for (int i=0;i<num_out>>1;i++) 
     p_dout[i] <: 0;
 
+  unsigned int sample_out = 0;
+  unsigned int sample_out_not_reversed = 0;
+
   // the unroll directives in the following loops only make sense if this
   // function is inlined into a more specific version
   while (1) {
@@ -343,14 +349,22 @@ inline void i2s_master_upto_4(const clock mclk,
 
 #pragma xta endpoint "i2s_master_bclk_output"
         p_bclk <: bclk_val;
+        
+        if (k < num_out>>1) {
+          sample_out_not_reversed = media_output_fifo_pull_sample(output_fifos[j+k*2],
+                                                     timestamp);
+          sample_out = bitrev(sample_out_not_reversed << 8);
+#pragma xta endpoint "i2s_master_sample_output"
+          p_dout[k] <: sample_out;
+        }
 
         if (k < num_in>>1) {
 #if SAMPLE_COUNTER_TEST
-        	if (active_fifos & (1 << (j+k*2))) {
+          if (active_fifos & (1 << (j+k*2))) {
             media_input_fifo_push_sample(input_fifos[j+k*2], sample_counter, timestamp);
-        	} else {
-        	  media_input_fifo_flush(input_fifos[j+k*2]);
-        	}
+          } else {
+            media_input_fifo_flush(input_fifos[j+k*2]);
+          }
 #else
           unsigned int sample_in;
 #pragma xta endpoint "i2s_master_sample_input"
@@ -362,6 +376,9 @@ inline void i2s_master_upto_4(const clock mclk,
             sample_in = i2s_sine[sine_count[k]>>8];
           }
 #endif
+#if AUDIO_IO_LOOPBACK
+          sample_in = sample_out_not_reversed;
+#endif
           if (active_fifos & (1 << (j+k*2))) {
             media_input_fifo_push_sample(input_fifos[j+k*2], sample_in, timestamp);
           } else {
@@ -369,15 +386,7 @@ inline void i2s_master_upto_4(const clock mclk,
           }
 #endif
         }
-        
-        if (k < num_out>>1) {
-          unsigned int sample_out;
-          sample_out = media_output_fifo_pull_sample(output_fifos[j+k*2],
-                                                     timestamp);
-          sample_out = bitrev(sample_out << 8);
-#pragma xta endpoint "i2s_master_sample_output"
-          p_dout[k] <: sample_out;
-        }
+
       } // end: for (int k=0;k<mclk_to_bclk_ratio;k++)
     } // end: for (int j=0;j<2;j++)
 
