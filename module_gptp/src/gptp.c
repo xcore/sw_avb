@@ -704,8 +704,6 @@ static void send_ptp_announce_msg(chanend c_tx)
   unsigned char *buf = (unsigned char *) &buf0[0];
   ComMessageHdr *pComMesgHdr = (ComMessageHdr *) &buf[sizeof(ethernet_hdr_t)];
   AnnounceMessage *pAnnounceMesg = (AnnounceMessage *) &buf[sizeof(ethernet_hdr_t) + sizeof(ComMessageHdr)];
-  unsigned cur_local_time;
-  ptp_timestamp cur_time_ptp;
 
   set_ptp_ethernet_hdr(buf);
 
@@ -741,13 +739,6 @@ static void send_ptp_announce_msg(chanend c_tx)
 
 
    create_my_announce_msg(pAnnounceMesg);
-   
-   // time stamp originTS
-   cur_local_time = get_local_time() + MESSAGE_PROCESS_TIME;
-
-   local_to_ptp_ts(&cur_time_ptp, cur_local_time);
-
-   timestamp_to_network(&pAnnounceMesg->originTimestamp, &cur_time_ptp);
 
    // send the message.
    ptp_tx(c_tx, buf0, ANNOUNCE_PACKET_SIZE);
@@ -763,12 +754,8 @@ static void send_ptp_sync_msg(chanend c_tx)
   unsigned int buf0[(FOLLOWUP_PACKET_SIZE+3)/4]; 
   unsigned char *buf = (unsigned char *) &buf0[0];
   ComMessageHdr *pComMesgHdr = (ComMessageHdr *) &buf[sizeof(ethernet_hdr_t)];;
-  SyncMessage *pSyncMesg = (SyncMessage *) &buf[sizeof(ethernet_hdr_t) +
-                                                sizeof(ComMessageHdr)];
   FollowUpMessage *pFollowUpMesg = (FollowUpMessage *) &buf[sizeof(ethernet_hdr_t) + sizeof(ComMessageHdr)];
 
-  unsigned cur_local_time;
-  ptp_timestamp cur_time_ptp;
   unsigned local_egress_ts;
   ptp_timestamp ptp_egress_ts;
 
@@ -799,13 +786,6 @@ static void send_ptp_sync_msg(chanend c_tx)
   pComMesgHdr->controlField = PTP_CTL_FIELD_SYNC;
   
   pComMesgHdr->logMessageInterval = PTP_LOG_SYNC_INTERVAL;
-  
-  // extract the current time.
-  cur_local_time = get_local_time() + MESSAGE_PROCESS_TIME;
-
-  local_to_ptp_ts(&cur_time_ptp, cur_local_time);
-
-  timestamp_to_network(&pSyncMesg->originTimestamp, &cur_time_ptp);
   
   // transmit the packet and record the egress time.
   ptp_tx_timed(c_tx, buf0, 

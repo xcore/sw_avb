@@ -50,9 +50,9 @@ typedef struct
 // PTP Announce message
 typedef struct
 {
-  n80_t originTimestamp;
+  n80_t reserved0;
   n16_t currentUtcOffset;
-  n8_t  Resv1;
+  n8_t  reserved1;
   n8_t  grandmasterPriority1;
   n8_t clockClass;
   n8_t clockAccuracy;
