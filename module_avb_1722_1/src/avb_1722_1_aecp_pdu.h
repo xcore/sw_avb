@@ -6,11 +6,12 @@
 #include "avb_1722_1_aecp_aem.h"
 
 #define AEM_MSG_GET_U_FLAG(pkt)         ((pkt)->uflag_command_type >> 7)
+#define AEM_MSG_SET_U_FLAG(pkt, uflag)  ((pkt)->uflag_command_type = ((pkt)->uflag_command_type & 0x7f) | (((uflag) << 7) & 0x80))
 #define AEM_MSG_GET_COMMAND_TYPE(pkt)   ((((pkt)->uflag_command_type & 0x7f) << 8)| \
                                         ((pkt)->command_type))
 
-#define AEM_MSG_SET_COMMAND_TYPE(pkt, type) do{ (pkt)->uflag_command_type[0] |= (type & 0x80) >> 8; \
-                                                (pkt->command_type = (type & 0xFF); } while (0)
+#define AEM_MSG_SET_COMMAND_TYPE(pkt, type) do{ (pkt)->uflag_command_type = ((pkt)->uflag_command_type & 0x80) | (((type) >> 8) & 0x7f); \
+                                                (pkt)->command_type = ((type) & 0xFF); } while (0)
 
 
 #define AVB_1722_1_AECP_CD_LENGTH   40
@@ -77,6 +78,7 @@ typedef struct {
 } avb_1722_1_aecp_packet_t;
 
 #define AVB_1722_1_AECP_PAYLOAD_OFFSET (sizeof(avb_1722_1_packet_header_t) + 18)
+#define AVB_1722_1_AECP_COMMAND_DATA_OFFSET (12)
 
 typedef enum {
     AECP_CMD_AEM_COMMAND = 0,
