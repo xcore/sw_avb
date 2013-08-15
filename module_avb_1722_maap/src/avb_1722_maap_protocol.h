@@ -19,6 +19,8 @@
 #define MAAP_ANNOUNCE_INTERVAL_MULTIPLIER 10
 #define MAAP_ANNOUNCE_INTERVAL_VARIATION_MS 2000
 
+#define MAAP_DATA_LENGTH 16
+
 typedef struct maap_packet_t {
   unsigned char cd_subtype;
   unsigned char sv_avb_version_msg_type;

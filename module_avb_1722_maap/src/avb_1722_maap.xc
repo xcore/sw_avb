@@ -58,7 +58,7 @@ static int create_maap_packet(int message_type,
   SET_MAAP_SUBTYPE(pkt, DEFAULT_MAAP_SUBTYPE);
   SET_MAAP_AVB_VERSION(pkt, DEFAULT_MAAP_AVB_VERSION);
   SET_MAAP_VERSION(pkt, DEFAULT_MAAP_VERSION);
-  SET_MAAP_DATALENGTH(pkt, sizeof(maap_packet_t));
+  SET_MAAP_DATALENGTH(pkt, MAAP_DATA_LENGTH);
   
   SET_MAAP_MSG_TYPE(pkt, message_type);
   for (int i=0; i < 6; i++)
@@ -188,7 +188,6 @@ void avb_1722_maap_periodic(chanend c_tx, client interface avb_interface avb)
                                   null, 0,
                                   null, 0);
       mac_tx(c_tx, maap_buf, nbytes, -1);
-      maap_addr.probe_count--;
 
       if (maap_addr.probe_count == 0)
       {
@@ -223,8 +222,10 @@ void avb_1722_maap_periodic(chanend c_tx, client interface avb_interface avb)
       else
       {
         // reset timeout
+        init_avb_timer(maap_timer, 1);
         start_avb_timer(maap_timer, timeout_val);
       }
+      maap_addr.probe_count--;
     }
     break;
   case MAAP_RESERVED:
