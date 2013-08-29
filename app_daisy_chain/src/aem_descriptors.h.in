@@ -114,9 +114,10 @@ unsigned char desc_audio_unit_0[] =
   U16(0),                                     /* base_control_block */
   U32(48000),                                 /* current_sample_rate */
   U16(144),                                   /* sample_rates_offset */
-  U16(1),                                     /* sample_rates_count */
+  U16(2),                                     /* sample_rates_count */
   /* sample_rates */
-  U32(48000)
+  U32(48000),
+  U32(96000)
 };
 
 /*******************************/
@@ -395,7 +396,7 @@ unsigned char desc_stream_input_0[] =
   AVB_NUM_MEDIA_OUTPUTS, // label_mbla_cnt
   0, // label_midi_cnt[0:3], label_smptecnt[4:]
   U16(132),                                   /* formats_offset */
-  U16(1),                                     /* number_of_formats */
+  U16(2),                                     /* number_of_formats */
   0, 0, 0, 0, 0, 0, 0, 0,                     /* backup_talker_guid[0] */
   U16(0),                                     /* backup_talker_unique[0] */
   0, 0, 0, 0, 0, 0, 0, 0,                     /* backup_talker_guid[1] */
@@ -407,7 +408,14 @@ unsigned char desc_stream_input_0[] =
   U16(0),                                     /* avb_interface_id */
   U32(0),                                     /* buffer_length */
   /* 130-> formats */
+  /* 48 khz */
   0x00, 0xa0, 0x02, AVB_NUM_MEDIA_OUTPUTS,
+  0x40, // b[0], nb[1], reserved[2:]
+  0, // label_iec_60958_cnt
+  AVB_NUM_MEDIA_OUTPUTS, // label_mbla_cnt
+  0, // label_midi_cnt[0:3], label_smptecnt[4:]
+  /* 96 khz */
+  0x00, 0xa0, 0x04, AVB_NUM_MEDIA_OUTPUTS,
   0x40, // b[0], nb[1], reserved[2:]
   0, // label_iec_60958_cnt
   AVB_NUM_MEDIA_OUTPUTS, // label_mbla_cnt
@@ -446,7 +454,14 @@ unsigned char desc_stream_output_0[] =
   U16(0),                                     /* avb_interface_id */
   U32(0),                                     /* buffer_length */
   /* 130-> formats */
+  /* 48 khz */
   0x00, 0xa0, 0x02, AVB_NUM_MEDIA_INPUTS,
+  0x40, // b[0], nb[1], reserved[2:]
+  0, // label_iec_60958_cnt
+  AVB_NUM_MEDIA_INPUTS, // label_mbla_cnt
+  0, // label_midi_cnt[0:3], label_smptecnt[4:]
+  /* 96 khz */
+  0x00, 0xa0, 0x04, AVB_NUM_MEDIA_INPUTS,
   0x40, // b[0], nb[1], reserved[2:]
   0, // label_iec_60958_cnt
   AVB_NUM_MEDIA_INPUTS, // label_mbla_cnt

@@ -88,6 +88,8 @@ void avb_manager(server interface avb_interface i_avb[num_avb_clients], unsigned
                  chanend c_mac_tx,
                  chanend ?c_media_clock_ctl,
                  chanend c_ptp);
+
+void avb_process_1722_control_packet(unsigned int buf0[], int nbytes, chanend c_tx, client interface avb_interface i_avb);
 #endif
 
 /** Receives an 802.1Qat SRP packet or an IEEE P1722 MAAP packet.
@@ -110,9 +112,6 @@ void avb_get_control_packet(chanend c_rx,
                             REFERENCE_PARAM(unsigned int, nbytes),
                             REFERENCE_PARAM(unsigned int, port_num));
 
-
-
-void avb_process_1722_control_packet(unsigned int buf0[], int nbytes, chanend c_tx);
 
 /** Process an AVB control packet.
 

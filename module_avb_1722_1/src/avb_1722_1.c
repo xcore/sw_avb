@@ -1,6 +1,7 @@
 #include <print.h>
 #include <string.h>
 #include <xccompat.h>
+#include "xc2compat.h"
 #include "avb_1722_common.h"
 #include "avb_1722_1.h"
 #include "avb_1722_1_common.h"
@@ -46,7 +47,7 @@ void avb_1722_1_init(unsigned char macaddr[6])
 
 }
 
-void avb_1722_1_process_packet(unsigned char *buf, unsigned char src_addr[6], int len, chanend c_tx)
+void avb_1722_1_process_packet(unsigned char *buf, unsigned char src_addr[6], int len, chanend c_tx, CLIENT_INTERFACE(avb_interface, i_avb_api))
 {
     struct avb_1722_1_packet_header_t *pkt = (struct avb_1722_1_packet_header_t *) &buf[0];
     unsigned subtype = GET_1722_1_SUBTYPE(pkt);
@@ -57,7 +58,7 @@ void avb_1722_1_process_packet(unsigned char *buf, unsigned char src_addr[6], in
         process_avb_1722_1_adp_packet((avb_1722_1_adp_packet_t*)pkt, c_tx);
         return;
     case DEFAULT_1722_1_AECP_SUBTYPE:
-        process_avb_1722_1_aecp_packet(src_addr, (avb_1722_1_aecp_packet_t*)pkt, len, c_tx);
+        process_avb_1722_1_aecp_packet(src_addr, (avb_1722_1_aecp_packet_t*)pkt, len, c_tx, i_avb_api);
         return;
     case DEFAULT_1722_1_ACMP_SUBTYPE:
         process_avb_1722_1_acmp_packet((avb_1722_1_acmp_packet_t*)pkt, c_tx);

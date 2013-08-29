@@ -817,7 +817,7 @@ void mrp_debug_dump_attrs(void)
       attr_string[23] = '\0';
       strncpy(attr_string, debug_attribute_type[attrs[i].attribute_type],strlen(debug_attribute_type[attrs[i].attribute_type]));
 
-      printf("%d        | %s| %d        | %d    | %d          | %x:%x\n",
+      simple_printf("%d        | %s| %d        | %d    | %d          | %x:%x\n",
         attrs[i].port_num, attr_string, attrs[i].applicant_state == MRP_DISABLED, attrs[i].here, attrs[i].propagated, stream_id[0], stream_id[1]);
 
     }

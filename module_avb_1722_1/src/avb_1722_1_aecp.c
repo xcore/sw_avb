@@ -8,6 +8,7 @@
 #include "simple_printf.h"
 #include "xccompat.h"
 #include "avb_1722_1.h"
+#include "avb_1722_1_aecp_controls.h"
 
 #if AVB_1722_1_USE_AVC
 #include "avc_commands.h"
@@ -358,110 +359,6 @@ static void process_aem_cmd_getset_stream_format(avb_1722_1_aecp_packet_t *pkt, 
 
 }
 
-static void process_aem_cmd_getset_sampling_rate(avb_1722_1_aecp_packet_t *pkt, unsigned char *status, unsigned short command_type)
-{
-  avb_1722_1_aem_getset_sampling_rate_t *cmd = (avb_1722_1_aem_getset_sampling_rate_t *)(pkt->data.aem.command.payload);
-  unsigned short media_clock_id = ntoh_16(cmd->descriptor_id);
-  int rate;
-
-  if (command_type == AECP_AEM_CMD_GET_SAMPLING_RATE)
-  {
-    if (get_device_media_clock_rate(media_clock_id, &rate))
-    {
-      hton_32(cmd->sampling_rate, rate);
-      return;
-    }
-  }
-  else // AECP_AEM_CMD_SET_SAMPLING_RATE
-  {
-    rate = ntoh_32(cmd->sampling_rate);
-
-    if (set_device_media_clock_rate(media_clock_id, rate))
-    {
-      // Success
-      return;
-    }
-  }
-
-  *status = AECP_AEM_STATUS_NO_SUCH_DESCRIPTOR;
-}
-
-static void process_aem_cmd_getset_clock_source(avb_1722_1_aecp_packet_t *pkt, unsigned char *status, unsigned short command_type)
-{
-  avb_1722_1_aem_getset_clock_source_t *cmd = (avb_1722_1_aem_getset_clock_source_t *)(pkt->data.aem.command.payload);
-  unsigned short media_clock_id = ntoh_16(cmd->descriptor_id);
-  // The clock source descriptor's index corresponds to the clock type in our implementation
-  enum device_media_clock_type_t source_index;
-
-  if (command_type == AECP_AEM_CMD_GET_CLOCK_SOURCE)
-  {
-    if (get_device_media_clock_type(media_clock_id, &source_index))
-    {
-      hton_16(cmd->clock_source_index, source_index);
-      return;
-    }
-  }
-  else // AECP_AEM_CMD_SET_CLOCK_SOURCE
-  {
-    source_index = ntoh_16(cmd->clock_source_index);
-
-    if (set_device_media_clock_type(media_clock_id, source_index))
-    {
-      // Success
-      return;
-    }
-  }
-
-  *status = AECP_AEM_STATUS_NO_SUCH_DESCRIPTOR;
-}
-
-static void process_aem_cmd_startstop_streaming(avb_1722_1_aecp_packet_t *pkt, unsigned char *status, unsigned short command_type)
-{
-  avb_1722_1_aem_startstop_streaming_t *cmd = (avb_1722_1_aem_startstop_streaming_t *)(pkt->data.aem.command.payload);
-  unsigned short stream_index = ntoh_16(cmd->descriptor_id);
-  unsigned short desc_type = ntoh_16(cmd->descriptor_type);
-
-  if (desc_type == AEM_STREAM_INPUT_TYPE)
-  {
-    enum avb_sink_state_t state;
-    if (get_avb_sink_state(stream_index, &state))
-    {
-      if (command_type == AECP_AEM_CMD_START_STREAMING)
-      {
-        set_avb_sink_state(stream_index, AVB_SINK_STATE_ENABLED);
-      }
-      else
-      {
-        if (state == AVB_SINK_STATE_ENABLED)
-        {
-          set_avb_sink_state(stream_index, AVB_SINK_STATE_POTENTIAL);
-        }
-      }
-    }
-    else *status = AECP_AEM_STATUS_NO_SUCH_DESCRIPTOR;
-
-  }
-  else if ((desc_type == AEM_STREAM_OUTPUT_TYPE))
-  {
-    enum avb_source_state_t state;
-    if (get_avb_source_state(stream_index, &state))
-    {
-      if (command_type == AECP_AEM_CMD_START_STREAMING)
-      {
-        set_avb_source_state(stream_index, AVB_SOURCE_STATE_ENABLED);
-      }
-      else
-      {
-        if (state == AVB_SINK_STATE_ENABLED)
-        {
-          set_avb_source_state(stream_index, AVB_SOURCE_STATE_POTENTIAL);
-        }
-      }
-    }
-    else *status = AECP_AEM_STATUS_NO_SUCH_DESCRIPTOR;
-  }
-}
-
 static unsigned short avb_1722_1_create_controller_available_packet(void)
 {
   struct ethernet_hdr_t *hdr = (ethernet_hdr_t*) &avb_1722_1_buf[0];
@@ -658,7 +555,12 @@ static unsigned short process_aem_cmd_acquire(avb_1722_1_aecp_packet_t *pkt, uns
   return sizeof(avb_1722_1_aem_acquire_entity_command_t) + AVB_1722_1_AECP_PAYLOAD_OFFSET;
 }
 
-static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsigned char src_addr[6], int message_type, int num_pkt_bytes, chanend c_tx)
+static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt,
+                                            unsigned char src_addr[6],
+                                            int message_type,
+                                            int num_pkt_bytes,
+                                            chanend c_tx,
+                                            CLIENT_INTERFACE(avb_interface, i_avb_api))
 {
   avb_1722_1_aecp_aem_msg_t *aem_msg = &(pkt->data.aem);
   unsigned short command_type = AEM_MSG_GET_COMMAND_TYPE(aem_msg);
@@ -733,29 +635,28 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
         cd_len = sizeof(avb_1722_1_aem_getset_stream_format_t);
         break;
       }
+      #endif
       case AECP_AEM_CMD_GET_SAMPLING_RATE:
       case AECP_AEM_CMD_SET_SAMPLING_RATE:
       {
-        process_aem_cmd_getset_sampling_rate(pkt, &status, command_type);
+        process_aem_cmd_getset_sampling_rate(pkt, &status, command_type, i_avb_api);
         cd_len = sizeof(avb_1722_1_aem_getset_sampling_rate_t);
         break;
       }
       case AECP_AEM_CMD_GET_CLOCK_SOURCE:
       case AECP_AEM_CMD_SET_CLOCK_SOURCE:
       {
-        process_aem_cmd_getset_clock_source(pkt, &status, command_type);
+        process_aem_cmd_getset_clock_source(pkt, &status, command_type, i_avb_api);
         cd_len = sizeof(avb_1722_1_aem_getset_clock_source_t);
         break;
       }
       case AECP_AEM_CMD_START_STREAMING:
       case AECP_AEM_CMD_STOP_STREAMING:
       {
-        process_aem_cmd_startstop_streaming(pkt, &status, command_type);
+        process_aem_cmd_startstop_streaming(pkt, &status, command_type, i_avb_api);
         cd_len = sizeof(avb_1722_1_aem_startstop_streaming_t);
         break;
       }
-      #endif
-      // TODO: ENTITY_AVAILABLE
       default:
       {
         // AECP_AEM_STATUS_NOT_IMPLEMENTED
@@ -814,7 +715,11 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
   }
 }
 
-void process_avb_1722_1_aecp_packet(unsigned char src_addr[6], avb_1722_1_aecp_packet_t *pkt, int num_pkt_bytes, chanend c_tx)
+void process_avb_1722_1_aecp_packet(unsigned char src_addr[6],
+                                    avb_1722_1_aecp_packet_t *pkt,
+                                    int num_pkt_bytes,
+                                    chanend c_tx,
+                                    CLIENT_INTERFACE(avb_interface, avb))
 {
   int message_type = GET_1722_1_MSG_TYPE(((avb_1722_1_packet_header_t*)pkt));
 
@@ -824,7 +729,7 @@ void process_avb_1722_1_aecp_packet(unsigned char src_addr[6], avb_1722_1_aecp_p
     case AECP_CMD_AEM_RESPONSE:
     {
 #if AVB_1722_1_AEM_ENABLED
-      process_avb_1722_1_aecp_aem_msg(pkt, src_addr, message_type, num_pkt_bytes, c_tx);
+      process_avb_1722_1_aecp_aem_msg(pkt, src_addr, message_type, num_pkt_bytes, c_tx, avb);
 #endif
       break;
     }

@@ -893,7 +893,7 @@ void set_avb_source_volumes(unsigned sink_num, int volumes[], int count)
 #endif
 
 
-void avb_process_1722_control_packet(unsigned int buf0[], int nbytes, chanend c_tx) {
+void avb_process_1722_control_packet(unsigned int buf0[], int nbytes, chanend c_tx, client interface avb_interface i_avb) {
 
   if (nbytes == STATUS_PACKET_LEN) {
     if (((unsigned char *)buf0)[0]) { // Link up
@@ -924,7 +924,7 @@ void avb_process_1722_control_packet(unsigned int buf0[], int nbytes, chanend c_
 
       switch (etype) {
         case AVB_1722_ETHERTYPE:
-          avb_1722_1_process_packet((unsigned char *unsafe)&buf[eth_hdr_size], ethernet_hdr->src_addr, len, c_tx);
+          avb_1722_1_process_packet((unsigned char *unsafe)&buf[eth_hdr_size], ethernet_hdr->src_addr, len, c_tx, i_avb);
           avb_1722_maap_process_packet(&buf[eth_hdr_size], ethernet_hdr->src_addr, len, c_tx);
           break;
       }
