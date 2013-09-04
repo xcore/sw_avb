@@ -23,6 +23,7 @@
 #include "media_clock_server.h"
 #include "avb_1722_1.h"
 #include "avb_srp.h"
+#include "ethernet_phy_reset.h"
 
 // This is the number of master clocks in a word clock
 #define MASTER_TO_WORDCLOCK_RATIO 512
@@ -61,6 +62,8 @@ on tile[1]: mii_interface_t mii2 = {
   XS1_PORT_1F,
   XS1_PORT_4B      
 };
+
+ethernet_reset_interface_t p_phy_reset = PORT_ETH_RST_N;
 
 //***** AVB audio ports ****
 #if I2C_COMBINE_SCL_SDA
@@ -117,7 +120,8 @@ void gpio_task(chanend c_gpio_ctl);
 
 void xscope_user_init(void)
 {
-  xscope_register_no_probes();
+  // xscope_register_no_probes();
+  xscope_register(1, XSCOPE_CONTINUOUS, "null", XSCOPE_UINT, "value");
   // Enable XScope printing
   xscope_config_io(XSCOPE_IO_BASIC);
 }
@@ -212,8 +216,14 @@ int main(void)
     {
       char mac_address[6];
       otp_board_info_get_mac(otp_ports, 0, mac_address);
+      eth_phy_reset(p_phy_reset);
       smi_init(smi1);
       eth_phy_config(1, smi1);
+      smi_reg(smi1, 0x4, 0x0020, 0); // Don't advertise as 10 mb capable
+      smi_reg(smi1, 0x0, 0x3000, 0); // Restart LDS
+      smi_reg(smi1, 0x17, 0xf0e, 0); // Write expansion reg 0xE
+      smi_reg(smi1, 0x15, 0x800, 0); // 0xE is written via register 0x15, Enable MII-Lite
+
       ethernet_server_full_two_port(mii1,
                                     mii2,
                                     smi1,
