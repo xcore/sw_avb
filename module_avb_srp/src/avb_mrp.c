@@ -26,6 +26,7 @@
 #define mrp_change_applicant_state(st, event, new) \
        do { \
           if (MRP_DEBUG_STATE_CHANGE) debug_print_applicant_state_change((st), (event), (new)); \
+          if (new == MRP_UNUSED) debug_print_applicant_state_change((st), (event), (new)); \
          (st)->applicant_state = (new);        \
        } while(0)
 
@@ -798,7 +799,7 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
 
 void mrp_debug_dump_attrs(void)
 {
-#if 0
+#if 1
   printstrln("port_num | type                   | disabled | here | propagated | stream_id");
   printstrln("---------+------------------------+----------+------+------------+----------");
   for (int i=0;i<MRP_MAX_ATTRS;i++) {
