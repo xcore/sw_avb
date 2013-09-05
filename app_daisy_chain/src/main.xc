@@ -27,21 +27,6 @@
 // This is the number of master clocks in a word clock
 #define MASTER_TO_WORDCLOCK_RATIO 512
 
-// Timeout for debouncing buttons
-#define BUTTON_TIMEOUT_PERIOD (20000000)
-
-// Buttons on reference board
-enum gpio_cmd
-{
-  STREAM_SEL=1, REMOTE_SEL=2, CHAN_SEL=4
-};
-
-// Note that this port must be at least declared to ensure it
-// drives the mute low
-out port p_mute_led_remote = PORT_MUTE_LED_REMOTE; // mute, led remote;
-out port p_chan_leds = PORT_LEDS;
-in port p_buttons = PORT_BUTTONS;
-
 on ETHERNET_DEFAULT_TILE: otp_ports_t otp_ports = OTP_PORTS_INITIALIZER;
 
 smi_interface_t smi1 = ETHERNET_DEFAULT_SMI_INIT;
@@ -112,12 +97,11 @@ media_input_fifo_t ififos[AVB_NUM_MEDIA_INPUTS];
   #define ififos null
 #endif
 
-[[combinable]] void demo_task(client interface avb_interface avb, chanend c_gpio_ctl);
-void gpio_task(chanend c_gpio_ctl);
+[[combinable]] void application_task(client interface avb_interface avb);
 
 void xscope_user_init(void)
 {
-  xscope_register_no_probes();
+  xscope_register(0, XSCOPE_CONTINUOUS, "", XSCOPE_INT, "");
   // Enable XScope printing
   xscope_config_io(XSCOPE_IO_BASIC);
 }
@@ -200,8 +184,6 @@ int main(void)
   // Media control
   chan c_media_ctl[AVB_NUM_MEDIA_UNITS];
   chan c_media_clock_ctl;
-
-  chan c_gpio_ctl;
 
   interface avb_interface i_avb[NUM_AVB_MANAGER_CHANS];
   interface srp_interface i_srp;
@@ -296,7 +278,7 @@ int main(void)
                    c_mac_tx[MAC_TX_TO_AVB_MANAGER],
                    c_media_clock_ctl,
                    c_ptp[PTP_TO_AVB_MANAGER]);
-        demo_task(i_avb[AVB_MANAGER_TO_DEMO], c_gpio_ctl);
+        application_task(i_avb[AVB_MANAGER_TO_DEMO]);
         avb_srp_task(i_avb[AVB_MANAGER_TO_SRP],
                      i_srp,
                      c_mac_rx[MAC_RX_TO_SRP],
@@ -318,75 +300,14 @@ int main(void)
     return 0;
 }
 
-void gpio_task(chanend c_gpio_ctl)
-{
-  int button_val;
-  int buttons_active = 1;
-  int toggle_remote = 0;
-  unsigned buttons_timeout;
-  int selected_chan = 0;
-  timer button_tmr;
-
-  p_mute_led_remote <: ~0;
-  p_chan_leds <: ~(1 << selected_chan);
-  p_buttons :> button_val;
-
-  while (1)
-  {
-    select
-    {
-      case buttons_active => p_buttons when pinsneq(button_val) :> unsigned new_button_val:
-        if ((button_val & STREAM_SEL) == STREAM_SEL && (new_button_val & STREAM_SEL) == 0)
-        {
-          c_gpio_ctl <: STREAM_SEL;
-          buttons_active = 0;
-        }
-        if ((button_val & REMOTE_SEL) == REMOTE_SEL && (new_button_val & REMOTE_SEL) == 0)
-        {
-          c_gpio_ctl <: REMOTE_SEL;
-          toggle_remote = !toggle_remote;
-          buttons_active = 0;
-          p_mute_led_remote <: (~0) & ~(toggle_remote<<1);
-        }
-        if ((button_val & CHAN_SEL) == CHAN_SEL && (new_button_val & CHAN_SEL) == 0)
-        {
-          selected_chan++;
-          if (selected_chan > ((AVB_NUM_MEDIA_OUTPUTS>>1)-1))
-          {
-            selected_chan = 0;
-          }
-          p_chan_leds <: ~(1 << selected_chan);
-          c_gpio_ctl <: CHAN_SEL;
-          c_gpio_ctl <: selected_chan;
-          buttons_active = 0;
-        }
-        if (!buttons_active)
-        {
-          button_tmr :> buttons_timeout;
-          buttons_timeout += BUTTON_TIMEOUT_PERIOD;
-        }
-        button_val = new_button_val;
-        break;
-      case !buttons_active => button_tmr when timerafter(buttons_timeout) :> void:
-        buttons_active = 1;
-        p_buttons :> button_val;
-        break;
-    }
-  }
-
-}
-
-
 /** The main application control task **/
 [[combinable]]
-void demo_task(client interface avb_interface avb, chanend c_gpio_ctl)
+void application_task(client interface avb_interface avb)
 {
 #if AVB_DEMO_ENABLE_TALKER
   int map[AVB_NUM_MEDIA_INPUTS];
 #endif
   unsigned sample_rate = 48000;
-  int change_stream = 1;
-  int toggle_remote = 0;
 
   // Initialize the media clock
   avb.set_device_media_clock_type(0, DEVICE_MEDIA_CLOCK_INPUT_STREAM_DERIVED);
@@ -406,59 +327,6 @@ void demo_task(client interface avb_interface avb, chanend c_gpio_ctl)
 
   while (1)
   {
-    select
-    {
-      // Receive any events from user button presses from the GPIO task
-      case c_gpio_ctl :> int cmd:
-      {
-#if 0
-        switch (cmd)
-        {
-          case STREAM_SEL:
-          {
-            change_stream = 1;
-            break;
-          }
-          case CHAN_SEL:
-          {
-            int selected_chan;
-            c_gpio_ctl :> selected_chan;
-#if AVB_DEMO_ENABLE_LISTENER
-            if (AVB_NUM_MEDIA_OUTPUTS > 2)
-            {
-              enum avb_sink_state_t cur_state;
-              int channel;
-              int map[AVB_NUM_MEDIA_OUTPUTS];
-
-              channel = selected_chan*2;
-              get_avb_sink_state(0, &cur_state);
-              set_avb_sink_state(0, AVB_SINK_STATE_DISABLED);
-              for (int j=0;j<AVB_NUM_MEDIA_OUTPUTS;j++)
-              {
-                map[j] = channel;
-                channel++;
-                if (channel > AVB_NUM_MEDIA_OUTPUTS-1)
-                {
-                  channel = 0;
-                }
-              }
-              set_avb_sink_map(0, map, AVB_NUM_MEDIA_OUTPUTS);
-              if (cur_state != AVB_SINK_STATE_DISABLED)
-                set_avb_sink_state(0, AVB_SINK_STATE_POTENTIAL);
-            }
-#endif
-            break;
-          }
-          case REMOTE_SEL:
-          {
-            toggle_remote = !toggle_remote;
-            break;
-          }
-          break;
-        }
-#endif
-        break;
-      }
-    } // end select
-  } // end while
+    select {}
+  }
 }
