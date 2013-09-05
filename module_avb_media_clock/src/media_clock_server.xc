@@ -1,6 +1,7 @@
 #include <xs1.h>
 #include <xclib.h>
 #include "print.h"
+#include <xscope.h>
 
 #include "avb_1722_def.h"
 #include "media_clock_client.h"
@@ -249,8 +250,9 @@ static void manage_buffer(buf_info_t &b,
 
 static void update_media_clock_divide(media_clock_t &clk)
 {
-  clk.divWordLength = clk.wordLength * INTERNAL_CLOCK_DIVIDE;
-  clk.baseLength = clk.divWordLength >> (WC_FRACTIONAL_BITS+1);
+  unsigned int divWordLength = clk.wordLength * INTERNAL_CLOCK_DIVIDE/2;
+  clk.baseLength = divWordLength >> (WC_FRACTIONAL_BITS);
+  clk.baseLengthRemainder = divWordLength & ((1 << WC_FRACTIONAL_BITS) - 1);
 }
 
 static void init_media_clock(media_clock_t &clk,
@@ -262,7 +264,6 @@ static void init_media_clock(media_clock_t &clk,
   clk.wordLength = 0x8235556;
   update_media_clock_divide(clk);
   clk.lowBits = 0;
-  clk.prevLowBits = 0;
   clk.bit = 0;
   p <: 0 @ ptime;
   tmr :> time;
@@ -277,7 +278,7 @@ static void init_media_clock(media_clock_t &clk,
 static void do_media_clock_output(media_clock_t &clk,
                                   out buffered port:32 p)
 {
-  const unsigned int bitMask = (1 << WC_FRACTIONAL_BITS) - 1;
+  const unsigned int one = (1 << WC_FRACTIONAL_BITS);
   const unsigned mult = PLL_TO_WORD_MULTIPLIER/(2*INTERNAL_CLOCK_DIVIDE);
 
   clk.count++;
@@ -289,13 +290,11 @@ static void do_media_clock_output(media_clock_t &clk,
   clk.wordTime += clk.baseLength;
   clk.next_event += clk.baseLength;
 
-  if (clk.bit) {
-    clk.lowBits = (clk.lowBits + clk.divWordLength) & bitMask;
-    if (clk.lowBits <  clk.prevLowBits) {
-      clk.wordTime += 1;
-      clk.next_event += 1;
-    }
-    clk.prevLowBits = clk.lowBits;
+  clk.lowBits = clk.lowBits + clk.baseLengthRemainder;
+  if (clk.lowBits >= one) {
+    clk.wordTime += 1;
+    clk.next_event += 1;
+    clk.lowBits -= one;
   }
 
   p @ clk.wordTime <: clk.bit;

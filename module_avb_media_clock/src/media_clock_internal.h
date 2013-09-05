@@ -12,11 +12,10 @@ typedef struct media_clock_t {
                             ///  fifo it should be derived from.
   int rate;                 ///<  The rate of the media clock in Hz
   unsigned int wordLength;
-  unsigned int divWordLength;
+  unsigned int baseLengthRemainder;
   unsigned int wordTime;
   unsigned int baseLength;
   unsigned int lowBits;
-  unsigned int prevLowBits;
   int count;
   unsigned int next_event;
   unsigned int bit;
