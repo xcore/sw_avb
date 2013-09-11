@@ -39,6 +39,33 @@
 #define MRP_DEBUG_ATTR_EGRESS 0
 #define MRP_DEBUG_ATTR_INGRESS 0
 
+#define MRP_DEBUG_STATE_CHANGE 0
+
+#define mrp_change_registrar_state(st, event, new) \
+       do { \
+          if (MRP_DEBUG_STATE_CHANGE) debug_print_registrar_state_change((st), (event), (new)); \
+         (st)->registrar_state = (new);        \
+       } while(0)
+
+#define mrp_change_applicant_state(st, event, new) \
+       do { \
+          if (MRP_DEBUG_STATE_CHANGE) debug_print_applicant_state_change((st), (event), (new)); \
+          if (new == MRP_UNUSED) { debug_print_applicant_state_change((st), (event), (new)); \
+            srp_cleanup_reservation_entry((st)); \
+          } \
+         (st)->applicant_state = (new);        \
+       } while(0)
+
+#define mrp_change_event_state(st, event, new) \
+       do { \
+          if (MRP_DEBUG_STATE_CHANGE) debug_print_tx_event((st), (event)); \
+          (new) = (event);       \
+       } while(0)
+
+void debug_print_applicant_state_change(mrp_attribute_state *st, mrp_event event, int new);
+void debug_print_registrar_state_change(mrp_attribute_state *st, mrp_event event, int new);
+void debug_print_tx_event(mrp_attribute_state *st, mrp_event event);
+
 #define FIRST_VALUE_LENGTHS \
   { sizeof(srp_talker_first_value),             \
     sizeof(srp_talker_failed_first_value),\
@@ -158,7 +185,7 @@ mrp_attribute_state *unsafe mrp_match_talker_non_prop_attribute(unsigned stream_
 
 mrp_attribute_state *unsafe mrp_match_attr_by_stream_and_type(mrp_attribute_state *unsafe attr, int opposite_port);
 int mrp_match_multiple_attrs_by_stream_and_type(mrp_attribute_state *unsafe attr, int opposite_port);
-mrp_attribute_state *unsafe mrp_match_attribute_by_stream_id(mrp_attribute_state *unsafe attr, int opposite_port, int match_disabled);
+mrp_attribute_state *unsafe mrp_match_attribute_pair_by_stream_id(mrp_attribute_state *unsafe attr, int opposite_port, int match_disabled);
 
 int mrp_is_observer(mrp_attribute_state *unsafe st);
 

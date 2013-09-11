@@ -24,9 +24,6 @@
 #include "avb_1722_1.h"
 #include "avb_srp.h"
 
-// This is the number of master clocks in a word clock
-#define MASTER_TO_WORDCLOCK_RATIO 512
-
 on ETHERNET_DEFAULT_TILE: otp_ports_t otp_ports = OTP_PORTS_INITIALIZER;
 
 smi_interface_t smi1 = ETHERNET_DEFAULT_SMI_INIT;
@@ -76,7 +73,7 @@ on tile[0]: in buffered port:32 p_aud_din[AVB_DEMO_NUM_CHANNELS/2] = PORT_SDATA_
   #define p_aud_din null
 #endif
 
-#if AVB_XA_SK_AUDIO_SLICE
+#if AVB_XA_SK_AUDIO_PLL_SLICE
 on tile[0]: out port p_audio_shared = PORT_AUDIO_SHARED;
 #endif
 
@@ -101,7 +98,7 @@ media_input_fifo_t ififos[AVB_NUM_MEDIA_INPUTS];
 
 void xscope_user_init(void)
 {
-  xscope_register(0, XSCOPE_CONTINUOUS, "", XSCOPE_INT, "");
+  xscope_register(1, XSCOPE_CONTINUOUS, "", XSCOPE_INT, "");
   // Enable XScope printing
   xscope_config_io(XSCOPE_IO_BASIC);
 }
@@ -113,9 +110,9 @@ void audio_hardware_setup(void)
 #elif PLL_TYPE_CS2300
   audio_clock_CS2300CP_init(r_i2c, MASTER_TO_WORDCLOCK_RATIO);
 #endif
-#if AVB_XA_SK_AUDIO_SLICE
-  audio_codec_CS4270_init(p_audio_shared, 0xff, 0x90, r_i2c);
-  audio_codec_CS4270_init(p_audio_shared, 0xff, 0x92, r_i2c);
+#if AVB_XA_SK_AUDIO_PLL_SLICE
+  audio_codec_CS4270_init(p_audio_shared, 0xff, 0x48, r_i2c);
+  audio_codec_CS4270_init(p_audio_shared, 0xff, 0x49, r_i2c);
 #endif
 }
 
@@ -260,8 +257,6 @@ int main(void)
                                   c_listener_ctl[0],
                                   AVB_NUM_SINKS);
 #endif
-
-    // on tile[AVB_GPIO_TILE]: gpio_task(c_gpio_ctl);
 
     // Application
     on tile[1]:

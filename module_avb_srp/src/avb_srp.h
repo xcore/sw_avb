@@ -43,6 +43,8 @@ void avb_srp_leave_talker_attrs(unsigned int stream_id[2]);
 void avb_srp_leave_listener_attrs(unsigned int stream_id[2]);
 void avb_srp_join_listener_attrs(unsigned int stream_id[2]);
 
+void srp_cleanup_reservation_entry(mrp_attribute_state *st);
+
 /* The following functions are called from avb_mrp.c */
 mrp_attribute_state *unsafe avb_srp_process_new_attribute_from_packet(int attribute_type,
                                   char *fv, 

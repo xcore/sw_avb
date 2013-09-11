@@ -255,8 +255,10 @@ static void set_sink_state0(unsigned sink_num,
                                   sink->stream.local_id);
 
   #ifndef AVB_EXCLUDE_MVRP
-      if (sink->reservation.vlan_id) {
-        avb_join_vlan(sink->reservation.vlan_id);
+      for (int i=0; i < MRP_NUM_PORTS; i++) {
+        if (sink->reservation.vlan_id) {
+          avb_join_vlan(sink->reservation.vlan_id, i);
+        }
       }
   #endif
 
@@ -297,7 +299,7 @@ static void set_sink_state0(unsigned sink_num,
   }
 }
 
-static unsigned avb_srp_calculate_max_framesize(avb_source_info_t *source_info)
+static unsigned avb_srp_calculate_max_framesize(const avb_source_info_t *source_info)
 {
 #if defined(AVB_1722_FORMAT_61883_6) || defined(AVB_1722_FORMAT_SAF)
   unsigned samples_per_packet = (source_info->stream.rate + (AVB1722_PACKET_RATE-1))/AVB1722_PACKET_RATE;
@@ -371,8 +373,10 @@ static void local_set_source_state(unsigned source_num,
         }
 
     #ifndef AVB_EXCLUDE_MVRP
-        if (source->reservation.vlan_id) {
-          avb_join_vlan(source->reservation.vlan_id);
+        for (int i=0; i < MRP_NUM_PORTS; i++) {
+          if (source->reservation.vlan_id) {
+            avb_join_vlan(source->reservation.vlan_id, i);
+          }
         }
     #endif
 
