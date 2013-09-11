@@ -3,6 +3,7 @@ sw_avb Change Log
 
 5.2.1
 -----
+  * Fixed issue with PLL pin drive logic that could appear as an oscillation in the PI loop output
   * Updates to sc_ethernet to meet timing under xTIMEcomposer v13beta1
   * Added support for DSP4YOU AVB module
   * Added performance improvements to Talker to support > 2 streams in a single logical core
