@@ -85,6 +85,16 @@
         <uri>https://github.com/xcore/sc_util.git</uri>
         <version>1.0.3rc0</version>
     </dependency>
+    <dependency repo = "sc_i2c">
+        <githash>53349e8bd6493701b1ec462187b14c9e74bdc6bd</githash>
+        <uri>https://github.com/xcore/sc_i2c.git</uri>
+        <version>2.2.0rc0</version>
+    </dependency>
+    <dependency repo = "sc_slicekit_support">
+        <githash>7920fc4235a96585274d73d25d275ea63b4cd285</githash>
+        <uri>https://github.com/xcore/sc_slicekit_support.git</uri>
+        <version>1.0.3rc0</version>
+    </dependency>
     <description>AVB software stack</description>
     <docdir>doc</docdir>
     <exclude_dir>tests</exclude_dir>
