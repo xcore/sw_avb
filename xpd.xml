@@ -3,22 +3,22 @@
     <components>
         <component description = "A simple 1722.1 example endpoint application" type = "demoCode" scope = "Example" path = "app_simple_avb_demo" local = "false" id = "app_simple_avb_demo" name = "Simple AVB Endpoint Demo">
             <board>XR-AVB-LC-BRD</board>
-            <componentDependency>module_avb_1722</componentDependency>
-            <componentDependency>module_random</componentDependency>
-            <componentDependency>module_avb_srp</componentDependency>
-            <componentDependency>module_avb_media_clock</componentDependency>
-            <componentDependency>module_avb_audio</componentDependency>
-            <componentDependency>module_avb_1722_maap</componentDependency>
+            <componentDependency version = "5.2.1">module_avb_audio</componentDependency>
+            <componentDependency version = "1.0.3">module_random</componentDependency>
+            <componentDependency version = "5.2.1">module_avb_1722_maap</componentDependency>
+            <componentDependency version = "5.2.1">module_avb_media_clock</componentDependency>
+            <componentDependency version = "5.2.1">module_avb_srp</componentDependency>
+            <componentDependency version = "5.2.1">module_avb_1722</componentDependency>
             <keyword>avb</keyword>
             <keyword>simple</keyword>
             <keyword>1722.1</keyword>
             <keyword>example</keyword>
         </component>
         <component description = "AVB stack control API" type = "demoCode" scope = "Example" path = "module_avb" local = "false" id = "module_avb" name = "module_avb">
-            <componentDependency>module_locks</componentDependency>
-            <componentDependency>module_ethernet_smi</componentDependency>
-            <componentDependency>module_ethernet</componentDependency>
-            <componentDependency>module_otp_board_info</componentDependency>
+            <componentDependency version = "1.0.0">module_otp_board_info</componentDependency>
+            <componentDependency version = "1.0.3">module_locks</componentDependency>
+            <componentDependency version = "2.2.5">module_ethernet</componentDependency>
+            <componentDependency version = "2.2.5">module_ethernet_smi</componentDependency>
             <keyword>avb</keyword>
             <keyword>api</keyword>
             <keyword>control</keyword>
@@ -70,14 +70,10 @@
             <keyword>802.1as</keyword>
         </component>
     </components>
-    <dependency repo = "sc_i2c">
-        <githash>d266213a4d5c4956f3d5980ba42611e24d129a39</githash>
-        <uri>https://github.com/xcore/sc_i2c.git</uri>
-    </dependency>
     <dependency repo = "sc_ethernet">
-        <githash>d4288863b8258d525d0ee421cab4f8c177080855</githash>
+        <githash>d25b40c4ae7c4817fee5897f546a34c952eca1c6</githash>
         <uri>https://github.com/xcore/sc_ethernet.git</uri>
-        <version>2.2.5rc2</version>
+        <version>2.2.5rc3</version>
     </dependency>
     <dependency repo = "sc_otp">
         <githash>062aa923a78bc603b254b2a99b78593ab3a816ec</githash>
@@ -87,11 +83,6 @@
     <dependency repo = "sc_util">
         <githash>d0531d7c68ab67334582c324828e36d617baf8b3</githash>
         <uri>https://github.com/xcore/sc_util.git</uri>
-        <version>1.0.3rc0</version>
-    </dependency>
-    <dependency repo = "sc_slicekit_support">
-        <githash>7920fc4235a96585274d73d25d275ea63b4cd285</githash>
-        <uri>https://github.com/xcore/sc_slicekit_support.git</uri>
         <version>1.0.3rc0</version>
     </dependency>
     <description>AVB software stack</description>
@@ -120,7 +111,7 @@
     <release parenthash = "ced4ad2747e2860c1f349a2556fc3a8d2640600e" version = "5.2.0beta5" githash = "dfece20955a0f7aaaced49f386a6517af7b260b4"></release>
     <release parenthash = "95f13f9d5b6ff5882b5cf7c4cea5e91c60cf3441" version = "5.2.0beta6" githash = "789e31c21ec5ae3a77ccf18c50cc4786127174ea"></release>
     <release parenthash = "868924510ad3ebac90310577f635e82b7bfe42a7" version = "5.2.1beta0" githash = "7cca4a4575e6a99d027018c05af20dc8091a851b"></release>
-    <release parenthash = "7cca4a4575e6a99d027018c05af20dc8091a851b" version = "5.2.1beta1"></release>
+    <release parenthash = "7cca4a4575e6a99d027018c05af20dc8091a851b" version = "5.2.1beta1" githash = "b4f852e8cae3c4e7337334cc908d3d416bdc4bf2"></release>
     <subpartnumber>XR-000008-SW</subpartnumber>
     <vendor>XMOS</vendor>
     <version_defines>
@@ -128,5 +119,4 @@
     </version_defines>
     <xcore_repo>sw_avb.git</xcore_repo>
     <xpd_version>1.0</xpd_version>
-    <scope>reference design</scope>
 </xpd>
