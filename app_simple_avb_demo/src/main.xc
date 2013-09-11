@@ -34,11 +34,13 @@ enum gpio_cmd
   STREAM_SEL=1, REMOTE_SEL=2, CHAN_SEL=4
 };
 
+#if !AVB_XA_SK_AUDIO_PLL_SLICE
 // Note that this port must be at least declared to ensure it
 // drives the mute low
 out port p_mute_led_remote = PORT_MUTE_LED_REMOTE; // mute, led remote;
 out port p_chan_leds = PORT_LEDS;
 in port p_buttons = PORT_BUTTONS;
+#endif
 
 void demo(chanend c_rx, chanend c_tx, chanend c_gpio_ctl);
 void gpio_task(chanend c_gpio_ctl);
@@ -77,7 +79,7 @@ on tile[AVB_AUDIO_TILE]: out buffered port:32 p_aud_dout[AVB_DEMO_NUM_CHANNELS/2
 
 on tile[AVB_AUDIO_TILE]: in buffered port:32 p_aud_din[AVB_DEMO_NUM_CHANNELS/2] = PORT_SDATA_IN;
 
-#if AVB_XA_SK_AUDIO_SLICE
+#if AVB_XA_SK_AUDIO_PLL_SLICE
 on tile[AVB_AUDIO_TILE]: out port p_audio_shared = PORT_AUDIO_SHARED;
 #endif
 
@@ -106,9 +108,9 @@ void audio_hardware_setup(void)
 #elif PLL_TYPE_CS2300
   audio_clock_CS2300CP_init(r_i2c, MASTER_TO_WORDCLOCK_RATIO);
 #endif
-#if AVB_XA_SK_AUDIO_SLICE
-  audio_codec_CS4270_init(p_audio_shared, 0xff, 0x90, r_i2c);
-  audio_codec_CS4270_init(p_audio_shared, 0xff, 0x92, r_i2c);
+#if AVB_XA_SK_AUDIO_PLL_SLICE
+  audio_codec_CS4270_init(p_audio_shared, 0xff, 0x48, r_i2c);
+  audio_codec_CS4270_init(p_audio_shared, 0xff, 0x49, r_i2c);
 #endif
 }
 
@@ -263,6 +265,7 @@ int main(void)
 
 void gpio_task(chanend c_gpio_ctl)
 {
+#if !AVB_XA_SK_AUDIO_PLL_SLICE
   int button_val;
   int buttons_active = 1;
   int toggle_remote = 0;
@@ -316,7 +319,7 @@ void gpio_task(chanend c_gpio_ctl)
         break;
     }
   }
-
+#endif
 }
 
 /** The main application control task **/
