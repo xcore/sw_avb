@@ -18,12 +18,12 @@
 #define PTP_TIME_TRACEABLE (0)
 #define PTP_FREQUENCY_TRACEABLE (0)
 #define PTP_CURRENT_UTC_OFFSET                     (33)
-#ifndef PTP_DEFAULT_GM_CAPABLE_PRIORITY1 
+#ifndef PTP_DEFAULT_GM_CAPABLE_PRIORITY1
 #define PTP_DEFAULT_GM_CAPABLE_PRIORITY1 (250)  // default for portable timeaware-system
 //#define PTP_DEFAULT_GM_CAPABLE_PRIORITY1 (100)  // default for portable timeaware-system
 #endif
 
-#define PTP_DEFAULT_NON_GM_CAPABLE_PRIORITY1 (255) 
+#define PTP_DEFAULT_NON_GM_CAPABLE_PRIORITY1 (255)
 #define PTP_DEFAULT_PRIORITY2 (248)
 #define PTP_CLOCK_CLASS (248) // don't know
 #define PTP_CLOCK_ACCURACY (0xFE)   // Unknown
@@ -39,7 +39,7 @@
 #define PTP_USE_8021AS_MULTICAST
 
 // constants base on 802.1as specification.
-#ifdef PTP_USE_8021AS_MULTICAST 
+#ifdef PTP_USE_8021AS_MULTICAST
 #define PTP_DEFAULT_DEST_ADDR PTP_8021AS_DEST_ADDR
 #else
 #define PTP_DEFAULT_DEST_ADDR PTP_8021AS_LEGACY_ADDR

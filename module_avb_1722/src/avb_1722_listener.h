@@ -3,7 +3,7 @@
  * \brief IEC 61883-6/AVB1722 Listener definitions
  */
 
-#ifndef _AVB1722_LISTENER_H_ 
+#ifndef _AVB1722_LISTENER_H_
 #define _AVB1722_LISTENER_H_ 1
 #ifndef __XC__
 #define streaming
@@ -15,14 +15,14 @@
 #include "media_output_fifo.h"
 
 #ifndef MAX_INCOMING_AVB_STREAMS
-#if AVB_NUM_SINKS > 0 
+#if AVB_NUM_SINKS > 0
 #define MAX_INCOMING_AVB_STREAMS (AVB_NUM_SINKS)
 #else
 #define MAX_INCOMING_AVB_STREAMS 1 // Just set to get Listener to compile when disabled
 #endif
 #endif
 
-#ifndef AVB_MAX_CHANNELS_PER_LISTENER_STREAM 
+#ifndef AVB_MAX_CHANNELS_PER_LISTENER_STREAM
 #define AVB_MAX_CHANNELS_PER_LISTENER_STREAM 8
 #endif
 

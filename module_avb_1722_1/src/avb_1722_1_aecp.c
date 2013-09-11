@@ -34,7 +34,7 @@ static guid_t acquired_controller_guid;
 static unsigned char acquired_controller_mac[6];
 
 
-static enum { 
+static enum {
     AECP_AEM_IDLE,
     AECP_AEM_WAITING,
     AECP_AEM_CONTROLLER_AVAILABLE_TIMEOUT,
@@ -112,7 +112,7 @@ static unsigned char *avb_1722_1_create_aecp_response_header(unsigned char dest_
 static void avb_1722_1_create_aecp_aem_response(unsigned char src_addr[6], unsigned char status, unsigned int command_data_len, avb_1722_1_aecp_packet_t* cmd_pkt)
 {
   /* 9.2.1.1.7: "control_data_length field for AECP is the number of octets following the target_guid,
-  but is limited to a maximum of 524" 
+  but is limited to a maximum of 524"
 
   control_data_length = payload_specific_data + sequence_id + controller_guid
   payload_specific_data (for AEM) = command_specific_data + command_type + u
@@ -179,7 +179,7 @@ static int create_aem_read_descriptor_response(unsigned short read_type, unsigne
           strcpy((char*)&descriptor[4], "Input ");
         }
         else offset = 17;
-        
+
         descriptor[offset] = id_num + 0x30;
       }
       descriptor[offset+1] = '\0'; // NUL
@@ -192,9 +192,9 @@ static int create_aem_read_descriptor_response(unsigned short read_type, unsigne
     {
       int num_mappings = (read_id == 0) ? AVB_NUM_MEDIA_OUTPUTS : AVB_NUM_MEDIA_INPUTS;
 
-      /* Since the map descriptors aren't constant size, unlike the clusters, and 
+      /* Since the map descriptors aren't constant size, unlike the clusters, and
        * dependent on the number of channels, we don't use a template */
-      
+
       struct ethernet_hdr_t *hdr = (ethernet_hdr_t*) &avb_1722_1_buf[0];
       avb_1722_1_aecp_packet_t *pkt = (avb_1722_1_aecp_packet_t*) (hdr + AVB_1722_1_PACKET_BODY_POINTER_OFFSET);
       avb_1722_1_aecp_aem_msg_t *aem = (avb_1722_1_aecp_aem_msg_t*)(pkt->data.payload);
@@ -203,7 +203,7 @@ static int create_aem_read_descriptor_response(unsigned short read_type, unsigne
       desc_size_bytes = 8+(num_mappings*8);
 
       memset(pktptr, 0, desc_size_bytes);
- 
+
       pktptr[0*2+1] = AEM_AUDIO_MAP_TYPE;
       pktptr[1*2+1] = read_id;
       pktptr[2*2+1] = 8;
@@ -232,7 +232,7 @@ static int create_aem_read_descriptor_response(unsigned short read_type, unsigne
         {
           desc_size_bytes = aem_descriptor_list[i+k];
           descriptor = (unsigned char *)aem_descriptor_list[i+k+1];
-          
+
           // TODO: Write macros for descriptor fields (or cast to structs??)
           if (( ((unsigned)descriptor[2] << 8) | ((unsigned)descriptor[3]) ) == read_id)
           {
@@ -513,7 +513,7 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
         {
           status = AECP_AEM_STATUS_NOT_SUPPORTED;
         }
-        else 
+        else
         {
           if (entity_acquired_status == AEM_ENTITY_NOT_ACQUIRED)
           {
@@ -550,7 +550,7 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
               }
               else
               {
-                /* Current acquired Controller is persistent or the CONTROLLER_AVAILABLE timed out. 
+                /* Current acquired Controller is persistent or the CONTROLLER_AVAILABLE timed out.
                 The Entity returns an ENTITY_ACQUIRED response immediately to any other Controller. */
                 status = AECP_AEM_STATUS_ENTITY_ACQUIRED;
                 /* Reset the pending controller GUID field */
@@ -578,7 +578,7 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
             {
               entity_acquired_status = AEM_ENTITY_ACQUIRED;
             }
-            
+
             for(int i=0; i < 8; i++)
             {
               acquired_controller_guid.c[i] = pkt->controller_guid[i];
@@ -587,7 +587,7 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
             status = AECP_AEM_STATUS_SUCCESS;
           }
         }
-        
+
         // TODO: Release
         printstr("1722.1 Controller ");
 
@@ -610,7 +610,7 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
           if (global_entity_acquired)
             if (global_controller_guid != this_controller_guid)
               send ENTITY_ACQUIRED
-            else 
+            else
               send LOCK_ENTITY response with locked_guid set to global_controller_guid
           else
             send LOCK_ENTITY response with locked_guid set to global_controller_guid
@@ -637,7 +637,7 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
           mac_tx(c_tx, avb_1722_1_buf, 68, 0);
         }
         */
-        
+
         break;
       }
       case AECP_AEM_CMD_READ_DESCRIPTOR:
@@ -734,7 +734,7 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt, unsig
           break;
         }
         /* The acquired controller is still available.
-         * We mark the entity status as acquired so that the ACQUIRE_ENTITY retry is responded to with 
+         * We mark the entity status as acquired so that the ACQUIRE_ENTITY retry is responded to with
          * the correct ENTITY_ACQUIRED status code */
         entity_acquired_status = AEM_ENTITY_ACQUIRED;
         break;

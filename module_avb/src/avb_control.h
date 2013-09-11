@@ -12,7 +12,7 @@
  *  Sets the presentation time offset of a source i.e. the
  *  time after sampling that the stream should be played. The default
  *  value for this is 2ms.
- * 
+ *
  *  This setting will not take effect until the next time the source
  *  state moves from disabled to potential.
  *
@@ -80,7 +80,7 @@ void get_avb_source_dest(unsigned source_num, char addr[], unsigned& len);
  *  The AVB source format covers the encoding and sample rate of the source.
  *  Currently the format is limited to a single encoding MBLA 24 bit signed
  *  integers.
- *  
+ *
  *  This setting will not take effect until the next time the source
  *  state moves from disabled to potential.
  *
@@ -103,7 +103,7 @@ void get_avb_source_format(unsigned source_num, unsigned format, unsigned& rate)
  *
  *  This setting will not take effect until the next time the source
  *  state moves from disabled to potential.
- *  
+ *
  *  \param source_num the local source number
  *  \param n          the number of channels
  */
@@ -118,7 +118,7 @@ void get_avb_source_channels(unsigned source_num, unsigned& n);
 /** Set the media clock of an AVB source.
  *
  *  Sets the media clock of the stream.
- *  
+ *
  *  \param source_num the local source number
  *  \param mclock     the media clock number
  */
@@ -153,9 +153,9 @@ void get_avb_source_vlan(unsigned source_num, unsigned& vlan);
  *
  *  Sets the current state of an AVB source. You cannot set the
  *  state to ``ENABLED``. Changing the state to ``POTENTIAL`` turns the stream
- *  on and it will automatically change to ``ENABLED`` when connected to 
+ *  on and it will automatically change to ``ENABLED`` when connected to
  *  a listener and streaming.
- *  
+ *
  *  \param source_num the local source number
  *  \param state      the state of the source
  */
@@ -175,7 +175,7 @@ void get_avb_source_state(unsigned source_num, avb_source_state_t& state);
  *  state moves from disabled to potential.
  *
  * \param sink_num   the number of the sink
- * \param map        array containing the media output FIFOs that the 
+ * \param map        array containing the media output FIFOs that the
  *                   stream will be split into
  * \param len        the length of the map; should equal to the number
  *                   of channels in the stream
@@ -294,7 +294,7 @@ void get_avb_sink_id(unsigned sink_num, unsigned streamId[]);
  *
  *  Sets the current state of an AVB sink. You cannot set the
  *  state to ``ENABLED``. Changing the state to ``POTENTIAL`` turns the stream
- *  on and it will automatically change to ``ENABLED`` when connected to 
+ *  on and it will automatically change to ``ENABLED`` when connected to
  *  a talker and receiving samples.
  *
  * \param sink_num the number of the sink
@@ -313,7 +313,7 @@ void get_avb_sink_state(unsigned sink_num, avb_sink_state_t state);
  *
  *  For clocks that are derived from an output FIFO. This function
  *  gets/sets which FIFO the clock should be derived from.
- * 
+ *
  *  \param clock_num the number of the media clock
  *  \param source the output FIFO number to base the clock on
  *
@@ -345,8 +345,8 @@ int get_device_media_clock_rate(int clock_num, int& rate);
 /** Set the type of a media clock.
  *
  *  \param clock_num the number of the media clock
- *  \param clock_type the type of the clock 
- * 
+ *  \param clock_type the type of the clock
+ *
  **/
 int set_device_media_clock_type(int clock_num, device_media_clock_type_t clock_type);
 

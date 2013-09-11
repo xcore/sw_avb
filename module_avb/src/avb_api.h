@@ -16,7 +16,7 @@ int getset_avb_source_presentation(int set, int source_num,REFERENCE_PARAM(int, 
  *  Sets the presentation time offset of a source i.e. the
  *  time after sampling that the stream should be played. The default
  *  value for this is 2ms.
- * 
+ *
  *  This setting will not take effect until the next time the source
  *  state moves from disabled to potential.
  *
@@ -96,7 +96,7 @@ int getset_avb_source_format(int set, int source_num,REFERENCE_PARAM(enum avb_st
  *  The AVB source format covers the encoding and sample rate of the source.
  *  Currently the format is limited to a single encoding MBLA 24 bit signed
  *  integers.
- *  
+ *
  *  This setting will not take effect until the next time the source
  *  state moves from disabled to potential.
  *
@@ -123,7 +123,7 @@ int getset_avb_source_channels(int set, int source_num,REFERENCE_PARAM(int, a0))
  *
  *  This setting will not take effect until the next time the source
  *  state moves from disabled to potential.
- *  
+ *
  *  \param source_num   the local source number
  *  \param channels     the number of channels
  */
@@ -142,7 +142,7 @@ int getset_avb_source_sync(int set, int source_num,REFERENCE_PARAM(int, a0));
 /** Set the media clock of an AVB source.
  *
  *  Sets the media clock of the stream.
- *  
+ *
  *  \param source_num   the local source number
  *  \param sync         the media clock number
  */
@@ -187,9 +187,9 @@ int getset_avb_source_state(int set, int source_num,REFERENCE_PARAM(enum avb_sou
  *
  *  Sets the current state of an AVB source. You cannot set the
  *  state to ``ENABLED``. Changing the state to ``AVB_SOURCE_STATE_POTENTIAL`` turns the stream
- *  on and it will automatically change to ``ENABLED`` when connected to 
+ *  on and it will automatically change to ``ENABLED`` when connected to
  *  a listener and streaming.
- *  
+ *
  *  \param source_num the local source number
  *  \param state      the state of the source
  */
@@ -217,7 +217,7 @@ int getset_avb_sink_format(int set, int h0,REFERENCE_PARAM(enum avb_stream_forma
  *  The AVB sink format covers the encoding and sample rate of the sink.
  *  Currently the format is limited to a single encoding MBLA 24 bit signed
  *  integers.
- *  
+ *
  *  This setting will not take effect until the next time the sink
  *  state moves from disabled to potential.
  *
@@ -245,7 +245,7 @@ int getset_avb_sink_channels(int set, int h0,REFERENCE_PARAM(int, a0));
  *
  *  This setting will not take effect until the next time the sink
  *  state moves from disabled to potential.
- *  
+ *
  *  \param sink_num     the local sink number
  *  \param channels     the number of channels
  */
@@ -264,7 +264,7 @@ int getset_avb_sink_sync(int set, int sink_num,REFERENCE_PARAM(int, sync));
 /** Set the media clock of an AVB sink.
  *
  *  Sets the media clock of the stream.
- *  
+ *
  *  \param sink_num   the local sink number
  *  \param sync         the media clock number
  */
@@ -307,7 +307,7 @@ int getset_avb_sink_state(int set, int sink_num,REFERENCE_PARAM(enum avb_sink_st
  *
  *  Sets the current state of an AVB sink. You cannot set the
  *  state to ``ENABLED``. Changing the state to ``POTENTIAL`` turns the stream
- *  on and it will automatically change to ``ENABLED`` when connected to 
+ *  on and it will automatically change to ``ENABLED`` when connected to
  *  a talker and receiving samples.
  *
  * \param sink_num the number of the sink
@@ -334,7 +334,7 @@ int getset_avb_sink_map(int set, int sink_num,int map[], REFERENCE_PARAM(int, le
  *  state moves from disabled to potential.
  *
  * \param sink_num   the number of the sink
- * \param map        array containing the media output FIFOs that the 
+ * \param map        array containing the media output FIFOs that the
  *                   stream will be split into
  * \param len        the length of the map; should equal to the number
  *                   of channels in the stream
@@ -411,7 +411,7 @@ int getset_device_media_clock_source(int set, int clock_num,REFERENCE_PARAM(int,
  *
  *  For clocks that are derived from an output FIFO. This function
  *  gets/sets which FIFO the clock should be derived from.
- * 
+ *
  *  \param clock_num the number of the media clock
  *  \param source the output FIFO number to base the clock on
  *
@@ -451,8 +451,8 @@ int getset_device_media_clock_type(int set, int clock_num,REFERENCE_PARAM(enum d
 /** Set the type of a media clock.
  *
  *  \param clock_num the number of the media clock
- *  \param clock_type the type of the clock 
- * 
+ *  \param clock_type the type of the clock
+ *
  **/
 inline int set_device_media_clock_type(int clock_num,enum device_media_clock_type_t clock_type)
 {return getset_device_media_clock_type(1, clock_num,REFERENCE_TO clock_type);}

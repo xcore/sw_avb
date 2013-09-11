@@ -17,11 +17,11 @@ static struct stream_info stream_history[AVB_STREAM_DETECT_HISTORY_SIZE];
 static int rdPtr=0;
 static int wrPtr = 0;
 
-void avb_add_detected_stream(unsigned streamId[2], 
+void avb_add_detected_stream(unsigned streamId[2],
                              unsigned vlan,
                              unsigned char addr[6],
                              int addr_offset)
-{  
+{
   int found = 0;
   unsigned int my_stream_id[2];
 
@@ -55,15 +55,15 @@ void avb_add_detected_stream(unsigned streamId[2],
       if (rdPtr==AVB_STREAM_DETECT_HISTORY_SIZE)
         rdPtr = 0;
     }
-    
+
     stream_history[wrPtr].id[0] = streamId[0];
     stream_history[wrPtr].id[1] = streamId[1];
     stream_history[wrPtr].vlan = vlan;
-    
+
     if (addr != NULL) {
       unsigned long long x;
-      
-      for(int i=0;i<6;i++) 
+
+      for(int i=0;i<6;i++)
         x = (x<<8) + addr[i];
 
       x += addr_offset;
@@ -77,7 +77,7 @@ void avb_add_detected_stream(unsigned streamId[2],
       for(int i=0;i<6;i++)
         stream_history[wrPtr].addr[i] = 0;
     }
-      
+
     wrPtr = new_wrPtr;
   }
 }
@@ -96,7 +96,7 @@ int avb_check_for_new_stream(unsigned streamId[2], unsigned *vlan,
       addr[i] = stream_history[rdPtr].addr[i];
     rdPtr++;
     if (rdPtr==AVB_STREAM_DETECT_HISTORY_SIZE)
-      rdPtr = 0;    
+      rdPtr = 0;
     return 1;
   }
   return 0;

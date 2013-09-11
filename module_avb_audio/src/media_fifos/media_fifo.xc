@@ -2,9 +2,9 @@
 #include "media_fifo.h"
 
 void media_ctl_register(chanend media_ctl,
-                        int num_in, 
-                        media_input_fifo_t ?input_fifos[], 
-                        int num_out, 
+                        int num_in,
+                        media_input_fifo_t ?input_fifos[],
+                        int num_out,
                         media_output_fifo_t ?output_fifos[],
                         int clk_ctl_index)
 {

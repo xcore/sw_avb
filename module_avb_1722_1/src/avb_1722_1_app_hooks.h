@@ -7,7 +7,7 @@
 #include "avb_1722_1_acmp_pdu.h"
 
 
-/** A new AVDECC entity has advertised itself as available. It may be an entity starting up or 
+/** A new AVDECC entity has advertised itself as available. It may be an entity starting up or
  *  a previously seen entity that had timed out.
  *
  * \param my_guid   The GUID of this entity
@@ -16,14 +16,14 @@
  **/
 void avb_entity_on_new_entity_available(const_guid_ref_t my_guid, REFERENCE_PARAM(avb_1722_1_entity_record, entity), chanend c_tx);
 
-/** A Controller has indicated that a Listener is connecting to this Talker stream source 
+/** A Controller has indicated that a Listener is connecting to this Talker stream source
  *
  * \param source_num        The local id of the Talker stream source
  * \param listener_guid     The GUID of the Listener entity that is connecting
  **/
 void avb_talker_on_listener_connect(int source_num, const_guid_ref_t listener_guid);
 
-/** A Controller has indicated that a Listener is disconnecting from this Talker stream source 
+/** A Controller has indicated that a Listener is disconnecting from this Talker stream source
  *
  * \param source_num        The local id of the Talker stream source
  * \param listener_guid     The GUID of the Listener entity that is disconnecting

@@ -75,11 +75,11 @@
 /** Use 61883-6 audio format for 1722 streams */
 #define AVB_1722_FORMAT_61883_6 1
 
-/** The number of components in the endpoint that will register and initialize media FIFOs 
+/** The number of components in the endpoint that will register and initialize media FIFOs
     (typically an audio interface component such as I2S). */
 #define AVB_NUM_MEDIA_UNITS 1
 
-/** The number of media clocks in the endpoint. Typically the number of clock domains, each with a 
+/** The number of media clocks in the endpoint. Typically the number of clock domains, each with a
   * separate PLL and master clock */
 #define AVB_NUM_MEDIA_CLOCKS 1
 

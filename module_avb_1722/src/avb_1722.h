@@ -3,20 +3,20 @@
  * \brief IEC 61883-6/AVB1722 common definitions
  */
 
-#ifndef _AVB1722_TOP_H_ 
+#ifndef _AVB1722_TOP_H_
 #define _AVB1722_TOP_H_ 1
 
 #ifdef __XC__
 
-/** An AVB IEEE 1722 audio talker thread. 
+/** An AVB IEEE 1722 audio talker thread.
  *  This thread implements a talker, taking
  *  media input FIFOs and combining them into 1722 packets to be
- *  sent to the ethernet component. It is dynamically configured 
+ *  sent to the ethernet component. It is dynamically configured
  *  using the AVB control API.
- * 
+ *
  *  \param c_ptp            link to the PTP timing server
  *  \param c_mac_tx         transmit link to the ethernet MAC
- *  \param c_talker_ctl     channel to configure the talker (given 
+ *  \param c_talker_ctl     channel to configure the talker (given
  *                          to avb_init())
  *  \param num_streams      the number of streams the unit controls
  **/
@@ -27,8 +27,8 @@ void avb_1722_talker(chanend c_ptp,
 
 /** An AVB IEEE 1722 audio listener thread.
  *
- *  This thread implements a listener. It takes IEEE 1722 packets from 
- *  the ethernet MAC and splits them into output FIFOs. The 
+ *  This thread implements a listener. It takes IEEE 1722 packets from
+ *  the ethernet MAC and splits them into output FIFOs. The
  *  buffer fill level of these streams is set in conjunction with communication
  *  to the media clock server. This thread is dynamically configured
  *  using the AVB control API.

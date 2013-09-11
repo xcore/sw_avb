@@ -8,5 +8,5 @@
 #define NUM_MII_TX_BUF 4
 
 #define MAX_ETHERNET_CLIENTS   5
-    
+
 #endif

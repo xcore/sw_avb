@@ -28,9 +28,9 @@ void avb_1722_1_acmp_listener_periodic(chanend c_tx);
  *  \param listener_id      the unique id of the Listener stream source to connect.
  *                          For entities using AEM, this corresponds to the id of the STREAM_INPUT descriptor
  *  \param c_tx             a transmit chanend to the Ethernet server
- *  
+ *
  **/
-void avb_1722_1_controller_connect(const_guid_ref_t talker_guid, 
+void avb_1722_1_controller_connect(const_guid_ref_t talker_guid,
                                    const_guid_ref_t listener_guid,
                                    int talker_id,
                                    int listener_id,
@@ -48,9 +48,9 @@ void avb_1722_1_controller_connect(const_guid_ref_t talker_guid,
  *  \param listener_id      the unique id of the Listener stream source to disconnect.
  *                          For entities using AEM, this corresponds to the id of the STREAM_INPUT descriptor
  *  \param c_tx             a transmit chanend to the Ethernet server
- *  
+ *
  **/
-void avb_1722_1_controller_disconnect(const_guid_ref_t talker_guid, 
+void avb_1722_1_controller_disconnect(const_guid_ref_t talker_guid,
                                       const_guid_ref_t listener_guid,
                                       int talker_id,
                                       int listener_id,
@@ -62,7 +62,7 @@ void avb_1722_1_controller_disconnect(const_guid_ref_t talker_guid,
  *  \param talker_id        the unique id of the Talker stream source to disconnect its listeners.
  *                          For entities using AEM, this corresponds to the id of the STREAM_OUTPUT descriptor
  *  \param c_tx             a transmit chanend to the Ethernet server
- *  
+ *
  **/
 void avb_1722_1_controller_disconnect_all_listeners(int talker_id, chanend c_tx);
 
@@ -73,7 +73,7 @@ void avb_1722_1_controller_disconnect_all_listeners(int talker_id, chanend c_tx)
  *  \param listener_id      the unique id of the Listener stream source to disconnect its Talker.
  *                          For entities using AEM, this corresponds to the id of the STREAM_INPUT descriptor
  *  \param c_tx             a transmit chanend to the Ethernet server
- *  
+ *
  **/
 void avb_1722_1_controller_disconnect_talker(int listener_id, chanend c_tx);
 
@@ -98,7 +98,7 @@ unsigned avb_1722_1_acmp_get_listener_connection_info(REFERENCE_PARAM(short,list
  */
 void avb_1722_1_talker_set_mac_address(unsigned talker_unique_id, unsigned char macaddr[]);
 
-/** 
+/**
  *
  * Called by the application to inform 1722.1 of the source stream identifier
  * for a particular stream.

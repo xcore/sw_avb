@@ -60,7 +60,7 @@ void avb_talker_on_listener_connect_failed(const_guid_ref_t my_guid, int source_
         const_guid_ref_t listener_guid, avb_1722_1_acmp_status_t status, chanend c_tx)
 {
     int i = avb_1722_1_entity_database_find(listener_guid);
-    
+
     // Don't attempt to re-connect if the other end says LISTENER_EXCLUSIVE
     if ((i != AVB_1722_1_MAX_ENTITIES) && (status != ACMP_STATUS_LISTENER_EXCLUSIVE))
         avb_entity_on_new_entity_available(my_guid, &entities[i], c_tx);

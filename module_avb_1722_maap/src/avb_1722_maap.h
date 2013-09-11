@@ -6,19 +6,19 @@
 #define MAX_AVB_1722_MAAP_PDU_SIZE (64)
 
 /** Request a range of multicast addresses.
- * 
+ *
  *  This function requests a range of multicast addresses to use as destination
- *  addresses for IEEE 1722 streams. It starts the reservation process 
- *  according to the 1722 MAAP protocol. If the reservation is successful it 
+ *  addresses for IEEE 1722 streams. It starts the reservation process
+ *  according to the 1722 MAAP protocol. If the reservation is successful it
  *  is reported via the status return value of avb_periodic().
  *
- *  \param num_addresses    number of addresses to try and reserve; 
+ *  \param num_addresses    number of addresses to try and reserve;
  *                          will be reserved in a contiguous range
- *  \param start_address    an optional six byte array specifying the required 
+ *  \param start_address    an optional six byte array specifying the required
  *                          start address of the range NOTE: must be within the MAAP reserved pool;
  *                           if argument is null then the start address will be picked at
  *                          random from the MAAP reserved pool
- *  
+ *
  **/
 #ifdef __XC__
 void avb_1722_maap_request_addresses(int num_addresses, char ?start_address[]);
@@ -59,7 +59,7 @@ void avb_1722_maap_rerequest_addresses();
 
 /** MAAP has indicated that a multicast address has been successfully reserved for this Talker stream
  *
- * \param source_num    The local source ID of the Talker 
+ * \param source_num    The local source ID of the Talker
  * \param mac_addr      The destination MAC address reserved for this Talker
  */
 void avb_talker_on_source_address_reserved(int source_num, unsigned char mac_addr[6]);

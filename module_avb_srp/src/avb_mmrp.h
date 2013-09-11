@@ -11,7 +11,7 @@
  */
 
 //! Ethertype for MMRP
-#define AVB_MMRP_ETHERTYPE (0x88f6) 
+#define AVB_MMRP_ETHERTYPE (0x88f6)
 
 #ifndef AVB_MAX_MMRP_GROUPS
 #define AVB_MAX_MMRP_GROUPS (AVB_NUM_SINKS*2)

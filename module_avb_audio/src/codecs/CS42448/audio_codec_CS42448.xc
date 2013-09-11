@@ -58,18 +58,18 @@ static unsigned REGWR(unsigned reg, unsigned val,
 
 static const char error_msg[] = "CS42448 Config Failed";
 
-void audio_codec_CS42448_init(out port p_reset, 
+void audio_codec_CS42448_init(out port p_reset,
                            #if I2C_COMBINE_SCL_SDA
                                port r_i2c
                            #else
                                struct r_i2c &r_i2c
                            #endif
-                              ,int mode) 
+                              ,int mode)
 {
    timer t;
    unsigned int time;
    unsigned res = 1;
-   
+
    i2c_master_init(r_i2c);
 
    // Reset the codec
@@ -77,7 +77,7 @@ void audio_codec_CS42448_init(out port p_reset,
    t :> time;
    t when timerafter(time + 100000) :> time;
    p_reset <: 1;
-   
+
    if (mode == CODEC_TDM) {
 	   // DAC_FM = 0 (single speed)
 	   // ADC_FM = 0 (single speed)
@@ -87,7 +87,7 @@ void audio_codec_CS42448_init(out port p_reset,
 	   // Default to I2S
 	   res = REGWR(CODEC_FUNCTIONAL_MODE, 0b00000100, r_i2c);
    }
-   
+
    if (res == 0) {
 	   printstr(error_msg);
 	   return;
@@ -103,7 +103,7 @@ void audio_codec_CS42448_init(out port p_reset,
 	   // Left justified for DAC and ADC
 	   res = REGWR(CODEC_INTERFACE_FORMATS, 0b00000000, r_i2c);
    }
-   
+
    if (res == 0) {
 	   printstr(error_msg);
 	   return;

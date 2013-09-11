@@ -13,7 +13,7 @@ void print_guid_ln(const_guid_ref_t g)
         if (i == 0)
             printchar('\n');
         else
-        printchar(':'); 
+        printchar(':');
     }
 }
 
@@ -25,7 +25,7 @@ void print_mac_ln(unsigned char *c)
         if (i == 5)
             printchar('\n');
         else
-        printchar(':'); 
+        printchar(':');
     }
 }
 

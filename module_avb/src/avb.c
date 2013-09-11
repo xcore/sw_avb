@@ -383,7 +383,7 @@ int getset_avb_source_state(int set,
         // enable the source
         int valid = 1;
         int clk_ctl;
- 
+
         if (source->stream.num_channels <= 0)
           valid = 0;
 
@@ -922,7 +922,7 @@ void avb_process_control_packet(unsigned int buf0[], int nbytes, chanend c_tx)
       for (int i=0; i < AVB_NUM_SINKS; i++)
       {
         set_avb_sink_state(i, AVB_SOURCE_STATE_DISABLED);
-      }      
+      }
     }
   }
   else

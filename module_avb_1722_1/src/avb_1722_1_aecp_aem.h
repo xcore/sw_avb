@@ -84,7 +84,7 @@ typedef struct {
     unsigned char stream_id[8];
     unsigned char msrp_accumulated_latency[4];
     unsigned char stream_dest_mac[6];
-    unsigned char msrp_failure_code[1]; 
+    unsigned char msrp_failure_code[1];
     unsigned char reserved[1];
     unsigned char msrp_failure_bridge_id[8];
 } avb_1722_1_aem_getset_stream_info_t;

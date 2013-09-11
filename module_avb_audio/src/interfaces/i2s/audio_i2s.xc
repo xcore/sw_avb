@@ -14,7 +14,7 @@
 
 #define I2S_SINE_TABLE_SIZE 100
 
-unsigned int i2s_sine[I2S_SINE_TABLE_SIZE] = 
+unsigned int i2s_sine[I2S_SINE_TABLE_SIZE] =
 {
     0x0100da,0x0200b0,0x02fe81,0x03f94b,0x04f011,
     0x05e1da,0x06cdb2,0x07b2aa,0x088fdb,0x096466,
@@ -52,20 +52,20 @@ void i2s_master_configure_ports(i2s_ports_t &i2s,
 
   configure_out_port_no_ready(i2s.p_bclk, i2s.mclk, 0);
   start_port(i2s.p_bclk);
-  
+
   configure_out_port_no_ready(i2s.p_lrclk, i2s.bclk, 0);
   start_port(i2s.p_lrclk);
-  
+
   for (int i=0;i<num_out;i++) {
     configure_out_port_no_ready(p_dout[i], i2s.bclk, 0);
     start_port(p_dout[i]);
   }
-  
+
   for (int i=0;i<num_in;i++) {
     configure_in_port_no_ready(p_din[i], i2s.bclk);
     start_port(p_din[i]);
   }
-  
+
   clearbuf(i2s.p_lrclk);
   clearbuf(i2s.p_bclk);
 
@@ -74,7 +74,7 @@ void i2s_master_configure_ports(i2s_ports_t &i2s,
   }
   for (int i = 0; i < num_out; i++) {
     clearbuf(p_dout[i]);
-  }  
+  }
   start_clock(i2s.bclk);
   return;
 }

@@ -3,8 +3,8 @@
  *
  *
  */
- 
-#ifndef _LOCAL_TALKER_STREAM_H_ 
+
+#ifndef _LOCAL_TALKER_STREAM_H_
 #define _LOCAL_TALKER_STREAM_H_ 1
 #include "avb_conf.h"
 
@@ -46,7 +46,7 @@ typedef int media_input_fifo_t;
  *  of a packet has been written then the pointer to the start of the
  *  packet is updated.
  */
-void 
+void
 media_input_fifo_push_sample(media_input_fifo_t media_input_fifo,
                              unsigned int sample,
                              unsigned int ts);
@@ -75,7 +75,7 @@ media_input_fifo_get_packet(media_input_fifo_t media_input_fifo,
  *
  * \param media_input_fifo  The fifo on which to release the packet
  */
-void 
+void
 media_input_fifo_release_packet(media_input_fifo_t media_input_fifo);
 
 /** \brief Initialise the fifo
@@ -107,9 +107,9 @@ media_input_fifo_disable(media_input_fifo_t media_input_fifo);
 /** Initialize media input fifos.
  *
  *  This function intializes media input FIFOs and ties the handles
- *  to their associated data structures. It should be called before the main 
+ *  to their associated data structures. It should be called before the main
  *  component function on a thread to setup the FIFOs.
- * 
+ *
  *  \param ififos      an array of media input FIFO handles to initialize
  *  \param ififo_data  an array of associated data structures
  *  \param n           the number of FIFOs to initialize
@@ -118,7 +118,7 @@ void
 init_media_input_fifos(media_input_fifo_t ififos[],
                        media_input_fifo_data_t ififo_data[],
                        int n);
-                       
+
 
 /**
  *  \brief Get the FIFO for the given stream number

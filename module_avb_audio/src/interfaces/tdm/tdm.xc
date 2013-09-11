@@ -17,7 +17,7 @@
 
 
 static void tdm_loopback_aux(
-  clock b_mck, in port p_mck, out port p_bck, 
+  clock b_mck, in port p_mck, out port p_bck,
   out buffered port:4 p_wck,
   in buffered port:32 p_din, out buffered port:32 p_dout,
   streaming chanend c_adc, streaming chanend c_dac)
@@ -62,7 +62,7 @@ static void tdm_loopback_aux(
 }
 
 
-void tdm_loopback(  clock b_mck, in port p_mck, out port p_bck, 
+void tdm_loopback(  clock b_mck, in port p_mck, out port p_bck,
                 out buffered port:4 p_wck,
                 in buffered port:32 p_din, out buffered port:32 p_dout)
 {
@@ -93,8 +93,8 @@ void tdm_loopback(  clock b_mck, in port p_mck, out port p_bck,
 void tdm_master(
   clock b_mck, in port p_mck, out port p_bck, out buffered port:4 p_wck,
   in buffered port:32 p_din, out buffered port:32 p_dout,
-  streaming chanend c_listener, 
-  int input_fifos[], 
+  streaming chanend c_listener,
+  int input_fifos[],
   int num_channels,
   chanend media_ctl,
   int clk_ctl_index)  // Both in and out
@@ -122,7 +122,7 @@ void tdm_master(
   start_clock(b_mck);
 
   p_din :> void @ t;
-  
+
   t += 64;
 
   asm("setpt res[%0], %1" : : "r"(p_din), "r"(t + CLOCKS_PER_CHANNEL + 2));

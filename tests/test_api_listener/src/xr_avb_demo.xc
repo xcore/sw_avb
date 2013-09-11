@@ -149,7 +149,7 @@ int main(void) {
             // Enable XScope printing
             xscope_register(0, XSCOPE_CONTINUOUS, "", XSCOPE_UINT, "");
             xscope_config_io(XSCOPE_IO_BASIC);
-            
+
 			media_clock_server(media_clock_ctl,
 					ptp_link[1],
 					buf_ctl,
@@ -204,7 +204,7 @@ int main(void) {
             // Enable XScope printing
             xscope_register(0, XSCOPE_CONTINUOUS, "", XSCOPE_UINT, "");
             xscope_config_io(XSCOPE_IO_BASIC);
-            
+
 			// First initialize avb higher level protocols
 			avb_init(media_ctl, listener_ctl, null, media_clock_ctl, rx_link[2], tx_link[1], ptp_link[0]);
 

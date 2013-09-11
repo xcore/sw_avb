@@ -9,11 +9,11 @@
 
 #include "avb_1722_def.h"
 #include <xccompat.h>
-#include "avb_conf.h" 
+#include "avb_conf.h"
 #include "gptp.h"
 #include "media_input_fifo.h"
 
-#ifndef AVB_MAX_CHANNELS_PER_TALKER_STREAM 
+#ifndef AVB_MAX_CHANNELS_PER_TALKER_STREAM
 #define AVB_MAX_CHANNELS_PER_TALKER_STREAM 8
 #endif
 

@@ -77,7 +77,7 @@ int avb_srp_match_listener(mrp_attribute_state *attr,
   for (int i=0;i<8;i++) {
     stream_id = (stream_id << 8) + first_value->StreamId[i];
   }
-  
+
   stream_id += i;
 
   return (my_stream_id == stream_id);
@@ -142,18 +142,18 @@ avb_srp_process_talker(int mrp_attribute_type, char *fv, int num)
 
   pdu_streamId[0] = streamId >> 32;
   pdu_streamId[1] = (unsigned) streamId;
-  
+
 
 #ifdef AVNU_OBSERVABILITY
-  switch (mrp_attribute_type) 
+  switch (mrp_attribute_type)
     {
-    case AVB_SRP_ATTRIBUTE_TYPE_TALKER_ADVERTISE:              
+    case AVB_SRP_ATTRIBUTE_TYPE_TALKER_ADVERTISE:
       avnu_log(AVNU_TESTPOINT_TA,NULL,"");
       break;
     case AVB_SRP_ATTRIBUTE_TYPE_TALKER_FAILED:
       avnu_log(AVNU_TESTPOINT_TAF,NULL,"");
       break;
-    }          
+    }
 #endif
 
   // Check if we already know about this stream
@@ -161,23 +161,23 @@ avb_srp_process_talker(int mrp_attribute_type, char *fv, int num)
     get_avb_sink_id(i, lstreamId);
     if (pdu_streamId[0] == lstreamId[0] &&
         pdu_streamId[1] == lstreamId[1]) {
-      
+
       registered = 1;
     }
-  }                   
+  }
 
   // Check if we already know about this stream
   for(int i=0;i<AVB_NUM_SOURCES;i++) {
     get_avb_source_id(i, lstreamId);
     if (pdu_streamId[0] == lstreamId[0] &&
         pdu_streamId[1] == lstreamId[1]) {
-      
+
       registered = 1;
     }
-  }                   
+  }
 
 // Old SRP snooping mechanism
-#if 0 
+#if 0
   if (!registered)
 #ifndef SRP_VERSION_5
     {
@@ -207,19 +207,19 @@ void avb_srp_talker_leave_ind(mrp_attribute_state *attr)
 }
 
 
-void avb_srp_get_failed_stream(unsigned int streamId[2]) 
+void avb_srp_get_failed_stream(unsigned int streamId[2])
 {
   streamId[0] = failed_streamId[0];
   streamId[1] = failed_streamId[1];
 }
 
-static int check_listener_merge(char *buf, 
+static int check_listener_merge(char *buf,
                                 avb_stream_info_t *sink_info)
 {
-  mrp_vector_header *hdr = (mrp_vector_header *) (buf + sizeof(mrp_msg_header));  
+  mrp_vector_header *hdr = (mrp_vector_header *) (buf + sizeof(mrp_msg_header));
   int num_values = hdr->NumberOfValuesLow;
   unsigned long long stream_id=0, my_stream_id=0;
-  srp_listener_first_value *first_value = 
+  srp_listener_first_value *first_value =
     (srp_listener_first_value *) (buf + sizeof(mrp_msg_header) + sizeof(mrp_vector_header));
 
   // check if we can merge
@@ -229,13 +229,13 @@ static int check_listener_merge(char *buf,
   for (int i=0;i<8;i++) {
     stream_id = (stream_id << 8) + first_value->StreamId[i];
   }
-  
+
   stream_id += num_values;
 
 
   if (my_stream_id != stream_id)
     return 0;
-  
+
   return 1;
 
 }
@@ -246,8 +246,8 @@ static int merge_listener_message(char *buf,
                                   int vector)
 {
   mrp_msg_header *mrp_hdr = (mrp_msg_header *) buf;
-  mrp_vector_header *hdr = 
-    (mrp_vector_header *) (buf + sizeof(mrp_msg_header));  
+  mrp_vector_header *hdr =
+    (mrp_vector_header *) (buf + sizeof(mrp_msg_header));
   int merge = 0;
   avb_stream_info_t *sink_info = st->attribute_info;
 
@@ -257,15 +257,15 @@ static int merge_listener_message(char *buf,
     return 0;
 
   num_values = hdr->NumberOfValuesLow;
-                           
-  if (num_values == 0) 
+
+  if (num_values == 0)
     merge = 1;
-  else 
+  else
     merge = check_listener_merge(buf, sink_info);
 
 
   if (merge) {
-    srp_listener_first_value *first_value = 
+    srp_listener_first_value *first_value =
       (srp_listener_first_value *) (buf + sizeof(mrp_msg_header) + sizeof(mrp_vector_header));
     unsigned * streamId = sink_info->streamId;
     unsigned int streamid;
@@ -276,12 +276,12 @@ static int merge_listener_message(char *buf,
       streamid = byterev(streamId[1]);
       memcpy(&first_value->StreamId[4], &streamid, 4);
     }
-    
-    mrp_encode_three_packed_event(buf, vector, st->attribute_type);    
+
+    mrp_encode_three_packed_event(buf, vector, st->attribute_type);
     mrp_encode_four_packed_event(buf, AVB_SRP_FOUR_PACKED_EVENT_READY, st->attribute_type);
 
-    hdr->NumberOfValuesLow = num_values+1;    
-    
+    hdr->NumberOfValuesLow = num_values+1;
+
   }
 
   return merge;
@@ -307,8 +307,8 @@ static int merge_domain_message(char *buf,
                                 int vector)
 {
   mrp_msg_header *mrp_hdr = (mrp_msg_header *) buf;
-  mrp_vector_header *hdr = 
-    (mrp_vector_header *) (buf + sizeof(mrp_msg_header));  
+  mrp_vector_header *hdr =
+    (mrp_vector_header *) (buf + sizeof(mrp_msg_header));
   int merge = 0;
   int num_values;
 
@@ -318,40 +318,40 @@ static int merge_domain_message(char *buf,
 
 
   num_values = hdr->NumberOfValuesLow;
-                           
-  if (num_values == 0) 
+
+  if (num_values == 0)
     merge = 1;
-  else 
+  else
     merge = check_domain_merge(buf);
 
-  if (merge) { 
-    srp_domain_first_value *first_value = 
-      (srp_domain_first_value *) (buf + sizeof(mrp_msg_header) + sizeof(mrp_vector_header));    
+  if (merge) {
+    srp_domain_first_value *first_value =
+      (srp_domain_first_value *) (buf + sizeof(mrp_msg_header) + sizeof(mrp_vector_header));
 
     first_value->SRclassID = AVB_SRP_SRCLASS_DEFAULT;
     first_value->SRclassPriority = AVB_SRP_TSPEC_PRIORITY_DEFAULT;
     first_value->SRclassVID[0] = (AVB_DEFAULT_VLAN>>8)&0xff;
     first_value->SRclassVID[1] = (AVB_DEFAULT_VLAN&0xff);
 
-    mrp_encode_three_packed_event(buf, vector, st->attribute_type);    
+    mrp_encode_three_packed_event(buf, vector, st->attribute_type);
 
     hdr->NumberOfValuesLow = num_values+1;
-  }    
-  
+  }
+
   return merge;
 }
 
 
-static int check_talker_merge(char *buf, 
+static int check_talker_merge(char *buf,
                               avb_source_info_t *source_info)
 {
-  mrp_vector_header *hdr = (mrp_vector_header *) (buf + sizeof(mrp_msg_header));  
+  mrp_vector_header *hdr = (mrp_vector_header *) (buf + sizeof(mrp_msg_header));
   int num_values = hdr->NumberOfValuesLow;
   unsigned long long stream_id=0, my_stream_id=0;
   unsigned long long dest_addr=0, my_dest_addr=0;
   int framesize=0, my_framesize=0;
   int vlan, my_vlan;
-  srp_talker_first_value *first_value = 
+  srp_talker_first_value *first_value =
     (srp_talker_first_value *) (buf + sizeof(mrp_msg_header) + sizeof(mrp_vector_header));
 
   // check if we can merge
@@ -360,7 +360,7 @@ static int check_talker_merge(char *buf,
     my_dest_addr = (my_dest_addr << 8) + source_info->dest[i];
     dest_addr = (dest_addr << 8) + first_value->DestMacAddr[i];
   }
-  
+
   dest_addr += num_values;
 
   if (dest_addr != my_dest_addr)
@@ -385,14 +385,14 @@ static int check_talker_merge(char *buf,
 
   if (vlan != my_vlan)
     return 0;
-  
+
   my_framesize = avb_srp_calculate_max_framesize(source_info);
-  framesize = ntoh_16(first_value->TSpecMaxFrameSize);  
+  framesize = ntoh_16(first_value->TSpecMaxFrameSize);
 
   if (framesize != my_framesize)
     return 0;
-  
-  
+
+
   return 1;
 
 }
@@ -402,10 +402,10 @@ static int merge_talker_message(char *buf,
                                 int vector)
 {
   mrp_msg_header *mrp_hdr = (mrp_msg_header *) buf;
-  mrp_vector_header *hdr = 
-    (mrp_vector_header *) (buf + sizeof(mrp_msg_header));  
+  mrp_vector_header *hdr =
+    (mrp_vector_header *) (buf + sizeof(mrp_msg_header));
   int merge = 0;
-  avb_source_info_t *source_info = st->attribute_info;       
+  avb_source_info_t *source_info = st->attribute_info;
   int num_values;
 
 
@@ -413,22 +413,22 @@ static int merge_talker_message(char *buf,
     return 0;
 
   num_values = hdr->NumberOfValuesLow;
-                           
-  if (num_values == 0) 
+
+  if (num_values == 0)
     merge = 1;
-  else 
+  else
     merge = check_talker_merge(buf, source_info);
-  
-  
+
+
 
   if (merge) {
-    srp_talker_first_value *first_value = 
+    srp_talker_first_value *first_value =
       (srp_talker_first_value *) (buf + sizeof(mrp_msg_header) + sizeof(mrp_vector_header));
     unsigned int framesize;
 
 
     // The SRP layer
-   
+
     if (num_values == 0) {
       unsigned int streamid;
       for (int i=0;i<6;i++) {
@@ -444,28 +444,28 @@ static int merge_talker_message(char *buf,
       //      printintln(source_info->vlan);
       hton_16(first_value->VlanID, source_info->stream.vlan);
 #endif
- 
+
 
       first_value->TSpec = AVB_SRP_TSPEC_PRIORITY_DEFAULT << 5 |
         AVB_SRP_TSPEC_RANK_DEFAULT << 4 |
         AVB_SRP_TSPEC_RESERVED_VALUE;
-      
+
       framesize = avb_srp_calculate_max_framesize(source_info);
 
       hton_16(first_value->TSpecMaxFrameSize, framesize);
       hton_16(first_value->TSpecMaxIntervalFrames,
                AVB_SRP_MAX_INTERVAL_FRAMES_DEFAULT);
-      hton_32(first_value->AccumulatedLatency, 
+      hton_32(first_value->AccumulatedLatency,
                AVB_SRP_ACCUMULATED_LATENCY_DEFAULT);
     }
 
-  mrp_encode_three_packed_event(buf, vector, st->attribute_type);    
+  mrp_encode_three_packed_event(buf, vector, st->attribute_type);
 
     hdr->NumberOfValuesLow = num_values+1;
 
   }
 
-  return merge;   
+  return merge;
 }
 
 

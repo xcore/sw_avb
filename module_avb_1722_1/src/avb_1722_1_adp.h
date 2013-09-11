@@ -33,7 +33,7 @@ void avb_1722_1_adp_depart(void);
 void avb_1722_1_adp_depart_then_announce(void);
 
 /** Ask to discover the information for a specific entity GUID
- * 
+ *
  * \param   guid    The GUID of the entity to discover
  */
 void avb_1722_1_adp_discover(REFERENCE_PARAM(guid_t, guid));
@@ -46,14 +46,14 @@ void avb_1722_1_adp_discover_all(void);
 
 /** Set the current PTP grandmaster used by ADP when it changes
  *
- *  \param grandmaster  a 6 byte array containing the AS Grandmaster ID 
+ *  \param grandmaster  a 6 byte array containing the AS Grandmaster ID
  */
 void avb_1722_1_adp_change_ptp_grandmaster(unsigned char grandmaster[8]);
 
 /** Find a GUID within the entities list.
  *
  *  \param guid  the GUID to be found
- *  
+ *
  *  \return      AVB_1722_1_MAX_ENTITIES if not found, otherwise the index of the entity.
  */
 int avb_1722_1_entity_database_find(const_guid_ref_t guid);

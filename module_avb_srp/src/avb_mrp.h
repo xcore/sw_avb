@@ -37,7 +37,7 @@
 
 typedef enum {
   MRP_UNUSED,
-  MRP_DISABLED,  
+  MRP_DISABLED,
   MRP_VO, // Very anxious Observer
   MRP_VP, // Very anxious Passive
   MRP_VN, // Very anxious New
@@ -161,9 +161,9 @@ typedef struct mrp_attribute_state {
 
 /** Function: mrp_init
 
-   This function initializes the MRP state machines. It just 
+   This function initializes the MRP state machines. It just
    needs to be called once at the start of the program.
-*/      
+*/
 void mrp_init(char macaddr[]);
 
 /** Function: mrp_attribute_init
@@ -191,7 +191,7 @@ void mrp_attribute_init(mrp_attribute_state *st,
    the state table and descriptions in IEEE802.1ak 10.7.
 
    \param st the attribute
-   
+
 */
 void mrp_mad_begin(mrp_attribute_state *st);
 
@@ -214,17 +214,17 @@ void mrp_mad_join(mrp_attribute_state *st, int new);
    state machines transition as if the Leave! event has occurred (see IEEE802.1ak 10.7)
 
    \param st The attribute to leave
-   
+
 */
 void mrp_mad_leave(mrp_attribute_state *st);
 
 /** Function: mrp_periodic
 
-   This function performs periodic MRP processing. It must be called 
+   This function performs periodic MRP processing. It must be called
    approximately 4 times a second.
 
    See also:
-   
+
        mrp_init
  */
 void mrp_periodic(void);

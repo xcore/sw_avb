@@ -10,7 +10,7 @@
 #include "string.h"
 #include "avb_1722_router_table.h"
 
-typedef struct avb_1722_router_table_entry_t 
+typedef struct avb_1722_router_table_entry_t
 {
   int id[2];
   int link;
@@ -26,7 +26,7 @@ void init_avb_1722_router_table_simple()
   for(i=0;i<AVB_NUM_SINKS;i++) {
     router_table[i].id[0] = 0;
     router_table[i].id[1] = 0;
-  }    
+  }
 }
 
 
@@ -34,14 +34,14 @@ void init_avb_1722_router_table_simple()
 #define STRINGIFY(X) STRINGIFY0(X)
 
 int avb_1722_router_table_lookup_simple(int key0,
-                                        int key1, 
-                                        unsigned int *link, 
-                                        unsigned int *sink_num) 
+                                        int key1,
+                                        unsigned int *link,
+                                        unsigned int *sink_num)
 {
 
   if (key0==0 && key1==0)
     return 0;
-  hwlock_acquire(table_lock);      
+  hwlock_acquire(table_lock);
   for(int i=0;i<AVB_NUM_SINKS;i++) {
     __asm__(".xtaloop " STRINGIFY(AVB_NUM_SINKS) "\n");
     if (key0 == router_table[i].id[0] &&

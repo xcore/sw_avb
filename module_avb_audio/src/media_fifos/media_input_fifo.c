@@ -82,9 +82,9 @@ int media_input_fifo_enable(media_input_fifo_t media_input_fifo0,
 #else
   packetSize = ((rate+(AVB1722_PACKET_RATE-1))/AVB1722_PACKET_RATE);
 #endif
-  media_input_fifo->rdIndex = (int) &media_input_fifo->buf[0]; 
-  media_input_fifo->wrIndex = (int) &media_input_fifo->buf[0]; 
-  media_input_fifo->startIndex = (int) &media_input_fifo->buf[0]; 
+  media_input_fifo->rdIndex = (int) &media_input_fifo->buf[0];
+  media_input_fifo->wrIndex = (int) &media_input_fifo->buf[0];
+  media_input_fifo->startIndex = (int) &media_input_fifo->buf[0];
   media_input_fifo->dbc = 0;
   media_input_fifo->fifoEnd = (int) &media_input_fifo->buf[MEDIA_INPUT_FIFO_SAMPLE_FIFO_SIZE-1];
   media_input_fifo->sampleCountInPacket = 0;
@@ -110,7 +110,7 @@ void media_input_fifo_push_sample(media_input_fifo_t media_input_fifo0,
     wrIndex = (int *) media_input_fifo->startIndex;
     int spaceLeft = ((int *) media_input_fifo->rdIndex) - wrIndex;
 
-    spaceLeft &= (MEDIA_INPUT_FIFO_SAMPLE_FIFO_SIZE-1); 
+    spaceLeft &= (MEDIA_INPUT_FIFO_SAMPLE_FIFO_SIZE-1);
 
     if (spaceLeft && (spaceLeft < packetSize)) return;
 
@@ -144,7 +144,7 @@ void media_input_fifo_push_sample(media_input_fifo_t media_input_fifo0,
   media_input_fifo->wrIndex = (int) wrIndex;
 }
 
-int media_input_fifo_fill_level(media_input_fifo_t media_input_fifo0) 
+int media_input_fifo_fill_level(media_input_fifo_t media_input_fifo0)
 {
   volatile ififo_t *media_input_fifo =  (ififo_t *) media_input_fifo0;
   int *rdIndex = (int *) media_input_fifo->rdIndex;
@@ -154,7 +154,7 @@ int media_input_fifo_fill_level(media_input_fifo_t media_input_fifo0)
     int packetSize = media_input_fifo->packetSize;
     rdIndex += packetSize;
     if (rdIndex + packetSize > (int *) media_input_fifo->fifoEnd)
-      rdIndex = (int *) &media_input_fifo->buf[0];    
+      rdIndex = (int *) &media_input_fifo->buf[0];
     fill += packetSize - 2;
   }
   return fill;
@@ -199,7 +199,7 @@ media_input_fifo_get_packet(media_input_fifo_t media_input_fifo0,
   return ((unsigned int *) (rdIndex+2));
 }
 
-void 
+void
 media_input_fifo_release_packet(media_input_fifo_t media_input_fifo0)
 {
   volatile ififo_t *media_input_fifo =  (ififo_t *) media_input_fifo0;
@@ -209,7 +209,7 @@ media_input_fifo_release_packet(media_input_fifo_t media_input_fifo0)
   rdIndex += packetSize;
   if (rdIndex + packetSize > (int *) media_input_fifo->fifoEnd)
     rdIndex = (int *) &media_input_fifo->buf[0];
-  
+
   media_input_fifo->rdIndex = (int) rdIndex;
   return;
 }
@@ -225,7 +225,7 @@ init_media_input_fifos(media_input_fifo_t ififos[],
 	}
 }
 
-extern inline void 
+extern inline void
 media_input_fifo_set_ptr(media_input_fifo_t media_infput_fifo0,
                          int *p);
 

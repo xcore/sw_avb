@@ -1,7 +1,7 @@
 #include <string.h>
 #include "avb_device_defines.h"
 
-int get_device_system(char a0[]) 
+int get_device_system(char a0[])
 {
   strcpy(a0, AVB_DEVICE_SYSTEM);
   return 1;
@@ -32,7 +32,7 @@ int get_device_identity_product(char a0[])
 }
 
 int get_device_identity_vendor(char a0[])
-{ 
+{
   strcpy(a0, AVB_DEVICE_VENDOR);
   return 1;
 }

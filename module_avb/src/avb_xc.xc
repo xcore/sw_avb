@@ -2,15 +2,15 @@
 #include "avb.h"
 #include <print.h>
 
-void avb_get_control_packet(chanend c_rx, 
+void avb_get_control_packet(chanend c_rx,
                             unsigned int buf[],
                             unsigned int &nbytes)
 {
   unsigned int src_port;
-  safe_mac_rx(c_rx, 
-              (buf, unsigned char[]), 
+  safe_mac_rx(c_rx,
+              (buf, unsigned char[]),
               nbytes,
-              src_port,                       
+              src_port,
               MAX_AVB_CONTROL_PACKET_SIZE);
 }
 

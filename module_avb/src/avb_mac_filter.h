@@ -24,7 +24,7 @@ inline int mac_custom_filter(unsigned int buf[])
   int result = 0;
   unsigned short etype = (unsigned short) buf[3];
   int qhdr = (etype == 0x0081);
-  
+
   if (qhdr) {
     // has a 802.1q tag - read etype from next word
     etype = (unsigned short) buf[4];
@@ -48,7 +48,7 @@ inline int mac_custom_filter(unsigned int buf[])
         else {
           cd_flag = (buf[3] >> 23) & 1;
         }
-        if (cd_flag) 
+        if (cd_flag)
           result = MAC_FILTER_AVB_CONTROL;
         else {
           // route the 1722 streams
@@ -63,7 +63,7 @@ inline int mac_custom_filter(unsigned int buf[])
             id0 = (buf[6] << 16 | buf[4]>>16);
             id1 = buf[5];
           }
-          lookup = 
+          lookup =
             avb_1722_router_table_lookup(id0,
                                          id1,
                                          link,

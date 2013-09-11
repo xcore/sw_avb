@@ -6,7 +6,7 @@
 #define PTP_ADJUST_PREC 30
 
 /** This type represents a timestamp in the gptp clock domain.
- *  
+ *
  **/
 typedef struct ptp_timestamp {
   unsigned int seconds[2];
@@ -18,14 +18,14 @@ typedef struct ptp_timestamp {
  *  so the nanoseconds field is always in the range 0-999999999
  */
 struct ptp_time_info {
-  unsigned int local_ts; /*!< A local timestamp based on the 100MHz 
+  unsigned int local_ts; /*!< A local timestamp based on the 100MHz
                               XCore reference clock */
-  ptp_timestamp ptp_ts;  /*!< A PTP timestamp in the gptp clock domain 
+  ptp_timestamp ptp_ts;  /*!< A PTP timestamp in the gptp clock domain
                            that matches the local timestamp */
 
-  int ptp_adjust; /*!< The adjustment required to convert from 
+  int ptp_adjust; /*!< The adjustment required to convert from
                        local time to PTP time */
-  int inv_ptp_adjust; /*!< The adjustment required to convert from 
+  int inv_ptp_adjust; /*!< The adjustment required to convert from
                                 PTP time to local time */
 };
 
@@ -57,7 +57,7 @@ struct ptp_time_info_mod64 {
  **/
 typedef struct ptp_time_info_mod64 ptp_time_info_mod64;
 
-/** The type of a PTP server. Can be passed into the ptp_server() function. 
+/** The type of a PTP server. Can be passed into the ptp_server() function.
  **/
 enum ptp_server_type {
   PTP_GRANDMASTER_CAPABLE,
@@ -70,7 +70,7 @@ typedef enum ptp_state_t {
   PTP_SLAVE
 } ptp_state_t;
 
-/** This function runs the PTP server. It takes one thread and runs 
+/** This function runs the PTP server. It takes one thread and runs
     indefinitely
 
     \param mac_rx       chanend connected to the ethernet server (receive)
@@ -79,9 +79,9 @@ typedef enum ptp_state_t {
                         of the ptp server
     \param num_clients  The number of clients attached
     \param server_type The type of the server (``PTP_GRANDMASTER_CAPABLE``
-                       or ``PTP_SLAVE_ONLY``) 
+                       or ``PTP_SLAVE_ONLY``)
  **/
-void ptp_server(chanend mac_rx, chanend mac_tx, 
+void ptp_server(chanend mac_rx, chanend mac_tx,
                 chanend ptp_clients[], int num_clients,
                 enum ptp_server_type server_type);
 
@@ -92,10 +92,10 @@ void ptp_server(chanend mac_rx, chanend mac_tx,
 ptp_state_t ptp_get_state(chanend ptp_server);
 
 
-/** Retrieve time information from the ptp server 
+/** Retrieve time information from the ptp server
  *
  *  This function gets an up-to-date structure of type `ptp_time_info` to use
- *  to convert local time to PTP time. 
+ *  to convert local time to PTP time.
  *
  *  \param ptp_server chanend connected to the ptp_server
  *  \param info       structure to be filled with time information
@@ -103,19 +103,19 @@ ptp_state_t ptp_get_state(chanend ptp_server);
  **/
 void ptp_get_propagation_delay(chanend ptp_server, REFERENCE_PARAM(unsigned, pdelay));
 
-/** Retrieve port progatation delay from the ptp server 
+/** Retrieve port progatation delay from the ptp server
  *
  *
  *  \param ptp_server chanend connected to the ptp_server
  *  \param pdelay     unsigned int with delay in ns
  *
  **/
-void ptp_get_time_info(chanend ptp_server, 
+void ptp_get_time_info(chanend ptp_server,
                         REFERENCE_PARAM(ptp_time_info, info));
-/** Retrieve time information from the ptp server 
+/** Retrieve time information from the ptp server
  *
- *  This function gets an up-to-date structure of type `ptp_time_info_mod64` 
- *  to use to convert local time to ptp time (modulo 64 bits). 
+ *  This function gets an up-to-date structure of type `ptp_time_info_mod64`
+ *  to use to convert local time to ptp time (modulo 64 bits).
  *
  *  \param ptp_server chanend connected to the ptp_server
  *  \param info       structure to be filled with time information
@@ -127,8 +127,8 @@ void ptp_get_time_info_mod64(NULLABLE_RESOURCE(chanend,ptp_server),
 // Asynchronous PTP client functions
 // --------------------------------
 
-/** This function requests a `ptp_time_info` structure from the 
-    PTP server. This is an asynchronous call so needs to be completed 
+/** This function requests a `ptp_time_info` structure from the
+    PTP server. This is an asynchronous call so needs to be completed
     later with a call to ptp_get_requested_time_info().
 
     \param ptp_server chanend connecting to the ptp server
@@ -136,24 +136,24 @@ void ptp_get_time_info_mod64(NULLABLE_RESOURCE(chanend,ptp_server),
  **/
 void ptp_request_time_info(chanend ptp_server);
 
-/** This function receives a `ptp_time_info` structure from the 
-    PTP server. This completes an asynchronous transaction initiated with a call 
-    to ptp_request_time_info(). The function can be placed in a select case 
+/** This function receives a `ptp_time_info` structure from the
+    PTP server. This completes an asynchronous transaction initiated with a call
+    to ptp_request_time_info(). The function can be placed in a select case
     which will activate when the PTP server is ready to send.
 
     \param ptp_server      chanend connecting to the PTP server
-    \param info            a reference parameter to be filled with the time 
+    \param info            a reference parameter to be filled with the time
                            information structure
 **/
 #ifdef __XC__
 #pragma select handler
 #endif
-void ptp_get_requested_time_info(chanend ptp_server, 
+void ptp_get_requested_time_info(chanend ptp_server,
                                   REFERENCE_PARAM(ptp_time_info, info));
 
 
-/** This function requests a `ptp_time_info_mod64` structure from the 
-    PTP server. This is an asynchronous call so needs to be completed 
+/** This function requests a `ptp_time_info_mod64` structure from the
+    PTP server. This is an asynchronous call so needs to be completed
     later with a call to ptp_get_requested_time_info_mod64().
 
     \param ptp_server chanend connecting to the PTP server
@@ -162,20 +162,20 @@ void ptp_get_requested_time_info(chanend ptp_server,
 void ptp_request_time_info_mod64(chanend ptp_server);
 
 
-/** This function receives a `ptp_time_info_mod64` structure from the 
-    PTP server. This completes an asynchronous transaction initiated with a call 
-    to ptp_request_time_info_mod64(). 
-    The function can be placed in a select case 
+/** This function receives a `ptp_time_info_mod64` structure from the
+    PTP server. This completes an asynchronous transaction initiated with a call
+    to ptp_request_time_info_mod64().
+    The function can be placed in a select case
     which will activate when the PTP server is ready to send.
 
     \param ptp_server      chanend connecting to the PTP server
-    \param info            a reference parameter to be filled with the time 
+    \param info            a reference parameter to be filled with the time
                            information structure
 **/
 #ifdef __XC__
 #pragma select handler
 #endif
-void ptp_get_requested_time_info_mod64(chanend ptp_server, 
+void ptp_get_requested_time_info_mod64(chanend ptp_server,
                                         REFERENCE_PARAM(ptp_time_info_mod64, info));
 
 #ifdef __XC__
@@ -218,7 +218,7 @@ unsigned local_timestamp_to_ptp_mod32(unsigned local_ts,
 
 /** Convert a PTP timestamp to a local XCore timestamp.
  *
- *  This function takes a PTP timestamp and converts it to a local 
+ *  This function takes a PTP timestamp and converts it to a local
  *  32-bit timestamp that is related to the XCore timer.
  *
  *  \param ts             the PTP timestamp to convert
@@ -245,13 +245,13 @@ unsigned ptp_mod32_timestamp_to_local(unsigned ts, REFERENCE_PARAM(ptp_time_info
  *
  *  This function adds and offset to a timestamp.
  *
- *  \param ptp_timestamp the timestamp to be offset; this argument is modified 
+ *  \param ptp_timestamp the timestamp to be offset; this argument is modified
  *                       by adding the offset
  *  \param offset        the offset to add in nanoseconds
  *
  */
 void ptp_timestamp_offset(REFERENCE_PARAM(ptp_timestamp, ts), int offset);
-                            
+
 void ptp_set_legacy_mode(chanend c, int mode);
 
 void ptp_get_current_grandmaster(chanend ptp_server, unsigned char grandmaster[8]);
@@ -262,11 +262,11 @@ void ptp_get_current_grandmaster(chanend ptp_server, unsigned char grandmaster[8
  *  \param mac_rx       chanend connected to the ethernet server (receive)
  *  \param mac_tx       chanend connected to the ethernet server (transmit)
  *  \param server_type The type of the server (``PTP_GRANDMASTER_CAPABLE``
- *                     or ``PTP_SLAVE_ONLY``) 
+ *                     or ``PTP_SLAVE_ONLY``)
  *
  *  This function initializes the ptp server when you want to use it inline
- *  combined with other event handling functions (i.e. share the resource in 
- *  the ptp thread). 
+ *  combined with other event handling functions (i.e. share the resource in
+ *  the ptp thread).
  *  It needs to be called in conjunction with do_ptp_server().
  *  Here is an example usage::
  *
@@ -274,14 +274,14 @@ void ptp_get_current_grandmaster(chanend ptp_server, unsigned char grandmaster[8
  *     while (1) {
  *         select {
  *             do_ptp_server(c_tx, c_tx, ptp_client, num_clients);
- *             // Add your own cases here 
+ *             // Add your own cases here
  *         }
  *
  *     }
- * 
+ *
  *  \sa do_ptp_server
  **/
-void ptp_server_init(chanend mac_rx, chanend mac_tx, 
+void ptp_server_init(chanend mac_rx, chanend mac_tx,
                      enum ptp_server_type server_type,
                      timer ptp_timer,
                      REFERENCE_PARAM(int, ptp_timeout));
@@ -315,7 +315,7 @@ void ptp_periodic(chanend, unsigned);
 
 
 
-void ptp_output_test_clock(chanend ptp_link, 
+void ptp_output_test_clock(chanend ptp_link,
                            port test_clock_port,
                            int period);
 #endif //__gptp_h__

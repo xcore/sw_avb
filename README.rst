@@ -1,7 +1,7 @@
 AVB Software Stack
 ..................
 
-:Latest release: 5.2.1beta1
+:Latest release: 5.2.1rc0
 :Maintainer: XMOS
 :Description: AVB software stack
 
@@ -36,8 +36,8 @@ Required software (dependencies)
 ================================
 
   * sc_i2c (https://github.com/xcore/sc_i2c.git)
+  * sc_util (git@github.com:xcore/sc_util)
+  * sc_slicekit_support (origin)
+  * sc_otp (git@github.com:xcore/sc_otp)
   * sc_ethernet (https://github.com/xcore/sc_ethernet.git)
-  * sc_otp (https://github.com/xcore/sc_otp.git)
-  * sc_util (https://github.com/xcore/sc_util.git)
-  * sc_slicekit_support (https://github.com/xcore/sc_slicekit_support.git)
 

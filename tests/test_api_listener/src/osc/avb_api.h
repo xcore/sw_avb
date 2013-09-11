@@ -19,13 +19,13 @@
 #endif
 
 #ifndef __AVB_SOURCE_FORMAT_T__
-enum avb_source_format_t 
+enum avb_source_format_t
 {
 AVB_SOURCE_FORMAT_MBLA_24BIT,
 };
 #endif
 #ifndef __AVB_SOURCE_STATE_T__
-enum avb_source_state_t 
+enum avb_source_state_t
 {
 AVB_SOURCE_STATE_DISABLED,
 AVB_SOURCE_STATE_POTENTIAL,
@@ -33,7 +33,7 @@ AVB_SOURCE_STATE_ENABLED,
 };
 #endif
 #ifndef __AVB_SINK_STATE_T__
-enum avb_sink_state_t 
+enum avb_sink_state_t
 {
 AVB_SINK_STATE_DISABLED,
 AVB_SINK_STATE_POTENTIAL,
@@ -41,14 +41,14 @@ AVB_SINK_STATE_ENABLED,
 };
 #endif
 #ifndef __DEVICE_MEDIA_CLOCK_TYPE_T__
-enum device_media_clock_type_t 
+enum device_media_clock_type_t
 {
 DEVICE_MEDIA_CLOCK_TYPE_PTP,
 DEVICE_MEDIA_CLOCK_TYPE_STREAM,
 };
 #endif
 #ifndef __DEVICE_MEDIA_CLOCK_STATE_T__
-enum device_media_clock_state_t 
+enum device_media_clock_state_t
 {
 DEVICE_MEDIA_CLOCK_STATE_DISABLED,
 DEVICE_MEDIA_CLOCK_STATE_ENABLED,

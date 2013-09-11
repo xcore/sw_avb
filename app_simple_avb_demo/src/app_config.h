@@ -18,7 +18,7 @@
 #include "avb_app_board_config.h"
 #endif
 
-/** Number of input/output audio channels in the demo application 
+/** Number of input/output audio channels in the demo application
   * For simplicity, input and output is identical in size but can be configured
   * differently in ``avb_conf.h``. */
 #ifndef AVB_DEMO_NUM_CHANNELS

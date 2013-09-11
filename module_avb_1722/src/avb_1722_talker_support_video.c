@@ -6,7 +6,7 @@
 
 #if defined(AVB_1722_FORMAT_61883_4)
 
-#define streaming 
+#define streaming
 #include <xccompat.h>
 #include <string.h>
 

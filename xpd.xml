@@ -3,22 +3,34 @@
     <components>
         <component description = "A simple 1722.1 example endpoint application" type = "demoCode" scope = "Example" path = "app_simple_avb_demo" local = "false" id = "app_simple_avb_demo" name = "Simple AVB Endpoint Demo">
             <board>XR-AVB-LC-BRD</board>
-            <componentDependency version = "5.2.1">module_avb_audio</componentDependency>
-            <componentDependency version = "1.0.3">module_random</componentDependency>
             <componentDependency version = "5.2.1">module_avb_1722_maap</componentDependency>
+            <componentDependency version = "2.2.5">module_ethernet_smi</componentDependency>
+            <componentDependency version = "5.2.1">module_gptp</componentDependency>
+            <componentDependency version = "2.2.5">module_ethernet</componentDependency>
+            <componentDependency version = "1.0.3">module_slicekit_support</componentDependency>
+            <componentDependency version = "2.2.0">module_i2c_simple</componentDependency>
+            <componentDependency version = "5.2.1">module_avb_1722_1</componentDependency>
+            <componentDependency version = "5.2.1">module_avb</componentDependency>
+            <componentDependency version = "2.2.5">module_ethernet_board_support</componentDependency>
+            <componentDependency version = "5.2.1">module_avb_audio</componentDependency>
+            <componentDependency version = "1.0.0">module_otp_board_info</componentDependency>
+            <componentDependency version = "5.2.1">module_avb_util</componentDependency>
+            <componentDependency version = "2.2.5">module_ethernet</componentDependency>
+            <componentDependency version = "1.0.3">module_random</componentDependency>
+            <componentDependency version = "1.0.3">module_locks</componentDependency>
+            <componentDependency version = "5.2.1">module_avb_1722</componentDependency>
             <componentDependency version = "5.2.1">module_avb_media_clock</componentDependency>
             <componentDependency version = "5.2.1">module_avb_srp</componentDependency>
-            <componentDependency version = "5.2.1">module_avb_1722</componentDependency>
             <keyword>avb</keyword>
             <keyword>simple</keyword>
             <keyword>1722.1</keyword>
             <keyword>example</keyword>
         </component>
         <component description = "AVB stack control API" type = "demoCode" scope = "Example" path = "module_avb" local = "false" id = "module_avb" name = "module_avb">
-            <componentDependency version = "1.0.0">module_otp_board_info</componentDependency>
-            <componentDependency version = "1.0.3">module_locks</componentDependency>
-            <componentDependency version = "2.2.5">module_ethernet</componentDependency>
             <componentDependency version = "2.2.5">module_ethernet_smi</componentDependency>
+            <componentDependency version = "2.2.5">module_ethernet</componentDependency>
+            <componentDependency version = "1.0.3">module_locks</componentDependency>
+            <componentDependency version = "1.0.0">module_otp_board_info</componentDependency>
             <keyword>avb</keyword>
             <keyword>api</keyword>
             <keyword>control</keyword>
@@ -122,6 +134,7 @@
     <release parenthash = "95f13f9d5b6ff5882b5cf7c4cea5e91c60cf3441" version = "5.2.0beta6" githash = "789e31c21ec5ae3a77ccf18c50cc4786127174ea"></release>
     <release parenthash = "868924510ad3ebac90310577f635e82b7bfe42a7" version = "5.2.1beta0" githash = "7cca4a4575e6a99d027018c05af20dc8091a851b"></release>
     <release parenthash = "7cca4a4575e6a99d027018c05af20dc8091a851b" version = "5.2.1beta1" githash = "b4f852e8cae3c4e7337334cc908d3d416bdc4bf2"></release>
+    <release parenthash = "3fea036f48598fa47881ba3025c808f58c45f43e" version = "5.2.1rc0"></release>
     <subpartnumber>XR-000008-SW</subpartnumber>
     <vendor>XMOS</vendor>
     <version_defines>

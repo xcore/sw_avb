@@ -5,10 +5,10 @@
 
 void notify_buf_ctl_of_info(chanend buf_ctl, int fifo)
 {
-  outuchar(buf_ctl, BUF_CTL_GOT_INFO); 
+  outuchar(buf_ctl, BUF_CTL_GOT_INFO);
   outuchar(buf_ctl,fifo>>8);
-  outuchar(buf_ctl,fifo&0xff);  
-  outct(buf_ctl, XS1_CT_END);            
+  outuchar(buf_ctl,fifo&0xff);
+  outct(buf_ctl, XS1_CT_END);
 }
 
 void notify_buf_ctl_of_new_stream(chanend buf_ctl,
@@ -16,8 +16,8 @@ void notify_buf_ctl_of_new_stream(chanend buf_ctl,
 {
   outuchar(buf_ctl, BUF_CTL_NEW_STREAM);
   outuchar(buf_ctl,fifo>>8);
-  outuchar(buf_ctl,fifo&0xff);  
-  outct(buf_ctl, XS1_CT_END);            
+  outuchar(buf_ctl,fifo&0xff);
+  outct(buf_ctl, XS1_CT_END);
 }
 
 void buf_ctl_ack(chanend buf_ctl)
@@ -26,7 +26,7 @@ void buf_ctl_ack(chanend buf_ctl)
 }
 
 int get_buf_ctl_adjust(chanend buf_ctl) {
-  int adjust;   
+  int adjust;
   buf_ctl :> adjust;
   return adjust;
 }
@@ -37,9 +37,9 @@ int get_buf_ctl_cmd(chanend buf_ctl) {
   return cmd;
 }
 
-void send_buf_ctl_info(chanend buf_ctl, 
-                       int active, 
-                       unsigned int ptp_ts, 
+void send_buf_ctl_info(chanend buf_ctl,
+                       int active,
+                       unsigned int ptp_ts,
                        unsigned int local_ts,
                        unsigned int rdptr,
                        unsigned int wrptr,

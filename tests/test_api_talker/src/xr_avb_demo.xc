@@ -146,7 +146,7 @@ int main(void) {
             xscope_register(0, 0, "", 0, "");
 
             xscope_config_io(XSCOPE_IO_BASIC);
-            
+
 			media_clock_server(media_clock_ctl,
 					ptp_link[1],
 					null,
@@ -193,7 +193,7 @@ int main(void) {
             xscope_register(0, 0, "", 0, "");
 
             xscope_config_io(XSCOPE_IO_BASIC);
-            
+
 			// First initialize avb higher level protocols
 			avb_init(media_ctl, null, talker_ctl, media_clock_ctl, rx_link[1], tx_link[2], ptp_link[2]);
 

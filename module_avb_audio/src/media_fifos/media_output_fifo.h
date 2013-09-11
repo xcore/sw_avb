@@ -5,7 +5,7 @@
 #define streaming
 #endif
 #ifndef NULLABLE
-#define NULLABLE 
+#define NULLABLE
 #endif
 #else
 #define NULLABLE ?
@@ -61,11 +61,11 @@ typedef int media_output_fifo_t;
  *
  * This function outputs samples from several media output FIFOs
  * over an XC channel over the streaming chanend ``samples_out``.
- * 
- * The protocol over the channel is that the thread expects a timestamp to 
- * be sent to it and then it will output ``num_channels`` samples, pulling 
+ *
+ * The protocol over the channel is that the thread expects a timestamp to
+ * be sent to it and then it will output ``num_channels`` samples, pulling
  * from the ``ofifos`` array. It will then expect another timestamp before
- * the next set of samples. 
+ * the next set of samples.
  *
  *  \param samples_out          the chanend on which samples are output
  *  \param ofifos               array of media output FIFOs to pull from
@@ -81,14 +81,14 @@ void media_output_fifo_to_xc_channel(streaming chanend samples_out,
  *  and right pairs.
  *
  * This function outputs samples from several media output FIFOs
- * over an XC channel over the streaming chanend ``samples_out``. The 
+ * over an XC channel over the streaming chanend ``samples_out``. The
  * media FIFOs are assumed to be grouped in left/right stereo pairs which are
  * then split.
- * 
- * The protocol over the channel is that the thread expects a timestamp to 
- * be sent to it and then it will first output ``num_channels/2`` samples, 
- * pulling 
- * from all the even indexed elements of the ``ofifos`` array and then output 
+ *
+ * The protocol over the channel is that the thread expects a timestamp to
+ * be sent to it and then it will first output ``num_channels/2`` samples,
+ * pulling
+ * from all the even indexed elements of the ``ofifos`` array and then output
  * all the odd elements.
  * It will then expect another timestamp before
  * the next set of samples.
@@ -97,7 +97,7 @@ void media_output_fifo_to_xc_channel(streaming chanend samples_out,
  *  \param output_fifos         array of media output fifos to pull from
  *  \param num_channels         the number of channels (or FIFOs)
  **/
-void 
+void
 media_output_fifo_to_xc_channel_split_lr(streaming chanend samples_out,
                                          media_output_fifo_t output_fifos[],
                                          int num_channels);
@@ -134,7 +134,7 @@ void enable_media_output_fifo(media_output_fifo_t s,
  *  \param buf_ctl a channel end that links the FIFO to the media clock service
  *  \param notified_buf_ctl pointer to a flag which is set when the media clock has been notified of a timing event in the FIFO
  */
-void 
+void
 media_output_fifo_maintain(media_output_fifo_t s,
                            chanend buf_ctl,
                            REFERENCE_PARAM(int, notified_buf_ctl));
@@ -156,7 +156,7 @@ media_output_fifo_maintain(media_output_fifo_t s,
  *  \param stride the number of words between successive samples for this FIFO
  *  \param n the number of samples to push into the buffer
  */
-void 
+void
 media_output_fifo_strided_push(media_output_fifo_t s0,
                                unsigned int *sample_ptr,
                                int stride,
@@ -214,7 +214,7 @@ void media_output_fifo_set_ptp_timestamp(media_output_fifo_t s0,
  *  \param notified_buf_ctl pointer to the flag which indicates whether the clock recovery thread has been notified of a timing event
  */
 void
-media_output_fifo_handle_buf_ctl(chanend buf_ctl, 
+media_output_fifo_handle_buf_ctl(chanend buf_ctl,
                                  int stream_num,
                                  REFERENCE_PARAM(int, notified_buf_ctl),
                                  timer tmr);
@@ -233,9 +233,9 @@ media_output_fifo_set_volume(media_output_fifo_t s0,
 /** Initialize media output FIFOs.
  *
  *  This function initializes media output FIFOs and ties the handles
- *  to their associated data structures. It should be called before the main 
+ *  to their associated data structures. It should be called before the main
  *  component function on a thread to setup the FIFOs.
- * 
+ *
  *  \param ofifos      an array of media output FIFO handles to initialize
  *  \param ofifo_data  an array of associated data structures
  *  \param n           the number of FIFOs to initialize

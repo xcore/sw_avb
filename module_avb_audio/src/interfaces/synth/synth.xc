@@ -38,9 +38,9 @@ static unsigned int sine[100] = {
     };
 
 
-void synth(int period, 
+void synth(int period,
            chanend media_ctl,
-           chanend clk_ctl, 
+           chanend clk_ctl,
            int clk_ctl_index,
            media_input_fifo_t input_fifos[],
            int num_channels)
@@ -48,7 +48,7 @@ void synth(int period,
   timer tmr;
   int i=0,index=0;
   unsigned int wordTime;
-  int wordLength; 
+  int wordLength;
   unsigned int baseLength;
   unsigned int lowBits = 0;
   unsigned int prevLowBits = 0;
@@ -61,16 +61,16 @@ void synth(int period,
   int sample;
   int count = 0;
 
-  media_ctl_register(media_ctl, num_channels, 
+  media_ctl_register(media_ctl, num_channels,
                      input_fifos, 0, null, clk_ctl_index);
 
   clk_cmd = -1;
-  while (clk_cmd != CLK_CTL_SET_RATE) 
+  while (clk_cmd != CLK_CTL_SET_RATE)
     {
       slave {clk_ctl :> clk_cmd; clk_ctl :> clk_arg; };
       switch (clk_cmd)
         {
-        case CLK_CTL_SET_RATE:  
+        case CLK_CTL_SET_RATE:
           wordLength = clk_arg;
           baseLength = wordLength >> WC_FRACTIONAL_BITS;
           break;
@@ -94,10 +94,10 @@ void synth(int period,
 
       // scale it down
       sample = (((signed) (sine[index] << 8)) >> 10) & 0xffffff;
-            
-      if (count < 48000)        
+
+      if (count < 48000)
         outData = sample;
-        //   outData = (sample+(rand>>30));     
+        //   outData = (sample+(rand>>30));
       else
         outData = 0;
 
@@ -108,7 +108,7 @@ void synth(int period,
     		media_input_fifo_flush(input_fifos[i]);
     	  }
       }
-        
+
       i++;
       if (i==step) {
         index++;

@@ -53,9 +53,9 @@ int  media_clock_get_type(chanend media_clock_svr, int media_clock_num)
 }
 
 
-void media_clock_set_source(chanend media_clock_svr, int media_clock_num, 
+void media_clock_set_source(chanend media_clock_svr, int media_clock_num,
                          int x)
-{  
+{
   media_clock_svr <: MEDIA_CLOCK_SET_SOURCE;
   master {
     media_clock_svr <: media_clock_num;
@@ -64,7 +64,7 @@ void media_clock_set_source(chanend media_clock_svr, int media_clock_num,
 }
 
 
-void media_clock_get_source(chanend media_clock_svr, int media_clock_num, 
+void media_clock_get_source(chanend media_clock_svr, int media_clock_num,
                          int &x)
 {
   media_clock_svr <: MEDIA_CLOCK_GET_SOURCE;
