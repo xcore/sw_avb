@@ -57,7 +57,6 @@ int avb_join_vlan(int vlan, int port_num)
     entries[found].active = 1;
     entries[found].vlan = vlan;
     mrp_mad_begin(entries[found].attr);
-    printstrln("VLAN!");
     mrp_mad_join(entries[found].attr, 1);
     return 1;
   }

@@ -828,8 +828,10 @@ void mrp_mad_begin(mrp_attribute_state *st)
 
 void mrp_mad_join(mrp_attribute_state *st, int new)
 {
+#if MRP_DEBUG_STATE_CHANGE  
   if (st->attribute_type == MSRP_LISTENER) printstr("Listener MAD_Join");
   else if (st->attribute_type == MSRP_TALKER_ADVERTISE) printstr("Talker MAD_Join");
+
 
   if (st->attribute_type == MSRP_LISTENER || st->attribute_type == MSRP_TALKER_ADVERTISE) {
     avb_sink_info_t *sink_info = (avb_sink_info_t *) st->attribute_info;
@@ -841,6 +843,7 @@ void mrp_mad_join(mrp_attribute_state *st, int new)
     }
     simple_printf(" %x:%x, Port:%d, Here:%d, propagated:%d\n", stream_id[0], stream_id[1], st->port_num, st->here, st->propagated);
   }
+#endif
 
   if (new) {
     mrp_update_state(MRP_EVENT_NEW, st, 0, st->port_num);
@@ -1108,7 +1111,6 @@ void mrp_periodic(CLIENT_INTERFACE(avb_interface, avb))
       leaveall_active[i] = 1;
 
       global_event(MRP_EVENT_RECEIVE_LEAVE_ALL, i);
-      // simple_printf("global_event(MRP_EVENT_RECEIVE_LEAVE_ALL, %d)\n", i);
     }
   #endif
 
@@ -1439,7 +1441,6 @@ void avb_mrp_process_packet(unsigned char *buf, int etype, int len, unsigned int
       if (leave_all)
       {
         leaveall_active[port_num] = 0;
-        // simple_printf("attribute_type_event(attr_type, MRP_EVENT_RECEIVE_LEAVE_ALL, %d)\n", port_num);
         attribute_type_event(attr_type, MRP_EVENT_RECEIVE_LEAVE_ALL, port_num);
       }
       
