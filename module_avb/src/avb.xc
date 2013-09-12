@@ -153,7 +153,7 @@ static void init_media_clock_server(chanend media_clock_ctl)
 	}
 }
 
-unsafe void avb_init(chanend c_media_ctl[],
+void avb_init(chanend c_media_ctl[],
               chanend ?c_listener_ctl[],
               chanend ?c_talker_ctl[],
               chanend ?c_media_clock_ctl,
@@ -162,8 +162,10 @@ unsafe void avb_init(chanend c_media_ctl[],
 {
   unsigned char mac_addr[6];
   mac_get_macaddr(c_mac_tx, mac_addr);
-  register_talkers(c_talker_ctl, mac_addr);
-  register_listeners(c_listener_ctl);
+  unsafe {
+    register_talkers(c_talker_ctl, mac_addr);
+    register_listeners(c_listener_ctl);
+  }
 }
 
 #if 0
@@ -924,14 +926,11 @@ void avb_process_1722_control_packet(unsigned int buf0[], int nbytes, chanend c_
 
     unsigned char *buf = (unsigned char *) buf0;
 
-    unsafe {
-
-      switch (etype) {
-        case AVB_1722_ETHERTYPE:
-          avb_1722_1_process_packet((unsigned char *unsafe)&buf[eth_hdr_size], ethernet_hdr->src_addr, len, c_tx, i_avb);
-          avb_1722_maap_process_packet(&buf[eth_hdr_size], ethernet_hdr->src_addr, len, c_tx);
-          break;
-      }
+    switch (etype) {
+      case AVB_1722_ETHERTYPE:
+        avb_1722_1_process_packet(&buf[eth_hdr_size], ethernet_hdr->src_addr, len, c_tx, i_avb);
+        avb_1722_maap_process_packet(&buf[eth_hdr_size], ethernet_hdr->src_addr, len, c_tx);
+        break;
     }
   }  
 }
@@ -970,17 +969,14 @@ void avb_process_control_packet(client interface avb_interface avb, unsigned int
 
     unsigned char *buf = (unsigned char *) buf0;
 
-    unsafe {
-
-      switch (etype) {
-        /* fallthrough intended */
-        case AVB_SRP_ETHERTYPE:
-        // TODO: #define around MMRP, disabled by default
-        case AVB_MMRP_ETHERTYPE:
-        case AVB_MVRP_ETHERTYPE:
-          avb_mrp_process_packet((unsigned char *unsafe)&buf[eth_hdr_size], etype, len, port_num);
-          break;
-      }
+    switch (etype) {
+      /* fallthrough intended */
+      case AVB_SRP_ETHERTYPE:
+      // TODO: #define around MMRP, disabled by default
+      case AVB_MMRP_ETHERTYPE:
+      case AVB_MVRP_ETHERTYPE:
+        avb_mrp_process_packet(&buf[eth_hdr_size], etype, len, port_num);
+        break;
     }
   }
 

@@ -75,6 +75,9 @@ typedef enum {
   MRP_ATTRIBUTE_EVENT_LV = 5
 } mrp_attribute_event;
 
+#ifdef __XC__
+extern "C" {
+#endif
 typedef struct mrp_attribute_state {
   unsigned int port_num;
   unsigned char attribute_type;
@@ -94,13 +97,16 @@ typedef struct mrp_attribute_state {
   short four_vector_parameter;
 
   //! While sorting the attributes, this contains a linked list of sorted attributes
-  struct mrp_attribute_state *unsafe next;
+  struct mrp_attribute_state *next;
 
   char here;
   char propagated;
 
   //! Generic pointer to allow random data to be stored alongside the attribute
-  void *unsafe attribute_info;
+  void *attribute_info;
 } mrp_attribute_state;
+#ifdef __XC__
+}
+#endif
 
 #endif

@@ -91,6 +91,12 @@ int  media_clock_get_state(chanend media_clock_svr, int media_clock_num);
  *  \param clk_ctl
  *  \param clk_num
  */
-unsafe void media_clock_register(chanend media_clock_svr, chanend *unsafe clk_ctl, int clk_num);
+#ifdef __XC__
+extern "C" {
+#endif
+void media_clock_register(chanend media_clock_svr, chanend *clk_ctl, int clk_num);
+#ifdef __XC__
+}
+#endif
 
 #endif 

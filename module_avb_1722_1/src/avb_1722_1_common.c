@@ -51,7 +51,7 @@ int qlog2(unsigned n)
     return l;
 }
 
-void avb_1722_1_create_1722_1_header(   unsigned char* dest_addr,
+void avb_1722_1_create_1722_1_header(   const unsigned char* dest_addr,
                                         int subtype,
                                         int message_type,
                                         unsigned char valid_time_status,

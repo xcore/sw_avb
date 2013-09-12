@@ -278,9 +278,9 @@ static void avb_1722_1_create_adp_packet(int message_type, guid_t guid)
 
     unsafe {
         memset((avb_1722_1_adp_packet_t *unsafe)pkt, 0, sizeof(avb_1722_1_adp_packet_t));
-        avb_1722_1_create_1722_1_header((unsigned char *unsafe)avb_1722_1_adp_dest_addr, DEFAULT_1722_1_ADP_SUBTYPE, message_type,
-          (message_type==ENTITY_AVAILABLE)?AVB_1722_1_ADP_VALID_TIME:0, AVB_1722_1_ADP_CD_LENGTH, (ethernet_hdr_t *unsafe)hdr);
     }
+    avb_1722_1_create_1722_1_header(avb_1722_1_adp_dest_addr, DEFAULT_1722_1_ADP_SUBTYPE, message_type,
+          (message_type==ENTITY_AVAILABLE)?AVB_1722_1_ADP_VALID_TIME:0, AVB_1722_1_ADP_CD_LENGTH, hdr);
 
     set_64(pkt->entity_guid, guid.c);
 

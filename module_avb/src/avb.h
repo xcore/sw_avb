@@ -45,7 +45,7 @@
  *
  **/
 #ifdef __XC__
-unsafe void avb_init(chanend c_media_ctl[],
+void avb_init(chanend c_media_ctl[],
               chanend ?c_listener_ctl[],
               chanend ?c_talker_ctl[],
               chanend ?c_media_clock_ctl,

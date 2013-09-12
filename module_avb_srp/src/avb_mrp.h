@@ -112,29 +112,13 @@ void mrp_init(char macaddr[]);
 
    \note: see also mrp_update_state
 */
-void mrp_attribute_init(mrp_attribute_state *unsafe st,
+
+#ifndef __XC__
+void mrp_attribute_init(mrp_attribute_state *st,
                         mrp_attribute_type t,
                         unsigned int port_num,
                         unsigned int here,
-                        void *unsafe info);
-
-
-void mrp_attribute_init_source_info(mrp_attribute_state *unsafe st,
-                        mrp_attribute_type t,
-                        unsigned int port_num,
-                        unsigned int here,
-                        avb_source_info_t *unsafe source);
-
-void mrp_attribute_init_sink_info(mrp_attribute_state *unsafe st,
-                        mrp_attribute_type t,
-                        unsigned int port_num,
-                        unsigned int here,
-                        avb_sink_info_t *unsafe sink);
-
-void mrp_attribute_init_null(mrp_attribute_state *unsafe st,
-                        mrp_attribute_type t,
-                        unsigned int port_num,
-                        unsigned int here);
+                        void *info);
 
 /** Function: mrp_mad_begin
 
@@ -145,7 +129,7 @@ void mrp_attribute_init_null(mrp_attribute_state *unsafe st,
    \param st the attribute
    
 */
-void mrp_mad_begin(mrp_attribute_state *unsafe st);
+void mrp_mad_begin(mrp_attribute_state *st);
 
 
 /** Function: mrp_mad_join
@@ -158,7 +142,7 @@ void mrp_mad_begin(mrp_attribute_state *unsafe st);
    \param new whether the attribute is a new one or not
 
 */
-void mrp_mad_join(mrp_attribute_state *unsafe st, int new);
+void mrp_mad_join(mrp_attribute_state *st, int new);
 
 /** Function: mrp_mad_leave
 
@@ -168,8 +152,36 @@ void mrp_mad_join(mrp_attribute_state *unsafe st, int new);
    \param st The attribute to leave
    
 */
-void mrp_mad_leave(mrp_attribute_state *unsafe st);
+void mrp_mad_leave(mrp_attribute_state *st);
 
+mrp_attribute_state *mrp_match_talker_non_prop_attribute(unsigned stream_id[2], int port_num);
+
+mrp_attribute_state *mrp_match_attr_by_stream_and_type(mrp_attribute_state *attr, int opposite_port);
+int mrp_match_multiple_attrs_by_stream_and_type(mrp_attribute_state *attr, int opposite_port);
+mrp_attribute_state *mrp_match_attribute_pair_by_stream_id(mrp_attribute_state *attr, int opposite_port, int match_disabled);
+
+int mrp_is_observer(mrp_attribute_state *st);
+
+
+void mrp_encode_three_packed_event(char *buf,
+                                   int event,
+                                   mrp_attribute_type attr);
+
+void mrp_encode_four_packed_event(char *buf,
+                                  int event,
+                                  mrp_attribute_type attr);
+
+mrp_attribute_state *mrp_get_attr(void);
+
+void avb_mrp_set_legacy_mode(int mode);
+#endif
+#ifdef __XC__
+extern "C" {
+#endif
+void avb_mrp_process_packet(unsigned char *buf, int etype, int len, unsigned int port_num);
+#ifdef __XC__
+}
+#endif
 /** Function: mrp_periodic
 
    This function performs periodic MRP processing. It must be called 
@@ -180,29 +192,6 @@ void mrp_mad_leave(mrp_attribute_state *unsafe st);
        mrp_init
  */
 void mrp_periodic(CLIENT_INTERFACE(avb_interface, avb));
-
-mrp_attribute_state *unsafe mrp_match_talker_non_prop_attribute(unsigned stream_id[2], int port_num);
-
-mrp_attribute_state *unsafe mrp_match_attr_by_stream_and_type(mrp_attribute_state *unsafe attr, int opposite_port);
-int mrp_match_multiple_attrs_by_stream_and_type(mrp_attribute_state *unsafe attr, int opposite_port);
-mrp_attribute_state *unsafe mrp_match_attribute_pair_by_stream_id(mrp_attribute_state *unsafe attr, int opposite_port, int match_disabled);
-
-int mrp_is_observer(mrp_attribute_state *unsafe st);
-
-
-void mrp_encode_three_packed_event(char *unsafe buf,
-                                   int event,
-                                   mrp_attribute_type attr);
-
-void mrp_encode_four_packed_event(char *unsafe buf,
-                                  int event,
-                                  mrp_attribute_type attr);
-
-mrp_attribute_state *unsafe mrp_get_attr(void);
-
-void avb_mrp_process_packet(unsigned char *unsafe buf, int etype, int len, unsigned int port_num);
-
-void avb_mrp_set_legacy_mode(int mode);
 
 void mrp_store_mac_tx_chanend(chanend c_mac_tx0);
 

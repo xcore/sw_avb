@@ -26,7 +26,6 @@ void avb_mvrp_init(void)
       entries[(i*AVB_MAX_NUM_VLAN)+j].active = 0;
       entries[(i*AVB_MAX_NUM_VLAN)+j].attr = mrp_get_attr();
       mrp_attribute_init(entries[i*AVB_MAX_NUM_VLAN+j].attr, MVRP_VID_VECTOR, j, 1, &entries[i*AVB_MAX_NUM_VLAN+j].vlan);
-      printstrln("init VID");
     }
   }
 }

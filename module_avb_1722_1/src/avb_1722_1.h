@@ -49,7 +49,13 @@ void avb_1722_1_task(client interface avb_interface avb,
  *  \param  len         the number of bytes in the buf array
 *   \param  c_tx        a transmit chanend to the Ethernet server
  */
-void avb_1722_1_process_packet(unsigned char *unsafe buf, unsigned char src_addr[6], int len, chanend c_tx, CLIENT_INTERFACE(avb_interface, i_avb_api));
+#ifdef __XC__
+extern "C" {
+#endif
+void avb_1722_1_process_packet(unsigned char *buf, unsigned char src_addr[6], int len, chanend c_tx, CLIENT_INTERFACE(avb_interface, i_avb_api));
+#ifdef __XC__
+}
+#endif
 
 #endif
 
