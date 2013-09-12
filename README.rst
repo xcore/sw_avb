@@ -15,7 +15,7 @@ Key Features
 * gPTP server and protocol
 * Audio interface for I2S and TDM
 * Media clock recovery and interface to PLL clock source
-* Support for 1722.1 AVDECC: ADP, AECP (AEM) and ACMP Draft 21
+* Support for 1722.1 AVDECC: ADP, AECP (AEM) and ACMP
 
 Firmware Overview
 =================
