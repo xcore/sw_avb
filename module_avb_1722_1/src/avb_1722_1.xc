@@ -36,6 +36,7 @@ void avb_1722_1_periodic(chanend c_tx, chanend c_ptp, client interface avb_inter
 // TODO: Move/rename this task?
 [[combinable]]
 void avb_1722_1_task(client interface avb_interface i_avb,
+                     client interface avb_1722_1_control_callbacks i_1722_1_entity,
                      chanend c_mac_rx,
                      chanend c_mac_tx,
                      chanend c_ptp) {
@@ -62,7 +63,7 @@ void avb_1722_1_task(client interface avb_interface i_avb,
       // Receive and process any incoming AVB packets (802.1Qat, 1722_MAAP)
       case avb_get_control_packet(c_mac_rx, buf, nbytes, port_num):
       {
-        avb_process_1722_control_packet(buf, nbytes, c_mac_tx, i_avb);
+        avb_process_1722_control_packet(buf, nbytes, c_mac_tx, i_avb, i_1722_1_entity);
         break;
       }
       // Periodic processing

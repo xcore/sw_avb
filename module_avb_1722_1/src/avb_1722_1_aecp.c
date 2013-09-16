@@ -560,7 +560,8 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt,
                                             int message_type,
                                             int num_pkt_bytes,
                                             chanend c_tx,
-                                            CLIENT_INTERFACE(avb_interface, i_avb_api))
+                                            CLIENT_INTERFACE(avb_interface, i_avb_api),
+                                            CLIENT_INTERFACE(avb_1722_1_control_callbacks, i_1722_1_entity))
 {
   avb_1722_1_aecp_aem_msg_t *aem_msg = &(pkt->data.aem);
   unsigned short command_type = AEM_MSG_GET_COMMAND_TYPE(aem_msg);
@@ -657,6 +658,12 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt,
         cd_len = sizeof(avb_1722_1_aem_startstop_streaming_t);
         break;
       }
+      case AECP_AEM_CMD_GET_CONTROL:
+      case AECP_AEM_CMD_SET_CONTROL:
+      {
+        cd_len = process_aem_cmd_getset_control(pkt, &status, command_type, i_1722_1_entity) + sizeof(avb_1722_1_aem_getset_control_t) + AVB_1722_1_AECP_COMMAND_DATA_OFFSET;
+        break;
+      }
       default:
       {
         // AECP_AEM_STATUS_NOT_IMPLEMENTED
@@ -719,7 +726,8 @@ void process_avb_1722_1_aecp_packet(unsigned char src_addr[6],
                                     avb_1722_1_aecp_packet_t *pkt,
                                     int num_pkt_bytes,
                                     chanend c_tx,
-                                    CLIENT_INTERFACE(avb_interface, avb))
+                                    CLIENT_INTERFACE(avb_interface, i_avb),
+                                    CLIENT_INTERFACE(avb_1722_1_control_callbacks, i_1722_1_entity))
 {
   int message_type = GET_1722_1_MSG_TYPE(((avb_1722_1_packet_header_t*)pkt));
 
@@ -729,7 +737,7 @@ void process_avb_1722_1_aecp_packet(unsigned char src_addr[6],
     case AECP_CMD_AEM_RESPONSE:
     {
 #if AVB_1722_1_AEM_ENABLED
-      process_avb_1722_1_aecp_aem_msg(pkt, src_addr, message_type, num_pkt_bytes, c_tx, avb);
+      process_avb_1722_1_aecp_aem_msg(pkt, src_addr, message_type, num_pkt_bytes, c_tx, i_avb, i_1722_1_entity);
 #endif
       break;
     }

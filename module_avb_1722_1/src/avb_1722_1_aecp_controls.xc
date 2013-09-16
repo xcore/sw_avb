@@ -15,6 +15,29 @@
 #include "aem_descriptor_types.h"
 #endif
 
+unsafe unsigned short process_aem_cmd_getset_control(avb_1722_1_aecp_packet_t *unsafe pkt,
+                                                     unsigned char &status,
+                                                     unsigned short command_type, 
+                                                     client interface avb_1722_1_control_callbacks i_1722_1_entity)
+{
+  avb_1722_1_aem_getset_control_t *cmd = (avb_1722_1_aem_getset_control_t *)(pkt->data.aem.command.payload);
+  unsigned short control_index = ntoh_16(cmd->descriptor_id);
+  unsigned short control_type = ntoh_16(cmd->descriptor_type);
+  unsigned char *values = pkt->data.aem.command.payload + sizeof(avb_1722_1_aem_getset_control_t);
+  unsigned short values_length = GET_1722_1_DATALENGTH(&(pkt->header)) - sizeof(avb_1722_1_aem_getset_control_t) - AVB_1722_1_AECP_COMMAND_DATA_OFFSET; 
+
+  if (command_type == AECP_AEM_CMD_GET_CONTROL)
+  {
+    status = i_1722_1_entity.get_control_value(control_type, control_index, values_length, values);
+  }
+  else // AECP_AEM_CMD_SET_CONTROL
+  {
+    simple_printf("Send %d\n", values_length);
+    status = i_1722_1_entity.set_control_value(control_type, control_index, values_length, values);
+  }
+  return values_length;
+}
+
 unsafe void process_aem_cmd_getset_sampling_rate(avb_1722_1_aecp_packet_t *unsafe pkt,
                                           unsigned char &status,
                                           unsigned short command_type,

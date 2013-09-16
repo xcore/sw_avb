@@ -23,6 +23,7 @@
 #include "media_clock_server.h"
 #include "avb_1722_1.h"
 #include "avb_srp.h"
+#include "aem_descriptor_types.h"
 
 on ETHERNET_DEFAULT_TILE: otp_ports_t otp_ports = OTP_PORTS_INITIALIZER;
 
@@ -43,6 +44,8 @@ on tile[1]: mii_interface_t mii2 = {
   XS1_PORT_1F,
   XS1_PORT_4B      
 };
+
+on tile[0]: out port p_leds = XS1_PORT_4F;
 
 //***** AVB audio ports ****
 #if I2C_COMBINE_SCL_SDA
@@ -94,7 +97,7 @@ media_input_fifo_t ififos[AVB_NUM_MEDIA_INPUTS];
   #define ififos null
 #endif
 
-[[combinable]] void application_task(client interface avb_interface avb);
+[[combinable]] void application_task(client interface avb_interface avb, server interface avb_1722_1_control_callbacks i_1722_1_entity);
 
 void xscope_user_init(void)
 {
@@ -184,6 +187,7 @@ int main(void)
 
   interface avb_interface i_avb[NUM_AVB_MANAGER_CHANS];
   interface srp_interface i_srp;
+  interface avb_1722_1_control_callbacks i_1722_1_entity;
 
   par
   {
@@ -211,7 +215,6 @@ int main(void)
                                    c_mac_tx[MAC_TX_TO_MEDIA_CLOCK],
                                    c_ptp, NUM_PTP_CHANS,
                                    PTP_GRANDMASTER_CAPABLE);
-
 
     // AVB - Audio
     on tile[0]:
@@ -273,7 +276,6 @@ int main(void)
                    c_mac_tx[MAC_TX_TO_AVB_MANAGER],
                    c_media_clock_ctl,
                    c_ptp[PTP_TO_AVB_MANAGER]);
-        application_task(i_avb[AVB_MANAGER_TO_DEMO]);
         avb_srp_task(i_avb[AVB_MANAGER_TO_SRP],
                      i_srp,
                      c_mac_rx[MAC_RX_TO_SRP],
@@ -282,10 +284,17 @@ int main(void)
 
     }
 
-    on tile[0]: avb_1722_1_task(i_avb[AVB_MANAGER_TO_1722_1],
+    on tile[0]:
+    {
+      [[combine]] par {
+        application_task(i_avb[AVB_MANAGER_TO_DEMO], i_1722_1_entity);
+        avb_1722_1_task(i_avb[AVB_MANAGER_TO_1722_1],
+                                i_1722_1_entity,
                                 c_mac_rx[MAC_RX_TO_1722_1],
                                 c_mac_tx[MAC_TX_TO_1722_1],
                                 c_ptp[PTP_TO_1722_1]);
+      }
+    }
 
     on tile[0]: ptp_output_test_clock(c_ptp[PTP_TO_TEST_CLOCK],
                                       ptp_sync_port, 100000000);
@@ -297,12 +306,13 @@ int main(void)
 
 /** The main application control task **/
 [[combinable]]
-void application_task(client interface avb_interface avb)
+void application_task(client interface avb_interface avb, server interface avb_1722_1_control_callbacks i_1722_1_entity)
 {
 #if AVB_DEMO_ENABLE_TALKER
   int map[AVB_NUM_MEDIA_INPUTS];
 #endif
   unsigned sample_rate = 48000;
+  unsigned char aem_identify_control_value = 0;
 
   // Initialize the media clock
   avb.set_device_media_clock_type(0, DEVICE_MEDIA_CLOCK_INPUT_STREAM_DERIVED);
@@ -322,6 +332,84 @@ void application_task(client interface avb_interface avb)
 
   while (1)
   {
-    select {}
+    select
+    {
+      case i_1722_1_entity.get_control_value(unsigned short control_type,
+                                            unsigned short control_index,
+                                            unsigned short &values_length,
+                                            unsigned char values[508]) -> unsigned char return_status:
+      {
+        printstrln("get_control_value");
+        return_status = AECP_AEM_STATUS_NO_SUCH_DESCRIPTOR;
+
+        if (control_type == AEM_CONTROL_TYPE)
+        {
+          switch (control_index)
+          {
+            case DESCRIPTOR_INDEX_CONTROL_IDENTIFY:
+                values[0] = aem_identify_control_value;
+                values_length = 1;
+                return_status = AECP_AEM_STATUS_SUCCESS;
+              break;
+          }
+        }
+
+        break;
+      }
+
+      case i_1722_1_entity.set_control_value(unsigned short control_type,
+                                            unsigned short control_index,
+                                            unsigned short values_length,
+                                            unsigned char values[508]) -> unsigned char return_status:
+      {        
+        // printstrln("set_control_value");
+        return_status = AECP_AEM_STATUS_NO_SUCH_DESCRIPTOR;
+        simple_printf("Receive %d\n", values_length);
+
+        if (control_type == AEM_CONTROL_TYPE)
+        {
+          if (control_index == DESCRIPTOR_INDEX_CONTROL_IDENTIFY) {
+            if (values_length == 1) {
+              aem_identify_control_value = values[0];
+              printintln(aem_identify_control_value);
+              p_leds <: aem_identify_control_value;
+              return_status = AECP_AEM_STATUS_SUCCESS;
+            }
+            else
+            {
+              printintln(values_length);
+              return_status = AECP_AEM_STATUS_BAD_ARGUMENTS;
+            }
+          }
+
+        
+          #if 0
+          switch (control_index)
+          {
+            case DESCRIPTOR_INDEX_CONTROL_IDENTIFY:
+            {
+              /*
+              if (values_length == 1)
+              {
+                // aem_identify_control_value = values[0];
+                printintln(aem_identify_control_value);
+                return_status = AECP_AEM_STATUS_SUCCESS;
+              }
+              else
+              {
+                return_status = AECP_AEM_STATUS_BAD_ARGUMENTS;
+              }
+              */
+              break;
+            }
+          }
+          #endif
+          
+        }
+        
+
+        break;
+      }
+    }
   }
 }

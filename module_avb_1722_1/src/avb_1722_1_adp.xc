@@ -40,7 +40,7 @@ static unsigned char avb_1722_1_adp_dest_addr[6] = AVB_1722_1_ADP_DEST_MAC;
 static unsigned long avb_1722_1_available_index = 0;
 
 // The GUID for the PTP grandmaster server
-static guid_t as_grandmaster_id;
+static guid_t gptp_grandmaster_id;
 
 // Timers for various parts of the state machines
 static avb_timer adp_advertise_timer;
@@ -114,7 +114,7 @@ void avb_1722_1_adp_discover_all()
 
 void avb_1722_1_adp_change_ptp_grandmaster(unsigned char grandmaster[8])
 {
-    memcpy(as_grandmaster_id.c, grandmaster, 8);
+    memcpy(gptp_grandmaster_id.c, grandmaster, 8);
 }
 
 int avb_1722_1_get_latest_new_entity_idx()
@@ -168,10 +168,11 @@ static int avb_1722_1_entity_database_add(avb_1722_1_adp_packet_t &pkt)
         entities[found_slot_index].listener_capabilities = ntoh_16(pkt.listener_capabilities);
         entities[found_slot_index].controller_capabilities = ntoh_32(pkt.controller_capabilities);
         entities[found_slot_index].available_index = ntoh_32(pkt.available_index);
-        get_64(entities[found_slot_index].as_grandmaster_id.c, pkt.as_grandmaster_id);
+        get_64(entities[found_slot_index].gptp_grandmaster_id.c, pkt.gptp_grandmaster_id);
+        entities[found_slot_index].gptp_domain_number = pkt.gptp_domain_number;
+        entities[found_slot_index].identify_control_index = ntoh_16(pkt.identify_control_index);
         entities[found_slot_index].association_id = ntoh_32(pkt.association_id);
         entities[found_slot_index].timeout = GET_1722_1_VALID_TIME(&pkt.header) + adp_two_second_counter;
-
         if (entity_update)
         {
             return 0;
@@ -295,8 +296,11 @@ static void avb_1722_1_create_adp_packet(int message_type, guid_t guid)
         hton_16(pkt->listener_capabilities, AVB_1722_1_ADP_LISTENER_CAPABILITIES);
         hton_32(pkt->controller_capabilities, AVB_1722_1_ADP_CONTROLLER_CAPABILITIES);
         hton_32(pkt->available_index, avb_1722_1_available_index);
-        memcpy(pkt->as_grandmaster_id, as_grandmaster_id.c, 8);
+        memcpy(pkt->gptp_grandmaster_id, gptp_grandmaster_id.c, 8);
+        pkt->gptp_domain_number = 0;
+        hton_16(pkt->identify_control_index, 0);
         hton_32(pkt->association_id, AVB_1722_1_ADP_ASSOCIATION_ID);
+        hton_16(pkt->interface_index, 0);
     }
 }
 
@@ -394,7 +398,7 @@ void avb_1722_1_adp_advertising_periodic(chanend c_tx, chanend ptp)
         if (avb_timer_expired(ptp_monitor_timer))
         {
             ptp_get_current_grandmaster(ptp, ptp_current.c);
-            if (as_grandmaster_id.l != ptp_current.l)
+            if (gptp_grandmaster_id.l != ptp_current.l)
             {
                 avb_1722_1_adp_change_ptp_grandmaster(ptp_current.c);
                 adp_advertise_state = ADP_ADVERTISE_ADVERTISE_1;
