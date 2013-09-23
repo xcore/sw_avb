@@ -339,7 +339,6 @@ void application_task(client interface avb_interface avb, server interface avb_1
                                             unsigned short &values_length,
                                             unsigned char values[508]) -> unsigned char return_status:
       {
-        printstrln("get_control_value");
         return_status = AECP_AEM_STATUS_NO_SUCH_DESCRIPTOR;
 
         if (control_type == AEM_CONTROL_TYPE)
@@ -362,22 +361,18 @@ void application_task(client interface avb_interface avb, server interface avb_1
                                             unsigned short values_length,
                                             unsigned char values[508]) -> unsigned char return_status:
       {        
-        // printstrln("set_control_value");
         return_status = AECP_AEM_STATUS_NO_SUCH_DESCRIPTOR;
-        simple_printf("Receive %d\n", values_length);
 
         if (control_type == AEM_CONTROL_TYPE)
         {
           if (control_index == DESCRIPTOR_INDEX_CONTROL_IDENTIFY) {
             if (values_length == 1) {
               aem_identify_control_value = values[0];
-              printintln(aem_identify_control_value);
               p_leds <: aem_identify_control_value;
               return_status = AECP_AEM_STATUS_SUCCESS;
             }
             else
             {
-              printintln(values_length);
               return_status = AECP_AEM_STATUS_BAD_ARGUMENTS;
             }
           }
