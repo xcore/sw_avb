@@ -32,7 +32,6 @@ unsafe unsigned short process_aem_cmd_getset_control(avb_1722_1_aecp_packet_t *u
   }
   else // AECP_AEM_CMD_SET_CONTROL
   {
-    simple_printf("Send %d\n", values_length);
     status = i_1722_1_entity.set_control_value(control_type, control_index, values_length, values);
   }
   return values_length;
