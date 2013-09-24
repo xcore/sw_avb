@@ -81,7 +81,7 @@ on tile[0]: out port p_audio_shared = PORT_AUDIO_SHARED;
 #endif
 
 // PTP sync port
-on tile[0]: port ptp_sync_port = XS1_PORT_1C;
+on tile[0]: port ptp_sync_port = XS1_PORT_1G;
 
 #if AVB_DEMO_ENABLE_LISTENER
 media_output_fifo_data_t ofifo_data[AVB_NUM_MEDIA_OUTPUTS];
@@ -106,7 +106,7 @@ void xscope_user_init(void)
   xscope_config_io(XSCOPE_IO_BASIC);
 }
 
-void audio_hardware_setup(void)
+[[distributable]] void audio_hardware_setup(void)
 {
 #if PLL_TYPE_CS2100
   audio_clock_CS2100CP_init(r_i2c, MASTER_TO_WORDCLOCK_RATIO);
@@ -117,6 +117,11 @@ void audio_hardware_setup(void)
   audio_codec_CS4270_init(p_audio_shared, 0xff, 0x48, r_i2c);
   audio_codec_CS4270_init(p_audio_shared, 0xff, 0x49, r_i2c);
 #endif
+
+  while (1) {
+    select {
+    }
+  }
 }
 
 enum mac_rx_chans {
@@ -216,12 +221,11 @@ int main(void)
                                    c_ptp, NUM_PTP_CHANS,
                                    PTP_GRANDMASTER_CAPABLE);
 
+    on tile[AVB_I2C_TILE]: [[distribute]] audio_hardware_setup();
+
     // AVB - Audio
     on tile[0]:
     {
-#if (AVB_I2C_TILE == 0)
-      audio_hardware_setup();
-#endif
 #if AVB_DEMO_ENABLE_TALKER
       media_input_fifo_data_t ififo_data[AVB_NUM_MEDIA_INPUTS];
       media_input_fifo_t ififos[AVB_NUM_MEDIA_INPUTS];
@@ -261,40 +265,26 @@ int main(void)
                                   AVB_NUM_SINKS);
 #endif
 
-    // Application
-    on tile[1]:
-    {
-#if (AVB_I2C_TILE == 1)
-      audio_hardware_setup();
-#endif
-      [[combine]] par {
-        avb_manager(i_avb, NUM_AVB_MANAGER_CHANS,
-                   i_srp,
-                   c_media_ctl,
-                   c_listener_ctl,
-                   c_talker_ctl,
-                   c_mac_tx[MAC_TX_TO_AVB_MANAGER],
-                   c_media_clock_ctl,
-                   c_ptp[PTP_TO_AVB_MANAGER]);
-        avb_srp_task(i_avb[AVB_MANAGER_TO_SRP],
-                     i_srp,
-                     c_mac_rx[MAC_RX_TO_SRP],
-                     c_mac_tx[MAC_TX_TO_SRP]);
-      }
+    on tile[1].core[0]: avb_manager(i_avb, NUM_AVB_MANAGER_CHANS,
+                                    i_srp,
+                                    c_media_ctl,
+                                    c_listener_ctl,
+                                    c_talker_ctl,
+                                    c_mac_tx[MAC_TX_TO_AVB_MANAGER],
+                                    c_media_clock_ctl,
+                                    c_ptp[PTP_TO_AVB_MANAGER]);
+    on tile[1].core[0]: avb_srp_task(i_avb[AVB_MANAGER_TO_SRP],
+                                     i_srp,
+                                     c_mac_rx[MAC_RX_TO_SRP],
+                                     c_mac_tx[MAC_TX_TO_SRP]);
 
-    }
 
-    on tile[0]:
-    {
-      [[combine]] par {
-        application_task(i_avb[AVB_MANAGER_TO_DEMO], i_1722_1_entity);
-        avb_1722_1_task(i_avb[AVB_MANAGER_TO_1722_1],
-                                i_1722_1_entity,
-                                c_mac_rx[MAC_RX_TO_1722_1],
-                                c_mac_tx[MAC_TX_TO_1722_1],
-                                c_ptp[PTP_TO_1722_1]);
-      }
-    }
+    on tile[0].core[0]: application_task(i_avb[AVB_MANAGER_TO_DEMO], i_1722_1_entity);
+    on tile[0].core[0]: avb_1722_1_task(i_avb[AVB_MANAGER_TO_1722_1],
+                                        i_1722_1_entity,
+                                        c_mac_rx[MAC_RX_TO_1722_1],
+                                        c_mac_tx[MAC_TX_TO_1722_1],
+                                        c_ptp[PTP_TO_1722_1]);
 
     on tile[0]: ptp_output_test_clock(c_ptp[PTP_TO_TEST_CLOCK],
                                       ptp_sync_port, 100000000);
