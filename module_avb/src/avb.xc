@@ -905,11 +905,13 @@ void avb_process_1722_control_packet(unsigned int buf0[],
                                      client interface avb_interface i_avb,
                                      client interface avb_1722_1_control_callbacks i_1722_1_entity) {
   if (nbytes == STATUS_PACKET_LEN) {
+    #if 0
     if (((unsigned char *)buf0)[0]) { // Link up
       avb_1722_1_adp_init();
       avb_1722_1_adp_depart_then_announce();
       avb_1722_1_adp_discover_all();
     }
+    #endif
   }
   else {
     struct ethernet_hdr_t *ethernet_hdr = (ethernet_hdr_t *) &buf0[0];
@@ -943,15 +945,6 @@ void avb_process_control_packet(client interface avb_interface avb, unsigned int
   if (nbytes == STATUS_PACKET_LEN) {
     if (((unsigned char *)buf0)[0]) { // Link up
       srp_domain_join();
-    }
-    else { // Link down
-      for (int i=0; i < AVB_NUM_SOURCES; i++) {
-        avb.set_source_state(i, AVB_SOURCE_STATE_DISABLED);
-      }
-
-      for (int i=0; i < AVB_NUM_SINKS; i++) {
-        avb.set_sink_state(i, AVB_SOURCE_STATE_DISABLED);
-      }      
     }
   }
   else {
