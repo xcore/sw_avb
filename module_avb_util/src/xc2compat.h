@@ -7,10 +7,4 @@
 #define unsafe
 #endif
 
-#ifdef __XC__
-#define CLIENT_INTERFACE(type, name) client interface type name
-#else
-#define CLIENT_INTERFACE(type, name) unsigned int name
-#endif
-
 #endif
