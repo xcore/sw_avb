@@ -312,6 +312,13 @@ static void update_adjust(ptp_timestamp *master_ts,
     adjust = master_diff - local_diff;
     inv_adjust = local_diff - master_diff;
 
+    // Detect and ignore outliers 
+    if (adjust > local_diff/10 || adjust < -local_diff/10) {
+      prev_adjust_valid = 0;
+      simple_printf("PTP threw away outlier (adjust %d)\n", adjust);
+      return;      
+    }
+
     adjust <<= ADJUST_CALC_PREC;
     inv_adjust <<= ADJUST_CALC_PREC;
     
