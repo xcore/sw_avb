@@ -7,6 +7,14 @@
 #ifndef _AVB_COMMON_H_ 
 #define _AVB_COMMON_H_ 1
 
+short ntoh_16(unsigned char x[2]);
+int ntoh_32(unsigned char x[4]) ;
+void get_64(unsigned char g[8], unsigned char c[8]);
+void set_64(unsigned char g[8], unsigned char c[8]);
+
+void hton_16(unsigned char x[2], unsigned short v);
+
+void hton_32(unsigned char x[4], unsigned int v);
 
 // Network to/from Host conversion
 #define NTOH_U16(x) ( ((unsigned) x[0] << 8) | ((unsigned) x[1]) )
@@ -116,11 +124,11 @@ typedef struct
 #define AVBTP_TIMESTAMP(x)             ((x->avb_timestamp[0] << 24) | \
                                         (x->avb_timestamp[1] << 16) | \
                                         (x->avb_timestamp[2] << 8) | \
-                                        (x->avb_timestamp[3]))                                
+                                        (x->avb_timestamp[3]))
 #define AVBTP_STREAM_ID1(x)            ((x->stream_id[0] << 24) | \
                                         (x->stream_id[1] << 16) | \
                                         (x->stream_id[2] << 8) | \
-                                        (x->stream_id[3]))                               
+                                        (x->stream_id[3]))
 #define AVBTP_STREAM_ID0(x)            ((x->stream_id[4] << 24) | \
                                         (x->stream_id[5] << 16) | \
                                         (x->stream_id[6] << 8) | \
@@ -142,23 +150,11 @@ typedef struct
 #define SET_AVBTP_TV(x, a)                (x->version_flags = (x->version_flags & ~0x1) | (a & 0x1))
 #define SET_AVBTP_SEQUENCE_NUMBER(x, a)   (x->sequence_number = (a & 0xff))
 #define SET_AVBTP_GM_DISCONTINUNITY(x, a) (x->gm_discontinunity_holdover |= (a & 0x7F) << 1)
-#define SET_AVBTP_HOLDOVER(x, a)          (x->gm_discontinunity_holdover |= a & 0x1)                                           
-#define SET_AVBTP_TIMESTAMP(x, a)        do {x->avb_timestamp[0] = (a >> 24) & 0xFF; \
-                                           x->avb_timestamp[1] = (a >> 16) & 0xFF; \
-                                           x->avb_timestamp[2] = (a >> 8) & 0xFF; \
-                                           x->avb_timestamp[3] = (a & 0xFF); } while (0)
-#define SET_AVBTP_STREAM_ID1(x, a)       do {x->stream_id[0] = (a >> 24) & 0xFF; \
-                                           x->stream_id[1] = (a >> 16) & 0xFF; \
-                                           x->stream_id[2] = (a >> 8) & 0xFF; \
-                                           x->stream_id[3] = (a & 0xFF); } while (0)
-#define SET_AVBTP_STREAM_ID0(x, a)       do {x->stream_id[4] = ((a) >> 24) & 0xFF; \
-                                           x->stream_id[5] = (a >> 16) & 0xFF; \
-                                           x->stream_id[6] = (a >> 8) & 0xFF; \
-                                           x->stream_id[7] = (a & 0xFF); } while (0)                                           
-#define SET_AVBTP_GATEWAY_INFO(x, a)     do {x->gateway_info[0] = (a >> 24) & 0xFF; \
-                                           x->gateway_info[1] = (a >> 16) & 0xFF; \
-                                           x->gateway_info[2] = (a >> 8) & 0xFF; \
-                                           x->gateway_info[3] = (a & 0xFF); } while (0)
+#define SET_AVBTP_HOLDOVER(x, a)          (x->gm_discontinunity_holdover |= a & 0x1)
+#define SET_AVBTP_TIMESTAMP(x, a)         hton_32((x)->avb_timestamp, (a))
+#define SET_AVBTP_STREAM_ID1(x, a)        hton_32(&(x)->stream_id[0], (a))
+#define SET_AVBTP_STREAM_ID0(x, a)        hton_32(&(x)->stream_id[4], (a))
+#define SET_AVBTP_GATEWAY_INFO(x, a)      hton_32((x)->gateway_info[0], (a))
 #define SET_AVBTP_PACKET_DATA_LENGTH(x, a)  do {x->packet_data_length[0] = a >> 8; \
                                                 x->packet_data_length[1] = a & 0xFF; } while (0)
 #define SET_AVBTP_PROTOCOL_SPECIFIC(x, a)   do {x->protocol_specific[0] = a >> 8; \
@@ -179,13 +175,3 @@ typedef struct
 // Number of transport stream packets to allow in each 61883-4 encapsulation
 #define MAX_TS_PACKETS_PER_1722 4
 #endif
-
-
-short ntoh_16(unsigned char x[2]);
-int ntoh_32(unsigned char x[4]) ;
-void get_64(unsigned char g[8], unsigned char c[8]);
-void set_64(unsigned char g[8], unsigned char c[8]);
-
-void hton_16(unsigned char x[2], unsigned short v);
-
-void hton_32(unsigned char x[4], unsigned int v);

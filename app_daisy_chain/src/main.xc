@@ -97,6 +97,10 @@ media_input_fifo_t ififos[AVB_NUM_MEDIA_INPUTS];
   #define ififos null
 #endif
 
+// Saves a bunch of memory
+void __libc_done() {}
+void _exit_unlocked() {}
+
 [[combinable]] void application_task(client interface avb_interface avb, server interface avb_1722_1_control_callbacks i_1722_1_entity);
 
 void xscope_user_init(void)
@@ -227,14 +231,10 @@ int main(void)
     on tile[0]:
     {
 #if AVB_DEMO_ENABLE_TALKER
-      media_input_fifo_data_t ififo_data[AVB_NUM_MEDIA_INPUTS];
-      media_input_fifo_t ififos[AVB_NUM_MEDIA_INPUTS];
       init_media_input_fifos(ififos, ififo_data, AVB_NUM_MEDIA_INPUTS);
 #endif
 
 #if AVB_DEMO_ENABLE_LISTENER
-      media_output_fifo_data_t ofifo_data[AVB_NUM_MEDIA_OUTPUTS];
-      media_output_fifo_t ofifos[AVB_NUM_MEDIA_OUTPUTS];
       init_media_output_fifos(ofifos, ofifo_data, AVB_NUM_MEDIA_OUTPUTS);
 #endif
 

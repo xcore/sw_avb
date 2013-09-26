@@ -594,16 +594,12 @@ static void timestamp_to_network(n80_t *msg,
   msg->data[0] = sec1_p[3];
   msg->data[1] = sec1_p[2];
 
-  msg->data[2] = sec0_p[3];
-  msg->data[3] = sec0_p[2];
-  msg->data[4] = sec0_p[1];
-  msg->data[5] = sec0_p[0];
+  for (int i=2; i < 6; i++) 
+    msg->data[i] = sec0_p[5-i];
                        
   // Now convert nanoseconds
-  msg->data[6] = nsec_p[3];
-  msg->data[7] = nsec_p[2];
-  msg->data[8] = nsec_p[1];
-  msg->data[9] = nsec_p[0];
+  for (int i=6; i < 10; i++)
+    msg->data[i] = nsec_p[9-i];
 }
 
 static void network_to_ptp_timestamp(ptp_timestamp *ts,
@@ -617,16 +613,12 @@ static void network_to_ptp_timestamp(ptp_timestamp *ts,
   sec1_p[2] = msg->data[1];
   sec1_p[1] = 0;
   sec1_p[0] = 0;
-                             
-  sec0_p[3] = msg->data[2];
-  sec0_p[2] = msg->data[3];
-  sec0_p[1] = msg->data[4];
-  sec0_p[0] = msg->data[5];
-                           
-  nsec_p[3] = msg->data[6];
-  nsec_p[2] = msg->data[7];
-  nsec_p[1] = msg->data[8];
-  nsec_p[0] = msg->data[9];
+
+  for (int i=2; i < 6; i++)
+    sec0_p[5-i] = msg->data[i];
+
+  for (int i=6; i < 10; i++)
+    nsec_p[9-i] = msg->data[i];
 }
 
 static int port_id_equal(n80_t *a, n80_t *b)
@@ -1291,14 +1283,13 @@ void ptp_init(chanend c_tx, chanend c_rx, enum ptp_server_type stype)
 
   mac_get_macaddr(c_tx, src_mac_addr);
 
-  my_port_id.data[0] = src_mac_addr[0];
-  my_port_id.data[1] = src_mac_addr[1];
-  my_port_id.data[2] = src_mac_addr[2];
+  for (int i=0; i < 3; i ++)
+    my_port_id.data[i] = src_mac_addr[i];
+
   my_port_id.data[3] = 0xff;
   my_port_id.data[4] = 0xfe;
-  my_port_id.data[5] = src_mac_addr[3];
-  my_port_id.data[6] = src_mac_addr[4];
-  my_port_id.data[7] = src_mac_addr[5];
+  for (int i=5; i < 8; i ++)
+    my_port_id.data[i] = src_mac_addr[i-2];
   my_port_id.data[8] = 0;
   my_port_id.data[9] = 1;
 
