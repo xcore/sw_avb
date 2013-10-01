@@ -1,7 +1,6 @@
 #include <platform.h>
 #include <print.h>
 #include <xccompat.h>
-#include <stdio.h>
 #include <string.h>
 #include <xscope.h>
 #include "audio_i2s.h"

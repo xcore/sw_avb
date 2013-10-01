@@ -19,4 +19,6 @@ void process_avb_1722_1_aecp_packet(unsigned char src_addr[6],
                                     CLIENT_INTERFACE(avb_1722_1_control_callbacks, i_1722_1_entity));
 void avb_1722_1_aecp_aem_periodic(chanend c_tx);
 
+int avb_write_upgrade_image_page(int address, unsigned char data[256]);
+
 #endif /* AVB_1722_1_AECP_H_ */

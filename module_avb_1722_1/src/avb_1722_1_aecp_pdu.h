@@ -13,6 +13,9 @@
 #define AEM_MSG_SET_COMMAND_TYPE(pkt, type) do{ (pkt)->uflag_command_type = ((pkt)->uflag_command_type & 0x80) | (((type) >> 8) & 0x7f); \
                                                 (pkt)->command_type = ((type) & 0xFF); } while (0)
 
+#define ADDRESS_MSG_GET_MODE(aa)       (((aa)->mode_length[0] >> 4) & 0xF)
+#define ADDRESS_MSG_GET_LENGTH(aa)     ((((aa)->mode_length[0] & 0xf) << 8)| \
+                                        ((aa)->mode_length[1]))
 
 #define AVB_1722_1_AECP_CD_LENGTH   40
 
@@ -37,9 +40,10 @@ typedef struct {
  * 1722.1 AECP Address access format
  */
 typedef struct {
-    unsigned char mode_len;
-    unsigned char lower_len;
-    unsigned char mode_specific_data[1];
+    unsigned char tlv_count[2];
+    unsigned char mode_length[2];
+    unsigned char address[8];
+    unsigned char data[514-8-2-2];
 } avb_1722_1_aecp_address_access_t;
 
 /**
@@ -172,6 +176,23 @@ typedef enum {
     AECP_AEM_STATUS_NOT_SUPPORTED = 11,
     AECP_AEM_STATUS_STREAM_IS_RUNNING = 12,
 } avb_1722_1_aecp_aem_status_code;
+
+typedef enum {
+    AECP_AA_MODE_READ = 0,
+    AECP_AA_MODE_WRITE = 1,
+    AECP_AA_MODE_EXECUTE = 2,
+} avb_1722_1_aecp_address_access_mode;
+
+typedef enum {
+    AECP_AA_STATUS_SUCCESS = 0,
+    AECP_AA_STATUS_NOT_IMPLEMENTED = 1,
+    AECP_AA_STATUS_ADDRESS_TOO_LOW = 2,
+    AECP_AA_STATUS_ADDRESS_TOO_HIGH = 3,
+    AECP_AA_STATUS_ADDRESS_INVALID = 4,
+    AECP_AA_STATUS_TLV_INVALID = 5,
+    AECP_AA_STATUS_DATA_INVALID = 6,
+    AECP_AA_STATUS_UNSUPPORTED = 7,
+} avb_1722_1_aecp_address_access_status_code;
 
 typedef enum {
     AECP_STATUS_SUCCESS = 0,

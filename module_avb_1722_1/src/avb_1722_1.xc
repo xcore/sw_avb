@@ -13,6 +13,7 @@
 #include "ethernet_rx_client.h"
 #include "ethernet_server_def.h"
 #include "avb_mac_filter.h"
+#include "spi.h"
 
 
 #define PERIODIC_POLL_TIME 5000
@@ -46,6 +47,8 @@ void avb_1722_1_task(client interface avb_interface i_avb,
   unsigned int buf[AVB_1722_1_PACKET_SIZE_WORDS];
   unsigned int port_num;
   unsigned char mac_addr[6];
+
+  spi_init();
 
   mac_get_macaddr(c_mac_tx, mac_addr);
   avb_1722_1_init(mac_addr);
