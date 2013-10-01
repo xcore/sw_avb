@@ -50,7 +50,7 @@ int spi_command_status(int cmd, int returnBytes) {
     return bitrev(data);
 }
 
-void spi_command_address_status(int cmd, int addr, char data[], int returnBytes) {
+void spi_command_address_status(int cmd, unsigned int addr, unsigned char data[], int returnBytes) {
     spi_cmd(cmd);
     addr = bitrev(addr << 8);
     spiMOSI <: >> addr;

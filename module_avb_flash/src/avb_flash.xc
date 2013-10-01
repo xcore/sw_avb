@@ -1,7 +1,7 @@
 #include "avb_flash.h"
 #include "flash_defaults.h"
 
-void spi_flash_write_small(int address, char data[],int bytes) {
+void spi_flash_write_small(unsigned int address, unsigned char data[],int bytes) {
     spi_command_status(SPI_CMD_WRITE_ENABLE, 0);
     spi_command_address_status(SPI_CMD_WRITE,address,data,-(bytes));
     while(spi_command_status(SPI_CMD_READSR, 1) & 1) {
@@ -10,7 +10,7 @@ void spi_flash_write_small(int address, char data[],int bytes) {
     spi_command_status(SPI_CMD_WRITE_DISABLE, 0);
 }
 
-void spi_flash_erase(int address, int bytes) {
+void spi_flash_erase(unsigned int address, int bytes) {
     char data[1];
     while (bytes > 0) {
         spi_command_status(SPI_CMD_WRITE_ENABLE, 0);
@@ -41,7 +41,7 @@ static int flashStartAddress = 0;
  * to it being made invalid, in which case this data is still valid but
  * just one step old.
  */
-int spi_flash_persistent_state_read(char data[]) {
+int spi_flash_persistent_state_read(unsigned char data[]) {
     char guard[1];
     for(int i = flashStartAddress;
         i < flashStartAddress + FLASH_PERSISTENT_SEGMENT_SIZE; 
@@ -85,7 +85,7 @@ int spi_flash_persistent_state_read(char data[]) {
  * 'valid'. This code cannot deal with it, but a full and large version
  * would put a CRC over the data to validate the guard.
  */
-void spi_flash_persistent_state_write(char data[]) {
+void spi_flash_persistent_state_write(unsigned char data[]) {
     char guard[1];
     int i, writeIndex = 0, clearIndex = FLASH_PERSISTENT_SEGMENT_SIZE - FLASH_PERSISTENT_SIZE;
     for(i = flashStartAddress;

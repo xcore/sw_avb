@@ -47,7 +47,7 @@ static int fl_get_next_boot_image(fl_boot_image_info* boot_image_info)
     return 1;
   while (sector_num < NUM_SECTORS) {
     unsigned sector_address = fl_get_sector_address(sector_num);
-    spi_flash_read(sector_address, (char*)tmpbuf, 6 * sizeof(int));
+    spi_flash_read(sector_address, (unsigned char*)tmpbuf, 6 * sizeof(int));
     if (sortbits(tmpbuf[0]) == IMAGE_TAG_13) {
       boot_image_info->startAddress = sector_address;
       boot_image_info->size         = sortbits(tmpbuf[IMAGE_LENGTH_OFFSET_13]);
@@ -63,9 +63,9 @@ static int fl_get_next_boot_image(fl_boot_image_info* boot_image_info)
 static int get_factory_image(fl_boot_image_info* boot_image_info)
 {
   unsigned tmpbuf[9];
-  spi_flash_read(0, (char*)tmpbuf, 4);
+  spi_flash_read(0, (unsigned char*)tmpbuf, 4);
   unsigned start_addr = (sortbits(tmpbuf[0])+2)<<2; /* Normal case. */
-  spi_flash_read(start_addr, (char*)tmpbuf, (6 + 3) * sizeof(int));
+  spi_flash_read(start_addr, (unsigned char*)tmpbuf, (6 + 3) * sizeof(int));
   unsigned *header = tmpbuf;
   if (sortbits(tmpbuf[0]) != IMAGE_TAG_13) {
     return 1;

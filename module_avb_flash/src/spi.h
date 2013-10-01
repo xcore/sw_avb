@@ -62,6 +62,6 @@ int spi_command_status(int cmd, int returnBytes);
  *                    bytes will be read or written.
  *
  */
-void spi_command_address_status(int cmd, int address, char data[], int returnBytes);
+void spi_command_address_status(int cmd, unsigned int address, unsigned char data[], int returnBytes);
 
 #endif

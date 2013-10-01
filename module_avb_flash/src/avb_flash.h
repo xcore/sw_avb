@@ -37,7 +37,7 @@ typedef struct {
  *                into ``data``.
  *
  */
-void spi_flash_read(int address, char data[],int bytes);
+void spi_flash_read(unsigned int address, unsigned char data[],int bytes);
 #define spi_flash_read(address,data,bytes) spi_command_address_status(SPI_CMD_READ,address,data,bytes)
 
 /** This function writes a small block of data to the flash at the given
@@ -58,7 +58,7 @@ void spi_flash_read(int address, char data[],int bytes);
  *                from ``data``.
  *
  */
-void spi_flash_write_small(int address, char data[],int bytes);
+void spi_flash_write_small(unsigned int address, unsigned char data[],int bytes);
 
 /** This function writes a block of data to the flash at the given address.
  * A write to flash can only change bits form '1' to '0'. A spiFlashErase()
@@ -74,7 +74,7 @@ void spi_flash_write_small(int address, char data[],int bytes);
  *                from ``data``.
  *
  */
-void spi_flash_write(int address, char data[],int bytes);
+void spi_flash_write(unsigned int address, unsigned char data[],int bytes);
 
 /** This function erases a block of data in the flash at the given address.
  * This will replace the block with all '1' bits. The address should be
@@ -87,7 +87,7 @@ void spi_flash_write(int address, char data[],int bytes);
  * \param bytes   The number of bytes that are to be erased.
  *
  */
-void spi_flash_erase(int address, int bytes);
+void spi_flash_erase(unsigned int address, int bytes);
 
 /** This function reads persistent data from flash memory. The size of hte
  * persistent data, the base address and the segment size are all compile
@@ -105,7 +105,7 @@ void spi_flash_erase(int address, int bytes);
  * \returns 0 if no valid data could be found. A factory default should be
  * used in this case.
  */
-int spi_flash_persistent_state_read(char data[]);
+int spi_flash_persistent_state_read(unsigned char data[]);
 
 /** This function writes persistent data to flash memory. The size of hte
  * persistent data, the base address and the segment size are all compile
@@ -134,6 +134,6 @@ int spi_flash_persistent_state_read(char data[]);
  *
  * \param data array in which the persistent data to be written is stored.
  */
-void spi_flash_persistent_state_write(char data[]);
+void spi_flash_persistent_state_write(unsigned char data[]);
 
 #endif
