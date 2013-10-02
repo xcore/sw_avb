@@ -365,14 +365,14 @@ void avb_srp_listener_join_ind(CLIENT_INTERFACE(avb_interface, avb), mrp_attribu
 
     if (mrp_match_attr_by_stream_and_type(attr, 1)) { // Listener ready on the other port also, therefore send on both ports
       if (stream_table[entry].bw_reserved[!attr->port_num] != 1) {
-        srp_increase_port_bandwidth(sink_info->reservation.tspec_max_frame_size, 1, !attr->port_num);
+        srp_increase_port_bandwidth(sink_info->reservation.tspec_max_frame_size, 0, !attr->port_num);
         set_avb_source_port(stream, -1);
         stream_table[entry].bw_reserved[!attr->port_num] = 1;
       }
     }
     else { // Just this port
       if (stream_table[entry].bw_reserved[attr->port_num] != 1) {
-        srp_increase_port_bandwidth(sink_info->reservation.tspec_max_frame_size, 1, attr->port_num);
+        srp_increase_port_bandwidth(sink_info->reservation.tspec_max_frame_size, 0, attr->port_num);
         set_avb_source_port(stream, attr->port_num);
         stream_table[entry].bw_reserved[attr->port_num] = 1;
       }
@@ -405,7 +405,7 @@ void avb_srp_listener_leave_ind(CLIENT_INTERFACE(avb_interface, avb), mrp_attrib
   {
     if (matched_listener_opposite_port) { // Transmitting on both ports
       if (stream_table[entry].bw_reserved[attr->port_num] == 1) {
-        srp_decrease_port_bandwidth(sink_info->reservation.tspec_max_frame_size, 1, attr->port_num);
+        srp_decrease_port_bandwidth(sink_info->reservation.tspec_max_frame_size, 0, attr->port_num);
         set_avb_source_port(stream, !attr->port_num);
         stream_table[entry].bw_reserved[attr->port_num] = 0;
       }
