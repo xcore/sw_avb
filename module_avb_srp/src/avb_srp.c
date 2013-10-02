@@ -15,6 +15,7 @@
 #include "simple_printf.h"
 #include "avb_1722_router.h"
 #include "avb_api.h"
+#include "ethernet_tx_client.h"
 
 #ifndef AVB_STREAM_TABLE_ENTRIES
 #define AVB_STREAM_TABLE_ENTRIES 6
@@ -25,9 +26,11 @@ typedef struct avb_stream_entry
   avb_srp_info_t reservation;
   int listener_present;
   int talker_present;
+  int bw_reserved[MRP_NUM_PORTS]; // While the bw_reserved flag is set/not set we do not add/subtract Qav credit
 } avb_stream_entry;
 
 static avb_stream_entry stream_table[AVB_STREAM_TABLE_ENTRIES];
+static unsigned int port_bandwidth[MRP_NUM_PORTS];
 
 static mrp_attribute_state *domain_attr[MRP_NUM_PORTS];
 
@@ -52,6 +55,30 @@ void srp_domain_join(void)
       mrp_mad_begin(domain_attr[i]);
       mrp_mad_join(domain_attr[i], 1);
   }
+}
+
+static int srp_calculate_stream_bandwidth(int max_frame_size, int extra_byte) {
+  const int interframe_gap = 12;
+  const int preamble_sfd = 8;
+  const int eth_header_and_tag = 16;
+  const int crc = 4;
+  const int total_frame_size = interframe_gap + preamble_sfd + eth_header_and_tag + max_frame_size + crc + extra_byte;
+
+  return total_frame_size * 8 * AVB1722_PACKET_RATE;
+}
+
+static void srp_increase_port_bandwidth(int max_frame_size, int extra_byte, int port) {
+  int stream_bandwidth_bps = srp_calculate_stream_bandwidth(max_frame_size, extra_byte);
+  port_bandwidth[port] += stream_bandwidth_bps;
+  simple_printf("Increasing port %d shaper bandwidth to %d\n", port, port_bandwidth[port]);
+  mac_set_qav_bandwidth(c_mac_tx, port_bandwidth[port]);
+}
+
+static void srp_decrease_port_bandwidth(int max_frame_size, int extra_byte, int port) {
+  int stream_bandwidth_bps = srp_calculate_stream_bandwidth(max_frame_size, extra_byte);
+  port_bandwidth[port] -= stream_bandwidth_bps;
+   simple_printf("Decreasing port %d shaper bandwidth to %d\n", port, port_bandwidth[port]);
+  mac_set_qav_bandwidth(c_mac_tx, port_bandwidth[port]);
 }
 
 int avb_srp_match_listener_to_talker_stream_id(unsigned stream_id[2], avb_srp_info_t **stream, int is_listener)
@@ -98,7 +125,7 @@ avb_stream_entry *srp_add_reservation_entry_stream_id_only(unsigned int stream_i
     stream_table[entry].reservation.stream_id[0] = stream_id[0];
     stream_table[entry].reservation.stream_id[1] = stream_id[1];
     stream_table[entry].listener_present = 1;
-    simple_printf("Added stream:\n ID: %x%x\n DA:", stream_id[0], stream_id[1]);
+    simple_printf("Added stream:\n ID: %x%x\n", stream_id[0], stream_id[1]);
   } else {
     printstrln("Assert: Out of stream entries");
     __builtin_trap();
@@ -156,7 +183,9 @@ static void create_propagated_attribute_and_join(mrp_attribute_state *attr) {
   mrp_attribute_state *st = mrp_get_attr();
   avb_srp_info_t *stream_data = attr->attribute_info;
   mrp_attribute_init(st, attr->attribute_type, !attr->port_num, 0, stream_data);
+#if 0
   simple_printf("JOIN mrp_attribute_init: %d, %d, STREAM_ID[0]: %x\n", attr->attribute_type, !attr->port_num, stream_data->stream_id[0]);
+#endif
   mrp_mad_begin(st);
   mrp_mad_join(st, 1);
   st->propagated = 1; // Propagated to other port
@@ -167,8 +196,10 @@ static void create_propagated_attribute_and_join(mrp_attribute_state *attr) {
 static void avb_srp_map_join(mrp_attribute_state *attr, int new, int listener)
 {
   avb_srp_info_t *attribute_info = attr->attribute_info;
+#if 0
   if (listener) printstrln("Listener MAP_Join.indication");
   else printstrln("Talker MAP_Join.indication");
+#endif
   mrp_attribute_state *matched_talker_listener = mrp_match_attribute_pair_by_stream_id(attr, 1, 0);
   mrp_attribute_state *matched_stream_id_opposite_port = mrp_match_attr_by_stream_and_type(attr, 1);
 
@@ -190,11 +221,17 @@ static void avb_srp_map_join(mrp_attribute_state *attr, int new, int listener)
     create_propagated_attribute_and_join(attr);
   }
 
+  /**** LISTENER ****/
   if (listener && matched_talker_listener && !matched_talker_listener->propagated) {
     if (!matched_talker_listener->here) { // Handle case where the Talker is not this endpoint
 
       if (!matched_talker_listener->here) {
-        avb_1722_enable_stream_forwarding(c_mac_tx, attribute_info->stream_id);
+        int entry = srp_match_reservation_entry_by_id(attribute_info->stream_id);
+        if (!stream_table[entry].bw_reserved[attr->port_num]) {
+          stream_table[entry].bw_reserved[attr->port_num] = 1;
+          srp_increase_port_bandwidth(attribute_info->tspec_max_frame_size, 1, attr->port_num);
+          avb_1722_enable_stream_forwarding(c_mac_tx, attribute_info->stream_id);
+        }
       }
       if (matched_stream_id_opposite_port)
       {
@@ -203,20 +240,25 @@ static void avb_srp_map_join(mrp_attribute_state *attr, int new, int listener)
       }
     }
   }
+  /**************/
 
+  /**** TALKER ****/
   if (!listener && matched_stream_id_opposite_port) {
     mrp_mad_join(matched_stream_id_opposite_port, 1);
     matched_stream_id_opposite_port->propagated = 1; // Propagate to other port
   }
+  /**************/
 
-    mrp_debug_dump_attrs();
+  mrp_debug_dump_attrs();
   
 }
 
 void avb_srp_map_leave(mrp_attribute_state *attr)
 {
+#if 0
   if (attr->attribute_type == MSRP_LISTENER) printstrln("Listener MAP_Leave.indication");
   else if (attr->attribute_type == MSRP_TALKER_ADVERTISE) printstrln("Talker MAP_Leave.indication");
+#endif
   mrp_attribute_state *matched_talker_listener = mrp_match_attribute_pair_by_stream_id(attr, 1, 0);
   mrp_attribute_state *matched_stream_id_opposite_port = mrp_match_attr_by_stream_and_type(attr, 1);
 
@@ -225,9 +267,14 @@ void avb_srp_map_leave(mrp_attribute_state *attr)
   if (attr->attribute_type == MSRP_LISTENER)
   {
     avb_srp_info_t *attribute_info = attr->attribute_info;
+    int entry = srp_match_reservation_entry_by_id(attribute_info->stream_id);
 
     if (matched_stream_id_opposite_port) {
-      avb_1722_disable_stream_forwarding(c_mac_tx, attribute_info->stream_id);
+      if (stream_table[entry].bw_reserved[attr->port_num]) {
+        srp_decrease_port_bandwidth(attribute_info->tspec_max_frame_size, 1, attr->port_num);
+        avb_1722_disable_stream_forwarding(c_mac_tx, attribute_info->stream_id);
+        stream_table[entry].bw_reserved[attr->port_num] = 0;
+      }
     }
   }
   else if (attr->attribute_type == MSRP_TALKER_ADVERTISE) 
@@ -314,11 +361,21 @@ void avb_srp_listener_join_ind(CLIENT_INTERFACE(avb_interface, avb), mrp_attribu
 
   	avb_get_source_state(avb, stream, &state);
 
-    if (mrp_match_attr_by_stream_and_type(attr, 1)) {
-      set_avb_source_port(stream, -1);
+    int entry = srp_match_reservation_entry_by_id(sink_info->reservation.stream_id);
+
+    if (mrp_match_attr_by_stream_and_type(attr, 1)) { // Listener ready on the other port also, therefore send on both ports
+      if (stream_table[entry].bw_reserved[!attr->port_num] != 1) {
+        srp_increase_port_bandwidth(sink_info->reservation.tspec_max_frame_size, 1, !attr->port_num);
+        set_avb_source_port(stream, -1);
+        stream_table[entry].bw_reserved[!attr->port_num] = 1;
+      }
     }
-    else {
-      set_avb_source_port(stream, attr->port_num);
+    else { // Just this port
+      if (stream_table[entry].bw_reserved[attr->port_num] != 1) {
+        srp_increase_port_bandwidth(sink_info->reservation.tspec_max_frame_size, 1, attr->port_num);
+        set_avb_source_port(stream, attr->port_num);
+        stream_table[entry].bw_reserved[attr->port_num] = 1;
+      }
     }
 
   	if (state == AVB_SOURCE_STATE_POTENTIAL) {
@@ -340,12 +397,18 @@ void avb_srp_listener_leave_ind(CLIENT_INTERFACE(avb_interface, avb), mrp_attrib
   unsigned stream = avb_get_source_stream_index_from_stream_id(sink_info->reservation.stream_id);
   mrp_attribute_state *matched_listener_opposite_port = mrp_match_attr_by_stream_and_type(attr, 1);
 
+  int entry = srp_match_reservation_entry_by_id(sink_info->reservation.stream_id);
+
   avb_srp_map_leave(attr);
 
   if (stream != -1u)
   {
-    if (matched_listener_opposite_port) {
-      set_avb_source_port(stream, !attr->port_num);
+    if (matched_listener_opposite_port) { // Transmitting on both ports
+      if (stream_table[entry].bw_reserved[attr->port_num] == 1) {
+        srp_decrease_port_bandwidth(sink_info->reservation.tspec_max_frame_size, 1, attr->port_num);
+        set_avb_source_port(stream, !attr->port_num);
+        stream_table[entry].bw_reserved[attr->port_num] = 0;
+      }
     }
   	avb_get_source_state(avb, stream, &state);
 

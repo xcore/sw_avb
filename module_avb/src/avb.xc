@@ -304,7 +304,7 @@ static void set_sink_state0(unsigned sink_num,
 static unsigned avb_srp_calculate_max_framesize(avb_source_info_t *source_info)
 {
 #if defined(AVB_1722_FORMAT_61883_6) || defined(AVB_1722_FORMAT_SAF)
-  unsigned samples_per_packet = (source_info->stream.rate + (AVB1722_PACKET_RATE-1))/AVB1722_PACKET_RATE;
+  const unsigned samples_per_packet = (AVB_MAX_AUDIO_SAMPLE_RATE + (AVB1722_PACKET_RATE-1))/AVB1722_PACKET_RATE;
   return AVB1722_PLUS_SIP_HEADER_SIZE + (source_info->stream.num_channels * samples_per_packet * 4);
 #endif
 #if defined(AVB_1722_FORMAT_61883_4)
