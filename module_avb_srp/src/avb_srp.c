@@ -179,7 +179,7 @@ void srp_cleanup_reservation_entry(mrp_attribute_state *st) {
   }
 }
 
-static void create_propagated_attribute_and_join(mrp_attribute_state *attr) {
+static void create_propagated_attribute_and_join(mrp_attribute_state *attr, int new) {
   mrp_attribute_state *st = mrp_get_attr();
   avb_srp_info_t *stream_data = attr->attribute_info;
   mrp_attribute_init(st, attr->attribute_type, !attr->port_num, 0, stream_data);
@@ -187,7 +187,7 @@ static void create_propagated_attribute_and_join(mrp_attribute_state *attr) {
   simple_printf("JOIN mrp_attribute_init: %d, %d, STREAM_ID[0]: %x\n", attr->attribute_type, !attr->port_num, stream_data->stream_id[0]);
 #endif
   mrp_mad_begin(st);
-  mrp_mad_join(st, 1);
+  mrp_mad_join(st, new);
   st->propagated = 1; // Propagated to other port
 }
 
@@ -208,17 +208,16 @@ static void avb_srp_map_join(mrp_attribute_state *attr, int new, int listener)
    matched_talker_listener ? matched_talker_listener->propagated : 0, matched_talker_listener ? matched_talker_listener->here : 0, new, matched_stream_id_opposite_port);
 #endif
   // Attribute propagation:
-  if (!matched_stream_id_opposite_port && !listener && new)
+  if (!matched_stream_id_opposite_port && !listener)
   {
-    create_propagated_attribute_and_join(attr);
+    create_propagated_attribute_and_join(attr, new);
   }
   else if (!matched_stream_id_opposite_port &&
             matched_talker_listener &&
             !matched_talker_listener->propagated &&
-            !matched_talker_listener->here &&
-            new)
+            !matched_talker_listener->here)
   {
-    create_propagated_attribute_and_join(attr);
+    create_propagated_attribute_and_join(attr, new);
   }
 
   /**** LISTENER ****/
@@ -599,10 +598,7 @@ void avb_srp_talker_join_ind(mrp_attribute_state *attr, int new)
     mrp_mad_join(matched_listener_this_port, 1);
   }
 
-  if (new)
-  {
-    avb_srp_map_join(attr, new, 0);
-  }
+  avb_srp_map_join(attr, new, 0);
 }
 
 void avb_srp_talker_leave_ind(mrp_attribute_state *attr)
