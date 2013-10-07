@@ -12,6 +12,7 @@
 #include "avb_1722_1_acmp_pdu.h"
 #include "avb_1722_1_aecp_pdu.h"
 #include "avb_1722_1_callbacks.h"
+#include "otp_board_info.h"
 
 typedef union {
     avb_1722_1_adp_packet_t adp;
@@ -25,8 +26,9 @@ typedef union {
  *
  *  \param  macaddr     the Ethernet MAC address (6 bytes) of the endpoint,
                         used to form the 64 bit 1722.1 entity GUID
+    \param  serial_num  Device serial number
  */
-void avb_1722_1_init(unsigned char macaddr[6]);
+void avb_1722_1_init(unsigned char macaddr[6], unsigned int serial_num);
 
 #ifdef __XC__
 /** This function performs periodic processing for 1722.1 state machines. It must be called frequently.
@@ -37,7 +39,8 @@ void avb_1722_1_init(unsigned char macaddr[6]);
 void avb_1722_1_periodic(chanend c_tx, chanend c_ptp, client interface avb_interface avb);
 
 [[combinable]]
-void avb_1722_1_task(client interface avb_interface i_avb,
+void avb_1722_1_task(otp_ports_t &ports,
+                     client interface avb_interface i_avb,
                      client interface avb_1722_1_control_callbacks i_1722_1_entity,
                      chanend c_mac_rx,
                      chanend c_mac_tx,
