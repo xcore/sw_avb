@@ -130,8 +130,6 @@ interface avb_interface {
  */
   int get_source_sync(unsigned source_num, int &sync);
 
-  int set_source_port(unsigned source_num, int port_num);
-
 /** Set the destination vlan of an AVB source.
  *
  *  Sets the vlan that the source will transmit on. This defaults
