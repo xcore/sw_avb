@@ -13,6 +13,15 @@ void print_mac_ln(unsigned char c[6]);
 unsigned compare_guid(unsigned char a[6], const_guid_ref_t b);
 
 int qlog2(unsigned n);
-void avb_1722_1_create_1722_1_header(unsigned char *unsafe dest_addr, int subtype, int message_type, unsigned char valid_time_status, unsigned data_len, ethernet_hdr_t *unsafe hdr);
+
+
+#ifdef __XC__
+extern "C" {
+#endif
+void avb_1722_1_create_1722_1_header(const unsigned char *dest_addr, int subtype, int message_type, unsigned char valid_time_status, unsigned data_len, ethernet_hdr_t *hdr);
+#ifdef __XC__
+}
+#endif
+
 
 #endif /* AVB_1722_1_COMMON_H_ */

@@ -319,6 +319,38 @@ unsigned char desc_external_output_port_0[] =
 
 /* Control Desciptors */
 
+/* Identify */
+unsigned char desc_control_identify[] =
+{
+  U16(AEM_CONTROL_TYPE),                      /* 0-1 descriptor_type */
+#ifdef DESCRIPTOR_INDEX_CONTROL_IDENTIFY
+  U16(DESCRIPTOR_INDEX_CONTROL_IDENTIFY),     /* 2-3 descriptor_id */
+#else
+  U16(0),
+#endif
+  U64(AEM_CONTROL_TYPE_IDENTIFY),             /* 4-11 control_type */
+  U16(AEM_ENTITY_TYPE),                       /* 12-13 control_location_type */
+  U16(0),                                     /* 14-15 control_location_id */
+  U16(AEM_CONTROL_LINEAR_UINT8),              /* 16-17 control_value_type */
+  U16(0),                                     /* 18-19 control_domain */
+  "Identify",                                 /* 20-83 control_name */
+  U16(9),                                     /* 84-85 control_name_string */
+  U16(102),                                   /* 86-87 values_offset */
+  U16(1),                                     /* 88-89 number_of_values */
+  U16(0),                                     /* 90-91 signal_type */
+  U16(0),                                     /* 92-93 signal_id */
+  U32(0),                                     /* 94-97 block_latency */
+  U32(0),                                     /* 98-101 control_latency */
+  /* 102-> value_details */
+  0,                                          /* minimum_value[0] */
+  255,                                        /* maximum_value[0] */
+  255,                                        /* step[0] */
+  0,                                          /* default_value[0] */
+  0,                                          /* current_value[0] */
+  U16(AEM_CONTROL_UNITS_UNITLESS),            /* unit[0] */
+  U16(AEM_NO_STRING)                            /* string[0] */
+};
+
 #if 0
 /* Mute */
 unsigned char desc_control_mute[] =
@@ -617,7 +649,7 @@ unsigned int aem_descriptor_list[] =
   AEM_AUDIO_CLUSTER_TYPE, 4, sizeof(desc_audio_cluster_0), (unsigned)desc_audio_cluster_0, sizeof(desc_audio_cluster_1), (unsigned)desc_audio_cluster_1, sizeof(desc_audio_cluster_2), (unsigned)desc_audio_cluster_2, sizeof(desc_audio_cluster_3), (unsigned)desc_audio_cluster_3,
   AEM_AUDIO_MAP_TYPE, 2, sizeof(desc_audio_map_0), (unsigned)desc_audio_map_0, sizeof(desc_audio_map_1), (unsigned)desc_audio_map_1,
 #endif
-  /* AEM_CONTROL_TYPE, 1, sizeof(desc_control_mute), (unsigned)desc_control_mute, */
+  AEM_CONTROL_TYPE, 1, sizeof(desc_control_identify), (unsigned)desc_control_identify,
   AEM_CLOCK_DOMAIN_TYPE, 1, sizeof(desc_clock_domain_0), (unsigned)desc_clock_domain_0
 };
 

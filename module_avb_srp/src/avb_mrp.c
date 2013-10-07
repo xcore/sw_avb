@@ -15,27 +15,6 @@
 #include "simple_printf.h"
 #include "avb_mrp_debug_strings.h"
 
-#define MRP_DEBUG_STATE_CHANGE 0
-
-#define mrp_change_registrar_state(st, event, new) \
-       do { \
-          if (MRP_DEBUG_STATE_CHANGE) debug_print_registrar_state_change((st), (event), (new)); \
-         (st)->registrar_state = (new);        \
-       } while(0)
-
-#define mrp_change_applicant_state(st, event, new) \
-       do { \
-          if (MRP_DEBUG_STATE_CHANGE) debug_print_applicant_state_change((st), (event), (new)); \
-          if (new == MRP_UNUSED) debug_print_applicant_state_change((st), (event), (new)); \
-         (st)->applicant_state = (new);        \
-       } while(0)
-
-#define mrp_change_event_state(st, event, new) \
-       do { \
-          if (MRP_DEBUG_STATE_CHANGE) debug_print_tx_event((st), (event)); \
-          (new) = (event);       \
-       } while(0)
-
 
 /** \file avb_mrp.c
  *  \brief the core of the MRP protocols
@@ -106,7 +85,7 @@ void debug_print_applicant_state_change(mrp_attribute_state *st, mrp_event event
         stream_id[1] = sink_info->reservation.stream_id[1];
       }
 
-    simple_printf("%s %x:%d:%d:%d\t %s: %s -> %s \n", debug_attribute_type[(st)->attribute_type], stream_id[1], st->port_num, st->here, st->propagated, debug_mrp_event[(event)], debug_mrp_applicant_state[(st)->applicant_state], debug_mrp_applicant_state[new]);
+    simple_printf("AP: %s %x:%d:%d:%d\t %s: %s -> %s \n", debug_attribute_type[(st)->attribute_type], stream_id[1], st->port_num, st->here, st->propagated, debug_mrp_event[(event)], debug_mrp_applicant_state[(st)->applicant_state], debug_mrp_applicant_state[new]);
   }
 }
 
@@ -120,7 +99,7 @@ void debug_print_registrar_state_change(mrp_attribute_state *st, mrp_event event
       stream_id[0] = sink_info->reservation.stream_id[0];
       stream_id[1] = sink_info->reservation.stream_id[1];
     }
-    simple_printf("%s %x:%d:%d:%d\t %s: %s -> %s \n", debug_attribute_type[(st)->attribute_type], stream_id[1], st->port_num, st->here, st->propagated, debug_mrp_event[(event)], debug_mrp_registrar_state[(st)->registrar_state], debug_mrp_registrar_state[new]);
+    simple_printf("RG: %s %x:%d:%d:%d\t %s: %s -> %s \n", debug_attribute_type[(st)->attribute_type], stream_id[1], st->port_num, st->here, st->propagated, debug_mrp_event[(event)], debug_mrp_registrar_state[(st)->registrar_state], debug_mrp_registrar_state[new]);
   }
 }
 
@@ -134,7 +113,7 @@ void debug_print_tx_event(mrp_attribute_state *st, mrp_event event)
       stream_id[0] = sink_info->reservation.stream_id[0];
       stream_id[1] = sink_info->reservation.stream_id[1];
     }
-    simple_printf("%s %x:%d:%d:%d\t %s \n", debug_attribute_type[(st)->attribute_type], stream_id[1], st->port_num, st->here, st->propagated, debug_attribute_event[(event)]);
+    simple_printf("TX: %s %x:%d:%d:%d\t %s \n", debug_attribute_type[(st)->attribute_type], stream_id[1], st->port_num, st->here, st->propagated, debug_attribute_event[(event)]);
   }
 }
 
@@ -237,8 +216,7 @@ static unsigned int makeTxEvent(mrp_event e, mrp_attribute_state *st, int leave_
           break;
           }
       }
-      else
-      if (leave_all || st->applicant_state != MRP_QP) {
+      else if (leave_all || st->applicant_state != MRP_QP) {
         switch (st->registrar_state) 
           {
           case MRP_IN:
@@ -687,7 +665,7 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
         case MRP_QO:
 #ifdef MRP_FULL_PARTICIPANT
           mrp_change_applicant_state(st, e, MRP_LO);
-          // if (!st->here) mrp_change_applicant_state(st, e, MRP_UNUSED);
+          if (st->registrar_state == MRP_MT) mrp_change_applicant_state(st, e, MRP_UNUSED);
 #else
           mrp_change_applicant_state(st, e, MRP_VO);
 #endif
@@ -799,7 +777,7 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
 
 void mrp_debug_dump_attrs(void)
 {
-#if 1
+#if 0
   printstrln("port_num | type                   | disabled | here | propagated | stream_id");
   printstrln("---------+------------------------+----------+------+------------+----------");
   for (int i=0;i<MRP_MAX_ATTRS;i++) {
@@ -850,8 +828,22 @@ void mrp_mad_begin(mrp_attribute_state *st)
 
 void mrp_mad_join(mrp_attribute_state *st, int new)
 {
-  if (st->attribute_type == MSRP_LISTENER) printstrln("Listener MAD_Join");
-  else if (st->attribute_type == MSRP_TALKER_ADVERTISE) printstrln("Talker MAD_Join");
+#if MRP_DEBUG_STATE_CHANGE  
+  if (st->attribute_type == MSRP_LISTENER) printstr("Listener MAD_Join");
+  else if (st->attribute_type == MSRP_TALKER_ADVERTISE) printstr("Talker MAD_Join");
+
+
+  if (st->attribute_type == MSRP_LISTENER || st->attribute_type == MSRP_TALKER_ADVERTISE) {
+    avb_sink_info_t *sink_info = (avb_sink_info_t *) st->attribute_info;
+    int stream_id[2] = {0, 0};
+
+    if (sink_info != NULL) {
+      stream_id[0] = sink_info->reservation.stream_id[0];
+      stream_id[1] = sink_info->reservation.stream_id[1];
+    }
+    simple_printf(" %x:%x, Port:%d, Here:%d, propagated:%d\n", stream_id[0], stream_id[1], st->port_num, st->here, st->propagated);
+  }
+#endif
 
   if (new) {
     mrp_update_state(MRP_EVENT_NEW, st, 0, st->port_num);
@@ -1320,8 +1312,7 @@ int mrp_match_multiple_attrs_by_stream_and_type(mrp_attribute_state *attr, int o
 }
 
 
-// FIXME: Rename me
-mrp_attribute_state *mrp_match_attribute_by_stream_id(mrp_attribute_state *attr, int opposite_port, int match_disabled)
+mrp_attribute_state *mrp_match_attribute_pair_by_stream_id(mrp_attribute_state *attr, int opposite_port, int match_disabled)
 {
   for (int j=0;j<MRP_MAX_ATTRS;j++) {
     if (attrs[j].applicant_state == MRP_UNUSED || (!match_disabled && attrs[j].applicant_state == MRP_DISABLED)) {
@@ -1489,11 +1480,13 @@ void avb_mrp_process_packet(unsigned char *buf, int etype, int len, unsigned int
               if (three_packed_event != MRP_ATTRIBUTE_EVENT_MT)
               {
                 mrp_attribute_state *st = avb_srp_process_new_attribute_from_packet(attr_type, first_value, i, port_num);
-                mrp_mad_begin(st);
+                if (st) {
+                  mrp_mad_begin(st);
 
-                mrp_debug_dump_attrs();
+                  mrp_debug_dump_attrs();
 
-                mrp_in(three_packed_event, four_packed_event, st, port_num);
+                  mrp_in(three_packed_event, four_packed_event, st, port_num);
+                }
               }
             }
         }

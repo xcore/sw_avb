@@ -11,6 +11,7 @@
 #include "avb_1722_1_adp_pdu.h"
 #include "avb_1722_1_acmp_pdu.h"
 #include "avb_1722_1_aecp_pdu.h"
+#include "avb_1722_1_callbacks.h"
 
 typedef union {
     avb_1722_1_adp_packet_t adp;
@@ -36,7 +37,8 @@ void avb_1722_1_init(unsigned char macaddr[6]);
 void avb_1722_1_periodic(chanend c_tx, chanend c_ptp, client interface avb_interface avb);
 
 [[combinable]]
-void avb_1722_1_task(client interface avb_interface avb,
+void avb_1722_1_task(client interface avb_interface i_avb,
+                     client interface avb_1722_1_control_callbacks i_1722_1_entity,
                      chanend c_mac_rx,
                      chanend c_mac_tx,
                      chanend c_ptp);
@@ -49,7 +51,18 @@ void avb_1722_1_task(client interface avb_interface avb,
  *  \param  len         the number of bytes in the buf array
 *   \param  c_tx        a transmit chanend to the Ethernet server
  */
-void avb_1722_1_process_packet(unsigned char *unsafe buf, unsigned char src_addr[6], int len, chanend c_tx, CLIENT_INTERFACE(avb_interface, i_avb_api));
+#ifdef __XC__
+extern "C" {
+#endif
+void avb_1722_1_process_packet(unsigned char *buf,
+                                unsigned char src_addr[6],
+                                int len,
+                                chanend c_tx,
+                                CLIENT_INTERFACE(avb_interface, i_avb_api),
+                                CLIENT_INTERFACE(avb_1722_1_control_callbacks, i_1722_1_entity));
+#ifdef __XC__
+}
+#endif
 
 #endif
 

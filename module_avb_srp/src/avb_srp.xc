@@ -67,11 +67,9 @@ void avb_srp_task(client interface avb_interface i_avb,
       }
       case i_srp.register_stream_request(avb_srp_info_t stream_info):
       {
-        unsafe {
-          avb_srp_info_t local_stream_info = stream_info;
-          printstrln("REGISTER STREAM REQUEST");
-          avb_srp_create_and_join_talker_advertise_attrs((avb_srp_info_t *unsafe) &local_stream_info);
-        }
+        avb_srp_info_t local_stream_info = stream_info;
+        printstrln("REGISTER STREAM REQUEST");
+        avb_srp_create_and_join_talker_advertise_attrs(&local_stream_info);
         break;
       }
       case i_srp.deregister_stream_request(unsigned stream_id[2]):

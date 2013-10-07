@@ -42,7 +42,8 @@ char *debug_mrp_event[] = {
   "MRP_EVENT_TX",
   "MRP_EVENT_TX_LEAVE_ALL",
   "MRP_EVENT_TX_LEAVE_ALL_FULL",
-  "MRP_EVENT_LEAVETIMER"
+  "MRP_EVENT_LEAVETIMER",
+  "MRP_EVENT_DUMMY"
 };
 
 char *debug_attribute_type[] = {

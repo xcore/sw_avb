@@ -153,7 +153,7 @@ static void init_media_clock_server(chanend media_clock_ctl)
 	}
 }
 
-unsafe void avb_init(chanend c_media_ctl[],
+void avb_init(chanend c_media_ctl[],
               chanend ?c_listener_ctl[],
               chanend ?c_talker_ctl[],
               chanend ?c_media_clock_ctl,
@@ -162,8 +162,10 @@ unsafe void avb_init(chanend c_media_ctl[],
 {
   unsigned char mac_addr[6];
   mac_get_macaddr(c_mac_tx, mac_addr);
-  register_talkers(c_talker_ctl, mac_addr);
-  register_listeners(c_listener_ctl);
+  unsafe {
+    register_talkers(c_talker_ctl, mac_addr);
+    register_listeners(c_listener_ctl);
+  }
 }
 
 #if 0
@@ -255,8 +257,10 @@ static void set_sink_state0(unsigned sink_num,
                                   sink->stream.local_id);
 
   #ifndef AVB_EXCLUDE_MVRP
-      if (sink->reservation.vlan_id) {
-        avb_join_vlan(sink->reservation.vlan_id);
+      for (int i=0; i < MRP_NUM_PORTS; i++) {
+        if (sink->reservation.vlan_id) {
+          avb_join_vlan(sink->reservation.vlan_id, i);
+        }
       }
   #endif
 
@@ -300,7 +304,7 @@ static void set_sink_state0(unsigned sink_num,
 static unsigned avb_srp_calculate_max_framesize(avb_source_info_t *source_info)
 {
 #if defined(AVB_1722_FORMAT_61883_6) || defined(AVB_1722_FORMAT_SAF)
-  unsigned samples_per_packet = (source_info->stream.rate + (AVB1722_PACKET_RATE-1))/AVB1722_PACKET_RATE;
+  const unsigned samples_per_packet = (AVB_MAX_AUDIO_SAMPLE_RATE + (AVB1722_PACKET_RATE-1))/AVB1722_PACKET_RATE;
   return AVB1722_PLUS_SIP_HEADER_SIZE + (source_info->stream.num_channels * samples_per_packet * 4);
 #endif
 #if defined(AVB_1722_FORMAT_61883_4)
@@ -371,8 +375,10 @@ static void local_set_source_state(unsigned source_num,
         }
 
     #ifndef AVB_EXCLUDE_MVRP
-        if (source->reservation.vlan_id) {
-          avb_join_vlan(source->reservation.vlan_id);
+        for (int i=0; i < MRP_NUM_PORTS; i++) {
+          if (source->reservation.vlan_id) {
+            avb_join_vlan(source->reservation.vlan_id, i);
+          }
         }
     #endif
 
@@ -893,14 +899,19 @@ void set_avb_source_volumes(unsigned sink_num, int volumes[], int count)
 #endif
 
 
-void avb_process_1722_control_packet(unsigned int buf0[], int nbytes, chanend c_tx, client interface avb_interface i_avb) {
-
+void avb_process_1722_control_packet(unsigned int buf0[],
+                                     int nbytes,
+                                     chanend c_tx,
+                                     client interface avb_interface i_avb,
+                                     client interface avb_1722_1_control_callbacks i_1722_1_entity) {
   if (nbytes == STATUS_PACKET_LEN) {
+    #if 0
     if (((unsigned char *)buf0)[0]) { // Link up
       avb_1722_1_adp_init();
       avb_1722_1_adp_depart_then_announce();
       avb_1722_1_adp_discover_all();
     }
+    #endif
   }
   else {
     struct ethernet_hdr_t *ethernet_hdr = (ethernet_hdr_t *) &buf0[0];
@@ -920,14 +931,11 @@ void avb_process_1722_control_packet(unsigned int buf0[], int nbytes, chanend c_
 
     unsigned char *buf = (unsigned char *) buf0;
 
-    unsafe {
-
-      switch (etype) {
-        case AVB_1722_ETHERTYPE:
-          avb_1722_1_process_packet((unsigned char *unsafe)&buf[eth_hdr_size], ethernet_hdr->src_addr, len, c_tx, i_avb);
-          avb_1722_maap_process_packet(&buf[eth_hdr_size], ethernet_hdr->src_addr, len, c_tx);
-          break;
-      }
+    switch (etype) {
+      case AVB_1722_ETHERTYPE:
+        avb_1722_1_process_packet(&buf[eth_hdr_size], ethernet_hdr->src_addr, len, c_tx, i_avb, i_1722_1_entity);
+        avb_1722_maap_process_packet(&buf[eth_hdr_size], ethernet_hdr->src_addr, len, c_tx);
+        break;
     }
   }  
 }
@@ -938,15 +946,6 @@ void avb_process_control_packet(client interface avb_interface avb, unsigned int
     if (((unsigned char *)buf0)[0]) { // Link up
       srp_domain_join();
     }
-    else { // Link down
-      for (int i=0; i < AVB_NUM_SOURCES; i++) {
-        avb.set_source_state(i, AVB_SOURCE_STATE_DISABLED);
-      }
-
-      for (int i=0; i < AVB_NUM_SINKS; i++) {
-        avb.set_sink_state(i, AVB_SOURCE_STATE_DISABLED);
-      }      
-    }
   }
   else {
     struct ethernet_hdr_t *ethernet_hdr = (ethernet_hdr_t *) &buf0[0];
@@ -966,17 +965,14 @@ void avb_process_control_packet(client interface avb_interface avb, unsigned int
 
     unsigned char *buf = (unsigned char *) buf0;
 
-    unsafe {
-
-      switch (etype) {
-        /* fallthrough intended */
-        case AVB_SRP_ETHERTYPE:
-        // TODO: #define around MMRP, disabled by default
-        case AVB_MMRP_ETHERTYPE:
-        case AVB_MVRP_ETHERTYPE:
-          avb_mrp_process_packet((unsigned char *unsafe)&buf[eth_hdr_size], etype, len, port_num);
-          break;
-      }
+    switch (etype) {
+      /* fallthrough intended */
+      case AVB_SRP_ETHERTYPE:
+      // TODO: #define around MMRP, disabled by default
+      case AVB_MMRP_ETHERTYPE:
+      case AVB_MVRP_ETHERTYPE:
+        avb_mrp_process_packet(&buf[eth_hdr_size], etype, len, port_num);
+        break;
     }
   }
 

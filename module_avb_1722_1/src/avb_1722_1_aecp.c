@@ -9,6 +9,9 @@
 #include "xccompat.h"
 #include "avb_1722_1.h"
 #include "avb_1722_1_aecp_controls.h"
+#include "reboot.h"
+#include <xs1.h>
+#include <platform.h>
 
 #if AVB_1722_1_USE_AVC
 #include "avc_commands.h"
@@ -32,13 +35,13 @@ static enum {
 } entity_acquired_status = AEM_ENTITY_NOT_ACQUIRED;
 
 static enum {
-  AECP_AEM_CONTROLLER_AVAILABLE_IDLE,
-  AECP_AEM_CONTROLLER_AVAILABLE_IN_A,
+  AECP_AEM_CONTROLLER_AVAILABLE_IN_A=0,
   AECP_AEM_CONTROLLER_AVAILABLE_IN_B,
   AECP_AEM_CONTROLLER_AVAILABLE_IN_C,
   AECP_AEM_CONTROLLER_AVAILABLE_IN_D,
   AECP_AEM_CONTROLLER_AVAILABLE_IN_E,
   AECP_AEM_CONTROLLER_AVAILABLE_IN_F,
+  AECP_AEM_CONTROLLER_AVAILABLE_IDLE
 } aecp_aem_controller_available_state = AECP_AEM_CONTROLLER_AVAILABLE_IDLE;
 
 static avb_timer aecp_aem_controller_available_timer;
@@ -97,14 +100,12 @@ void avb_1722_1_aecp_aem_init()
   aecp_aem_state = AECP_AEM_WAITING;
 }
 
-// TODO: Set available_index on entity descriptor tx
-
-static unsigned char *avb_1722_1_create_aecp_response_header(unsigned char dest_addr[6], char status, unsigned int data_len, avb_1722_1_aecp_packet_t* cmd_pkt)
+static unsigned char *avb_1722_1_create_aecp_response_header(unsigned char dest_addr[6], char status, int message_type, unsigned int data_len, avb_1722_1_aecp_packet_t* cmd_pkt)
 {
   struct ethernet_hdr_t *hdr = (ethernet_hdr_t*) &avb_1722_1_buf[0];
   avb_1722_1_aecp_packet_t *pkt = (avb_1722_1_aecp_packet_t*) (hdr + AVB_1722_1_PACKET_BODY_POINTER_OFFSET);
 
-  avb_1722_1_create_1722_1_header(dest_addr, DEFAULT_1722_1_AECP_SUBTYPE, AECP_CMD_AEM_RESPONSE, status, data_len, hdr);
+  avb_1722_1_create_1722_1_header(dest_addr, DEFAULT_1722_1_AECP_SUBTYPE, message_type+1, status, data_len, hdr);
 
   // Copy the target guid, controller guid and sequence ID into the response header
   memcpy(pkt->target_guid, cmd_pkt->target_guid, (pkt->data.payload - pkt->target_guid));
@@ -124,7 +125,7 @@ static void avb_1722_1_create_aecp_aem_response(unsigned char src_addr[6], unsig
 
   = command_specific_data + 2 + 2 + 8
   */
-  avb_1722_1_aecp_aem_msg_t *aem = (avb_1722_1_aecp_aem_msg_t*)avb_1722_1_create_aecp_response_header(src_addr, status, command_data_len+12, cmd_pkt);
+  avb_1722_1_aecp_aem_msg_t *aem = (avb_1722_1_aecp_aem_msg_t*)avb_1722_1_create_aecp_response_header(src_addr, status, AECP_CMD_AEM_COMMAND, command_data_len+12, cmd_pkt);
 
   /* Copy payload_specific_data into the response */
   memcpy(aem, cmd_pkt->data.payload, command_data_len + 2);
@@ -232,7 +233,7 @@ static int create_aem_read_descriptor_response(unsigned short read_type, unsigne
 
     if (packet_size < 64) packet_size = 64;
 
-    avb_1722_1_aecp_aem_msg_t *aem = (avb_1722_1_aecp_aem_msg_t*)avb_1722_1_create_aecp_response_header(src_addr, AECP_AEM_STATUS_SUCCESS, desc_size_bytes+16, pkt);
+    avb_1722_1_aecp_aem_msg_t *aem = (avb_1722_1_aecp_aem_msg_t*)avb_1722_1_create_aecp_response_header(src_addr, AECP_AEM_STATUS_SUCCESS, AECP_CMD_AEM_COMMAND, desc_size_bytes+16, pkt);
 
     memcpy(aem, pkt->data.payload, 6);
     if (found_descriptor < 2) memcpy(&(aem->command.read_descriptor_resp.descriptor), descriptor, desc_size_bytes+40);
@@ -243,7 +244,7 @@ static int create_aem_read_descriptor_response(unsigned short read_type, unsigne
   {
     int packet_size = sizeof(ethernet_hdr_t)+sizeof(avb_1722_1_packet_header_t)+20+sizeof(avb_1722_1_aem_read_descriptor_command_t);
 
-    avb_1722_1_aecp_aem_msg_t *aem = (avb_1722_1_aecp_aem_msg_t*)avb_1722_1_create_aecp_response_header(src_addr, AECP_AEM_STATUS_NO_SUCH_DESCRIPTOR, 40, pkt);
+    avb_1722_1_aecp_aem_msg_t *aem = (avb_1722_1_aecp_aem_msg_t*)avb_1722_1_create_aecp_response_header(src_addr, AECP_AEM_STATUS_NO_SUCH_DESCRIPTOR, AECP_CMD_AEM_COMMAND, 40, pkt);
 
     memcpy(aem, pkt->data.payload, 20+sizeof(avb_1722_1_aem_read_descriptor_command_t));
 
@@ -374,8 +375,6 @@ static unsigned short avb_1722_1_create_controller_available_packet(void)
   AEM_MSG_SET_COMMAND_TYPE(aem_msg, AECP_AEM_CMD_CONTROLLER_AVAILABLE);
   AEM_MSG_SET_U_FLAG(aem_msg, 0);
 
-  simple_printf("avb_1722_1_create_controller_available_packet: %d\n", aecp_controller_available_sequence);
-
   return AVB_1722_1_AECP_PAYLOAD_OFFSET;
 }
 
@@ -398,8 +397,6 @@ static unsigned short avb_1722_1_create_acquire_response_packet(unsigned char st
 
   AEM_MSG_SET_COMMAND_TYPE(aem_msg, AECP_AEM_CMD_ACQUIRE_ENTITY);
   AEM_MSG_SET_U_FLAG(aem_msg, 0);
-
-  simple_printf("avb_1722_1_create_acquire_response_packet: %d\n", pending_controller_sequence);
 
   return sizeof(avb_1722_1_aem_acquire_entity_command_t) + AVB_1722_1_AECP_PAYLOAD_OFFSET;
 }
@@ -445,10 +442,7 @@ static unsigned short process_aem_cmd_acquire(avb_1722_1_aecp_packet_t *pkt, uns
           acquired_controller_guid.c[7-i] = 0;
         }
         printstrln(" released entity");
-        for(int i=0; i < 6; i++)
-        {
-          acquired_controller_mac[i] = 0;
-        }
+        memset(&acquired_controller_mac, 0, 6);
       }
       else
       {
@@ -484,10 +478,7 @@ static unsigned short process_aem_cmd_acquire(avb_1722_1_aecp_packet_t *pkt, uns
             printhex(acquired_controller_guid.c[7-i]);
           }
           printstrln(" acquired entity");
-          for(int i=0; i < 6; i++)
-          {
-            acquired_controller_mac[i] = src_addr[i];
-          }
+          memcpy(&acquired_controller_mac, &src_addr, 6);
           break;
        
         case AEM_ENTITY_ACQUIRED_BUT_PENDING:
@@ -506,10 +497,7 @@ static unsigned short process_aem_cmd_acquire(avb_1722_1_aecp_packet_t *pkt, uns
             {
               pending_controller_guid.c[7-i] = pkt->controller_guid[i];
             }
-            for(int i=0; i < 6; i++)
-            {
-              pending_controller_mac[i] = src_addr[i];
-            }
+            memcpy(&pending_controller_mac, &src_addr, 6);
             pending_controller_sequence = ntoh_16(pkt->sequence_id);
             pending_persistent = AEM_ACQUIRE_ENTITY_PERSISTENT_FLAG(&(pkt->data.aem.command.acquire_entity_cmd));
            
@@ -560,7 +548,8 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt,
                                             int message_type,
                                             int num_pkt_bytes,
                                             chanend c_tx,
-                                            CLIENT_INTERFACE(avb_interface, i_avb_api))
+                                            CLIENT_INTERFACE(avb_interface, i_avb_api),
+                                            CLIENT_INTERFACE(avb_1722_1_control_callbacks, i_1722_1_entity))
 {
   avb_1722_1_aecp_aem_msg_t *aem_msg = &(pkt->data.aem);
   unsigned short command_type = AEM_MSG_GET_COMMAND_TYPE(aem_msg);
@@ -589,6 +578,12 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt,
         cd_len = AVB_1722_1_AECP_PAYLOAD_OFFSET;
         break;
       }
+      case AECP_AEM_CMD_REBOOT:
+      {
+        // Reply before reboot, do the reboot after sending the packet
+        cd_len = AVB_1722_1_AECP_PAYLOAD_OFFSET;
+        break;
+      }
       case AECP_AEM_CMD_READ_DESCRIPTOR:
       {
         unsigned short desc_read_type, desc_read_id;
@@ -596,8 +591,6 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt,
 
         desc_read_type = ntoh_16(aem_msg->command.read_descriptor_cmd.descriptor_type);
         desc_read_id = ntoh_16(aem_msg->command.read_descriptor_cmd.descriptor_id);
-
-        simple_printf("READ_DESCRIPTOR - type: %d, id: %d\n", desc_read_type, desc_read_id);
 
         num_tx_bytes = create_aem_read_descriptor_response(desc_read_type, desc_read_id, src_addr, pkt);
 
@@ -657,6 +650,12 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt,
         cd_len = sizeof(avb_1722_1_aem_startstop_streaming_t);
         break;
       }
+      case AECP_AEM_CMD_GET_CONTROL:
+      case AECP_AEM_CMD_SET_CONTROL:
+      {
+        cd_len = process_aem_cmd_getset_control(pkt, &status, command_type, i_1722_1_entity) + sizeof(avb_1722_1_aem_getset_control_t) + AVB_1722_1_AECP_COMMAND_DATA_OFFSET;
+        break;
+      }
       default:
       {
         // AECP_AEM_STATUS_NOT_IMPLEMENTED
@@ -712,14 +711,66 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt,
     if (num_tx_bytes < 64) num_tx_bytes = 64;
     
     mac_tx(c_tx, avb_1722_1_buf, num_tx_bytes, -1);
+
+    if (command_type == AECP_AEM_CMD_REBOOT) {
+      waitfor(10000); // Wait for the response packet to egress
+      device_reboot();
+    }
   }
 }
+
+static void process_avb_1722_1_aecp_address_access_cmd(avb_1722_1_aecp_packet_t *pkt,
+                                            unsigned char src_addr[6],
+                                            int message_type,
+                                            int num_pkt_bytes,
+                                            chanend c_tx)
+{
+  avb_1722_1_aecp_address_access_t *aa_cmd = &(pkt->data.address);
+  int tlv_count = ntoh_16(aa_cmd->tlv_count);
+  unsigned short status = AECP_AA_STATUS_SUCCESS;
+  int mode = ADDRESS_MSG_GET_MODE(aa_cmd);
+  int length = ADDRESS_MSG_GET_LENGTH(aa_cmd);
+  int cd_len = 0;
+
+  if (compare_guid(pkt->target_guid, &my_guid)==0) return;
+
+  if (tlv_count != 1 || mode != AECP_AA_MODE_WRITE || length != 256) {
+    status = AECP_AA_STATUS_UNSUPPORTED;
+  }
+  else {
+    long long address = ntoh_32(&aa_cmd->address[4]);
+    if (avb_write_upgrade_image_page(address, aa_cmd->data) != 0) {
+      status = AECP_AA_STATUS_ADDRESS_INVALID;
+    }
+    cd_len = num_pkt_bytes;
+  }
+
+  // Send a response if required
+  if (cd_len > 0)
+  {
+    avb_1722_1_aecp_address_access_t *aa_pkt = (avb_1722_1_aecp_address_access_t*)avb_1722_1_create_aecp_response_header(src_addr, status, AECP_CMD_ADDRESS_ACCESS_COMMAND, 278, pkt);
+
+    /* Copy payload_specific_data into the response */
+    memcpy(aa_pkt, pkt->data.payload, sizeof(avb_1722_1_aecp_address_access_t));
+  }
+ 
+  if (cd_len > 0)
+  {
+    int num_tx_bytes = cd_len;
+    
+    if (num_tx_bytes < 64) num_tx_bytes = 64;
+    
+    mac_tx(c_tx, avb_1722_1_buf, 304, -1);
+  }
+}
+
 
 void process_avb_1722_1_aecp_packet(unsigned char src_addr[6],
                                     avb_1722_1_aecp_packet_t *pkt,
                                     int num_pkt_bytes,
                                     chanend c_tx,
-                                    CLIENT_INTERFACE(avb_interface, avb))
+                                    CLIENT_INTERFACE(avb_interface, i_avb),
+                                    CLIENT_INTERFACE(avb_1722_1_control_callbacks, i_1722_1_entity))
 {
   int message_type = GET_1722_1_MSG_TYPE(((avb_1722_1_packet_header_t*)pkt));
 
@@ -729,12 +780,13 @@ void process_avb_1722_1_aecp_packet(unsigned char src_addr[6],
     case AECP_CMD_AEM_RESPONSE:
     {
 #if AVB_1722_1_AEM_ENABLED
-      process_avb_1722_1_aecp_aem_msg(pkt, src_addr, message_type, num_pkt_bytes, c_tx, avb);
+      process_avb_1722_1_aecp_aem_msg(pkt, src_addr, message_type, num_pkt_bytes, c_tx, i_avb, i_1722_1_entity);
 #endif
       break;
     }
     case AECP_CMD_ADDRESS_ACCESS_COMMAND:
     {
+      process_avb_1722_1_aecp_address_access_cmd(pkt, src_addr, message_type, num_pkt_bytes, c_tx);
       break;
     }
     case AECP_CMD_AVC_COMMAND:
@@ -757,6 +809,7 @@ void process_avb_1722_1_aecp_packet(unsigned char src_addr[6],
 
 void avb_1722_1_aecp_aem_periodic(chanend c_tx)
 {
+  char available_timeouts[5] = {12, 1, 11, 12, 2}; 
   if (avb_timer_expired(&aecp_aem_controller_available_timer))
   {
     int cd_len = 0;
@@ -783,29 +836,13 @@ void avb_1722_1_aecp_aem_periodic(chanend c_tx)
         //Nothing to do
         break;
       case AECP_AEM_CONTROLLER_AVAILABLE_IN_A:
-        cd_len = avb_1722_1_create_acquire_response_packet(AECP_AEM_STATUS_IN_PROGRESS);
-        start_avb_timer(&aecp_aem_controller_available_timer, 12);
-        aecp_aem_controller_available_state = AECP_AEM_CONTROLLER_AVAILABLE_IN_B;
-        break;
       case AECP_AEM_CONTROLLER_AVAILABLE_IN_B:
-        cd_len = avb_1722_1_create_acquire_response_packet(AECP_AEM_STATUS_IN_PROGRESS);
-        start_avb_timer(&aecp_aem_controller_available_timer, 1);
-        aecp_aem_controller_available_state = AECP_AEM_CONTROLLER_AVAILABLE_IN_C;
-        break;
       case AECP_AEM_CONTROLLER_AVAILABLE_IN_C:
-        cd_len = avb_1722_1_create_controller_available_packet();
-        start_avb_timer(&aecp_aem_controller_available_timer, 11);
-        aecp_aem_controller_available_state = AECP_AEM_CONTROLLER_AVAILABLE_IN_D;
-        break;
       case AECP_AEM_CONTROLLER_AVAILABLE_IN_D:
-        cd_len = avb_1722_1_create_acquire_response_packet(AECP_AEM_STATUS_IN_PROGRESS);
-        start_avb_timer(&aecp_aem_controller_available_timer, 12);
-        aecp_aem_controller_available_state = AECP_AEM_CONTROLLER_AVAILABLE_IN_E;
-        break;
       case AECP_AEM_CONTROLLER_AVAILABLE_IN_E:
         cd_len = avb_1722_1_create_acquire_response_packet(AECP_AEM_STATUS_IN_PROGRESS);
-        start_avb_timer(&aecp_aem_controller_available_timer, 2);
-        aecp_aem_controller_available_state = AECP_AEM_CONTROLLER_AVAILABLE_IN_F;
+        start_avb_timer(&aecp_aem_controller_available_timer, available_timeouts[aecp_aem_controller_available_state]);
+        aecp_aem_controller_available_state++;
         break;
       case AECP_AEM_CONTROLLER_AVAILABLE_IN_F:
         if (pending_persistent)
@@ -824,10 +861,7 @@ void avb_1722_1_aecp_aem_periodic(chanend c_tx)
           printhex(acquired_controller_guid.c[7-i]);
         }
         printstrln(" acquired entity after timeout");
-        for(int i=0; i < 6; i++)
-        {
-          acquired_controller_mac[i] = pending_controller_mac[i];
-        }
+        memcpy(&acquired_controller_mac, &pending_controller_mac, 6);
       
         //TODO: Construct and send response to pending controller
         cd_len = avb_1722_1_create_acquire_response_packet(AECP_AEM_STATUS_SUCCESS);

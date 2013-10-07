@@ -98,14 +98,17 @@
 /** The maximum sample rate in Hz of audio that is to be input or output */
 #define AVB_MAX_AUDIO_SAMPLE_RATE 96000
 
-// Fix for Apple
-#define MEDIA_OUTPUT_FIFO_WORD_SIZE (AVB_MAX_AUDIO_SAMPLE_RATE/300)
+// This is the number of master clocks in a word clock
+#define MASTER_TO_WORDCLOCK_RATIO 512
 
 
 /******** 1722.1 PARAMETERS *****************************************************************/
 
 /** Enable 1722.1 AVDECC on the entity */
 #define AVB_ENABLE_1722_1 1
+
+#define AVB_1722_1_ADP_ENTITY_CAPABILITIES (AVB_1722_1_ADP_ENTITY_CAPABILITIES_AEM_SUPPORTED|AVB_1722_1_ADP_ENTITY_CAPABILITIES_CLASS_A_SUPPORTED|AVB_1722_1_ADP_ENTITY_CAPABILITIES_GPTP_SUPPORTED|AVB_1722_1_ADP_ENTITY_CAPABILITIES_AEM_IDENTIFY_CONTROL_INDEX_VALID)
+#define DESCRIPTOR_INDEX_CONTROL_IDENTIFY 0
 
 /** Enable 1722.1 Controller functionality on the entity. */
 #define AVB_1722_1_CONTROLLER_ENABLED 0

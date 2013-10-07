@@ -15,6 +15,7 @@
 #include "simple_printf.h"
 #include "avb_1722_router.h"
 #include "avb_api.h"
+#include "ethernet_tx_client.h"
 
 #ifndef AVB_STREAM_TABLE_ENTRIES
 #define AVB_STREAM_TABLE_ENTRIES 6
@@ -25,9 +26,11 @@ typedef struct avb_stream_entry
   avb_srp_info_t reservation;
   int listener_present;
   int talker_present;
+  int bw_reserved[MRP_NUM_PORTS]; // While the bw_reserved flag is set/not set we do not add/subtract Qav credit
 } avb_stream_entry;
 
 static avb_stream_entry stream_table[AVB_STREAM_TABLE_ENTRIES];
+static unsigned int port_bandwidth[MRP_NUM_PORTS];
 
 static mrp_attribute_state *domain_attr[MRP_NUM_PORTS];
 
@@ -52,6 +55,30 @@ void srp_domain_join(void)
       mrp_mad_begin(domain_attr[i]);
       mrp_mad_join(domain_attr[i], 1);
   }
+}
+
+static int srp_calculate_stream_bandwidth(int max_frame_size, int extra_byte) {
+  const int interframe_gap = 12;
+  const int preamble_sfd = 8;
+  const int eth_header_and_tag = 16;
+  const int crc = 4;
+  const int total_frame_size = interframe_gap + preamble_sfd + eth_header_and_tag + max_frame_size + crc + extra_byte;
+
+  return total_frame_size * 8 * AVB1722_PACKET_RATE;
+}
+
+static void srp_increase_port_bandwidth(int max_frame_size, int extra_byte, int port) {
+  int stream_bandwidth_bps = srp_calculate_stream_bandwidth(max_frame_size, extra_byte);
+  port_bandwidth[port] += stream_bandwidth_bps;
+  simple_printf("Increasing port %d shaper bandwidth to %d\n", port, port_bandwidth[port]);
+  mac_set_qav_bandwidth(c_mac_tx, port, port_bandwidth[port]);
+}
+
+static void srp_decrease_port_bandwidth(int max_frame_size, int extra_byte, int port) {
+  int stream_bandwidth_bps = srp_calculate_stream_bandwidth(max_frame_size, extra_byte);
+  port_bandwidth[port] -= stream_bandwidth_bps;
+   simple_printf("Decreasing port %d shaper bandwidth to %d\n", port, port_bandwidth[port]);
+  mac_set_qav_bandwidth(c_mac_tx, port, port_bandwidth[port]);
 }
 
 int avb_srp_match_listener_to_talker_stream_id(unsigned stream_id[2], avb_srp_info_t **stream, int is_listener)
@@ -98,7 +125,7 @@ avb_stream_entry *srp_add_reservation_entry_stream_id_only(unsigned int stream_i
     stream_table[entry].reservation.stream_id[0] = stream_id[0];
     stream_table[entry].reservation.stream_id[1] = stream_id[1];
     stream_table[entry].listener_present = 1;
-    simple_printf("Added stream:\n ID: %x%x\n DA:", stream_id[0], stream_id[1]);
+    simple_printf("Added stream:\n ID: %x%x\n", stream_id[0], stream_id[1]);
   } else {
     printstrln("Assert: Out of stream entries");
     __builtin_trap();
@@ -124,7 +151,7 @@ avb_stream_entry *srp_add_reservation_entry(avb_srp_info_t *reservation) {
     stream_table[entry].talker_present = 1;
   } else {
     printstrln("Assert: Out of stream entries");
-    __builtin_trap();
+    // __builtin_trap();
     return NULL;
   }
 
@@ -135,6 +162,7 @@ int srp_remove_reservation_entry(avb_srp_info_t *reservation) {
   int entry = srp_match_reservation_entry_by_id(reservation->stream_id);
 
   if (entry >= 0) {
+    simple_printf("Removed stream:\n ID: %x%x\n DA:", reservation->stream_id[0], reservation->stream_id[1]);
     memset(&stream_table[entry], 0, sizeof(avb_stream_entry));
   } else {
     printstrln("Assert: Tried to remove a reservation that isn't stored");
@@ -142,13 +170,24 @@ int srp_remove_reservation_entry(avb_srp_info_t *reservation) {
   }
 }
 
-static void create_propagated_attribute_and_join(mrp_attribute_state *attr) {
+void srp_cleanup_reservation_entry(mrp_attribute_state *st) {
+  mrp_attribute_state *matched1 = mrp_match_attribute_pair_by_stream_id(st, 1, 0);
+  mrp_attribute_state *matched2 = mrp_match_attr_by_stream_and_type(st, 1);
+
+  if (!matched1 && !matched2) {
+    srp_remove_reservation_entry(st->attribute_info);
+  }
+}
+
+static void create_propagated_attribute_and_join(mrp_attribute_state *attr, int new) {
   mrp_attribute_state *st = mrp_get_attr();
   avb_srp_info_t *stream_data = attr->attribute_info;
   mrp_attribute_init(st, attr->attribute_type, !attr->port_num, 0, stream_data);
+#if 0
   simple_printf("JOIN mrp_attribute_init: %d, %d, STREAM_ID[0]: %x\n", attr->attribute_type, !attr->port_num, stream_data->stream_id[0]);
+#endif
   mrp_mad_begin(st);
-  mrp_mad_join(st, 1);
+  mrp_mad_join(st, new);
   st->propagated = 1; // Propagated to other port
 }
 
@@ -157,9 +196,11 @@ static void create_propagated_attribute_and_join(mrp_attribute_state *attr) {
 static void avb_srp_map_join(mrp_attribute_state *attr, int new, int listener)
 {
   avb_srp_info_t *attribute_info = attr->attribute_info;
+#if 0
   if (listener) printstrln("Listener MAP_Join.indication");
   else printstrln("Talker MAP_Join.indication");
-  mrp_attribute_state *matched_talker_listener = mrp_match_attribute_by_stream_id(attr, 1, 0);
+#endif
+  mrp_attribute_state *matched_talker_listener = mrp_match_attribute_pair_by_stream_id(attr, 1, 0);
   mrp_attribute_state *matched_stream_id_opposite_port = mrp_match_attr_by_stream_and_type(attr, 1);
 
 #if 0
@@ -167,24 +208,29 @@ static void avb_srp_map_join(mrp_attribute_state *attr, int new, int listener)
    matched_talker_listener ? matched_talker_listener->propagated : 0, matched_talker_listener ? matched_talker_listener->here : 0, new, matched_stream_id_opposite_port);
 #endif
   // Attribute propagation:
-  if (!matched_stream_id_opposite_port && !listener && new)
+  if (!matched_stream_id_opposite_port && !listener)
   {
-    create_propagated_attribute_and_join(attr);
+    create_propagated_attribute_and_join(attr, new);
   }
   else if (!matched_stream_id_opposite_port &&
             matched_talker_listener &&
             !matched_talker_listener->propagated &&
-            !matched_talker_listener->here &&
-            new)
+            !matched_talker_listener->here)
   {
-    create_propagated_attribute_and_join(attr);
+    create_propagated_attribute_and_join(attr, new);
   }
 
+  /**** LISTENER ****/
   if (listener && matched_talker_listener && !matched_talker_listener->propagated) {
     if (!matched_talker_listener->here) { // Handle case where the Talker is not this endpoint
 
       if (!matched_talker_listener->here) {
-        avb_1722_enable_stream_forwarding(c_mac_tx, attribute_info->stream_id);
+        int entry = srp_match_reservation_entry_by_id(attribute_info->stream_id);
+        if (!stream_table[entry].bw_reserved[attr->port_num]) {
+          stream_table[entry].bw_reserved[attr->port_num] = 1;
+          srp_increase_port_bandwidth(attribute_info->tspec_max_frame_size, 1, attr->port_num);
+          avb_1722_enable_stream_forwarding(c_mac_tx, attribute_info->stream_id);
+        }
       }
       if (matched_stream_id_opposite_port)
       {
@@ -193,21 +239,26 @@ static void avb_srp_map_join(mrp_attribute_state *attr, int new, int listener)
       }
     }
   }
+  /**************/
 
+  /**** TALKER ****/
   if (!listener && matched_stream_id_opposite_port) {
     mrp_mad_join(matched_stream_id_opposite_port, 1);
     matched_stream_id_opposite_port->propagated = 1; // Propagate to other port
   }
+  /**************/
 
-    mrp_debug_dump_attrs();
+  mrp_debug_dump_attrs();
   
 }
 
 void avb_srp_map_leave(mrp_attribute_state *attr)
 {
+#if 0
   if (attr->attribute_type == MSRP_LISTENER) printstrln("Listener MAP_Leave.indication");
   else if (attr->attribute_type == MSRP_TALKER_ADVERTISE) printstrln("Talker MAP_Leave.indication");
-  mrp_attribute_state *matched_talker_listener = mrp_match_attribute_by_stream_id(attr, 1, 0);
+#endif
+  mrp_attribute_state *matched_talker_listener = mrp_match_attribute_pair_by_stream_id(attr, 1, 0);
   mrp_attribute_state *matched_stream_id_opposite_port = mrp_match_attr_by_stream_and_type(attr, 1);
 
   mrp_debug_dump_attrs();
@@ -215,27 +266,20 @@ void avb_srp_map_leave(mrp_attribute_state *attr)
   if (attr->attribute_type == MSRP_LISTENER)
   {
     avb_srp_info_t *attribute_info = attr->attribute_info;
+    int entry = srp_match_reservation_entry_by_id(attribute_info->stream_id);
 
     if (matched_stream_id_opposite_port) {
-      avb_1722_disable_stream_forwarding(c_mac_tx, attribute_info->stream_id);
+      if (stream_table[entry].bw_reserved[attr->port_num]) {
+        srp_decrease_port_bandwidth(attribute_info->tspec_max_frame_size, 1, attr->port_num);
+        avb_1722_disable_stream_forwarding(c_mac_tx, attribute_info->stream_id);
+        stream_table[entry].bw_reserved[attr->port_num] = 0;
+      }
     }
-
-    /*
-    if (!matched_stream_id_opposite_port) {
-      mrp_mad_leave(attr);
-    }
-    else if (!matched_talker_listener)
-    {
-      mrp_mad_leave(matched_stream_id_opposite_port);
-      avb_1722_disable_stream_forwarding(c_mac_tx, attribute_info->stream_id);
-    }
-    */
   }
   else if (attr->attribute_type == MSRP_TALKER_ADVERTISE) 
   {
     if (matched_stream_id_opposite_port) {
       mrp_mad_leave(matched_stream_id_opposite_port);
-      attr->applicant_state = MRP_UNUSED;
     }
   }
 }
@@ -316,11 +360,21 @@ void avb_srp_listener_join_ind(CLIENT_INTERFACE(avb_interface, avb), mrp_attribu
 
   	avb_get_source_state(avb, stream, &state);
 
-    if (mrp_match_attr_by_stream_and_type(attr, 1)) {
-      set_avb_source_port(stream, -1);
+    int entry = srp_match_reservation_entry_by_id(sink_info->reservation.stream_id);
+
+    if (mrp_match_attr_by_stream_and_type(attr, 1)) { // Listener ready on the other port also, therefore send on both ports
+      if (stream_table[entry].bw_reserved[!attr->port_num] != 1) {
+        srp_increase_port_bandwidth(sink_info->reservation.tspec_max_frame_size, 0, !attr->port_num);
+        set_avb_source_port(stream, -1);
+        stream_table[entry].bw_reserved[!attr->port_num] = 1;
+      }
     }
-    else {
-      set_avb_source_port(stream, attr->port_num);
+    else { // Just this port
+      if (stream_table[entry].bw_reserved[attr->port_num] != 1) {
+        srp_increase_port_bandwidth(sink_info->reservation.tspec_max_frame_size, 0, attr->port_num);
+        set_avb_source_port(stream, attr->port_num);
+        stream_table[entry].bw_reserved[attr->port_num] = 1;
+      }
     }
 
   	if (state == AVB_SOURCE_STATE_POTENTIAL) {
@@ -342,12 +396,18 @@ void avb_srp_listener_leave_ind(CLIENT_INTERFACE(avb_interface, avb), mrp_attrib
   unsigned stream = avb_get_source_stream_index_from_stream_id(sink_info->reservation.stream_id);
   mrp_attribute_state *matched_listener_opposite_port = mrp_match_attr_by_stream_and_type(attr, 1);
 
+  int entry = srp_match_reservation_entry_by_id(sink_info->reservation.stream_id);
+
   avb_srp_map_leave(attr);
 
   if (stream != -1u)
   {
-    if (matched_listener_opposite_port) {
-      set_avb_source_port(stream, !attr->port_num);
+    if (matched_listener_opposite_port) { // Transmitting on both ports
+      if (stream_table[entry].bw_reserved[attr->port_num] == 1) {
+        srp_decrease_port_bandwidth(sink_info->reservation.tspec_max_frame_size, 0, attr->port_num);
+        set_avb_source_port(stream, !attr->port_num);
+        stream_table[entry].bw_reserved[attr->port_num] = 0;
+      }
     }
   	avb_get_source_state(avb, stream, &state);
 
@@ -391,8 +451,8 @@ void avb_srp_leave_listener_attrs(unsigned int stream_id[2]) {
   mrp_attribute_state *matched_talker_advertise = mrp_match_talker_non_prop_attribute(stream_id, -1);
 
   if (matched_talker_advertise) {
-    mrp_attribute_state *matched_listener_opposite_port = mrp_match_attribute_by_stream_id(matched_talker_advertise, 1, 0);
-    mrp_attribute_state *matched_listener_this_port = mrp_match_attribute_by_stream_id(matched_talker_advertise, 0, 0);
+    mrp_attribute_state *matched_listener_opposite_port = mrp_match_attribute_pair_by_stream_id(matched_talker_advertise, 1, 0);
+    mrp_attribute_state *matched_listener_this_port = mrp_match_attribute_pair_by_stream_id(matched_talker_advertise, 0, 0);
 
     // LL2: If there is a non-propagated Listener attr on the opposite port, then there is another Listener
     // Do not leave
@@ -416,7 +476,7 @@ void avb_srp_join_listener_attrs(unsigned int stream_id[2]) {
   mrp_attribute_state *matched_talker_advertise = mrp_match_talker_non_prop_attribute(stream_id, -1);
 
   if (matched_talker_advertise) { 
-    mrp_attribute_state *matched_listener_same_port = mrp_match_attribute_by_stream_id(matched_talker_advertise, 0, 0);
+    mrp_attribute_state *matched_listener_same_port = mrp_match_attribute_pair_by_stream_id(matched_talker_advertise, 0, 0);
 
     // LJ2. If Listener Ready attribute not present on this port, create it
     if (!matched_listener_same_port) {
@@ -506,17 +566,22 @@ mrp_attribute_state* avb_srp_process_new_attribute_from_packet(int mrp_attribute
       break;
   }
 
-  mrp_attribute_state *st = mrp_get_attr();
-  mrp_attribute_init(st, mrp_attribute_type, port_num, 0, stream_ptr);
+  if (stream_ptr) {
+    mrp_attribute_state *st = mrp_get_attr();
+    mrp_attribute_init(st, mrp_attribute_type, port_num, 0, stream_ptr);
 
-  return st;
+    return st;
+  }
+  else {
+    return NULL;
+  }
 }
 
 void avb_srp_talker_join_ind(mrp_attribute_state *attr, int new)
 {
   avb_sink_info_t *sink_info = (avb_sink_info_t *) attr->attribute_info;
   unsigned stream = avb_get_sink_stream_index_from_stream_id(sink_info->reservation.stream_id);
-  mrp_attribute_state *matched_listener_this_port = mrp_match_attribute_by_stream_id(attr, 0, 1);
+  mrp_attribute_state *matched_listener_this_port = mrp_match_attribute_pair_by_stream_id(attr, 0, 1);
 
   /* This covers the case where the Listener joins before the Talker attribute. When we receive the Talker join new, 
    * we also trigger join for the Listener attribute on the same port if it already exists. 
@@ -524,19 +589,16 @@ void avb_srp_talker_join_ind(mrp_attribute_state *attr, int new)
    */
   if (stream != -1u && matched_listener_this_port)
   {
-    mrp_attribute_state *matched_listener_opposite_port = mrp_match_attribute_by_stream_id(attr, 1, 1);
+    mrp_attribute_state *matched_listener_opposite_port = mrp_match_attribute_pair_by_stream_id(attr, 1, 1);
     if (matched_listener_opposite_port) {
-      matched_listener_opposite_port->applicant_state = MRP_UNUSED;
+      mrp_change_applicant_state(matched_listener_opposite_port, MRP_EVENT_DUMMY, MRP_UNUSED);
     }
 
     mrp_mad_begin(matched_listener_this_port);
     mrp_mad_join(matched_listener_this_port, 1);
   }
 
-  if (new)
-  {
-    avb_srp_map_join(attr, new, 0);
-  }
+  avb_srp_map_join(attr, new, 0);
 }
 
 void avb_srp_talker_leave_ind(mrp_attribute_state *attr)

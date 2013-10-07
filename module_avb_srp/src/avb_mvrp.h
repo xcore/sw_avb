@@ -30,7 +30,7 @@
  *  \returns                  non-zero if sucessful, non-zero otherwise.
  *
  **/
-int avb_join_vlan(int vlan_id);
+int avb_join_vlan(int vlan_id, int port_num);
 
 /** Leave a VLAN
  *

@@ -38,10 +38,8 @@ typedef struct buf_info_t {
   int lock_count;
   int prev_diff;
   int stability_count;
-  int instability_count;
   int media_clock;
   int fifo;
-  int adjust;
 } buf_info_t;
 
 
@@ -87,9 +85,7 @@ static buf_info_t buf_info[AVB_NUM_MEDIA_OUTPUTS];
 
 static void init_buffers(void) 
 {
-  for (int i=0;i<AVB_NUM_MEDIA_OUTPUTS;i++) {
-    buf_info[i].adjust = 0;
-  }
+  // This used to set the (now removed) adjust field in the buf_into_t array to zero
 }
 
 int get_buf_info(int fifo)
@@ -146,7 +142,6 @@ static void manage_buffer(buf_info_t &b,
   {
 	  outgoing_timestamp_local = outgoing_timestamp_local - (othercore_now - thiscore_now);
   }
-  outgoing_timestamp_local += b.adjust;
 
   fill = wrptr - rdptr;
 
@@ -203,7 +198,6 @@ static void manage_buffer(buf_info_t &b,
 #ifdef DEBUG_MEDIA_CLOCK
     	simple_printf("Media output %d compensation too large: %d samples\n", index, sample_diff);
 #endif
-        b.adjust = 0;
         buf_ctl <: b.fifo;
         buf_ctl <: BUF_CTL_RESET;
         inct(buf_ctl);
@@ -227,7 +221,6 @@ static void manage_buffer(buf_info_t &b,
 #ifdef DEBUG_MEDIA_CLOCK
       simple_printf("Media output %d lost lock\n", index);
 #endif
-      b.adjust = 0;
       buf_ctl <: b.fifo;
       buf_ctl <: BUF_CTL_RESET;
       inct(buf_ctl);  

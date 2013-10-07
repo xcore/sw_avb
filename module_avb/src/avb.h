@@ -5,6 +5,7 @@
 #include "xc2compat.h"
 #include "avb_api.h"
 #include "avb_srp_interface.h"
+#include "avb_1722_1_callbacks.h"
 
 
 #ifndef MAX_AVB_CONTROL_PACKET_SIZE
@@ -45,7 +46,7 @@
  *
  **/
 #ifdef __XC__
-unsafe void avb_init(chanend c_media_ctl[],
+void avb_init(chanend c_media_ctl[],
               chanend ?c_listener_ctl[],
               chanend ?c_talker_ctl[],
               chanend ?c_media_clock_ctl,
@@ -89,7 +90,11 @@ void avb_manager(server interface avb_interface i_avb[num_avb_clients], unsigned
                  chanend ?c_media_clock_ctl,
                  chanend c_ptp);
 
-void avb_process_1722_control_packet(unsigned int buf0[], int nbytes, chanend c_tx, client interface avb_interface i_avb);
+void avb_process_1722_control_packet(unsigned int buf0[],
+                                    int nbytes,
+                                    chanend c_tx,
+                                    client interface avb_interface i_avb,
+                                    client interface avb_1722_1_control_callbacks i_1722_1_entity);
 #endif
 
 /** Receives an 802.1Qat SRP packet or an IEEE P1722 MAAP packet.

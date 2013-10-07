@@ -13,6 +13,7 @@
 #include "ethernet_rx_client.h"
 #include "ethernet_server_def.h"
 #include "avb_mac_filter.h"
+#include "spi.h"
 
 
 #define PERIODIC_POLL_TIME 5000
@@ -36,6 +37,7 @@ void avb_1722_1_periodic(chanend c_tx, chanend c_ptp, client interface avb_inter
 // TODO: Move/rename this task?
 [[combinable]]
 void avb_1722_1_task(client interface avb_interface i_avb,
+                     client interface avb_1722_1_control_callbacks i_1722_1_entity,
                      chanend c_mac_rx,
                      chanend c_mac_tx,
                      chanend c_ptp) {
@@ -45,6 +47,8 @@ void avb_1722_1_task(client interface avb_interface i_avb,
   unsigned int buf[AVB_1722_1_PACKET_SIZE_WORDS];
   unsigned int port_num;
   unsigned char mac_addr[6];
+
+  spi_init();
 
   mac_get_macaddr(c_mac_tx, mac_addr);
   avb_1722_1_init(mac_addr);
@@ -62,7 +66,7 @@ void avb_1722_1_task(client interface avb_interface i_avb,
       // Receive and process any incoming AVB packets (802.1Qat, 1722_MAAP)
       case avb_get_control_packet(c_mac_rx, buf, nbytes, port_num):
       {
-        avb_process_1722_control_packet(buf, nbytes, c_mac_tx, i_avb);
+        avb_process_1722_control_packet(buf, nbytes, c_mac_tx, i_avb, i_1722_1_entity);
         break;
       }
       // Periodic processing

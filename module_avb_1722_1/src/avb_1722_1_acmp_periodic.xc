@@ -61,11 +61,9 @@ void acmp_send_command(int entity_type, int message_type, avb_1722_1_acmp_cmd_re
     command->sequence_id = sequence_id[entity_type];
     sequence_id[entity_type]++;
 
-    unsafe {
-        avb_1722_1_create_acmp_packet((avb_1722_1_acmp_cmd_resp *unsafe)command, message_type, ACMP_STATUS_SUCCESS);
-        mac_tx(c_tx, avb_1722_1_buf, AVB_1722_1_ACMP_PACKET_SIZE, -1);
-        process_avb_1722_1_acmp_packet((avb_1722_1_acmp_packet_t *unsafe)pkt_without_eth_header, c_tx);
-    }
+    avb_1722_1_create_acmp_packet(command, message_type, ACMP_STATUS_SUCCESS);
+    mac_tx(c_tx, avb_1722_1_buf, AVB_1722_1_ACMP_PACKET_SIZE, -1);
+    process_avb_1722_1_acmp_packet((avb_1722_1_acmp_packet_t *)pkt_without_eth_header, c_tx);
 
     if (!retry)
     {
@@ -82,10 +80,8 @@ void acmp_send_command(int entity_type, int message_type, avb_1722_1_acmp_cmd_re
 
 void acmp_send_response(int message_type, avb_1722_1_acmp_cmd_resp *response, int status, chanend c_tx)
 {
-    unsafe {
-        avb_1722_1_create_acmp_packet((avb_1722_1_acmp_cmd_resp *unsafe)response, message_type, status);
-        mac_tx(c_tx, avb_1722_1_buf, AVB_1722_1_ACMP_PACKET_SIZE, -1);
-    }
+    avb_1722_1_create_acmp_packet(response, message_type, status);
+    mac_tx(c_tx, avb_1722_1_buf, AVB_1722_1_ACMP_PACKET_SIZE, -1);
 }
 
 void acmp_controller_connect_disconnect(int message_type, const_guid_ref_t talker_guid, const_guid_ref_t listener_guid, int talker_id, int listener_id, chanend c_tx)

@@ -17,36 +17,37 @@ struct mvrp_entry {
   int vlan;
 };
 
-static struct mvrp_entry entries[AVB_MAX_NUM_VLAN];
+static struct mvrp_entry entries[AVB_MAX_NUM_VLAN*MRP_NUM_PORTS];
 
 void avb_mvrp_init(void)
 {
-  for (int i=0;i<AVB_MAX_NUM_VLAN;i++) {
-    entries[i].active = 0;
-    entries[i].attr = mrp_get_attr();
-    // TODO: 2 port MVRP
-    mrp_attribute_init(entries[i].attr, MVRP_VID_VECTOR, 0, 1, &entries[i].vlan);
+  for (int j=0;j<MRP_NUM_PORTS;j++) {
+    for (int i=0;i<AVB_MAX_NUM_VLAN;i++) {
+      entries[(i*AVB_MAX_NUM_VLAN)+j].active = 0;
+      entries[(i*AVB_MAX_NUM_VLAN)+j].attr = mrp_get_attr();
+      mrp_attribute_init(entries[i*AVB_MAX_NUM_VLAN+j].attr, MVRP_VID_VECTOR, j, 1, &entries[i*AVB_MAX_NUM_VLAN+j].vlan);
+    }
   }
 }
 
-int avb_join_vlan(int vlan)
+int avb_join_vlan(int vlan, int port_num)
 {
   int found = -1;
   
   for (int i=0;i<AVB_MAX_NUM_VLAN;i++)
-    if (entries[i].active && (entries[i].vlan == vlan)) 
+    if (entries[i].active && (entries[i].vlan == vlan) && (entries[i].attr->port_num == port_num)) 
       found = i;
 
   if (found == -1) 
     for (int i=0;i<AVB_MAX_NUM_VLAN;i++)
-      if (!entries[i].active) {
+      if (!entries[i].active && (entries[i].attr->port_num == port_num)) {
         found = i;
         break;
       }
 
   if (found == -1)
     for (int i=0;i<AVB_MAX_NUM_VLAN;i++)
-      if (entries[i].active && mrp_is_observer(entries[i].attr)) {
+      if (entries[i].active && mrp_is_observer(entries[i].attr) && (entries[i].attr->port_num == port_num)) {
         found = i;
         break;
       }

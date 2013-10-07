@@ -39,11 +39,7 @@ static transaction configure_stream(chanend avb1722_tx_config,
     stream.srcMACAdrs[i] = mac_addr[i];
   }
 
-  stream.streamId[1] =
-  ((unsigned) stream.srcMACAdrs[0] << 24) |
-  ((unsigned) stream.srcMACAdrs[1] << 16) |
-  ((unsigned) stream.srcMACAdrs[2] << 8) |
-  ((unsigned) stream.srcMACAdrs[3]);
+  stream.streamId[1] = ntoh_32(stream.srcMACAdrs);
 
   stream.streamId[0] =
   ((unsigned) stream.srcMACAdrs[4] << 24) |

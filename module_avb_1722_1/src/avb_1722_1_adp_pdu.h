@@ -61,11 +61,13 @@ typedef struct {
     unsigned char listener_capabilities[2];
     unsigned char controller_capabilities[4];
     unsigned char available_index[4];
-    unsigned char as_grandmaster_id[8];
-    unsigned char reserved0[4];
-    unsigned char reserved1[4];
+    unsigned char gptp_grandmaster_id[8];
+    unsigned char gptp_domain_number;
+    unsigned char reserved0[3];
+    unsigned char identify_control_index[2];
+    unsigned char interface_index[2];
     unsigned char association_id[8];
-    unsigned char reserved2[4];
+    unsigned char reserved1[4];
 } avb_1722_1_adp_packet_t;
 
 #define AVB_1722_1_ADP_PACKET_SIZE (sizeof(ethernet_hdr_t)+sizeof(avb_1722_1_adp_packet_t))
@@ -81,7 +83,9 @@ typedef struct {
     unsigned short listener_capabilities;
     unsigned int controller_capabilities;
     unsigned int available_index;
-    gmid_t as_grandmaster_id;
+    gmid_t gptp_grandmaster_id;
+    unsigned char gptp_domain_number;
+    unsigned short identify_control_index;
     unsigned int association_id;
     unsigned timeout;
 } avb_1722_1_entity_record;

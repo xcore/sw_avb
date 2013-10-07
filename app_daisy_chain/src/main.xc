@@ -1,7 +1,6 @@
 #include <platform.h>
 #include <print.h>
 #include <xccompat.h>
-#include <stdio.h>
 #include <string.h>
 #include <xscope.h>
 #include "audio_i2s.h"
@@ -23,9 +22,7 @@
 #include "media_clock_server.h"
 #include "avb_1722_1.h"
 #include "avb_srp.h"
-
-// This is the number of master clocks in a word clock
-#define MASTER_TO_WORDCLOCK_RATIO 512
+#include "aem_descriptor_types.h"
 
 on ETHERNET_DEFAULT_TILE: otp_ports_t otp_ports = OTP_PORTS_INITIALIZER;
 
@@ -46,6 +43,8 @@ on tile[1]: mii_interface_t mii2 = {
   XS1_PORT_1F,
   XS1_PORT_4B      
 };
+
+on tile[0]: out port p_leds = XS1_PORT_4F;
 
 //***** AVB audio ports ****
 #if I2C_COMBINE_SCL_SDA
@@ -76,12 +75,12 @@ on tile[0]: in buffered port:32 p_aud_din[AVB_DEMO_NUM_CHANNELS/2] = PORT_SDATA_
   #define p_aud_din null
 #endif
 
-#if AVB_XA_SK_AUDIO_SLICE
+#if AVB_XA_SK_AUDIO_PLL_SLICE
 on tile[0]: out port p_audio_shared = PORT_AUDIO_SHARED;
 #endif
 
 // PTP sync port
-on tile[0]: port ptp_sync_port = XS1_PORT_1C;
+on tile[0]: port ptp_sync_port = XS1_PORT_1G;
 
 #if AVB_DEMO_ENABLE_LISTENER
 media_output_fifo_data_t ofifo_data[AVB_NUM_MEDIA_OUTPUTS];
@@ -97,26 +96,35 @@ media_input_fifo_t ififos[AVB_NUM_MEDIA_INPUTS];
   #define ififos null
 #endif
 
-[[combinable]] void application_task(client interface avb_interface avb);
+// Saves a bunch of memory
+void __libc_done() {}
+void _exit_unlocked() {}
+
+[[combinable]] void application_task(client interface avb_interface avb, server interface avb_1722_1_control_callbacks i_1722_1_entity);
 
 void xscope_user_init(void)
 {
-  xscope_register(0, XSCOPE_CONTINUOUS, "", XSCOPE_INT, "");
+  xscope_register(1, XSCOPE_CONTINUOUS, "", XSCOPE_INT, "");
   // Enable XScope printing
   xscope_config_io(XSCOPE_IO_BASIC);
 }
 
-void audio_hardware_setup(void)
+[[distributable]] void audio_hardware_setup(void)
 {
 #if PLL_TYPE_CS2100
   audio_clock_CS2100CP_init(r_i2c, MASTER_TO_WORDCLOCK_RATIO);
 #elif PLL_TYPE_CS2300
   audio_clock_CS2300CP_init(r_i2c, MASTER_TO_WORDCLOCK_RATIO);
 #endif
-#if AVB_XA_SK_AUDIO_SLICE
-  audio_codec_CS4270_init(p_audio_shared, 0xff, 0x90, r_i2c);
-  audio_codec_CS4270_init(p_audio_shared, 0xff, 0x92, r_i2c);
+#if AVB_XA_SK_AUDIO_PLL_SLICE
+  audio_codec_CS4270_init(p_audio_shared, 0xff, 0x48, r_i2c);
+  audio_codec_CS4270_init(p_audio_shared, 0xff, 0x49, r_i2c);
 #endif
+
+  while (1) {
+    select {
+    }
+  }
 }
 
 enum mac_rx_chans {
@@ -187,6 +195,7 @@ int main(void)
 
   interface avb_interface i_avb[NUM_AVB_MANAGER_CHANS];
   interface srp_interface i_srp;
+  interface avb_1722_1_control_callbacks i_1722_1_entity;
 
   par
   {
@@ -215,22 +224,16 @@ int main(void)
                                    c_ptp, NUM_PTP_CHANS,
                                    PTP_GRANDMASTER_CAPABLE);
 
+    on tile[AVB_I2C_TILE]: [[distribute]] audio_hardware_setup();
 
     // AVB - Audio
     on tile[0]:
     {
-#if (AVB_I2C_TILE == 0)
-      audio_hardware_setup();
-#endif
 #if AVB_DEMO_ENABLE_TALKER
-      media_input_fifo_data_t ififo_data[AVB_NUM_MEDIA_INPUTS];
-      media_input_fifo_t ififos[AVB_NUM_MEDIA_INPUTS];
       init_media_input_fifos(ififos, ififo_data, AVB_NUM_MEDIA_INPUTS);
 #endif
 
 #if AVB_DEMO_ENABLE_LISTENER
-      media_output_fifo_data_t ofifo_data[AVB_NUM_MEDIA_OUTPUTS];
-      media_output_fifo_t ofifos[AVB_NUM_MEDIA_OUTPUTS];
       init_media_output_fifos(ofifos, ofifo_data, AVB_NUM_MEDIA_OUTPUTS);
 #endif
 
@@ -261,36 +264,26 @@ int main(void)
                                   AVB_NUM_SINKS);
 #endif
 
-    // on tile[AVB_GPIO_TILE]: gpio_task(c_gpio_ctl);
+    on tile[1].core[0]: avb_manager(i_avb, NUM_AVB_MANAGER_CHANS,
+                                    i_srp,
+                                    c_media_ctl,
+                                    c_listener_ctl,
+                                    c_talker_ctl,
+                                    c_mac_tx[MAC_TX_TO_AVB_MANAGER],
+                                    c_media_clock_ctl,
+                                    c_ptp[PTP_TO_AVB_MANAGER]);
+    on tile[1].core[0]: avb_srp_task(i_avb[AVB_MANAGER_TO_SRP],
+                                     i_srp,
+                                     c_mac_rx[MAC_RX_TO_SRP],
+                                     c_mac_tx[MAC_TX_TO_SRP]);
 
-    // Application
-    on tile[1]:
-    {
-#if (AVB_I2C_TILE == 1)
-      audio_hardware_setup();
-#endif
-      [[combine]] par {
-        avb_manager(i_avb, NUM_AVB_MANAGER_CHANS,
-                   i_srp,
-                   c_media_ctl,
-                   c_listener_ctl,
-                   c_talker_ctl,
-                   c_mac_tx[MAC_TX_TO_AVB_MANAGER],
-                   c_media_clock_ctl,
-                   c_ptp[PTP_TO_AVB_MANAGER]);
-        application_task(i_avb[AVB_MANAGER_TO_DEMO]);
-        avb_srp_task(i_avb[AVB_MANAGER_TO_SRP],
-                     i_srp,
-                     c_mac_rx[MAC_RX_TO_SRP],
-                     c_mac_tx[MAC_TX_TO_SRP]);
-      }
 
-    }
-
-    on tile[0]: avb_1722_1_task(i_avb[AVB_MANAGER_TO_1722_1],
-                                c_mac_rx[MAC_RX_TO_1722_1],
-                                c_mac_tx[MAC_TX_TO_1722_1],
-                                c_ptp[PTP_TO_1722_1]);
+    on tile[0].core[0]: application_task(i_avb[AVB_MANAGER_TO_DEMO], i_1722_1_entity);
+    on tile[0].core[0]: avb_1722_1_task(i_avb[AVB_MANAGER_TO_1722_1],
+                                        i_1722_1_entity,
+                                        c_mac_rx[MAC_RX_TO_1722_1],
+                                        c_mac_tx[MAC_TX_TO_1722_1],
+                                        c_ptp[PTP_TO_1722_1]);
 
     on tile[0]: ptp_output_test_clock(c_ptp[PTP_TO_TEST_CLOCK],
                                       ptp_sync_port, 100000000);
@@ -302,12 +295,13 @@ int main(void)
 
 /** The main application control task **/
 [[combinable]]
-void application_task(client interface avb_interface avb)
+void application_task(client interface avb_interface avb, server interface avb_1722_1_control_callbacks i_1722_1_entity)
 {
 #if AVB_DEMO_ENABLE_TALKER
   int map[AVB_NUM_MEDIA_INPUTS];
 #endif
   unsigned sample_rate = 48000;
+  unsigned char aem_identify_control_value = 0;
 
   // Initialize the media clock
   avb.set_device_media_clock_type(0, DEVICE_MEDIA_CLOCK_INPUT_STREAM_DERIVED);
@@ -327,6 +321,79 @@ void application_task(client interface avb_interface avb)
 
   while (1)
   {
-    select {}
+    select
+    {
+      case i_1722_1_entity.get_control_value(unsigned short control_type,
+                                            unsigned short control_index,
+                                            unsigned short &values_length,
+                                            unsigned char values[508]) -> unsigned char return_status:
+      {
+        return_status = AECP_AEM_STATUS_NO_SUCH_DESCRIPTOR;
+
+        if (control_type == AEM_CONTROL_TYPE)
+        {
+          switch (control_index)
+          {
+            case DESCRIPTOR_INDEX_CONTROL_IDENTIFY:
+                values[0] = aem_identify_control_value;
+                values_length = 1;
+                return_status = AECP_AEM_STATUS_SUCCESS;
+              break;
+          }
+        }
+
+        break;
+      }
+
+      case i_1722_1_entity.set_control_value(unsigned short control_type,
+                                            unsigned short control_index,
+                                            unsigned short values_length,
+                                            unsigned char values[508]) -> unsigned char return_status:
+      {        
+        return_status = AECP_AEM_STATUS_NO_SUCH_DESCRIPTOR;
+
+        if (control_type == AEM_CONTROL_TYPE)
+        {
+          if (control_index == DESCRIPTOR_INDEX_CONTROL_IDENTIFY) {
+            if (values_length == 1) {
+              aem_identify_control_value = values[0];
+              p_leds <: aem_identify_control_value;
+              return_status = AECP_AEM_STATUS_SUCCESS;
+            }
+            else
+            {
+              return_status = AECP_AEM_STATUS_BAD_ARGUMENTS;
+            }
+          }
+
+        
+          #if 0
+          switch (control_index)
+          {
+            case DESCRIPTOR_INDEX_CONTROL_IDENTIFY:
+            {
+              /*
+              if (values_length == 1)
+              {
+                // aem_identify_control_value = values[0];
+                printintln(aem_identify_control_value);
+                return_status = AECP_AEM_STATUS_SUCCESS;
+              }
+              else
+              {
+                return_status = AECP_AEM_STATUS_BAD_ARGUMENTS;
+              }
+              */
+              break;
+            }
+          }
+          #endif
+          
+        }
+        
+
+        break;
+      }
+    }
   }
 }
