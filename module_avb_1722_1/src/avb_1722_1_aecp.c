@@ -62,13 +62,15 @@ static enum {
 } aecp_aem_state = AECP_AEM_IDLE;
 
 // Called on startup to initialise certain static descriptor fields
-void avb_1722_1_aem_descriptors_init()
+void avb_1722_1_aem_descriptors_init(unsigned int serial_num)
 {
   // entity_guid in Entity Descriptor
   for (int i=0; i < 8; i++)
   {
     desc_entity[4+i] = my_guid.c[7-i];
   }
+
+  avb_itoa(serial_num, &desc_entity[244], 10, 0);
 
   for (int i=0; i < 6; i++)
   {
@@ -91,9 +93,9 @@ void avb_1722_1_aem_descriptors_init()
   desc_avb_interface_0[78+9] = 1;
 }
 
-void avb_1722_1_aecp_aem_init()
+void avb_1722_1_aecp_aem_init(unsigned int serial_num)
 {
-  avb_1722_1_aem_descriptors_init();
+  avb_1722_1_aem_descriptors_init(serial_num);
   init_avb_timer(&aecp_aem_lock_timer, 100);
   init_avb_timer(&aecp_aem_controller_available_timer, 5);
 

@@ -24,7 +24,8 @@
 #include "avb_srp.h"
 #include "aem_descriptor_types.h"
 
-on ETHERNET_DEFAULT_TILE: otp_ports_t otp_ports = OTP_PORTS_INITIALIZER;
+on tile[0]: otp_ports_t otp_ports0 = OTP_PORTS_INITIALIZER;
+on ETHERNET_DEFAULT_TILE: otp_ports_t otp_ports1 = OTP_PORTS_INITIALIZER;
 
 smi_interface_t smi1 = ETHERNET_DEFAULT_SMI_INIT;
 
@@ -202,7 +203,7 @@ int main(void)
     on ETHERNET_DEFAULT_TILE:
     {
       char mac_address[6];
-      otp_board_info_get_mac(otp_ports, 0, mac_address);
+      otp_board_info_get_mac(otp_ports1, 0, mac_address);
       smi_init(smi1);
       eth_phy_config(1, smi1);
       ethernet_server_full_two_port(mii1,
@@ -279,7 +280,8 @@ int main(void)
 
 
     on tile[0].core[0]: application_task(i_avb[AVB_MANAGER_TO_DEMO], i_1722_1_entity);
-    on tile[0].core[0]: avb_1722_1_task(i_avb[AVB_MANAGER_TO_1722_1],
+    on tile[0].core[0]: avb_1722_1_task(otp_ports0,
+                                        i_avb[AVB_MANAGER_TO_1722_1],
                                         i_1722_1_entity,
                                         c_mac_rx[MAC_RX_TO_1722_1],
                                         c_mac_tx[MAC_TX_TO_1722_1],

@@ -36,7 +36,8 @@ void avb_1722_1_periodic(chanend c_tx, chanend c_ptp, client interface avb_inter
 
 // TODO: Move/rename this task?
 [[combinable]]
-void avb_1722_1_task(client interface avb_interface i_avb,
+void avb_1722_1_task(otp_ports_t &otp_ports,
+                     client interface avb_interface i_avb,
                      client interface avb_1722_1_control_callbacks i_1722_1_entity,
                      chanend c_mac_rx,
                      chanend c_mac_tx,
@@ -47,11 +48,14 @@ void avb_1722_1_task(client interface avb_interface i_avb,
   unsigned int buf[AVB_1722_1_PACKET_SIZE_WORDS];
   unsigned int port_num;
   unsigned char mac_addr[6];
+  unsigned int serial;
+
+  otp_board_info_get_serial(otp_ports, serial);
 
   spi_init();
 
   mac_get_macaddr(c_mac_tx, mac_addr);
-  avb_1722_1_init(mac_addr);
+  avb_1722_1_init(mac_addr, serial);
   avb_1722_maap_init(mac_addr);
 
   mac_set_custom_filter(c_mac_rx, MAC_FILTER_AVB_CONTROL);
