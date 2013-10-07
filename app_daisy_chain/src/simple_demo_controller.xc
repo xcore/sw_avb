@@ -60,11 +60,6 @@ void avb_entity_on_new_entity_available(client interface avb_interface avb, cons
 void avb_talker_on_listener_connect_failed(client interface avb_interface avb, const_guid_ref_t my_guid, int source_num,
         const_guid_ref_t listener_guid, avb_1722_1_acmp_status_t status, chanend c_tx)
 {
-    int i = avb_1722_1_entity_database_find(listener_guid);
-    
-    // Don't attempt to re-connect if the other end says LISTENER_EXCLUSIVE
-    if ((i != AVB_1722_1_MAX_ENTITIES) && (status != ACMP_STATUS_LISTENER_EXCLUSIVE))
-        avb_entity_on_new_entity_available(avb, my_guid, &entities[i], c_tx);
 }
 
 /* The controller has indicated that a listener is connecting to this talker stream */
@@ -90,58 +85,21 @@ void avb_talker_on_listener_connect(client interface avb_interface avb, int sour
 /* The controller has indicated to connect this listener sink to a talker stream */
 avb_1722_1_acmp_status_t avb_listener_on_talker_connect(client interface avb_interface avb, int sink_num, const_guid_ref_t talker_guid, unsigned char dest_addr[6], unsigned int stream_id[2], const_guid_ref_t my_guid)
 {
-  // Ensure XMOS devices only connect when they are known entities to ensure correct synchronisation
-  int do_connect = 0;
-
   int map[AVB_NUM_MEDIA_OUTPUTS];
   for (int i = 0; i < AVB_NUM_MEDIA_OUTPUTS; i++) map[i] = i;
 
   avb.set_device_media_clock_type(0, DEVICE_MEDIA_CLOCK_INPUT_STREAM_DERIVED);
 
-  if ((talker_guid.l >> 40) != (XMOS_VENDOR_ID>>8))
-  {
-    // Non XMOS talker
-    do_connect = 1;
-  }
-  else
-  {
-    int i = avb_1722_1_entity_database_find(talker_guid);
+  simple_printf("CONNECTING Listener sink #%d -> Talker stream %x%x, DA: ", sink_num, stream_id[0], stream_id[1]); print_mac_ln(dest_addr);
 
-    if (i != AVB_1722_1_MAX_ENTITIES)
-    {
-      do_connect = 1;
-      #if 0 
-      if (AVB_DEMO_ENABLE_TALKER && AVB_DEMO_ENABLE_LISTENER && (talker_guid->l < my_guid->l))
-      {
-        // Check if the remote Talker is also a Listener
-        if (entities[i].listener_stream_sinks >= 1)
-        {
-          // We can be master clock
-          set_device_media_clock_type(0, DEVICE_MEDIA_CLOCK_LOCAL_CLOCK);
-          printstrln("Entity elected Master audio clock");
-        }
-        // else we remain input stream derived
-      }
-      #endif
-    }
-  }
+  avb.set_sink_sync(sink_num, 0);
+  avb.set_sink_channels(sink_num, AVB_NUM_MEDIA_OUTPUTS);
+  avb.set_sink_map(sink_num, map, AVB_NUM_MEDIA_OUTPUTS);
+  avb.set_sink_id(sink_num, stream_id);
+  avb.set_sink_addr(sink_num, dest_addr, 6);
 
-  if (do_connect)
-  {
-    simple_printf("CONNECTING Listener sink #%d -> Talker stream %x%x, DA: ", sink_num, stream_id[0], stream_id[1]); print_mac_ln(dest_addr);
-
-    avb.set_sink_sync(sink_num, 0);
-    avb.set_sink_channels(sink_num, AVB_NUM_MEDIA_OUTPUTS);
-    avb.set_sink_map(sink_num, map, AVB_NUM_MEDIA_OUTPUTS);
-    avb.set_sink_id(sink_num, stream_id);
-    avb.set_sink_addr(sink_num, dest_addr, 6);
-
-    avb.set_sink_state(sink_num, AVB_SINK_STATE_POTENTIAL);
-    return ACMP_STATUS_SUCCESS;
-  }
-
-  simple_printf("CONNECTING Listener : entity not found : "); print_guid_ln(talker_guid);
-  return ACMP_STATUS_NOT_SUPPORTED;
+  avb.set_sink_state(sink_num, AVB_SINK_STATE_POTENTIAL);
+  return ACMP_STATUS_SUCCESS;
 }
 
 /* The controller has indicated to disconnect this listener sink from a talker stream */
