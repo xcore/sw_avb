@@ -273,6 +273,8 @@ void avb_srp_map_leave(mrp_attribute_state *attr)
         srp_decrease_port_bandwidth(attribute_info->tspec_max_frame_size, 1, attr->port_num);
         avb_1722_disable_stream_forwarding(c_mac_tx, attribute_info->stream_id);
         stream_table[entry].bw_reserved[attr->port_num] = 0;
+        // Propagate Listener leave:
+        mrp_mad_leave(matched_stream_id_opposite_port);
       }
     }
   }
