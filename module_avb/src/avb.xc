@@ -191,23 +191,6 @@ void avb_init_srp_only(chanend c_mac_rx0,
 
 #define timeafter(A, B) ((int)((B) - (A)) < 0)
 
-static void avb_set_talker_bandwidth(chanend c_mac_tx)
-{
-#if defined(ETHERNET_TX_HP_QUEUE) && defined(ETHERNET_TRAFFIC_SHAPER)
-  int data_size = 0;
-  for (int i=0;i<AVB_NUM_SOURCES;i++) {
-    avb_source_info_t *source = &sources[i];
-    if (source->stream.state == AVB_SOURCE_STATE_POTENTIAL ||
-        source->stream.state == AVB_SOURCE_STATE_ENABLED)
-      {
-        int samples_per_packet = (source->stream.rate + (AVB1722_PACKET_RATE-1))/AVB1722_PACKET_RATE;
-        data_size += 18 + 32 + (source->stream.num_channels * samples_per_packet * 4);
-      }
-  }
-  mac_set_qav_bandwidth(c_mac_tx, (data_size*8*AVB1722_PACKET_RATE*102)/100);
-#endif
-}
-
 static void set_sink_state0(unsigned sink_num,
                             enum avb_sink_state_t state,
                             chanend c_mac_tx,
