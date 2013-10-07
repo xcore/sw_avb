@@ -60,7 +60,7 @@ void srp_domain_join(void)
 static int srp_calculate_stream_bandwidth(int max_frame_size, int extra_byte) {
   const int interframe_gap = 12;
   const int preamble_sfd = 8;
-  const int eth_header_and_tag = 16;
+  const int eth_header_and_tag = 18;
   const int crc = 4;
   const int total_frame_size = interframe_gap + preamble_sfd + eth_header_and_tag + max_frame_size + crc + extra_byte;
 
