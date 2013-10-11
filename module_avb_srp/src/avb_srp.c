@@ -18,7 +18,7 @@
 #include "ethernet_tx_client.h"
 
 #ifndef AVB_STREAM_TABLE_ENTRIES
-#define AVB_STREAM_TABLE_ENTRIES 6
+#define AVB_STREAM_TABLE_ENTRIES 8
 #endif
 
 typedef struct avb_stream_entry 
