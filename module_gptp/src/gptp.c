@@ -291,7 +291,7 @@ static void set_new_role(enum ptp_port_role_t new_role,
 
 #define DEBUG_ADJUST
 
-static void update_adjust(ptp_timestamp *master_ts,
+static int update_adjust(ptp_timestamp *master_ts,
                           unsigned local_ts) 
 {
 
@@ -313,10 +313,15 @@ static void update_adjust(ptp_timestamp *master_ts,
     inv_adjust = local_diff - master_diff;
 
     // Detect and ignore outliers 
-    if (adjust > local_diff/10 || adjust < -local_diff/10) {
+    if (master_diff > 127000000 || master_diff < 124000000) {
       prev_adjust_valid = 0;
-      simple_printf("PTP threw away outlier (adjust %d)\n", adjust);
-      return;      
+      simple_printf("PTP threw away outlier (master_diff %d)\n", master_diff);
+      return 1;
+    }
+    if (master_diff == 0) {
+      prev_adjust_valid = 0;
+      simple_printf("PTP threw away Sync outlier, master_diff = 0\n");
+      return 1;
     }
 
     adjust <<= ADJUST_CALC_PREC;
@@ -324,7 +329,7 @@ static void update_adjust(ptp_timestamp *master_ts,
     
     if (master_diff == 0 || local_diff == 0) {
       prev_adjust_valid = 0;
-      return;
+      return 1;
     }
 
     adjust = adjust / master_diff;
@@ -336,7 +341,8 @@ static void update_adjust(ptp_timestamp *master_ts,
     
     if (adjust >> 32) {
     // Overflow on adjust!!
-      
+      prev_adjust_valid = 0;
+      return 1;
     }    
 
     /* Re-average the adjust with a given weighting.
@@ -367,6 +373,8 @@ static void update_adjust(ptp_timestamp *master_ts,
             printstr("PTP sync lock lost\n");
             sync_lock = 0;
             sync_count = 0;
+            prev_adjust_valid = 0;
+            return 1;
           }
         }
         else 
@@ -391,6 +399,13 @@ static void update_adjust(ptp_timestamp *master_ts,
   prev_adjust_local_ts = local_ts;
   prev_adjust_master_ts = *master_ts;
   prev_adjust_valid = 1;
+
+  if (prev_adjust_valid) {
+    return 0;
+  } 
+  else {
+    return 1;
+  }
 }
 
 static void update_reference_timestamps(ptp_timestamp *master_egress_ts,
@@ -1197,8 +1212,9 @@ void ptp_recv(chanend c_tx,
         ptp_timestamp_offset64(&master_egress_ts, &master_egress_ts, 
                                correction>>16);
                 
-        update_adjust(&master_egress_ts,received_sync_ts);
-        update_reference_timestamps(&master_egress_ts, received_sync_ts);
+        if (update_adjust(&master_egress_ts,received_sync_ts) == 0) {
+          update_reference_timestamps(&master_egress_ts, received_sync_ts);
+        }
 #if DEBUG_PRINT
         simple_printf("RX Follow Up, Port %d\n", src_port);
 #endif
