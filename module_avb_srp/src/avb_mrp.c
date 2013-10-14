@@ -480,9 +480,6 @@ static void doTx(mrp_attribute_state *st,
       create_empty_msg(st->attribute_type, 0);
       (void) encode_msg(msg, st, vector, port_num);
     }
-    else {
-      printstrln("no tx!");
-    }
   }
 
   if (MRP_DEBUG_ATTR_EGRESS)
