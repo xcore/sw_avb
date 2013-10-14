@@ -165,17 +165,21 @@ int srp_remove_reservation_entry(avb_srp_info_t *reservation) {
     simple_printf("Removed stream:\n ID: %x%x\n DA:", reservation->stream_id[0], reservation->stream_id[1]);
     memset(&stream_table[entry], 0, sizeof(avb_stream_entry));
   } else {
-    printstrln("Assert: Tried to remove a reservation that isn't stored");
+    simple_printf("Assert: Tried to remove a reservation that isn't stored: %x%d", reservation->stream_id[0], reservation->stream_id[1]);
     __builtin_trap();
   }
 }
 
 void srp_cleanup_reservation_entry(mrp_attribute_state *st) {
-  mrp_attribute_state *matched1 = mrp_match_attribute_pair_by_stream_id(st, 1, 0);
-  mrp_attribute_state *matched2 = mrp_match_attr_by_stream_and_type(st, 1);
+  if (st->attribute_type == MSRP_TALKER_ADVERTISE ||
+      st->attribute_type == MSRP_TALKER_FAILED ||
+      st->attribute_type == MSRP_LISTENER) {
+    mrp_attribute_state *matched1 = mrp_match_attribute_pair_by_stream_id(st, 1, 0);
+    mrp_attribute_state *matched2 = mrp_match_attr_by_stream_and_type(st, 1);
 
-  if (!matched1 && !matched2) {
-    srp_remove_reservation_entry(st->attribute_info);
+    if (!matched1 && !matched2) {
+      srp_remove_reservation_entry(st->attribute_info);
+    }
   }
 }
 
