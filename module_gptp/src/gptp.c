@@ -676,8 +676,6 @@ static void ptp_tx_timed(chanend c_tx,
 
 static unsigned char src_mac_addr[6];
 static unsigned char dest_mac_addr[6] = PTP_DEFAULT_DEST_ADDR;
-static unsigned char non_legacy_dest_mac_addr[6] = PTP_8021AS_DEST_ADDR;
-static unsigned char legacy_dest_mac_addr[6] = PTP_8021AS_LEGACY_ADDR;
 
 
 static void set_ptp_ethernet_hdr(unsigned char *buf)

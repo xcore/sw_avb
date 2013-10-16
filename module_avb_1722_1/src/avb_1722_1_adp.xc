@@ -363,7 +363,7 @@ void avb_1722_1_adp_advertising_periodic(chanend c_tx, chanend ptp)
                 adp_advertise_state = ADP_ADVERTISE_ADVERTISE_1;
             }
             break;
-
+#pragma fallthrough
         case ADP_ADVERTISE_ADVERTISE_0:
             avb_1722_1_adp_change_ptp_grandmaster(ptp_current.c);
             start_avb_timer(ptp_monitor_timer, 1); //Every second

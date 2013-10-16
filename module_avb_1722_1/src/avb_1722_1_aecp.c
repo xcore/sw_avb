@@ -12,6 +12,7 @@
 #include "reboot.h"
 #include <xs1.h>
 #include <platform.h>
+#include "avb_util.h"
 
 #if AVB_1722_1_USE_AVC
 #include "avc_commands.h"
@@ -70,7 +71,7 @@ void avb_1722_1_aem_descriptors_init(unsigned int serial_num)
     desc_entity[4+i] = my_guid.c[7-i];
   }
 
-  avb_itoa(serial_num, &desc_entity[244], 10, 0);
+  avb_itoa((int)serial_num, &desc_entity[244], 10, 0);
 
   for (int i=0; i < 6; i++)
   {
@@ -401,22 +402,6 @@ static unsigned short avb_1722_1_create_acquire_response_packet(unsigned char st
   AEM_MSG_SET_U_FLAG(aem_msg, 0);
 
   return sizeof(avb_1722_1_aem_acquire_entity_command_t) + AVB_1722_1_AECP_PAYLOAD_OFFSET;
-}
-
-static unsigned aem_command_from_acquired_controller(avb_1722_1_aecp_packet_t *pkt)
-{
-  unsigned result = 0;
-
-  if (entity_acquired_status == AEM_ENTITY_NOT_ACQUIRED)
-  {
-   result = 1;
-  }
-  else //if (entity_acquired_status == AEM_ENTITY_ACQUIRED || entity_acquired_status == AEM_ENTITY_ACQUIRED_AND_PERSISTENT)
-  {
-   result = compare_guid(pkt->controller_guid, &acquired_controller_guid);
-  }
-
-  return result;
 }
 
 static unsigned short process_aem_cmd_acquire(avb_1722_1_aecp_packet_t *pkt, unsigned char *status, unsigned char src_addr[6], chanend c_tx)
