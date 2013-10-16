@@ -12,6 +12,8 @@
 static chanend avb_1722_links[MAX_AVB_1722_ROUTER_LINKS];
 
 #define AVB_1722_ROUTER_UNMAPPED -1
+#define AVB_1722_ROUTER_UPDATE 0
+#define AVB_1722_ROUTER_REMOVE 1
 
 #define DEBUG_1722_ROUTER 1
 
@@ -88,7 +90,7 @@ void avb_1722_add_stream_mapping(chanend c_tx,
     simple_printf("1722 router: Enabled map for stream %x%x (link_num:%x, hash:%x)\n", stream_id[0], stream_id[1], link_num, avb_hash);
   }
 
-  mac_1722_update_router(c_tx, key0, key1,
+  mac_1722_update_router(c_tx, AVB_1722_ROUTER_UPDATE, key0, key1,
                         link_num != AVB_1722_ROUTER_UNMAPPED ? avb_1722_links[link_num] : AVB_1722_ROUTER_UNMAPPED,
                         avb_hash);
 
@@ -105,6 +107,20 @@ void avb_1722_remove_stream_mapping(chanend c_tx,
     simple_printf("1722 router: Disabled map for stream %x%x\n", stream_id[0], stream_id[1]);
   }
 
-  mac_1722_update_router(c_tx, key0, key1, AVB_1722_ROUTER_UNMAPPED, AVB_1722_ROUTER_UNMAPPED);
+  mac_1722_update_router(c_tx, AVB_1722_ROUTER_UPDATE, key0, key1, AVB_1722_ROUTER_UNMAPPED, AVB_1722_ROUTER_UNMAPPED);
+
+}
+
+void avb_1722_remove_stream_from_table(chanend c_tx,
+                                        unsigned int stream_id[2])
+{
+  int key0, key1;
+  keys_from_stream_id(stream_id, &key0, &key1);
+
+  if (DEBUG_1722_ROUTER) {
+    simple_printf("1722 router: Removed entry for stream %x%x\n", stream_id[0], stream_id[1]);
+  }
+
+  mac_1722_update_router(c_tx, AVB_1722_ROUTER_REMOVE, key0, key1, AVB_1722_ROUTER_UNMAPPED, AVB_1722_ROUTER_UNMAPPED);
 
 }

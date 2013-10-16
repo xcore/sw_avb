@@ -575,11 +575,9 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
           break;
         case MRP_AO:
           mrp_change_applicant_state(st, e, MRP_AP);
-          if (!st->here) mrp_change_applicant_state(st, e, MRP_UNUSED);
           break;
         case MRP_QO:
           mrp_change_applicant_state(st, e, MRP_QP);
-          if (!st->here) mrp_change_applicant_state(st, e, MRP_UNUSED);
           break;      
         }
       break;
@@ -608,7 +606,6 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
         {
         case MRP_VO:
           mrp_change_applicant_state(st, e, MRP_AO);
-          if (!st->here) mrp_change_applicant_state(st, e, MRP_UNUSED);
           break;
         case MRP_VP:
           mrp_change_applicant_state(st, e, MRP_AP);
@@ -618,7 +615,6 @@ static void mrp_update_state(mrp_event e, mrp_attribute_state *st, int four_pack
           break;
         case MRP_AO:
           mrp_change_applicant_state(st, e, MRP_QO);
-          if (!st->here) mrp_change_applicant_state(st, e, MRP_UNUSED);
           break;
         case MRP_AP:
           mrp_change_applicant_state(st, e, MRP_QP);

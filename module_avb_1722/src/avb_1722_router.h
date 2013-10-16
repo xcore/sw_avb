@@ -79,4 +79,8 @@ void avb_1722_add_stream_mapping(chanend c_tx,
 
 void avb_1722_remove_stream_mapping(chanend c_tx,
                                     unsigned int streamId[2]);
+
+void avb_1722_remove_stream_from_table(chanend c_tx,
+                                        unsigned int streamId[2]);
+
 #endif // _avb_1722_router_h_

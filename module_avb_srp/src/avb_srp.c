@@ -17,8 +17,15 @@
 #include "avb_api.h"
 #include "ethernet_tx_client.h"
 
+/* This needs to be greater than the actual max number of handled streams, because SRP 
+   cannot remove the attributes as quickly as a connection can be torn down and setup 
+   again on the Mac. The Mac uses a new set of stream IDs, presumably because the old 
+   attributes are still hanging around in their implementation also.
+   Hence there will be a period where the number of active stream entries is greater 
+   than the max capable number until they are cleaned up.
+*/
 #ifndef AVB_STREAM_TABLE_ENTRIES
-#define AVB_STREAM_TABLE_ENTRIES 8
+#define AVB_STREAM_TABLE_ENTRIES (8+4)
 #endif
 
 typedef struct avb_stream_entry 
@@ -158,12 +165,15 @@ avb_stream_entry *srp_add_reservation_entry(avb_srp_info_t *reservation) {
   return &stream_table[entry];
 }
 
-int srp_remove_reservation_entry(avb_srp_info_t *reservation) {
+void srp_remove_reservation_entry(avb_srp_info_t *reservation) {
   int entry = srp_match_reservation_entry_by_id(reservation->stream_id);
 
   if (entry >= 0) {
-    simple_printf("Removed stream:\n ID: %x%x\n DA:", reservation->stream_id[0], reservation->stream_id[1]);
-    memset(&stream_table[entry], 0, sizeof(avb_stream_entry));
+    simple_printf("Removed stream:\n ID: %x%x\n", reservation->stream_id[0], reservation->stream_id[1]);
+    if (stream_table[entry].reservation.stream_id[0] < 10 && stream_table[entry].reservation.stream_id[1] < 5) {
+      __builtin_trap();
+    }
+    memset(&stream_table[entry], 0x00, sizeof(avb_stream_entry));
   } else {
     simple_printf("Assert: Tried to remove a reservation that isn't stored: %x%d", reservation->stream_id[0], reservation->stream_id[1]);
     __builtin_trap();
@@ -177,8 +187,16 @@ void srp_cleanup_reservation_entry(mrp_attribute_state *st) {
     mrp_attribute_state *matched1 = mrp_match_attribute_pair_by_stream_id(st, 1, 0);
     mrp_attribute_state *matched2 = mrp_match_attr_by_stream_and_type(st, 1);
 
+    // If there is no match, it is either because there is genuinely no attribute match or if the reservation entry has been zeroed
+    // Hence the stream ID is zero
     if (!matched1 && !matched2) {
-      srp_remove_reservation_entry(st->attribute_info);
+      avb_srp_info_t *attribute_info = st->attribute_info;
+      if (attribute_info == NULL) __builtin_trap();
+
+      if (attribute_info->stream_id[0] != 0 && attribute_info->stream_id[1] != 0) {
+        avb_1722_remove_stream_from_table(c_mac_tx, attribute_info->stream_id);
+        srp_remove_reservation_entry(attribute_info);
+      }
     }
   }
 }
@@ -285,7 +303,16 @@ void avb_srp_map_leave(mrp_attribute_state *attr)
   else if (attr->attribute_type == MSRP_TALKER_ADVERTISE) 
   {
     if (matched_stream_id_opposite_port) {
+      // Propagate Talker leave:
       mrp_mad_leave(matched_stream_id_opposite_port);
+    }
+
+    if (matched_talker_listener) {
+      /* Special case of behaviour described in 25.3.4.4.1.
+       * "the Bridge shall act as a proxy for the Listener(s) and automatically generate a
+       *  MAD_Leave.request back toward the Talker for those Listener attributes" 
+       */
+      mrp_mad_leave(matched_talker_listener);
     }
   }
 }

@@ -11,7 +11,7 @@
 #include "string.h"
 #include "avb_1722_router_table.h"
 
- #define AVB_MAX_NUM_SINK_AND_FORWARD_STREAMS 8
+ #define AVB_MAX_NUM_SINK_AND_FORWARD_STREAMS 16
 
 typedef struct avb_1722_router_table_entry_t 
 {
