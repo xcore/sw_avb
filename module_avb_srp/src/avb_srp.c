@@ -435,13 +435,13 @@ void avb_srp_listener_leave_ind(CLIENT_INTERFACE(avb_interface, avb), mrp_attrib
 
   if (stream != -1u)
   {
-    if (matched_listener_opposite_port) { // Transmitting on both ports
       if (stream_table[entry].bw_reserved[attr->port_num] == 1) {
         srp_decrease_port_bandwidth(sink_info->reservation.tspec_max_frame_size, 0, attr->port_num);
-        set_avb_source_port(stream, !attr->port_num);
+        if (matched_listener_opposite_port) { // Transmitting on both ports
+          set_avb_source_port(stream, !attr->port_num);
+        }
         stream_table[entry].bw_reserved[attr->port_num] = 0;
       }
-    }
   	avb_get_source_state(avb, stream, &state);
 
   	if (state == AVB_SOURCE_STATE_ENABLED && !matched_listener_opposite_port) {
