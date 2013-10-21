@@ -377,21 +377,21 @@ int avb_srp_match_listener(mrp_attribute_state *attr,
 
 int avb_srp_match_domain(mrp_attribute_state *attr,char *fv,int i)
 {
-	// This returns zero becauase we don't expect to have to merge/aggragate domain messages
-	return 0;
+  // This returns zero becauase we don't expect to have to merge/aggragate domain messages
+  return 0;
 }
 
 void avb_srp_listener_join_ind(CLIENT_INTERFACE(avb_interface, avb), mrp_attribute_state *attr, int new, int four_packed_event)
 {
   enum avb_source_state_t state;
   avb_sink_info_t *sink_info = (avb_sink_info_t *) attr->attribute_info;
-	unsigned stream = avb_get_source_stream_index_from_stream_id(sink_info->reservation.stream_id);
+  unsigned stream = avb_get_source_stream_index_from_stream_id(sink_info->reservation.stream_id);
 
   avb_srp_map_join(attr, new, 1);
 
   if (stream != -1u) {
 
-  	avb_get_source_state(avb, stream, &state);
+    avb_get_source_state(avb, stream, &state);
 
     int entry = srp_match_reservation_entry_by_id(sink_info->reservation.stream_id);
 
@@ -410,15 +410,15 @@ void avb_srp_listener_join_ind(CLIENT_INTERFACE(avb_interface, avb), mrp_attribu
       }
     }
 
-  	if (state == AVB_SOURCE_STATE_POTENTIAL) {
-  		if (four_packed_event == AVB_SRP_FOUR_PACKED_EVENT_READY ||
-  			four_packed_event == AVB_SRP_FOUR_PACKED_EVENT_READY_FAILED) {
+    if (state == AVB_SOURCE_STATE_POTENTIAL) {
+      if (four_packed_event == AVB_SRP_FOUR_PACKED_EVENT_READY ||
+        four_packed_event == AVB_SRP_FOUR_PACKED_EVENT_READY_FAILED) {
   #if SRP_AUTO_TALKER_STREAM_CONTROL
-  			avb_set_source_state(avb, stream, AVB_SOURCE_STATE_ENABLED);
+        avb_set_source_state(avb, stream, AVB_SOURCE_STATE_ENABLED);
   #else
   #endif
-  		}
-  	}
+      }
+    }
   }
 }
 
@@ -442,18 +442,18 @@ void avb_srp_listener_leave_ind(CLIENT_INTERFACE(avb_interface, avb), mrp_attrib
         }
         stream_table[entry].bw_reserved[attr->port_num] = 0;
       }
-  	avb_get_source_state(avb, stream, &state);
+    avb_get_source_state(avb, stream, &state);
 
-  	if (state == AVB_SOURCE_STATE_ENABLED && !matched_listener_opposite_port) {
+    if (state == AVB_SOURCE_STATE_ENABLED && !matched_listener_opposite_port) {
   #if SRP_AUTO_TALKER_STREAM_CONTROL
-  		avb_set_source_state(avb, stream, AVB_SOURCE_STATE_POTENTIAL);
+      avb_set_source_state(avb, stream, AVB_SOURCE_STATE_POTENTIAL);
       if (stream_table[entry].bw_reserved[attr->port_num] == 1) {
         srp_decrease_port_bandwidth(sink_info->reservation.tspec_max_frame_size, 0, attr->port_num);
         stream_table[entry].bw_reserved[attr->port_num] = 0;
       }
   #else
   #endif
-	 }
+   }
   }
 }
 
@@ -640,10 +640,10 @@ void avb_srp_talker_join_ind(mrp_attribute_state *attr, int new)
 
 void avb_srp_talker_leave_ind(mrp_attribute_state *attr)
 {
-	unsigned stream = avb_get_sink_stream_index_from_pointer(attr->attribute_info);
-	if (stream != -1u) {
-		// This could be used to report talker advertising instead of the snooping scheme above
-	}
+  unsigned stream = avb_get_sink_stream_index_from_pointer(attr->attribute_info);
+  if (stream != -1u) {
+    // This could be used to report talker advertising instead of the snooping scheme above
+  }
   else
   {
     avb_srp_map_leave(attr);
@@ -733,17 +733,17 @@ static int encode_listener_message(char *buf,
 
 void avb_srp_domain_join_ind(mrp_attribute_state *attr, int new)
 {
-	//printstr("SRP Domain join ind\n");
+  //printstr("SRP Domain join ind\n");
 }
 
 void avb_srp_domain_leave_ind(mrp_attribute_state *attr)
 {
-	//printstr("SRP domain leave ind\n");
+  //printstr("SRP domain leave ind\n");
 }
 
 static int check_domain_firstvalue_merge(char *buf) {
-	// We never both to merge domain attribute together
-	return 0;
+  // We never both to merge domain attribute together
+  return 0;
 }
 
 static int encode_domain_message(char *buf,
@@ -944,24 +944,24 @@ int avb_srp_encode_message(char *buf,
 int avb_srp_compare_talker_attributes(mrp_attribute_state *a,
                                       mrp_attribute_state *b)
 {
-	avb_stream_info_t *source_info_a = (avb_stream_info_t *) a->attribute_info;
-	avb_stream_info_t *source_info_b = (avb_stream_info_t *) b->attribute_info;
-	return (source_info_a->local_id < source_info_b->local_id);
+  avb_stream_info_t *source_info_a = (avb_stream_info_t *) a->attribute_info;
+  avb_stream_info_t *source_info_b = (avb_stream_info_t *) b->attribute_info;
+  return (source_info_a->local_id < source_info_b->local_id);
 }
 
 int avb_srp_compare_listener_attributes(mrp_attribute_state *a,
                                        mrp_attribute_state *b)
 {
-	avb_sink_info_t *sink_info_a = (avb_sink_info_t *) a->attribute_info;
-	avb_sink_info_t *sink_info_b = (avb_sink_info_t *) b->attribute_info;
-	unsigned int *sA = sink_info_a->reservation.stream_id;
-	unsigned int *sB = sink_info_b->reservation.stream_id;
-	for (int i=0;i<2;i++) {
-		if (sA[i] < sB[i])
-			return 1;
-		if (sB[i] < sA[i])
-			return 0;
-	}
-	return 0;
+  avb_sink_info_t *sink_info_a = (avb_sink_info_t *) a->attribute_info;
+  avb_sink_info_t *sink_info_b = (avb_sink_info_t *) b->attribute_info;
+  unsigned int *sA = sink_info_a->reservation.stream_id;
+  unsigned int *sB = sink_info_b->reservation.stream_id;
+  for (int i=0;i<2;i++) {
+    if (sA[i] < sB[i])
+      return 1;
+    if (sB[i] < sA[i])
+      return 0;
+  }
+  return 0;
 }
 
