@@ -54,8 +54,8 @@ static int create_maap_packet(int message_type,
   struct ethernet_hdr_t *hdr = (ethernet_hdr_t*) &buf[0];
   struct maap_packet_t *pkt = (maap_packet_t*) (hdr + 1);
 
-  hdr->ethertype[0] = AVB_1722_ETHERTYPE >> 8;
-  hdr->ethertype[1] = AVB_1722_ETHERTYPE & 0xff;
+  hdr->ethertype.data[0] = AVB_1722_ETHERTYPE >> 8;
+  hdr->ethertype.data[1] = AVB_1722_ETHERTYPE & 0xff;
 
   SET_MAAP_CD_FLAG(pkt, DEFAULT_MAAP_CD_FLAG);
   SET_MAAP_SUBTYPE(pkt, DEFAULT_MAAP_SUBTYPE);

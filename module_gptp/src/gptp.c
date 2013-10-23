@@ -658,8 +658,8 @@ static void set_ptp_ethernet_hdr(unsigned char *buf)
     hdr->dest_addr[i] = dest_mac_addr[i];
   }
 
-  hdr->ethertype[0] = (PTP_ETHERTYPE >> 8);
-  hdr->ethertype[1] = (PTP_ETHERTYPE & 0xff);
+  hdr->ethertype.data[0] = (PTP_ETHERTYPE >> 8);
+  hdr->ethertype.data[1] = (PTP_ETHERTYPE & 0xff);
 }
 
 // Estimate of announce message processing time delay.
@@ -992,7 +992,7 @@ void ptp_recv(chanend c_tx,
 
   /* Extract the ethernet header and ptp common message header */
   struct ethernet_hdr_t *ethernet_hdr = (ethernet_hdr_t *) &buf[0];
-  int has_qtag = ethernet_hdr->ethertype[1]==0x18;
+  int has_qtag = ethernet_hdr->ethertype.data[1]==0x18;
   int ethernet_pkt_size = has_qtag ? 18 : 14;
   ComMessageHdr *msg =  (ComMessageHdr *) &buf[ethernet_pkt_size];
 

@@ -66,8 +66,8 @@ void avb_1722_1_create_1722_1_header(   const unsigned char* dest_addr,
         hdr->src_addr[i] = my_mac_addr[i];
     }
 
-    hdr->ethertype[0] = AVB_1722_ETHERTYPE >> 8;
-    hdr->ethertype[1] = AVB_1722_ETHERTYPE & 0xff;
+    hdr->ethertype.data[0] = AVB_1722_ETHERTYPE >> 8;
+    hdr->ethertype.data[1] = AVB_1722_ETHERTYPE & 0xff;
 
     SET_1722_1_CD_FLAG(pkt, 1);
     SET_1722_1_SUBTYPE(pkt, subtype);
