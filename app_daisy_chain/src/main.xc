@@ -300,7 +300,8 @@ int main(void)
 void application_task(client interface avb_interface avb, server interface avb_1722_1_control_callbacks i_1722_1_entity)
 {
 #if AVB_DEMO_ENABLE_TALKER
-  int map[AVB_NUM_MEDIA_INPUTS];
+  const int channels_per_stream = AVB_NUM_MEDIA_INPUTS/AVB_NUM_SOURCES;
+  int map[AVB_NUM_MEDIA_INPUTS/AVB_NUM_SOURCES];
 #endif
   unsigned sample_rate = 48000;
   unsigned char aem_identify_control_value = 0;
@@ -311,12 +312,15 @@ void application_task(client interface avb_interface avb, server interface avb_1
   avb.set_device_media_clock_state(0, DEVICE_MEDIA_CLOCK_STATE_ENABLED);
 
 #if AVB_DEMO_ENABLE_TALKER
-  avb.set_source_channels(0, AVB_NUM_MEDIA_INPUTS);
-  for (int i = 0; i < AVB_NUM_MEDIA_INPUTS; i++)
-    map[i] = i;
-  avb.set_source_map(0, map, AVB_NUM_MEDIA_INPUTS);
-  avb.set_source_format(0, AVB_SOURCE_FORMAT_MBLA_24BIT, sample_rate);
-  avb.set_source_sync(0, 0); // use the media_clock defined above
+  for (int j=0; j < AVB_NUM_SOURCES; j++)
+  {
+    avb.set_source_channels(j, channels_per_stream);
+    for (int i = 0; i < channels_per_stream; i++)
+      map[i] = j ? j*(channels_per_stream)+i  : j+i;
+    avb.set_source_map(j, map, channels_per_stream);
+    avb.set_source_format(j, AVB_SOURCE_FORMAT_MBLA_24BIT, sample_rate);
+    avb.set_source_sync(j, 0); // use the media_clock defined above
+  }
 #endif
 
   avb.set_sink_format(0, AVB_SOURCE_FORMAT_MBLA_24BIT, sample_rate);

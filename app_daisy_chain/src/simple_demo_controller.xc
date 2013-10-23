@@ -85,16 +85,17 @@ void avb_talker_on_listener_connect(client interface avb_interface avb, int sour
 /* The controller has indicated to connect this listener sink to a talker stream */
 avb_1722_1_acmp_status_t avb_listener_on_talker_connect(client interface avb_interface avb, int sink_num, const_guid_ref_t talker_guid, unsigned char dest_addr[6], unsigned int stream_id[2], const_guid_ref_t my_guid)
 {
-  int map[AVB_NUM_MEDIA_OUTPUTS];
-  for (int i = 0; i < AVB_NUM_MEDIA_OUTPUTS; i++) map[i] = i;
+  const int channels_per_stream = AVB_NUM_MEDIA_OUTPUTS/AVB_NUM_SINKS;
+  int map[AVB_NUM_MEDIA_OUTPUTS/AVB_NUM_SINKS];
+  for (int i = 0; i < channels_per_stream; i++) map[i] = sink_num ? sink_num*channels_per_stream+i  : sink_num+i;
 
   avb.set_device_media_clock_type(0, DEVICE_MEDIA_CLOCK_INPUT_STREAM_DERIVED);
 
   simple_printf("CONNECTING Listener sink #%d -> Talker stream %x%x, DA: ", sink_num, stream_id[0], stream_id[1]); print_mac_ln(dest_addr);
 
   avb.set_sink_sync(sink_num, 0);
-  avb.set_sink_channels(sink_num, AVB_NUM_MEDIA_OUTPUTS);
-  avb.set_sink_map(sink_num, map, AVB_NUM_MEDIA_OUTPUTS);
+  avb.set_sink_channels(sink_num, channels_per_stream);
+  avb.set_sink_map(sink_num, map, channels_per_stream);
   avb.set_sink_id(sink_num, stream_id);
   avb.set_sink_addr(sink_num, dest_addr, 6);
 

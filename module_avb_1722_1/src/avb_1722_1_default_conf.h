@@ -4,8 +4,8 @@
 /* Must include avb_conf.h as it may redefine the default defines here */
 #include "avb_conf.h"
 
-#ifndef AEM_GENERATE_CLUSTERS_MAP_ON_FLY
-#define AEM_GENERATE_CLUSTERS_MAP_ON_FLY 1
+#ifndef AEM_GENERATE_DESCRIPTORS_ON_FLY
+#define AEM_GENERATE_DESCRIPTORS_ON_FLY 1
 #endif
 
 #ifndef AVB_1722_1_AEM_ENABLED

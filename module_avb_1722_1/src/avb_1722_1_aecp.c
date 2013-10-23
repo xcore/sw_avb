@@ -20,6 +20,7 @@
 #if AVB_1722_1_AEM_ENABLED
 #include "aem_descriptor_types.h"
 #include "aem_descriptors.h"
+#include "aem_descriptor_structs.h"
 #endif
 
 extern unsigned int avb_1722_1_buf[AVB_1722_1_PACKET_SIZE_WORDS];
@@ -71,7 +72,7 @@ void avb_1722_1_aem_descriptors_init(unsigned int serial_num)
     desc_entity[4+i] = my_guid.c[7-i];
   }
 
-  avb_itoa((int)serial_num, &desc_entity[244], 10, 0);
+  avb_itoa((int)serial_num,(char)&desc_entity[244], 10, 0);
 
   for (int i=0; i < 6; i++)
   {
@@ -134,66 +135,99 @@ static void avb_1722_1_create_aecp_aem_response(unsigned char src_addr[6], unsig
   memcpy(aem, cmd_pkt->data.payload, command_data_len + 2);
 }
 
-static int create_aem_read_descriptor_response(unsigned short read_type, unsigned short read_id, unsigned char src_addr[6], avb_1722_1_aecp_packet_t *pkt)
+static void generate_output_object_name(char *object_name, int number) {
+  memset(object_name, 0, 64);
+  strcpy(object_name, "Output ");
+  char num_string = (char)(number + 0x30);
+  strcat(object_name, &num_string);
+}
+
+static void generate_input_object_name(char *object_name, int number) {
+  memset(object_name, 0, 64);
+  strcpy(object_name, "Input ");
+  char num_string = (char)(number + 0x30);
+  strcat(object_name, &num_string);
+}
+
+static int create_aem_read_descriptor_response(unsigned int read_type, unsigned int read_id, unsigned char src_addr[6], avb_1722_1_aecp_packet_t *pkt)
 {
   int desc_size_bytes = 0, i = 0;
   unsigned char *descriptor = NULL;
   int found_descriptor = 0;
 
-#if AEM_GENERATE_CLUSTERS_MAP_ON_FLY
-  // Generate audio clusters on the fly (to reduce memory)
-  if (read_type == AEM_AUDIO_CLUSTER_TYPE || read_type == AEM_STREAM_INPUT_TYPE || read_type == AEM_STREAM_OUTPUT_TYPE)
+#if AEM_GENERATE_DESCRIPTORS_ON_FLY
+  switch (read_type) {
+    case AEM_AUDIO_CLUSTER_TYPE:
+      if (read_id < (AVB_NUM_MEDIA_OUTPUTS+AVB_NUM_MEDIA_INPUTS)) {
+        descriptor = &desc_audio_cluster_template[0];
+        desc_size_bytes = sizeof(aem_desc_audio_cluster_t);
+      }
+      break;
+    case AEM_STREAM_INPUT_TYPE:
+      if (read_id < AVB_NUM_SINKS) {
+        descriptor = &desc_stream_input_0[0];
+        desc_size_bytes = sizeof(aem_desc_stream_input_output_t);
+      }
+      break;
+    case AEM_STREAM_OUTPUT_TYPE:
+      if (read_id < AVB_NUM_SOURCES) {
+        descriptor = &desc_stream_output_0[0];
+        desc_size_bytes = sizeof(aem_desc_stream_input_output_t);
+      }
+      break;
+    case AEM_STREAM_PORT_INPUT_TYPE:
+      if (read_id < AVB_NUM_SINKS) {
+        descriptor = &desc_stream_port_input_0[0];
+        desc_size_bytes = sizeof(aem_desc_stream_port_input_output_t);
+      }
+      break;
+    case AEM_STREAM_PORT_OUTPUT_TYPE:
+      if (read_id < AVB_NUM_SOURCES) {
+        descriptor = &desc_stream_port_output_0[0];
+        desc_size_bytes = sizeof(aem_desc_stream_port_input_output_t);
+      }
+      break;
+  }
+
+  if (descriptor != NULL)
   {
-    if (read_type == AEM_AUDIO_CLUSTER_TYPE && read_id < (AVB_NUM_MEDIA_OUTPUTS+AVB_NUM_MEDIA_INPUTS))
+    aem_desc_audio_cluster_t *cluster = (aem_desc_audio_cluster_t *)descriptor;
+    char id_num = (char)read_id;
+
+    // The descriptor id is also the channel number
+    cluster->descriptor_index[1] = (uint8_t)read_id;
+
+    if ((read_type == AEM_AUDIO_CLUSTER_TYPE) || read_type == AEM_STREAM_OUTPUT_TYPE)
     {
-      descriptor = &desc_audio_cluster_template[0];
+      int id = (int)read_id;;
+      if (read_id >= AVB_NUM_MEDIA_OUTPUTS) {
+        id = (int)read_id - AVB_NUM_MEDIA_OUTPUTS;
+      }
+      generate_output_object_name((char)cluster->object_name, id);
     }
-    else if ((read_type == AEM_STREAM_INPUT_TYPE && read_id < AVB_NUM_SINKS))
+    else if (read_type == AEM_STREAM_INPUT_TYPE)
     {
-      descriptor = &desc_stream_input_0[0];
-    }
-    else if ((read_type == AEM_STREAM_OUTPUT_TYPE && read_id < AVB_NUM_SOURCES))
-    {
-      descriptor = &desc_stream_output_0[0];
+      generate_input_object_name((char)cluster->object_name, (int)id_num);
     }
 
-    if (descriptor != NULL)
-    {
-      char id_num = (char)read_id;
-      int offset = 11;
-
-      // The descriptor id is also the channel number
-      descriptor[3] = (unsigned char)read_id;
-      if ((read_type == AEM_AUDIO_CLUSTER_TYPE && read_id < AVB_NUM_MEDIA_OUTPUTS) || read_type == AEM_STREAM_OUTPUT_TYPE)
-      {
-        if (read_type != AEM_STREAM_OUTPUT_TYPE)
-        {
-          strcpy((char*)&descriptor[4], "Output ");
-        }
-        else offset = 18;
-        descriptor[offset] = id_num + 0x30;
-      }
-      else
-      {
-        if (read_type != AEM_STREAM_INPUT_TYPE)
-        {
-          id_num = (char)read_id - AVB_NUM_MEDIA_OUTPUTS;
-          strcpy((char*)&descriptor[4], "Input ");
-        }
-        else offset = 17;
-        
-        descriptor[offset] = id_num + 0x30;
-      }
-      descriptor[offset+1] = '\0'; // NUL
-      desc_size_bytes = sizeof(desc_audio_cluster_template);
-      found_descriptor = 1;
+    if (read_type == AEM_STREAM_PORT_OUTPUT_TYPE) {
+      aem_desc_stream_port_input_output_t *stream_port = (aem_desc_stream_port_input_output_t *)descriptor;
+      hton_16(stream_port->base_cluster, read_id * AVB_NUM_SOURCES);
+      hton_16(stream_port->base_map, read_id);
     }
+    else if (read_type == AEM_STREAM_PORT_INPUT_TYPE) {
+      aem_desc_stream_port_input_output_t *stream_port = (aem_desc_stream_port_input_output_t *)descriptor;
+      hton_16(stream_port->base_cluster, read_id * AVB_NUM_SINKS);
+      hton_16(stream_port->base_map, read_id);
+    }
+
+    found_descriptor = 1;
   }
   else if (read_type == AEM_AUDIO_MAP_TYPE)
   {
     if (read_id < (AVB_NUM_SINKS+AVB_NUM_SOURCES))
     {
-      int num_mappings = (read_id == 0) ? AVB_NUM_MEDIA_OUTPUTS : AVB_NUM_MEDIA_INPUTS;
+      const int num_mappings = (read_id < AVB_NUM_SINKS) ? AVB_NUM_MEDIA_OUTPUTS/AVB_NUM_SINKS : AVB_NUM_MEDIA_INPUTS/AVB_NUM_SOURCES;
 
       /* Since the map descriptors aren't constant size, unlike the clusters, and 
        * dependent on the number of channels, we don't use a template */
@@ -202,20 +236,22 @@ static int create_aem_read_descriptor_response(unsigned short read_type, unsigne
       avb_1722_1_aecp_packet_t *pkt = (avb_1722_1_aecp_packet_t*) (hdr + AVB_1722_1_PACKET_BODY_POINTER_OFFSET);
       avb_1722_1_aecp_aem_msg_t *aem = (avb_1722_1_aecp_aem_msg_t*)(pkt->data.payload);
       unsigned char *pktptr = (unsigned char *)&(aem->command.read_descriptor_resp.descriptor);
+      aem_desc_audio_map_t *audio_map = (aem_desc_audio_map_t *)pktptr;
 
       desc_size_bytes = 8+(num_mappings*8);
 
-      memset(pktptr, 0, desc_size_bytes);
- 
-      pktptr[0*2+1] = AEM_AUDIO_MAP_TYPE;
-      pktptr[1*2+1] = read_id;
-      pktptr[2*2+1] = 8;
-      pktptr[3*2+1] = num_mappings;
+      memset(audio_map, 0, desc_size_bytes);
+      hton_16(audio_map->descriptor_type, AEM_AUDIO_MAP_TYPE);
+      hton_16(audio_map->descriptor_index, read_id);
+      hton_16(audio_map->mappings_offset, 8);
+      hton_16(audio_map->number_of_mappings, num_mappings);
 
       for (int i=0; i < num_mappings; i++)
       {
-        pktptr[11+(8*i)] = i;
-        pktptr[13+(8*i)] = i;
+        hton_16(audio_map->mappings[i].mapping_stream_index, read_id);
+        hton_16(audio_map->mappings[i].mapping_stream_channel, i);
+        hton_16(audio_map->mappings[i].mapping_cluster_offset, (read_id < AVB_NUM_SOURCES) ? i%AVB_NUM_SOURCES : i%AVB_NUM_SINKS);
+        hton_16(audio_map->mappings[i].mapping_cluster_channel, 0); // Single channel audio clusters
       }
 
       found_descriptor = 2; // 2 signifies do not copy descriptor below
@@ -236,7 +272,6 @@ static int create_aem_read_descriptor_response(unsigned short read_type, unsigne
           desc_size_bytes = aem_descriptor_list[i+k];
           descriptor = (unsigned char *)aem_descriptor_list[i+k+1];
           
-          // TODO: Write macros for descriptor fields (or cast to structs??)
           if (( ((unsigned)descriptor[2] << 8) | ((unsigned)descriptor[3]) ) == read_id)
           {
             found_descriptor = 1;
@@ -595,7 +630,7 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt,
       }
       case AECP_AEM_CMD_READ_DESCRIPTOR:
       {
-        unsigned short desc_read_type, desc_read_id;
+        unsigned int desc_read_type, desc_read_id;
         int num_tx_bytes;
 
         desc_read_type = ntoh_16(aem_msg->command.read_descriptor_cmd.descriptor_type);
