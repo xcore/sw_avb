@@ -72,7 +72,7 @@ void avb_1722_1_aem_descriptors_init(unsigned int serial_num)
     desc_entity[4+i] = my_guid.c[7-i];
   }
 
-  avb_itoa((int)serial_num,(char)&desc_entity[244], 10, 0);
+  avb_itoa((int)serial_num,(char *)&desc_entity[244], 10, 0);
 
   for (int i=0; i < 6; i++)
   {
@@ -203,11 +203,11 @@ static int create_aem_read_descriptor_response(unsigned int read_type, unsigned 
       if (read_id >= AVB_NUM_MEDIA_OUTPUTS) {
         id = (int)read_id - AVB_NUM_MEDIA_OUTPUTS;
       }
-      generate_output_object_name((char)cluster->object_name, id);
+      generate_output_object_name((char *)cluster->object_name, id);
     }
     else if (read_type == AEM_STREAM_INPUT_TYPE)
     {
-      generate_input_object_name((char)cluster->object_name, (int)id_num);
+      generate_input_object_name((char *)cluster->object_name, (int)id_num);
     }
 
     if (read_type == AEM_STREAM_PORT_OUTPUT_TYPE) {
