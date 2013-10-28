@@ -346,7 +346,7 @@ static int maap_conflict(unsigned char remote_addr[6], int remote_count, unsigne
   return 1;
 }
 
-void avb_1722_maap_process_packet(unsigned char *buf, unsigned char src_addr[6], int nbytes, chanend c_tx)
+void avb_1722_maap_process_packet(unsigned char buf[nbytes], unsigned int nbytes, unsigned char src_addr[6], chanend c_tx)
 {
   struct maap_packet_t *maap_pkt = (struct maap_packet_t *) &buf[0];
   int msg_type;

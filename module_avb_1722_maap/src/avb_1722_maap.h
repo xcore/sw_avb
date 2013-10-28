@@ -30,7 +30,11 @@ void avb_1722_maap_request_addresses(int num_addresses, char start_address[]);
 
 void avb_1722_maap_init(unsigned char macaddr[6]);
 
-void avb_1722_maap_process_packet(unsigned char *buf, unsigned char src_addr[6], int nbytes, chanend c_tx);
+#ifdef __XC__
+void avb_1722_maap_process_packet(unsigned char buf[nbytes], unsigned int nbytes, unsigned char src_addr[6], chanend c_tx);
+#else
+void avb_1722_maap_process_packet(unsigned char buf[], unsigned int nbytes, unsigned char src_addr[6], chanend c_tx);
+#endif
 
 /** Relinquish the reserved MAAP address range
  *

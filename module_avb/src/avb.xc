@@ -917,7 +917,7 @@ void avb_process_1722_control_packet(unsigned int buf0[],
     switch (etype) {
       case AVB_1722_ETHERTYPE:
         avb_1722_1_process_packet(&buf[eth_hdr_size], ethernet_hdr->src_addr, len, c_tx, i_avb, i_1722_1_entity);
-        avb_1722_maap_process_packet(&buf[eth_hdr_size], ethernet_hdr->src_addr, len, c_tx);
+        avb_1722_maap_process_packet(&buf[eth_hdr_size], len, ethernet_hdr->src_addr, c_tx);
         break;
     }
   }  
