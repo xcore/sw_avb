@@ -590,7 +590,9 @@ static void bmca_update_roles(char *msg, unsigned t, int port_num)
       simple_printf("NEW BEST: %d\n", port_num);
 #endif
       set_new_role(PTP_SLAVE, port_num, t);
-      set_new_role(PTP_MASTER, !port_num, t);
+      if (PTP_NUM_PORTS == 2) {
+        set_new_role(PTP_MASTER, !port_num, t);
+      }
       last_received_announce_time_valid[port_num] = 0;    
       master_port_id = pComMesgHdr->sourcePortIdentity;    
     }
