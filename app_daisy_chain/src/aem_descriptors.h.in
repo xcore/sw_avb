@@ -317,31 +317,27 @@ unsigned char desc_external_output_port_0[] =
   U16(0)                                      /* jack_id */
 };
 
-/* Control Desciptors */
+/* Control Descriptors */
 
 /* Identify */
 unsigned char desc_control_identify[] =
 {
   U16(AEM_CONTROL_TYPE),                      /* 0-1 descriptor_type */
-#ifdef DESCRIPTOR_INDEX_CONTROL_IDENTIFY
-  U16(DESCRIPTOR_INDEX_CONTROL_IDENTIFY),     /* 2-3 descriptor_id */
-#else
-  U16(0),
-#endif
-  U64(AEM_CONTROL_TYPE_IDENTIFY),             /* 4-11 control_type */
-  U16(AEM_ENTITY_TYPE),                       /* 12-13 control_location_type */
-  U16(0),                                     /* 14-15 control_location_id */
-  U16(AEM_CONTROL_LINEAR_UINT8),              /* 16-17 control_value_type */
-  U16(0),                                     /* 18-19 control_domain */
-  "Identify",                                 /* 20-83 control_name */
-  U16(9),                                     /* 84-85 control_name_string */
-  U16(102),                                   /* 86-87 values_offset */
-  U16(1),                                     /* 88-89 number_of_values */
-  U16(0),                                     /* 90-91 signal_type */
-  U16(0),                                     /* 92-93 signal_id */
-  U32(0),                                     /* 94-97 block_latency */
-  U32(0),                                     /* 98-101 control_latency */
-  /* 102-> value_details */
+  U16(DESCRIPTOR_INDEX_CONTROL_IDENTIFY),     /* 2-3 descriptor_id */ 
+  "Identify LED Control",                     /* object_name */
+  U16(AEM_NO_STRING),                         /* localized_description */
+  U32(0),                                     /* block_latency */
+  U32(0),                                     /* control_latency */
+  U16(0),                                     /* control_domain */
+  U16(AEM_CONTROL_LINEAR_UINT8),              /* control_value_type */
+  U64(AEM_CONTROL_TYPE_IDENTIFY),             /* control_type */
+  U32(0),                                     /* reset_time */
+  U16(104),                                   /* values_offset */
+  U16(1),                                     /* number_of_values */
+  U16(0),                                     /* signal_type */
+  U16(0),                                     /* signal_index */
+  U16(0),                                     /* signal_output */
+  /* 104-> value_details */
   0,                                          /* minimum_value[0] */
   255,                                        /* maximum_value[0] */
   255,                                        /* step[0] */
@@ -350,64 +346,6 @@ unsigned char desc_control_identify[] =
   U16(AEM_CONTROL_UNITS_UNITLESS),            /* unit[0] */
   U16(AEM_NO_STRING)                            /* string[0] */
 };
-
-#if 0
-/* Mute */
-unsigned char desc_control_mute[] =
-{
-  U16(AEM_CONTROL_TYPE),                      /* 0-1 descriptor_type */
-  U16(0),                                     /* 2-3 descriptor_id */
-  U64(AEM_CONTROL_TYPE_MUTE),                 /* 4-11 control_type */
-  U16(AEM_EXTERNAL_PORT_OUTPUT_TYPE),         /* 12-13 control_location_type */
-  U16(0),                                     /* 14-15 control_location_id */
-  U16(AEM_CONTROL_LINEAR_UINT8),              /* 16-17 control_value_type */
-  U16(0),                                     /* 18-19 control_domain */
-  "Mute",                                     /* 20-83 control_name */
-  U16(AEM_NO_STRING),                        /* 84-85 control_name_string */
-  U16(102),                                   /* 86-87 values_offset */
-  U16(1),                                     /* 88-89 number_of_values */
-  U16(0),                                     /* 90-91 signal_type */
-  U16(0),                                     /* 92-93 signal_id */
-  U32(0),                                     /* 94-97 block_latency */
-  U32(0),                                     /* 98-101 control_latency */
-  /* 102-> value_details */
-  0,                                          /* minimum_value[0] */
-  255,                                        /* maximum_value[0] */
-  255,                                        /* step[0] */
-  0,                                          /* default_value[0] */
-  0,                                          /* current_value[0] */
-  U16(AEM_CONTROL_UNITS_UNITLESS),            /* unit[0] */
-  U16(AEM_NO_STRING)                            /* string[0] */
-};
-
-/* Volume */
-unsigned char desc_control_volume[] =
-{
-  U16(AEM_CONTROL_TYPE),                      /* 0-1 descriptor_type */
-  U16(1),                                     /* 2-3 descriptor_id */
-  U64(AEM_CONTROL_TYPE_VOLUME),               /* 4-11 control_type */
-  U16(AEM_EXTERNAL_PORT_OUTPUT_TYPE),         /* 12-13 control_location_type */
-  U16(0),                                     /* 14-15 control_location_id */
-  U16(AEM_CONTROL_LINEAR_UINT32),             /* 16-17 control_value_type */
-  U16(0),                                     /* 18-19 control_domain */
-  "Volume",                                   /* 20-83 control_name */
-  U16(AEM_NO_STRING),                         /* 84-85 control_name_string */
-  U16(102),                                   /* 86-87 values_offset */
-  U16(1),                                     /* 88-89 number_of_values */
-  U16(0),                                     /* 90-91 signal_type */
-  U16(0),                                     /* 92-93 signal_id */
-  U32(0),                                     /* 94-97 block_latency */
-  U32(0),                                     /* 98-101 control_latency */
-  /* 102-> value_details */
-  U32(0),                                     /* minimum_value[0] */
-  U32(0),                                     /* maximum_value[0] */
-  U32(0),                                     /* step[0] */
-  U32(0),                                     /* default_value[0] */
-  U32(0),                                     /* current_value[0] */
-  U16(AEM_CONTROL_UNITS_UNITLESS),            /* unit[0] */
-  U16(AEM_NO_STRING)                            /* string[0] */
-};
-#endif
 
 
 /* Stream Descriptors */

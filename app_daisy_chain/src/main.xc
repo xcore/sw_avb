@@ -360,40 +360,20 @@ void application_task(client interface avb_interface avb, server interface avb_1
 
         if (control_type == AEM_CONTROL_TYPE)
         {
-          if (control_index == DESCRIPTOR_INDEX_CONTROL_IDENTIFY) {
-            if (values_length == 1) {
-              aem_identify_control_value = values[0];
-              p_leds <: aem_identify_control_value;
-              return_status = AECP_AEM_STATUS_SUCCESS;
-            }
-            else
-            {
-              return_status = AECP_AEM_STATUS_BAD_ARGUMENTS;
-            }
-          }
-
-        
-          #if 0
-          switch (control_index)
-          {
-            case DESCRIPTOR_INDEX_CONTROL_IDENTIFY:
-            {
-              /*
-              if (values_length == 1)
-              {
-                // aem_identify_control_value = values[0];
-                printintln(aem_identify_control_value);
+          switch (control_index) {
+            case DESCRIPTOR_INDEX_CONTROL_IDENTIFY: {
+              if (values_length == 1) {
+                aem_identify_control_value = values[0];
+                p_leds <: aem_identify_control_value;
                 return_status = AECP_AEM_STATUS_SUCCESS;
               }
               else
               {
                 return_status = AECP_AEM_STATUS_BAD_ARGUMENTS;
               }
-              */
               break;
             }
           }
-          #endif
           
         }
         
