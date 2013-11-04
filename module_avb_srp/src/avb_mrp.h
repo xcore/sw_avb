@@ -22,7 +22,7 @@
  *  the correct traffic.
  */
 
-#define MRP_NUM_PORTS (2)
+#define MRP_NUM_PORTS (NUM_ETHERNET_MASTER_PORTS)
 
 
 #ifndef MRP_MAX_ATTRS
