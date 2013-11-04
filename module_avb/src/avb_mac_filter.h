@@ -77,6 +77,7 @@ inline int mac_custom_filter(unsigned int buf[], unsigned int mac[2], int &user_
             id0 = (buf[6] << 16 | buf[4]>>16);
             id1 = buf[5];
           }
+#pragma xta endpoint "hp_1722_lookup"
           lookup = 
             avb_1722_router_table_lookup(id0,
                                          id1,
