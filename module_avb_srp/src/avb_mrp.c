@@ -9,7 +9,6 @@
 #include "avb_srp_pdu.h"
 #include "misc_timer.h"
 #include "ethernet_tx_client.h"
-#include "avb_internal.h"
 #include <string.h>
 #include <print.h>
 #include "simple_printf.h"

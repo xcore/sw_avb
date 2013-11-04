@@ -8,9 +8,7 @@
 #include "avb_stream.h"
 #include "avb_1722_talker.h"
 #include <print.h>
-#include "avb_stream_detect.h"
 #include "avb_control_types.h"
-#include "avb_internal.h"
 #include "stdlib.h"
 #include "simple_printf.h"
 #include "avb_1722_router.h"

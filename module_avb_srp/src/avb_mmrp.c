@@ -4,7 +4,6 @@
 #include "avb_mrp_pdu.h"
 #include "avb_mmrp_pdu.h"
 #include <xccompat.h>
-#include "avb_internal.h"
 
 #ifdef AVB_INCLUDE_MMRP
 

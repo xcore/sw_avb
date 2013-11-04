@@ -28,11 +28,6 @@
 
 //#define AVB_TRANSMIT_BEFORE_RESERVATION 1
 
-// Warning: The XC spec makes no assertions that a null chanend is numerically zero. There is
-//          no isnull function in C, so this makes up that deficiency, but it may need modifying
-//          if XC starts using some other value to mean a null
-// #define isnull(A) (A == 0)
-
 #define UNMAPPED (-1)
 #define AVB_CHANNEL_UNMAPPED (-1)
 
@@ -1016,4 +1011,37 @@ unsigned avb_get_sink_stream_index_from_pointer(avb_sink_info_t *unsafe p)
 		if (p == &sinks[i]) return i;
 	}
 	return -1u;
+}
+
+void avb_get_control_packet(chanend c_rx, 
+                            unsigned int buf[],
+                            unsigned int &nbytes,
+                            unsigned int &port_num)
+{
+  safe_mac_rx(c_rx, 
+              (buf, unsigned char[]), 
+              nbytes,
+              port_num,                       
+              MAX_AVB_CONTROL_PACKET_SIZE);
+}
+
+int avb_register_listener_streams(chanend listener_ctl,
+                                   int num_streams)
+{
+  int core_id;
+  int link_id;
+  core_id = get_local_tile_id();
+  listener_ctl <: core_id;
+  listener_ctl <: num_streams;
+  listener_ctl :> link_id;
+  return link_id;
+}
+
+void avb_register_talker_streams(chanend talker_ctl,
+                                 int num_streams)
+{
+  int core_id;
+  core_id = get_local_tile_id();
+  talker_ctl <: core_id;
+  talker_ctl <: num_streams;
 }

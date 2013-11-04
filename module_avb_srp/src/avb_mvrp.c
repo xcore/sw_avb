@@ -4,7 +4,6 @@
 #include "avb_mrp_pdu.h"
 #include "avb_mvrp_pdu.h"
 #include <xccompat.h>
-#include "avb_internal.h"
 #include "print.h"
 
 #ifndef AVB_EXCLUDE_MVRP
