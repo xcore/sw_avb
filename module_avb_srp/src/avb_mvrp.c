@@ -23,9 +23,10 @@ void avb_mvrp_init(void)
 {
   for (int j=0;j<MRP_NUM_PORTS;j++) {
     for (int i=0;i<AVB_MAX_NUM_VLAN;i++) {
-      entries[(i*AVB_MAX_NUM_VLAN)+j].active = 0;
-      entries[(i*AVB_MAX_NUM_VLAN)+j].attr = mrp_get_attr();
-      mrp_attribute_init(entries[i*AVB_MAX_NUM_VLAN+j].attr, MVRP_VID_VECTOR, j, 1, &entries[i*AVB_MAX_NUM_VLAN+j].vlan);
+      const int idx = j*AVB_MAX_NUM_VLAN+i;
+      entries[idx].active = 0;
+      entries[idx].attr = mrp_get_attr();
+      mrp_attribute_init(entries[idx].attr, MVRP_VID_VECTOR, j, 1, &entries[idx].vlan);
     }
   }
 }
