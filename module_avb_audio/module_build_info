@@ -11,5 +11,3 @@
 
 
 MODULE_XCC_FLAGS = $(XCC_FLAGS) -g -O2
-
-XCC_FLAGS_media_output_fifo.c = $(XCC_FLAGS) -g 
