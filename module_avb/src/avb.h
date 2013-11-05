@@ -6,6 +6,7 @@
 #include "avb_api.h"
 #include "avb_srp_interface.h"
 #include "avb_1722_1_callbacks.h"
+#include "spi.h"
 
 
 #ifndef MAX_AVB_CONTROL_PACKET_SIZE
@@ -91,10 +92,11 @@ void avb_manager(server interface avb_interface i_avb[num_avb_clients], unsigned
                  chanend c_ptp);
 
 void avb_process_1722_control_packet(unsigned int buf0[],
-                                    int nbytes,
+                                    unsigned nbytes,
                                     chanend c_tx,
                                     client interface avb_interface i_avb,
-                                    client interface avb_1722_1_control_callbacks i_1722_1_entity);
+                                    client interface avb_1722_1_control_callbacks i_1722_1_entity,
+                                    client interface spi_interface i_spi);
 #endif
 
 /** Receives an 802.1Qat SRP packet or an IEEE P1722 MAAP packet.
@@ -117,7 +119,6 @@ void avb_get_control_packet(chanend c_rx,
                             REFERENCE_PARAM(unsigned int, nbytes),
                             REFERENCE_PARAM(unsigned int, port_num));
 
-
 /** Process an AVB control packet.
 
    This function processes an ethernet packet and if it is a 802.1Qat or
@@ -134,7 +135,7 @@ void avb_get_control_packet(chanend c_rx,
  **/
 #ifdef __XC__
 void avb_process_control_packet(client interface avb_interface i_avb,
-                               unsigned int buf[], int len,
+                               unsigned int buf[], unsigned len,
                                chanend c_tx,
                                unsigned int port_num);
 #endif

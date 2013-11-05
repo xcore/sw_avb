@@ -13,6 +13,7 @@
 #include "avb_1722_1_aecp_pdu.h"
 #include "avb_1722_1_callbacks.h"
 #include "otp_board_info.h"
+#include "spi.h"
 
 typedef union {
     avb_1722_1_adp_packet_t adp;
@@ -42,10 +43,10 @@ void avb_1722_1_periodic(chanend c_tx, chanend c_ptp, client interface avb_inter
 void avb_1722_1_task(otp_ports_t &ports,
                      client interface avb_interface i_avb,
                      client interface avb_1722_1_control_callbacks i_1722_1_entity,
+                     client interface spi_interface i_spi,
                      chanend c_mac_rx,
                      chanend c_mac_tx,
                      chanend c_ptp);
-#endif
 
 /** Process a received 1722.1 packet
  *
@@ -54,17 +55,13 @@ void avb_1722_1_task(otp_ports_t &ports,
  *  \param  len         the number of bytes in the buf array
 *   \param  c_tx        a transmit chanend to the Ethernet server
  */
-#ifdef __XC__
-extern "C" {
-#endif
-void avb_1722_1_process_packet(unsigned char *buf,
+void avb_1722_1_process_packet(unsigned char buf[len],
+                                unsigned len,
                                 unsigned char src_addr[6],
-                                int len,
                                 chanend c_tx,
                                 CLIENT_INTERFACE(avb_interface, i_avb_api),
-                                CLIENT_INTERFACE(avb_1722_1_control_callbacks, i_1722_1_entity));
-#ifdef __XC__
-}
+                                CLIENT_INTERFACE(avb_1722_1_control_callbacks, i_1722_1_entity),
+                                CLIENT_INTERFACE(spi_interface, i_spi));
 #endif
 
 #endif

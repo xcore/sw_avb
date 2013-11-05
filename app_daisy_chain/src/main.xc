@@ -97,18 +97,7 @@ media_input_fifo_t ififos[AVB_NUM_MEDIA_INPUTS];
   #define ififos null
 #endif
 
-// Saves a bunch of memory
-void __libc_done() {}
-void _exit_unlocked() {}
-
 [[combinable]] void application_task(client interface avb_interface avb, server interface avb_1722_1_control_callbacks i_1722_1_entity);
-
-void xscope_user_init(void)
-{
-  xscope_register(1, XSCOPE_CONTINUOUS, "", XSCOPE_INT, "");
-  // Enable XScope printing
-  xscope_config_io(XSCOPE_IO_BASIC);
-}
 
 [[distributable]] void audio_hardware_setup(void)
 {
@@ -197,6 +186,7 @@ int main(void)
   interface avb_interface i_avb[NUM_AVB_MANAGER_CHANS];
   interface srp_interface i_srp;
   interface avb_1722_1_control_callbacks i_1722_1_entity;
+  interface spi_interface i_spi;
 
   par
   {
@@ -283,9 +273,11 @@ int main(void)
     on tile[0].core[0]: avb_1722_1_task(otp_ports0,
                                         i_avb[AVB_MANAGER_TO_1722_1],
                                         i_1722_1_entity,
+                                        i_spi,
                                         c_mac_rx[MAC_RX_TO_1722_1],
                                         c_mac_tx[MAC_TX_TO_1722_1],
                                         c_ptp[PTP_TO_1722_1]);
+    on tile[0].core[0]: spi_task(i_spi);
 
     on tile[0]: ptp_output_test_clock(c_ptp[PTP_TO_TEST_CLOCK],
                                       ptp_sync_port, 100000000);

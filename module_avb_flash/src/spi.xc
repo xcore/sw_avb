@@ -11,15 +11,15 @@ on tile[0]: buffered out port:8 spiMOSI = PORT_SPI_MOSI;
 
 on tile[0]: clock SPIclock = XS1_CLKBLK_1;
 
-void spi_init() {
-    spiSS <: ~0;
-    spiCLK <: ~0;
+static void spi_init() {
+  spiSS <: ~0;
+  spiCLK <: ~0;
 
-    configure_clock_src(SPIclock, spiCLK);
-    start_clock(SPIclock);
+  configure_clock_src(SPIclock, spiCLK);
+  start_clock(SPIclock);
 
-    configure_out_port(spiMOSI, SPIclock, 0);
-    configure_in_port(spiMISO, SPIclock);
+  configure_out_port(spiMOSI, SPIclock, 0);
+  configure_in_port(spiMISO, SPIclock);
 }
 
 #if (SPI_CLK_MHZ == 25)
@@ -31,45 +31,58 @@ void spi_init() {
 #endif
 
 static void spi_cmd(int cmd) {
-    spiSS <: 0;
-    clearbuf(spiMOSI);
-    spiMOSI <: bitrev(cmd<<24);
-    eightPulses(spiCLK);
-    sync(spiCLK);
+  spiSS <: 0;
+  clearbuf(spiMOSI);
+  spiMOSI <: bitrev(cmd<<24);
+  eightPulses(spiCLK);
+  sync(spiCLK);
 }
 
-int spi_command_status(int cmd, int returnBytes) {
-    int data = 0;
-    spi_cmd(cmd);
-    clearbuf(spiMISO);
-    while(returnBytes--) {
-        eightPulses(spiCLK);
-        spiMISO :> >> data;
-    }
-    spiSS <: 1;
-    return bitrev(data);
+static int spi_command_status(int cmd, unsigned returnBytes) {
+  int data = 0;
+  spi_cmd(cmd);
+  clearbuf(spiMISO);
+  while(returnBytes--) {
+    eightPulses(spiCLK);
+    spiMISO :> >> data;
+  }
+  spiSS <: 1;
+  return bitrev(data);
 }
 
-void spi_command_address_status(int cmd, unsigned int addr, unsigned char data[], int returnBytes) {
-    spi_cmd(cmd);
-    addr = bitrev(addr << 8);
-    spiMOSI <: >> addr;
-    eightPulses(spiCLK);
-    spiMOSI <: >> addr;
-    eightPulses(spiCLK);
-    spiMOSI <: >> addr;
-    eightPulses(spiCLK);
-    for(int i = 0; i < -returnBytes; i++) {
-        spiMOSI <: bitrev(data[i]<<24);
+[[combinable]] 
+void spi_task(server interface spi_interface i_spi) {
+
+  spi_init();
+
+  while (1) {
+    select {
+      case i_spi.command_status(int cmd, unsigned returnBytes) -> int read_bytes:
+        read_bytes = spi_command_status(cmd, returnBytes);
+        break;
+      case i_spi.command_address_status(int cmd, unsigned int addr, unsigned char data[returnBytes], unsigned returnBytes):
+        spi_cmd(cmd);
+        addr = bitrev(addr << 8);
+        spiMOSI <: >> addr;
         eightPulses(spiCLK);
-    }
-    sync(spiCLK);
-    clearbuf(spiMISO);
-    for(int i = 0; i < returnBytes; i++) {
-        int x;
+        spiMOSI <: >> addr;
         eightPulses(spiCLK);
-        spiMISO :> x;
-        data[i] = bitrev(x<<24);
+        spiMOSI <: >> addr;
+        eightPulses(spiCLK);
+        for (int i = 0; i < -returnBytes; i++) {
+          spiMOSI <: bitrev(data[i]<<24);
+          eightPulses(spiCLK);
+        }
+        sync(spiCLK);
+        clearbuf(spiMISO);
+        for (int i = 0; i < returnBytes; i++) {
+          int x;
+          eightPulses(spiCLK);
+          spiMISO :> x;
+          data[i] = bitrev(x<<24);
+        }
+        spiSS <: 1;
+        break;
     }
-    spiSS <: 1;
+  }
 }

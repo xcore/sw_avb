@@ -590,7 +590,7 @@ void avb_manager(server interface avb_interface avb[num_avb_clients], unsigned n
         else return_val = 0;
         break;
       }
-      case avb[int i].set_source_dest(unsigned source_num, unsigned char addr[], int len) -> int return_val: {
+      case avb[int i].set_source_dest(unsigned source_num, unsigned char addr[len], unsigned len) -> int return_val: {
         if (source_num < AVB_NUM_SOURCES && sources[source_num].stream.state == AVB_SOURCE_STATE_DISABLED &&
           len == 6) {
           avb_source_info_t *source = &sources[source_num];
@@ -867,10 +867,11 @@ void set_avb_source_volumes(unsigned sink_num, int volumes[], int count)
 
 
 void avb_process_1722_control_packet(unsigned int buf0[],
-                                     int nbytes,
+                                     unsigned nbytes,
                                      chanend c_tx,
                                      client interface avb_interface i_avb,
-                                     client interface avb_1722_1_control_callbacks i_1722_1_entity) {
+                                     client interface avb_1722_1_control_callbacks i_1722_1_entity,
+                                     client interface spi_interface i_spi) {
   if (nbytes == STATUS_PACKET_LEN) {
     #if 0
     if (((unsigned char *)buf0)[0]) { // Link up
@@ -900,14 +901,14 @@ void avb_process_1722_control_packet(unsigned int buf0[],
 
     switch (etype) {
       case AVB_1722_ETHERTYPE:
-        avb_1722_1_process_packet(&buf[eth_hdr_size], ethernet_hdr->src_addr, len, c_tx, i_avb, i_1722_1_entity);
+        avb_1722_1_process_packet(&buf[eth_hdr_size], len, ethernet_hdr->src_addr, c_tx, i_avb, i_1722_1_entity, i_spi);
         avb_1722_maap_process_packet(&buf[eth_hdr_size], len, ethernet_hdr->src_addr, c_tx);
         break;
     }
   }  
 }
 
-void avb_process_control_packet(client interface avb_interface avb, unsigned int buf0[], int nbytes, chanend c_tx, unsigned int port_num)
+void avb_process_control_packet(client interface avb_interface avb, unsigned int buf0[], unsigned nbytes, chanend c_tx, unsigned int port_num)
 {
   if (nbytes == STATUS_PACKET_LEN) {
     if (((unsigned char *)buf0)[0]) { // Link up

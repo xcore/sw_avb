@@ -38,16 +38,16 @@ static int fl_get_sector_at_or_after(unsigned address)
   return -1;
 }
 
-static int fl_get_next_boot_image(fl_boot_image_info* boot_image_info)
+static int fl_get_next_boot_image(client interface spi_interface i_spi, fl_boot_image_info* boot_image_info)
 {
-  unsigned tmpbuf[6];
+  unsigned tmpbuf[7];
   unsigned last_address = boot_image_info->startAddress+boot_image_info->size;
   unsigned sector_num = fl_get_sector_at_or_after(last_address);
   if (sector_num < 0)
     return 1;
   while (sector_num < NUM_SECTORS) {
     unsigned sector_address = fl_get_sector_address(sector_num);
-    spi_flash_read(sector_address, (unsigned char*)tmpbuf, 6 * sizeof(int));
+    spi_flash_read(i_spi, sector_address, (unsigned char*)tmpbuf, 6 * sizeof(int));
     if (sortbits(tmpbuf[0]) == IMAGE_TAG_13) {
       boot_image_info->startAddress = sector_address;
       boot_image_info->size         = sortbits(tmpbuf[IMAGE_LENGTH_OFFSET_13]);
@@ -60,12 +60,12 @@ static int fl_get_next_boot_image(fl_boot_image_info* boot_image_info)
   return 1;
 }
 
-static int get_factory_image(fl_boot_image_info* boot_image_info)
+static int get_factory_image(client interface spi_interface i_spi, fl_boot_image_info* boot_image_info)
 {
   unsigned tmpbuf[9];
-  spi_flash_read(0, (unsigned char*)tmpbuf, 4);
+  spi_flash_read(i_spi, 0, (unsigned char*)tmpbuf, 4);
   unsigned start_addr = (sortbits(tmpbuf[0])+2)<<2; /* Normal case. */
-  spi_flash_read(start_addr, (unsigned char*)tmpbuf, (6 + 3) * sizeof(int));
+  spi_flash_read(i_spi, start_addr, (unsigned char*)tmpbuf, (6 + 3) * sizeof(int));
   unsigned *header = tmpbuf;
   if (sortbits(tmpbuf[0]) != IMAGE_TAG_13) {
     return 1;
@@ -77,55 +77,55 @@ static int get_factory_image(fl_boot_image_info* boot_image_info)
   return 0;
 }
 
-static void write_and_update_address(unsigned char data[PAGE_SIZE]) {
+static void write_and_update_address(client interface spi_interface i_spi, unsigned char data[PAGE_SIZE]) {
     simple_printf("Wrote offset %d at %x \n", write_offset, write_address);
-    spi_flash_write_small(write_address, data, PAGE_SIZE);
+    spi_flash_write_small(i_spi, write_address, data, PAGE_SIZE);
     write_address += PAGE_SIZE;
     write_offset += PAGE_SIZE;
 }
 
-static void erase_sectors(unsigned int image_size) {
+static void erase_sectors(client interface spi_interface i_spi, unsigned int image_size) {
     unsigned int sector_address = write_address;
     do {
-      spi_flash_erase(sector_address, SECTOR_SIZE);
+      spi_flash_erase(i_spi, sector_address, SECTOR_SIZE);
       simple_printf("Erased sector %x\n", sector_address);
       sector_address += SECTOR_SIZE;
     } while(sector_address < write_address + image_size);
 }
 
-int avb_write_upgrade_image_page(int address, unsigned char data[PAGE_SIZE]) {
+int avb_write_upgrade_image_page(client interface spi_interface i_spi, int address, unsigned char data[PAGE_SIZE]) {
   fl_boot_image_info image;
 
   if (address == 0) {
     write_address = 0;
     write_offset = 0;
-    if (get_factory_image(&image) != 0) {
+    if (get_factory_image(i_spi, &image) != 0) {
       printstrln("No factory image!");
       return 1;
     } else {
-      if (fl_get_next_boot_image(&image) != 0) {
+      if (fl_get_next_boot_image(i_spi, &image) != 0) {
         // No upgrade image exists, add one
         printstrln("No upgrade");
         unsigned sectorNum = fl_get_sector_at_or_after(image.startAddress + image.size);
         write_address = fl_get_sector_address(sectorNum);
 
-        erase_sectors(MAX_UPGRADE_IMAGE_SIZE);
+        erase_sectors(i_spi, MAX_UPGRADE_IMAGE_SIZE);
 
-        write_and_update_address(data);
+        write_and_update_address(i_spi, data);
       }
       else {
         // Replace the upgrade image
         printstrln("Upgrade exists");
         write_address = image.startAddress;
 
-        erase_sectors(image.size);
+        erase_sectors(i_spi, image.size);
 
-        write_and_update_address(data);
+        write_and_update_address(i_spi, data);
       }
     }
   }
   else if (address == write_offset) {
-    write_and_update_address(data);
+    write_and_update_address(i_spi, data);
   }
 
   return 0;

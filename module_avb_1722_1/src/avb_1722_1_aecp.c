@@ -764,6 +764,7 @@ static void process_avb_1722_1_aecp_address_access_cmd(avb_1722_1_aecp_packet_t 
                                             unsigned char src_addr[6],
                                             int message_type,
                                             int num_pkt_bytes,
+                                            CLIENT_INTERFACE(spi_inteface, i_spi),
                                             chanend c_tx)
 {
   avb_1722_1_aecp_address_access_t *aa_cmd = &(pkt->data.address);
@@ -780,7 +781,7 @@ static void process_avb_1722_1_aecp_address_access_cmd(avb_1722_1_aecp_packet_t 
   }
   else {
     long long address = ntoh_32(&aa_cmd->address[4]);
-    if (avb_write_upgrade_image_page(address, aa_cmd->data) != 0) {
+    if (avb_write_upgrade_image_page(i_spi, address, aa_cmd->data) != 0) {
       status = AECP_AA_STATUS_ADDRESS_INVALID;
     }
     cd_len = num_pkt_bytes;
@@ -811,7 +812,8 @@ void process_avb_1722_1_aecp_packet(unsigned char src_addr[6],
                                     int num_pkt_bytes,
                                     chanend c_tx,
                                     CLIENT_INTERFACE(avb_interface, i_avb),
-                                    CLIENT_INTERFACE(avb_1722_1_control_callbacks, i_1722_1_entity))
+                                    CLIENT_INTERFACE(avb_1722_1_control_callbacks, i_1722_1_entity),
+                                    CLIENT_INTERFACE(spi_inteface, i_spi))
 {
   int message_type = GET_1722_1_MSG_TYPE(((avb_1722_1_packet_header_t*)pkt));
 
@@ -827,7 +829,7 @@ void process_avb_1722_1_aecp_packet(unsigned char src_addr[6],
     }
     case AECP_CMD_ADDRESS_ACCESS_COMMAND:
     {
-      process_avb_1722_1_aecp_address_access_cmd(pkt, src_addr, message_type, num_pkt_bytes, c_tx);
+      process_avb_1722_1_aecp_address_access_cmd(pkt, src_addr, message_type, num_pkt_bytes, i_spi, c_tx);
       break;
     }
     case AECP_CMD_AVC_COMMAND:

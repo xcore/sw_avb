@@ -66,7 +66,7 @@ interface avb_interface {
  *  \param len          the length of the address, should always be equal to 6
  *
  **/
-  int set_source_dest(unsigned source_num, unsigned char addr[], int len);
+  int set_source_dest(unsigned source_num, unsigned char addr[len], unsigned len);
 
 /** Get the destination address of an avb source.
  *  \param source_num   the local source number
