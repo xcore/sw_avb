@@ -1304,12 +1304,8 @@ static int match_attribute_of_same_type(mrp_attribute_type attr_type,
               int four_packed_event,
               unsigned int port_num)
 {
-  /*
   if (attr->applicant_state == MRP_UNUSED ||
       attr->applicant_state == MRP_DISABLED)
-    return 0;
-  */
-  if (attr->applicant_state == MRP_UNUSED)
     return 0;
 
   if (attr->port_num != port_num)
@@ -1422,24 +1418,26 @@ void avb_mrp_process_packet(unsigned char *buf, int etype, int len, unsigned int
           }
         }
 
-        if (!matched_attribute && !leave_all)
-        {
-            if (attr_type == MSRP_TALKER_ADVERTISE ||
-                attr_type == MSRP_TALKER_FAILED ||
-                attr_type == MSRP_LISTENER)
-            {
-              if (three_packed_event != MRP_ATTRIBUTE_EVENT_MT)
+        if (MRP_NUM_PORTS == 2) {
+          if (!matched_attribute && !leave_all)
+          {
+              if (attr_type == MSRP_TALKER_ADVERTISE ||
+                  attr_type == MSRP_TALKER_FAILED ||
+                  attr_type == MSRP_LISTENER)
               {
-                mrp_attribute_state *st = avb_srp_process_new_attribute_from_packet(attr_type, first_value, i, port_num);
-                if (st) {
-                  mrp_mad_begin(st);
+                if (three_packed_event != MRP_ATTRIBUTE_EVENT_MT)
+                {
+                  mrp_attribute_state *st = avb_srp_process_new_attribute_from_packet(attr_type, first_value, i, port_num);
+                  if (st) {
+                    mrp_mad_begin(st);
 
-                  mrp_debug_dump_attrs();
+                    mrp_debug_dump_attrs();
 
-                  mrp_in(three_packed_event, four_packed_event, st, port_num);
+                    mrp_in(three_packed_event, four_packed_event, st, port_num);
+                  }
                 }
               }
-            }
+          }
         }
 
       }

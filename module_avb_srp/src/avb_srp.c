@@ -385,7 +385,9 @@ void avb_srp_listener_join_ind(CLIENT_INTERFACE(avb_interface, avb), mrp_attribu
   avb_sink_info_t *sink_info = (avb_sink_info_t *) attr->attribute_info;
   unsigned stream = avb_get_source_stream_index_from_stream_id(sink_info->reservation.stream_id);
 
-  avb_srp_map_join(attr, new, 1);
+  if (MRP_NUM_PORTS == 2) {
+    avb_srp_map_join(attr, new, 1);
+  }
 
   if (stream != -1u) {
 
@@ -429,7 +431,9 @@ void avb_srp_listener_leave_ind(CLIENT_INTERFACE(avb_interface, avb), mrp_attrib
 
   int entry = srp_match_reservation_entry_by_id(sink_info->reservation.stream_id);
 
-  avb_srp_map_leave(attr);
+  if (MRP_NUM_PORTS == 2) {
+    avb_srp_map_leave(attr);
+  }
 
   if (stream != -1u)
   {
@@ -614,37 +618,41 @@ mrp_attribute_state* avb_srp_process_new_attribute_from_packet(int mrp_attribute
 
 void avb_srp_talker_join_ind(mrp_attribute_state *attr, int new)
 {
-  avb_sink_info_t *sink_info = (avb_sink_info_t *) attr->attribute_info;
-  unsigned stream = avb_get_sink_stream_index_from_stream_id(sink_info->reservation.stream_id);
-  mrp_attribute_state *matched_listener_this_port = mrp_match_attribute_pair_by_stream_id(attr, 0, 1);
+  if (MRP_NUM_PORTS == 2) {
+    avb_sink_info_t *sink_info = (avb_sink_info_t *) attr->attribute_info;
+    unsigned stream = avb_get_sink_stream_index_from_stream_id(sink_info->reservation.stream_id);
+    mrp_attribute_state *matched_listener_this_port = mrp_match_attribute_pair_by_stream_id(attr, 0, 1);
 
-  /* This covers the case where the Listener joins before the Talker attribute. When we receive the Talker join new, 
-   * we also trigger join for the Listener attribute on the same port if it already exists. 
-   * We also need to mark the disabled Listener attr we created on the other port as unused 
-   */
-  if (stream != -1u && matched_listener_this_port)
-  {
-    mrp_attribute_state *matched_listener_opposite_port = mrp_match_attribute_pair_by_stream_id(attr, 1, 1);
-    if (matched_listener_opposite_port) {
-      mrp_change_applicant_state(matched_listener_opposite_port, MRP_EVENT_DUMMY, MRP_UNUSED);
+    /* This covers the case where the Listener joins before the Talker attribute. When we receive the Talker join new, 
+     * we also trigger join for the Listener attribute on the same port if it already exists. 
+     * We also need to mark the disabled Listener attr we created on the other port as unused 
+     */
+    if (stream != -1u && matched_listener_this_port)
+    {
+      mrp_attribute_state *matched_listener_opposite_port = mrp_match_attribute_pair_by_stream_id(attr, 1, 1);
+      if (matched_listener_opposite_port) {
+        mrp_change_applicant_state(matched_listener_opposite_port, MRP_EVENT_DUMMY, MRP_UNUSED);
+      }
+
+      mrp_mad_begin(matched_listener_this_port);
+      mrp_mad_join(matched_listener_this_port, 1);
     }
 
-    mrp_mad_begin(matched_listener_this_port);
-    mrp_mad_join(matched_listener_this_port, 1);
+    avb_srp_map_join(attr, new, 0);
   }
-
-  avb_srp_map_join(attr, new, 0);
 }
 
 void avb_srp_talker_leave_ind(mrp_attribute_state *attr)
 {
-  unsigned stream = avb_get_sink_stream_index_from_pointer(attr->attribute_info);
-  if (stream != -1u) {
-    // This could be used to report talker advertising instead of the snooping scheme above
-  }
-  else
-  {
-    avb_srp_map_leave(attr);
+  if (MRP_NUM_PORTS == 2) {
+    unsigned stream = avb_get_sink_stream_index_from_pointer(attr->attribute_info);
+    if (stream != -1u) {
+      // This could be used to report talker advertising instead of the snooping scheme above
+    }
+    else
+    {
+      avb_srp_map_leave(attr);
+    }
   }
 }
 
