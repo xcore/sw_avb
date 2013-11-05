@@ -33,10 +33,6 @@ void avb_srp_task(client interface avb_interface i_avb,
 
   srp_domain_init();
 
-  #ifdef AVB_INCLUDE_MMRP
-  avb_mmrp_init();
-#endif
-
 #ifndef AVB_EXCLUDE_MVRP
   avb_mvrp_init();
 #endif

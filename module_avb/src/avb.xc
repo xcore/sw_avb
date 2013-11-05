@@ -1,7 +1,6 @@
 #include "avb.h"
 #include <xccompat.h>
 #include "avb_srp.h"
-#include "avb_mmrp.h"
 #include "avb_mvrp.h"
 #include "avb_mrp.h"
 #include "avb_stream.h"
@@ -242,12 +241,6 @@ static void set_sink_state0(unsigned sink_num,
       }
   #endif
 
-  #ifdef AVB_INCLUDE_MMRP
-      if (sink->addr[0] & 1) {
-        avb_join_multicast_group(sink->addr);
-      }
-  #endif
-
         i_srp.register_attach_request(sink->reservation.stream_id);
 
     }
@@ -262,12 +255,6 @@ static void set_sink_state0(unsigned sink_num,
       i_srp.deregister_attach_request(sink->reservation.stream_id);
 
       avb_1722_remove_stream_mapping(c_mac_tx, sink->reservation.stream_id);
-
-  #ifdef AVB_INCLUDE_MMRP
-      if (sink->addr[0] & 1) {
-        avb_leave_multicast_group(sink->addr);
-      }
-  #endif
 
   #ifndef AVB_EXCLUDE_MVRP
       if (sink->reservation.vlan_id) {
@@ -946,8 +933,6 @@ void avb_process_control_packet(client interface avb_interface avb, unsigned int
     switch (etype) {
       /* fallthrough intended */
       case AVB_SRP_ETHERTYPE:
-      // TODO: #define around MMRP, disabled by default
-      case AVB_MMRP_ETHERTYPE:
       case AVB_MVRP_ETHERTYPE:
         avb_mrp_process_packet(&buf[eth_hdr_size], etype, len, port_num);
         break;

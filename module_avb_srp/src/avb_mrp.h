@@ -4,7 +4,7 @@
 #include "avb_api.h"
 #include "avb_conf.h"
 #include "xc2compat.h"
-
+#include "avb_mmrp_pdu.h"
 #include "avb_mrp_types.h"
 #include "avb_stream.h"
 

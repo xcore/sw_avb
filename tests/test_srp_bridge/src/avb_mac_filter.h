@@ -2,7 +2,6 @@
 #define _mac_custom_filter_h_
 #include "avb_conf.h"
 #include "avb_srp.h"
-#include "avb_mmrp.h"
 #include "avb_mvrp.h"
 #include "avb_1722_common.h"
 #include "avb_1722_router_table.h"
@@ -33,7 +32,6 @@ inline int mac_custom_filter(unsigned int buf[], unsigned int mac[2], int &user_
 
   switch (etype) {
     case HTONS(AVB_SRP_ETHERTYPE):
-    case HTONS(AVB_MMRP_ETHERTYPE):
     case HTONS(AVB_MVRP_ETHERTYPE):
       result = MAC_FILTER_AVB_CONTROL;
       break;
