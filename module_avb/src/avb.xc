@@ -162,29 +162,6 @@ void avb_init(chanend c_media_ctl[],
   }
 }
 
-#if 0
-void avb_init_srp_only(chanend c_mac_rx0,
-                       chanend c_mac_tx0)
-{
-  mac_get_macaddr(c_mac_tx0, mac_addr);
-  mrp_init((char *)mac_addr);
-
-  c_mac_rx = c_mac_rx0;
-  c_mac_tx = c_mac_tx0;
-
-  for(int i=0; i < MRP_NUM_PORTS; i++)
-  {
-    domain_attr[i] = mrp_get_attr();
-    mrp_attribute_init(domain_attr[i], MSRP_DOMAIN_VECTOR, i, 1, NULL);
-  }
-
-  mac_set_custom_filter(c_mac_rx, MAC_FILTER_AVB_CONTROL);
-  mac_request_status_packets(c_mac_rx);
-}
-#endif
-
-#define timeafter(A, B) ((int)((B) - (A)) < 0)
-
 static void set_sink_state0(unsigned sink_num,
                             enum avb_sink_state_t state,
                             chanend c_mac_tx,
