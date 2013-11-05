@@ -50,7 +50,7 @@ static int spi_command_status(int cmd, unsigned returnBytes) {
   return bitrev(data);
 }
 
-[[combinable]] 
+[[distributable]] 
 void spi_task(server interface spi_interface i_spi) {
 
   spi_init();

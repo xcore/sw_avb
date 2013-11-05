@@ -63,7 +63,7 @@ interface spi_interface {
     void command_address_status(int cmd, unsigned int address, unsigned char data[returnBytes], unsigned returnBytes);
 };
 
-[[combinable]]
+[[distributable]]
 void spi_task(server interface spi_interface i_spi);
 #endif
 
