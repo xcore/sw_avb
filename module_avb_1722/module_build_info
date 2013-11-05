@@ -13,7 +13,3 @@
 MODULE_XCC_C_FLAGS = $(XCC_FLAGS)
 
 XCC_FLAGS_avb_1722_listener.xc = $(XCC_FLAGS) -fsubword-select
-
-XCC_FLAGS_avb_1722_router_support.c = $(XCC_FLAGS) -g
-
-XCC_FLAGS_avb_1722_talker_support.c = $(XCC_FLAGS) -g 
