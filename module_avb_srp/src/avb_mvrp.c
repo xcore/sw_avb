@@ -6,8 +6,6 @@
 #include <xccompat.h>
 #include "print.h"
 
-#ifndef AVB_EXCLUDE_MVRP
-
 void *memcpy(void *dest, const void *src, int n);
 
 struct mvrp_entry {
@@ -132,6 +130,3 @@ void avb_mvrp_vid_vector_join_ind(mrp_attribute_state *attr, int new)
 void avb_mvrp_vid_vector_leave_ind(mrp_attribute_state *attr)
 {
 }
-
-#endif
-

@@ -30,12 +30,8 @@ void avb_srp_task(client interface avb_interface i_avb,
 
   mac_get_macaddr(c_mac_tx, mac_addr);
   mrp_init(mac_addr);
-
   srp_domain_init();
-
-#ifndef AVB_EXCLUDE_MVRP
   avb_mvrp_init();
-#endif
 
   mac_initialize_routing_table(c_mac_tx);
 

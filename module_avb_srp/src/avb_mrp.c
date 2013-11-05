@@ -29,9 +29,7 @@ static int first_value_lengths[MRP_NUM_ATTRIBUTE_TYPES] = FIRST_VALUE_LENGTHS;
 
 //!@{
 //! \name MAC addresses for the various protocols
-#ifndef AVB_EXCLUDE_MVRP
 static unsigned char mvrp_dest_mac[6] = AVB_MVRP_MACADDR;
-#endif
 static unsigned char srp_dest_mac[6] = AVB_SRP_MACADDR;
 //!@}
 
@@ -426,11 +424,9 @@ static int encode_msg(char *msg, mrp_attribute_state* st, int vector, unsigned i
     case MSRP_DOMAIN_VECTOR:             
       return avb_srp_encode_message(msg, st, vector);
       break;
-#ifndef AVB_EXCLUDE_MVRP
     case MVRP_VID_VECTOR:
       return avb_mvrp_merge_message(msg, st, vector);
       break;
-#endif
   }
 
   return 0;
@@ -1027,11 +1023,9 @@ static void send_join_indication(CLIENT_INTERFACE(avb_interface, avb), mrp_attri
   case MSRP_DOMAIN_VECTOR:
     avb_srp_domain_join_ind(st, new);
     break;
-#ifndef AVB_EXCLUDE_MVRP
   case MVRP_VID_VECTOR:
     avb_mvrp_vid_vector_join_ind(st, new);
     break;
-#endif
   }
 }
 
@@ -1050,11 +1044,9 @@ static void send_leave_indication(CLIENT_INTERFACE(avb_interface, avb), mrp_attr
   case MSRP_DOMAIN_VECTOR:
     avb_srp_domain_leave_ind(st);
     break;
-#ifndef AVB_EXCLUDE_MVRP
   case MVRP_VID_VECTOR:
     avb_mvrp_vid_vector_leave_ind(st);
     break;
-#endif
   }
 }
 
@@ -1098,7 +1090,6 @@ void mrp_periodic(CLIENT_INTERFACE(avb_interface, avb))
       attribute_type_event(MSRP_DOMAIN_VECTOR, tx_event, i);
       force_send(c_mac_tx, i);
 
-  #ifndef AVB_EXCLUDE_MVRP
       configure_send_buffer(mvrp_dest_mac, AVB_MVRP_ETHERTYPE);
       if (leaveall_active[i])
       {
@@ -1106,7 +1097,6 @@ void mrp_periodic(CLIENT_INTERFACE(avb_interface, avb))
       }
       attribute_type_event(MVRP_VID_VECTOR, tx_event, i);
       force_send(c_mac_tx, i);
-  #endif
 
       leaveall_active[i] = 0;
     }
@@ -1323,10 +1313,8 @@ static int match_attribute_of_same_type(mrp_attribute_type attr_type,
     return avb_srp_match_listener(attr, msg, i, four_packed_event);
   case MSRP_DOMAIN_VECTOR:
     return avb_srp_match_domain(attr, msg, i);
-#ifndef AVB_EXCLUDE_MVRP
   case MVRP_VID_VECTOR:
     return avb_mvrp_match_vid_vector(attr, msg, i);
-#endif
   default:
   return 0;
   }

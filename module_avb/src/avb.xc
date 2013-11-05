@@ -210,13 +210,11 @@ static void set_sink_state0(unsigned sink_num,
                                   router_link,
                                   sink->stream.local_id);
 
-  #ifndef AVB_EXCLUDE_MVRP
       for (int i=0; i < MRP_NUM_PORTS; i++) {
         if (sink->reservation.vlan_id) {
           avb_join_vlan(sink->reservation.vlan_id, i);
         }
       }
-  #endif
 
         i_srp.register_attach_request(sink->reservation.stream_id);
 
@@ -233,7 +231,7 @@ static void set_sink_state0(unsigned sink_num,
 
       avb_1722_remove_stream_mapping(c_mac_tx, sink->reservation.stream_id);
 
-  #ifndef AVB_EXCLUDE_MVRP
+  #if NUM_MRP_PORTS == 1
       if (sink->reservation.vlan_id) {
         avb_leave_vlan(sink->reservation.vlan_id);
       }
@@ -316,13 +314,11 @@ static void local_set_source_state(unsigned source_num,
             *c <: AVB_DEFAULT_PRESENTATION_TIME_DELAY_NS;
         }
 
-    #ifndef AVB_EXCLUDE_MVRP
         for (int i=0; i < MRP_NUM_PORTS; i++) {
           if (source->reservation.vlan_id) {
             avb_join_vlan(source->reservation.vlan_id, i);
           }
         }
-    #endif
 
         source->reservation.tspec_max_frame_size = avb_srp_calculate_max_framesize(source);
         i_srp.register_stream_request(source->reservation);
@@ -379,7 +375,7 @@ static void local_set_source_state(unsigned source_num,
 
         printstr(stream_string); simple_printf("#%d off\n", source_num);
 
-    #ifndef AVB_EXCLUDE_MVRP
+    #if MRP_NUM_PORTS == 1
       if (source->reservation.vlan_id) {
         avb_leave_vlan(source->reservation.vlan_id);
       }
