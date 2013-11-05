@@ -1,1 +1,0 @@
-void device_reboot(void);
