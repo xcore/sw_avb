@@ -850,15 +850,17 @@ unsafe int set_avb_source_port(unsigned source_num,
 void set_avb_source_volumes(unsigned sink_num, int volumes[], int count)
 {
 	if (sink_num < AVB_NUM_SINKS) {
-		  avb_sink_info_t *sink = &sinks[sink_num];
-		  chanend c = sink->listener_ctl;
-		  xc_abi_outuint(c, AVB1722_ADJUST_LISTENER_STREAM);
-		  xc_abi_outuint(c, sink->stream.local_id);
-		  xc_abi_outuint(c, AVB1722_ADJUST_LISTENER_VOLUME);
-		  xc_abi_outuint(c, count);
-	      for (int i=0;i<count;i++) {
-	          xc_abi_outuint(c, volumes[i]);
-	      }
+    unsafe {
+      avb_sink_info_t *sink = &sinks[sink_num];
+      chanend *unsafe c = sink->listener_ctl;
+      *c <: AVB1722_ADJUST_LISTENER_STREAM;
+      *c <: sink->stream.local_id;
+      *c <: AVB1722_ADJUST_LISTENER_VOLUME;
+      *c <: count;
+      for (int i=0;i<count;i++) {
+        *c <:  volumes[i];
+      }
+    }
 	}
 }
 #endif
