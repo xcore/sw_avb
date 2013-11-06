@@ -11,8 +11,6 @@
 #include "avb_1722_1_app_hooks.h"
 #include "avb_1722_1.h"
 
-extern void memset(void *unsafe, int, size_t);
-
 /* Enumerations for state variables */
 static enum { ADP_ADVERTISE_IDLE,
        ADP_ADVERTISE_WAITING,

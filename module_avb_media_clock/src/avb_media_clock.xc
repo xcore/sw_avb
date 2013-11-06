@@ -1,12 +1,14 @@
 #include "avb_media_clock.h"
 #include "avb_media_clock_def.h"
 
-unsafe void media_clock_register(chanend media_clock_svr, chanend *unsafe clk_ctl, int clk_num)
+void media_clock_register(chanend media_clock_svr, chanend *unsafe clk_ctl, int clk_num)
 {
+  unsafe  {
   media_clock_svr <: MEDIA_CLOCK_REGISTER;
   master {
     media_clock_svr <: clk_ctl;
     media_clock_svr <: clk_num;
+  }
   }
 }
 

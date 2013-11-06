@@ -802,8 +802,9 @@ void avb_manager(server interface avb_interface avb[num_avb_clients], unsigned n
   }
 }
 
-unsafe int set_avb_source_port(unsigned source_num,
+int set_avb_source_port(unsigned source_num,
                         int srcport) {
+  unsafe {
   if (source_num < AVB_NUM_SOURCES) {
     avb_source_info_t *source = &sources[source_num];
     chanend *unsafe c = source->talker_ctl;
@@ -817,6 +818,7 @@ unsafe int set_avb_source_port(unsigned source_num,
   }
   else
     return 0;
+  }
 }
 
 #ifdef MEDIA_OUTPUT_FIFO_VOLUME_CONTROL
