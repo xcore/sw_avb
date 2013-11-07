@@ -48,8 +48,8 @@
  **/
 #ifdef __XC__
 void avb_init(chanend c_media_ctl[],
-              chanend ?c_listener_ctl[],
-              chanend ?c_talker_ctl[],
+              chanend (&?c_listener_ctl)[],
+              chanend (&?c_talker_ctl)[],
               chanend ?c_media_clock_ctl,
               chanend c_ptp,
               chanend c_mac_tx);
@@ -85,8 +85,8 @@ void avb_periodic(chanend c_mac_tx, unsigned int time_now);
 void avb_manager(server interface avb_interface i_avb[num_avb_clients], unsigned num_avb_clients,
                  client interface srp_interface i_srp,
                  chanend c_media_ctl[],
-                 chanend ?c_listener_ctl[],
-                 chanend ?c_talker_ctl[],
+                 chanend (&?c_listener_ctl)[],
+                 chanend (&?c_talker_ctl)[],
                  chanend c_mac_tx,
                  chanend ?c_media_clock_ctl,
                  chanend c_ptp);

@@ -313,14 +313,13 @@ static void update_media_clocks(chanend ?ptp_svr, int clk_time)
 #pragma unsafe arrays
 void media_clock_server(chanend media_clock_ctl,
                         chanend ?ptp_svr,
-                        chanend ?buf_ctl[],
-                        int num_buf_ctl,
+                        chanend (&?buf_ctl)[num_buf_ctl], unsigned num_buf_ctl,
                         out buffered port:32 p_fs[]
 #if COMBINE_MEDIA_CLOCK_AND_PTP
                         ,chanend c_rx,
                         chanend c_tx,
-                        chanend c_ptp[],
-                        int num_ptp,
+                        chanend c_ptp[num_ptp],
+                        unsigned num_ptp,
                         enum ptp_server_type server_type
 #endif
 )

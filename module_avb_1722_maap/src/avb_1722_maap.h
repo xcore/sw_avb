@@ -23,7 +23,7 @@
  *  
  **/
 #ifdef __XC__
-void avb_1722_maap_request_addresses(int num_addresses, char ?start_address[]);
+void avb_1722_maap_request_addresses(int num_addresses, char (&?start_address)[]);
 #else
 void avb_1722_maap_request_addresses(int num_addresses, char start_address[]);
 #endif

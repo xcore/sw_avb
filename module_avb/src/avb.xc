@@ -148,8 +148,8 @@ static void init_media_clock_server(chanend media_clock_ctl)
 }
 
 void avb_init(chanend c_media_ctl[],
-              chanend ?c_listener_ctl[],
-              chanend ?c_talker_ctl[],
+              chanend (&?c_listener_ctl)[],
+              chanend (&?c_talker_ctl)[],
               chanend ?c_media_clock_ctl,
               chanend c_ptp,
               chanend c_mac_tx)
@@ -404,9 +404,9 @@ int avb_set_source_state(client interface avb_interface avb, unsigned source_num
 [[combinable]]
 void avb_manager(server interface avb_interface avb[num_avb_clients], unsigned num_avb_clients,
                  client interface srp_interface i_srp,
-                 chanend c_media_ctl[],
-                 chanend ?c_listener_ctl[],
-                 chanend ?c_talker_ctl[],
+                 chanend c_media_ctl[],  
+                 chanend (&?c_listener_ctl)[],
+                 chanend (&?c_talker_ctl)[],
                  chanend c_mac_tx,
                  chanend ?c_media_clock_ctl,
                  chanend c_ptp) {

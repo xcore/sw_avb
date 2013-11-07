@@ -40,10 +40,10 @@ unsigned int i2s_sine[I2S_SINE_TABLE_SIZE] =
 
 
 void i2s_master_configure_ports(i2s_ports_t &i2s,
-                                out buffered port:32 ?p_dout[],
-                                int num_out,
-                                in buffered port:32 ?p_din[],
-                                int num_in)
+                                out buffered port:32 (&?p_dout)[num_out],
+                                unsigned num_out,
+                                in buffered port:32 (&?p_din)[num_in],
+                                unsigned num_in)
 {
   configure_clock_src(i2s.mclk, i2s.p_mclk);
   start_clock(i2s.mclk);
@@ -83,25 +83,25 @@ extern inline void i2s_master_upto_8(const clock mclk,
                                      clock bclk,
                                      out buffered port:32 p_bclk,
                                      out buffered port:32 p_lrclk,
-                                     out buffered port:32 ?p_dout[],
+                                     out buffered port:32 (&?p_dout)[],
                                      int num_out,
-                                     in buffered port:32 ?p_din[],
+                                     in buffered port:32 (&?p_din)[],
                                      int num_in,
                                      int master_to_word_clock_ratio,
                                      streaming chanend ?c_listener,
-                                     media_input_fifo_t ?input_fifos[]);
+                                     media_input_fifo_t (&?input_fifos)[]);
 
 extern inline void i2s_master_upto_4(const clock mclk,
                                      clock bclk,
                                      out buffered port:32 p_bclk,
                                      out buffered port:32 p_lrclk,
-                                     out buffered port:32 ?p_dout[],
+                                     out buffered port:32 (&?p_dout)[],
                                      int num_out,
-                                     in buffered port:32 ?p_din[],
+                                     in buffered port:32 (&?p_din)[],
                                      int num_in,
                                      int master_to_word_clock_ratio,
-                                     media_input_fifo_t ?input_fifos[],
-                                     media_output_fifo_t ?output_fifos[]);
+                                     media_input_fifo_t (&?input_fifos)[],
+                                     media_output_fifo_t (&?output_fifos)[]);
 
 
 

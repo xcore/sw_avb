@@ -40,12 +40,12 @@ static int timeout_val;
 static unsigned int maap_buf[(MAX_AVB_1722_MAAP_PDU_SIZE+1)/4];
 
 static int create_maap_packet(int message_type,
-                              unsigned char ?src_addr[6],
+                              unsigned char (&?src_addr)[6],
                               maap_address_range &addr,
                               char *buf,
-                              unsigned char ?request_addr[6],
+                              unsigned char (&?request_addr)[6],
                               int request_count,
-                              unsigned char ?conflict_addr[6],
+                              unsigned char (&?conflict_addr)[6],
                               int conflict_count)
 { 
   struct ethernet_hdr_t *hdr = (ethernet_hdr_t*) &buf[0];
@@ -113,7 +113,7 @@ void avb_1722_maap_init(unsigned char macaddr[6])
 }
 
 // If used, start_address[] must be within the official IEEE MAAP pool
-void avb_1722_maap_request_addresses(int num_addr, char ?start_address[]) 
+void avb_1722_maap_request_addresses(int num_addr, char (&?start_address)[]) 
 {
   if (!isnull(start_address))
   {
@@ -262,7 +262,7 @@ static int maap_compare_mac(unsigned char src_addr[6])
   return 0;
 }
 
-static int maap_conflict(unsigned char remote_addr[6], int remote_count, unsigned char ?conflicted_addr[6], int &?conflicted_count)
+static int maap_conflict(unsigned char remote_addr[6], int remote_count, unsigned char (&?conflicted_addr)[6], int &?conflicted_count)
 {
   int my_addr_lo;
   int my_addr_hi;
