@@ -23,7 +23,7 @@ void ptp_get_requested_time_info(chanend c,
 {
   timer tmr;
   signed thiscore_now,othercore_now;
-  unsigned server_core_id;
+  unsigned server_tile_id;
   slave {
     tmr :> thiscore_now;
     c :> othercore_now;
@@ -31,9 +31,9 @@ void ptp_get_requested_time_info(chanend c,
     c :> info.ptp_ts;
     c :> info.ptp_adjust;
     c :> info.inv_ptp_adjust;
-    c :> server_core_id;
+    c :> server_tile_id;
   }
-  if (server_core_id != get_local_tile_id())
+  if (server_tile_id != get_local_tile_id())
   {
     info.local_ts = info.local_ts - (othercore_now-thiscore_now);
   }
@@ -59,7 +59,7 @@ void ptp_get_requested_time_info_mod64_use_timer(chanend c,
                                                  timer tmr)
 {
   signed thiscore_now,othercore_now;
-  unsigned server_core_id;
+  unsigned server_tile_id;
   slave {
     c <: 0;
     tmr :> thiscore_now;
@@ -69,9 +69,9 @@ void ptp_get_requested_time_info_mod64_use_timer(chanend c,
     c :> info.ptp_ts_lo;
     c :> info.ptp_adjust;
     c :> info.inv_ptp_adjust;
-    c :> server_core_id;
+    c :> server_tile_id;
   }
-  if (server_core_id != get_local_tile_id())
+  if (server_tile_id != get_local_tile_id())
   {
     // 3 = protocol instruction cycle difference
     info.local_ts = info.local_ts - (othercore_now-thiscore_now-3);

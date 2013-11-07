@@ -75,7 +75,7 @@ void ptp_recv_and_process_packet(chanend c_rx, chanend c_tx)
 static void ptp_give_requested_time_info(chanend c, timer ptp_timer)
 {
   int thiscore_now;
-  unsigned core_id = get_local_tile_id();
+  unsigned tile_id = get_local_tile_id();
   master {
     ptp_timer :> thiscore_now;
     c <: thiscore_now;
@@ -83,7 +83,7 @@ static void ptp_give_requested_time_info(chanend c, timer ptp_timer)
     c <: ptp_reference_ptp_ts;
     c <: g_ptp_adjust;
     c <: g_inv_ptp_adjust;
-    c <: core_id;
+    c <: tile_id;
   }
 }
 void ptp_get_local_time_info_mod64(ptp_time_info_mod64 &info)
@@ -102,7 +102,7 @@ void ptp_process_client_request(chanend c, timer ptp_timer)
 {
   unsigned char cmd;
   unsigned thiscore_now;
-  unsigned core_id = get_local_tile_id();
+  unsigned tile_id = get_local_tile_id();
 
   cmd = inuchar(c);
   (void) inuchar(c);
@@ -125,7 +125,7 @@ void ptp_process_client_request(chanend c, timer ptp_timer)
       c <: lo;
       c <: g_ptp_adjust;
       c <: g_inv_ptp_adjust;
-      c <: core_id;
+      c <: tile_id;
       }                        
       break;
     }

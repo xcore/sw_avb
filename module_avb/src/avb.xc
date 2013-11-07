@@ -31,7 +31,7 @@
 #define AVB_CHANNEL_UNMAPPED (-1)
 
 typedef struct media_info_t {
-  int core_id;
+  int tile_id;
   chanend *unsafe clk_ctl;
   unsigned fifo;
   int local_id;
@@ -106,17 +106,17 @@ static void register_media(chanend media_ctl[])
     int output_id = 0;
 
     for (int i=0;i<AVB_NUM_MEDIA_UNITS;i++) {
-      int core_id;
+      int tile_id;
       int num_in;
       int num_out;
       chanend *unsafe clk_ctl;
-      media_ctl[i] :> core_id;
+      media_ctl[i] :> tile_id;
       media_ctl[i] :> clk_ctl;
       media_ctl[i] :> num_in;
 
       for (int j=0;j<num_in;j++) {
         media_ctl[i] <: input_id;
-        inputs[input_id].core_id = core_id;
+        inputs[input_id].tile_id = tile_id;
         inputs[input_id].clk_ctl = clk_ctl;
         inputs[input_id].local_id = j;
         inputs[input_id].mapped_to = UNMAPPED;
@@ -127,7 +127,7 @@ static void register_media(chanend media_ctl[])
       media_ctl[i] :> num_out;
       for (int j=0;j<num_out;j++) {
         media_ctl[i] <: output_id;
-        outputs[output_id].core_id = core_id;
+        outputs[output_id].tile_id = tile_id;
         outputs[output_id].clk_ctl = clk_ctl;
         outputs[output_id].local_id = j;
         outputs[output_id].mapped_to = UNMAPPED;
@@ -991,10 +991,10 @@ void avb_get_control_packet(chanend c_rx,
 int avb_register_listener_streams(chanend listener_ctl,
                                    int num_streams)
 {
-  int core_id;
+  int tile_id;
   int link_id;
-  core_id = get_local_tile_id();
-  listener_ctl <: core_id;
+  tile_id = get_local_tile_id();
+  listener_ctl <: tile_id;
   listener_ctl <: num_streams;
   listener_ctl :> link_id;
   return link_id;
@@ -1003,8 +1003,8 @@ int avb_register_listener_streams(chanend listener_ctl,
 void avb_register_talker_streams(chanend talker_ctl,
                                  int num_streams)
 {
-  int core_id;
-  core_id = get_local_tile_id();
-  talker_ctl <: core_id;
+  int tile_id;
+  tile_id = get_local_tile_id();
+  talker_ctl <: tile_id;
   talker_ctl <: num_streams;
 }

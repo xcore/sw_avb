@@ -45,7 +45,7 @@ void send_buf_ctl_info(chanend buf_ctl,
                        unsigned int wrptr,
                        timer tmr) {
   int thiscore_now;
-  int core_id = get_local_tile_id();
+  int tile_id = get_local_tile_id();
   slave {
     buf_ctl :>  int;
     tmr :> thiscore_now;
@@ -55,7 +55,7 @@ void send_buf_ctl_info(chanend buf_ctl,
     buf_ctl <: local_ts;
     buf_ctl <: rdptr;
     buf_ctl <: wrptr;
-    buf_ctl <: core_id;
+    buf_ctl <: tile_id;
   }
 }
 

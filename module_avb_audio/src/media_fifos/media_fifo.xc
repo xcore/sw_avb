@@ -8,9 +8,9 @@ void media_ctl_register(chanend media_ctl,
                         unsigned num_out, 
                         int clk_ctl_index)
 {
-  unsigned core_id;
-  core_id = get_local_tile_id();
-  media_ctl <: core_id;
+  unsigned tile_id;
+  tile_id = get_local_tile_id();
+  media_ctl <: tile_id;
   media_ctl <: clk_ctl_index;
   media_ctl <: num_in;
   for (int i=0;i<num_in;i++) {
