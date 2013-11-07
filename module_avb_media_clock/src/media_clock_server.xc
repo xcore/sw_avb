@@ -98,7 +98,6 @@ int get_buf_info(int fifo)
   return stream_num;
 }
 
-#pragma unsafe arrays
 static void manage_buffer(buf_info_t &b,
                           chanend ?ptp_svr,
                           chanend buf_ctl,
@@ -310,7 +309,6 @@ static void update_media_clocks(chanend ?ptp_svr, int clk_time)
   }
 }
 
-#pragma unsafe arrays
 void media_clock_server(chanend media_clock_ctl,
                         chanend ?ptp_svr,
                         chanend (&?buf_ctl)[num_buf_ctl], unsigned num_buf_ctl,

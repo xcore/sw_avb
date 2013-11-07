@@ -22,10 +22,9 @@
 
 #if AVB_NUM_SOURCES != 0
 
-#pragma unsafe arrays
 static transaction configure_stream(chanend avb1722_tx_config,
                avb1722_Talker_StreamConfig_t &stream,
-               unsigned char mac_addr[]) {
+               unsigned char mac_addr[MAC_ADRS_BYTE_COUNT]) {
   unsigned int streamIdExt;
   unsigned int rate;
   unsigned int tmp;
@@ -81,7 +80,6 @@ static transaction configure_stream(chanend avb1722_tx_config,
   stream.txport = AVB1722_PORT_UNINITIALIZED;
 }
 
-#pragma unsafe arrays
 static void disable_stream(avb1722_Talker_StreamConfig_t &stream) {
 
   stream.streamId[1] = 0;
@@ -134,7 +132,6 @@ void avb_1722_talker_init(chanend c_talker_ctl,
 }
 
 
-#pragma unsafe arrays
 #pragma select handler
 void avb_1722_talker_handle_cmd(chanend c_talker_ctl,
                                 avb_1722_talker_state_t &st)
@@ -256,7 +253,6 @@ void avb_1722_talker_send_packets(chanend c_mac_tx,
  *  2. Convert the local timer value to global PTP timestamp.
  *  3. AVB payload generation and transmit to Ethernet.
  */
-#pragma unsafe arrays
 void avb_1722_talker(chanend c_ptp, chanend c_mac_tx,
                      chanend c_talker_ctl, int num_streams) {
   avb_1722_talker_state_t st;

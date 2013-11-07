@@ -55,7 +55,6 @@ void audio_codec_CS4270_init(out port p_codec_reset,
   time += 100;
   tmr when timerafter(time) :> int _;
 
-  #pragma unsafe arrays
   for(int i = 0; i < 8; i++) {
     data[0] = regdata[i];
     i2c_master_write_reg(codec_addr, regaddr[i], data, 1, r_i2c);

@@ -37,7 +37,6 @@ void audio_clock_CS2300CP_init(
 
   i2c_master_init(r_i2c);
 
-  #pragma unsafe arrays
   for(int i = 8; i >= 0; i--) {
     data[0] = (regdata,unsigned char[])[i];
     i2c_master_write_reg(deviceAddr, regaddr[i], data, 1, r_i2c);
