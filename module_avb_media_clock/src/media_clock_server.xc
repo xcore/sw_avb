@@ -410,7 +410,6 @@ void media_clock_server(chanend media_clock_ctl,
           (void) inct(buf_ctl[i]);
 
           buf_index = get_buf_info(fifo);
-          if (buf_index < 0) __builtin_trap();
           switch (buf_ctl_cmd)
             {
             case BUF_CTL_GOT_INFO:
