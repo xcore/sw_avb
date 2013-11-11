@@ -135,7 +135,8 @@
     <release parenthash = "868924510ad3ebac90310577f635e82b7bfe42a7" version = "5.2.1beta0" githash = "7cca4a4575e6a99d027018c05af20dc8091a851b"></release>
     <release parenthash = "7cca4a4575e6a99d027018c05af20dc8091a851b" version = "5.2.1beta1" githash = "b4f852e8cae3c4e7337334cc908d3d416bdc4bf2"></release>
     <release parenthash = "3fea036f48598fa47881ba3025c808f58c45f43e" version = "5.2.1rc0" githash = "b62c146761a02e82521117e489054d1570252e7c"></release>
-    <release parenthash = "77077b94d94d83316e33882d5cd78956d5f5f2af" version = "5.2.1rc1"></release>
+    <release parenthash = "77077b94d94d83316e33882d5cd78956d5f5f2af" version = "5.2.1rc1" githash = "c9571f7ba9113648c12534912010302e18e3892e"></release>
+    <release parenthash = "fbcd83f1169ffaff13479e38eb5ca608b5c99da7" version = "6.0.0alpha0"></release>
     <subpartnumber>XR-000008-SW</subpartnumber>
     <vendor>XMOS</vendor>
     <version_defines>
