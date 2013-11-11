@@ -1,6 +1,9 @@
 sw_avb Change Log
 =================
 
+6.0.0
+-----
+  * First release supporting daisy chain AVB
 
 5.2.0
 -----
