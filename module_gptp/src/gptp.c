@@ -313,16 +313,13 @@ static int update_adjust(ptp_timestamp *master_ts,
     inv_adjust = local_diff - master_diff;
 
     // Detect and ignore outliers 
-    if (master_diff > 127000000 || master_diff < 124000000) {
+#if PTP_THROW_AWAY_SYNC_OUTLIERS
+    if (master_diff > 150000000 || master_diff < 100000000) {
       prev_adjust_valid = 0;
-      simple_printf("PTP threw away outlier (master_diff %d)\n", master_diff);
+      simple_printf("PTP threw away Sync outlier (master_diff %d)\n", master_diff);
       return 1;
     }
-    if (master_diff == 0) {
-      prev_adjust_valid = 0;
-      simple_printf("PTP threw away Sync outlier, master_diff = 0\n");
-      return 1;
-    }
+#endif
 
     adjust <<= ADJUST_CALC_PREC;
     inv_adjust <<= ADJUST_CALC_PREC;

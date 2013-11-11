@@ -255,19 +255,20 @@ int main(void)
                                   AVB_NUM_SINKS);
 #endif
 
-    on tile[1].core[0]: avb_manager(i_avb, NUM_AVB_MANAGER_CHANS,
-                                    i_srp,
-                                    c_media_ctl,
-                                    c_listener_ctl,
-                                    c_talker_ctl,
-                                    c_mac_tx[MAC_TX_TO_AVB_MANAGER],
-                                    c_media_clock_ctl,
-                                    c_ptp[PTP_TO_AVB_MANAGER]);
-    on tile[1].core[0]: avb_srp_task(i_avb[AVB_MANAGER_TO_SRP],
-                                     i_srp,
-                                     c_mac_rx[MAC_RX_TO_SRP],
-                                     c_mac_tx[MAC_TX_TO_SRP]);
-
+    on tile[1]: [[combine]] par {
+      avb_manager(i_avb, NUM_AVB_MANAGER_CHANS,
+                  i_srp,
+                  c_media_ctl,
+                  c_listener_ctl,
+                  c_talker_ctl,
+                  c_mac_tx[MAC_TX_TO_AVB_MANAGER],
+                  c_media_clock_ctl,
+                  c_ptp[PTP_TO_AVB_MANAGER]);
+      avb_srp_task(i_avb[AVB_MANAGER_TO_SRP],
+                   i_srp,
+                   c_mac_rx[MAC_RX_TO_SRP],
+                   c_mac_tx[MAC_TX_TO_SRP]);
+    }
 
     on tile[0].core[0]: application_task(i_avb[AVB_MANAGER_TO_DEMO], i_1722_1_entity);
     on tile[0].core[0]: avb_1722_1_task(otp_ports0,
