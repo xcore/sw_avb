@@ -141,7 +141,9 @@
     <release parenthash = "81977bd6b644a3f81a0cd31493c095a629de6abe" version = "6.0.0alpha1"></release>
     <subpartnumber>XM-004286-SM</subpartnumber>
     <vendor>XMOS</vendor>
-    <version_defines></version_defines>
+    <version_defines>
+        <version_define type = "str" name = "AVB_1722_1_FIRMWARE_VERSION_STRING" format = "%VERSION%"></version_define>
+    </version_defines>
     <xcore_repo>sw_avb.git</xcore_repo>
     <xpd_version>1.0</xpd_version>
 </xpd>
