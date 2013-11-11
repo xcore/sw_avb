@@ -1,9 +1,7 @@
-<Add title here>
+module_avb_flash
 ================
 
-:scope: <Put one of Roadmap, Example, Early Development or General Use>
-:description: <Add one line here>
-:keywords: <Add comma separated list of keywords>
-:boards: <Add comma separated list of supported boards>
+:scope: Example
+:description: Low memory SPI flash module for AVB
 
-<Add description of software block>
+Low memory SPI flash module for AVB
