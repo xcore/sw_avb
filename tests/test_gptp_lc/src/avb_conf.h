@@ -8,7 +8,7 @@
 #define NUM_MII_TX_BUF 3
 #define ETHERNET_RX_HP_QUEUE 1
 #define MAX_ETHERNET_CLIENTS   5
-#define MII_RX_BUFSIZE_HIGH_PRIORITY (700)    
+#define MII_RX_BUFSIZE_HIGH_PRIORITY (700)
 #define MII_RX_BUFSIZE_LOW_PRIORITY (384)
 #define MII_TX_BUFSIZE (384)
 
@@ -22,7 +22,7 @@
 
 /* Talker configuration */
 #define AVB_NUM_SOURCES 1
-#define AVB_NUM_TALKER_UNITS 1 
+#define AVB_NUM_TALKER_UNITS 1
 
 /* Media configuration */
 #define AVB_1722_FORMAT_61883_6

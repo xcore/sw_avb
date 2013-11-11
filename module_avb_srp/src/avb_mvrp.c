@@ -31,12 +31,12 @@ void avb_mvrp_init(void)
 int avb_join_vlan(int vlan, int port_num)
 {
   int found = -1;
-  
+
   for (int i=0;i<AVB_MAX_NUM_VLAN;i++)
-    if (entries[i].active && (entries[i].vlan == vlan) && (entries[i].attr->port_num == port_num)) 
+    if (entries[i].active && (entries[i].vlan == vlan) && (entries[i].attr->port_num == port_num))
       found = i;
 
-  if (found == -1) 
+  if (found == -1)
     for (int i=0;i<AVB_MAX_NUM_VLAN;i++)
       if (!entries[i].active && (entries[i].attr->port_num == port_num)) {
         found = i;
@@ -65,9 +65,9 @@ void avb_leave_vlan(int vlan)
 {
   int found = -1;
   for (int i=0;i<AVB_MAX_NUM_VLAN;i++)
-    if (entries[i].active && (entries[i].vlan == vlan)) 
+    if (entries[i].active && (entries[i].vlan == vlan))
       found = i;
-  
+
   if (found != -1) {
     mrp_mad_leave(entries[found].attr);
   }
@@ -78,16 +78,16 @@ int avb_mvrp_merge_message(char *buf,
                           int vector)
 {
    mrp_msg_header *mrp_hdr = (mrp_msg_header *) buf;
-  mrp_vector_header *hdr = 
-    (mrp_vector_header *) (buf + sizeof(mrp_msg_header));  
+  mrp_vector_header *hdr =
+    (mrp_vector_header *) (buf + sizeof(mrp_msg_header));
   int merge = 0;
   int num_values;
   if (mrp_hdr->AttributeType != AVB_MVRP_VID_VECTOR_ATTRIBUTE_TYPE)
     return 0;
 
   num_values = hdr->NumberOfValuesLow;
-                           
-  if (num_values == 0) 
+
+  if (num_values == 0)
     merge = 1;
 
   if (merge) {
@@ -98,13 +98,13 @@ int avb_mvrp_merge_message(char *buf,
     first_value->vlan[0] = (*vlan >> 8) & 0xff;
     first_value->vlan[1] = (*vlan) & 0xff;
 
-    mrp_encode_three_packed_event(buf, vector, st->attribute_type);    
+    mrp_encode_three_packed_event(buf, vector, st->attribute_type);
 
     hdr->NumberOfValuesLow = num_values+1;
 
   }
 
-  return merge;   
+  return merge;
 }
 
 

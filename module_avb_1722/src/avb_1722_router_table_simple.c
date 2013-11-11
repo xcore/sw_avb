@@ -13,7 +13,7 @@
 
  #define AVB_MAX_NUM_SINK_AND_FORWARD_STREAMS 16
 
-typedef struct avb_1722_router_table_entry_t 
+typedef struct avb_1722_router_table_entry_t
 {
   int id[2];
   int link;
@@ -37,7 +37,7 @@ void init_avb_1722_router_table_simple()
   for(i=0;i<AVB_MAX_NUM_SINK_AND_FORWARD_STREAMS;i++) {
     router_table[i].id[0] = 0;
     router_table[i].id[1] = 0;
-  }    
+  }
 }
 
 
@@ -45,18 +45,18 @@ void init_avb_1722_router_table_simple()
 #define STRINGIFY(X) STRINGIFY0(X)
 
 int avb_1722_router_table_lookup_simple(int key0,
-                                        int key1, 
-                                        int *link, 
+                                        int key1,
+                                        int *link,
                                         int *avb_hash,
-                                        int *f0rward) 
+                                        int *f0rward)
 {
 
   if (key0==0 && key1==0) {
     return 0;
   }
 
-  hwlock_acquire(table_lock);      
-  
+  hwlock_acquire(table_lock);
+
   for(int i=0;i<AVB_MAX_NUM_SINK_AND_FORWARD_STREAMS;i++) {
     __asm__(".xtaloop " STRINGIFY(AVB_MAX_NUM_SINK_AND_FORWARD_STREAMS) "\n");
     if (key0 == router_table[i].id[0] &&
@@ -81,7 +81,7 @@ void avb_1722_router_table_add_or_update_forwarding_simple(int key0, int key1, i
   for(int i=0;i<AVB_MAX_NUM_SINK_AND_FORWARD_STREAMS;i++) {
     if (key0 == router_table[i].id[0] &&
         key1 == router_table[i].id[1]) {
-      
+
       router_table[i].f0rward = f0rward;
 
       hwlock_release(table_lock);
@@ -101,7 +101,7 @@ void avb_1722_router_table_add_or_update_forwarding_simple(int key0, int key1, i
     }
   }
 
-  hwlock_release(table_lock);  
+  hwlock_release(table_lock);
 }
 
 void avb_1722_router_table_add_or_update_entry_simple(int key0,
@@ -115,7 +115,7 @@ void avb_1722_router_table_add_or_update_entry_simple(int key0,
     if (key0 == router_table[i].id[0] &&
         key1 == router_table[i].id[1]) {
       // Found an existing entry with this stream ID, update it
-      
+
       router_table[i].link = link;
       router_table[i].avb_hash = avb_hash;
 
@@ -146,7 +146,7 @@ void avb_1722_router_table_remove_entry_simple(int key0, int key1) {
   for(int i=0;i<AVB_MAX_NUM_SINK_AND_FORWARD_STREAMS;i++) {
     if (key0 == router_table[i].id[0] &&
         key1 == router_table[i].id[1]) {
-      
+
       router_table[i].id[0] = 0;
       router_table[i].id[1] = 0;
 

@@ -12,11 +12,11 @@
 #ifdef AVB_1722_1_AEM_ENABLED
 
 /* Entity Descriptor */
-unsigned char desc_entity[] = 
-{                                                                                                                                                            
-  U16(AEM_ENTITY_TYPE),                       /* 0-1 descriptor_type */                
-  U16(0),                                     /* 2-3 descriptor_id */  
-  0, 0, 0, 0, 0, 0, 0, 0,                     /* 4-11 entity_guid */ 
+unsigned char desc_entity[] =
+{
+  U16(AEM_ENTITY_TYPE),                       /* 0-1 descriptor_type */
+  U16(0),                                     /* 2-3 descriptor_id */
+  0, 0, 0, 0, 0, 0, 0, 0,                     /* 4-11 entity_guid */
   U32(AVB_1722_1_ADP_VENDOR_ID),              /* 12-15 vendor_id */
   U32(AVB_1722_1_ADP_MODEL_ID),               /* 16-19 model_id */
   U32(AVB_1722_1_ADP_ENTITY_CAPABILITIES),    /* 20-23 entity_capabilities */
@@ -35,7 +35,7 @@ unsigned char desc_entity[] =
   AVB_1722_1_SERIAL_NUMBER_STRING,            /* 244-307 serial_number */
   U16(1),                                     /* 308-309 configurations_count */
   U16(0)                                      /* 310-311 current_configuration */
-};   
+};
 
 /* Configuration Descriptor 0 */
 unsigned char desc_configuration_0[] =
@@ -124,7 +124,7 @@ unsigned char desc_audio_unit_0[] =
 
 /* Stream Port Input Descriptors */
 
-#if (AVB_NUM_SINKS > 0)  
+#if (AVB_NUM_SINKS > 0)
 unsigned char desc_stream_port_input_0[] =
 {
   U16(AEM_STREAM_PORT_INPUT_TYPE),            /* 0-1 descriptor_type */
@@ -146,7 +146,7 @@ unsigned char desc_stream_port_input_0[] =
 unsigned char desc_audio_cluster_template[] =
 {
   U16(AEM_AUDIO_CLUSTER_TYPE),                /* 0-1 descriptor_type */
-  U16(0),                                     /* 2-3 descriptor_id */ 
+  U16(0),                                     /* 2-3 descriptor_id */
   "Input 0",                                  /* object_name */
   U16(AEM_NO_STRING),                         /* localized_description */
   U16(AEM_INVALID_TYPE),                      /* signal_type */
@@ -161,7 +161,7 @@ unsigned char desc_audio_cluster_template[] =
 unsigned char desc_audio_cluster_0[] =
 {
   U16(AEM_AUDIO_CLUSTER_TYPE),                /* 0-1 descriptor_type */
-  U16(0),                                     /* 2-3 descriptor_id */ 
+  U16(0),                                     /* 2-3 descriptor_id */
   "Left Input",                               /* object_name */
   U16(AEM_NO_STRING),                         /* localized_description */
   U16(AEM_INVALID_TYPE),                      /* signal_type */
@@ -176,7 +176,7 @@ unsigned char desc_audio_cluster_0[] =
 unsigned char desc_audio_cluster_1[] =
 {
   U16(AEM_AUDIO_CLUSTER_TYPE),                /* 0-1 descriptor_type */
-  U16(1),                                     /* 2-3 descriptor_id */ 
+  U16(1),                                     /* 2-3 descriptor_id */
   "Right Input",                              /* object_name */
   U16(AEM_NO_STRING),                         /* localized_description */
   U16(AEM_INVALID_TYPE),                      /* signal_type */
@@ -212,7 +212,7 @@ unsigned char desc_audio_map_0[] =
 
 /* Stream Port Output Descriptors */
 
-#if (AVB_NUM_SOURCES > 0)  
+#if (AVB_NUM_SOURCES > 0)
 unsigned char desc_stream_port_output_0[] =
 {
   U16(AEM_STREAM_PORT_OUTPUT_TYPE),           /* 0-1 descriptor_type */
@@ -234,7 +234,7 @@ unsigned char desc_stream_port_output_0[] =
 unsigned char desc_audio_cluster_2[] =
 {
   U16(AEM_AUDIO_CLUSTER_TYPE),                /* 0-1 descriptor_type */
-  U16(2),                                     /* 2-3 descriptor_id */ 
+  U16(2),                                     /* 2-3 descriptor_id */
   "Left Output",                              /* object_name */
   U16(AEM_NO_STRING),                         /* localized_description */
   U16(AEM_AUDIO_UNIT_TYPE),                   /* signal_type */
@@ -249,7 +249,7 @@ unsigned char desc_audio_cluster_2[] =
 unsigned char desc_audio_cluster_3[] =
 {
   U16(AEM_AUDIO_CLUSTER_TYPE),                /* 0-1 descriptor_type */
-  U16(3),                                     /* 2-3 descriptor_id */ 
+  U16(3),                                     /* 2-3 descriptor_id */
   "Right Output",                             /* object_name */
   U16(AEM_NO_STRING),                         /* localized_description */
   U16(AEM_AUDIO_UNIT_TYPE),                   /* signal_type */
@@ -288,7 +288,7 @@ unsigned char desc_audio_map_1[] =
 unsigned char desc_external_input_port_0[] =
 {
   U16(AEM_EXTERNAL_PORT_INPUT_TYPE),          /* 0-1 descriptor_type */
-  U16(0),                                     /* 2-3 descriptor_id */ 
+  U16(0),                                     /* 2-3 descriptor_id */
   U16(0),                                     /* clock_domain_index */
   U16(0),                                     /* port_flags */
   U16(0),                                     /* number_of_controls */
@@ -305,7 +305,7 @@ unsigned char desc_external_input_port_0[] =
 unsigned char desc_external_output_port_0[] =
 {
   U16(AEM_EXTERNAL_PORT_OUTPUT_TYPE),         /* 0-1 descriptor_type */
-  U16(0),                                     /* 2-3 descriptor_id */ 
+  U16(0),                                     /* 2-3 descriptor_id */
   U16(0),                                     /* clock_domain_index */
   U16(0),                                     /* port_flags */
   U16(0),                                     /* number_of_controls */
@@ -323,7 +323,7 @@ unsigned char desc_external_output_port_0[] =
 unsigned char desc_control_identify[] =
 {
   U16(AEM_CONTROL_TYPE),                      /* 0-1 descriptor_type */
-  U16(DESCRIPTOR_INDEX_CONTROL_IDENTIFY),     /* 2-3 descriptor_id */ 
+  U16(DESCRIPTOR_INDEX_CONTROL_IDENTIFY),     /* 2-3 descriptor_id */
   "Identify LED Control",                     /* object_name */
   U16(AEM_NO_STRING),                         /* localized_description */
   U32(0),                                     /* block_latency */
@@ -350,7 +350,7 @@ unsigned char desc_control_identify[] =
 
 /* Stream Descriptors */
 
-#if (AVB_NUM_SINKS > 0) 
+#if (AVB_NUM_SINKS > 0)
 /* Input */
 unsigned char desc_stream_input_0[] =
 {
@@ -396,7 +396,7 @@ unsigned char desc_stream_input_0[] =
 };
 #endif
 
-#if (AVB_NUM_SOURCES > 0)  
+#if (AVB_NUM_SOURCES > 0)
 /* Output */
 unsigned char desc_stream_output_0[] =
 {
@@ -527,7 +527,7 @@ unsigned char desc_clock_domain_0[] =
   U16(0),                                     /* clock_source_index */
   U16(76),                                    /* clock_sources_offset */
   U16(2),                                     /* clock_sources_count */
-  U16(0),                                     /* clock_sources */ 
+  U16(0),                                     /* clock_sources */
   U16(1)
 };
 
@@ -563,10 +563,10 @@ unsigned int aem_descriptor_list[] =
   AEM_ENTITY_TYPE, 1, sizeof(desc_entity), (unsigned)desc_entity,
   AEM_CONFIGURATION_TYPE, 1, sizeof(desc_configuration_0), (unsigned)desc_configuration_0,
   AEM_AUDIO_UNIT_TYPE, 1, sizeof(desc_audio_unit_0), (unsigned)desc_audio_unit_0,
-#if (AVB_NUM_SINKS > 0)  
+#if (AVB_NUM_SINKS > 0)
   AEM_STREAM_INPUT_TYPE, 1, sizeof(desc_stream_input_0), (unsigned)desc_stream_input_0,
 #endif
-#if (AVB_NUM_SOURCES > 0)  
+#if (AVB_NUM_SOURCES > 0)
   AEM_STREAM_OUTPUT_TYPE, 1, sizeof(desc_stream_output_0), (unsigned)desc_stream_output_0,
 #endif
   AEM_JACK_INPUT_TYPE, 1, sizeof(desc_jack_input_0), (unsigned)desc_jack_input_0,
@@ -574,11 +574,11 @@ unsigned int aem_descriptor_list[] =
   AEM_AVB_INTERFACE_TYPE, 1, sizeof(desc_avb_interface_0), (unsigned)desc_avb_interface_0,
   AEM_CLOCK_SOURCE_TYPE, 2, sizeof(desc_clock_source_0), (unsigned)desc_clock_source_0, sizeof(desc_clock_source_1), (unsigned)desc_clock_source_1,
   AEM_LOCALE_TYPE, 1, sizeof(desc_locale_0), (unsigned)desc_locale_0,
-  AEM_STRINGS_TYPE, 1, sizeof(desc_strings_0), (unsigned)desc_strings_0, 
-#if (AVB_NUM_SINKS > 0)  
+  AEM_STRINGS_TYPE, 1, sizeof(desc_strings_0), (unsigned)desc_strings_0,
+#if (AVB_NUM_SINKS > 0)
   AEM_STREAM_PORT_INPUT_TYPE, 1, sizeof(desc_stream_port_input_0), (unsigned)desc_stream_port_input_0,
 #endif
-#if (AVB_NUM_SOURCES > 0)  
+#if (AVB_NUM_SOURCES > 0)
   AEM_STREAM_PORT_OUTPUT_TYPE, 1, sizeof(desc_stream_port_output_0), (unsigned)desc_stream_port_output_0,
 #endif
   AEM_EXTERNAL_PORT_INPUT_TYPE, 1, sizeof(desc_external_input_port_0), (unsigned)desc_external_input_port_0,

@@ -2,7 +2,7 @@
  * \file avb_1722_talker_support.c
  * \brief 1722 Talker support C functions
  */
-#define streaming 
+#define streaming
 
 #include <xccompat.h>
 

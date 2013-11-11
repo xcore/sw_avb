@@ -1,7 +1,7 @@
 #include <print.h>
 #include <stdarg.h>
 
-int simple_printf(char * fmt, ...) 
+int simple_printf(char * fmt, ...)
 {
   char * marker;
   int intArg;
@@ -12,10 +12,10 @@ int simple_printf(char * fmt, ...)
 
   va_start(args,fmt);
 
-  marker = fmt;	
-  
+  marker = fmt;
+
   while (*fmt) {
-    switch (*fmt) 
+    switch (*fmt)
       {
       case '%':
         if (fmt != marker) {
@@ -25,7 +25,7 @@ int simple_printf(char * fmt, ...)
           *fmt = c;
         }
         fmt++;
-	switch (*(fmt)) 
+	switch (*(fmt))
 	  {
 	  case 'd':
 	    intArg = va_arg(args, int);
@@ -46,12 +46,12 @@ int simple_printf(char * fmt, ...)
 	  case 's':
 	    strArg = va_arg(args, char *);
             printstr(strArg);
-	    break;	    
+	    break;
 	  }
 	fmt++;
 	marker = fmt;
 	break;
-      default: 
+      default:
 	fmt++;
       }
   }

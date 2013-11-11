@@ -35,7 +35,7 @@ on stdcore[1]: smi_interface_t smi = { PORT_ETH_MDIO, PORT_ETH_MDC, 0 };
 // Test port
 on stdcore[0]: port test_port = XS1_PORT_8B;
 
-int main() 
+int main()
 {
   chan c_mac_rx[1], c_mac_tx[1];
   chan ptp_link[1];
@@ -57,14 +57,14 @@ int main()
 				smi, connect_status);
 	}
 
-    on stdcore[1]: ptp_server(c_mac_rx[0], 
-                              c_mac_tx[0], 
-                              ptp_link, 
-                              1, 
+    on stdcore[1]: ptp_server(c_mac_rx[0],
+                              c_mac_tx[0],
+                              ptp_link,
+                              1,
                               PTP_GRANDMASTER_CAPABLE);
 
-                                
-    on stdcore[0]: 
+
+    on stdcore[0]:
     {
         int x = 0;
         timer tmr;
@@ -86,7 +86,7 @@ int main()
         t = ptp_timestamp_to_local(ptp_ts, ptp_info);
 
         x = ptp_ts.seconds[0] & 1;
- 
+
         while (1) {
           tmr when timerafter(t) :> void;
           test_port <: x;
@@ -96,7 +96,7 @@ int main()
           t = ptp_timestamp_to_local(ptp_ts, ptp_info);
         }
      }
-  
+
      // Xlog server
      on stdcore[0]: xlog_server_uart(p_uart_tx);
   }

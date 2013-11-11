@@ -69,7 +69,7 @@ void avb_1722_1_adp_init()
 
 void avb_1722_1_adp_announce()
 {
-    if (adp_advertise_state == ADP_ADVERTISE_IDLE || 
+    if (adp_advertise_state == ADP_ADVERTISE_IDLE ||
         adp_advertise_state == ADP_ADVERTISE_WAITING)
     {
         adp_advertise_state = ADP_ADVERTISE_ADVERTISE_0;
@@ -78,7 +78,7 @@ void avb_1722_1_adp_announce()
 
 void avb_1722_1_adp_depart()
 {
-    if (adp_advertise_state == ADP_ADVERTISE_IDLE || 
+    if (adp_advertise_state == ADP_ADVERTISE_IDLE ||
         adp_advertise_state == ADP_ADVERTISE_WAITING)
     {
         adp_advertise_state = ADP_ADVERTISE_DEPARTING;
@@ -87,11 +87,11 @@ void avb_1722_1_adp_depart()
 
 void avb_1722_1_adp_depart_then_announce()
 {
-    if (adp_advertise_state == ADP_ADVERTISE_IDLE || 
+    if (adp_advertise_state == ADP_ADVERTISE_IDLE ||
         adp_advertise_state == ADP_ADVERTISE_WAITING)
     {
         adp_advertise_state = ADP_ADVERTISE_DEPART_THEN_ADVERTISE;
-    }    
+    }
 }
 
 void avb_1722_1_adp_discover(const_guid_ref_t guid)
@@ -100,7 +100,7 @@ void avb_1722_1_adp_discover(const_guid_ref_t guid)
     {
         adp_discovery_state = ADP_DISCOVERY_DISCOVER;
         discover_guid.l = guid.l;
-    } 
+    }
 }
 
 void avb_1722_1_adp_discover_all()

@@ -10,7 +10,7 @@
 #include "avb_api.h"
 #include "avb_srp_interface.h"
 
-#define AVB_SRP_ETHERTYPE (0x22ea) 
+#define AVB_SRP_ETHERTYPE (0x22ea)
 
 #define AVB_SRP_MACADDR { 0x01, 0x80, 0xc2, 0x00, 0x00, 0xe }
 #define AVB_SRP_LEGACY_MACADDR { 0x01, 0x00, 0x5e, 0x0, 1, 129 }
@@ -30,7 +30,7 @@ int avb_add_detected_stream(srp_talker_first_value *fv,
 
 typedef struct srp_stream_state {
   union {
-    mrp_attribute_state talker; 
+    mrp_attribute_state talker;
     mrp_attribute_state listener;
   } u;
 } srp_stream_state;
@@ -51,7 +51,7 @@ void srp_cleanup_reservation_entry(mrp_attribute_state *st);
 
 /* The following functions are called from avb_mrp.c */
 mrp_attribute_state *unsafe avb_srp_process_new_attribute_from_packet(int attribute_type,
-                                  char *fv, 
+                                  char *fv,
                                   int num,
                                   int port_num);
 

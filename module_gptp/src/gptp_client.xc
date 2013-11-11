@@ -18,7 +18,7 @@ void ptp_request_time_info(chanend c)
 }
 
 
-void ptp_get_requested_time_info(chanend c, 
+void ptp_get_requested_time_info(chanend c,
                                  ptp_time_info &info)
 {
   timer tmr;
@@ -40,11 +40,11 @@ void ptp_get_requested_time_info(chanend c,
 }
 
 
-void ptp_get_time_info(chanend c, 
+void ptp_get_time_info(chanend c,
                        ptp_time_info  &info)
 {
   ptp_request_time_info(c);
-  ptp_get_requested_time_info(c, info);   
+  ptp_get_requested_time_info(c, info);
 }
 
 

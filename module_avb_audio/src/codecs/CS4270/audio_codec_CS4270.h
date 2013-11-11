@@ -3,7 +3,7 @@
 #include "avb_conf.h"
 #include "i2c.h"
 
-void audio_codec_CS4270_init(out port p_codec_reset, 
+void audio_codec_CS4270_init(out port p_codec_reset,
                               int mask,
                               int codec_addr,
                         #if I2C_COMBINE_SCL_SDA
@@ -15,4 +15,4 @@ void audio_codec_CS4270_init(out port p_codec_reset,
 
 
 
-#endif 
+#endif

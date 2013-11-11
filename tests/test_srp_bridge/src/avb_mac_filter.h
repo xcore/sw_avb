@@ -24,7 +24,7 @@ inline int mac_custom_filter(unsigned int buf[], unsigned int mac[2], int &user_
   int result = 0;
   unsigned short etype = (unsigned short) buf[3];
   int qhdr = (etype == 0x0081);
-  
+
   if (qhdr) {
     // has a 802.1q tag - read etype from next word
     etype = (unsigned short) buf[4];
@@ -39,7 +39,7 @@ inline int mac_custom_filter(unsigned int buf[], unsigned int mac[2], int &user_
       result = MAC_FILTER_PTP;
       break;
     default:
-      if ((buf[0] & 0x1) || // Broadcast 
+      if ((buf[0] & 0x1) || // Broadcast
           (buf[0] != mac[0] || buf[1] != mac[1])) // Not unicast
       {
         result |= MII_FILTER_FORWARD_TO_OTHER_PORTS;
@@ -51,4 +51,4 @@ inline int mac_custom_filter(unsigned int buf[], unsigned int mac[2], int &user_
 }
 #endif
 
-#endif 
+#endif

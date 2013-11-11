@@ -8,7 +8,7 @@
 #ifdef __XC__
 typedef struct avb_ethernet_ports_s {
   otp_ports_t otp_ports;
-  smi_interface_t smi;    
+  smi_interface_t smi;
   mii_interface_full_t mii;
   ethernet_reset_interface_t eth_rst;
 } avb_ethernet_ports_t;

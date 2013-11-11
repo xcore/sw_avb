@@ -8,7 +8,7 @@
 #include "hwlock.h"
 #include "string.h"
 #include "avb_1722_router_table.h"
-typedef struct avb_1722_router_table_entry_t 
+typedef struct avb_1722_router_table_entry_t
 {
   int id[2];
   int link;
@@ -43,10 +43,10 @@ void init_avb_1722_router_table_hash()
     router_table[i].id[1] = 0;
     backup_table[i].id[0] = 0;
     backup_table[i].id[1] = 0;
-  }    
+  }
 }
 
-static inline int hash(int key0, int key1, int poly) 
+static inline int hash(int key0, int key1, int poly)
 {
   unsigned int x=0x9226F562;
 
@@ -60,18 +60,18 @@ static inline int hash(int key0, int key1, int poly)
 }
 
 int avb_1722_router_table_lookup_hash(int key0,
-                                      int key1, 
-                                      int *link, 
-                                      int *avb_hash) 
+                                      int key1,
+                                      int *link,
+                                      int *avb_hash)
 {
   unsigned int x;
 
   if (key0==0 && key1==0)
     return 0;
 
-  hwlock_acquire(table_lock);      
+  hwlock_acquire(table_lock);
   x = hash(key0, key1, router_table_poly[0]);
-  
+
   if (key0 == router_table[x].id[0] &&
       key1 == router_table[x].id[1]) {
 
@@ -82,7 +82,7 @@ int avb_1722_router_table_lookup_hash(int key0,
   }
 
   x = hash(key0, key1, router_table_poly[1]);
-  
+
   if (key0 == router_table[x].id[0] &&
       key1 == router_table[x].id[1]) {
     *link = router_table[x].link;
@@ -100,27 +100,27 @@ int avb_1722_router_table_lookup_hash(int key0,
 
 static int contains_different_entry(int index, int key[2])
 {
-  int empty = 
+  int empty =
     router_table[index].id[0] == 0
     &&
     router_table[index].id[1] == 0;
 
-  int different = 
-    router_table[index].id[0] != key[0] 
+  int different =
+    router_table[index].id[0] != key[0]
     ||
-    router_table[index].id[1] != key[1]; 
+    router_table[index].id[1] != key[1];
 
   return (!empty && different);
 }
 
-static int insert(int key0, int key1, int link, int avb_hash) 
+static int insert(int key0, int key1, int link, int avb_hash)
 {
   int count = 0;
   int conflict = 0;
   int hashtype = 0;
   int curkey[2];
   curkey[0] = key0;
-  curkey[1] = key1; 
+  curkey[1] = key1;
   do {
     int index = hash(curkey[0], curkey[1], backup_table_poly[hashtype]);
     if (!contains_different_entry(index, curkey)) {
@@ -134,7 +134,7 @@ static int insert(int key0, int key1, int link, int avb_hash)
       int new_curkey[2];
       conflict=1;
       if (count==0) {
-        hashtype = 1-hashtype;        
+        hashtype = 1-hashtype;
       }
       else {
         new_curkey[0] = backup_table[index].id[0];
@@ -143,13 +143,13 @@ static int insert(int key0, int key1, int link, int avb_hash)
         backup_table[index].id[1] = curkey[1];
         backup_table[index].link = link;
         backup_table[index].avb_hash = avb_hash;
-        
+
         curkey[0] = new_curkey[0];
         curkey[1] = new_curkey[1];
         hashtype = 1-hashtype;
       }
     }
-    
+
     count++;
   }
   while (conflict && count < num_entries+10);
@@ -168,7 +168,7 @@ static void refill_backup_table() {
   for(i=0;i<AVB_1722_ROUTER_TABLE_SIZE;i++) {
     backup_table[i].id[0] = 0;
     backup_table[i].id[1] = 0;
-  }    
+  }
 
   do {
     // change the poly
@@ -183,7 +183,7 @@ static void refill_backup_table() {
                          router_table[i].link,
                          router_table[i].avb_hash);
           }
-    }    
+    }
   } while (!success);
 }
 
@@ -196,10 +196,10 @@ void avb_1722_router_table_add_entry_hash(int key0,
 
   while (!success) {
     success = insert(key0, key1, link, avb_hash);
-    
+
     if (success) {
       avb_1722_router_table_entry_t *old_table = router_table;
-      // flip the tables      
+      // flip the tables
       hwlock_acquire(table_lock);
       router_table = backup_table;
       router_table_poly[0] = backup_table_poly[0];

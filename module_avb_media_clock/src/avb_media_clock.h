@@ -52,7 +52,7 @@ int  media_clock_get_type(chanend media_clock_svr, int media_clock_num);
  *  \param media_clock_num the index of the specific media clock
  *  \param a the new clock source, the index of the FIFO that it is based on
  */
-void media_clock_set_source(chanend media_clock_svr, int media_clock_num, 
+void media_clock_set_source(chanend media_clock_svr, int media_clock_num,
                          int a);
 
 /**
@@ -62,7 +62,7 @@ void media_clock_set_source(chanend media_clock_svr, int media_clock_num,
  *  \param media_clock_num the index of the specific media clock
  *  \param a pointer to an integer where the clock source is placed
  */
-void media_clock_get_source(chanend media_clock_svr, int media_clock_num, 
+void media_clock_get_source(chanend media_clock_svr, int media_clock_num,
                          int &a);
 
 
@@ -99,4 +99,4 @@ void media_clock_register(chanend media_clock_svr, chanend *clk_ctl, int clk_num
 }
 #endif
 
-#endif 
+#endif

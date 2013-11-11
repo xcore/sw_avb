@@ -47,11 +47,11 @@
 #define AVB_MAX_CHANNELS_PER_LISTENER_STREAM 8
 
 
-/** The number of components in the endpoint that will register and initialize media FIFOs 
+/** The number of components in the endpoint that will register and initialize media FIFOs
     (typically an audio interface component such as I2S). */
 #define AVB_NUM_MEDIA_UNITS 0
 
-/** The number of media clocks in the endpoint. Typically the number of clock domains, each with a 
+/** The number of media clocks in the endpoint. Typically the number of clock domains, each with a
   * separate PLL and master clock */
 #define AVB_NUM_MEDIA_CLOCKS 1
 

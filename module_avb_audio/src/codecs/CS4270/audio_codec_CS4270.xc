@@ -28,7 +28,7 @@ static unsigned char regaddr[8] = { CODEC_PWR_CTRL_ADDR,
                                    };
 static unsigned char regdata[8] = {0x01,0x35,0x09,0x60,0x00,0x00,0x00,0x00};
 
-void audio_codec_CS4270_init(out port p_codec_reset, 
+void audio_codec_CS4270_init(out port p_codec_reset,
                               int mask,
                               int codec_addr,
                         #if I2C_COMBINE_SCL_SDA
@@ -40,7 +40,7 @@ void audio_codec_CS4270_init(out port p_codec_reset,
 {
   timer tmr;
   unsigned time;
-  char data[1]; 
+  char data[1];
 
 #if I2C_COMBINE_SCL_SDA
   // Unfortunately the single port and simple I2C APIs do not currently match

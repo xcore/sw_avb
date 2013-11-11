@@ -15,7 +15,7 @@
 /*** ADP ***/
 void __attribute__((weak)) avb_entity_on_new_entity_available(client interface avb_interface avb, const_guid_ref_t my_guid, avb_1722_1_entity_record *entity, chanend c_tx)
 {
-  // Do nothing in the core stack 
+  // Do nothing in the core stack
 }
 
 /*** ACMP ***/

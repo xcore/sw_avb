@@ -3,7 +3,7 @@
  * \brief IEC 61883-6/AVB1722 Audio over 1722 AVB Transport.
  */
 
-#ifndef _AVB1722_DEF_H_ 
+#ifndef _AVB1722_DEF_H_
 #define _AVB1722_DEF_H_ 1
 
 #include "avb_1722_common.h"
@@ -48,7 +48,7 @@
 #define AVB_CIP_HDR_SIZE    				(8)
 
 // 61883-6/AVB1722 CIP Header definitions.
-typedef struct 
+typedef struct
 {
   unsigned char SID;             // bit 0,1 are fixed 00;
   unsigned char DBS;             // Data block size. In 61883 a data block is all information arriving
@@ -61,13 +61,13 @@ typedef struct
   unsigned char FMT;             // stream format
   unsigned char FDF;             // format dependent field
   unsigned char SYT[2];          // synchronisation timing
-  
+
 } AVB_AVB1722_CIP_Header_t;
 
 // NOTE: It is worth pointing out that the 'data block' in 61886-3 means a sample (or
 // a collection of samples one for each channel)
 
-//                                                                                      
+//
 // Macros for 61883 header
 //
 #define SET_AVB1722_CIP_TAG(x, a)              (x->protocol_specific[0] |= (a & 0x3) << 6)
@@ -77,13 +77,13 @@ typedef struct
 #define SET_AVB1722_CIP_SY(x, a)               (x->protocol_specific[1] |= (a & 0xF))
 
 #define SET_AVB1722_CIP_SID(x, a)              (x->SID |= (a & 0x3F))
-#define SET_AVB1722_CIP_EOH1(x, a)             (x->SID |= (a & 0x3) << 6)   
+#define SET_AVB1722_CIP_EOH1(x, a)             (x->SID |= (a & 0x3) << 6)
 #define SET_AVB1722_CIP_DBS(x, a)              (x->DBS = a)
 #define SET_AVB1722_CIP_FN(x, a)               (x->FN_QPC_SPH |= (a & 0x3) << 6)
 #define SET_AVB1722_CIP_QPC(x, a)              (x->FN_QPC_SPH |= (a & 0x7) << 3)
 #define SET_AVB1722_CIP_SPH(x, a)              (x->FN_QPC_SPH |= (a & 0x1) << 2)
 #define SET_AVB1722_CIP_DBC(x, a)              (x->DBC = a)
-#define SET_AVB1722_CIP_EOH2(x, a)             (x->FMT |= (a & 0x3) << 6)   
+#define SET_AVB1722_CIP_EOH2(x, a)             (x->FMT |= (a & 0x3) << 6)
 #define SET_AVB1722_CIP_FMT(x, a)              (x->FMT |= (a & 0x3F))
 #define SET_AVB1722_CIP_FDF(x, a)              (x->FDF = a)
 #define SET_AVB1722_CIP_SYT(x, a)              do {x->SYT[0] = a >> 8; \

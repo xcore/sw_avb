@@ -4,11 +4,11 @@
 #define ETHERNET_DEFAULT_IMPLEMENTATION full
 #endif
 
-#ifndef ETHERNET_RX_HP_QUEUE 
+#ifndef ETHERNET_RX_HP_QUEUE
 #define ETHERNET_RX_HP_QUEUE 1
 #endif
 
-#ifndef ETHERNET_TX_HP_QUEUE 
+#ifndef ETHERNET_TX_HP_QUEUE
 #define ETHERNET_TX_HP_QUEUE 1
 #endif
 

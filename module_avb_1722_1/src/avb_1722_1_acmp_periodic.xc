@@ -189,7 +189,7 @@ void avb_1722_1_acmp_controller_periodic(chanend c_tx, client interface avb_inte
             if (acmp_controller_cmd_resp.status != ACMP_STATUS_SUCCESS)
             {
                 avb_talker_on_listener_connect_failed(avb, my_guid, acmp_controller_cmd_resp.talker_unique_id,
-                        acmp_controller_cmd_resp.listener_guid, acmp_controller_cmd_resp.status, c_tx); 
+                        acmp_controller_cmd_resp.listener_guid, acmp_controller_cmd_resp.status, c_tx);
             }
 
             acmp_controller_state = ACMP_CONTROLLER_WAITING;
@@ -200,7 +200,7 @@ void avb_1722_1_acmp_controller_periodic(chanend c_tx, client interface avb_inte
         case ACMP_CONTROLLER_GET_RX_STATE_RESPONSE:
         case ACMP_CONTROLLER_GET_TX_CONNECTION_RESPONSE:
         {
-            
+
 #ifdef AVB_1722_1_ACMP_DEBUG_INFLIGHT
             // Remove inflight command
             avb_1722_1_acmp_inflight_command *inflight = acmp_remove_inflight(CONTROLLER);
@@ -412,7 +412,7 @@ void avb_1722_1_acmp_listener_periodic(chanend c_tx, client interface avb_interf
                                                         stream_id,
                                                         my_guid);
 
-                        acmp_listener_rcvd_cmd_resp.status = 
+                        acmp_listener_rcvd_cmd_resp.status =
                             avb_listener_on_talker_connect(avb,
                                                     acmp_listener_rcvd_cmd_resp.listener_unique_id,
                                                     acmp_listener_rcvd_cmd_resp.talker_guid,
@@ -437,14 +437,14 @@ void avb_1722_1_acmp_listener_periodic(chanend c_tx, client interface avb_interf
                 if (acmp_listener_valid_listener_unique())
                 {
                     avb_1722_1_acmp_inflight_command *unsafe inflight = acmp_remove_inflight(LISTENER);
-                    
+
                     if (inflight != NULL)
                     {
                         acmp_listener_rcvd_cmd_resp.sequence_id = inflight->original_sequence_id;
-        
+
                         acmp_send_response(ACMP_CMD_DISCONNECT_RX_RESPONSE, &acmp_listener_rcvd_cmd_resp, acmp_listener_rcvd_cmd_resp.status, c_tx);
                         acmp_zero_listener_stream_info(acmp_listener_rcvd_cmd_resp.listener_unique_id);
-        
+
         #ifdef AVB_1722_1_ACMP_DEBUG_INFLIGHT
                         simple_printf("ACMP Listener: Removed inflight %d DISCONNECT_TX_COMMAND with response %s - seq id: %d\n",
                                 (int)inflight,
@@ -452,7 +452,7 @@ void avb_1722_1_acmp_listener_periodic(chanend c_tx, client interface avb_interf
                                 inflight->command.sequence_id);
         #endif
                     }
-                    
+
 
                     acmp_listener_rcvd_cmd_resp.status = ACMP_STATUS_SUCCESS;
                     acmp_listener_state = ACMP_LISTENER_WAITING;

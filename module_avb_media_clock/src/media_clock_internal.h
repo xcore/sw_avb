@@ -31,7 +31,7 @@ typedef struct media_clock_t {
 #define CLOCK_RECOVERY_SLOW_PERIOD  300000000
 #define CLOCK_RECOVERY_PERIOD  (1<<21)
 
-// The number of samples the buffer can deviate from the fill point 
+// The number of samples the buffer can deviate from the fill point
 // over the recovery period to allow a lock
 #define ACCEPTABLE_LOCKED_FILL_DEVIATION 20
 
@@ -47,7 +47,7 @@ unsigned int update_media_clock(NULLABLE_RESOURCE(chanend,ptp_svr),
                                 int period);
 
 
-void update_media_clock_stream_info(int clock_index, 
+void update_media_clock_stream_info(int clock_index,
                                     unsigned int local_ts,
                                     unsigned int outgoing_ptp_ts,
                                     unsigned int presentation_ts,

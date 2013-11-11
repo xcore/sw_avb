@@ -213,7 +213,7 @@ void avb_1722_talker_send_packets(chanend c_mac_tx,
     int packet_size;
     int t;
 
-    tmr :> t; 
+    tmr :> t;
     packet_size =
       avb1722_create_packet((st.TxBuf, unsigned char[]),
                             st.talker_streams[st.cur_avb_stream],

@@ -382,7 +382,7 @@ static void local_set_source_state(unsigned source_num,
     #endif
 
       i_srp.deregister_stream_request(source->reservation.stream_id);
-        
+
     }
     source->stream.state = state;
   }
@@ -404,7 +404,7 @@ int avb_set_source_state(client interface avb_interface avb, unsigned source_num
 [[combinable]]
 void avb_manager(server interface avb_interface avb[num_avb_clients], unsigned num_avb_clients,
                  client interface srp_interface i_srp,
-                 chanend c_media_ctl[],  
+                 chanend c_media_ctl[],
                  chanend (&?c_listener_ctl)[],
                  chanend (&?c_talker_ctl)[],
                  chanend c_mac_tx,
@@ -512,7 +512,7 @@ void avb_manager(server interface avb_interface avb[num_avb_clients], unsigned n
           return_val = 1;
         }
         else return_val = 0;
-        break;      
+        break;
       }
       case avb[int i].get_source_state(unsigned source_num, enum avb_source_state_t &state) -> int return_val: {
         if (source_num < AVB_NUM_SOURCES) {
@@ -542,7 +542,7 @@ void avb_manager(server interface avb_interface avb[num_avb_clients], unsigned n
         }
         else return_val = 0;
         break;
-      }      
+      }
       case avb[int i].set_source_map(unsigned source_num, int map[len], unsigned len) -> int return_val: {
         if (source_num < AVB_NUM_SOURCES && sources[source_num].stream.state == AVB_SOURCE_STATE_DISABLED &&
           len <= AVB_MAX_CHANNELS_PER_TALKER_STREAM) {
@@ -627,7 +627,7 @@ void avb_manager(server interface avb_interface avb[num_avb_clients], unsigned n
           return_val = 1;
         }
         else return_val = 0;
-        break;      
+        break;
       }
       case avb[int i].set_sink_channels(unsigned sink_num, int channels) -> int return_val: {
         if (sink_num < AVB_NUM_SINKS && sinks[sink_num].stream.state == AVB_SINK_STATE_DISABLED) {
@@ -636,7 +636,7 @@ void avb_manager(server interface avb_interface avb[num_avb_clients], unsigned n
           return_val = 1;
         }
         else return_val = 0;
-        break;      
+        break;
       }
       case avb[int i].get_sink_sync(unsigned sink_num, int &sync) -> int return_val: {
         if (sink_num < AVB_NUM_SINKS) {
@@ -645,7 +645,7 @@ void avb_manager(server interface avb_interface avb[num_avb_clients], unsigned n
           return_val = 1;
         }
         else return_val = 0;
-        break;        
+        break;
       }
       case avb[int i].set_sink_sync(unsigned sink_num, int sync) -> int return_val: {
         if (sink_num < AVB_NUM_SINKS && sinks[sink_num].stream.state == AVB_SINK_STATE_DISABLED) {
@@ -654,8 +654,8 @@ void avb_manager(server interface avb_interface avb[num_avb_clients], unsigned n
           return_val = 1;
         }
         else return_val = 0;
-        break;      
-      }      
+        break;
+      }
       case avb[int i].get_sink_vlan(unsigned sink_num, int &vlan) -> int return_val: {
         if (sink_num < AVB_NUM_SINKS) {
           avb_sink_info_t *sink = &sinks[sink_num];
@@ -663,7 +663,7 @@ void avb_manager(server interface avb_interface avb[num_avb_clients], unsigned n
           return_val = 1;
         }
         else return_val = 0;
-        break;       
+        break;
       }
       case avb[int i].set_sink_vlan(unsigned sink_num, int vlan) -> int return_val: {
         if (sink_num < AVB_NUM_SINKS && sinks[sink_num].stream.state == AVB_SINK_STATE_DISABLED) {
@@ -672,7 +672,7 @@ void avb_manager(server interface avb_interface avb[num_avb_clients], unsigned n
           return_val = 1;
         }
         else return_val = 0;
-        break;       
+        break;
       }
       case avb[int i].get_sink_addr(unsigned sink_num, unsigned char addr[], int &len) -> int return_val: {
         if (sink_num < AVB_NUM_SINKS) {
@@ -682,7 +682,7 @@ void avb_manager(server interface avb_interface avb[num_avb_clients], unsigned n
           return_val = 1;
         }
         else return_val = 0;
-        break;        
+        break;
       }
       case avb[int i].set_sink_addr(unsigned sink_num, unsigned char addr[len], unsigned len) -> int return_val: {
         if (sink_num < AVB_NUM_SINKS && sinks[sink_num].stream.state == AVB_SINK_STATE_DISABLED && len == 6) {
@@ -691,12 +691,12 @@ void avb_manager(server interface avb_interface avb[num_avb_clients], unsigned n
           return_val = 1;
         }
         else return_val = 0;
-        break;  
+        break;
       }
       case avb[int i].get_sink_state(unsigned sink_num, enum avb_sink_state_t &state) -> int return_val: {
         if (sink_num < AVB_NUM_SINKS) {
           avb_sink_info_t *sink = &sinks[sink_num];
-          state = sink->stream.state; 
+          state = sink->stream.state;
           return_val = 1;
         }
         else return_val = 0;
@@ -720,17 +720,17 @@ void avb_manager(server interface avb_interface avb[num_avb_clients], unsigned n
           return_val = 1;
         }
         else return_val = 0;
-        break;     
+        break;
       }
       case avb[int i].set_sink_map(unsigned sink_num, int map[len], unsigned len) -> int return_val: {
-        if (sink_num < AVB_NUM_SINKS && sinks[sink_num].stream.state == AVB_SINK_STATE_DISABLED && 
+        if (sink_num < AVB_NUM_SINKS && sinks[sink_num].stream.state == AVB_SINK_STATE_DISABLED &&
             len <= AVB_MAX_CHANNELS_PER_LISTENER_STREAM) {
           avb_sink_info_t *sink = &sinks[sink_num];
           memcpy(sink->map, map, len<<2);
           return_val = 1;
         }
         else return_val = 0;
-        break;  
+        break;
       }
       case avb[int i].get_device_media_clock_rate(int clock_num, int &rate) -> int return_val: {
         if (clock_num < AVB_NUM_MEDIA_CLOCKS && !isnull(c_media_clock_ctl)) {
@@ -738,7 +738,7 @@ void avb_manager(server interface avb_interface avb[num_avb_clients], unsigned n
           return_val = 1;
         }
         else return_val = 0;
-        break;  
+        break;
       }
       case avb[int i].set_device_media_clock_rate(int clock_num, int rate) -> int return_val: {
         if (clock_num < AVB_NUM_MEDIA_CLOCKS && !isnull(c_media_clock_ctl)) {
@@ -746,7 +746,7 @@ void avb_manager(server interface avb_interface avb[num_avb_clients], unsigned n
           return_val = 1;
         }
         else return_val = 0;
-        break;          
+        break;
       }
       case avb[int i].get_device_media_clock_state(int clock_num, enum device_media_clock_state_t &state) -> int return_val: {
         if (clock_num < AVB_NUM_MEDIA_CLOCKS && !isnull(c_media_clock_ctl)) {
@@ -754,7 +754,7 @@ void avb_manager(server interface avb_interface avb[num_avb_clients], unsigned n
           return_val = 1;
         }
         else return_val = 0;
-        break;  
+        break;
       }
       case avb[int i].set_device_media_clock_state(int clock_num, enum device_media_clock_state_t state) -> int return_val: {
         if (clock_num < AVB_NUM_MEDIA_CLOCKS && !isnull(c_media_clock_ctl)) {
@@ -762,7 +762,7 @@ void avb_manager(server interface avb_interface avb[num_avb_clients], unsigned n
           return_val = 1;
         }
         else return_val = 0;
-        break;  
+        break;
       }
       case avb[int i].get_device_media_clock_source(int clock_num, int &source) -> int return_val: {
         if (clock_num < AVB_NUM_MEDIA_CLOCKS && !isnull(c_media_clock_ctl)) {
@@ -772,7 +772,7 @@ void avb_manager(server interface avb_interface avb[num_avb_clients], unsigned n
           return_val = 1;
         }
         else return_val = 0;
-        break;         
+        break;
       }
       case avb[int i].set_device_media_clock_source(int clock_num, int source) -> int return_val: {
         if (clock_num < AVB_NUM_MEDIA_CLOCKS && !isnull(c_media_clock_ctl)) {
@@ -780,7 +780,7 @@ void avb_manager(server interface avb_interface avb[num_avb_clients], unsigned n
           return_val = 1;
         }
         else return_val = 0;
-        break;          
+        break;
       }
       case avb[int i].get_device_media_clock_type(int clock_num, enum device_media_clock_type_t &clock_type) -> int return_val: {
         if (clock_num < AVB_NUM_MEDIA_CLOCKS && !isnull(c_media_clock_ctl)) {
@@ -788,7 +788,7 @@ void avb_manager(server interface avb_interface avb[num_avb_clients], unsigned n
           return_val = 1;
         }
         else return_val = 0;
-        break;  
+        break;
       }
       case avb[int i].set_device_media_clock_type(int clock_num, enum device_media_clock_type_t clock_type) -> int return_val: {
         if (clock_num < AVB_NUM_MEDIA_CLOCKS && !isnull(c_media_clock_ctl)) {
@@ -796,7 +796,7 @@ void avb_manager(server interface avb_interface avb[num_avb_clients], unsigned n
           return_val = 1;
         }
         else return_val = 0;
-        break;          
+        break;
       }
     }
   }
@@ -880,7 +880,7 @@ void avb_process_1722_control_packet(unsigned int buf0[],
         avb_1722_maap_process_packet(&buf[eth_hdr_size], len, ethernet_hdr->src_addr, c_tx);
         break;
     }
-  }  
+  }
 }
 
 void avb_process_control_packet(client interface avb_interface avb, unsigned int buf0[], unsigned nbytes, chanend c_tx, unsigned int port_num)
@@ -946,7 +946,7 @@ unsigned avb_get_source_stream_index_from_stream_id(unsigned int stream_id[2])
       return i;
     }
   }
-  return -1u;  
+  return -1u;
 }
 
 unsigned avb_get_sink_stream_index_from_stream_id(unsigned int stream_id[2])
@@ -957,7 +957,7 @@ unsigned avb_get_sink_stream_index_from_stream_id(unsigned int stream_id[2])
       return i;
     }
   }
-  return -1u;  
+  return -1u;
 }
 
 unsigned avb_get_source_stream_index_from_pointer(avb_source_info_t *unsafe p)
@@ -976,15 +976,15 @@ unsigned avb_get_sink_stream_index_from_pointer(avb_sink_info_t *unsafe p)
 	return -1u;
 }
 
-void avb_get_control_packet(chanend c_rx, 
+void avb_get_control_packet(chanend c_rx,
                             unsigned int buf[],
                             unsigned int &nbytes,
                             unsigned int &port_num)
 {
-  safe_mac_rx(c_rx, 
-              (buf, unsigned char[]), 
+  safe_mac_rx(c_rx,
+              (buf, unsigned char[]),
               nbytes,
-              port_num,                       
+              port_num,
               MAX_AVB_CONTROL_PACKET_SIZE);
 }
 

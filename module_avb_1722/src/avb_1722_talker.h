@@ -9,13 +9,13 @@
 
 #include "avb_1722_def.h"
 #include <xccompat.h>
-#include "avb_conf.h" 
+#include "avb_conf.h"
 #include "gptp.h"
 #include "media_input_fifo.h"
 
 #if AVB_NUM_SOURCES > 0
 
-#ifndef AVB_MAX_CHANNELS_PER_TALKER_STREAM 
+#ifndef AVB_MAX_CHANNELS_PER_TALKER_STREAM
 #define AVB_MAX_CHANNELS_PER_TALKER_STREAM 8
 #endif
 

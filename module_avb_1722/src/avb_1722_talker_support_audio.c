@@ -159,7 +159,7 @@ int avb1722_create_packet(unsigned char Buf0[],
     unsigned ptp_ts = 0;
     int dbc;
     int pkt_data_length;
-    
+
     if (stream_info->initial)
     {
         if (media_input_fifo_fill_level(map[0]) < MEDIA_INPUT_FIFO_SAMPLE_FIFO_SIZE/2)
@@ -220,7 +220,7 @@ int avb1722_create_packet(unsigned char Buf0[],
     AVB_Frame_t *pEtherHdr = (AVB_Frame_t *) &(Buf[0]);
     for (i = 0; i < MAC_ADRS_BYTE_COUNT; i++) {
         pEtherHdr->DA[i] = stream_info->destMACAdrs[i];
-    } 
+    }
 
     num_audio_samples = samples_in_packet * num_channels;
 

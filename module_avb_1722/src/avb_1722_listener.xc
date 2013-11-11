@@ -45,7 +45,7 @@ static transaction configure_stream(chanend c,
 	c :> media_clock;
 	c :> s.rate;
 	c :> s.num_channels;
-    
+
 	for(int i=0;i<s.num_channels;i++) {
 		c :> s.map[i];
 		if (s.map[i])

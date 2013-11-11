@@ -42,7 +42,7 @@ on tile[1]: mii_interface_t mii2 = {
   XS1_PORT_1C,
   XS1_PORT_1G,
   XS1_PORT_1F,
-  XS1_PORT_4B      
+  XS1_PORT_4B
 };
 
 on tile[0]: out port p_leds = XS1_PORT_4F;
@@ -348,7 +348,7 @@ void application_task(client interface avb_interface avb, server interface avb_1
                                             unsigned short control_index,
                                             unsigned short values_length,
                                             unsigned char values[508]) -> unsigned char return_status:
-      {        
+      {
         return_status = AECP_AEM_STATUS_NO_SUCH_DESCRIPTOR;
 
         if (control_type == AEM_CONTROL_TYPE)
@@ -367,9 +367,9 @@ void application_task(client interface avb_interface avb, server interface avb_1
               break;
             }
           }
-          
+
         }
-        
+
 
         break;
       }

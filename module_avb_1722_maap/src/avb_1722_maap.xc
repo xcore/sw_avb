@@ -47,19 +47,19 @@ static int create_maap_packet(int message_type,
                               int request_count,
                               unsigned char (&?conflict_addr)[6],
                               int conflict_count)
-{ 
+{
   struct ethernet_hdr_t *hdr = (ethernet_hdr_t*) &buf[0];
   struct maap_packet_t *pkt = (maap_packet_t*) (hdr + 1);
-  
+
   hdr->ethertype[0] = AVB_1722_ETHERTYPE >> 8;
   hdr->ethertype[1] = AVB_1722_ETHERTYPE & 0xff;
-  
+
   SET_MAAP_CD_FLAG(pkt, DEFAULT_MAAP_CD_FLAG);
   SET_MAAP_SUBTYPE(pkt, DEFAULT_MAAP_SUBTYPE);
   SET_MAAP_AVB_VERSION(pkt, DEFAULT_MAAP_AVB_VERSION);
   SET_MAAP_VERSION(pkt, DEFAULT_MAAP_VERSION);
   SET_MAAP_DATALENGTH(pkt, MAAP_DATA_LENGTH);
-  
+
   SET_MAAP_MSG_TYPE(pkt, message_type);
   for (int i=0; i < 6; i++)
   {
@@ -80,7 +80,7 @@ static int create_maap_packet(int message_type,
       pkt->request_start_address[i] = request_addr[i];
       pkt->conflict_start_address[i] = conflict_addr[i];
     }
-    
+
     SET_MAAP_REQUESTED_COUNT(pkt, request_count);
     SET_MAAP_CONFLICT_COUNT(pkt, conflict_count);
   }
@@ -92,14 +92,14 @@ static int create_maap_packet(int message_type,
       pkt->request_start_address[i] = addr.base[i];
       pkt->conflict_start_address[i] = 0;
     }
-    
+
     SET_MAAP_REQUESTED_COUNT(pkt, addr.range);
     SET_MAAP_CONFLICT_COUNT(pkt, 0);
   }
   return (64);
 }
 
-void avb_1722_maap_init(unsigned char macaddr[6]) 
+void avb_1722_maap_init(unsigned char macaddr[6])
 {
   maap_addr.state = MAAP_DISABLED;
   unsigned char base_addr[6] = MAAP_ALLOCATION_POOL_BASE_ADDR;
@@ -113,13 +113,13 @@ void avb_1722_maap_init(unsigned char macaddr[6])
 }
 
 // If used, start_address[] must be within the official IEEE MAAP pool
-void avb_1722_maap_request_addresses(int num_addr, char (&?start_address)[]) 
+void avb_1722_maap_request_addresses(int num_addr, char (&?start_address)[])
 {
   if (!isnull(start_address))
   {
     for (int i=0; i < 6; i++)
     {
-      maap_addr.base[i] = start_address[i];    
+      maap_addr.base[i] = start_address[i];
     }
   }
   else
@@ -127,7 +127,7 @@ void avb_1722_maap_request_addresses(int num_addr, char (&?start_address)[])
     int range_offset;
     // Set the base address randomly in the allocated maap address range
     range_offset = random_get_random_number(random_gen) % (MAAP_ALLOCATION_POOL_SIZE - maap_addr.range);
-    
+
     maap_addr.base[4] = (range_offset >> 8) & 0xFF;
     maap_addr.base[5] = range_offset & 0xFF;
   }
@@ -149,7 +149,7 @@ void avb_1722_maap_request_addresses(int num_addr, char (&?start_address)[])
   start_avb_timer(maap_timer, timeout_val);
 }
 
-void avb_1722_maap_rerequest_addresses() 
+void avb_1722_maap_rerequest_addresses()
 {
   if (maap_addr.state != MAAP_DISABLED)
   {
@@ -171,7 +171,7 @@ void avb_1722_maap_periodic(chanend c_tx, client interface avb_interface avb)
 {
   int nbytes;
 
-  switch (maap_addr.state) 
+  switch (maap_addr.state)
   {
   case MAAP_DISABLED:
     break;
@@ -250,7 +250,7 @@ void avb_1722_maap_periodic(chanend c_tx, client interface avb_interface avb)
       }
     }
     break;
-  } 
+  }
 }
 
 static int maap_compare_mac(unsigned char src_addr[6])
@@ -269,7 +269,7 @@ static int maap_conflict(unsigned char remote_addr[6], int remote_count, unsigne
   int conflict_lo;
   int conflict_hi;
   int first_conflict_addr;
-  
+
   // First, check the address is within the IEEE allocation pool
   for (int i=0; i < 4; i++)
   {
@@ -286,7 +286,7 @@ static int maap_conflict(unsigned char remote_addr[6], int remote_count, unsigne
   printstr("my_addr_lo: "); printintln(my_addr_lo);
   printstr("my_addr_hi: "); printintln(my_addr_hi);
   printstr("conflict_lo: "); printintln(conflict_lo);
-  printstr("conflict_hi: "); printintln(conflict_hi); 
+  printstr("conflict_hi: "); printintln(conflict_hi);
 #endif
 
   // We need to find the "first allocated address that conflicts with the requested address range"
@@ -327,7 +327,7 @@ static int maap_conflict(unsigned char remote_addr[6], int remote_count, unsigne
   {
     return 0;
   }
-  
+
   // We have a conflict.
 
   if (maap_addr.state == MAAP_RESERVED)
@@ -336,13 +336,13 @@ static int maap_conflict(unsigned char remote_addr[6], int remote_count, unsigne
     // Fill in the conflict_start_address field
     for (int i=0; i<4; i++)
     {
-      conflicted_addr[i] = maap_addr.base[i];        
+      conflicted_addr[i] = maap_addr.base[i];
     }
 
     conflicted_addr[4] = (unsigned char)(first_conflict_addr >> 8);
     conflicted_addr[5] = (unsigned char)first_conflict_addr;
   }
-  
+
   return 1;
 }
 
@@ -383,7 +383,7 @@ void avb_1722_maap_process_packet(unsigned char buf[nbytes], unsigned int nbytes
       {
         if (maap_compare_mac(src_addr)) return;
         // Generate new addresses using the same range count as before:
-        avb_1722_maap_request_addresses(-1, null); 
+        avb_1722_maap_request_addresses(-1, null);
       }
       else
       {

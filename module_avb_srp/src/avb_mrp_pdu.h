@@ -59,10 +59,10 @@ typedef struct {
 
 typedef struct {
   unsigned char EndMark[2];
-} mrp_footer; 
+} mrp_footer;
 
 typedef struct {
   unsigned char EndMark[2];
-} mrp_msg_footer; 
+} mrp_msg_footer;
 
 #endif //__avb_mrp_pdu_h__

@@ -26,7 +26,7 @@ void media_output_fifo_to_xc_channel(streaming chanend samples_out,
       sample = media_output_fifo_pull_sample(output_fifos[i],
                                              timestamp);
       samples_out <: sample;
-      
+
     }
   }
 }
@@ -34,13 +34,13 @@ void media_output_fifo_to_xc_channel(streaming chanend samples_out,
 
 int mo_ts;
 #pragma unsafe arrays
-void 
+void
 media_output_fifo_to_xc_channel_split_lr(streaming chanend samples_out,
                                          media_output_fifo_t output_fifos[],
                                          int num_channels)
 {
   mo_ts = 0xbadf00d;
-  
+
 #ifdef XSCOPE_OUTPUT_FIFO_PULL
   xscope_register(1, XSCOPE_DISCRETE, "Media Output FIFO", XSCOPE_UINT, "Samples");
 #endif

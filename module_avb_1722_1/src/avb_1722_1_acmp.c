@@ -236,7 +236,7 @@ avb_1722_1_acmp_inflight_command *acmp_remove_inflight(int entity_type)
     avb_1722_1_acmp_inflight_command *inflight = acmp_get_inflight_list(entity_type);
     int index;
     avb_1722_1_acmp_inflight_command *result = 0;
-    
+
     switch (entity_type)
     {
         case CONTROLLER: acmp_command = &acmp_controller_cmd_resp; break;
@@ -244,7 +244,7 @@ avb_1722_1_acmp_inflight_command *acmp_remove_inflight(int entity_type)
     }
 
     index = acmp_get_inflight_from_sequence_id(entity_type, acmp_command->sequence_id);
-    
+
     if (index >= 0)
     {
         inflight[index].in_use = 0;
@@ -258,7 +258,7 @@ avb_1722_1_acmp_inflight_command *acmp_remove_inflight(int entity_type)
                         acmp_command->sequence_id);
 #endif
     }
-    
+
     return result;
 }
 

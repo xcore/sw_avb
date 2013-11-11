@@ -30,16 +30,16 @@
 #define PTP_COMMON_MESG_HDR_LENGTH        (34)
 
 // PTP Common Message Header format
-typedef struct 
+typedef struct
 {
   n8_t transportSpecific_messageType;
   n8_t versionPTP;
-  n16_t messageLength;   
+  n16_t messageLength;
   n8_t domainNumber;
   n8_t Resv0;
   n8_t flagField[2];
   n64_t correctionField;
-  n32_t Resv1;   
+  n32_t Resv1;
   n80_t sourcePortIdentity;
   n16_t sequenceId;
   n8_t controlField;
@@ -59,7 +59,7 @@ typedef struct
   n8_t  grandmasterPriority2;
   n64_t grandmasterIdentity;
   n16_t stepsRemoved;
-  n8_t  timeSource;  
+  n8_t  timeSource;
   n16_t tlvType;
   n16_t tlvLength;
   n64_t pathSequence[PTP_MAXIMUM_PATH_TRACE_TLV];
@@ -93,7 +93,7 @@ typedef struct
 } PdelayReqMessage;
 
 // PTP Peer delay response message
-typedef struct 
+typedef struct
 {
   n80_t requestReceiptTimestamp;
   n80_t requestingPortIdentity;

@@ -57,7 +57,7 @@ void avb_1722_1_init(unsigned char macaddr[6], unsigned serial_num)
 
 }
 
-void avb_1722_1_process_packet(unsigned char buf[len], unsigned len, 
+void avb_1722_1_process_packet(unsigned char buf[len], unsigned len,
                                 unsigned char src_addr[6],
                                 chanend c_tx,
                                 CLIENT_INTERFACE(avb_interface, i_avb_api),

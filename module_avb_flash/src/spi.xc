@@ -23,9 +23,9 @@ static void spi_init() {
 }
 
 #if (SPI_CLK_MHZ == 25)
-#define eightPulses(clk)     { clk <: 0xCCCCCCCC;} 
+#define eightPulses(clk)     { clk <: 0xCCCCCCCC;}
 #elif (SPI_CLK_MHZ == 13)
-#define eightPulses(clk)     { clk <: 0xF0F0F0F0; clk <: 0xF0F0F0F0;} 
+#define eightPulses(clk)     { clk <: 0xF0F0F0F0; clk <: 0xF0F0F0F0;}
 #else
 #error "Undefined SPI_CLK_MHZ speed  - must be one of 25 or 13"
 #endif
@@ -50,7 +50,7 @@ static int spi_command_status(int cmd, unsigned returnBytes) {
   return bitrev(data);
 }
 
-[[distributable]] 
+[[distributable]]
 void spi_task(server interface spi_interface i_spi) {
 
   spi_init();

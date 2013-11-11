@@ -42,7 +42,7 @@ extern unsigned ptp_path_delay;
        ptp_timeout += PTP_PERIODIC_TIME; \
        break
 
-void ptp_server_init(chanend c_rx, chanend c_tx, 
+void ptp_server_init(chanend c_rx, chanend c_tx,
                      enum ptp_server_type server_type,
                      timer ptp_timer,
                      int &ptp_timeout)
@@ -51,7 +51,7 @@ void ptp_server_init(chanend c_rx, chanend c_tx,
   mac_set_custom_filter(c_rx, MAC_FILTER_PTP);
 
   ptp_timer :> ptp_timeout;
- 
+
   ptp_init(c_tx, c_rx, server_type);
 
 }
@@ -59,15 +59,15 @@ void ptp_server_init(chanend c_rx, chanend c_tx,
 #pragma select handler
 void ptp_recv_and_process_packet(chanend c_rx, chanend c_tx)
 {
-  unsigned int buf[MAX_PTP_MESG_LENGTH/4];  
+  unsigned int buf[MAX_PTP_MESG_LENGTH/4];
   unsigned ts;
   unsigned src_port;
   unsigned len;
-  safe_mac_rx_timed(c_rx, 
-                   (buf, unsigned char[]), 
+  safe_mac_rx_timed(c_rx,
+                   (buf, unsigned char[]),
                    len,
-                   ts, 
-                   src_port, 
+                   ts,
+                   src_port,
                    MAX_PTP_MESG_LENGTH);
   ptp_recv(c_tx, (buf, unsigned char[]), ts, src_port, len);
 }
@@ -106,9 +106,9 @@ void ptp_process_client_request(chanend c, timer ptp_timer)
 
   cmd = inuchar(c);
   (void) inuchar(c);
-  (void) inuchar(c); 
+  (void) inuchar(c);
   (void) inct(c);
-  switch (cmd) 
+  switch (cmd)
   {
     case PTP_GET_TIME_INFO:
       ptp_give_requested_time_info(c, ptp_timer);
@@ -126,7 +126,7 @@ void ptp_process_client_request(chanend c, timer ptp_timer)
       c <: g_ptp_adjust;
       c <: g_inv_ptp_adjust;
       c <: tile_id;
-      }                        
+      }
       break;
     }
     case PTP_GET_GRANDMASTER: {
@@ -160,7 +160,7 @@ void ptp_process_client_request(chanend c, timer ptp_timer)
 }
 
 
-void ptp_server(chanend c_rx, chanend c_tx, 
+void ptp_server(chanend c_rx, chanend c_tx,
                 chanend ptp_clients[], int num_clients,
                 enum ptp_server_type server_type)
 {
@@ -169,7 +169,7 @@ void ptp_server(chanend c_rx, chanend c_tx,
   ptp_server_init(c_rx, c_tx, server_type, ptp_timer, ptp_timeout);
 
   while (1) {
-    select 
+    select
       {
         do_ptp_server(c_rx, c_tx, ptp_clients, num_clients, ptp_timer, ptp_timeout);
       }

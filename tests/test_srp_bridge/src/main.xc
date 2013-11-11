@@ -32,7 +32,7 @@ on tile[1]: mii_interface_t mii2 = {
   XS1_PORT_1C,
   XS1_PORT_1G,
   XS1_PORT_1F,
-  XS1_PORT_4B      
+  XS1_PORT_4B
 };
 
 // PTP sync port
@@ -40,7 +40,7 @@ on stdcore[0]: port ptp_sync_port = XS1_PORT_1C;
 
 #define PERIODIC_POLL_TIME 5000
 
-int main() 
+int main()
 {
   chan c_mac_rx[2], c_mac_tx[2];
   chan c_ptp[1];
@@ -62,13 +62,13 @@ int main()
                                     c_mac_tx, 2);
     }
 
-    on stdcore[0]: ptp_server(c_mac_rx[0], 
-                              c_mac_tx[0], 
-                              c_ptp, 
-                              1, 
+    on stdcore[0]: ptp_server(c_mac_rx[0],
+                              c_mac_tx[0],
+                              c_ptp,
+                              1,
                               PTP_GRANDMASTER_CAPABLE);
 
-                                
+
     on stdcore[0]: ptp_output_test_clock(c_ptp[0], ptp_sync_port, 100000000);
 
     on stdcore[0]:

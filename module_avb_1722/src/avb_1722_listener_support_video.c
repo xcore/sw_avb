@@ -21,7 +21,7 @@ static unsigned avb_1722_sequence_failure = 0;
 #endif
 
 int avb_1722_listener_process_packet(chanend buf_ctl,
-                                     unsigned char Buf0[], 
+                                     unsigned char Buf0[],
                                      int numBytes,
                                      avb_1722_stream_info_t *stream_info,
                                      ptp_time_info_mod64* timeInfo,
@@ -143,7 +143,7 @@ int avb_1722_listener_process_packet(chanend buf_ctl,
 		media_output_fifo_push(map[0], sample_ptr, dbc & 0x7, num_blocks_in_payload);
 	}
 
- 
+
 	return 1;
 }
 

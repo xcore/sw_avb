@@ -2,7 +2,7 @@
 #define __AUDIO_I2S_CTL_H__ 1
 
 /*
-  This unit provides functionality to communicate from AVB media fifos to 
+  This unit provides functionality to communicate from AVB media fifos to
   an audio codec using the I2S digital audio interface format.
 */
 
@@ -36,16 +36,16 @@ void i2s_master_configure_ports(REFERENCE_PARAM(i2s_ports_t, p),
                                 in buffered port:32 (&?p_din)[num_in],
                                 unsigned num_in);
 
-/** Input and output audio data using I2S format with the XCore acting 
+/** Input and output audio data using I2S format with the XCore acting
  as master.
 
- This function implements a thread that can handle several synchronous 
+ This function implements a thread that can handle several synchronous
  I2S interfaces. It inputs and outputs 24-bit data packed into 32 bits.
 
- The function will take input from the I2S interface and put the samples 
- directly into shared memory media input FIFOs. The output samples are 
+ The function will take input from the I2S interface and put the samples
+ directly into shared memory media input FIFOs. The output samples are
  received over a channel. Every two word clock periods (i.e. once a
- sample) a timestamp is sent from this thread over the channel 
+ sample) a timestamp is sent from this thread over the channel
  and num_out samples are taken from the channel.
 
  The master clock is generated externally by the PLL. A clock block clocks
@@ -55,9 +55,9 @@ void i2s_master_configure_ports(REFERENCE_PARAM(i2s_ports_t, p),
  We also write out data to the LRCLK port to generate a correct LRCLK pattern.
 
 
- This function can handle up to 8in and 8out at 48KHz. 
+ This function can handle up to 8in and 8out at 48KHz.
 
-  \param mclk      clock block that clocks the system clock of the codec;  
+  \param mclk      clock block that clocks the system clock of the codec;
                    needs to be configured before the function call
   \param bclk      clock block that clocks the bit clock; configured
                    within the i2s_master function
@@ -109,8 +109,8 @@ inline void i2s_master_upto_8(const clock mclk,
 #endif
 
   // You can output 32 mclk ticks worth of bitclock at a time.
-  // So the ratio between the master clock and the word clock will affect 
-  // how many bitclocks outputs you have to do per word and also the 
+  // So the ratio between the master clock and the word clock will affect
+  // how many bitclocks outputs you have to do per word and also the
   // length of the bitclock w.r.t the master clock.
   // In every case you will end up with 32 bit clocks per word.
   switch (mclk_to_bclk_ratio)
@@ -118,7 +118,7 @@ inline void i2s_master_upto_8(const clock mclk,
   case 2:
     bclk_val = 0xaaaaaaaa; // 10
     break;
-  case 4: 
+  case 4:
     bclk_val = 0xcccccccc; // 1100
     break;
   case 8:
@@ -130,15 +130,15 @@ inline void i2s_master_upto_8(const clock mclk,
   }
 
 
-  // This sections aligns the ports so that the dout/din ports are 
+  // This sections aligns the ports so that the dout/din ports are
   // inputting and outputting in sync,
   // setting the t variable at the end sets when the lrclk will change
   // w.r.t to the bitclock.
 
-  for (int i=0;i<num_out>>1;i++) 
+  for (int i=0;i<num_out>>1;i++)
     p_dout[i] @ 32 <: 0;
 
-  for (int i=0;i<num_in>>1;i++) 
+  for (int i=0;i<num_in>>1;i++)
     asm ("setpt res[%0], %1" : : "r"(p_din[i]), "r"(63));
 
   p_lrclk @ 31 <: 0xFFFFFFFF;
@@ -146,11 +146,11 @@ inline void i2s_master_upto_8(const clock mclk,
   for (int j=0;j<2;j++) {
     for (int i=0;i<mclk_to_bclk_ratio;i++)  {
       p_bclk <: bclk_val;
-    }  
+    }
   }
 
 
-  for (int i=0;i<num_out>>1;i++) 
+  for (int i=0;i<num_out>>1;i++)
     p_dout[i] <: 0;
 
   // the unroll directives in the following loops only make sense if this
@@ -183,7 +183,7 @@ inline void i2s_master_upto_8(const clock mclk,
     	p_lrclk <: lrclk_val;
     	lrclk_val = ~lrclk_val;
 
-#pragma loop unroll    
+#pragma loop unroll
       for (int k=0;k<mclk_to_bclk_ratio;k++) {
 
 #pragma xta endpoint "i2s_master_bclk_output"
@@ -214,7 +214,7 @@ inline void i2s_master_upto_8(const clock mclk,
           }
 #endif
         }
-        
+
         if (k < num_out>>1) {
           unsigned int sample_out;
           c_listener :> sample_out;
@@ -266,8 +266,8 @@ inline void i2s_master_upto_4(const clock mclk,
 #endif
 
   // You can output 32 mclk ticks worth of bitclock at a time.
-  // So the ratio between the master clock and the word clock will affect 
-  // how many bitclocks outputs you have to do per word and also the 
+  // So the ratio between the master clock and the word clock will affect
+  // how many bitclocks outputs you have to do per word and also the
   // length of the bitclock w.r.t the master clock.
   // In every case you will end up with 32 bit clocks per word.
   switch (mclk_to_bclk_ratio)
@@ -275,7 +275,7 @@ inline void i2s_master_upto_4(const clock mclk,
   case 2:
     bclk_val = 0xaaaaaaaa; // 10
     break;
-  case 4: 
+  case 4:
     bclk_val = 0xcccccccc; // 1100
     break;
   case 8:
@@ -287,17 +287,17 @@ inline void i2s_master_upto_4(const clock mclk,
   }
 
 
-  
 
-  // This sections aligns the ports so that the dout/din ports are 
+
+  // This sections aligns the ports so that the dout/din ports are
   // inputting and outputting in sync,
   // setting the t variable at the end sets when the lrclk will change
   // w.r.t to the bitclock.
 
-  for (int i=0;i<num_out>>1;i++) 
+  for (int i=0;i<num_out>>1;i++)
     p_dout[i] @ 32 <: 0;
 
-  for (int i=0;i<num_in>>1;i++) 
+  for (int i=0;i<num_in>>1;i++)
     asm ("setpt res[%0], %1" : : "r"(p_din[i]), "r"(63));
 
   p_lrclk @ 31 <: 0xFFFFFFFF;
@@ -305,11 +305,11 @@ inline void i2s_master_upto_4(const clock mclk,
   for (int j=0;j<2;j++) {
     for (int i=0;i<mclk_to_bclk_ratio;i++)  {
       p_bclk <: bclk_val;
-    }  
+    }
   }
 
 
-  for (int i=0;i<num_out>>1;i++) 
+  for (int i=0;i<num_out>>1;i++)
     p_dout[i] <: 0;
 
   // the unroll directives in the following loops only make sense if this
@@ -338,7 +338,7 @@ inline void i2s_master_upto_4(const clock mclk,
     	p_lrclk <: lrclk_val;
     	lrclk_val = ~lrclk_val;
 
-#pragma loop unroll    
+#pragma loop unroll
       for (int k=0;k<mclk_to_bclk_ratio;k++) {
 
 #pragma xta endpoint "i2s_master_bclk_output"
@@ -369,7 +369,7 @@ inline void i2s_master_upto_4(const clock mclk,
           }
 #endif
         }
-        
+
         if (k < num_out>>1) {
           unsigned int sample_out;
           sample_out = media_output_fifo_pull_sample(output_fifos[j+k*2],
@@ -404,7 +404,7 @@ static inline void i2s_master(i2s_ports_t &ports,
                               int clk_ctl_index)
 {
   media_ctl_register(media_ctl,
-                     input_fifos, num_in, 
+                     input_fifos, num_in,
                      output_fifos, num_out,
                      clk_ctl_index);
 

@@ -1,6 +1,6 @@
 #include <xs1.h>
 #include "avb_1722_def.h"
-#include "avb_conf.h" 
+#include "avb_conf.h"
 #include "gptp.h"
 #include "media_input_fifo.h"
 #include "avb_1722.h"

@@ -31,7 +31,7 @@ typedef struct aem_desc_stream_input_output_t {
     uint8_t backup_talker_entity_id_2[8];
     uint8_t backup_talker_unique_id_2[2];
     uint8_t backedup_talker_entity_id[8];
-    uint8_t backedup_talker_unique_id[2];   
+    uint8_t backedup_talker_unique_id[2];
     uint8_t avb_interface_index[2];
     uint8_t buffer_length[4];
     #define MAX_NUM_STREAM_FORMATS 8
@@ -53,7 +53,7 @@ typedef struct aem_desc_audio_map_t {
     uint8_t number_of_mappings[2];
     #define MAX_NUM_MAPPINGS 8
     aem_audio_map_format_t mappings[MAX_NUM_MAPPINGS];
-    #undef  MAX_NUM_MAPPINGS    
+    #undef  MAX_NUM_MAPPINGS
 } aem_desc_audio_map_t;
 
 typedef struct aem_desc_stream_port_input_output_t {

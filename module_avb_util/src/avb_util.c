@@ -25,7 +25,7 @@ int avb_itoa(int n, char *buf, int base, int fill)
     fill--;
     n = next;
   }
-  for (;fill > 0;fill--) {    
+  for (;fill > 0;fill--) {
     buf[i] = '0';
     i++;
   }
@@ -35,7 +35,7 @@ int avb_itoa(int n, char *buf, int base, int fill)
 
 int avb_itoa_fixed(int n, char *buf, int base, int fill1, int fill2, int prec)
 {
-  long long x; 
+  long long x;
   char *buf0 = buf;
   if (n < 0) {
     buf[0] = '-';
@@ -52,7 +52,7 @@ int avb_itoa_fixed(int n, char *buf, int base, int fill1, int fill2, int prec)
   x -= ((x>>prec)<<prec);
   for (int i=0;i<fill2;i++)
     x *= base;
-  buf += avb_itoa(x>>prec,buf,base,fill2); 
+  buf += avb_itoa(x>>prec,buf,base,fill2);
   return (buf - buf0);
 }
 

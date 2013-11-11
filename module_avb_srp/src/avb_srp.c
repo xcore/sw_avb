@@ -15,18 +15,18 @@
 #include "avb_api.h"
 #include "ethernet_tx_client.h"
 
-/* This needs to be greater than the actual max number of handled streams, because SRP 
-   cannot remove the attributes as quickly as a connection can be torn down and setup 
-   again on the Mac. The Mac uses a new set of stream IDs, presumably because the old 
+/* This needs to be greater than the actual max number of handled streams, because SRP
+   cannot remove the attributes as quickly as a connection can be torn down and setup
+   again on the Mac. The Mac uses a new set of stream IDs, presumably because the old
    attributes are still hanging around in their implementation also.
-   Hence there will be a period where the number of active stream entries is greater 
+   Hence there will be a period where the number of active stream entries is greater
    than the max capable number until they are cleaned up.
 */
 #ifndef AVB_STREAM_TABLE_ENTRIES
 #define AVB_STREAM_TABLE_ENTRIES (8+4)
 #endif
 
-typedef struct avb_stream_entry 
+typedef struct avb_stream_entry
 {
   avb_srp_info_t reservation;
   int listener_present;
@@ -90,7 +90,7 @@ int avb_srp_match_listener_to_talker_stream_id(unsigned stream_id[2], avb_srp_in
 {
   for(int i=0;i<AVB_STREAM_TABLE_ENTRIES;i++)
   {
-    if (((is_listener && stream_table[i].talker_present == 1) || 
+    if (((is_listener && stream_table[i].talker_present == 1) ||
         (!is_listener && stream_table[i].listener_present == 1)) &&
         stream_id[0] == stream_table[i].reservation.stream_id[0] &&
         stream_id[1] == stream_table[i].reservation.stream_id[1]) {
@@ -269,7 +269,7 @@ static void avb_srp_map_join(mrp_attribute_state *attr, int new, int listener)
   /**************/
 
   mrp_debug_dump_attrs();
-  
+
 }
 
 void avb_srp_map_leave(mrp_attribute_state *attr)
@@ -298,7 +298,7 @@ void avb_srp_map_leave(mrp_attribute_state *attr)
       }
     }
   }
-  else if (attr->attribute_type == MSRP_TALKER_ADVERTISE) 
+  else if (attr->attribute_type == MSRP_TALKER_ADVERTISE)
   {
     if (matched_stream_id_opposite_port) {
       // Propagate Talker leave:
@@ -308,7 +308,7 @@ void avb_srp_map_leave(mrp_attribute_state *attr)
     if (matched_talker_listener) {
       /* Special case of behaviour described in 25.3.4.4.1.
        * "the Bridge shall act as a proxy for the Listener(s) and automatically generate a
-       *  MAD_Leave.request back toward the Talker for those Listener attributes" 
+       *  MAD_Leave.request back toward the Talker for those Listener attributes"
        */
       mrp_mad_leave(matched_talker_listener);
     }
@@ -340,7 +340,7 @@ int avb_srp_match_talker_advertise(mrp_attribute_state *attr,
   }
 
   stream_id += i;
-  
+
 
   return (my_stream_id == stream_id);
 }
@@ -367,7 +367,7 @@ int avb_srp_match_listener(mrp_attribute_state *attr,
   for (int i=0;i<8;i++) {
     stream_id = (stream_id << 8) + first_value->StreamId[i];
   }
-  
+
   stream_id += i;
 
   return (my_stream_id == stream_id);
@@ -514,7 +514,7 @@ void avb_srp_join_listener_attrs(unsigned int stream_id[2]) {
   // LJ1. Find Talker advertise attribute that has not been propagated
   mrp_attribute_state *matched_talker_advertise = mrp_match_talker_non_prop_attribute(stream_id, -1);
 
-  if (matched_talker_advertise) { 
+  if (matched_talker_advertise) {
     mrp_attribute_state *matched_listener_same_port = mrp_match_attribute_pair_by_stream_id(matched_talker_advertise, 0, 0);
 
     // LJ2. If Listener Ready attribute not present on this port, create it
@@ -529,7 +529,7 @@ void avb_srp_join_listener_attrs(unsigned int stream_id[2]) {
     }
 
     // LJ3. Join Listener Ready on the Talker advertise port
-    mrp_mad_join(matched_listener_same_port, 1); 
+    mrp_mad_join(matched_listener_same_port, 1);
   }
   else { // LJ4: If the Talker advertise hasn't matched, then it probably hasn't arrived yet
     // LJ5: Create Listener attrs on both ports but leave them disabled
@@ -577,8 +577,8 @@ mrp_attribute_state* avb_srp_process_new_attribute_from_packet(int mrp_attribute
     {
       unsigned long long x;
       reservation.vlan_id = ntoh_16(packet->VlanID);
-        
-      for(int i=0;i<6;i++) 
+
+      for(int i=0;i<6;i++)
         x = (x<<8) + packet->DestMacAddr[i];
 
       x += num;
@@ -623,9 +623,9 @@ void avb_srp_talker_join_ind(mrp_attribute_state *attr, int new)
     unsigned stream = avb_get_sink_stream_index_from_stream_id(sink_info->reservation.stream_id);
     mrp_attribute_state *matched_listener_this_port = mrp_match_attribute_pair_by_stream_id(attr, 0, 1);
 
-    /* This covers the case where the Listener joins before the Talker attribute. When we receive the Talker join new, 
-     * we also trigger join for the Listener attribute on the same port if it already exists. 
-     * We also need to mark the disabled Listener attr we created on the other port as unused 
+    /* This covers the case where the Listener joins before the Talker attribute. When we receive the Talker join new,
+     * we also trigger join for the Listener attribute on the same port if it already exists.
+     * We also need to mark the disabled Listener attr we created on the other port as unused
      */
     if (stream != -1u && matched_listener_this_port)
     {
@@ -656,13 +656,13 @@ void avb_srp_talker_leave_ind(mrp_attribute_state *attr)
   }
 }
 
-static int check_listener_firstvalue_merge(char *buf, 
+static int check_listener_firstvalue_merge(char *buf,
                                 avb_sink_info_t *sink_info)
 {
-  mrp_vector_header *hdr = (mrp_vector_header *) (buf + sizeof(mrp_msg_header));  
+  mrp_vector_header *hdr = (mrp_vector_header *) (buf + sizeof(mrp_msg_header));
   int num_values = hdr->NumberOfValuesLow;
   unsigned long long stream_id=0, my_stream_id=0;
-  srp_listener_first_value *first_value = 
+  srp_listener_first_value *first_value =
     (srp_listener_first_value *) (buf + sizeof(mrp_msg_header) + sizeof(mrp_vector_header));
 
   // check if we can merge
@@ -672,13 +672,13 @@ static int check_listener_firstvalue_merge(char *buf,
   for (int i=0;i<8;i++) {
     stream_id = (stream_id << 8) + first_value->StreamId[i];
   }
-  
+
   stream_id += num_values;
 
 
   if (my_stream_id != stream_id)
     return 0;
-  
+
   return 1;
 
 }
@@ -689,8 +689,8 @@ static int encode_listener_message(char *buf,
                                   int vector)
 {
   mrp_msg_header *mrp_hdr = (mrp_msg_header *) buf;
-  mrp_vector_header *hdr = 
-    (mrp_vector_header *) (buf + sizeof(mrp_msg_header));  
+  mrp_vector_header *hdr =
+    (mrp_vector_header *) (buf + sizeof(mrp_msg_header));
   int merge = 0;
   avb_sink_info_t *sink_info = st->attribute_info;
 
@@ -700,15 +700,15 @@ static int encode_listener_message(char *buf,
     return 0;
 
   num_values = hdr->NumberOfValuesLow;
-                           
-  if (num_values == 0) 
+
+  if (num_values == 0)
     merge = 1;
-  else 
+  else
     merge = check_listener_firstvalue_merge(buf, sink_info);
 
 
   if (merge) {
-    srp_listener_first_value *first_value = 
+    srp_listener_first_value *first_value =
       (srp_listener_first_value *) (buf + sizeof(mrp_msg_header) + sizeof(mrp_vector_header));
     unsigned *streamId = sink_info->reservation.stream_id;
     unsigned int streamid;
@@ -726,12 +726,12 @@ static int encode_listener_message(char *buf,
       }
 
     }
-    
-    mrp_encode_three_packed_event(buf, vector, st->attribute_type);    
+
+    mrp_encode_three_packed_event(buf, vector, st->attribute_type);
     mrp_encode_four_packed_event(buf, AVB_SRP_FOUR_PACKED_EVENT_READY, st->attribute_type);
 
-    hdr->NumberOfValuesLow = num_values+1;    
-    
+    hdr->NumberOfValuesLow = num_values+1;
+
   }
 
   return merge;
@@ -757,8 +757,8 @@ static int encode_domain_message(char *buf,
                                 int vector)
 {
   mrp_msg_header *mrp_hdr = (mrp_msg_header *) buf;
-  mrp_vector_header *hdr = 
-    (mrp_vector_header *) (buf + sizeof(mrp_msg_header));  
+  mrp_vector_header *hdr =
+    (mrp_vector_header *) (buf + sizeof(mrp_msg_header));
   int merge = 0;
   int num_values;
 
@@ -768,40 +768,40 @@ static int encode_domain_message(char *buf,
 
 
   num_values = hdr->NumberOfValuesLow;
-                           
-  if (num_values == 0) 
+
+  if (num_values == 0)
     merge = 1;
-  else 
+  else
     merge = check_domain_firstvalue_merge(buf);
 
-  if (merge) { 
-    srp_domain_first_value *first_value = 
-      (srp_domain_first_value *) (buf + sizeof(mrp_msg_header) + sizeof(mrp_vector_header));    
+  if (merge) {
+    srp_domain_first_value *first_value =
+      (srp_domain_first_value *) (buf + sizeof(mrp_msg_header) + sizeof(mrp_vector_header));
 
     first_value->SRclassID = AVB_SRP_SRCLASS_DEFAULT;
     first_value->SRclassPriority = AVB_SRP_TSPEC_PRIORITY_DEFAULT;
     first_value->SRclassVID[0] = (AVB_DEFAULT_VLAN>>8)&0xff;
     first_value->SRclassVID[1] = (AVB_DEFAULT_VLAN&0xff);
 
-    mrp_encode_three_packed_event(buf, vector, st->attribute_type);    
+    mrp_encode_three_packed_event(buf, vector, st->attribute_type);
 
     hdr->NumberOfValuesLow = num_values+1;
-  }    
-  
+  }
+
   return merge;
 }
 
 
-static int check_talker_firstvalue_merge(char *buf, 
+static int check_talker_firstvalue_merge(char *buf,
                               avb_source_info_t *source_info)
 {
-  mrp_vector_header *hdr = (mrp_vector_header *) (buf + sizeof(mrp_msg_header));  
+  mrp_vector_header *hdr = (mrp_vector_header *) (buf + sizeof(mrp_msg_header));
   int num_values = hdr->NumberOfValuesLow;
   unsigned long long stream_id=0, my_stream_id=0;
   unsigned long long dest_addr=0, my_dest_addr=0;
   int framesize=0, my_framesize=0;
   int vlan, my_vlan;
-  srp_talker_first_value *first_value = 
+  srp_talker_first_value *first_value =
     (srp_talker_first_value *) (buf + sizeof(mrp_msg_header) + sizeof(mrp_vector_header));
 
   // check if we can merge
@@ -810,7 +810,7 @@ static int check_talker_firstvalue_merge(char *buf,
     my_dest_addr = (my_dest_addr << 8) + source_info->reservation.dest_mac_addr[i];
     dest_addr = (dest_addr << 8) + first_value->DestMacAddr[i];
   }
-  
+
   dest_addr += num_values;
 
   if (dest_addr != my_dest_addr)
@@ -835,14 +835,14 @@ static int check_talker_firstvalue_merge(char *buf,
 
   if (vlan != my_vlan)
     return 0;
-  
+
   my_framesize = source_info->reservation.tspec_max_frame_size;
-  framesize = ntoh_16(first_value->TSpecMaxFrameSize);  
+  framesize = ntoh_16(first_value->TSpecMaxFrameSize);
 
   if (framesize != my_framesize)
     return 0;
-  
-  
+
+
   return 1;
 
 }
@@ -852,8 +852,8 @@ static int encode_talker_message(char *buf,
                                 int vector)
 {
   mrp_msg_header *mrp_hdr = (mrp_msg_header *) buf;
-  mrp_vector_header *hdr = 
-    (mrp_vector_header *) (buf + sizeof(mrp_msg_header));  
+  mrp_vector_header *hdr =
+    (mrp_vector_header *) (buf + sizeof(mrp_msg_header));
   int merge = 0;
   avb_source_info_t *source_info = st->attribute_info;
   avb_srp_info_t *attribute_info;
@@ -868,20 +868,20 @@ static int encode_talker_message(char *buf,
     attribute_info = st->attribute_info;
 
   num_values = hdr->NumberOfValuesLow;
-                           
-  if (num_values == 0) 
+
+  if (num_values == 0)
     merge = 1;
-  else 
+  else
     merge = check_talker_firstvalue_merge(buf, source_info);
-  
-  
+
+
 
   if (merge) {
-    srp_talker_first_value *first_value = 
+    srp_talker_first_value *first_value =
       (srp_talker_first_value *) (buf + sizeof(mrp_msg_header) + sizeof(mrp_vector_header));
 
     // The SRP layer
-   
+
     if (num_values == 0) {
       unsigned int streamid;
       for (int i=0;i<6;i++) {
@@ -893,7 +893,7 @@ static int encode_talker_message(char *buf,
       streamid = byterev(attribute_info->stream_id[1]);
       memcpy(&first_value->StreamId[4], &streamid, 4);
 
-      int port_to_transmit = st->port_num;  
+      int port_to_transmit = st->port_num;
       if (MRP_DEBUG_ATTR_EGRESS)
       {
         simple_printf("Port %d out: MSRP_TALKER_ADVERTISE, stream %x:%x\n", port_to_transmit, attribute_info->stream_id[0], attribute_info->stream_id[1]);
@@ -904,19 +904,19 @@ static int encode_talker_message(char *buf,
       hton_16(first_value->TSpecMaxFrameSize, attribute_info->tspec_max_frame_size);
       hton_16(first_value->TSpecMaxIntervalFrames,
                  attribute_info->tspec_max_interval);
-      hton_32(first_value->AccumulatedLatency, 
+      hton_32(first_value->AccumulatedLatency,
                  attribute_info->accumulated_latency);
 
 
     }
 
-    mrp_encode_three_packed_event(buf, vector, st->attribute_type);    
+    mrp_encode_three_packed_event(buf, vector, st->attribute_type);
 
     hdr->NumberOfValuesLow = num_values+1;
 
   }
 
-  return merge;   
+  return merge;
 }
 
 

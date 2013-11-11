@@ -3,7 +3,7 @@
 
 char *debug_mrp_applicant_state[] = {
   "MRP_UNUSED",
-  "MRP_DISABLED",  
+  "MRP_DISABLED",
   "MRP_VO", // Very anxious Observer
   "MRP_VP", // Very anxious Passive
   "MRP_VN", // Very anxious New
