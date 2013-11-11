@@ -143,4 +143,7 @@
     <version_defines></version_defines>
     <xcore_repo>sw_avb.git</xcore_repo>
     <xpd_version>1.0</xpd_version>
+    <version_defines>
+        <version_define type = "str" name = "AVB_1722_1_FIRMWARE_VERSION_STRING" format = "%VERSION%"></version_define>
+    </version_defines>
 </xpd>
