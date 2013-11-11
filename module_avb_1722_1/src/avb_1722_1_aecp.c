@@ -309,114 +309,6 @@ static int create_aem_read_descriptor_response(unsigned int read_type, unsigned 
   }
 }
 
-static int sampling_rate_from_sfc(int sfc)
-{
-  switch (sfc)
-  {
-    case 0: return 32000;
-    case 1: return 44100;
-    case 2: return 48000;
-    case 3: return 88200;
-    case 4: return 96000;
-    case 5: return 176400;
-    case 6: return 192000;
-    default: return 0;
-  }
-}
-
-static int sfc_from_sampling_rate(int rate)
-{
-  switch (rate)
-  {
-    case 32000: return 0;
-    case 44100: return 1;
-    case 48000: return 2;
-    case 88200: return 3;
-    case 96000: return 4;
-    case 176400: return 5;
-    case 192000: return 6;
-    default: return 0;
-  }
-}
-
-static void process_aem_cmd_getset_stream_format(avb_1722_1_aecp_packet_t *pkt, unsigned char *status, unsigned short command_type)
-{
-  avb_1722_1_aem_getset_stream_format_t *cmd = (avb_1722_1_aem_getset_stream_format_t *)(pkt->data.aem.command.payload);
-  unsigned short stream_index = ntoh_16(cmd->descriptor_id);
-  unsigned short desc_type = ntoh_16(cmd->descriptor_type);
-  enum avb_stream_format_t format;
-  int rate;
-  int channels;
-
-
-  if (command_type == AECP_AEM_CMD_GET_STREAM_FORMAT)
-  {
-    cmd->stream_format[0] = 0x00;
-    cmd->stream_format[1] = 0xa0;
-    cmd->stream_format[2] = 0x02;
-    cmd->stream_format[4] = 0x40; // b[0], nb[1], reserved[2:]
-    cmd->stream_format[5] = 0; // label_iec_60958_cnt
-    cmd->stream_format[7] = 0; // label_midi_cnt[0:3], label_smptecnt[4:]
-
-    if ((desc_type == AEM_STREAM_INPUT_TYPE) && get_avb_sink_format(stream_index, &format, &rate))
-    {
-      get_avb_sink_channels(stream_index, &channels);
-    }
-    else if ((desc_type == AEM_STREAM_OUTPUT_TYPE) && get_avb_source_format(stream_index, &format, &rate))
-    {
-      get_avb_source_channels(stream_index, &channels);
-    }
-    else *status = AECP_AEM_STATUS_NO_SUCH_DESCRIPTOR;
-
-    cmd->stream_format[2] = sfc_from_sampling_rate(rate); // 10.3.2 in 61883-6
-    cmd->stream_format[3] = channels; // dbs
-    cmd->stream_format[6] = channels; // label_mbla_cnt
-  }
-  else // AECP_AEM_CMD_SET_STREAM_FORMAT
-  {
-    format = AVB_SOURCE_FORMAT_MBLA_24BIT;
-    rate = sampling_rate_from_sfc(cmd->stream_format[2]);
-    channels = cmd->stream_format[6];
-
-    if (desc_type == AEM_STREAM_INPUT_TYPE)
-    {
-      // Check if we are currently streaming
-      enum avb_sink_state_t state;
-      if (get_avb_sink_state(stream_index, &state))
-      {
-        if (state == AVB_SINK_STATE_DISABLED)
-        {
-          set_avb_sink_format(stream_index, format, rate);
-          set_avb_sink_channels(stream_index, channels);
-        }
-        else *status = AECP_AEM_STATUS_STREAM_IS_RUNNING;
-      }
-      else *status = AECP_AEM_STATUS_NO_SUCH_DESCRIPTOR;
-
-    }
-    else if ((desc_type == AEM_STREAM_OUTPUT_TYPE))
-    {
-      enum avb_source_state_t state;
-      if (get_avb_source_state(stream_index, &state))
-      {
-        if (state == AVB_SOURCE_STATE_DISABLED)
-        {
-          set_avb_source_format(stream_index, format, rate);
-          set_avb_source_channels(stream_index, channels);
-        }
-        else *status = AECP_AEM_STATUS_STREAM_IS_RUNNING;
-      }
-      else *status = AECP_AEM_STATUS_NO_SUCH_DESCRIPTOR;
-    }
-    else
-    {
-      // invalid
-    }
-
-  }
-
-}
-
 static unsigned short avb_1722_1_create_controller_available_packet(void)
 {
   struct ethernet_hdr_t *hdr = (ethernet_hdr_t*) &avb_1722_1_buf[0];
@@ -609,9 +501,7 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt,
         break;
       }
       case AECP_AEM_CMD_LOCK_ENTITY: // Atomic operation on the entity
-      {
-        avb_1722_1_aem_lock_entity_command_t *cmd = (avb_1722_1_aem_lock_entity_command_t *)(pkt->data.aem.command.payload);
-        
+      {        
         break;
       }
       case AECP_AEM_CMD_ENTITY_AVAILABLE:

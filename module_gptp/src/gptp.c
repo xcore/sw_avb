@@ -824,24 +824,6 @@ static void send_ptp_announce_msg(chanend c_tx, int port_num)
    return;
 }
 
-static void long_long_correction_to_network(long long ts, n64_t *msg)
-{
-  ts = ts << 16;
-
-  msg->data[0] = (ts >> 56) & 0xff;
-  msg->data[1] = (ts >> 48) & 0xff;
-
-  msg->data[2] = (ts >> 40) & 0xff;
-  msg->data[3] = (ts >> 32) & 0xff;
-  msg->data[4] = (ts >> 24) & 0xff;
-  msg->data[5] = (ts >> 16) & 0xff;
-                       
-  msg->data[6] = 0;
-  msg->data[7] = 0;
-  
-  return;
-}
-
 
 static u16_t sync_seq_id = 0;
 
@@ -934,33 +916,6 @@ static void send_ptp_sync_msg(chanend c_tx, int port_num)
   pFollowUpMesg->organizationSubType[0] = 0;
   pFollowUpMesg->organizationSubType[1] = 0;
   pFollowUpMesg->organizationSubType[2] = 1;
-  
-    // Add correction to correction Field in received sync message
-#if 0
-  if ((received_sync == 2) && ptp_path_delay_valid)
-  {
-    long long correction;
-    ptp_timestamp ptp_sync_rx_ts;
-    local_to_ptp_ts(&ptp_sync_rx_ts, prev_adjust_local_ts);
-    correction = ptp_timestamp_diff(&ptp_egress_ts, &ptp_sync_rx_ts); // Residence time
-    correction += ptp_path_delay;
-
-    long_long_correction_to_network(correction, &pComMesgHdr->correctionField);
-
-    // printintln(correction);
-
-    // unsigned int residence_time = local_egress_ts - received_sync_ts;
-    /*
-    xscope_probe_data(0, local_egress_ts);
-    xscope_probe_data(1, received_sync_ts);
-    xscope_probe_data(2, residence_time);
-    */
-    // simple_printf("local_egress_ts: %d\n received_sync_ts: %d\n", local_egress_ts, received_sync_ts);
-    // long long residence_time_in_ptp = local_time_to_ptp_time(residence_time, g_ptp_adjust);
-    // printintln(residence_time_in_ptp);
-    // printintln(local_egress_ts - prev_local_egress);
-  }
-#endif
   
   ptp_tx(c_tx, buf0, FOLLOWUP_PACKET_SIZE, port_num);
 
