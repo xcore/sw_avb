@@ -288,8 +288,6 @@ static int create_aem_read_descriptor_response(unsigned int read_type, unsigned 
   {
     int packet_size = sizeof(ethernet_hdr_t)+sizeof(avb_1722_1_packet_header_t)+24+desc_size_bytes;
 
-    if (packet_size < 64) packet_size = 64;
-
     avb_1722_1_aecp_aem_msg_t *aem = (avb_1722_1_aecp_aem_msg_t*)avb_1722_1_create_aecp_response_header(src_addr, AECP_AEM_STATUS_SUCCESS, AECP_CMD_AEM_COMMAND, desc_size_bytes+16, pkt);
 
     memcpy(aem, pkt->data.payload, 6);
@@ -524,6 +522,8 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt,
         desc_read_id = ntoh_16(aem_msg->command.read_descriptor_cmd.descriptor_id);
 
         num_tx_bytes = create_aem_read_descriptor_response(desc_read_type, desc_read_id, src_addr, pkt);
+
+        if (num_tx_bytes < 64) num_tx_bytes = 64;
 
         mac_tx(c_tx, avb_1722_1_buf, num_tx_bytes, -1);
 
