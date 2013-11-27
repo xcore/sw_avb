@@ -3,6 +3,7 @@
 #include <xccompat.h>
 #include <string.h>
 #include <xscope.h>
+#include <overlay_flash.h>
 #include "audio_i2s.h"
 #include "avb_xscope.h"
 #include "i2c.h"
@@ -97,10 +98,20 @@ media_input_fifo_t ififos[AVB_NUM_MEDIA_INPUTS];
   #define ififos null
 #endif
 
+on tile[0]: fl_SPIPorts spi_ports = {
+  PORT_SPI_MISO ,
+  PORT_SPI_SS ,
+  PORT_SPI_CLK ,
+  PORT_SPI_MOSI ,
+  XS1_CLKBLK_1
+};
+
 [[combinable]] void application_task(client interface avb_interface avb, server interface avb_1722_1_control_callbacks i_1722_1_entity);
 
 [[distributable]] void audio_hardware_setup(void)
 {
+  fl_SPIPorts * movable spi_ports_ptr = &spi_ports;
+  overlay_flash_init(move (spi_ports_ptr), 100, 4);
 #if PLL_TYPE_CS2100
   audio_clock_CS2100CP_init(r_i2c, MASTER_TO_WORDCLOCK_RATIO);
 #elif PLL_TYPE_CS2300
@@ -270,15 +281,21 @@ int main(void)
                    c_mac_tx[MAC_TX_TO_SRP]);
     }
 
-    on tile[0].core[0]: application_task(i_avb[AVB_MANAGER_TO_DEMO], i_1722_1_entity);
-    on tile[0].core[0]: avb_1722_1_task(otp_ports0,
+    on tile[0]: {
+
+      [[combine]]
+      par {
+        application_task(i_avb[AVB_MANAGER_TO_DEMO], i_1722_1_entity);
+        avb_1722_1_task(otp_ports0,
                                         i_avb[AVB_MANAGER_TO_1722_1],
                                         i_1722_1_entity,
                                         i_spi,
                                         c_mac_rx[MAC_RX_TO_1722_1],
                                         c_mac_tx[MAC_TX_TO_1722_1],
                                         c_ptp[PTP_TO_1722_1]);
-    on tile[0].core[0]: spi_task(i_spi);
+        spi_task(i_spi);
+      }
+    }
 
     on tile[0]: ptp_output_test_clock(c_ptp[PTP_TO_TEST_CLOCK],
                                       ptp_sync_port, 100000000);

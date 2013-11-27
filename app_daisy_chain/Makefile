@@ -28,7 +28,7 @@ OPTIONAL_HEADERS = avb_app_board_config.h
 # If the variable XCC_MAP_FLAGS is set it overrides the flags passed to 
 # xcc for the final link (mapping) stage.
 
-XCC_FLAGS = -O2 -save-temps -g -report -Xmapper --map -Xmapper MAPFILE -fxscope
+XCC_FLAGS = -O2 -save-temps -g -report -Xmapper --map -Xmapper MAPFILE -fxscope -foverlay=flash -Wno-timing
 
 XCC_FLAGS_main.xc = $(XCC_FLAGS) -falways-inline
 

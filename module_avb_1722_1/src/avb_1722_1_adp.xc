@@ -130,6 +130,7 @@ int avb_1722_1_entity_database_find(const_guid_ref_t guid)
     return AVB_1722_1_MAX_ENTITIES;
 }
 
+__attribute__((overlay))
 static int avb_1722_1_entity_database_add(avb_1722_1_adp_packet_t &pkt)
 {
     guid_t guid;
@@ -270,14 +271,13 @@ void process_avb_1722_1_adp_packet(avb_1722_1_adp_packet_t &pkt, chanend c_tx)
     }
 }
 
+__attribute__((overlay))
 static void avb_1722_1_create_adp_packet(int message_type, guid_t guid)
 {
     ethernet_hdr_t *hdr = (ethernet_hdr_t*) &avb_1722_1_buf[0];
     avb_1722_1_adp_packet_t *pkt = (avb_1722_1_adp_packet_t*) (hdr + AVB_1722_1_PACKET_BODY_POINTER_OFFSET);
 
-    unsafe {
-        memset((avb_1722_1_adp_packet_t *unsafe)pkt, 0, sizeof(avb_1722_1_adp_packet_t));
-    }
+    memset(pkt, 0, sizeof(avb_1722_1_adp_packet_t));
     avb_1722_1_create_1722_1_header(avb_1722_1_adp_dest_addr, DEFAULT_1722_1_ADP_SUBTYPE, message_type,
           (message_type==ENTITY_AVAILABLE)?AVB_1722_1_ADP_VALID_TIME:0, AVB_1722_1_ADP_CD_LENGTH, hdr);
 

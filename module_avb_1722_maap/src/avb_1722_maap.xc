@@ -39,6 +39,7 @@ static int timeout_val;
 
 static unsigned int maap_buf[(MAX_AVB_1722_MAAP_PDU_SIZE+1)/4];
 
+__attribute__((overlay))
 static int create_maap_packet(int message_type,
                               unsigned char (&?src_addr)[6],
                               maap_address_range &addr,
@@ -99,6 +100,7 @@ static int create_maap_packet(int message_type,
   return (64);
 }
 
+__attribute__((overlay))
 void avb_1722_maap_init(unsigned char macaddr[6])
 {
   maap_addr.state = MAAP_DISABLED;
@@ -113,6 +115,7 @@ void avb_1722_maap_init(unsigned char macaddr[6])
 }
 
 // If used, start_address[] must be within the official IEEE MAAP pool
+__attribute__((overlay))
 void avb_1722_maap_request_addresses(int num_addr, char (&?start_address)[])
 {
   if (!isnull(start_address))
@@ -166,6 +169,7 @@ void avb_1722_maap_get_base_address(unsigned char addr[6])
 {
   // TODO
 }
+
 
 void avb_1722_maap_periodic(chanend c_tx, client interface avb_interface avb)
 {

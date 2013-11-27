@@ -3,6 +3,7 @@
 #include "reboot.h"
 
 /* Reboots XMOS device by writing to the PLL config register */
+__attribute__((overlay))
 void device_reboot(void)
 {
     unsigned int pllVal;

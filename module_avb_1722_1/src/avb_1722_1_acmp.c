@@ -85,6 +85,7 @@ void avb_1722_1_acmp_talker_init()
     acmp_talker_state = ACMP_TALKER_WAITING;
 }
 
+__attribute__((overlay))
 void avb_1722_1_acmp_listener_init()
 {
     int i;
@@ -103,6 +104,7 @@ void avb_1722_1_acmp_listener_init()
 /**
  * Creates a valid ACMP Ethernet packet in avb_1722_1_buf[] from a supplied command structure
  */
+ __attribute__((overlay))
 void avb_1722_1_create_acmp_packet(avb_1722_1_acmp_cmd_resp *cr, int message_type, int status)
 {
     struct ethernet_hdr_t *hdr = (ethernet_hdr_t*) &avb_1722_1_buf[0];

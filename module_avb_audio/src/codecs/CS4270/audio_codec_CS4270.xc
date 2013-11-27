@@ -28,6 +28,7 @@ static unsigned char regaddr[8] = { CODEC_PWR_CTRL_ADDR,
                                    };
 static unsigned char regdata[8] = {0x01,0x35,0x09,0x60,0x00,0x00,0x00,0x00};
 
+__attribute__((overlay))
 void audio_codec_CS4270_init(out port p_codec_reset,
                               int mask,
                               int codec_addr,

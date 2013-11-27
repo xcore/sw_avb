@@ -12,7 +12,7 @@
 #ifdef AVB_1722_1_AEM_ENABLED
 
 /* Entity Descriptor */
-unsigned char desc_entity[] =
+const unsigned char desc_entity[] =
 {
   U16(AEM_ENTITY_TYPE),                       /* 0-1 descriptor_type */
   U16(0),                                     /* 2-3 descriptor_id */
@@ -38,7 +38,7 @@ unsigned char desc_entity[] =
 };
 
 /* Configuration Descriptor 0 */
-unsigned char desc_configuration_0[] =
+const unsigned char desc_configuration_0[] =
 {
   U16(AEM_CONFIGURATION_TYPE),                /* 0-1 descriptor_type */
   U16(0),                                     /* 2-3 descriptor_id */
@@ -73,7 +73,7 @@ unsigned char desc_configuration_0[] =
 
 /* Audio Unit Descriptor 0 */
 
-unsigned char desc_audio_unit_0[] =
+const unsigned char desc_audio_unit_0[] =
 {
   U16(AEM_AUDIO_UNIT_TYPE),                   /* 0-1 descriptor_type */
   U16(0),                                     /* 2-3 descriptor_id */
@@ -285,7 +285,7 @@ unsigned char desc_audio_map_1[] =
 
 /* Input External Ports */
 
-unsigned char desc_external_input_port_0[] =
+const unsigned char desc_external_input_port_0[] =
 {
   U16(AEM_EXTERNAL_PORT_INPUT_TYPE),          /* 0-1 descriptor_type */
   U16(0),                                     /* 2-3 descriptor_id */
@@ -302,7 +302,7 @@ unsigned char desc_external_input_port_0[] =
 
 /* Output External Ports */
 
-unsigned char desc_external_output_port_0[] =
+const unsigned char desc_external_output_port_0[] =
 {
   U16(AEM_EXTERNAL_PORT_OUTPUT_TYPE),         /* 0-1 descriptor_type */
   U16(0),                                     /* 2-3 descriptor_id */
@@ -320,7 +320,7 @@ unsigned char desc_external_output_port_0[] =
 /* Control Descriptors */
 
 /* Identify */
-unsigned char desc_control_identify[] =
+const unsigned char desc_control_identify[] =
 {
   U16(AEM_CONTROL_TYPE),                      /* 0-1 descriptor_type */
   U16(DESCRIPTOR_INDEX_CONTROL_IDENTIFY),     /* 2-3 descriptor_id */
@@ -445,7 +445,7 @@ unsigned char desc_stream_output_0[] =
 /* Jack Descriptors */
 
 /* Input */
-unsigned char desc_jack_input_0[] =
+const unsigned char desc_jack_input_0[] =
 {
   U16(AEM_JACK_INPUT_TYPE),                   /* 0-1 descriptor_type */
   U16(0),                                     /* 2-3 descriptor_id */
@@ -458,7 +458,7 @@ unsigned char desc_jack_input_0[] =
 };
 
 /* Output */
-unsigned char desc_jack_output_0[] =
+const unsigned char desc_jack_output_0[] =
 {
   U16(AEM_JACK_OUTPUT_TYPE),                  /* 0-1 descriptor_type */
   U16(0),                                     /* 2-3 descriptor_id */
@@ -471,7 +471,7 @@ unsigned char desc_jack_output_0[] =
 };
 
 /* AVB Interface Descriptor */
-unsigned char desc_avb_interface_0[] =
+const unsigned char desc_avb_interface_0[] =
 {
   U16(AEM_AVB_INTERFACE_TYPE),                /* 0-1 descriptor_type */
   U16(0),                                     /* 2-3 descriptor_id */
@@ -491,7 +491,7 @@ unsigned char desc_avb_interface_0[] =
 
 /* Clock Source Descriptors */
 /* NOTE: Descriptor IDs should match media_clock_type_t enum */
-unsigned char desc_clock_source_0[] =
+const unsigned char desc_clock_source_0[] =
 {
   U16(AEM_CLOCK_SOURCE_TYPE),                 /* 0-1 descriptor_type */
   U16(0),                                     /* 2-3 descriptor_id */
@@ -504,7 +504,7 @@ unsigned char desc_clock_source_0[] =
   U16(0)                                      /* 84-85 clock_source_location_id */
 };
 
-unsigned char desc_clock_source_1[] =
+const unsigned char desc_clock_source_1[] =
 {
   U16(AEM_CLOCK_SOURCE_TYPE),                 /* 0-1 descriptor_type */
   U16(1),                                     /* 2-3 descriptor_id */
@@ -518,7 +518,7 @@ unsigned char desc_clock_source_1[] =
 };
 
 /* Clock Domain Descriptor */
-unsigned char desc_clock_domain_0[] =
+const unsigned char desc_clock_domain_0[] =
 {
   U16(AEM_CLOCK_DOMAIN_TYPE),                 /* 0-1 descriptor_type */
   U16(0),                                     /* 2-3 descriptor_id */
@@ -532,7 +532,7 @@ unsigned char desc_clock_domain_0[] =
 };
 
 /* Locale Descriptors */
-unsigned char desc_locale_0[] =
+const unsigned char desc_locale_0[] =
 {
   U16(AEM_LOCALE_TYPE),                       /* 0-1 descriptor_type */
   U16(0),                                     /* 2-3 descriptor_id */
@@ -542,7 +542,7 @@ unsigned char desc_locale_0[] =
 };
 
 /* Strings Descriptors */
-unsigned char desc_strings_0[] =
+const unsigned char desc_strings_0[] =
 {
   U16(AEM_STRINGS_TYPE),                      /* 0-1 descriptor_type */
   U16(0),                                     /* 2-3 descriptor_id */
@@ -553,42 +553,6 @@ unsigned char desc_strings_0[] =
   "",
   "",
   ""
-};
-
-/* List of descriptors */
-/* Format is: descriptor_type, # of descriptors of that type, desc size, descriptor... */
-/* Should be ordered by descriptor_type num */
-unsigned int aem_descriptor_list[] =
-{
-  AEM_ENTITY_TYPE, 1, sizeof(desc_entity), (unsigned)desc_entity,
-  AEM_CONFIGURATION_TYPE, 1, sizeof(desc_configuration_0), (unsigned)desc_configuration_0,
-  AEM_AUDIO_UNIT_TYPE, 1, sizeof(desc_audio_unit_0), (unsigned)desc_audio_unit_0,
-#if (AVB_NUM_SINKS > 0)
-  AEM_STREAM_INPUT_TYPE, 1, sizeof(desc_stream_input_0), (unsigned)desc_stream_input_0,
-#endif
-#if (AVB_NUM_SOURCES > 0)
-  AEM_STREAM_OUTPUT_TYPE, 1, sizeof(desc_stream_output_0), (unsigned)desc_stream_output_0,
-#endif
-  AEM_JACK_INPUT_TYPE, 1, sizeof(desc_jack_input_0), (unsigned)desc_jack_input_0,
-  AEM_JACK_OUTPUT_TYPE, 1, sizeof(desc_jack_output_0), (unsigned)desc_jack_output_0,
-  AEM_AVB_INTERFACE_TYPE, 1, sizeof(desc_avb_interface_0), (unsigned)desc_avb_interface_0,
-  AEM_CLOCK_SOURCE_TYPE, 2, sizeof(desc_clock_source_0), (unsigned)desc_clock_source_0, sizeof(desc_clock_source_1), (unsigned)desc_clock_source_1,
-  AEM_LOCALE_TYPE, 1, sizeof(desc_locale_0), (unsigned)desc_locale_0,
-  AEM_STRINGS_TYPE, 1, sizeof(desc_strings_0), (unsigned)desc_strings_0,
-#if (AVB_NUM_SINKS > 0)
-  AEM_STREAM_PORT_INPUT_TYPE, 1, sizeof(desc_stream_port_input_0), (unsigned)desc_stream_port_input_0,
-#endif
-#if (AVB_NUM_SOURCES > 0)
-  AEM_STREAM_PORT_OUTPUT_TYPE, 1, sizeof(desc_stream_port_output_0), (unsigned)desc_stream_port_output_0,
-#endif
-  AEM_EXTERNAL_PORT_INPUT_TYPE, 1, sizeof(desc_external_input_port_0), (unsigned)desc_external_input_port_0,
-  AEM_EXTERNAL_PORT_OUTPUT_TYPE, 1, sizeof(desc_external_output_port_0), (unsigned)desc_external_output_port_0,
-#if (AEM_GENERATE_DESCRIPTORS_ON_FLY == 0)
-  AEM_AUDIO_CLUSTER_TYPE, 4, sizeof(desc_audio_cluster_0), (unsigned)desc_audio_cluster_0, sizeof(desc_audio_cluster_1), (unsigned)desc_audio_cluster_1, sizeof(desc_audio_cluster_2), (unsigned)desc_audio_cluster_2, sizeof(desc_audio_cluster_3), (unsigned)desc_audio_cluster_3,
-  AEM_AUDIO_MAP_TYPE, 2, sizeof(desc_audio_map_0), (unsigned)desc_audio_map_0, sizeof(desc_audio_map_1), (unsigned)desc_audio_map_1,
-#endif
-  AEM_CONTROL_TYPE, 1, sizeof(desc_control_identify), (unsigned)desc_control_identify,
-  AEM_CLOCK_DOMAIN_TYPE, 1, sizeof(desc_clock_domain_0), (unsigned)desc_clock_domain_0
 };
 
 

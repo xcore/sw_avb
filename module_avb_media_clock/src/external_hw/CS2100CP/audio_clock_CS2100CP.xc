@@ -9,6 +9,7 @@ static unsigned char regaddr[9] = {0x09,0x08,0x07,0x06,0x17,0x16,0x05,0x03,0x1E}
 static unsigned char regdata[9] = {0x00,0x00,0x00,0x00,0x00,0x08,0x01,0x01,0x00};
 
 // Set up the multiplier in the PLL clock generator
+__attribute__((overlay))
 void audio_clock_CS2100CP_init(
                           #if I2C_COMBINE_SCL_SDA
                               port r_i2c

@@ -26,6 +26,7 @@
 extern unsigned int avb_1722_1_buf[AVB_1722_1_PACKET_SIZE_WORDS];
 extern guid_t my_guid;
 extern unsigned char my_mac_addr[6];
+static int g_serial_num;
 
 static avb_timer aecp_aem_lock_timer;
 
@@ -66,33 +67,7 @@ static enum {
 // Called on startup to initialise certain static descriptor fields
 void avb_1722_1_aem_descriptors_init(unsigned int serial_num)
 {
-  // entity_guid in Entity Descriptor
-  for (int i=0; i < 8; i++)
-  {
-    desc_entity[4+i] = my_guid.c[7-i];
-  }
-
-  avb_itoa((int)serial_num,(char *)&desc_entity[244], 10, 0);
-
-  for (int i=0; i < 6; i++)
-  {
-    // mac_address in AVB Interface Descriptor
-    desc_avb_interface_0[70+i] = my_mac_addr[i];
-    // clock_source_identifier in clock source descriptor
-    desc_clock_source_0[74+i] = my_mac_addr[i];
-  }
-
-  // TODO: Should be stored centrally, possibly query PTP for ID per interface
-  desc_avb_interface_0[78+0] = my_mac_addr[0];
-  desc_avb_interface_0[78+1] = my_mac_addr[1];
-  desc_avb_interface_0[78+2] = my_mac_addr[2];
-  desc_avb_interface_0[78+3] = 0xff;
-  desc_avb_interface_0[78+4] = 0xfe;
-  desc_avb_interface_0[78+5] = my_mac_addr[3];
-  desc_avb_interface_0[78+6] = my_mac_addr[4];
-  desc_avb_interface_0[78+7] = my_mac_addr[5];
-  desc_avb_interface_0[78+8] = 0;
-  desc_avb_interface_0[78+9] = 1;
+  g_serial_num = serial_num;
 }
 
 void avb_1722_1_aecp_aem_init(unsigned int serial_num)
@@ -142,6 +117,283 @@ static void generate_object_name(char *object_name, int number) {
   strcat(object_name, num_string);
 }
 
+__attribute__((overlay))
+int get_config_desc(int read_id, int *desc_size_bytes, unsigned char **descriptor)
+{
+  *desc_size_bytes = sizeof(desc_configuration_0);
+  *descriptor = (unsigned char *)&desc_configuration_0;
+
+  return 1;
+}
+
+__attribute__((overlay))
+int get_audio_unit_desc(int read_id, int *desc_size_bytes, unsigned char **descriptor)
+{
+  *desc_size_bytes = sizeof(desc_audio_unit_0);
+  *descriptor = (unsigned char *)&desc_audio_unit_0;
+
+  return 1;
+}
+
+__attribute__((overlay))
+int get_external_port_desc(int read_type, int read_id, int *desc_size_bytes, unsigned char **descriptor)
+{
+  if (read_type == AEM_EXTERNAL_PORT_INPUT_TYPE)
+  {
+    *desc_size_bytes = sizeof(desc_external_input_port_0);
+    *descriptor = (unsigned char *)&desc_external_input_port_0;
+  }
+  else
+  {
+    *desc_size_bytes = sizeof(desc_external_output_port_0);
+    *descriptor = (unsigned char *)&desc_external_output_port_0;    
+  }
+
+  return 1;
+}
+
+__attribute__((overlay))
+int get_control_identify_desc(int read_id, int *desc_size_bytes, unsigned char **descriptor)
+{
+  *desc_size_bytes = sizeof(desc_control_identify);
+  *descriptor = (unsigned char *)&desc_control_identify;
+
+  return 1;
+}
+
+__attribute__((overlay))
+int get_jack_desc(int read_type, int read_id, int *desc_size_bytes, unsigned char **descriptor)
+{
+  if (read_type == AEM_JACK_INPUT_TYPE)
+  {
+    *desc_size_bytes = sizeof(desc_jack_input_0);
+    *descriptor = (unsigned char *)&desc_jack_input_0;
+  }
+  else
+  {
+    *desc_size_bytes = sizeof(desc_jack_output_0);
+    *descriptor = (unsigned char *)&desc_jack_output_0;    
+  }
+
+  return 1;
+}
+
+__attribute__((overlay))
+int get_interface_desc(int read_id, int *desc_size_bytes, unsigned char **descriptor)
+{
+  *desc_size_bytes = sizeof(desc_avb_interface_0);
+  struct ethernet_hdr_t *hdr = (ethernet_hdr_t*) &avb_1722_1_buf[0];
+  avb_1722_1_aecp_packet_t *pkt = (avb_1722_1_aecp_packet_t*) (hdr + AVB_1722_1_PACKET_BODY_POINTER_OFFSET);
+  avb_1722_1_aecp_aem_msg_t *aem = (avb_1722_1_aecp_aem_msg_t*)(pkt->data.payload);
+  memcpy(&(aem->command.read_descriptor_resp.descriptor), &desc_avb_interface_0, sizeof(desc_avb_interface_0)+40);
+
+  for (int i=0; i < 6; i++)
+  {
+    // mac_address in AVB Interface Descriptor
+    aem->command.read_descriptor_resp.descriptor[70+i] = my_mac_addr[i];
+  }
+
+  // TODO: Should be stored centrally, possibly query PTP for ID per interface
+  aem->command.read_descriptor_resp.descriptor[78+0] = my_mac_addr[0];
+  aem->command.read_descriptor_resp.descriptor[78+1] = my_mac_addr[1];
+  aem->command.read_descriptor_resp.descriptor[78+2] = my_mac_addr[2];
+  aem->command.read_descriptor_resp.descriptor[78+3] = 0xff;
+  aem->command.read_descriptor_resp.descriptor[78+4] = 0xfe;
+  aem->command.read_descriptor_resp.descriptor[78+5] = my_mac_addr[3];
+  aem->command.read_descriptor_resp.descriptor[78+6] = my_mac_addr[4];
+  aem->command.read_descriptor_resp.descriptor[78+7] = my_mac_addr[5];
+  aem->command.read_descriptor_resp.descriptor[78+8] = 0;
+  aem->command.read_descriptor_resp.descriptor[78+9] = 1;  
+
+  return 2;
+}
+
+__attribute__ ((overlay))
+int get_entity_desc(int read_id, int *desc_size_bytes, unsigned char **descriptor)
+{
+  *desc_size_bytes = sizeof(desc_entity);
+  struct ethernet_hdr_t *hdr = (ethernet_hdr_t*) &avb_1722_1_buf[0];
+  avb_1722_1_aecp_packet_t *pkt = (avb_1722_1_aecp_packet_t*) (hdr + AVB_1722_1_PACKET_BODY_POINTER_OFFSET);
+  avb_1722_1_aecp_aem_msg_t *aem = (avb_1722_1_aecp_aem_msg_t*)(pkt->data.payload);
+  memcpy(&(aem->command.read_descriptor_resp.descriptor), &desc_entity, sizeof(desc_entity)+40);
+  // unsigned char *desc = &(aem->command.read_descriptor_resp.descriptor);
+
+  for (int i=0; i < 8; i++)
+  {
+    aem->command.read_descriptor_resp.descriptor[4+i] = my_guid.c[7-i];
+  }
+
+  avb_itoa((int)g_serial_num,(char *)&aem->command.read_descriptor_resp.descriptor[244], 10, 0);
+
+  return 2;
+}
+
+__attribute__((overlay))
+int get_clock_source_desc(int read_id, int *desc_size_bytes, unsigned char **descriptor)
+{
+  switch (read_id) {
+    case 0:
+      *desc_size_bytes = sizeof(desc_clock_source_0);
+      *descriptor = (unsigned char *)&desc_clock_source_0;
+      break;
+    case 1:
+      *desc_size_bytes = sizeof(desc_clock_source_1);
+      *descriptor = (unsigned char *)&desc_clock_source_1;
+      break;   
+    default:
+      return 0;   
+  }
+
+  struct ethernet_hdr_t *hdr = (ethernet_hdr_t*) &avb_1722_1_buf[0];
+  avb_1722_1_aecp_packet_t *pkt = (avb_1722_1_aecp_packet_t*) (hdr + AVB_1722_1_PACKET_BODY_POINTER_OFFSET);
+  avb_1722_1_aecp_aem_msg_t *aem = (avb_1722_1_aecp_aem_msg_t*)(pkt->data.payload);
+  memcpy(&(aem->command.read_descriptor_resp.descriptor), *descriptor, sizeof(desc_clock_source_0)+40);
+
+  for (int i=0; i < 6; i++)
+  {
+    // clock_source_identifier in clock source descriptor
+    aem->command.read_descriptor_resp.descriptor[74+i] = my_mac_addr[i];
+  }
+
+  return 2;
+}
+
+__attribute__((overlay))
+int get_clock_domain_desc(int read_id, int *desc_size_bytes, unsigned char **descriptor)
+{
+  *desc_size_bytes = sizeof(desc_clock_domain_0);
+  *descriptor = (unsigned char *)&desc_clock_domain_0;
+
+  return 1;
+}
+
+__attribute__((overlay))
+int get_locale_desc(int read_id, int *desc_size_bytes, unsigned char **descriptor)
+{
+  *desc_size_bytes = sizeof(desc_locale_0);
+  *descriptor = (unsigned char *)&desc_locale_0;
+
+  return 1;
+}
+
+__attribute__((overlay))
+int get_strings_desc(int read_id, int *desc_size_bytes, unsigned char **descriptor)
+{
+  *desc_size_bytes = sizeof(desc_strings_0);
+  *descriptor = (unsigned char *)&desc_strings_0;
+
+  return 1;
+}
+
+int find_static_descriptor(unsigned int read_type, unsigned int read_id, int *desc_size_bytes, unsigned char **descriptor)
+{
+  switch (read_type) {
+    case AEM_ENTITY_TYPE:
+      return get_entity_desc(read_id, desc_size_bytes, descriptor); break;
+    case AEM_CONFIGURATION_TYPE:
+      return get_config_desc(read_id, desc_size_bytes, descriptor); break;
+    case AEM_AUDIO_UNIT_TYPE:
+      return get_audio_unit_desc(read_id, desc_size_bytes, descriptor); break;
+    case AEM_EXTERNAL_PORT_INPUT_TYPE:
+    case AEM_EXTERNAL_PORT_OUTPUT_TYPE:
+      return get_external_port_desc(read_type, read_id, desc_size_bytes, descriptor); break;
+    case AEM_CONTROL_TYPE:
+      switch (read_id) 
+      {
+        case DESCRIPTOR_INDEX_CONTROL_IDENTIFY:
+          return get_control_identify_desc(read_id, desc_size_bytes, descriptor); break;
+        default:
+          return 0;
+      }
+    case AEM_JACK_INPUT_TYPE:
+    case AEM_JACK_OUTPUT_TYPE:
+      return get_jack_desc(read_type, read_id, desc_size_bytes, descriptor); break;
+    case AEM_AVB_INTERFACE_TYPE:
+      return get_interface_desc(read_id, desc_size_bytes, descriptor); break;
+    case AEM_CLOCK_SOURCE_TYPE:
+      return get_clock_source_desc(read_id, desc_size_bytes, descriptor); break;
+    case AEM_CLOCK_DOMAIN_TYPE:
+      return get_clock_domain_desc(read_id, desc_size_bytes, descriptor); break;
+    case AEM_LOCALE_TYPE:
+      return get_locale_desc(read_id, desc_size_bytes, descriptor); break;
+    case AEM_STRINGS_TYPE:
+      return get_strings_desc(read_id, desc_size_bytes, descriptor); break;
+    default:
+      return 0;
+  }
+}
+
+__attribute__((overlay))
+int generate_audio_map_desc(int read_id)
+{
+  const int num_mappings = (read_id < AVB_NUM_SINKS) ? AVB_NUM_MEDIA_OUTPUTS/AVB_NUM_SINKS : AVB_NUM_MEDIA_INPUTS/AVB_NUM_SOURCES;
+
+  /* Since the map descriptors aren't constant size, unlike the clusters, and
+   * dependent on the number of channels, we don't use a template */
+
+  struct ethernet_hdr_t *hdr = (ethernet_hdr_t*) &avb_1722_1_buf[0];
+  avb_1722_1_aecp_packet_t *pkt = (avb_1722_1_aecp_packet_t*) (hdr + AVB_1722_1_PACKET_BODY_POINTER_OFFSET);
+  avb_1722_1_aecp_aem_msg_t *aem = (avb_1722_1_aecp_aem_msg_t*)(pkt->data.payload);
+  unsigned char *pktptr = (unsigned char *)&(aem->command.read_descriptor_resp.descriptor);
+  aem_desc_audio_map_t *audio_map = (aem_desc_audio_map_t *)pktptr;
+
+  int desc_size_bytes = 8+(num_mappings*8);
+
+  memset(audio_map, 0, desc_size_bytes);
+  hton_16(audio_map->descriptor_type, AEM_AUDIO_MAP_TYPE);
+  hton_16(audio_map->descriptor_index, read_id);
+  hton_16(audio_map->mappings_offset, 8);
+  hton_16(audio_map->number_of_mappings, num_mappings);
+
+  for (int i=0; i < num_mappings; i++)
+  {
+    hton_16(audio_map->mappings[i].mapping_stream_index, read_id);
+    hton_16(audio_map->mappings[i].mapping_stream_channel, i);
+    hton_16(audio_map->mappings[i].mapping_cluster_offset, (read_id < AVB_NUM_SOURCES) ? i%AVB_NUM_SOURCES : i%AVB_NUM_SINKS);
+    hton_16(audio_map->mappings[i].mapping_cluster_channel, 0); // Single channel audio clusters
+  }
+
+  return desc_size_bytes;
+}
+
+__attribute__((overlay))
+void generate_template_desc(int read_type, int read_id, unsigned char *descriptor)
+{
+  aem_desc_audio_cluster_t *cluster = (aem_desc_audio_cluster_t *)descriptor;
+  char id_num = (char)read_id;
+
+  // The descriptor id is also the channel number
+  cluster->descriptor_index[1] = (uint8_t)read_id;
+
+  if ((read_type == AEM_AUDIO_CLUSTER_TYPE) || read_type == AEM_STREAM_OUTPUT_TYPE)
+  {
+    int id = (int)read_id;;
+    if (read_id >= AVB_NUM_MEDIA_OUTPUTS) {
+      id = (int)read_id - AVB_NUM_MEDIA_OUTPUTS;
+    }
+    memset(cluster->object_name, 0, 64);
+    strcpy((char *)cluster->object_name, "Output ");
+    generate_object_name((char *)cluster->object_name, id);
+  }
+  else if (read_type == AEM_STREAM_INPUT_TYPE)
+  {
+    memset(cluster->object_name, 0, 64);
+    strcpy((char *)cluster->object_name, "Input ");
+    generate_object_name((char *)cluster->object_name, (int)id_num);
+  }
+
+  if (read_type == AEM_STREAM_PORT_OUTPUT_TYPE) {
+    aem_desc_stream_port_input_output_t *stream_port = (aem_desc_stream_port_input_output_t *)descriptor;
+    hton_16(stream_port->base_cluster, read_id * AVB_NUM_SOURCES);
+    hton_16(stream_port->base_map, read_id);
+  }
+  else if (read_type == AEM_STREAM_PORT_INPUT_TYPE) {
+    aem_desc_stream_port_input_output_t *stream_port = (aem_desc_stream_port_input_output_t *)descriptor;
+    hton_16(stream_port->base_cluster, read_id * AVB_NUM_SINKS);
+    hton_16(stream_port->base_map, read_id);
+  }
+}
+
 static int create_aem_read_descriptor_response(unsigned int read_type, unsigned int read_id, unsigned char src_addr[6], avb_1722_1_aecp_packet_t *pkt)
 {
   int desc_size_bytes = 0, i = 0;
@@ -184,39 +436,7 @@ static int create_aem_read_descriptor_response(unsigned int read_type, unsigned 
 
   if (descriptor != NULL)
   {
-    aem_desc_audio_cluster_t *cluster = (aem_desc_audio_cluster_t *)descriptor;
-    char id_num = (char)read_id;
-
-    // The descriptor id is also the channel number
-    cluster->descriptor_index[1] = (uint8_t)read_id;
-
-    if ((read_type == AEM_AUDIO_CLUSTER_TYPE) || read_type == AEM_STREAM_OUTPUT_TYPE)
-    {
-      int id = (int)read_id;;
-      if (read_id >= AVB_NUM_MEDIA_OUTPUTS) {
-        id = (int)read_id - AVB_NUM_MEDIA_OUTPUTS;
-      }
-      memset(cluster->object_name, 0, 64);
-      strcpy((char *)cluster->object_name, "Output ");
-      generate_object_name((char *)cluster->object_name, id);
-    }
-    else if (read_type == AEM_STREAM_INPUT_TYPE)
-    {
-      memset(cluster->object_name, 0, 64);
-      strcpy((char *)cluster->object_name, "Input ");
-      generate_object_name((char *)cluster->object_name, (int)id_num);
-    }
-
-    if (read_type == AEM_STREAM_PORT_OUTPUT_TYPE) {
-      aem_desc_stream_port_input_output_t *stream_port = (aem_desc_stream_port_input_output_t *)descriptor;
-      hton_16(stream_port->base_cluster, read_id * AVB_NUM_SOURCES);
-      hton_16(stream_port->base_map, read_id);
-    }
-    else if (read_type == AEM_STREAM_PORT_INPUT_TYPE) {
-      aem_desc_stream_port_input_output_t *stream_port = (aem_desc_stream_port_input_output_t *)descriptor;
-      hton_16(stream_port->base_cluster, read_id * AVB_NUM_SINKS);
-      hton_16(stream_port->base_map, read_id);
-    }
+    generate_template_desc(read_type, read_id, descriptor);
 
     found_descriptor = 1;
   }
@@ -224,63 +444,15 @@ static int create_aem_read_descriptor_response(unsigned int read_type, unsigned 
   {
     if (read_id < (AVB_NUM_SINKS+AVB_NUM_SOURCES))
     {
-      const int num_mappings = (read_id < AVB_NUM_SINKS) ? AVB_NUM_MEDIA_OUTPUTS/AVB_NUM_SINKS : AVB_NUM_MEDIA_INPUTS/AVB_NUM_SOURCES;
-
-      /* Since the map descriptors aren't constant size, unlike the clusters, and
-       * dependent on the number of channels, we don't use a template */
-
-      struct ethernet_hdr_t *hdr = (ethernet_hdr_t*) &avb_1722_1_buf[0];
-      avb_1722_1_aecp_packet_t *pkt = (avb_1722_1_aecp_packet_t*) (hdr + AVB_1722_1_PACKET_BODY_POINTER_OFFSET);
-      avb_1722_1_aecp_aem_msg_t *aem = (avb_1722_1_aecp_aem_msg_t*)(pkt->data.payload);
-      unsigned char *pktptr = (unsigned char *)&(aem->command.read_descriptor_resp.descriptor);
-      aem_desc_audio_map_t *audio_map = (aem_desc_audio_map_t *)pktptr;
-
-      desc_size_bytes = 8+(num_mappings*8);
-
-      memset(audio_map, 0, desc_size_bytes);
-      hton_16(audio_map->descriptor_type, AEM_AUDIO_MAP_TYPE);
-      hton_16(audio_map->descriptor_index, read_id);
-      hton_16(audio_map->mappings_offset, 8);
-      hton_16(audio_map->number_of_mappings, num_mappings);
-
-      for (int i=0; i < num_mappings; i++)
-      {
-        hton_16(audio_map->mappings[i].mapping_stream_index, read_id);
-        hton_16(audio_map->mappings[i].mapping_stream_channel, i);
-        hton_16(audio_map->mappings[i].mapping_cluster_offset, (read_id < AVB_NUM_SOURCES) ? i%AVB_NUM_SOURCES : i%AVB_NUM_SINKS);
-        hton_16(audio_map->mappings[i].mapping_cluster_channel, 0); // Single channel audio clusters
-      }
-
-      found_descriptor = 2; // 2 signifies do not copy descriptor below
+      desc_size_bytes = generate_audio_map_desc(read_id);
+      found_descriptor = 2;
     }
+
   }
   else
 #endif
   {
-    /* Search for the descriptor */
-    while (aem_descriptor_list[i] <= read_type)
-    {
-      int num_descriptors = aem_descriptor_list[i+1];
-
-      if (aem_descriptor_list[i] == read_type)
-      {
-        for (int j=0, k=2; j < num_descriptors; j++, k += 2)
-        {
-          desc_size_bytes = aem_descriptor_list[i+k];
-          descriptor = (unsigned char *)aem_descriptor_list[i+k+1];
-
-          if (( ((unsigned)descriptor[2] << 8) | ((unsigned)descriptor[3]) ) == read_id)
-          {
-            found_descriptor = 1;
-            break;
-          }
-        }
-
-      }
-
-      i += ((num_descriptors*2)+2);
-      if (i >= (sizeof(aem_descriptor_list)>>2)) break;
-    }
+    found_descriptor = find_static_descriptor(read_type, read_id, &desc_size_bytes, &descriptor);
   }
 
 
@@ -348,6 +520,7 @@ static unsigned short avb_1722_1_create_acquire_response_packet(unsigned char st
   return sizeof(avb_1722_1_aem_acquire_entity_command_t) + AVB_1722_1_AECP_PAYLOAD_OFFSET;
 }
 
+__attribute__((overlay))
 static unsigned short process_aem_cmd_acquire(avb_1722_1_aecp_packet_t *pkt, unsigned char *status, unsigned char src_addr[6], chanend c_tx)
 {
   unsigned short descriptor_index = ntoh_16(pkt->data.aem.command.acquire_entity_cmd.descriptor_id);
@@ -474,6 +647,7 @@ static unsigned short process_aem_cmd_acquire(avb_1722_1_aecp_packet_t *pkt, uns
   return sizeof(avb_1722_1_aem_acquire_entity_command_t) + AVB_1722_1_AECP_PAYLOAD_OFFSET;
 }
 
+// __attribute__((overlay))
 static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt,
                                             unsigned char src_addr[6],
                                             int message_type,
@@ -650,6 +824,7 @@ static void process_avb_1722_1_aecp_aem_msg(avb_1722_1_aecp_packet_t *pkt,
   }
 }
 
+__attribute__((overlay))
 static void process_avb_1722_1_aecp_address_access_cmd(avb_1722_1_aecp_packet_t *pkt,
                                             unsigned char src_addr[6],
                                             int message_type,

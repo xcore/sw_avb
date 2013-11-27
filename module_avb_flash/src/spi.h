@@ -1,6 +1,7 @@
 #ifndef SPI_H
 #define SPI_H
 
+#include <overlay_flash.h>
 #ifdef __spi_conf_h_exists__
 #include "spi_conf.h"
 #endif

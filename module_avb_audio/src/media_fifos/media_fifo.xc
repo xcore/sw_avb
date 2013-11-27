@@ -1,6 +1,7 @@
 #include <xs1.h>
 #include "media_fifo.h"
 
+__attribute__((overlay))
 void media_ctl_register(chanend media_ctl,
                         media_input_fifo_t (&?input_fifos)[num_in],
                         unsigned num_in,

@@ -52,7 +52,7 @@ extern short sequence_id[2];
 extern void acmp_zero_listener_stream_info(int unique_id);
 extern unsigned int avb_1722_1_buf[AVB_1722_1_PACKET_SIZE_WORDS];
 
-
+__attribute__((overlay))
 void acmp_send_command(int entity_type, int message_type, avb_1722_1_acmp_cmd_resp *command, int retry, int inflight_idx, chanend c_tx)
 {
     /* We need to save the sequence_id of the Listener command that generated this Talker command for the response */

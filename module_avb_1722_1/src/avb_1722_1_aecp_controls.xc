@@ -15,6 +15,7 @@
 #include "aem_descriptor_types.h"
 #endif
 
+__attribute__((overlay))
 unsafe unsigned short process_aem_cmd_getset_control(avb_1722_1_aecp_packet_t *unsafe pkt,
                                                      unsigned char &status,
                                                      unsigned short command_type,
@@ -37,6 +38,7 @@ unsafe unsigned short process_aem_cmd_getset_control(avb_1722_1_aecp_packet_t *u
   return values_length;
 }
 
+__attribute__((overlay))
 unsafe void process_aem_cmd_getset_sampling_rate(avb_1722_1_aecp_packet_t *unsafe pkt,
                                           unsigned char &status,
                                           unsigned short command_type,
@@ -69,6 +71,7 @@ unsafe void process_aem_cmd_getset_sampling_rate(avb_1722_1_aecp_packet_t *unsaf
   status = AECP_AEM_STATUS_NO_SUCH_DESCRIPTOR;
 }
 
+__attribute__((overlay))
 unsafe void process_aem_cmd_getset_clock_source(avb_1722_1_aecp_packet_t *unsafe pkt,
                                          unsigned char &status,
                                          unsigned short command_type,
@@ -101,6 +104,7 @@ unsafe void process_aem_cmd_getset_clock_source(avb_1722_1_aecp_packet_t *unsafe
   status = AECP_AEM_STATUS_NO_SUCH_DESCRIPTOR;
 }
 
+__attribute__((overlay))
 unsafe void process_aem_cmd_startstop_streaming(avb_1722_1_aecp_packet_t *unsafe pkt,
                                          unsigned char &status,
                                          unsigned short command_type,

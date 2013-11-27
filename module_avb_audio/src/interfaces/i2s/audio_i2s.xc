@@ -39,6 +39,7 @@ unsigned int i2s_sine[I2S_SINE_TABLE_SIZE] =
 };
 
 
+__attribute__((overlay))
 void i2s_master_configure_ports(i2s_ports_t &i2s,
                                 out buffered port:32 (&?p_dout)[num_out],
                                 unsigned num_out,
