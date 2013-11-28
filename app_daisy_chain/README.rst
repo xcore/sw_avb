@@ -1,9 +1,9 @@
-Simple AVB Endpoint Demo
-========================
+AVB-DC example application
+==========================
 
 :scope: Example
-:description: A simple 1722.1 example endpoint application
-:keywords: avb, simple, 1722.1, example
-:boards: XR-AVB-LC-BRD
+:description: A 1722.1 example daisy chain endpoint application
+:keywords: avb, daisy, chain, 1722.1, example
+:boards: SLICEKIT-L2, SLICEKIT-L16
 
-A simple 1722.1 example endpoint application
+A 1722.1 example daisy chain endpoint application
