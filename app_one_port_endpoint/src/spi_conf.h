@@ -1,0 +1,5 @@
+#define SECTOR_SIZE (65536)
+#define PAGE_SIZE (256)
+#define NUM_PAGES (8192)
+
+#define MAX_UPGRADE_IMAGE_SIZE (128 * 1024)
