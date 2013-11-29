@@ -4,7 +4,7 @@ AVB-DC Quick Start Guide
 ========================
 
 This guide is intended for customers who have purchased the AVB-DC kit based on sliceKIT (XK-SK-AVB-DC).
-It applies to version 1.0 of the AVB-DC firmware.
+It applies to version 1.0 of the AVB-DC firmware. An AVB-capable Apple Mac running OS X 10.9 Mavericks is required.
 
 Obtaining the latest firmware
 -----------------------------
@@ -45,30 +45,31 @@ follow these steps:
 Installing the application onto flash memory
 --------------------------------------------
 
-#. Connect the 20-way IDC header on the xTAG-2 debug adapter to the XSYS connector on the 
-   first sliceKIT core board adapter. 
+#. Connect the xTAG-2 debug adapter (XA-SK-XTAG2) to the first sliceKIT core board. 
+#. Connect the xTAG-2 to the debug adapter.
 #. Plug the xTAG-2 into your development system via USB.
-#. In xTIMEcomposer, right-click on the binary within the *bin* folder of the project.
+#. Plug in the 12V power adapter and connect it to the sliceKIT core board.
+#. In xTIMEcomposer, right-click on the binary within the *app_daisy_chain/bin* folder of the project.
 #. Choose `Flash As` |submenu| `Flash Configurations`.
 #. Double click `xCORE Application` in the left panel.
 #. Choose `hardware` in `Device options` and select the relevant xTAG-2 adapter.
 #. Click on **Apply** if configuration has changed.
-#. Click on **Flash**. Note that the firmware will not run until the board is reset.
+#. Click on **Flash**. Once completed, disconnect the power from the sliceKIT core board.
 #. Repeat steps 1 through 8 for the second sliceKIT.
 
 Setting up the hardware
 -----------------------
 
-.. only:: latex
-
-  .. image:: images/board.jpg
+  .. figure:: images/board.jpg
      :align: center
 
-Refer to the above figure for the correct setup of the I/O sliceCARDs to the sliceKIT core boards.
+     XK-SK-AVB-DC
+
+Refer to Figure 1 for the correct setup of the I/O sliceCARDs to the sliceKIT core boards.
 
 #. The Ethernet sliceCARDs (XA-SK-E100) must be inserted into the slots denoted by the Circle and Square symbols.
 #. The audio sliceCARD (XA-SK-AUDIO-PLL) must be inserted into the slot denoted by the Triangle symbol.
-#. Connect the two sliceKITs together via an Ethernet cable between either of the Ethernet ports.
+#. Connect the two sliceKITs together using an Ethernet cable between either of the Ethernet ports.
 #. Connect one of the remaining Ethernet ports to an AVB-capable Apple Mac running OS X 10.9 Mavericks.
 #. Connect the provided 12V power supplies to the input power jacks of the boards and power them on.
 
@@ -88,7 +89,7 @@ To enumerate and stream audio between a Mac and XMOS AVB-DC endpoints:
        :align: center
 
 #. XMOS AVB-DC endpoints will enumerate in this list as *AVB 4in/4out*. Select the checkbox to the left of the entries to connect
-   the devices. Pressing the *Identify* button will identify the particular device by flashing LED1 and LED2 on the audio sliceCARD.
+   the devices. Pressing the *Identify* button will identify the particular device by lighting LED1 and LED2 on the audio sliceCARD.
 
     .. image:: images/network_device_browser.png
        :align: center   
@@ -96,7 +97,7 @@ To enumerate and stream audio between a Mac and XMOS AVB-DC endpoints:
 #. On successful connection, the devices will appear as Audio Devices in the *Audio MIDI Setup* window.
 
 #. The devices can be streamed to individually, aggregated as an 8in/8out device, or treated as a Multi-Output Device.
-   Aggregate or Multi-Output devices can be created in the Audio MIDI Setup window by clicking on the arrow in the bottom left corner.
+   Aggregate or Multi-Output devices can be created in the Audio MIDI Setup window by clicking on the plus in the bottom left corner.
 
     .. image:: images/create_aggregate.png
        :align: center
