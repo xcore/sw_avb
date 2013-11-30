@@ -164,7 +164,9 @@ void acmp_remove_talker_stream_info(void);
 
 unsigned acmp_talker_valid_talker_unique(void);
 
-void acmp_send_command(int entity_type, int message_type, avb_1722_1_acmp_cmd_resp * command, int retry, int inflight_idx, chanend c_tx);
+#ifdef __XC__
+void acmp_send_command(int entity_type, int message_type, avb_1722_1_acmp_cmd_resp *alias command, int retry, int inflight_idx, chanend c_tx);
+#endif
 
 #ifdef __XC__
 extern "C" {
